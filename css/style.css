@@ -11,3 +11,28 @@ header{
     margin: 32px auto;
 }
 
+h3{
+    font-size: 40px;
+}
+
+.linkedin {
+    margin: 20px;
+    border: 2px solid rgb(210, 134, 189);
+    padding: 10px;
+    color: rgb(210, 134, 189);
+    background-color: rgb(39, 43, 46);
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.linkedin-link {
+    color: rgb(210, 134, 189);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.linkedin-link:hover {
+    text-decoration: underline;
+    color: #fff;
+}
