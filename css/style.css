@@ -11,8 +11,29 @@ header{
     margin: 32px auto;
 }
 
-h3{
+.menu a {
+    color: rgb(238, 233, 228);
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 8px;
+    transition: color 0.2s;
+}
+
+.menu a:hover {
+    color: rgb(210, 134, 189);
+    text-decoration: underline;
+}
+
+h1{
+    font-size: 52px;
+}
+
+h2{
     font-size: 40px;
+}
+
+p{
+    font-size: 24px;
 }
 
 .linkedin {
