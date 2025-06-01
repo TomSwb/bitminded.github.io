@@ -32,7 +32,7 @@ h3{
     font-weight: bold;
 }
 
-.linkedin-link:hover {
-    text-decoration: underline;
-    color: #fff;
+.linkedin:hover {
+    background-color: rgb(210, 134, 189);
+    color: rgb(39, 43, 46);
 }
