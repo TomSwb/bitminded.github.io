@@ -39,6 +39,13 @@ main{
     color: var(--bg-dark);
 }
 
+/* Ensure hamburger is hidden on desktop and tablet */
+@media (min-width: 481px) {
+    .hamburger {
+        display: none !important;
+    }
+}
+
 .menu{
     border: 2px solid var(--accent-green);
     padding: 0.5rem 1rem; /* Reduced padding for tighter appearance */
@@ -128,9 +135,7 @@ p{
         padding: 0 1rem;
     }
     
-    .hamburger {
-        display: none; /* Still hidden on tablet */
-    }
+    /* Removed the hamburger display: none rule here since it's handled above */
 }
 
 /* Mobile styles */
