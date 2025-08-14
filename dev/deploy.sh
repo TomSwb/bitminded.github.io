@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Deployment script for Bitminder.ch
+# Deployment script for BitMinded.ch
 # This script copies files from development to production repository
 
-echo "🚀 Deploying Bitminder.ch to production..."
+echo "🚀 Deploying BitMinded.ch to production..."
 
 # Define paths
-DEV_DIR="/home/tomswb/programming/bitminder-dev"
+DEV_DIR="/home/tomswb/bitminded-dev"
 PROD_DIR="/home/tomswb/bitminded.github.io"
 
 # Check if production directory exists
