@@ -1,0 +1,223 @@
+/* CSS Custom Properties (Variables) for better color management */
+:root {
+    --bg-dark: rgb(39, 43, 46);
+    --accent-green: rgb(207, 222, 103);
+    --accent-pink: rgb(210, 134, 189);
+    --text-light: rgb(238, 233, 228);
+}
+
+body{
+    background-color: var(--bg-dark);
+    text-align: center;
+    color: var(--accent-green);
+}
+
+main{
+    margin-top: -2rem; /* Pulls content higher up */
+    padding-top: 1rem; /* Adds some breathing room */
+}
+
+/* Development banner */
+.dev-banner {
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    color: #2c2c2c;
+    font-weight: bold;
+    padding: 8px 16px;
+    margin: -1rem auto 2rem auto;
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Hide dev banner in production (you can remove this section when deploying) */
+@media (max-width: 0px) {
+    .dev-banner { display: none; }
+}
+
+/* Hamburger menu button - hidden by default on desktop */
+.hamburger {
+    display: none;
+    background: none;
+    border: 2px solid var(--accent-green);
+    color: var(--accent-green);
+    font-size: 1.5rem;
+    padding: 8px 12px;
+    cursor: pointer;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    border-radius: 4px;
+    transition: all 0.2s ease; /* Smooth transitions */
+}
+
+.hamburger:hover {
+    background-color: var(--accent-green);
+    color: var(--bg-dark);
+}
+
+/* Ensure hamburger is hidden on desktop and tablet */
+@media (min-width: 481px) {
+    .hamburger {
+        display: none !important;
+    }
+}
+
+.menu{
+    border: 2px solid var(--accent-green);
+    padding: 0.5rem 1rem; /* Reduced padding for tighter appearance */
+    margin: 32px 0 32px auto; 
+    max-width: fit-content;
+    max-height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem; /* Small gap between items instead of large padding */
+}
+
+.pages {
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s ease; /* Only transition color, not all properties */
+    padding: 0.5rem 1rem; /* Reduced vertical padding for desktop */
+    min-height: 44px; /* Touch-friendly minimum size */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center the text */
+    cursor: pointer;
+}
+
+.pages:hover, .pages:focus { /* Added focus state for accessibility */
+    color: var(--accent-pink);
+    outline: none; /* Remove the border outline */
+}
+
+h1{
+    font-size: clamp(2rem, 5vw, 3.25rem); /* Responsive font: min 32px, scales with viewport, max 52px */
+}
+
+h2{
+    font-size: clamp(1.5rem, 4vw, 2.5rem); /* Responsive font: min 24px, scales with viewport, max 40px */
+}
+
+p{
+    font-size: clamp(1rem, 2.5vw, 1.5rem); /* Responsive font: min 16px, scales with viewport, max 24px */
+}
+
+.contact {
+    margin: clamp(10px, 2vw, 20px); /* Responsive margins */
+    border: 2px solid var(--accent-pink);
+    padding: clamp(8px, 1.5vw, 12px); /* Responsive padding */
+    color: var(--accent-pink);
+    background-color: var(--bg-dark);
+    border-radius: 8px;
+    font-size: 1rem; /* Consistent rem units */
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth hover transition */
+    min-height: 44px; /* Touch-friendly size */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-link {
+    color: var(--accent-pink);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.contact:hover, .contact:focus { /* Added focus state */
+    background-color: var(--accent-pink);
+    color: var(--bg-dark);
+    transform: translateY(-2px); /* Subtle lift effect */
+    box-shadow: 0 4px 12px rgba(210, 134, 189, 0.3); /* Subtle shadow */
+}
+
+/* Tablet styles */
+@media (max-width: 768px) {
+    .menu {
+        margin: clamp(10px, 3vw, 20px) auto; /* Responsive margins */
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+        max-width: 90%;
+    }
+    
+    .pages {
+        padding: 0.75rem 1rem; /* Keep larger padding for tablet */
+        margin: 0.25rem;
+    }
+    
+    body {
+        padding: 0 1rem;
+    }
+    
+    /* Removed the hamburger display: none rule here since it's handled above */
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+    .hamburger {
+        display: block;
+    }
+    
+    .menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: min(250px, 80vw); /* Responsive width */
+        background-color: var(--bg-dark);
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 80px;
+        margin: 0;
+        max-width: none;
+        max-height: none;
+        transition: right 0.3s ease;
+        z-index: 999;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .menu.active {
+        right: 0;
+    }
+    
+    .pages {
+        width: 100%;
+        padding: 1rem 2rem; /* Keep larger padding for mobile */
+        margin: 0;
+        border-bottom: 1px solid rgba(207, 222, 103, 0.2);
+        justify-content: flex-start; /* Left-align on mobile for better UX */
+    }
+    
+    .pages:last-child { /* Better selector than hard-coding */
+        border-bottom: none;
+    }
+    
+    body {
+        padding: 0 0.5rem;
+    }
+    
+    .linkedin {
+        margin: 10px;
+        padding: 12px;
+        font-size: 0.9rem; /* Consistent rem units */
+    }
+}
+
+/* Accessibility: Reduced motion for users with motion sensitivity */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
