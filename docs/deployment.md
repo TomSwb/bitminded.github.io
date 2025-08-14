@@ -1,10 +1,10 @@
-# Deployment Guide - Bitminder.ch
+# Deployment Guide - Bitminded.ch
 
 ## Overview
 
-The Bitminder.ch website uses a two-repository system:
+The Bitminded.ch website uses a two-repository system:
 
-- **Development**: `bitminder-dev` (this repository)
+- **Development**: `bitminded-dev` (this repository)
 - **Production**: `bitminded.github.io`
 
 ## Development Workflow
@@ -13,7 +13,7 @@ The Bitminder.ch website uses a two-repository system:
 
 ```bash
 # Navigate to development directory
-cd /home/tomswb/programming/bitminder-dev
+cd /home/tomswb/programming/bitminded-dev
 
 # Start development server
 python3 -m http.server 8000

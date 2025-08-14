@@ -1,7 +1,7 @@
 {
-  "name": "bitminder-dev",
+  "name": "bitminded-dev",
   "version": "1.0.0",
-  "description": "Development environment for Bitminder.ch website",
+  "description": "Development environment for Bitminded.ch website",
   "main": "index.html",
   "scripts": {
     "start": "live-server --port=8000 --open=/index.html",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TomSwb/bitminder-dev.git"
+    "url": "git+https://github.com/TomSwb/bitminded-dev.git"
   },
   "keywords": [
     "website",

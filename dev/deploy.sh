@@ -3,7 +3,7 @@
 # Deployment script for BitMinded.ch
 # This script copies files from development to production repository
 
-echo "🚀 Deploying BitMinded.ch to production..."
+echo "🚀 Deploying Bitminded.ch to production..."
 
 # Define paths
 DEV_DIR="/home/tomswb/bitminded-dev"
