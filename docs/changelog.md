@@ -1,4 +1,4 @@
-# Changelog - Bitminder.ch
+# Changelog - Bitminded.ch
 
 All notable changes to the Bitminder.ch website will be documented in this file.
 

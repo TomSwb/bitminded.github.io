@@ -1,6 +1,6 @@
 # Documentation
 
-This folder contains documentation for the Bitminder.ch website.
+This folder contains documentation for the Bitminded.ch website.
 
 ## Contents
 

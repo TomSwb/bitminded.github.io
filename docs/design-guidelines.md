@@ -1,4 +1,4 @@
-# Design Guidelines - Bitminder.ch
+# Design Guidelines - Bitminded.ch
 
 ## Color Palette
 
