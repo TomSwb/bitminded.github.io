@@ -1,0 +1,30 @@
+{
+    "folders": [
+        {
+            "name": "Bitminder Development",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "liveServer.settings.port": 8000,
+        "liveServer.settings.root": "/",
+        "files.associations": {
+            "*.html": "html",
+            "*.css": "css",
+            "*.js": "javascript"
+        },
+        "emmet.includeLanguages": {
+            "html": "html",
+            "css": "css"
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ritwickdey.liveserver",
+            "ms-vscode.vscode-html-languageservice",
+            "bradlc.vscode-tailwindcss",
+            "formulahendry.auto-rename-tag",
+            "ms-vscode.vscode-css-languageservice"
+        ]
+    }
+}

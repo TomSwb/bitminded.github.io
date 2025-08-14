@@ -1,0 +1,26 @@
+{
+  "name": "bitminder-dev",
+  "version": "1.0.0",
+  "description": "Development environment for Bitminder.ch website",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=8000 --open=/index.html",
+    "serve": "python3 -m http.server 8000",
+    "deploy": "./dev/deploy.sh"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TomSwb/bitminder-dev.git"
+  },
+  "keywords": [
+    "website",
+    "portfolio",
+    "bitminded",
+    "development"
+  ],
+  "author": "TomSwb",
+  "license": "MIT"
+}
