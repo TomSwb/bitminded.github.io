@@ -76,6 +76,8 @@ header {
   .hamburger {
     display: block;
     position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
     z-index: 5000;
   }
   
@@ -101,12 +103,6 @@ header {
     border: 2px solid var(--color-primary);
     box-sizing: border-box;
     min-height: 100vh;
-  }
-  .hamburger {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    z-index: 5000;
   }
 
   .menu.active {
