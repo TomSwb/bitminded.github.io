@@ -1,3 +1,27 @@
+/* Language Switcher Buttons */
+.lang-btn {
+    font-size: 1rem;
+    padding: 0.5em 1em;
+    border-radius: 20px;
+    border: 2px solid var(--accent-green);
+    background: var(--bg-dark);
+    color: var(--accent-green);
+    cursor: pointer;
+    margin: 0 0.25em;
+    transition: background 0.2s, color 0.2s;
+}
+.lang-btn:hover {
+    background: var(--accent-green);
+    color: var(--bg-dark);
+}
+
+.lang-switcher {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1100;
+}
+
 /* CSS Custom Properties (Variables) for better color management */
 :root {
     --bg-dark: rgb(39, 43, 46);
@@ -255,6 +279,40 @@ p{
 
 /* Mobile styles */
 @media (max-width: 480px) {
+    header {
+        padding: 0.5rem 0.2rem;
+    }
+
+    main {
+        padding-top: 0.5rem;
+        margin-top: 0;
+    }
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    p {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .contact {
+        font-size: 0.95rem;
+        padding: 10px;
+        min-height: 38px;
+        margin: 8px;
+    }
+
+    .contact-link {
+        font-size: 0.95rem;
+    }
     .hamburger {
         display: block;
     }
@@ -301,6 +359,18 @@ p{
         margin: 10px;
         padding: 12px;
         font-size: 0.9rem; /* Consistent rem units */
+    }
+
+    .lang-btn {
+        font-size: 1.2rem;
+        padding: 0.4em 0.7em;
+        border-radius: 16px;
+        margin: 0 0.15em;
+    }
+
+    .lang-switcher {
+        top: 8px;
+        left: 8px;
     }
 }
 
