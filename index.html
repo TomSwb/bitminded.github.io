@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,8 @@
     <title>BitMinded</title>
     <link rel="icon" href="images/bitminded1.jpeg" type="image/jpeg">
     <link rel="stylesheet" href="css/style.css">
+        <!-- i18next CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
 </head>
 
 <body>
@@ -16,13 +18,52 @@
             <a class="pages" href="index.html">Home</a>             
             <a class="pages" href="contact.html">Contact</a>
         </nav>
+            <!-- Language Switcher -->
+            <div class="lang-switcher">
+                <button class="lang-btn" onclick="changeLanguage('en')">🇬🇧</button></br>
+                <button class="lang-btn" onclick="changeLanguage('fr')">🇫🇷</button>
+            </div>
     </header>
 
     <main>
-        <h1>Welcome to BitMinded!</h1>
-        <h2>Site under construction</h2>
+    <h1 id="main-title">Welcome to BitMinded!</h1>
+    <h2 id="subtitle">Site under construction</h2>
     </main>
-    <script src="js/script.js"></script>
+        <script src="js/script.js"></script>
+        <script>
+        // i18next translations
+        const resources = {
+            en: {
+                translation: {
+                    "main-title": "Welcome to BitMinded!",
+                    "subtitle": "Site under construction"
+                }
+            },
+            fr: {
+                translation: {
+                    "main-title": "Bienvenue sur BitMinded!",
+                    "subtitle": "Site en construction"
+                }
+            }
+        };
+
+        i18next.init({
+            lng: 'en',
+            debug: false,
+            resources
+        }, function(err, t) {
+            updateContent();
+        });
+
+        function updateContent() {
+            document.getElementById('main-title').textContent = i18next.t('main-title');
+            document.getElementById('subtitle').textContent = i18next.t('subtitle');
+        }
+
+        function changeLanguage(lng) {
+            i18next.changeLanguage(lng, updateContent);
+        }
+        </script>
 </body> 
 
 </html>
