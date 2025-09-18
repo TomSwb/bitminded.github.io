@@ -8,9 +8,12 @@
   --color-accent-green: rgb(207, 222, 103);
   --color-accent-pink: rgb(210, 134, 189);
   --color-text-light: rgb(238, 233, 228);
+  --color-bg-light: rgb(238, 233, 228);
+  --color-accent-blue: rgb(39, 43, 46);
+  --color-text-dark: rgb(39, 43, 46);
   
   /* Semantic Color Mapping */
-  --color-primary: var(--color-accent-green);
+  --color-primary: var(--color-accent-green); /* dark mode primary */
   --color-secondary: var(--color-accent-pink);
   --color-background: var(--color-bg-dark);
   --color-text: var(--color-text-light);
@@ -79,4 +82,14 @@
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1024px;
   --breakpoint-large: 1200px;
+}
+
+/* ===== LIGHT THEME OVERRIDES ===== */
+[data-theme="light"] {
+  --color-background: var(--color-bg-light);
+  --color-text: var(--color-text-dark);
+  --color-primary: var(--color-accent-pink); /* light mode primary */
+  --color-secondary: var(--color-accent-green);
+  --color-text-primary: var(--color-accent-pink);
+  --border-color-primary: var(--color-accent-pink); /* pink borders in light mode */
 }
