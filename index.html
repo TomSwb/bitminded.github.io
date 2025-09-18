@@ -34,7 +34,6 @@
         <h1 id="main-title">Welcome to BitMinded!</h1>
         <h2 id="subtitle">Site under construction</h2>
     </main>
-    <script src="js/script.js"></script>
     <script>
     // i18next translations
     const resources = {
@@ -69,6 +68,17 @@
         i18next.changeLanguage(lng, updateContent);
     }
     </script>
+
+    <script src="js/script.js"></script>
+
+    <footer><button id="theme-toggle" aria-label="Toggle theme">
+        <svg id="theme-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="5" fill="currentColor" />
+            <path
+                d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                stroke="currentColor" stroke-width="2" />
+        </svg>
+    </button></footer>
 </body> 
 
 </html>
