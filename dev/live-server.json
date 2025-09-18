@@ -1,9 +1,0 @@
-{
-  "port": 8000,
-  "host": "localhost",
-  "root": "../",
-  "open": "/index.html",
-  "file": "index.html",
-  "wait": 1000,
-  "logLevel": 2
-}
