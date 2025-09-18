@@ -75,6 +75,8 @@ header {
   /* Hamburger menu visibility */
   .hamburger {
     display: block;
+    position: absolute;
+    z-index: 5000;
   }
   
   /* Mobile menu overlay */
@@ -96,6 +98,7 @@ header {
     transition: opacity var(--transition-normal);
     opacity: 0;
     pointer-events: none;
+    border: none;
   }
 
   .menu.active {
