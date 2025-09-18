@@ -18,7 +18,7 @@ header {
     flex-direction: row;
     justify-content: center;
     flex-wrap: wrap;
-    max-width: 90%;
+    max-width: 100%;
   }
   
   .pages {
@@ -35,7 +35,7 @@ header {
 @media (max-width: 480px) {
   /* Header adjustments */
   header {
-    padding: 2.5rem 0.2rem;
+    padding: 3rem;
   }
 
   /* Main content adjustments */
@@ -84,21 +84,29 @@ header {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: rgba(39, 43, 46, 0.95);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     z-index: var(--z-modal);
     right: 0;
     transition: opacity var(--transition-normal);
     opacity: 0;
     pointer-events: none;
-    border: none;
+    border: 2px solid var(--color-primary);
+    box-sizing: border-box;
+    min-height: 100vh;
+  }
+  .hamburger {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 5000;
   }
 
   .menu.active {
