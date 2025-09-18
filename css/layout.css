@@ -1,0 +1,146 @@
+/* ========================================
+   LAYOUT & RESPONSIVE DESIGN
+   ======================================== */
+
+/* ===== HEADER LAYOUT ===== */
+
+header {
+  position: relative;
+  z-index: var(--z-sticky);
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet Styles */
+@media (max-width: 768px) {
+  .menu {
+    margin: var(--spacing-responsive-lg) auto;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 90%;
+  }
+  
+  .pages {
+    padding: 0.75rem var(--spacing-md);
+    margin: var(--spacing-xs);
+  }
+  
+  body {
+    padding: 0 var(--spacing-md);
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 480px) {
+  /* Header adjustments */
+  header {
+    padding: 2.5rem 0.2rem;
+  }
+
+  /* Main content adjustments */
+  main {
+    padding-top: var(--spacing-lg);
+    margin-top: 0;
+  }
+
+  /* Typography adjustments */
+  h1 {
+    font-size: var(--font-size-4xl);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  h2 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  p {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  /* Contact button adjustments */
+  .contact {
+    font-size: var(--font-size-sm);
+    padding: 10px;
+    min-height: 38px;
+    margin: var(--spacing-sm);
+  }
+
+  .contact-link {
+    font-size: var(--font-size-sm);
+  }
+
+  /* Hamburger menu visibility */
+  .hamburger {
+    display: block;
+  }
+  
+  /* Mobile menu overlay */
+  .menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(39, 43, 46, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    z-index: var(--z-modal);
+    right: 0;
+    transition: opacity var(--transition-normal);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .menu.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .pages {
+    font-size: var(--font-size-4xl);
+    margin: 1.2rem 0;
+    color: var(--color-primary);
+  }
+  
+  .pages:last-child {
+    border-bottom: none;
+  }
+  
+  body {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  /* Language switcher adjustments */
+  .lang-btn {
+    font-size: var(--font-size-xl);
+    padding: 0.4em 0.7em;
+    border-radius: var(--radius-lg);
+    margin: 0 0.15em;
+  }
+
+  .lang-switcher {
+    top: var(--spacing-sm);
+    left: var(--spacing-sm);
+  }
+}
+
+/* Desktop: Ensure hamburger is hidden */
+@media (min-width: 481px) {
+  .hamburger {
+    display: none !important;
+  }
+}
+
+/* Hide dev banner in production */
+@media (max-width: 0px) {
+  .dev-banner { 
+    display: none; 
+  }
+}
