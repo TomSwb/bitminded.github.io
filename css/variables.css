@@ -1,5 +1,5 @@
 /* ========================================
-   CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+    CSS CUSTOM PROPERTIES (DESIGN TOKENS)
    ======================================== */
 
 :root {
@@ -16,8 +16,7 @@
   --color-primary: var(--color-accent-green); /* dark mode primary */
   --color-secondary: var(--color-accent-pink);
   --color-background: var(--color-bg-dark);
-  --color-text: var(--color-text-light);
-  --color-text-primary: var(--color-accent-green);
+  --color-text-primary: var(--color-text-light);
   
   /* Border Colors */
   --border-color-primary: var(--color-accent-green);
@@ -87,9 +86,8 @@
 /* ===== LIGHT THEME OVERRIDES ===== */
 [data-theme="light"] {
   --color-background: var(--color-bg-light);
-  --color-text: var(--color-text-dark);
   --color-primary: var(--color-accent-pink); /* light mode primary */
   --color-secondary: var(--color-accent-green);
-  --color-text-primary: var(--color-accent-pink);
+  --color-text-primary: var(--color-text-dark);
   --border-color-primary: var(--color-accent-pink); /* pink borders in light mode */
 }
