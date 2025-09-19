@@ -15,10 +15,14 @@ function toggleMenu() {
 document.addEventListener('click', function(event) {
     const menu = document.querySelector('.menu');
     const hamburger = document.querySelector('.hamburger');
+    const langSwitcher = document.querySelector('.lang-switcher');
+    const themeToggle = document.getElementById('theme-toggle');
     
     if (menu && menu.classList.contains('active') && 
         !menu.contains(event.target) && 
-        !hamburger.contains(event.target)) {
+        !hamburger.contains(event.target) &&
+        !langSwitcher.contains(event.target) &&
+        !themeToggle.contains(event.target)) {
         menu.classList.remove('active');
     }
 });
