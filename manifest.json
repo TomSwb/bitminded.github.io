@@ -1,0 +1,28 @@
+{
+  "name": "BitMinded",
+  "short_name": "BitMinded",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#272B2E",
+  "theme_color": "#CFDE67",
+  "description": "BitMinded - Digital solutions and consulting services",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["business", "technology", "consulting"],
+  "icons": [
+    {
+      "src": "images/bitminded1.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/bitminded1.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
