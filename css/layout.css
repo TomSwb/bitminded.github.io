@@ -1,5 +1,5 @@
 /* ========================================
-   LAYOUT & RESPONSIVE DESIGN
+    LAYOUT & RESPONSIVE DESIGN
    ======================================== */
 
 /* ===== HEADER LAYOUT ===== */
@@ -101,7 +101,7 @@ header {
     transition: opacity var(--transition-normal);
     opacity: 0;
     pointer-events: none;
-    border: 2px solid var(--color-primary);
+    border: none;
     box-sizing: border-box;
     min-height: 100vh;
   }
