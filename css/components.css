@@ -27,7 +27,7 @@
   margin: var(--spacing-responsive-md);
   border: 2px solid var(--border-color-secondary);
   padding: var(--spacing-responsive-sm);
-  color: var(--color-secondary);
+  color: var(--color-text-primary);
   background-color: var(--color-background);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
@@ -85,7 +85,7 @@
 
 /* Navigation Links */
 .pages {
-  color: var(--color-text);
+  color: var(--color-text-primary);
   text-decoration: none;
   font-weight: bold;
   transition: color var(--transition-fast);
@@ -132,7 +132,7 @@
 }
 
 .dropdown-content a {
-  color: var(--color-text);
+  color: var(--color-text-primary);
   padding: 10px 14px;
   text-decoration: none;
   display: block;
