@@ -13,8 +13,8 @@
     <header>
         <button class="hamburger" onclick="toggleMenu()">☰</button>
         <nav class="menu">
-            <a class="pages" href="/">Home</a>
-            <a class="pages" href="contact.html">Contact</a>
+            <a class="pages" id="nav-home" href="/">Home</a>
+            <a class="pages" id="nav-contact" href="contact.html">Contact</a>
             <!-- <a class="pages" href="the-team.html">The Team</a>
             <a class="pages" href="values.html">Values</a>
             <a class="pages" href="services.html">What We Do</a>
@@ -23,17 +23,17 @@
         </nav>
         <!-- Language Switcher -->
         <div class="lang-switcher">
-            <button class="lang-btn" onclick="changeLanguage('en')">🇬🇧</button></br>
+            <button class="lang-btn" onclick="changeLanguage('en')">🇬🇧</button><br>
             <button class="lang-btn" onclick="changeLanguage('fr')">🇫🇷</button>
         </div>
     </header>
 
     <main>
         <a href="https://www.linkedin.com/in/thomas-schwab-bmi/" target="_blank" rel="noopener" class="contact-link">
-            <button class="contact">Find me on LinkedIn</button>
+            <button class="contact" id="contact-linkedin">Find me on LinkedIn</button>
         </a>
         <a href="mailto:contact@bitminded.ch" class="contact-link">
-            <button class="contact">Email me</button>
+            <button class="contact" id="contact-email">Email me</button>
         </a>
     </main>
     
@@ -45,7 +45,11 @@
                 stroke="currentColor" stroke-width="2" />
         </svg>
     </button></footer>
-    
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- language switcher -->
+    <script src="js/lang-contact/lang-contact.js"></script>
+    <!-- other scripts -->
     <script src="js/script.js"></script>
 </body>
 

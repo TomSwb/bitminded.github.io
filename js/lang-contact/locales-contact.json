@@ -1,0 +1,20 @@
+{
+  "en": {
+    "translation": {
+      "nav-home": "Home", 
+      "nav-contact": "Contact",
+
+      "contact-linkedin": "Find me on LinkedIn",
+      "contact-email": "Email me"
+    }
+  },
+  "fr": {
+    "translation": {
+      "nav-home": "Accueil", 
+      "nav-contact": "Contact",
+      
+      "contact-linkedin": "Retrouvez-moi sur LinkedIn",
+      "contact-email": "Envoyez-moi un email"
+    }
+  }
+}
