@@ -1,20 +1,28 @@
 {
   "en": {
     "translation": {
-      "nav-home": "Home", 
-      "nav-contact": "Contact",
+  "nav-home": "Home", 
+  "nav-contact": "Contact",
 
-      "contact-linkedin": "Find me on LinkedIn",
-      "contact-email": "Email me"
+  "contact-linkedin": "Find me on LinkedIn",
+
+  "contact-name": "Name:",
+  "contact-email-label": "Email:",
+  "contact-message": "Message:",
+  "contact-send": "Send Message"
     }
   },
   "fr": {
     "translation": {
-      "nav-home": "Accueil", 
-      "nav-contact": "Contact",
+  "nav-home": "Accueil", 
+  "nav-contact": "Contact",
       
-      "contact-linkedin": "Retrouvez-moi sur LinkedIn",
-      "contact-email": "Envoyez-moi un email"
+  "contact-linkedin": "Retrouvez-moi sur LinkedIn",
+
+  "contact-name": "Nom :",
+  "contact-email-label": "Email :",
+  "contact-message": "Message :",
+  "contact-send": "Envoyer le message"
     }
   }
 }
