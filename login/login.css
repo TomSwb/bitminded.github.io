@@ -48,8 +48,6 @@
 .auth-section input[type="text"],
 .auth-section input[type="email"],
 .auth-section input[type="password"] {
-  width: 100%;
-  box-sizing: border-box;
   padding: 0.75rem;
   border: 1px solid var(--color-border, #ccc);
   border-radius: 0.5rem;
@@ -64,7 +62,7 @@
   font-size: 1rem;
   border-radius: 0.5rem;
   background: var(--color-primary, #0066ff);
-  color: var(--color-text-secondary, #fff);
+  color: var(--color-text-primary, #fff);
   border: none;
   cursor: pointer;
   font-weight: bold;
@@ -74,11 +72,11 @@
 .auth-section button[type="submit"]:hover,
 .auth-section button[type="submit"]:focus {
   background: var(--color-secondary, #004bb5);
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text-primary, #fff) !important;
 }
 #auth-message {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 1rem; 
   font-weight: 500;
   font-size: 1rem;
 }
