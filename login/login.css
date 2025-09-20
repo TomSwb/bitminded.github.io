@@ -62,7 +62,7 @@
   font-size: 1rem;
   border-radius: 0.5rem;
   background: var(--color-primary, #0066ff);
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text-secondary, #222);
   border: none;
   cursor: pointer;
   font-weight: bold;
@@ -72,7 +72,7 @@
 .auth-section button[type="submit"]:hover,
 .auth-section button[type="submit"]:focus {
   background: var(--color-secondary, #004bb5);
-  color: var(--color-text-primary, #fff) !important;
+  color: var(--color-text-primary, #fff);
 }
 #auth-message {
   text-align: center;

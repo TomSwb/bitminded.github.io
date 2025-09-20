@@ -19,6 +19,7 @@
   --color-secondary: var(--color-accent-pink);
   --color-background: var(--color-bg-dark);
   --color-text-primary: var(--color-text-light);
+  --color-text-secondary: var(--color-text-dark);
   
   /* Border Colors */
   --border-color-primary: var(--color-accent-green);
@@ -92,4 +93,5 @@
   --color-secondary: var(--color-accent-green);
   --color-text-primary: var(--color-text-dark);
   --border-color-primary: var(--color-accent-pink); /* pink borders in light mode */
+  --color-text-secondary: var(--color-text-light);
 }
