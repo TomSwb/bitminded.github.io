@@ -270,7 +270,7 @@
   font-size: 0.95rem;
   border-radius: 0.4rem;
   background: var(--color-primary, #0066ff);
-  color: var(--color-text-secondary, #fff);
+  color: var(--color-text-secondary, #222);
   border: none;
   cursor: pointer;
   font-weight: 500;
