@@ -13,25 +13,52 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        if (document.getElementById('contact-linkedin')) {
-            document.getElementById('contact-linkedin').textContent = i18next.t('contact-linkedin');
+        // Login/Sign Up button translations
+        if (document.querySelector('.auth-buttons button:nth-child(1)')) {
+            document.querySelector('.auth-buttons button:nth-child(1)').textContent = i18next.t('login-btn');
         }
+<<<<<<< Updated upstream:js/lang-contact/lang-contact.js
         if (document.getElementById('contact-email')) {
             document.getElementById('contact-email').textContent = i18next.t('contact-email');
         }
+=======
+        if (document.querySelector('.auth-buttons button:nth-child(2)')) {
+            document.querySelector('.auth-buttons button:nth-child(2)').textContent = i18next.t('signup-btn');
+        }
+        // Sign Out button translation
+        if (document.getElementById('signout-btn')) {
+            document.getElementById('signout-btn').textContent = i18next.t('signout-btn');
+        }
+        // Nav menu translations
+>>>>>>> Stashed changes:contact/lang-contact/lang-contact.js
         if (document.getElementById('nav-home')) {
             document.getElementById('nav-home').textContent = i18next.t('nav-home');
         }
         if (document.getElementById('nav-contact')) {
             document.getElementById('nav-contact').textContent = i18next.t('nav-contact');
         }
+<<<<<<< Updated upstream:js/lang-contact/lang-contact.js
         
+=======
+        // Contact form translations
+        if (document.querySelector('label[for="name"]')) {
+            document.querySelector('label[for="name"]').textContent = i18next.t('contact-name');
+        }
+        if (document.querySelector('label[for="email"]')) {
+            document.querySelector('label[for="email"]').textContent = i18next.t('contact-email-label');
+        }
+        if (document.querySelector('label[for="message"]')) {
+            document.querySelector('label[for="message"]').textContent = i18next.t('contact-message');
+        }
+        if (document.querySelector('button.contact')) {
+            document.querySelector('button.contact').textContent = i18next.t('contact-send');
+        }
+>>>>>>> Stashed changes:contact/lang-contact/lang-contact.js
         // Show all translatable content after translation is complete
         const translatableElements = document.querySelectorAll('.translatable-content');
         translatableElements.forEach(element => {
             element.classList.add('loaded');
         });
-        
         // Remove the hide-translatable class from document
         document.documentElement.classList.remove('hide-translatable');
     }

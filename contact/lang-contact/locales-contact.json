@@ -1,0 +1,40 @@
+{
+  "en": {
+    "translation": {
+
+  "login-btn": "Login",
+  "signup-btn": "Sign Up",
+  "signout-btn": "Sign Out",
+
+  "nav-home": "Home", 
+  "nav-contact": "Contact",
+
+  "contact-linkedin": "Find me on LinkedIn",
+
+  "contact-name": "Name:",
+  "contact-email-label": "Email:",
+  "contact-message": "Message:",
+  "contact-send": "Send Message"
+
+    }
+  },
+  "fr": {
+    "translation": {
+
+  "login-btn": "Connexion",
+  "signup-btn": "Inscription",
+  "signout-btn": "Déconnexion",
+
+  "nav-home": "Accueil", 
+  "nav-contact": "Contact",
+      
+  "contact-linkedin": "Retrouvez-moi sur LinkedIn",
+
+  "contact-name": "Nom :",
+  "contact-email-label": "Email :",
+  "contact-message": "Message :",
+  "contact-send": "Envoyer le message"
+
+    }
+  }
+}

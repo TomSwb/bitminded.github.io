@@ -90,6 +90,34 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 
+// ===== AUTHENTICATION BUTTONS =====
+
+document.addEventListener('DOMContentLoaded', async function() {
+  const authButtons = document.querySelector('.auth-buttons');
+  if (!authButtons) return;
+
+  // Supabase client setup (reuse credentials from login.js)
+  const SUPABASE_URL = 'https://jkikrzxzpyfjseirsqxb.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpraWtyenh6cHlmanNlaXJzcXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNDk2MjUsImV4cCI6MjA3MzkyNTYyNX0.6Nb08-tnLHNzUCR2S8zb4Nv4hCj1rCTcqlOJebvrrps';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Check session
+  const session = await supabase.auth.getSession();
+  const user = session.data?.session?.user;
+  if (user) {
+    // Replace buttons with username (button) and sign out
+    const username = user.user_metadata?.username || user.email;
+    authButtons.innerHTML = `
+      <button class="username-btn" onclick="window.location.href='user-account/index.html'">${username}</button>
+      <button id="signout-btn">Sign Out</button>
+    `;
+    document.getElementById('signout-btn').onclick = async function() {
+      await supabase.auth.signOut();
+      window.location.reload();
+    };
+  }
+});
+
 // ===== INITIALIZATION =====
 
 document.addEventListener('DOMContentLoaded', function() {

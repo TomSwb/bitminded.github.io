@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document -->
+    <meta charset="UTF-8">
+
+    <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--Browser Tab title-->
+    <title>Login - BitMinded</title>
+    <!--Browser Tab icon-->
+    <link rel="icon" href="../images/bitminded1.jpeg" type="image/jpeg">
+
+    <!--iOS home-saved app icon-->
+    <link rel="apple-touch-icon" href="../images/bitminded1.jpeg">
+    <!-- iOS status bar style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Critical CSS to prevent white flash -->
+    <link rel="stylesheet" href="../css/critical.css">
+
+    <!-- Critical JavaScript for immediate initialization -->
+    <script src="../js/critical.js"></script>
+
+    <!-- Login CSS -->
+    <link rel="stylesheet" href="login.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Hamburger menu button - on mobiles only -->
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+
+        <nav class="menu">
+            <a id="nav-home" class="pages translatable-content" href="../index.html">Home</a>
+            <a id="nav-contact" class="pages translatable-content" href="../contact/index.html">Contact</a>
+            <!-- <a class="pages" href="the-team.html">The Team</a>
+            <a class="pages" href="values.html">Values</a>
+            <a class="pages" href="services.html">What We Do</a>
+            <a class="pages" href="pricing.html">Pricing</a>
+            <a class="pages" href="project.html">Portfolio</a> -->
+        </nav>
+
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+            <button class="lang-btn" onclick="changeLanguage('en')">🇬🇧</button><br>
+            <button class="lang-btn" onclick="changeLanguage('fr')">🇫🇷</button>
+        </div>
+    </header>
+
+    <main>
+        <!--- Login & Sign Up-->
+        <section class="auth-section">
+            <div id="form-switcher">
+                <button id="show-login" type="button">Login</button>
+                <button id="show-signup" type="button">Sign Up</button>
+            </div>
+            <form id="login-form">
+                <label for="login-username" class="translatable-content" id="login-username-label">Username:</label>
+                <input type="text" id="login-username" name="login-username" required autocomplete="username">
+
+                <label for="login-password" class="translatable-content" id="login-password-label">Password:</label>
+                <input type="password" id="login-password" name="login-password" required autocomplete="current-password">
+
+                <button type="submit" class="translatable-content" id="login-submit">Login</button>
+            </form>
+            <form id="signup-form">
+                <label for="signup-username" class="translatable-content" id="signup-username-label">Username:</label>
+                <input type="text" id="signup-username" name="signup-username" required autocomplete="username">
+
+                <label for="signup-email" class="translatable-content" id="signup-email-label">Email:</label>
+                <input type="email" id="signup-email" name="signup-email" required autocomplete="email">
+
+                <label for="signup-password" class="translatable-content" id="signup-password-label">Password:</label>
+                <input type="password" id="signup-password" name="signup-password" required autocomplete="new-password">
+
+                <label for="signup-confirm" class="translatable-content" id="signup-confirm-label">Confirm Password:</label>
+                <input type="password" id="signup-confirm" name="signup-confirm" required autocomplete="new-password">
+
+                <button type="submit" class="translatable-content" id="signup-submit">Sign Up</button>
+            </form>
+            <div id="auth-message"></div>
+        </section>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+        <script src="login.js"></script>
+        <!--- End Auth-->
+    </main>
+
+    <footer>
+        <!-- Theme Switcher -->
+        <button id="theme-toggle" aria-label="Toggle theme">
+            <svg id="theme-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="5" fill="currentColor" />
+                <path
+                    d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                    stroke="currentColor" stroke-width="2" />
+            </svg>
+        </button>
+    </footer>
+
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- language switcher -->
+    <script src="lang-login/lang-login.js"></script>
+    <!-- other scripts -->
+    <script src="../js/script.js"></script>
+
+</body>
+
+</html>
