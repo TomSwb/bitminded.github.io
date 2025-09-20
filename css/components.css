@@ -253,3 +253,31 @@
     transform: scale(1.05); 
   }
 }
+
+/* Login/Sign Up Button Styles - Site-wide */
+.auth-buttons {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+}
+.auth-buttons button {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.95rem;
+  border-radius: 0.4rem;
+  background: var(--color-primary, #0066ff);
+  color: var(--color-text-secondary, #fff);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+.auth-buttons button:hover,
+.auth-buttons button:focus {
+  background: var(--color-secondary, #004bb5);
+  color: var(--color-text-primary, #fff);
+}
