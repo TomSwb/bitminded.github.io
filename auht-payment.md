@@ -171,8 +171,132 @@ Acts as dashboard/launcher PWA. Handles:
 
 ---
 
-✅ **With this setup:**
+---
 
-- Users can install Bitminded hub or any individual app as a PWA
-- Subscriptions are enforced consistently
-- Everything is serverless: GitHub Pages (frontend), Supabase (auth/db), Stripe (billing), Cloudflare (edge security)
+## 6. Step-by-Step Implementation Reference
+
+### Supabase Setup
+
+**1. Create Supabase Project**
+
+- Go to [supabase.com](https://supabase.com) and create a new project.
+
+**2. Enable Authentication**
+
+- In the Auth section, enable Email/Password (and OAuth if needed).
+- Configure email templates and settings as desired.
+
+**3. Create Database Tables**
+
+- `users`: Managed by Supabase Auth.
+- `entitlements`:
+  - `user_id` (uuid) – references `auth.users.id`
+  - `app_id` (text) – e.g. "converter", "notes", "all"
+  - `active` (boolean)
+  - `updated_at` (timestamp)
+- Use Supabase SQL editor to create the `entitlements` table:
+  ```sql
+  create table public.entitlements (
+   user_id uuid references auth.users(id),
+   app_id text not null,
+   active boolean default false,
+   updated_at timestamp default now(),
+   primary key (user_id, app_id)
+  );
+  ```
+
+**4. (Optional) Store Stripe Customer ID**
+
+- Add a column to `users` or a separate table to store Stripe customer IDs for reference.
+
+**5. API Keys & Security**
+
+- Get your Supabase project URL and anon/public key for frontend use.
+- Use service role key for backend/webhook updates.
+
+---
+
+### Stripe Setup
+
+**1. Create Products**
+
+- In Stripe Dashboard, create a product for each app (e.g. "Converter Pass", "Notes Pass").
+- Create an "All Pass" product for full access.
+
+**2. Set Up Pricing**
+
+- Add recurring prices (subscriptions) to each product.
+- Optionally, create bundles or discounts.
+
+**3. Configure Stripe Checkout**
+
+- Use Stripe Checkout for payment flows in your frontend.
+- Pass user’s email or Supabase user ID as metadata if possible.
+
+**4. Set Up Webhooks**
+
+- In Stripe Dashboard, add a webhook endpoint (can be Supabase Edge Function or serverless function).
+- Listen for events: `checkout.session.completed`, `invoice.payment_succeeded`, `customer.subscription.deleted`, etc.
+- On payment success: update `entitlements.active = true` for the purchased app(s) in Supabase.
+- On cancellation/failure: set `active = false`.
+- Example webhook logic (pseudo-code):
+  ```js
+  // On webhook event
+  if (event.type === "checkout.session.completed") {
+    // Get user_id and app_id from metadata
+    // Update entitlements in Supabase
+  }
+  ```
+
+**5. Test Payments**
+
+- Use Stripe test mode and test cards to verify flows.
+
+---
+
+### Cloudflare Setup
+
+**1. DNS & Routing**
+
+- In Cloudflare, add DNS records for your main domain and each subdomain (e.g. `converter.bitminded.ch`).
+- Point main domain to GitHub Pages (CNAME).
+- Route subdomains through Cloudflare Workers.
+
+**2. Create Cloudflare Worker for Access Control**
+
+- Use [Wrangler](https://developers.cloudflare.com/workers/wrangler/) to scaffold a Worker.
+- Worker logic:
+  - Parse Supabase JWT from request (cookie or header).
+  - Verify token and fetch entitlements from Supabase (REST API or Edge Function).
+  - If entitled, proxy request to GitHub Pages app.
+  - If not, redirect to main site login/subscribe page.
+- Example Worker logic (pseudo-code):
+  ```js
+  // On request
+  if (validJWT && entitledForApp) {
+    // Proxy to app
+  } else {
+    // Redirect to login/subscribe
+  }
+  ```
+
+**3. Test Worker Locally**
+
+- Use `wrangler dev` to test Worker before deploying.
+
+**4. Deploy Worker**
+
+- Deploy via Wrangler to Cloudflare.
+
+---
+
+### General Tips
+
+- Use [jwt.io](https://jwt.io) to inspect Supabase tokens.
+- Use Stripe’s dashboard and logs to debug payment flows.
+- Use Supabase logs and SQL editor to debug entitlements.
+- Document all environment variables and API keys securely.
+
+---
+
+This section provides a step-by-step reference for setting up authentication, payments, and access control for Bitminded. Use it as a checklist when implementing each part.

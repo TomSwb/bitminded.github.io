@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Replace buttons with username (button) and sign out
     const username = user.user_metadata?.username || user.email;
     authButtons.innerHTML = `
-      <button class="username-btn" onclick="window.location.href='user-account/index.html'">${username}</button>
+      <button class="username-btn" onclick="window.location.href='account/index.html'">${username}</button>
       <button id="signout-btn">Sign Out</button>
     `;
     document.getElementById('signout-btn').onclick = async function() {
