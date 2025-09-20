@@ -16,14 +16,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('contact-linkedin')) {
             document.getElementById('contact-linkedin').textContent = i18next.t('contact-linkedin');
         }
-        if (document.getElementById('contact-email')) {
-            document.getElementById('contact-email').textContent = i18next.t('contact-email');
-        }
         if (document.getElementById('nav-home')) {
             document.getElementById('nav-home').textContent = i18next.t('nav-home');
         }
         if (document.getElementById('nav-contact')) {
             document.getElementById('nav-contact').textContent = i18next.t('nav-contact');
+        }
+
+        // Contact form translations
+        if (document.querySelector('label[for="name"]')) {
+            document.querySelector('label[for="name"]').textContent = i18next.t('contact-name');
+        }
+        if (document.querySelector('label[for="email"]')) {
+            document.querySelector('label[for="email"]').textContent = i18next.t('contact-email-label');
+        }
+        if (document.querySelector('label[for="message"]')) {
+            document.querySelector('label[for="message"]').textContent = i18next.t('contact-message');
+        }
+        if (document.querySelector('button.contact')) {
+            document.querySelector('button.contact').textContent = i18next.t('contact-send');
         }
         
         // Show all translatable content after translation is complete

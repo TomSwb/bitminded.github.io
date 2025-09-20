@@ -26,6 +26,8 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="../css/main.css">
+    <!-- Contact Form CSS -->
+    <link rel="stylesheet" href="../css/contact-form.css">
 </head>
 
 <body>
@@ -51,14 +53,20 @@
     </header>
 
     <main>
-        <!-- LinkedIn button -->
-        <a href="https://www.linkedin.com/in/thomas-schwab-bmi/" target="_blank" rel="noopener" class="contact-link">
-            <button id="contact-linkedin" class="contact translatable-content">Find me on LinkedIn</button>
-        </a>
-        <!-- Email button -->
-        <a href="mailto:contact@bitminded.ch" class="contact-link">
-            <button id="contact-email" class="contact translatable-content">Email me</button>
-        </a>
+        <!-- Contact Form -->
+        <form id="contact-form" class="contact-form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+
+            <button type="submit" class="contact">Send Message</button>
+        </form>
+        <div id="form-status"></div>
     </main>
     
     <footer>
@@ -79,6 +87,10 @@
     <script src="../js/lang-contact/lang-contact.js"></script>
     <!-- other scripts -->
     <script src="../js/script.js"></script>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <!-- Contact Form JS -->
+    <script src="../js/contact-form.js"></script>
 
 </body>
 
