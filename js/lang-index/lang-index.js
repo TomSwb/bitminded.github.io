@@ -13,22 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        // Login/Sign Up button translations (always visible, translate immediately)
-        if (document.querySelector('.auth-buttons button:nth-child(1)') && !document.querySelector('.auth-buttons .username-btn')) {
-            document.querySelector('.auth-buttons button:nth-child(1)').textContent = i18next.t('login-btn');
-        }
-        if (document.querySelector('.auth-buttons button:nth-child(2)') && !document.querySelector('.auth-buttons .username-btn')) {
-            document.querySelector('.auth-buttons button:nth-child(2)').textContent = i18next.t('signup-btn');
-        }
-        // Sign Out button translation (preserve admin badge if present)
-        if (document.getElementById('signout-btn')) {
-            document.getElementById('signout-btn').textContent = i18next.t('signout-btn');
-        }
-        
-        // Update auth buttons translation if function exists
-        if (typeof window.updateAuthButtonsTranslation === 'function') {
-            window.updateAuthButtonsTranslation();
-        }
         // Nav menu translations
         if (document.getElementById('nav-home')) {
             document.getElementById('nav-home').textContent = i18next.t('nav-home');

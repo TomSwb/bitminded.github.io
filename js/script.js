@@ -90,72 +90,14 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 
-// ===== AUTHENTICATION BUTTONS =====
-
-document.addEventListener('DOMContentLoaded', async function() {
-  const authButtons = document.querySelector('.auth-buttons');
-  if (!authButtons) return;
-
-  // Supabase client setup (reuse credentials from login.js)
-  const SUPABASE_URL = 'https://jkikrzxzpyfjseirsqxb.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpraWtyenh6cHlmanNlaXJzcXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNDk2MjUsImV4cCI6MjA3MzkyNTYyNX0.6Nb08-tnLHNzUCR2S8zb4Nv4hCj1rCTcqlOJebvrrps';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // Check session
-  const session = await supabase.auth.getSession();
-  const user = session.data?.session?.user;
-  if (user) {
-    // Check if user is admin
-    const { data: adminData, error } = await supabase
-      .from('admins')
-      .select('is_superadmin')
-      .eq('user_id', user.id)
-      .single();
-    
-    console.log('Admin check:', { adminData, error, userId: user.id });
-    
-    const isAdmin = adminData?.is_superadmin || false;
-    const username = user.user_metadata?.username || user.email;
-    
-    // Replace buttons with username (button) and sign out
-    authButtons.innerHTML = `
-      <button class="username-btn" onclick="window.location.href='/account/'">${username}</button>
-      ${isAdmin ? '<span class="admin-badge" onclick="window.location.href=\'/admin/\'" style="cursor: pointer;">👑 Admin</span>' : ''}
-      <button id="signout-btn">Sign Out</button>
-    `;
-    document.getElementById('signout-btn').onclick = async function() {
-      await supabase.auth.signOut();
-      window.location.reload();
-    };
-    
-    // Store reference for translation updates
-    window.updateAuthButtonsTranslation = function() {
-      const signoutBtn = document.getElementById('signout-btn');
-      if (signoutBtn && typeof i18next !== 'undefined' && i18next.isInitialized) {
-        signoutBtn.textContent = i18next.t('signout-btn');
-      }
-    };
-    
-    // Try to translate immediately if i18next is ready
-    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
-      window.updateAuthButtonsTranslation();
-    }
-  }
-  
-  // Signal that auth is ready
-  window.authReady = true;
-  console.log('🔐 Auth ready set to true');
-  console.log('🔄 Calling checkPageReady from auth...');
-  checkPageReady();
-});
 
 // ===== PAGE READY CHECK =====
 
 function checkPageReady() {
-    console.log('🔍 checkPageReady called - translationReady:', window.translationReady, 'authReady:', window.authReady);
-    // Check if both translation and auth are ready
-    if (window.translationReady && window.authReady) {
-        console.log('✅ Both ready flags are true, hiding loading screen');
+    console.log('🔍 checkPageReady called - translationReady:', window.translationReady);
+    // Check if translation is ready
+    if (window.translationReady) {
+        console.log('✅ Translation ready, hiding loading screen');
         // Immediate transition for faster loading
         document.documentElement.classList.add('page-loaded');
     } else {
