@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        // Login/Sign Up button translations
-        if (document.querySelector('.auth-buttons button:nth-child(1)')) {
+        // Login/Sign Up button translations (always visible, translate immediately)
+        if (document.querySelector('.auth-buttons button:nth-child(1)') && !document.querySelector('.auth-buttons .username-btn')) {
             document.querySelector('.auth-buttons button:nth-child(1)').textContent = i18next.t('login-btn');
         }
-        if (document.querySelector('.auth-buttons button:nth-child(2)')) {
+        if (document.querySelector('.auth-buttons button:nth-child(2)') && !document.querySelector('.auth-buttons .username-btn')) {
             document.querySelector('.auth-buttons button:nth-child(2)').textContent = i18next.t('signup-btn');
         }
         // Sign Out button translation
@@ -53,6 +53,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Remove the hide-translatable class from document
         document.documentElement.classList.remove('hide-translatable');
+        
+        // Signal that translation is ready
+        window.translationReady = true;
+        if (typeof checkPageReady === 'function') {
+            checkPageReady();
+        }
     }
 
     window.changeLanguage = function(lng) {

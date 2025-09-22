@@ -9,7 +9,7 @@
   "contact-message": "Message:",
   "contact-send": "Send Message",
 
-  "login-username-label": "Username:",
+  "login-username-label": "Email:",
   "login-email-label": "Email:",
   "login-password-label": "Password:",
   "login-submit": "Login",
@@ -34,7 +34,7 @@
   "contact-message": "Message :",
   "contact-send": "Envoyer le message",
 
-  "login-username-label": "Nom d'utilisateur :",
+  "login-username-label": "Email :",
   "login-email-label": "E-mail :",
   "login-password-label": "Mot de passe :",
   "login-submit": "Connexion",

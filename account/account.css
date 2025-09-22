@@ -1,0 +1,68 @@
+/* account.css - Styles for BitMinded Account Page */
+
+.account-info {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--color-background, #fff);
+  border: 1px solid var(--border-color-primary, #ccc);
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.account-info label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.account-info input[type="text"],
+.account-info input[type="email"] {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: var(--color-bg-input, #fafafa);
+  margin-bottom: 0.5rem;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.account-info .avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+  border: 2px solid var(--border-color-primary, #ccc);
+}
+
+.account-info button[type="submit"] {
+  align-self: flex;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  background: var(--color-primary, #0066ff);
+  color: var(--color-text-secondary, #222);
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 1rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.account-info button[type="submit"]:hover,
+.account-info button[type="submit"]:focus {
+  background: var(--color-secondary, #004bb5);
+  color: var(--color-text-primary, #fff);
+}
+
+.account-info .status {
+  text-align: center;
+  margin-top: 1rem;
+  font-weight: 500;
+  font-size: 1rem;
+}
