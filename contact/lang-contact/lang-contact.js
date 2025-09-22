@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.updateAuthButtonsTranslation === 'function') {
             window.updateAuthButtonsTranslation();
         }
+        if (document.getElementById('contact-linkedin')) {
+            document.getElementById('contact-linkedin').textContent = i18next.t('contact-linkedin');
+        }
         if (document.getElementById('nav-home')) {
             document.getElementById('nav-home').textContent = i18next.t('nav-home');
         }

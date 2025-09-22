@@ -82,10 +82,11 @@
   flex-direction: column;
   gap: var(--spacing-xs);
   background-color: var(--color-background);
+  color: var(--color-text-primary);
 }
 
 /* Navigation Links */
-.pages {
+.menu .pages{
   color: var(--color-text-primary);
   text-decoration: none;
   font-weight: bold;
@@ -98,10 +99,20 @@
   cursor: pointer;
 }
 
-.pages:hover,
-.pages:focus {
+.menu :hover,
+.menu :focus {
   color: var(--color-secondary);
   outline: none;
+}
+
+/* Force correct navigation color with high specificity */
+nav.menu a.pages {
+  color: var(--color-text-primary) !important;
+}
+
+nav.menu a.pages:hover,
+nav.menu a.pages:focus {
+  color: var(--color-secondary) !important;
 }
 
 /* ===== DROPDOWN COMPONENTS ===== */

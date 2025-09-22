@@ -94,6 +94,7 @@
   --color-primary: var(--color-accent-pink); /* light mode primary */
   --color-secondary: var(--color-accent-green);
   --color-text-primary: var(--color-text-dark);
+  --color-text-secondary: var(--color-text-light);
   --border-color-primary: var(--color-accent-pink); /* pink borders in light mode */
   --color-text-secondary: var(--color-text-light);
 }
