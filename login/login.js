@@ -37,25 +37,13 @@ document.addEventListener('DOMContentLoaded', function() {
         showLogin();
     }
 
-    // Login logic (username + password)
+    // Login logic (email + password)
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        const username = document.getElementById('login-username').value;
+        const email = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
         authMessage.textContent = '';
         try {
-            // Find user by username in Supabase public.user table (requires RLS policy to allow select)
-            const { data, error } = await supabase
-                .from('users')
-                .select('email')
-                .eq('username', username)
-                .single();
-            if (error || !data) {
-                authMessage.textContent = 'User not found.';
-                authMessage.style.color = 'red';
-                return;
-            }
-            const email = data.email;
             const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
             if (loginError) {
                 authMessage.textContent = loginError.message;

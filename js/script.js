@@ -105,10 +105,22 @@ document.addEventListener('DOMContentLoaded', async function() {
   const session = await supabase.auth.getSession();
   const user = session.data?.session?.user;
   if (user) {
-    // Replace buttons with username (button) and sign out
+    // Check if user is admin
+    const { data: adminData, error } = await supabase
+      .from('admins')
+      .select('is_superadmin')
+      .eq('user_id', user.id)
+      .single();
+    
+    console.log('Admin check:', { adminData, error, userId: user.id });
+    
+    const isAdmin = adminData?.is_superadmin || false;
     const username = user.user_metadata?.username || user.email;
+    
+    // Replace buttons with username (button) and sign out
     authButtons.innerHTML = `
-      <button class="username-btn" onclick="window.location.href='account/index.html'">${username}</button>
+      <button class="username-btn" onclick="window.location.href='account/'">${username}</button>
+      ${isAdmin ? '<span class="admin-badge">👑 Admin</span>' : ''}
       <button id="signout-btn">Sign Out</button>
     `;
     document.getElementById('signout-btn').onclick = async function() {
@@ -116,7 +128,21 @@ document.addEventListener('DOMContentLoaded', async function() {
       window.location.reload();
     };
   }
+  
+  // Signal that auth is ready
+  window.authReady = true;
+  checkPageReady();
 });
+
+// ===== PAGE READY CHECK =====
+
+function checkPageReady() {
+    // Check if both translation and auth are ready
+    if (window.translationReady && window.authReady) {
+        // Immediate transition for faster loading
+        document.documentElement.classList.add('page-loaded');
+    }
+}
 
 // ===== INITIALIZATION =====
 

@@ -1,0 +1,24 @@
+{
+  "en": {
+    "translation": {
+      "account-title": "Account",
+      "account-subtitle": "Your profile & settings",
+      "nav-home": "Home",
+      "nav-contact": "Contact",
+      "login-btn": "Login",
+      "signup-btn": "Sign Up",
+      "signout-btn": "Sign Out"
+    }
+  },
+  "fr": {
+    "translation": {
+      "account-title": "Compte",
+      "account-subtitle": "Votre profil et paramètres",
+      "nav-home": "Accueil",
+      "nav-contact": "Contact",
+      "login-btn": "Connexion",
+      "signup-btn": "Inscription",
+      "signout-btn": "Déconnexion"
+    }
+  }
+}
