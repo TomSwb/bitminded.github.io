@@ -119,28 +119,47 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Replace buttons with username (button) and sign out
     authButtons.innerHTML = `
-      <button class="username-btn" onclick="window.location.href='account/'">${username}</button>
-      ${isAdmin ? '<span class="admin-badge">👑 Admin</span>' : ''}
+      <button class="username-btn" onclick="window.location.href='/account/'">${username}</button>
+      ${isAdmin ? '<span class="admin-badge" onclick="window.location.href=\'/admin/\'" style="cursor: pointer;">👑 Admin</span>' : ''}
       <button id="signout-btn">Sign Out</button>
     `;
     document.getElementById('signout-btn').onclick = async function() {
       await supabase.auth.signOut();
       window.location.reload();
     };
+    
+    // Store reference for translation updates
+    window.updateAuthButtonsTranslation = function() {
+      const signoutBtn = document.getElementById('signout-btn');
+      if (signoutBtn && typeof i18next !== 'undefined' && i18next.isInitialized) {
+        signoutBtn.textContent = i18next.t('signout-btn');
+      }
+    };
+    
+    // Try to translate immediately if i18next is ready
+    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+      window.updateAuthButtonsTranslation();
+    }
   }
   
   // Signal that auth is ready
   window.authReady = true;
+  console.log('🔐 Auth ready set to true');
+  console.log('🔄 Calling checkPageReady from auth...');
   checkPageReady();
 });
 
 // ===== PAGE READY CHECK =====
 
 function checkPageReady() {
+    console.log('🔍 checkPageReady called - translationReady:', window.translationReady, 'authReady:', window.authReady);
     // Check if both translation and auth are ready
     if (window.translationReady && window.authReady) {
+        console.log('✅ Both ready flags are true, hiding loading screen');
         // Immediate transition for faster loading
         document.documentElement.classList.add('page-loaded');
+    } else {
+        console.log('⏳ Still waiting for ready flags...');
     }
 }
 

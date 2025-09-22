@@ -40,6 +40,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('signout-btn')) {
             document.getElementById('signout-btn').textContent = i18next.t('signout-btn');
         }
+        
+        // Update all translatable content with data-i18n attributes
+        const elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            if (key) {
+                element.textContent = i18next.t(key);
+            }
+        });
+        
+        // Update auth buttons translation if function exists
+        if (typeof window.updateAuthButtonsTranslation === 'function') {
+            window.updateAuthButtonsTranslation();
+        }
         // Show all translatable content after translation is complete
         const translatableElements = document.querySelectorAll('.translatable-content');
         translatableElements.forEach(element => {

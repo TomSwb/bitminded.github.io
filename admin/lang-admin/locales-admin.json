@@ -1,0 +1,36 @@
+{
+  "en": {
+    "translation": {
+      "admin-title": "Admin Dashboard",
+      "admin-subtitle": "Manage your BitMinded platform",
+      "admin-welcome-text": "Welcome to the admin panel. Choose a section below to manage your platform.",
+      "admin-nav-users": "Users",
+      "admin-nav-payments": "Payments", 
+      "admin-nav-entitlements": "Entitlements",
+      "admin-nav-settings": "Settings",
+      "nav-home": "Home",
+      "nav-contact": "Contact",
+      "nav-admin": "Admin",
+      "login-btn": "Login",
+      "signup-btn": "Sign Up",
+      "signout-btn": "Sign Out"
+    }
+  },
+  "fr": {
+    "translation": {
+      "admin-title": "Tableau de Bord Admin",
+      "admin-subtitle": "Gérez votre plateforme BitMinded",
+      "admin-welcome-text": "Bienvenue dans le panneau d'administration. Choisissez une section ci-dessous pour gérer votre plateforme.",
+      "admin-nav-users": "Utilisateurs",
+      "admin-nav-payments": "Paiements",
+      "admin-nav-entitlements": "Autorisations", 
+      "admin-nav-settings": "Paramètres",
+      "nav-home": "Accueil",
+      "nav-contact": "Contact",
+      "nav-admin": "Admin",
+      "login-btn": "Connexion",
+      "signup-btn": "S'inscrire",
+      "signout-btn": "Déconnexion"
+    }
+  }
+}

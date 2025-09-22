@@ -37,3 +37,16 @@ CREATE POLICY "User can view/update own preferences"
   ON public.preferences
   FOR ALL
   USING (auth.uid() = user_id);
+
+-- Two-Factor Authentication tables: Only user can manage own 2FA settings
+ALTER TABLE public.two_factor_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "User can manage own 2FA settings"
+  ON public.two_factor_settings
+  FOR ALL
+  USING (auth.uid() = user_id);
+
+ALTER TABLE public.two_factor_backup_codes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "User can manage own backup codes"
+  ON public.two_factor_backup_codes
+  FOR ALL
+  USING (auth.uid() = user_id);
