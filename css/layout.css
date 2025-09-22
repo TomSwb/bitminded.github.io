@@ -22,7 +22,7 @@ header {
     background-color: var(--color-background);
   }
   
-  .pages {
+  .menu .pages {
     padding: 0.75rem var(--spacing-md);
     margin: var(--spacing-xs);
   }
@@ -121,10 +121,10 @@ header {
     background-color: rgba(var(--color-bg-light-rgb), 0.95);
   }
 
-  .pages {
+  .menu .pages {
     font-size: var(--font-size-4xl);
     margin: 1.2rem 0;
-    color: var(--color-primary);
+    color: var(--color-text-primary);
   }
   
   .pages:last-child {
