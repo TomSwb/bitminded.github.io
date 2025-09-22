@@ -66,3 +66,287 @@
   font-weight: 500;
   font-size: 1rem;
 }
+
+/* Account Sections Layout */
+.account-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.account-section {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--border-color-primary, #ccc);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.account-section h3 {
+  margin: 0 0 1.5rem 0;
+  color: var(--color-text-primary, #333);
+  font-size: 1.25rem;
+  border-bottom: 2px solid var(--color-primary, #0066ff);
+  padding-bottom: 0.5rem;
+}
+
+/* Security Settings */
+.security-settings {
+  margin-top: 1rem;
+}
+
+.2fa-status h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--color-text-primary, #333);
+}
+
+.2fa-status p {
+  margin: 0 0 1rem 0;
+  color: var(--color-text-secondary, #666);
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.enabled {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-badge.disabled {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.2fa-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: center;
+  margin-top: var(--spacing-lg);
+}
+
+.2fa-actions button {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin: var(--spacing-sm);
+  min-width: 200px;
+  min-height: 60px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: var(--color-primary, #0066ff) !important;
+  color: var(--color-text-secondary, #222) !important;
+  padding: var(--spacing-lg) var(--spacing-xl) !important;
+  border-radius: var(--radius-md) !important;
+  font-size: var(--font-size-xl) !important;
+  font-weight: 600 !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all var(--transition-fast) !important;
+  margin: var(--spacing-sm) !important;
+  min-width: 200px !important;
+  min-height: 60px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+.btn-primary:hover {
+  background: var(--color-secondary, #004bb5) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text-primary, #333);
+  border: 2px solid var(--border-color-primary, #ccc);
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background: var(--color-primary, #0066ff);
+  color: white;
+  border-color: var(--color-primary, #0066ff);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Backup Codes Modal */
+.backup-codes-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--color-background, #fff);
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+  margin: 0 0 1rem 0;
+  color: var(--color-text-primary, #333);
+}
+
+.modal-content p {
+  margin: 0 0 1.5rem 0;
+  color: var(--color-text-secondary, #666);
+  line-height: 1.5;
+}
+
+.backup-codes-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.backup-code-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color-primary, #ccc);
+  background: var(--color-background-secondary, #f8f9fa);
+}
+
+.backup-code-item.available {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.backup-code-item.used {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.05);
+  opacity: 0.7;
+}
+
+.backup-code-item .code {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+}
+
+.backup-code-item .status {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.backup-code-item.available .status {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.backup-code-item.used .status {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.modal-content button {
+  margin-right: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 120px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .account-sections {
+    gap: 1.5rem;
+  }
+  
+  .account-section {
+    padding: 1rem;
+  }
+  
+  .2fa-actions {
+    gap: 0.5rem;
+  }
+  
+  .backup-codes-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+    width: 95%;
+  }
+}

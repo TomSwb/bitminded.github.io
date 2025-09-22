@@ -1,9 +1,9 @@
-// lang-account.js
-// Language switcher for Account page
+// lang-admin.js
+// Language switcher for Admin page
 
 document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('language') || 'en';
-    fetch('lang-account/locales-account.json')
+    fetch('lang-admin/locales-admin.json')
         .then(response => response.json())
         .then(resources => {
             i18next.init({
@@ -16,13 +16,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        // Account page translations
-        if (document.getElementById('account-title')) {
-            document.getElementById('account-title').textContent = i18next.t('account-title');
+        // Admin page translations
+        if (document.getElementById('admin-title')) {
+            document.getElementById('admin-title').textContent = i18next.t('admin-title');
         }
-        if (document.getElementById('account-subtitle')) {
-            document.getElementById('account-subtitle').textContent = i18next.t('account-subtitle');
+        if (document.getElementById('admin-subtitle')) {
+            document.getElementById('admin-subtitle').textContent = i18next.t('admin-subtitle');
         }
+        if (document.getElementById('admin-welcome-text')) {
+            document.getElementById('admin-welcome-text').textContent = i18next.t('admin-welcome-text');
+        }
+        
+        // Admin navigation translations
+        if (document.getElementById('admin-nav-users')) {
+            document.getElementById('admin-nav-users').textContent = i18next.t('admin-nav-users');
+        }
+        if (document.getElementById('admin-nav-payments')) {
+            document.getElementById('admin-nav-payments').textContent = i18next.t('admin-nav-payments');
+        }
+        if (document.getElementById('admin-nav-entitlements')) {
+            document.getElementById('admin-nav-entitlements').textContent = i18next.t('admin-nav-entitlements');
+        }
+        if (document.getElementById('admin-nav-settings')) {
+            document.getElementById('admin-nav-settings').textContent = i18next.t('admin-nav-settings');
+        }
+        
         // Nav menu translations
         if (document.getElementById('nav-home')) {
             document.getElementById('nav-home').textContent = i18next.t('nav-home');
@@ -30,6 +48,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('nav-contact')) {
             document.getElementById('nav-contact').textContent = i18next.t('nav-contact');
         }
+        if (document.getElementById('nav-admin')) {
+            document.getElementById('nav-admin').textContent = i18next.t('nav-admin');
+        }
+        
         // Auth buttons (always visible, translate immediately)
         if (document.querySelector('.auth-buttons button:nth-child(1)') && !document.querySelector('.auth-buttons .username-btn')) {
             document.querySelector('.auth-buttons button:nth-child(1)').textContent = i18next.t('login-btn');
@@ -41,19 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('signout-btn').textContent = i18next.t('signout-btn');
         }
         
-        // Update all translatable content with data-i18n attributes
-        const elements = document.querySelectorAll('[data-i18n]');
-        elements.forEach(element => {
-            const key = element.getAttribute('data-i18n');
-            if (key) {
-                element.textContent = i18next.t(key);
-            }
-        });
-        
         // Update auth buttons translation if function exists
         if (typeof window.updateAuthButtonsTranslation === 'function') {
             window.updateAuthButtonsTranslation();
         }
+        
         // Show all translatable content after translation is complete
         const translatableElements = document.querySelectorAll('.translatable-content');
         translatableElements.forEach(element => {

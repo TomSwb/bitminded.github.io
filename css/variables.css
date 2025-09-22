@@ -17,7 +17,8 @@
   /* Semantic Color Mapping */
   --color-primary: var(--color-accent-green); /* dark mode primary */
   --color-secondary: var(--color-accent-pink);
-  --color-background: var(--color-bg-dark);
+  --color-background-primary: var(--color-bg-dark);
+  --color-background-secondary: var(--color-bg-light);
   --color-text-primary: var(--color-text-light);
   --color-text-secondary: var(--color-text-dark);
   
@@ -88,7 +89,8 @@
 
 /* ===== LIGHT THEME OVERRIDES ===== */
 [data-theme="light"] {
-  --color-background: var(--color-bg-light);
+  --color-background-primary: var(--color-bg-light);
+  --color-background-secondary: var(--color-bg-dark);
   --color-primary: var(--color-accent-pink); /* light mode primary */
   --color-secondary: var(--color-accent-green);
   --color-text-primary: var(--color-text-dark);

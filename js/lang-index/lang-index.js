@@ -24,6 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('signout-btn')) {
             document.getElementById('signout-btn').textContent = i18next.t('signout-btn');
         }
+        
+        // Update auth buttons translation if function exists
+        if (typeof window.updateAuthButtonsTranslation === 'function') {
+            window.updateAuthButtonsTranslation();
+        }
         // Nav menu translations
         if (document.getElementById('nav-home')) {
             document.getElementById('nav-home').textContent = i18next.t('nav-home');

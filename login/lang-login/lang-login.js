@@ -24,9 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Login & Sign Up translations
-        if (document.getElementById('login-username-label')) {
-            document.getElementById('login-username-label').textContent = i18next.t('login-username-label');
-        }
         if (document.getElementById('login-email-label')) {
             document.getElementById('login-email-label').textContent = i18next.t('login-email-label');
         }
