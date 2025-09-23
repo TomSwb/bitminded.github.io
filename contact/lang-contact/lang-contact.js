@@ -22,16 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        if (document.getElementById('contact-linkedin')) {
-            document.getElementById('contact-linkedin').textContent = i18next.t('contact-linkedin');
-        }
-        if (document.getElementById('nav-home')) {
-            document.getElementById('nav-home').textContent = i18next.t('nav-home');
-        }
-        if (document.getElementById('nav-contact')) {
-            document.getElementById('nav-contact').textContent = i18next.t('nav-contact');
-        }
-
         // Contact form translations
         if (document.querySelector('label[for="name"]')) {
             document.querySelector('label[for="name"]').textContent = i18next.t('contact-name');

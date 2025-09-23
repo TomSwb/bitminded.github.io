@@ -1,18 +1,12 @@
 {
   "en": {
     "translation": {
-      "nav-home": "Home", 
-      "nav-contact": "Contact",
-
       "main-title": "Welcome to BitMinded!",
       "subtitle": "Site under construction"
     }
   },
   "fr": {
     "translation": {
-      "nav-home": "Accueil", 
-      "nav-contact": "Contact",
-      
       "main-title": "Bienvenue sur BitMinded!",
       "subtitle": "Site en construction"
     }
