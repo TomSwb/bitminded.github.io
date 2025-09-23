@@ -160,6 +160,12 @@ class ComponentLoader {
                 } else if (componentName === 'language-switcher' && window.languageSwitcher) {
                     // Special handling for language-switcher component
                     window.languageSwitcher.init(config);
+                } else if (componentName === 'navigation-menu' && window.navigationMenu) {
+                    // Special handling for navigation-menu component
+                    window.navigationMenu.init(config);
+                } else if (componentName === 'theme-switcher' && window.themeSwitcher) {
+                    // Special handling for theme-switcher component
+                    window.themeSwitcher.init(config);
                 }
                 resolve();
             };

@@ -1,0 +1,16 @@
+{
+  "en": {
+    "translation": {
+      "nav-home": "Home",
+      "nav-contact": "Contact",
+      "nav-hamburger-label": "Toggle navigation menu"
+    }
+  },
+  "fr": {
+    "translation": {
+      "nav-home": "Accueil",
+      "nav-contact": "Contact",
+      "nav-hamburger-label": "Basculer le menu de navigation"
+    }
+  }
+}

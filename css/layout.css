@@ -72,64 +72,6 @@ header {
   .contact-link {
     font-size: var(--font-size-sm);
   }
-
-  /* Hamburger menu visibility */
-  .hamburger {
-    display: block;
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    z-index: 5000;
-  }
-  
-  /* Mobile menu overlay */
-  .menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(var(--color-bg-dark-rgb), 0.95);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 0 !important;
-    padding: 0 !important;
-    z-index: var(--z-modal);
-    right: 0;
-    transition: opacity var(--transition-normal);
-    opacity: 0;
-    pointer-events: none;
-    border: none;
-    box-sizing: border-box;
-    min-height: 100vh;
-  }
-
-  .menu.active {
-    opacity: 1;
-    pointer-events: auto;
-    background-color: rgba(var(--color-bg-dark-rgb), 0.95);
-  }
-
-  /* Light theme mobile menu overlay */
-  [data-theme="light"] .menu {
-    background-color: rgba(var(--color-bg-light-rgb), 0.95);
-  }
-
-  [data-theme="light"] .menu.active {
-    background-color: rgba(var(--color-bg-light-rgb), 0.95);
-  }
-
-  .menu .pages {
-    font-size: var(--font-size-4xl);
-    margin: 1.2rem 0;
-    color: var(--color-text-primary);
-  }
-  
-  .pages:last-child {
-    border-bottom: none;
-  }
   
   body {
     padding: 0 var(--spacing-sm);
@@ -147,13 +89,6 @@ header {
     top: var(--spacing-sm);
     left: var(--spacing-sm);
     z-index: var(--z-popover);
-  }
-}
-
-/* Desktop: Ensure hamburger is hidden */
-@media (min-width: 481px) {
-  .hamburger {
-    display: none !important;
   }
 }
 
