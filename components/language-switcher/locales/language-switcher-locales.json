@@ -1,0 +1,18 @@
+{
+  "en": {
+    "translation": {
+      "lang-en-label": "Switch to English",
+      "lang-en-title": "English",
+      "lang-fr-label": "Switch to French", 
+      "lang-fr-title": "Français"
+    }
+  },
+  "fr": {
+    "translation": {
+      "lang-en-label": "Passer à l'anglais",
+      "lang-en-title": "English",
+      "lang-fr-label": "Passer au français",
+      "lang-fr-title": "Français"
+    }
+  }
+}
