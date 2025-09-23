@@ -98,8 +98,13 @@ function checkPageReady() {
     // Check if translation is ready
     if (window.translationReady) {
         console.log('✅ Translation ready, hiding loading screen');
-        // Immediate transition for faster loading
-        document.documentElement.classList.add('page-loaded');
+        // Use the loading screen component if available
+        if (window.loadingScreen) {
+            window.loadingScreen.setReadyFlag('page', true);
+        } else {
+            // Fallback to old method
+            document.documentElement.classList.add('page-loaded');
+        }
     } else {
         console.log('⏳ Still waiting for ready flags...');
     }

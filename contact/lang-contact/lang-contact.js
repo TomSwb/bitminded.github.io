@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('language') || 'en';
+    
+    // Ensure content is hidden until translation is ready
+    document.documentElement.classList.add('hide-translatable');
+    
     fetch('lang-contact/locales-contact.json')
         .then(response => response.json())
         .then(resources => {
@@ -10,6 +14,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }, function(err, t) {
                 updateContent();
             });
+        })
+        .catch(error => {
+            console.error('Failed to load contact translations:', error);
+            // Still show content even if translation fails
+            showContent();
         });
 
     function updateContent() {
@@ -48,12 +57,47 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Signal that translation is ready
         window.translationReady = true;
+        
+        // Notify loading screen component
+        if (window.loadingScreen) {
+            window.loadingScreen.setReadyFlag('translation', true);
+        }
+        
+        if (typeof checkPageReady === 'function') {
+            checkPageReady();
+        }
+    }
+
+    function showContent() {
+        // Show all translatable content
+        const translatableElements = document.querySelectorAll('.translatable-content');
+        translatableElements.forEach(element => {
+            element.classList.add('loaded');
+        });
+        
+        // Remove the hide-translatable class from document
+        document.documentElement.classList.remove('hide-translatable');
+        
+        // Signal that translation is ready (even if failed)
+        window.translationReady = true;
+        
+        // Notify loading screen component
+        if (window.loadingScreen) {
+            window.loadingScreen.setReadyFlag('translation', true);
+        }
+        
         if (typeof checkPageReady === 'function') {
             checkPageReady();
         }
     }
 
     window.changeLanguage = function(lng) {
+        // Show loading screen during language change
+        if (window.loadingScreen) {
+            window.loadingScreen.show();
+            window.loadingScreen.setReadyFlag('translation', false);
+        }
+        
         localStorage.setItem('language', lng);
         i18next.changeLanguage(lng, updateContent);
     };

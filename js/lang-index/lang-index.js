@@ -39,12 +39,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Signal that translation is ready
         window.translationReady = true;
+        
+        // Notify loading screen component
+        if (window.loadingScreen) {
+            window.loadingScreen.setReadyFlag('translation', true);
+        }
+        
         if (typeof checkPageReady === 'function') {
             checkPageReady();
         }
     }
 
     window.changeLanguage = function(lng) {
+        // Show loading screen during language change
+        if (window.loadingScreen) {
+            window.loadingScreen.show();
+            window.loadingScreen.setReadyFlag('translation', false);
+        }
+        
         localStorage.setItem('language', lng);
         i18next.changeLanguage(lng, updateContent);
     };
