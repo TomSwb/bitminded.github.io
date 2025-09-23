@@ -157,6 +157,9 @@ class ComponentLoader {
                 } else if (componentName === 'loading-screen' && window.loadingScreen) {
                     // Special handling for loading-screen component
                     window.loadingScreen.init(config);
+                } else if (componentName === 'language-switcher' && window.languageSwitcher) {
+                    // Special handling for language-switcher component
+                    window.languageSwitcher.init(config);
                 }
                 resolve();
             };

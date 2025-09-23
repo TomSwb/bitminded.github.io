@@ -1,0 +1,96 @@
+/* Language Switcher Component Styles - Based on existing design system */
+.language-switcher {
+    position: fixed;
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    z-index: var(--z-popover);
+}
+
+.language-switcher__container {
+    display: flex;
+    gap: var(--spacing-xs);
+    align-items: center;
+}
+
+.language-switcher__button {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--border-color-primary);
+    background: var(--color-background);
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+}
+
+.language-switcher__button:hover {
+    background: var(--color-primary);
+    color: var(--color-background);
+}
+
+.language-switcher__button.active {
+    background: var(--color-primary);
+    color: var(--color-background);
+}
+
+.language-switcher__flag {
+    font-size: var(--font-size-base);
+    line-height: 1;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 480px) {
+    .language-switcher {
+        top: var(--spacing-sm);
+        left: var(--spacing-sm);
+        z-index: var(--z-popover);
+    }
+    
+    .language-switcher__button {
+        font-size: var(--font-size-xl);
+        padding: 0.4em 0.7em;
+        border-radius: var(--radius-lg);
+        margin: 0 0.15em;
+    }
+}
+
+/* Compact mode for mobile hamburger menu */
+.language-switcher.compact {
+    position: static;
+    top: auto;
+    left: auto;
+}
+
+.language-switcher.compact .language-switcher__container {
+    gap: var(--spacing-sm);
+}
+
+.language-switcher.compact .language-switcher__button {
+    margin: 0;
+}
+
+/* Animation for language change */
+.language-switcher__button.changing {
+    animation: languageChange 0.3s ease-in-out;
+}
+
+@keyframes languageChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* Accessibility improvements */
+.language-switcher__button:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.language-switcher__button:focus:not(:focus-visible) {
+    outline: none;
+}

@@ -115,5 +115,22 @@ function checkPageReady() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('BitMinded website initialized');
     
+    // Load Language Switcher Component
+    loadLanguageSwitcher();
+    
     // Any additional initialization code can go here
 });
+
+// ===== LANGUAGE SWITCHER COMPONENT LOADING =====
+
+async function loadLanguageSwitcher() {
+    try {
+        await componentLoader.load('language-switcher', {
+            container: 'header',
+            priority: 'high'
+        });
+        console.log('✅ Language switcher component loaded');
+    } catch (error) {
+        console.error('❌ Failed to load language switcher component:', error);
+    }
+}
