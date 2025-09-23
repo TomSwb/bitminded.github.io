@@ -44,7 +44,7 @@ class LanguageSwitcher {
         this.setupComponent();
         this.bindEvents();
         this.updateActiveLanguage();
-        this.loadTranslations();
+        this.setAccessibilityAttributes();
         
         this.isInitialized = true;
         console.log('✅ Language switcher initialized successfully');
@@ -124,43 +124,19 @@ class LanguageSwitcher {
     }
 
     /**
-     * Load component translations
+     * Set accessibility attributes for language buttons
      */
-    async loadTranslations() {
-        try {
-            // Use absolute path from root to avoid subdirectory issues
-            const response = await fetch('/components/language-switcher/locales/language-switcher-locales.json');
-            if (response.ok) {
-                const translations = await response.json();
-                this.translations = translations;
-                this.updateComponentTranslations();
-                console.log('✅ Language switcher translations loaded');
-            } else {
-                console.warn('Failed to load language switcher translations:', response.status);
-            }
-        } catch (error) {
-            console.warn('Failed to load language switcher translations:', error);
-        }
-    }
-
-    /**
-     * Update component translations based on current language
-     */
-    updateComponentTranslations() {
-        if (!this.translations?.[this.currentLanguage]) {
-            return;
-        }
-
-        const t = this.translations[this.currentLanguage].translation;
-        
-        // Update button labels
+    setAccessibilityAttributes() {
         this.buttons.forEach(button => {
             const lang = button.dataset.lang;
-            const ariaLabel = t[`lang-${lang}-label`];
-            const title = t[`lang-${lang}-title`];
+            const languageNames = {
+                'en': 'English',
+                'fr': 'Français'
+            };
             
-            if (ariaLabel) button.setAttribute('aria-label', ariaLabel);
-            if (title) button.setAttribute('title', title);
+            const languageName = languageNames[lang] || lang;
+            button.setAttribute('aria-label', `Switch to ${languageName}`);
+            button.setAttribute('title', languageName);
         });
     }
 
@@ -202,9 +178,6 @@ class LanguageSwitcher {
             console.log('Updating i18next language');
             i18next.changeLanguage(language);
         }
-
-        // Update component translations
-        this.updateComponentTranslations();
         
         console.log('✅ Language change completed');
     }
