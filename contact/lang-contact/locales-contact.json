@@ -1,11 +1,6 @@
 {
   "en": {
     "translation": {
-      "nav-home": "Home", 
-      "nav-contact": "Contact",
-
-      "contact-linkedin": "Find me on LinkedIn",
-
       "contact-name": "Name:",
       "contact-email-label": "Email:",
       "contact-message": "Message:",
@@ -14,11 +9,6 @@
   },
   "fr": {
     "translation": {
-      "nav-home": "Accueil", 
-      "nav-contact": "Contact",
-      
-      "contact-linkedin": "Retrouvez-moi sur LinkedIn",
-
       "contact-name": "Nom :",
       "contact-email-label": "Email :",
       "contact-message": "Message :",

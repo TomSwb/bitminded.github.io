@@ -13,14 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        // Nav menu translations
-        if (document.getElementById('nav-home')) {
-            document.getElementById('nav-home').textContent = i18next.t('nav-home');
-        }
-        if (document.getElementById('nav-contact')) {
-            document.getElementById('nav-contact').textContent = i18next.t('nav-contact');
-        }
-
         if (document.getElementById('main-title')) {
             document.getElementById('main-title').textContent = i18next.t('main-title');
         }
