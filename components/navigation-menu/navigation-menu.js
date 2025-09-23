@@ -81,16 +81,26 @@ class NavigationMenu {
         const navLinks = this.links.querySelectorAll('.navigation-menu__link');
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
+                // Add click effect
+                link.classList.add('clicked');
+                
+                // Close mobile menu if configured
                 if (this.config.closeOnLinkClick) {
                     this.closeMobileMenu();
                 }
+                
+                // Remove click effect after animation
+                setTimeout(() => {
+                    link.classList.remove('clicked');
+                }, 200);
             });
         });
 
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
             if (this.isMobileMenuOpen() && 
-                !this.element.contains(e.target)) {
+                !this.element.contains(e.target) &&
+                !e.target.closest('.navigation-menu')) {
                 this.closeMobileMenu();
             }
         });
@@ -248,31 +258,62 @@ class NavigationMenu {
      * Load mobile components (Language Switcher and Theme Switcher)
      */
     async loadMobileComponents() {
-        // Load Language Switcher in compact mode for mobile
-        if (!this.mobileComponents.querySelector('#mobile-language-switcher .language-switcher')) {
-            try {
-                await componentLoader.load('language-switcher', {
-                    container: '#mobile-language-switcher',
-                    priority: 'high',
-                    config: { compact: true }
-                });
-                console.log('✅ Mobile language switcher loaded');
-            } catch (error) {
-                console.error('❌ Failed to load mobile language switcher:', error);
+        // Move existing Language Switcher to mobile container
+        const existingLangSwitcher = document.querySelector('.language-switcher');
+        const mobileLangContainer = this.mobileComponents.querySelector('#mobile-language-switcher');
+        
+        console.log('🔍 Debug - existingLangSwitcher:', existingLangSwitcher);
+        console.log('🔍 Debug - mobileLangContainer:', mobileLangContainer);
+        console.log('🔍 Debug - already has language switcher:', mobileLangContainer?.querySelector('.language-switcher'));
+        
+        if (existingLangSwitcher && mobileLangContainer && !mobileLangContainer.querySelector('.language-switcher')) {
+            // Clone the existing language switcher
+            const langClone = existingLangSwitcher.cloneNode(true);
+            langClone.classList.add('compact');
+            mobileLangContainer.appendChild(langClone);
+            
+            console.log('🔍 Debug - langClone created:', langClone);
+            
+            // Re-initialize the cloned language switcher
+            if (window.languageSwitcher) {
+                // Create a new instance for the mobile version
+                const mobileLangSwitcher = new LanguageSwitcher();
+                mobileLangSwitcher.element = langClone;
+                mobileLangSwitcher.init({ compact: true });
+                console.log('✅ Mobile language switcher moved and initialized');
+            } else {
+                console.warn('⚠️ window.languageSwitcher not available');
             }
+        } else {
+            console.log('❌ Language switcher not loaded - conditions not met');
         }
 
-        // Load Theme Switcher for mobile
-        if (!this.mobileComponents.querySelector('#mobile-theme-switcher .theme-switcher')) {
-            try {
-                await componentLoader.load('theme-switcher', {
-                    container: '#mobile-theme-switcher',
-                    priority: 'high'
+        // Move existing Theme Switcher to mobile container
+        const existingThemeSwitcher = document.querySelector('.theme-switcher');
+        const mobileThemeContainer = this.mobileComponents.querySelector('#mobile-theme-switcher');
+        
+        if (existingThemeSwitcher && mobileThemeContainer && !mobileThemeContainer.querySelector('.theme-switcher')) {
+            // Clone the existing theme switcher
+            const themeClone = existingThemeSwitcher.cloneNode(true);
+            mobileThemeContainer.appendChild(themeClone);
+            
+            // Prevent theme switcher clicks from closing the menu
+            const themeButton = themeClone.querySelector('.theme-switcher__button');
+            if (themeButton) {
+                themeButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
                 });
-                console.log('✅ Mobile theme switcher loaded');
-            } catch (error) {
-                console.error('❌ Failed to load mobile theme switcher:', error);
             }
+            
+            // Re-initialize the cloned theme switcher
+            if (window.themeSwitcher) {
+                // Create a new instance for the mobile version
+                const mobileThemeSwitcher = new ThemeSwitcher();
+                mobileThemeSwitcher.element = themeClone;
+                mobileThemeSwitcher.init();
+            }
+            
+            console.log('✅ Mobile theme switcher moved and initialized');
         }
     }
 

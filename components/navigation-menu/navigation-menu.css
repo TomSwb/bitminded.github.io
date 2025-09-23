@@ -15,7 +15,7 @@
     position: fixed;
     top: var(--spacing-lg);
     right: var(--spacing-lg);
-    z-index: var(--z-fixed);
+    z-index: var(--z-tooltip);
     border-radius: var(--radius-sm);
     transition: all var(--transition-fast);
     flex-direction: column;
@@ -24,15 +24,16 @@
     height: 48px;
     justify-content: center;
     align-items: center;
+    overflow: visible;
 }
 
 .navigation-menu__hamburger:hover {
     background-color: var(--color-primary);
-    color: var(--color-background);
+    color: var(--color-background-primary);
 }
 
 .hamburger-line {
-    width: 20px;
+    width: 24px;
     height: 2px;
     background-color: currentColor;
     transition: all var(--transition-fast);
@@ -41,7 +42,7 @@
 
 /* Hamburger animation when active */
 .navigation-menu__hamburger.active .hamburger-line:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    opacity: 0;
 }
 
 .navigation-menu__hamburger.active .hamburger-line:nth-child(2) {
@@ -49,7 +50,29 @@
 }
 
 .navigation-menu__hamburger.active .hamburger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -6px);
+    opacity: 0;
+}
+
+/* Create X using pseudo-elements */
+.navigation-menu__hamburger.active::before,
+.navigation-menu__hamburger.active::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 1px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+}
+
+.navigation-menu__hamburger.active::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.navigation-menu__hamburger.active::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 /* Navigation Links Container */
@@ -62,7 +85,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
-    background-color: var(--color-background);
+    background-color: var(--color-background-primary);
     color: var(--color-text-primary);
 }
 
@@ -83,22 +106,24 @@
 
 .navigation-menu__link:hover,
 .navigation-menu__link:focus {
-    color: var(--color-secondary);
+    color: var(--color-background-primary);
+    background-color: var(--color-primary);
     outline: none;
+    transform: scale(1.05);
 }
 
 .navigation-menu__link.active {
     background-color: var(--color-primary);
-    color: var(--color-background);
+    color: var(--color-background-primary);
 }
 
 /* Mobile Components Container */
 .navigation-menu__mobile-components {
     display: none;
     flex-direction: column;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-lg);
-    padding-top: var(--spacing-lg);
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
     border-top: 1px solid var(--border-color-primary);
 }
 
@@ -109,33 +134,35 @@
         display: flex;
     }
     
-    /* Hide desktop language switcher on mobile */
-    .language-switcher {
+    /* Hide desktop language switcher on mobile (but not the one in mobile menu) */
+    .language-switcher:not(.navigation-menu__mobile-components .language-switcher) {
         display: none !important;
     }
     
     /* Mobile menu overlay */
     .navigation-menu__links {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
         background-color: rgba(var(--color-bg-dark-rgb), 0.95);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         margin: 0 !important;
-        padding: var(--spacing-xl) !important;
+        padding: var(--spacing-md) !important;
         z-index: var(--z-modal);
-        right: 0;
+        right: 0 !important;
+        bottom: 0 !important;
         transition: opacity var(--transition-normal);
         opacity: 0;
         pointer-events: none;
-        border: none;
+        border: none !important;
         box-sizing: border-box;
-        min-height: 100vh;
+        min-height: 100vh !important;
+        max-width: 100vw !important;
     }
     
     .navigation-menu__links.active {
@@ -159,11 +186,65 @@
         margin: var(--spacing-sm) 0;
         border-radius: var(--radius-md);
         min-height: 60px;
+        text-align: center;
+        width: 100%;
+        max-width: 300px;
+        transition: all var(--transition-fast);
+    }
+    
+    /* Mobile touch effects (no hover on mobile) */
+    .navigation-menu__link:active,
+    .navigation-menu__link.clicked {
+        color: var(--color-background) !important;
+        background-color: var(--color-primary) !important;
+        transform: scale(0.98);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        z-index: var(--z-tooltip);
+        position: relative;
+        opacity: 1 !important;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* Focus for accessibility */
+    .navigation-menu__link:focus {
+        color: var(--color-background-primary);
+        background-color: var(--color-primary);
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
     }
     
     /* Show mobile components */
     .navigation-menu__mobile-components {
         display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    /* Remove browser highlight effects from mobile language switcher */
+    .navigation-menu__mobile-components .language-switcher__button {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* Remove browser highlight effects from mobile theme switcher */
+    .navigation-menu__mobile-components .theme-switcher__button {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 }
 
