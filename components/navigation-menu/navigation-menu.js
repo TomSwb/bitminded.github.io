@@ -9,6 +9,7 @@ class NavigationMenu {
         this.links = null;
         this.mobileComponents = null;
         this.isInitialized = false;
+        this.mobileComponentsLoaded = false;
         this.currentPage = this.detectCurrentPage();
         this.translations = null;
         this.eventListeners = new Map();
@@ -156,12 +157,6 @@ class NavigationMenu {
                 link.textContent = translatedText;
             }
         });
-
-        // Update hamburger aria-label
-        const hamburgerLabel = t['nav-hamburger-label'];
-        if (hamburgerLabel && this.hamburger) {
-            this.hamburger.setAttribute('aria-label', hamburgerLabel);
-        }
     }
 
     /**
@@ -230,7 +225,9 @@ class NavigationMenu {
         document.body.style.overflow = 'hidden';
         
         // Load mobile components if not already loaded
-        this.loadMobileComponents();
+        if (!this.mobileComponentsLoaded) {
+            this.loadMobileComponents();
+        }
         
         console.log('📱 Mobile menu opened');
     }
@@ -315,6 +312,9 @@ class NavigationMenu {
             
             console.log('✅ Mobile theme switcher moved and initialized');
         }
+        
+        // Mark mobile components as loaded
+        this.mobileComponentsLoaded = true;
     }
 
     /**
