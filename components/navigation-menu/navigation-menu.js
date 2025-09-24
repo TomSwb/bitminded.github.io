@@ -210,6 +210,8 @@ class NavigationMenu {
             return 'home';
         } else if (path.includes('/contact')) {
             return 'contact';
+        } else if (path.includes('/auth')) {
+            return 'auth'; // Special case for auth page
         }
         return 'home'; // Default fallback
     }
@@ -220,6 +222,17 @@ class NavigationMenu {
      */
     setActivePage(pageId) {
         const navLinks = this.links.querySelectorAll('.navigation-menu__link');
+        
+        // Special case: if we're on auth page, don't show any active navigation items
+        if (pageId === 'auth') {
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            this.currentPage = pageId;
+            return;
+        }
+        
+        // Normal behavior for other pages
         navLinks.forEach(link => {
             const isActive = link.id === `nav-${pageId}`;
             link.classList.toggle('active', isActive);
