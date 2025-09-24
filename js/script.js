@@ -81,6 +81,12 @@ async function loadThemeSwitcher() {
 }
 
 async function loadAuthButtons() {
+    // Don't load auth buttons on auth page
+    if (window.location.pathname.includes('/auth')) {
+        console.log('🔒 Skipping auth buttons load on auth page');
+        return;
+    }
+    
     console.log('🔄 Script: Loading auth buttons component...');
     try {
         // Load auth buttons into header (for desktop positioning)

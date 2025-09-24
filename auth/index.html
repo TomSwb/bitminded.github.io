@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document -->
+    <meta charset="UTF-8">
+    
+    <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--Browser Tab title-->
+    <title>Authentication - BitMinded</title>
+    <!--Browser Tab icon-->
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+
+    <!--Apple home-saved app icon-->
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+    <!-- iOS status bar style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Critical CSS to prevent white flash -->
+    <link rel="stylesheet" href="../css/critical.css">
+    
+    <!-- Critical JavaScript for immediate initialization -->
+    <script src="../js/critical.js"></script>
+    
+    <!-- Component Loader -->
+    <script src="../components/shared/component-loader.js"></script>
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+        
+        <!-- Language Switcher Component will be loaded here -->
+    </header>
+
+    <main class="auth-main">
+        <!-- Authentication Container -->
+        <div class="auth-container">
+            <!-- Page Title -->
+            <h1 id="auth-title" class="translatable-content">Authentication</h1>
+            
+            <!-- Error Display Area -->
+            <div id="auth-error" class="auth-error hidden" role="alert">
+                <span id="auth-error-message" class="translatable-content"></span>
+            </div>
+            
+            <!-- Auth Toggle Component will be loaded here -->
+            <div id="auth-toggle-container"></div>
+            
+            <!-- Login Form Component will be loaded here -->
+            <div id="login-form-container" class="auth-form-container"></div>
+            
+            <!-- Signup Form Component will be loaded here -->
+            <div id="signup-form-container" class="auth-form-container hidden"></div>
+        </div>
+    </main>
+
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- i18next CDN language-switcher-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!--- language switcher-->
+    <script src="lang-auth.js"></script>
+    <!-- other scripts -->
+    <script src="../js/script.js"></script>
+
+</body> 
+
+</html>

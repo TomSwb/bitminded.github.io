@@ -19,6 +19,12 @@ class AuthButtons {
      */
     async init() {
         try {
+            // Check if we're on the auth page and hide if so
+            if (this.isOnAuthPage()) {
+                this.hideOnAuthPage();
+                return;
+            }
+            
             this.cacheElements();
             this.bindEvents();
             await this.loadTranslations();
@@ -29,6 +35,34 @@ class AuthButtons {
         } catch (error) {
             console.error('❌ Failed to initialize Auth Buttons:', error);
             this.showError('Failed to initialize authentication');
+        }
+    }
+
+    /**
+     * Check if we're currently on the authentication page
+     * @returns {boolean} True if on auth page
+     */
+    isOnAuthPage() {
+        const path = window.location.pathname;
+        return path.includes('/auth/') || path.includes('/auth');
+    }
+
+    /**
+     * Hide the auth buttons component when on auth page
+     */
+    hideOnAuthPage() {
+        // Find the auth buttons container and hide it
+        const authContainer = document.getElementById('auth-buttons');
+        if (authContainer) {
+            authContainer.style.display = 'none';
+            console.log('🔒 Auth buttons hidden on auth page');
+        }
+        
+        // Also hide any mobile auth buttons in navigation
+        const mobileAuthContainer = document.querySelector('#mobile-auth-buttons');
+        if (mobileAuthContainer) {
+            mobileAuthContainer.style.display = 'none';
+            console.log('🔒 Mobile auth buttons hidden on auth page');
         }
     }
 
@@ -111,6 +145,13 @@ class AuthButtons {
         // Listen for language changes
         window.addEventListener('languageChanged', (e) => {
             console.log('Auth buttons received language change event:', e.detail.language);
+            
+            // Don't refresh translations if we're on the auth page
+            if (this.isOnAuthPage()) {
+                console.log('🔒 Skipping auth buttons translation refresh on auth page');
+                return;
+            }
+            
             this.refreshTranslations(e.detail.language);
         });
     }
@@ -399,6 +440,12 @@ class AuthButtons {
      * @param {string} language - Language code from event
      */
     refreshTranslations(language) {
+        // Safety check: don't refresh if we're on auth page
+        if (this.isOnAuthPage()) {
+            console.log('🔒 Skipping auth buttons translation refresh on auth page (safety check)');
+            return;
+        }
+        
         this.updateTranslations(language);
         // Update user info with new translations
         if (this.currentUser) {
