@@ -1148,6 +1148,27 @@ mkdir -p admin/components/access-control
 
 ---
 
+## 📚 **Related Documentation**
+
+### **Implementation Guides**
+- **[AUTHENTICATION-IMPLEMENTATION-ORDER.md](./AUTHENTICATION-IMPLEMENTATION-ORDER.md)** - Detailed step-by-step implementation phases
+- **[SUBDOMAIN-PROTECTION-STRATEGY.md](./SUBDOMAIN-PROTECTION-STRATEGY.md)** - Complete subdomain protection and subscription integration strategy
+
+### **Setup Guides**
+- **[auht-payment.md](./auht-payment.md)** - Quick setup guide for the complete ecosystem
+- **[MULTIPLE-SUBDOMAINS-GUIDE.md](./MULTIPLE-SUBDOMAINS-GUIDE.md)** - Subdomain setup and configuration
+
+### **Feature Checklists**
+- **[account-management.md](./account-management.md)** - Account page features checklist
+
+### **Supabase Files**
+- **[../supabase/database-schema.sql](../supabase/database-schema.sql)** - Complete database schema
+- **[../supabase/fix-rls-policy.sql](../supabase/fix-rls-policy.sql)** - RLS policy fix
+- **[../supabase/supabase-test.html](../supabase/supabase-test.html)** - Connection test page
+- **[../supabase/email-templates.md](../supabase/email-templates.md)** - Custom email templates
+
+---
+
 *Last updated: [Current Date]*
 *Status: Planning Phase - Supabase Setup Required*
 *Next Steps: Configure Supabase client and authentication*

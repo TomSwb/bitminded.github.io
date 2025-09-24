@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test - BitMinded</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #272b2e;
+            color: #eee9e4;
+        }
+        .test-container {
+            background: #1a1d21;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #cfde67;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #2d5a2d; color: #90ee90; }
+        .error { background: #5a2d2d; color: #ff6b6b; }
+        .info { background: #2d4a5a; color: #6bb6ff; }
+        button {
+            background: #cfde67;
+            color: #272b2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #d286bd;
+            color: white;
+        }
+        #results {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Supabase Connection Test</h1>
+        <p>This page tests the connection to your Supabase project and verifies the database setup.</p>
+        
+        <div class="status info">
+            <strong>Project URL:</strong> https://dynxqnrkmjcvgzsugxtm.supabase.co
+        </div>
+        
+        <button onclick="testConnection()">Test Supabase Connection</button>
+        <button onclick="testAuth()">Test Authentication</button>
+        <button onclick="testDatabase()">Test Database Schema</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <!-- Include Supabase client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    
+    <script>
+        let results = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            results.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+        
+        async function testConnection() {
+            log('🔄 Testing Supabase connection...');
+            
+            try {
+                // Test basic connection
+                const { data, error } = await supabase.from('user_profiles').select('count');
+                
+                if (error) {
+                    log(`❌ Connection failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log('✅ Supabase connection successful!');
+                log(`📊 Database accessible - user_profiles table exists`);
+                
+            } catch (err) {
+                log(`❌ Connection error: ${err.message}`, 'error');
+            }
+        }
+        
+        async function testAuth() {
+            log('🔄 Testing authentication setup...');
+            
+            try {
+                // Test auth configuration
+                const { data, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    log(`❌ Auth test failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log('✅ Authentication system accessible!');
+                log(`🔐 Current session: ${data.session ? 'Active' : 'No active session'}`);
+                
+            } catch (err) {
+                log(`❌ Auth error: ${err.message}`, 'error');
+            }
+        }
+        
+        async function testDatabase() {
+            log('🔄 Testing database schema...');
+            
+            try {
+                // Test each table exists
+                const tables = [
+                    'user_profiles',
+                    'user_roles', 
+                    'user_2fa',
+                    'user_sessions',
+                    'user_preferences',
+                    'login_activity',
+                    'entitlements',
+                    'user_subscriptions'
+                ];
+                
+                for (const table of tables) {
+                    try {
+                        const { data, error } = await supabase.from(table).select('count');
+                        if (error) {
+                            log(`❌ Table ${table}: ${error.message}`, 'error');
+                        } else {
+                            log(`✅ Table ${table}: OK`);
+                        }
+                    } catch (err) {
+                        log(`❌ Table ${table}: ${err.message}`, 'error');
+                    }
+                }
+                
+                log('📋 Database schema test complete!');
+                
+            } catch (err) {
+                log(`❌ Database test error: ${err.message}`, 'error');
+            }
+        }
+        
+        // Auto-run connection test on page load
+        window.addEventListener('load', () => {
+            log('🚀 BitMinded Supabase Test Page Loaded');
+            log('Click the buttons above to test different components');
+        });
+    </script>
+</body>
+</html>
