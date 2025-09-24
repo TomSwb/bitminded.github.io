@@ -515,4 +515,25 @@ git push -u origin main
 
 ---
 
+## 📚 **Related Documentation**
+
+### **Authentication & Protection Strategy**
+- **[AUTHENTICATION-USER-MANAGEMENT-STRATEGY.md](./AUTHENTICATION-USER-MANAGEMENT-STRATEGY.md)** - Complete component architecture and database schema
+- **[SUBDOMAIN-PROTECTION-STRATEGY.md](./SUBDOMAIN-PROTECTION-STRATEGY.md)** - Subdomain protection and subscription integration strategy
+- **[AUTHENTICATION-IMPLEMENTATION-ORDER.md](./AUTHENTICATION-IMPLEMENTATION-ORDER.md)** - Step-by-step implementation phases
+
+### **Setup Guides**
+- **[auht-payment.md](./auht-payment.md)** - Quick setup guide for the complete ecosystem
+
+### **Feature Checklists**
+- **[account-management.md](./account-management.md)** - Account page features checklist
+
+### **Supabase Files**
+- **[../supabase/database-schema.sql](../supabase/database-schema.sql)** - Complete database schema
+- **[../supabase/fix-rls-policy.sql](../supabase/fix-rls-policy.sql)** - RLS policy fix
+- **[../supabase/supabase-test.html](../supabase/supabase-test.html)** - Connection test page
+- **[../supabase/email-templates.md](../supabase/email-templates.md)** - Custom email templates
+
+---
+
 **Remember**: This approach gives you professional, scalable tool architecture with clean URLs and excellent SEO potential. Each tool can grow independently while maintaining strong integration with your main BitMinded brand.
