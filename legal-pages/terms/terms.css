@@ -55,7 +55,7 @@
 }
 
 .content-section__title {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 600;
     color: var(--primary-color);
     margin-bottom: 0.75rem;
@@ -72,6 +72,7 @@
 .content-section__content p {
     margin-bottom: 0.75rem;
     color: var(--text-color);
+    font-size: 0.9rem;
 }
 
 .content-section__content p:last-child {
@@ -131,11 +132,15 @@
     }
     
     .content-section__title {
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
     
     .content-section__content {
         font-size: 0.75rem;
+    }
+    
+    .content-section__content p {
+        font-size: 0.85rem;
     }
     
     .contact-info {
@@ -173,11 +178,15 @@
     }
     
     .content-section__title {
-        font-size: 0.95rem;
+        font-size: 1.1rem;
     }
     
     .content-section__content {
         font-size: 0.7rem;
+    }
+    
+    .content-section__content p {
+        font-size: 0.8rem;
     }
 }
 

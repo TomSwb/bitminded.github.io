@@ -7,7 +7,7 @@ class AuthToggle {
         this.isInitialized = false;
         this.elements = {};
         this.translations = null;
-        this.currentMode = 'login'; // Default to login
+        this.currentMode = null; // Will be determined based on URL or page state
         
         this.init();
     }
@@ -18,14 +18,51 @@ class AuthToggle {
     async init() {
         try {
             this.cacheElements();
+            this.determineInitialMode();
             this.bindEvents();
             await this.loadTranslations();
             this.isInitialized = true;
             
-            console.log('✅ Auth Toggle initialized successfully');
+            console.log('✅ Auth Toggle initialized successfully with mode:', this.currentMode);
         } catch (error) {
             console.error('❌ Failed to initialize Auth Toggle:', error);
         }
+    }
+
+    /**
+     * Determine the initial mode based on URL parameters
+     */
+    determineInitialMode() {
+        // Check URL parameters first
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+        
+        if (action === 'login' || action === 'signup') {
+            this.currentMode = action;
+            console.log(`🔍 Auth toggle initial mode determined from URL: ${action}`);
+        } else {
+            // Default to signup if no action specified
+            this.currentMode = 'signup';
+            console.log('🔍 Auth toggle initial mode defaulted to: signup');
+        }
+        
+        // Update button states immediately based on determined mode
+        this.updateButtonStates();
+    }
+
+    /**
+     * Update button states based on current mode
+     */
+    updateButtonStates() {
+        if (!this.elements.loginButton || !this.elements.signupButton) {
+            console.warn('Auth toggle buttons not found, cannot update states');
+            return;
+        }
+        
+        this.elements.loginButton.classList.toggle('auth-toggle__button--active', this.currentMode === 'login');
+        this.elements.signupButton.classList.toggle('auth-toggle__button--active', this.currentMode === 'signup');
+        
+        console.log(`🔄 Button states updated. Login active: ${this.currentMode === 'login'}, Signup active: ${this.currentMode === 'signup'}`);
     }
 
     /**
@@ -145,16 +182,18 @@ class AuthToggle {
      * @param {string} mode - 'login' or 'signup'
      */
     setMode(mode) {
-        if (mode === this.currentMode) return;
+        if (mode === this.currentMode) {
+            console.log(`🔄 Auth mode already set to ${mode}, no change needed`);
+            return;
+        }
 
         console.log(`🔄 Switching auth mode from ${this.currentMode} to ${mode}`);
 
-        // Update button states
-        this.elements.loginButton.classList.toggle('auth-toggle__button--active', mode === 'login');
-        this.elements.signupButton.classList.toggle('auth-toggle__button--active', mode === 'signup');
-
         // Update current mode
         this.currentMode = mode;
+        
+        // Update button states using the centralized method
+        this.updateButtonStates();
 
         // Switch forms using auth page loader
         if (window.authPageLoader) {
@@ -188,6 +227,25 @@ class AuthToggle {
      */
     initializeWithMode(mode) {
         this.setMode(mode);
+    }
+
+    /**
+     * Sync toggle state with the currently displayed form
+     * This should be called by the auth page loader after it determines which form to show
+     */
+    syncWithDisplayedForm() {
+        // Check which form container is currently visible
+        const loginContainer = document.getElementById('login-form-container');
+        const signupContainer = document.getElementById('signup-form-container');
+        
+        if (loginContainer && !loginContainer.classList.contains('hidden')) {
+            // Login form is visible
+            this.setMode('login');
+        } else if (signupContainer && !signupContainer.classList.contains('hidden')) {
+            // Signup form is visible
+            this.setMode('signup');
+        }
+        // If neither is visible or both are hidden, keep current mode
     }
 }
 

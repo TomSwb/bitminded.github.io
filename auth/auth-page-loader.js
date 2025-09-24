@@ -34,6 +34,9 @@ class AuthPageLoader {
                 await this.loadSignupForm();
             }
             
+            // Auth toggle will now handle its own initialization based on URL parameters
+            // No need to manually sync since it reads the URL during initialization
+            
             this.isInitialized = true;
             console.log('✅ Auth page loader initialized successfully');
         } catch (error) {
@@ -50,8 +53,10 @@ class AuthPageLoader {
         const urlParams = new URLSearchParams(window.location.search);
         const action = urlParams.get('action');
         
+        console.log(`🔍 Detecting auth action. URL params: ${window.location.search}, action: ${action}`);
+        
         if (action === 'login' || action === 'signup') {
-            console.log(`Auth action detected from URL: ${action}`);
+            console.log(`✅ Auth action detected from URL: ${action}`);
             return action;
         }
 
@@ -286,6 +291,7 @@ class AuthPageLoader {
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('signup');
+            console.log('🔄 Auth toggle updated to signup mode');
         }
     }
 
@@ -313,6 +319,7 @@ class AuthPageLoader {
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('login');
+            console.log('🔄 Auth toggle updated to login mode');
         }
     }
 }
