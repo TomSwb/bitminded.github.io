@@ -32,37 +32,29 @@
     display: flex;
     align-items: center;
     justify-content: center;
-}
+    }
 
 .auth-toggle__button:hover:not(.auth-toggle__button--active) {
-    background-color: var(--color-background-secondary);
+    background-color: var(--color-secondary);
     color: var(--color-text-primary);
-}
+    }
 
 .auth-toggle__button--active {
     background-color: var(--color-primary);
     color: var(--color-text-secondary);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+    }
 
 .auth-toggle__button--active:hover {
     background-color: var(--color-secondary);
-}
+        background-color: var(--color-secondary);
+        color: var(--color-text-secondary);
+    }
 
 .auth-toggle__button-text {
     font-weight: inherit;
     transition: inherit;
-}
-
-/* Focus states for accessibility */
-.auth-toggle__button:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--color-primary);
-}
-
-.auth-toggle__button--active:focus {
-    box-shadow: 0 0 0 3px var(--color-secondary);
-}
+    }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -94,7 +86,7 @@
 .auth-toggle__button {
     position: relative;
     overflow: hidden;
-}
+    }
 
 .auth-toggle__button::before {
     content: '';
@@ -105,28 +97,11 @@
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     transition: left 0.5s;
-}
+    }
 
 .auth-toggle__button:hover::before {
     left: 100%;
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .auth-toggle__container {
-        background-color: var(--color-background-primary);
-        border-color: var(--border-color-primary);
     }
-    
-    .auth-toggle__button {
-        color: var(--color-text-primary);
-    }
-    
-    .auth-toggle__button:hover:not(.auth-toggle__button--active) {
-        background-color: var(--color-background-secondary);
-        color: var(--color-text-primary);
-    }
-}
 
 /* Accessibility - reduced motion */
 @media (prefers-reduced-motion: reduce) {
