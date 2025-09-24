@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load Theme Switcher Component
     loadThemeSwitcher();
     
+    // Load Auth Buttons Component
+    loadAuthButtons();
+    
     // Any additional initialization code can go here
 });
 
@@ -74,5 +77,20 @@ async function loadThemeSwitcher() {
         console.log('✅ Theme switcher component loaded');
     } catch (error) {
         console.error('❌ Failed to load theme switcher component:', error);
+    }
+}
+
+async function loadAuthButtons() {
+    console.log('🔄 Script: Loading auth buttons component...');
+    try {
+        // Load auth buttons into header (for desktop positioning)
+        await componentLoader.load('auth-buttons', {
+            container: 'header',
+            priority: 'high'
+        });
+        console.log('✅ Script: Auth buttons component loaded');
+        
+    } catch (error) {
+        console.error('❌ Script: Failed to load auth buttons component:', error);
     }
 }

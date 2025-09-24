@@ -1,0 +1,22 @@
+{
+  "en": {
+    "translation": {
+      "auth.login": "Login",
+      "auth.signup": "Sign Up",
+      "auth.account": "Account",
+      "auth.preferences": "Preferences",
+      "auth.logout": "Logout",
+      "auth.user": "User"
+    }
+  },
+  "fr": {
+    "translation": {
+      "auth.login": "Connexion",
+      "auth.signup": "S'inscrire",
+      "auth.account": "Compte",
+      "auth.preferences": "Préférences",
+      "auth.logout": "Déconnexion",
+      "auth.user": "Utilisateur"
+    }
+  }
+}

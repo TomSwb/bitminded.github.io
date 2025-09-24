@@ -32,7 +32,7 @@ class ComponentLoader {
                 return this.loadedComponents.get(componentName);
             }
 
-            console.log(`🔄 Loading component: ${componentName}`);
+            console.log(`🔄 ComponentLoader: Loading component: ${componentName}`);
 
             // Load component files
             const component = await this.loadComponentFiles(componentName, finalOptions);
@@ -40,11 +40,11 @@ class ComponentLoader {
             // Store loaded component
             this.loadedComponents.set(componentName, component);
 
-            console.log(`✅ Component ${componentName} loaded successfully`);
+            console.log(`✅ ComponentLoader: Component ${componentName} loaded successfully`);
             return component;
 
         } catch (error) {
-            console.error(`❌ Failed to load component ${componentName}:`, error);
+            console.error(`❌ ComponentLoader: Failed to load component ${componentName}:`, error);
             throw error;
         }
     }
