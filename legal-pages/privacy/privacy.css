@@ -1,7 +1,7 @@
-/* Terms of Service Page Styles */
+/* Privacy Policy Page Styles */
 
 /* Page Layout */
-.terms-page {
+.privacy-page {
     min-height: 100vh;
     background: var(--background-color);
     color: var(--text-color);
@@ -40,8 +40,8 @@
     margin: 0;
 }
 
-/* Terms Content */
-.terms-content {
+/* Privacy Content */
+.privacy-content {
     margin-bottom: 2rem;
 }
 
@@ -77,6 +77,20 @@
 
 .content-section__content p:last-child {
     margin-bottom: 0;
+}
+
+.content-section__content h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.content-section__content h3:first-child {
+    margin-top: 0;
 }
 
 /* Links */
@@ -143,18 +157,22 @@
         font-size: 0.85rem;
     }
     
+    .content-section__content h3 {
+        font-size: 0.85rem;
+    }
+    
     .contact-info {
         padding: 0.75rem;
     }
 }
 
 @media (max-width: 480px) {
-    /* Override global mobile styles for terms page */
-    .terms-page header {
+    /* Override global mobile styles for privacy page */
+    .privacy-page header {
         padding: 2rem, 0rem, 0rem, 0rem !important;
     }
     
-    .terms-page main {
+    .privacy-page main {
         padding-top: 0.5rem !important;
     }
     
@@ -188,6 +206,10 @@
     .content-section__content p {
         font-size: 0.8rem;
     }
+    
+    .content-section__content h3 {
+        font-size: 0.8rem;
+    }
 }
 
 /* Dark Mode Adjustments */
@@ -199,7 +221,7 @@
 
 /* Print Styles */
 @media print {
-    .terms-page {
+    .privacy-page {
         background: white;
         color: black;
     }
