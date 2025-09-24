@@ -1,9 +1,10 @@
 /* Login Form Component Styles */
 .login-form {
-    max-width: 400px;
+    max-width: 360px;
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
     padding: var(--spacing-xl);
+    box-sizing: border-box;
     background-color: var(--color-background-primary);
     border: 2px solid var(--border-color-primary);
     border-radius: var(--radius-md);
@@ -193,8 +194,8 @@
 @media (max-width: 768px) {
     .login-form {
         padding: var(--spacing-lg);
-        margin: var(--spacing-md);
-        max-width: none;
+        margin: 0;
+        max-width: 100%;
     }
     
     .login-form__title {
@@ -209,7 +210,8 @@
 @media (max-width: 480px) {
     .login-form {
         padding: var(--spacing-md);
-        margin: var(--spacing-sm);
+        margin: 0;
+        max-width: 100%;
         border-radius: var(--radius-sm);
     }
     

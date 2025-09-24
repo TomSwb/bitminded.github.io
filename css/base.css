@@ -70,7 +70,7 @@ img {
 /* Main Content Area */
 main {
   margin-top: -2rem; /* Pulls content higher up */
-  padding-top: var(--spacing-md); /* Adds some breathing room */
+  padding-top: calc(var(--spacing-lg) + 80px + var(--spacing-xl)); /* Account for fixed nav + more breathing room */
 }
 
 /* Accessibility: Reduced motion for users with motion sensitivity */

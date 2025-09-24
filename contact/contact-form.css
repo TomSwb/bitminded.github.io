@@ -1,7 +1,8 @@
 /* Contact Form Styling */
 .contact-form {
-  max-width: 400px;
-  margin: 2rem auto;
+  max-width: 90%;
+  width: 100%;
+  margin: var(--spacing-5xl) auto;
   padding: 2rem;
   background: var(--color-background);
   border: 1px solid var(--border-color-primary);
@@ -48,4 +49,16 @@
   text-align: center;
   margin-top: 1rem;
   font-weight: 500;
+}
+
+/* Mobile spacing override */
+@media (max-width: 480px) {
+  /* Override global mobile styles for contact page */
+  header {
+    padding: 1rem !important;
+  }
+  
+  main {
+    padding-top: 0.5rem !important;
+  }
 }
