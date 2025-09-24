@@ -55,6 +55,9 @@ class NavigationMenu {
         this.loadTranslations();
         this.updateActivePage();
         
+        // Fallback: ensure content is visible after initialization
+        this.ensureContentVisible();
+        
         this.isInitialized = true;
         console.log('✅ Navigation menu initialized successfully');
     }
@@ -142,22 +145,49 @@ class NavigationMenu {
      * @param {string} language - Language code
      */
     updateTranslations(language = this.getCurrentLanguage()) {
-        if (!this.translations?.[language]) {
-            return;
+        if (this.translations?.[language]) {
+            const t = this.translations[language].translation;
+            
+            // Update navigation links
+            const navLinks = this.links.querySelectorAll('.navigation-menu__link');
+            navLinks.forEach(link => {
+                const linkId = link.id;
+                const translatedText = t[linkId];
+                if (translatedText) {
+                    link.textContent = translatedText;
+                }
+            });
         }
 
-        const t = this.translations[language].translation;
+        // No need to update mobile auth-buttons since we're using the same element
+
+        // Always show translatable content after translation attempt (even if no translations found)
+        this.showTranslatableContent();
+    }
+
+    /**
+     * Ensure translatable content is visible (fallback method)
+     */
+    ensureContentVisible() {
+        // Add loaded class immediately
+        this.showTranslatableContent();
         
-        // Update navigation links
-        const navLinks = this.links.querySelectorAll('.navigation-menu__link');
-        navLinks.forEach(link => {
-            const linkId = link.id;
-            const translatedText = t[linkId];
-            if (translatedText) {
-                link.textContent = translatedText;
-            }
+        // Also set a timeout as a fallback in case translations take too long
+        setTimeout(() => {
+            this.showTranslatableContent();
+        }, 100);
+    }
+
+    /**
+     * Show all translatable content by adding loaded class
+     */
+    showTranslatableContent() {
+        const translatableElements = this.element.querySelectorAll('.translatable-content');
+        translatableElements.forEach(element => {
+            element.classList.add('loaded');
         });
     }
+
 
     /**
      * Get current language from language switcher or localStorage
@@ -252,7 +282,7 @@ class NavigationMenu {
     }
 
     /**
-     * Load mobile components (Language Switcher and Theme Switcher)
+     * Load mobile components (Language Switcher, Theme Switcher, and Auth Buttons)
      */
     async loadMobileComponents() {
         // Move existing Language Switcher to mobile container
@@ -311,6 +341,26 @@ class NavigationMenu {
             }
             
             console.log('✅ Mobile theme switcher moved and initialized');
+        }
+
+        // Move existing Auth Buttons to mobile container (no cloning needed)
+        const existingAuthButtons = document.querySelector('.auth-buttons');
+        const mobileAuthContainer = this.mobileComponents.querySelector('#mobile-auth-buttons');
+        
+        if (existingAuthButtons && mobileAuthContainer && !mobileAuthContainer.querySelector('.auth-buttons')) {
+            // Move the existing auth buttons (not clone) to mobile container
+            existingAuthButtons.classList.add('compact');
+            mobileAuthContainer.appendChild(existingAuthButtons);
+            
+            // Prevent auth button clicks from closing the menu
+            const authButtons = existingAuthButtons.querySelectorAll('.auth-buttons__button, .auth-buttons__user-button');
+            authButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            });
+            
+            console.log('✅ Mobile auth buttons moved (no cloning)');
         }
         
         // Mark mobile components as loaded

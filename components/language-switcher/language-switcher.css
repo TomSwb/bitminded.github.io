@@ -1,7 +1,7 @@
 /* Language Switcher Component Styles - Based on existing design system */
 .language-switcher {
     position: fixed;
-    top: var(--spacing-md);
+    top: var(--spacing-lg);
     left: var(--spacing-md);
     z-index: var(--z-popover);
 }
