@@ -1,0 +1,22 @@
+{
+  "en": {
+    "translation": {
+      "login.title": "Welcome Back",
+      "login.subtitle": "Sign in to your account",
+      "login.email": "Email Address",
+      "login.password": "Password",
+      "login.submit": "Sign In",
+      "login.signingIn": "Signing in..."
+    }
+  },
+  "fr": {
+    "translation": {
+  "login.title": "Bienvenue",
+      "login.subtitle": "Connectez-vous à votre compte",
+      "login.email": "Adresse e-mail",
+      "login.password": "Mot de passe",
+      "login.submit": "Se connecter",
+      "login.signingIn": "Connexion en cours..."
+    }
+  }
+}

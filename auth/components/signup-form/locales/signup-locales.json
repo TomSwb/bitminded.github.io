@@ -1,0 +1,38 @@
+{
+  "en": {
+    "translation": {
+      "signup.title": "Create Account",
+      "signup.subtitle": "Join BitMinded today",
+      "signup.username": "Username",
+      "signup.email": "Email Address",
+      "signup.password": "Password",
+      "signup.confirmPassword": "Confirm Password",
+      "signup.agreeTerms": "I agree to the",
+      "signup.termsLink": "Terms of Service",
+      "signup.and": "and",
+      "signup.privacyLink": "Privacy Policy",
+      "signup.submit": "Create Account",
+      "signup.creating": "Creating account...",
+      "signup.successTitle": "Account Created!",
+      "signup.successMessage": "Please check your email to verify your account."
+    }
+  },
+  "fr": {
+    "translation": {
+      "signup.title": "Créer un compte",
+      "signup.subtitle": "Rejoignez BitMinded aujourd'hui",
+      "signup.username": "Nom d'utilisateur",
+      "signup.email": "Adresse e-mail",
+      "signup.password": "Mot de passe",
+      "signup.confirmPassword": "Confirmer le mot de passe",
+      "signup.agreeTerms": "J'accepte les",
+      "signup.termsLink": "Conditions d'utilisation",
+      "signup.and": "et la",
+      "signup.privacyLink": "Politique de confidentialité",
+      "signup.submit": "Créer un compte",
+      "signup.creating": "Création du compte...",
+      "signup.successTitle": "Compte créé !",
+      "signup.successMessage": "Veuillez vérifier votre e-mail pour confirmer votre compte."
+    }
+  }
+}

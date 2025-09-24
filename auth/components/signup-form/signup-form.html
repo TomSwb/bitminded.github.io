@@ -1,0 +1,129 @@
+<!-- Signup Form Component -->
+<form class="signup-form" id="signup-form">
+    <div class="signup-form__header">
+        <h2 class="signup-form__title translatable-content" data-translate="signup.title">Create Account</h2>
+        <p class="signup-form__subtitle translatable-content" data-translate="signup.subtitle">Join BitMinded today</p>
+    </div>
+
+    <div class="signup-form__fields">
+        <!-- Username Field -->
+        <div class="signup-form__field">
+            <label for="signup-username" class="signup-form__label translatable-content" data-translate="signup.username">Username</label>
+            <input 
+                type="text" 
+                id="signup-username" 
+                name="username" 
+                class="signup-form__input" 
+                required 
+                autocomplete="username"
+                placeholder="Choose a username"
+                minlength="3"
+                maxlength="20"
+                pattern="[a-zA-Z0-9_]+"
+            >
+            <div class="signup-form__error" id="signup-username-error" role="alert"></div>
+        </div>
+
+        <!-- Email Field -->
+        <div class="signup-form__field">
+            <label for="signup-email" class="signup-form__label translatable-content" data-translate="signup.email">Email Address</label>
+            <input 
+                type="email" 
+                id="signup-email" 
+                name="email" 
+                class="signup-form__input" 
+                required 
+                autocomplete="email"
+                placeholder="Enter your email"
+            >
+            <div class="signup-form__error" id="signup-email-error" role="alert"></div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="signup-form__field">
+            <label for="signup-password" class="signup-form__label translatable-content" data-translate="signup.password">Password</label>
+            <div class="signup-form__password-container">
+                <input 
+                    type="password" 
+                    id="signup-password" 
+                    name="password" 
+                    class="signup-form__input" 
+                    required 
+                    autocomplete="new-password"
+                    placeholder="Create a password"
+                    minlength="6"
+                >
+                <button type="button" class="signup-form__toggle-password" id="signup-toggle-password" aria-label="Toggle password visibility">
+                    <svg class="signup-form__eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="signup-form__error" id="signup-password-error" role="alert"></div>
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div class="signup-form__field">
+            <label for="signup-confirm-password" class="signup-form__label translatable-content" data-translate="signup.confirmPassword">Confirm Password</label>
+            <div class="signup-form__password-container">
+                <input 
+                    type="password" 
+                    id="signup-confirm-password" 
+                    name="confirmPassword" 
+                    class="signup-form__input" 
+                    required 
+                    autocomplete="new-password"
+                    placeholder="Confirm your password"
+                    minlength="6"
+                >
+                <button type="button" class="signup-form__toggle-password" id="signup-toggle-confirm-password" aria-label="Toggle password visibility">
+                    <svg class="signup-form__eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="signup-form__error" id="signup-confirm-password-error" role="alert"></div>
+        </div>
+    </div>
+
+    <!-- Terms and Conditions -->
+    <div class="signup-form__terms">
+        <label class="signup-form__checkbox-label">
+            <input type="checkbox" id="signup-terms" name="terms" required class="signup-form__checkbox">
+            <span class="signup-form__checkbox-text">
+                <span class="translatable-content" data-translate="signup.agreeTerms">I agree to the</span>
+                <a href="/terms" class="signup-form__link" data-translate="signup.termsLink">Terms of Service</a>
+                <span class="translatable-content" data-translate="signup.and">and</span>
+                <a href="/privacy" class="signup-form__link" data-translate="signup.privacyLink">Privacy Policy</a>
+            </span>
+        </label>
+        <div class="signup-form__error" id="signup-terms-error" role="alert"></div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="signup-form__actions">
+        <button type="submit" class="signup-form__submit" id="signup-submit">
+            <span class="signup-form__submit-text translatable-content" data-translate="signup.submit">Create Account</span>
+            <div class="signup-form__loading" id="signup-loading" style="display: none;">
+                <div class="signup-form__spinner"></div>
+                <span class="translatable-content" data-translate="signup.creating">Creating account...</span>
+            </div>
+        </button>
+    </div>
+
+    <!-- Success Message -->
+    <div class="signup-form__success" id="signup-success" style="display: none;">
+        <div class="signup-form__success-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+        <div class="signup-form__success-content">
+            <h3 class="signup-form__success-title translatable-content" data-translate="signup.successTitle">Account Created!</h3>
+            <p class="signup-form__success-message translatable-content" data-translate="signup.successMessage">Please check your email to verify your account.</p>
+        </div>
+    </div>
+</form>

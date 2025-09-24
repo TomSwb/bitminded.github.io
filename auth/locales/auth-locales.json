@@ -1,0 +1,14 @@
+{
+  "en": {
+    "translation": {
+      "auth-title": "Authentication",
+      "auth-error-message": "An error occurred"
+    }
+  },
+  "fr": {
+    "translation": {
+      "auth-title": "Authentification",
+      "auth-error-message": "Une erreur s'est produite"
+    }
+  }
+}

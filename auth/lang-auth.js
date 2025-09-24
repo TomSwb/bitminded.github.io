@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('language') || 'en';
-    fetch('../js/lang-index/locales-index.json')
+    fetch('locales/auth-locales.json')
         .then(response => response.json())
         .then(resources => {
             i18next.init({
@@ -41,6 +41,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof checkPageReady === 'function') {
             checkPageReady();
         }
+        
+        // Dispatch languageChanged event for form components
+        const languageChangedEvent = new CustomEvent('languageChanged', {
+            detail: { language: i18next.language }
+        });
+        window.dispatchEvent(languageChangedEvent);
     }
 
     window.changeLanguage = function(lng) {
@@ -52,5 +58,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         localStorage.setItem('language', lng);
         i18next.changeLanguage(lng, updateContent);
+        
+        // Dispatch languageChanged event for form components
+        const languageChangedEvent = new CustomEvent('languageChanged', {
+            detail: { language: lng }
+        });
+        window.dispatchEvent(languageChangedEvent);
     };
 });

@@ -1,0 +1,139 @@
+/* Auth Toggle Component Styles */
+.auth-toggle {
+    margin-bottom: var(--spacing-lg);
+}
+
+.auth-toggle__container {
+    display: flex;
+    background-color: var(--color-background-secondary);
+    border: 2px solid var(--border-color-primary);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-xs);
+    gap: var(--spacing-xs);
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.auth-toggle__button {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    background-color: transparent;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-toggle__button:hover:not(.auth-toggle__button--active) {
+    background-color: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-text-primary);
+}
+
+.auth-toggle__button--active {
+    background-color: var(--color-primary);
+    color: var(--color-text-secondary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-toggle__button--active:hover {
+    background-color: var(--color-secondary);
+}
+
+.auth-toggle__button-text {
+    font-weight: inherit;
+    transition: inherit;
+}
+
+/* Focus states for accessibility */
+.auth-toggle__button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.auth-toggle__button--active:focus {
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .auth-toggle__container {
+        max-width: 280px;
+        padding: var(--spacing-xs);
+    }
+    
+    .auth-toggle__button {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        min-height: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-toggle__container {
+        max-width: 250px;
+    }
+    
+    .auth-toggle__button {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        min-height: 32px;
+    }
+}
+
+/* Animation for smooth transitions */
+.auth-toggle__button {
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-toggle__button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.auth-toggle__button:hover::before {
+    left: 100%;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .auth-toggle__container {
+        background-color: var(--color-background-primary);
+        border-color: var(--border-color-primary);
+    }
+    
+    .auth-toggle__button {
+        color: var(--color-text-primary);
+    }
+    
+    .auth-toggle__button:hover:not(.auth-toggle__button--active) {
+        background-color: rgba(var(--color-primary-rgb), 0.1);
+        color: var(--color-text-primary);
+    }
+}
+
+/* Accessibility - reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .auth-toggle__button,
+    .auth-toggle__button-text,
+    .auth-toggle__button::before {
+        transition: none;
+    }
+    
+    .auth-toggle__button::before {
+        display: none;
+    }
+}
