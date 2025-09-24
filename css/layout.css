@@ -30,6 +30,11 @@ header {
   body {
     padding: 0 var(--spacing-md);
   }
+  
+  /* Main content adjustments for tablet */
+  main {
+    padding-top: calc(var(--spacing-lg) + 80px + var(--spacing-xl)); /* Account for fixed nav on tablet */
+  }
 }
 
 /* Mobile Styles */
@@ -41,7 +46,7 @@ header {
 
   /* Main content adjustments */
   main {
-    padding-top: var(--spacing-lg);
+    padding-top: calc(var(--spacing-lg) + 80px + var(--spacing-xl)); /* Account for fixed nav on mobile */
     margin-top: 0;
   }
 

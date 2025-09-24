@@ -1,0 +1,207 @@
+/* Terms of Service Page Styles */
+
+/* Page Layout */
+.terms-page {
+    min-height: 100vh;
+    background: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem;
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin: 0;
+}
+
+/* Terms Content */
+.terms-content {
+    margin-bottom: 2rem;
+}
+
+.content-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.content-section__title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.content-section__content {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+.content-section__content p {
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+}
+
+.content-section__content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Links */
+.content-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.content-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Contact Info */
+.contact-info {
+    background: var(--background-secondary);
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color);
+    margin-top: 0.75rem;
+    text-align: center;
+}
+
+.contact-info p {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.contact-info p:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 0.75rem;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .page-subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .content-section {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .content-section__title {
+        font-size: 1rem;
+    }
+    
+    .content-section__content {
+        font-size: 0.75rem;
+    }
+    
+    .contact-info {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Override global mobile styles for terms page */
+    .terms-page header {
+        padding: 2rem, 0rem, 0rem, 0rem !important;
+    }
+    
+    .terms-page main {
+        padding-top: 0.5rem !important;
+    }
+    
+    .container {
+        padding-top: 0rem;
+        margin-top: 0rem;
+    }
+
+    .page-header {
+        padding-top: 0rem;
+    }
+
+    .page-title {
+        padding-top: 0rem;
+        margin: 0rem;
+        font-size: 1.3rem;
+    }
+    
+    .content-section {
+        padding: 0.5rem;
+    }
+    
+    .content-section__title {
+        font-size: 0.95rem;
+    }
+    
+    .content-section__content {
+        font-size: 0.7rem;
+    }
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+    .content-section {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .terms-page {
+        background: white;
+        color: black;
+    }
+    
+    .content-section {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    
+    .page-header {
+        border-bottom: 1px solid #ccc;
+    }
+}

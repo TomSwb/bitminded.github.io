@@ -64,9 +64,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to check if user has accepted specific consent
 CREATE OR REPLACE FUNCTION public.has_consent(
-    user_uuid UUID DEFAULT auth.uid(),
     consent_type_param TEXT,
-    version_param TEXT DEFAULT '1.0'
+    version_param TEXT DEFAULT '1.0',
+    user_uuid UUID DEFAULT auth.uid()
 )
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -104,11 +104,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to record consent (called by frontend)
 CREATE OR REPLACE FUNCTION public.record_consent(
-    user_uuid UUID DEFAULT auth.uid(),
     consent_type_param TEXT,
     version_param TEXT DEFAULT '1.0',
     ip_address_param INET DEFAULT NULL,
-    user_agent_param TEXT DEFAULT NULL
+    user_agent_param TEXT DEFAULT NULL,
+    user_uuid UUID DEFAULT auth.uid()
 )
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -144,8 +144,8 @@ RETURNS BOOLEAN AS $$
 BEGIN
     -- Check if user has accepted required consents
     RETURN (
-        public.has_consent(user_uuid, 'terms', '1.0') AND
-        public.has_consent(user_uuid, 'privacy', '1.0')
+        public.has_consent('terms', '1.0', user_uuid) AND
+        public.has_consent('privacy', '1.0', user_uuid)
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -355,9 +355,9 @@ CREATE INDEX idx_consent_audit_log_created_at ON public.consent_audit_log(create
 
 -- 12. Grant Permissions
 -- Grant execute permissions on functions to authenticated users
-GRANT EXECUTE ON FUNCTION public.has_consent(UUID, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.has_consent(TEXT, TEXT, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_user_consents(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.record_consent(UUID, TEXT, TEXT, INET, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.record_consent(TEXT, TEXT, INET, TEXT, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.validate_signup_consents(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.export_user_data(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.delete_user_data(UUID) TO authenticated;
@@ -433,8 +433,8 @@ COMMENT ON TABLE public.user_consents IS 'Stores user consent records for GDPR c
 COMMENT ON TABLE public.consent_versions IS 'Tracks versions of consent documents';
 COMMENT ON TABLE public.consent_audit_log IS 'Audit trail for consent changes';
 
-COMMENT ON FUNCTION public.has_consent(UUID, TEXT, TEXT) IS 'Check if user has accepted specific consent';
-COMMENT ON FUNCTION public.record_consent(UUID, TEXT, TEXT, INET, TEXT) IS 'Record user consent with IP and user agent';
+COMMENT ON FUNCTION public.has_consent(TEXT, TEXT, UUID) IS 'Check if user has accepted specific consent';
+COMMENT ON FUNCTION public.record_consent(TEXT, TEXT, INET, TEXT, UUID) IS 'Record user consent with IP and user agent';
 COMMENT ON FUNCTION public.validate_signup_consents(UUID) IS 'Validate that user has accepted required consents for signup';
 COMMENT ON FUNCTION public.export_user_data(UUID) IS 'Export all user data for GDPR compliance';
 COMMENT ON FUNCTION public.delete_user_data(UUID) IS 'Delete user data for GDPR right to be forgotten';
