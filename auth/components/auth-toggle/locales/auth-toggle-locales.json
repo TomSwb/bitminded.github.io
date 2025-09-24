@@ -1,0 +1,14 @@
+{
+  "en": {
+    "translation": {
+      "authToggle.login": "Login",
+      "authToggle.signup": "Sign Up"
+    }
+  },
+  "fr": {
+    "translation": {
+      "authToggle.login": "Connexion",
+      "authToggle.signup": "Inscription"
+    }
+  }
+}
