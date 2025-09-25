@@ -4,12 +4,12 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: calc(var(--spacing-6xl)); /* Basic nav clearance */
+    padding-top: calc(var(--spacing-4xl)); /* Basic nav clearance */
 }
 
 .auth-container {
     width: 100%;
-    max-width: 360px;
+    max-width: 480px; /* Increased from 360px for desktop */
     margin: 0 auto;
 }
 
@@ -46,6 +46,12 @@
 }
 
 /* Responsive adjustments */
+@media (min-width: 1200px) {
+    .auth-container {
+        max-width: 520px; /* Even wider on large screens */
+    }
+}
+
 @media (max-width: 768px) {
     .auth-main {
         padding-top: calc(var(--spacing-5xl)); /* Basic nav clearance */
@@ -74,7 +80,7 @@
 .auth-submit-container {
     margin-top: var(--spacing-lg);
     width: 100%;
-    max-width: 360px;
+    max-width: 480px; /* Match auth-container */
     margin-left: auto;
     margin-right: auto;
 }

@@ -1,6 +1,6 @@
 /* Login Form Component Styles */
 .login-form {
-    max-width: 360px;
+    max-width: 480px; /* Match auth-container */
     width: 100%;
     margin: 0;
     padding: var(--spacing-xl);
@@ -191,6 +191,12 @@
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
+@media (min-width: 1200px) {
+    .login-form {
+        max-width: 520px; /* Even wider on large screens */
+    }
+}
+
 @media (max-width: 768px) {
     .login-form {
         padding: var(--spacing-lg);
