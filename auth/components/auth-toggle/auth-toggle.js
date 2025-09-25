@@ -62,6 +62,12 @@ class AuthToggle {
         this.elements.loginButton.classList.toggle('auth-toggle__button--active', this.currentMode === 'login');
         this.elements.signupButton.classList.toggle('auth-toggle__button--active', this.currentMode === 'signup');
         
+        // Notify universal submit button of mode change
+        const modeChangedEvent = new CustomEvent('authModeChanged', {
+            detail: { mode: this.currentMode }
+        });
+        window.dispatchEvent(modeChangedEvent);
+        
         console.log(`🔄 Button states updated. Login active: ${this.currentMode === 'login'}, Signup active: ${this.currentMode === 'signup'}`);
     }
 

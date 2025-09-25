@@ -2,7 +2,7 @@
 <form class="signup-form" id="signup-form">
     <div class="signup-form__header">
         <h2 class="signup-form__title translatable-content" data-translate="signup.title">Create Account</h2>
-        <p class="signup-form__subtitle translatable-content" data-translate="signup.subtitle">Join BitMinded today</p>
+        <p class="signup-form__subtitle translatable-content" data-translate="signup.subtitle"></p>
     </div>
 
     <div class="signup-form__fields">
@@ -88,42 +88,21 @@
         </div>
     </div>
 
-    <!-- Terms and Conditions -->
-    <div class="signup-form__terms">
-        <label class="signup-form__checkbox-label">
-            <input type="checkbox" id="signup-terms" name="terms" required class="signup-form__checkbox">
-            <span class="signup-form__checkbox-text">
-                <span class="translatable-content" data-translate="signup.agreeTerms">I agree to the</span>
-                <a href="/legal-pages/terms" class="signup-form__link" data-translate="signup.termsLink">Terms of Service</a>
-                <span class="translatable-content" data-translate="signup.and">and</span>
-                <a href="/legal-pages/privacy" class="signup-form__link" data-translate="signup.privacyLink">Privacy Policy</a>
-            </span>
-        </label>
-        <div class="signup-form__error" id="signup-terms-error" role="alert"></div>
-    </div>
-
-    <!-- Submit Button -->
-    <div class="signup-form__actions">
-        <button type="submit" class="signup-form__submit" id="signup-submit">
-            <span class="signup-form__submit-text translatable-content" data-translate="signup.submit">Create Account</span>
-            <div class="signup-form__loading" id="signup-loading" style="display: none;">
-                <div class="signup-form__spinner"></div>
-                <span class="translatable-content" data-translate="signup.creating">Creating account...</span>
-            </div>
-        </button>
-    </div>
 
     <!-- Success Message -->
-    <div class="signup-form__success" id="signup-success" style="display: none;">
+    <div class="signup-form__success" id="signup-success">
         <div class="signup-form__success-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
             </svg>
         </div>
         <div class="signup-form__success-content">
-            <h3 class="signup-form__success-title translatable-content" data-translate="signup.successTitle">Account Created!</h3>
-            <p class="signup-form__success-message translatable-content" data-translate="signup.successMessage">Please check your email to verify your account.</p>
+            <h3 class="signup-form__success-title translatable-content" data-translate="signup.successTitle">Account
+                Created!</h3>
+            <p class="signup-form__success-message translatable-content" data-translate="signup.successMessage">Please check
+                your email to verify your account.</p>
         </div>
     </div>
 </form>

@@ -61,6 +61,20 @@
             
             <!-- Signup Form Component will be loaded here -->
             <div id="signup-form-container" class="auth-form-container hidden"></div>
+            
+            <!-- Terms Checkbox Component will be loaded here -->
+            <div id="terms-checkbox-container" class="auth-form-container hidden"></div>
+            
+            <!-- Universal Submit Button -->
+            <div class="auth-submit-container">
+                <button type="button" class="auth-submit-button" id="auth-submit-button">
+                    <span class="auth-submit-text translatable-content" id="auth-submit-text" data-translate="auth.submit">Sign In</span>
+                    <div class="auth-submit-loading" id="auth-submit-loading" style="display: none;">
+                        <div class="auth-submit-spinner"></div>
+                        <span class="translatable-content" id="auth-submit-loading-text" data-translate="auth.submitting">Signing in...</span>
+                    </div>
+                </button>
+            </div>
         </div>
     </main>
 
@@ -76,6 +90,8 @@
     <script src="lang-auth.js"></script>
     <!-- Auth page loader -->
     <script src="auth-page-loader.js"></script>
+    <!-- Universal submit button -->
+    <script src="universal-submit-button.js"></script>
     <!-- other scripts -->
     <script src="../js/script.js"></script>
 

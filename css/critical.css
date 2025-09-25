@@ -62,6 +62,11 @@ html, body {
     opacity: 0 !important;
 }
 
+/* Ensure loaded translations are visible even while hide-translatable is set */
+.hide-translatable .translatable-content.loaded {
+    opacity: 1 !important;
+}
+
 /* Hide loading screen when page is ready */
 .page-loaded #loading-screen {
     opacity: 0;

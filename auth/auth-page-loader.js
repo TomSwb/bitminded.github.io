@@ -141,7 +141,9 @@ class AuthPageLoader {
             console.log('🔄 Loading signup form component...');
 
             // Load HTML
-            const htmlResponse = await fetch('components/signup-form/signup-form.html');
+            console.log('🔍 Fetching signup form HTML from: components/signup-form/signup-form.html');
+            const htmlResponse = await fetch(`components/signup-form/signup-form.html?t=${Date.now()}`);
+            console.log('🔍 HTML response status:', htmlResponse.status, htmlResponse.ok);
             if (!htmlResponse.ok) {
                 throw new Error(`Failed to load signup form HTML: ${htmlResponse.status}`);
             }
@@ -182,6 +184,14 @@ class AuthPageLoader {
                 scriptElement.onerror = reject;
             });
 
+            // Initialize the signup form after HTML is loaded
+            if (window.signupForm && !window.signupForm.isInitialized) {
+                await window.signupForm.init();
+            }
+
+            // Load terms checkbox component
+            await this.loadTermsCheckbox();
+
             this.loadedComponents.set('signup-form', true);
             console.log('✅ Signup form component loaded successfully');
             
@@ -190,6 +200,69 @@ class AuthPageLoader {
 
         } catch (error) {
             console.error('❌ Failed to load signup form component:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Load terms checkbox component
+     */
+    async loadTermsCheckbox() {
+        try {
+            console.log('🔄 Loading terms checkbox component...');
+
+            // Load HTML
+            const htmlResponse = await fetch('components/signup-form/component/terms-checkbox.html');
+            if (!htmlResponse.ok) {
+                throw new Error(`Failed to load terms checkbox HTML: ${htmlResponse.status}`);
+            }
+            const htmlContent = await htmlResponse.text();
+
+            // Load CSS
+            const cssResponse = await fetch('components/signup-form/component/terms-checkbox.css');
+            if (!cssResponse.ok) {
+                throw new Error(`Failed to load terms checkbox CSS: ${cssResponse.status}`);
+            }
+            const cssContent = await cssResponse.text();
+
+            // Create and inject CSS
+            const styleElement = document.createElement('style');
+            styleElement.textContent = cssContent;
+            styleElement.setAttribute('data-component', 'terms-checkbox');
+            document.head.appendChild(styleElement);
+
+            // Inject HTML into container
+            const container = document.getElementById('terms-checkbox-container');
+            if (container) {
+                container.innerHTML = htmlContent;
+                container.classList.remove('hidden');
+                console.log('✅ Terms checkbox HTML loaded');
+            } else {
+                throw new Error('Terms checkbox container not found');
+            }
+
+            // Load JavaScript
+            const scriptElement = document.createElement('script');
+            scriptElement.src = 'components/signup-form/component/terms-checkbox.js';
+            scriptElement.setAttribute('data-component', 'terms-checkbox');
+            document.head.appendChild(scriptElement);
+
+            // Wait for script to load
+            await new Promise((resolve, reject) => {
+                scriptElement.onload = resolve;
+                scriptElement.onerror = reject;
+            });
+
+            // Initialize the terms checkbox after HTML is loaded
+            if (window.termsCheckbox && !window.termsCheckbox.isInitialized) {
+                await window.termsCheckbox.init();
+            }
+
+            this.loadedComponents.set('terms-checkbox', true);
+            console.log('✅ Terms checkbox component loaded successfully');
+
+        } catch (error) {
+            console.error('❌ Failed to load terms checkbox component:', error);
             throw error;
         }
     }
@@ -243,6 +316,11 @@ class AuthPageLoader {
                 scriptElement.onerror = reject;
             });
 
+            // Initialize the login form after HTML is loaded
+            if (window.loginForm && !window.loginForm.isInitialized) {
+                await window.loginForm.init();
+            }
+
             this.loadedComponents.set('login-form', true);
             console.log('✅ Login form component loaded successfully');
             
@@ -288,6 +366,17 @@ class AuthPageLoader {
             }
         }
 
+        // Show terms checkbox
+        const termsContainer = document.getElementById('terms-checkbox-container');
+        if (termsContainer) {
+            termsContainer.classList.remove('hidden');
+            
+            // Load terms checkbox if not already loaded
+            if (!this.loadedComponents.has('terms-checkbox')) {
+                await this.loadTermsCheckbox();
+            }
+        }
+
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('signup');
@@ -303,6 +392,12 @@ class AuthPageLoader {
         const signupContainer = document.getElementById('signup-form-container');
         if (signupContainer) {
             signupContainer.classList.add('hidden');
+        }
+
+        // Hide terms checkbox
+        const termsContainer = document.getElementById('terms-checkbox-container');
+        if (termsContainer) {
+            termsContainer.classList.add('hidden');
         }
 
         // Show login form
