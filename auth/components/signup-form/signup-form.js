@@ -15,6 +15,13 @@ class SignupForm {
      */
     async init() {
         try {
+            // Ensure DOM is ready before caching elements
+            if (document.readyState === 'loading') {
+                await new Promise(resolve => {
+                    document.addEventListener('DOMContentLoaded', resolve, { once: true });
+                });
+            }
+            
             this.cacheElements();
             this.bindEvents();
             await this.loadTranslations();
@@ -49,6 +56,18 @@ class SignupForm {
             togglePassword: document.getElementById('signup-toggle-password'),
             toggleConfirmPassword: document.getElementById('signup-toggle-confirm-password')
         };
+
+        // Debug: Log missing elements
+        const missingElements = [];
+        Object.entries(this.elements).forEach(([key, element]) => {
+            if (!element) {
+                missingElements.push(key);
+            }
+        });
+        
+        if (missingElements.length > 0) {
+            console.warn('Signup form missing elements:', missingElements);
+        }
     }
 
     /**
@@ -139,6 +158,19 @@ class SignupForm {
             return window.languageSwitcher.getCurrentLanguage();
         }
         return localStorage.getItem('language') || 'en';
+    }
+
+    /**
+     * Get translation for a given key
+     * @param {string} key - Translation key
+     * @returns {string|null} Translated text or null if not found
+     */
+    getTranslation(key) {
+        if (!this.translations) return null;
+        
+        const language = this.getCurrentLanguage();
+        const translation = this.translations[language]?.translation?.[key];
+        return translation || null;
     }
 
     /**
@@ -377,15 +409,100 @@ class SignupForm {
     showError(message) {
         // You could implement a toast notification system here
         console.error('Signup Form Error:', message);
-        alert(message); // Temporary - replace with better UX
+        
+        // Use translated message if available, otherwise use the provided message
+        const translatedMessage = this.getTranslation('signup.error') || message;
+        alert(translatedMessage); // Temporary - replace with better UX
     }
 
     /**
      * Show success message
      */
     showSuccess() {
-        this.elements.form.style.display = 'none';
-        this.elements.success.style.display = 'flex';
+        // Hide the signup form
+        if (this.elements.form) {
+            this.elements.form.style.display = 'none';
+        }
+        
+        // Hide the terms checkbox container
+        const termsContainer = document.getElementById('terms-checkbox-container');
+        if (termsContainer) {
+            termsContainer.style.display = 'none';
+        }
+        
+        // Hide the submit button container
+        const submitContainer = document.querySelector('.auth-submit-container');
+        if (submitContainer) {
+            submitContainer.style.display = 'none';
+        }
+        
+        // Show the success message
+        if (this.elements.success) {
+            this.elements.success.style.display = 'flex';
+        } else {
+            console.warn('Success element not found, showing fallback message');
+            // Use translated success message
+            const successMessage = this.getTranslation('signup.successMessage') || 'Account created successfully! Please check your email to verify your account.';
+            alert(successMessage);
+            
+            // Show thank you message after popup is dismissed
+            setTimeout(() => {
+                this.showThankYouMessage();
+            }, 100);
+        }
+    }
+
+    /**
+     * Show thank you message after popup is dismissed
+     */
+    showThankYouMessage() {
+        // Create thank you container if it doesn't exist
+        let thankYouContainer = document.getElementById('signup-thank-you');
+        if (!thankYouContainer) {
+            thankYouContainer = document.createElement('div');
+            thankYouContainer.id = 'signup-thank-you';
+            thankYouContainer.className = 'signup-thank-you';
+            thankYouContainer.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 2rem;
+                background: var(--color-background);
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                max-width: 500px;
+                margin: 0 auto;
+            `;
+            
+            // Add to auth container
+            const authContainer = document.querySelector('.auth-container');
+            if (authContainer) {
+                authContainer.appendChild(thankYouContainer);
+            }
+        }
+        
+        // Get translated messages
+        const title = this.getTranslation('signup.thankYouTitle') || 'Thank You for Signing Up!';
+        const message = this.getTranslation('signup.thankYouMessage') || 'We\'ve sent a verification email to your inbox. Please check your email and click the verification link to activate your account.';
+        const reminder = this.getTranslation('signup.checkEmailReminder') || 'Don\'t forget to check your spam folder if you don\'t see the email in your inbox.';
+        
+        // Set content
+        thankYouContainer.innerHTML = `
+            <div style="margin-bottom: 1.5rem;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="color: var(--color-success);">
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </div>
+            <h2 style="color: var(--color-text); margin-bottom: 1rem; font-size: 1.5rem; font-weight: 600;">${title}</h2>
+            <p style="color: var(--color-text-secondary); margin-bottom: 1rem; line-height: 1.6;">${message}</p>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem; font-style: italic;">${reminder}</p>
+        `;
+        
+        // Show the thank you message
+        thankYouContainer.style.display = 'flex';
     }
 
     /**
