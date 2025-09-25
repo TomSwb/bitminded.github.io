@@ -37,8 +37,6 @@ class LoginForm {
             form: document.getElementById('login-form'),
             email: document.getElementById('login-email'),
             password: document.getElementById('login-password'),
-            submit: document.getElementById('login-submit'),
-            loading: document.getElementById('login-loading'),
             
             // Error elements
             emailError: document.getElementById('login-email-error'),
@@ -55,11 +53,7 @@ class LoginForm {
     bindEvents() {
         if (!this.elements.form) return;
 
-        // Form submission
-        this.elements.form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleSubmit();
-        });
+        // Form submission is now handled by universal submit button
 
         // Real-time validation
         this.elements.email.addEventListener('blur', () => this.validateEmail());

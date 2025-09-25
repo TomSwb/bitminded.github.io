@@ -2,13 +2,21 @@
   "en": {
     "translation": {
       "auth-title": "Authentication",
-      "auth-error-message": "An error occurred"
+      "auth-error-message": "An error occurred",
+      "auth.submit": "Sign In",
+      "auth.submitting": "Signing in...",
+      "auth.submitSignup": "Create Account",
+      "auth.submittingSignup": "Creating account..."
     }
   },
   "fr": {
     "translation": {
       "auth-title": "Authentification",
-      "auth-error-message": "Une erreur s'est produite"
+      "auth-error-message": "Une erreur s'est produite",
+      "auth.submit": "Se connecter",
+      "auth.submitting": "Connexion en cours...",
+      "auth.submitSignup": "Créer un compte",
+      "auth.submittingSignup": "Création du compte..."
     }
   }
 }

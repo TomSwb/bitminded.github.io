@@ -8,8 +8,6 @@ class SignupForm {
         this.elements = {};
         this.translations = null;
         this.isSubmitting = false;
-        
-        this.init();
     }
 
     /**
@@ -39,9 +37,6 @@ class SignupForm {
             email: document.getElementById('signup-email'),
             password: document.getElementById('signup-password'),
             confirmPassword: document.getElementById('signup-confirm-password'),
-            terms: document.getElementById('signup-terms'),
-            submit: document.getElementById('signup-submit'),
-            loading: document.getElementById('signup-loading'),
             success: document.getElementById('signup-success'),
             
             // Error elements
@@ -49,7 +44,6 @@ class SignupForm {
             emailError: document.getElementById('signup-email-error'),
             passwordError: document.getElementById('signup-password-error'),
             confirmPasswordError: document.getElementById('signup-confirm-password-error'),
-            termsError: document.getElementById('signup-terms-error'),
             
             // Password toggle buttons
             togglePassword: document.getElementById('signup-toggle-password'),
@@ -63,22 +57,17 @@ class SignupForm {
     bindEvents() {
         if (!this.elements.form) return;
 
-        // Form submission
-        this.elements.form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleSubmit();
-        });
+        // Form submission is now handled by universal submit button
 
-        // Real-time validation
-        this.elements.username.addEventListener('blur', () => this.validateUsername());
-        this.elements.email.addEventListener('blur', () => this.validateEmail());
-        this.elements.password.addEventListener('blur', () => this.validatePassword());
-        this.elements.confirmPassword.addEventListener('blur', () => this.validateConfirmPassword());
-        this.elements.terms.addEventListener('change', () => this.validateTerms());
+        // Real-time validation - only bind if elements exist
+        if (this.elements.username) this.elements.username.addEventListener('blur', () => this.validateUsername());
+        if (this.elements.email) this.elements.email.addEventListener('blur', () => this.validateEmail());
+        if (this.elements.password) this.elements.password.addEventListener('blur', () => this.validatePassword());
+        if (this.elements.confirmPassword) this.elements.confirmPassword.addEventListener('blur', () => this.validateConfirmPassword());
 
-        // Password visibility toggles
-        this.elements.togglePassword.addEventListener('click', () => this.togglePasswordVisibility('password'));
-        this.elements.toggleConfirmPassword.addEventListener('click', () => this.togglePasswordVisibility('confirmPassword'));
+        // Password visibility toggles - only bind if elements exist
+        if (this.elements.togglePassword) this.elements.togglePassword.addEventListener('click', () => this.togglePasswordVisibility('password'));
+        if (this.elements.toggleConfirmPassword) this.elements.toggleConfirmPassword.addEventListener('click', () => this.togglePasswordVisibility('confirmPassword'));
 
         // Listen for language changes
         window.addEventListener('languageChanged', async (e) => {
@@ -95,13 +84,9 @@ class SignupForm {
      */
     async loadTranslations() {
         try {
-            console.log('🔄 Loading signup form translations...');
             const response = await fetch('components/signup-form/locales/signup-locales.json');
-            console.log('📁 Signup translations response:', response.status, response.ok);
-            
             if (response.ok) {
                 this.translations = await response.json();
-                console.log('📚 Signup translations loaded:', this.translations);
                 this.updateTranslations(this.getCurrentLanguage());
                 console.log('✅ Signup form translations loaded');
             } else {
@@ -117,27 +102,18 @@ class SignupForm {
      * @param {string} language - Language code
      */
     updateTranslations(language = this.getCurrentLanguage()) {
-        console.log('🔄 Updating signup form translations for language:', language);
-        console.log('📚 Available translations:', this.translations);
-        
         if (this.translations?.[language]) {
             const t = this.translations[language].translation;
-            console.log('🎯 Translation object for', language, ':', t);
             
             // Update all translatable elements
             const translatableElements = this.elements.form.querySelectorAll('[data-translate]');
-            console.log('🔍 Found translatable elements:', translatableElements.length);
-            
             translatableElements.forEach(element => {
                 const key = element.getAttribute('data-translate');
                 const translatedText = t[key];
-                console.log(`🔤 Updating ${key}: "${translatedText}"`);
                 if (translatedText) {
                     element.textContent = translatedText;
                 }
             });
-        } else {
-            console.warn('❌ No translations found for language:', language);
         }
 
         // Show translatable content
@@ -176,9 +152,8 @@ class SignupForm {
         const isEmailValid = this.validateEmail();
         const isPasswordValid = this.validatePassword();
         const isConfirmPasswordValid = this.validateConfirmPassword();
-        const isTermsValid = this.validateTerms();
 
-        if (!isUsernameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid || !isTermsValid) {
+        if (!isUsernameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
             this.showError('Please fix the errors above');
             return;
         }
@@ -272,7 +247,7 @@ class SignupForm {
      */
     validateUsername() {
         const username = this.elements.username.value.trim();
-        const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+        const usernameRegex = /^\w{3,20}$/;
 
         if (!username) {
             this.showFieldError('username', 'Username is required');
@@ -363,19 +338,6 @@ class SignupForm {
         return true;
     }
 
-    /**
-     * Validate terms checkbox
-     * @returns {boolean} True if valid
-     */
-    validateTerms() {
-        if (!this.elements.terms.checked) {
-            this.showFieldError('terms', 'You must agree to the terms and conditions');
-            return false;
-        }
-
-        this.clearFieldError('terms');
-        return true;
-    }
 
     /**
      * Show field-specific error
@@ -432,14 +394,10 @@ class SignupForm {
      */
     setSubmitting(isSubmitting) {
         this.isSubmitting = isSubmitting;
-        this.elements.submit.disabled = isSubmitting;
         
-        if (isSubmitting) {
-            this.elements.submit.querySelector('.signup-form__submit-text').style.display = 'none';
-            this.elements.loading.style.display = 'flex';
-        } else {
-            this.elements.submit.querySelector('.signup-form__submit-text').style.display = 'block';
-            this.elements.loading.style.display = 'none';
+        // Update universal submit button state
+        if (window.universalSubmitButton) {
+            window.universalSubmitButton.setSubmitting(isSubmitting);
         }
     }
 
@@ -455,7 +413,7 @@ class SignupForm {
      * Clear all error messages
      */
     clearAllErrors() {
-        const fields = ['username', 'email', 'password', 'confirmPassword', 'terms'];
+        const fields = ['username', 'email', 'password', 'confirmPassword'];
         fields.forEach(field => this.clearFieldError(field));
     }
 
