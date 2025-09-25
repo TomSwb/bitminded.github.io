@@ -1,6 +1,6 @@
 /* Contact Form Styling */
 .contact-form {
-  max-width: 90%;
+  max-width: 50%;
   width: 100%;
   margin: var(--spacing-5xl) auto;
   padding: 2rem;
@@ -54,6 +54,11 @@
 /* Mobile spacing override */
 @media (max-width: 480px) {
   /* Override global mobile styles for contact page */
+  .contact-form {
+      max-width: 80%;
+      width: 100%;
+  }
+
   header {
     padding: 1rem !important;
   }
