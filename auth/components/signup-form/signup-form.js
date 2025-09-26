@@ -485,19 +485,6 @@ class SignupForm {
             thankYouContainer = document.createElement('div');
             thankYouContainer.id = 'signup-thank-you';
             thankYouContainer.className = 'signup-thank-you';
-            thankYouContainer.style.cssText = `
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                padding: 2rem;
-                background: var(--color-background);
-                border-radius: 8px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                max-width: 500px;
-                margin: 0 auto;
-            `;
             
             // Add to auth container
             const authContainer = document.querySelector('.auth-container');
@@ -513,27 +500,16 @@ class SignupForm {
         
         // Set content
         thankYouContainer.innerHTML = `
-            <div style="margin-bottom: 1.5rem;">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="color: var(--color-success);">
+            <div class="thank-you-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
                     <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                 </svg>
             </div>
-            <h2 style="color: var(--color-text); margin-bottom: 1rem; font-size: 1.5rem; font-weight: 600;">${title}</h2>
-            <p style="color: var(--color-text-secondary); margin-bottom: 1rem; line-height: 1.6;">${message}</p>
-            <p style="color: var(--color-text-muted); font-size: 0.9rem; font-style: italic; margin-bottom: 1.5rem;">${reminder}</p>
-            <button id="signup-resend-verification-btn" style="
-                background: var(--color-primary);
-                color: var(--color-primary-text);
-                border: 1px solid var(--color-primary);
-                padding: 0.75rem 1.5rem;
-                border-radius: 6px;
-                font-weight: 500;
-                font-size: 0.9rem;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                min-width: 200px;
-            " onmouseover="this.style.background='var(--color-primary-hover)'" onmouseout="this.style.background='var(--color-primary)'">
+            <h2 class="thank-you-title">${title}</h2>
+            <p class="thank-you-message">${message}</p>
+            <p class="thank-you-reminder">${reminder}</p>
+            <button id="signup-resend-verification-btn" class="resend-verification-btn">
                 ${this.getTranslation('signup.resendEmail') || 'Resend Verification Email'}
             </button>
         `;
