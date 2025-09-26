@@ -196,6 +196,11 @@ class UniversalSubmitButton {
             throw new Error('You must agree to the terms and conditions');
         }
 
+        // Check CAPTCHA verification
+        if (window.captcha && !window.captcha.isCaptchaVerified()) {
+            throw new Error('Please complete the security verification');
+        }
+
         // Use the signup form's validation and submission logic
         if (window.signupForm?.handleSubmit) {
             await window.signupForm.handleSubmit();

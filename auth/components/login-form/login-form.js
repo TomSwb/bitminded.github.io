@@ -145,7 +145,7 @@ class LoginForm {
         const isPasswordValid = this.validatePassword();
 
         if (!isEmailValid || !isPasswordValid) {
-            this.showError('Please fix the errors above');
+            // Field-specific errors are already displayed inline
             return;
         }
 

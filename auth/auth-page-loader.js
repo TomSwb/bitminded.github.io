@@ -192,6 +192,15 @@ class AuthPageLoader {
             // Load terms checkbox component
             await this.loadTermsCheckbox();
 
+            // Load CAPTCHA component for signup
+            await this.loadCaptcha();
+
+            // Show CAPTCHA container for signup
+            const captchaContainer = document.getElementById('captcha-container');
+            if (captchaContainer) {
+                captchaContainer.classList.remove('hidden');
+            }
+
             this.loadedComponents.set('signup-form', true);
             console.log('✅ Signup form component loaded successfully');
             
@@ -334,6 +343,48 @@ class AuthPageLoader {
     }
 
     /**
+     * Load CAPTCHA component
+     */
+    async loadCaptcha() {
+        try {
+            // Check if CAPTCHA is already loaded
+            if (this.loadedComponents.has('captcha')) {
+                console.log('🔄 CAPTCHA component already loaded, skipping...');
+                return;
+            }
+
+            console.log('🔄 Loading CAPTCHA component...');
+
+            // Initialize CAPTCHA component
+            if (window.CaptchaComponent && !window.captcha) {
+                window.captcha = new window.CaptchaComponent({
+                    siteKey: '0x4AAAAAAB3ePnQXAhy39NwT',
+                    theme: 'auto',
+                    size: 'normal',
+                    callback: (token) => {
+                        console.log('✅ CAPTCHA verified:', token);
+                    },
+                    errorCallback: (error) => {
+                        console.error('❌ CAPTCHA error:', error);
+                    }
+                });
+                
+                // Initialize the component
+                if (window.captcha && !window.captcha.isInitialized) {
+                    await window.captcha.init();
+                }
+            }
+
+            this.loadedComponents.set('captcha', true);
+            console.log('✅ CAPTCHA component loaded successfully');
+
+        } catch (error) {
+            console.error('❌ Failed to load CAPTCHA component:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Trigger language change event for loaded components
      */
     triggerLanguageChange() {
@@ -377,6 +428,17 @@ class AuthPageLoader {
             }
         }
 
+        // Show CAPTCHA for signup
+        const captchaContainer = document.getElementById('captcha-container');
+        if (captchaContainer) {
+            captchaContainer.classList.remove('hidden');
+            
+            // Load CAPTCHA if not already loaded
+            if (!this.loadedComponents.has('captcha')) {
+                await this.loadCaptcha();
+            }
+        }
+
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('signup');
@@ -398,6 +460,12 @@ class AuthPageLoader {
         const termsContainer = document.getElementById('terms-checkbox-container');
         if (termsContainer) {
             termsContainer.classList.add('hidden');
+        }
+
+        // Hide CAPTCHA for login
+        const captchaContainer = document.getElementById('captcha-container');
+        if (captchaContainer) {
+            captchaContainer.classList.add('hidden');
         }
 
         // Show login form

@@ -1,0 +1,20 @@
+{
+  "en": {
+    "translation": {
+      "captcha.loading": "Loading security verification...",
+      "captcha.error": "Security verification failed. Please try again.",
+      "captcha.required": "Please complete the security verification",
+      "captcha.expired": "Security verification expired. Please try again.",
+      "captcha.timeout": "Security verification timed out. Please try again."
+    }
+  },
+  "fr": {
+    "translation": {
+      "captcha.loading": "Chargement de la vérification de sécurité...",
+      "captcha.error": "La vérification de sécurité a échoué. Veuillez réessayer.",
+      "captcha.required": "Veuillez compléter la vérification de sécurité",
+      "captcha.expired": "La vérification de sécurité a expiré. Veuillez réessayer.",
+      "captcha.timeout": "La vérification de sécurité a expiré. Veuillez réessayer."
+    }
+  }
+}
