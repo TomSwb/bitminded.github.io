@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('language') || 'en';
-    fetch('locales/auth-locales.json')
+    fetch('../locales/auth-locales.json')
         .then(response => response.json())
         .then(resources => {
             i18next.init({
