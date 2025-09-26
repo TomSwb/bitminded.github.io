@@ -70,6 +70,14 @@
         max-width: 90vw;
         padding: 0 var(--spacing-md);
     }
+    
+    #account-title {
+        margin-bottom: var(--spacing-xs); /* Minimal space below title */
+    }
+    
+    #account-layout-container {
+        margin-top: var(--spacing-xs); /* Minimal space above navigation */
+    }
 }
 
 @media (max-width: 480px) {

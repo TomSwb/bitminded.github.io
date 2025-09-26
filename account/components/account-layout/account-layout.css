@@ -141,39 +141,58 @@
     .account-layout__sidebar {
         flex: none;
         position: static;
-        order: 2;
+        order: 1;
+        border: none;
+        padding: 0;
+        background: none;
     }
     
     .account-layout__content {
-        order: 1;
+        order: 2;
         padding: var(--spacing-lg);
     }
     
     .account-layout__nav-list {
-        flex-direction: row;
-        overflow-x: auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
         gap: var(--spacing-sm);
-        padding-bottom: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
     }
     
     .account-layout__nav-item {
-        flex-shrink: 0;
+        margin: 0;
     }
     
     .account-layout__nav-button {
         flex-direction: column;
         gap: var(--spacing-xs);
-        padding: var(--spacing-sm) var(--spacing-md);
-        min-width: 80px;
+        padding: var(--spacing-md);
+        min-height: 60px;
         text-align: center;
+        border: 2px solid var(--border-color-primary);
+        border-radius: var(--radius-md);
+        background: var(--color-background-primary);
+        transition: all var(--transition-fast);
+    }
+    
+    .account-layout__nav-button:hover {
+        border-color: var(--color-primary);
+        background: var(--color-background-secondary);
+    }
+    
+    .account-layout__nav-button.active {
+        border-color: var(--color-primary);
+        background: var(--color-primary);
+        color: var(--color-background-primary);
     }
     
     .account-layout__nav-text {
-        font-size: var(--font-size-sm);
+        display: none; /* Hide text on mobile, show only icons */
     }
     
     .account-layout__nav-icon {
-        font-size: var(--font-size-md);
+        font-size: var(--font-size-lg);
     }
     
     .account-layout__section-title {
