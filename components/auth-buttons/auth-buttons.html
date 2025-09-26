@@ -5,30 +5,18 @@
         <a href="/auth/" class="auth-buttons__button auth-buttons__button--login" data-auth-action="login">
             <span class="auth-buttons__button-text" data-translate="auth.login">Login</span>
         </a>
-        <a href="/auth/" class="auth-buttons__button auth-buttons__button--signup" data-auth-action="signup">
+        <a href="/auth/" class="auth-buttons__button auth-buttons__button--secondary" data-auth-action="signup">
             <span class="auth-buttons__button-text" data-translate="auth.signup">Sign Up</span>
         </a>
     </div>
 
     <!-- Logged In State -->
     <div class="auth-buttons__logged-in auth-buttons__logged-in--hidden translatable-content" id="auth-buttons-logged-in">
-        <div class="auth-buttons__user-menu">
-            <button class="auth-buttons__user-button" id="auth-user-button" aria-expanded="false" aria-haspopup="true">
-                <div class="auth-buttons__user-avatar" id="auth-user-avatar">
-                    <span class="auth-buttons__avatar-text" id="auth-avatar-text">U</span>
-                </div>
-                <span class="auth-buttons__user-name" id="auth-user-name">User</span>
-                <svg class="auth-buttons__dropdown-icon" width="12" height="8" viewBox="0 0 12 8" fill="none">
-                    <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
-            
-            <div class="auth-buttons__dropdown auth-buttons__dropdown--hidden" id="auth-user-dropdown">
-                <a href="/account/" class="auth-buttons__dropdown-item" data-translate="auth.account">Account</a>
-                <a href="/account/preferences" class="auth-buttons__dropdown-item" data-translate="auth.preferences">Preferences</a>
-                <div class="auth-buttons__dropdown-divider"></div>
-                <button class="auth-buttons__dropdown-item auth-buttons__dropdown-item--logout" id="auth-logout-button" data-translate="auth.logout">Logout</button>
-            </div>
-        </div>
+        <a href="/account/" class="auth-buttons__button auth-buttons__button--account" id="auth-account-button">
+            <span class="auth-buttons__button-text" id="auth-user-name">User</span>
+        </a>
+        <button class="auth-buttons__button auth-buttons__button--secondary" id="auth-logout-button" data-translate="auth.logout">
+            <span class="auth-buttons__button-text">Logout</span>
+        </button>
     </div>
 </div>

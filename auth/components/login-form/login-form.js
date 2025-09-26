@@ -166,8 +166,8 @@ class LoginForm {
             }
 
             if (data.user) {
-                // Redirect to account page or home page
-                window.location.href = '/account/';
+                // Redirect to home page
+                window.location.href = '/';
             }
 
         } catch (error) {
@@ -305,14 +305,16 @@ class LoginForm {
      */
     setSubmitting(isSubmitting) {
         this.isSubmitting = isSubmitting;
-        this.elements.submit.disabled = isSubmitting;
         
-        if (isSubmitting) {
-            this.elements.submit.querySelector('.login-form__submit-text').style.display = 'none';
-            this.elements.loading.style.display = 'flex';
-        } else {
-            this.elements.submit.querySelector('.login-form__submit-text').style.display = 'block';
-            this.elements.loading.style.display = 'none';
+        // Disable form inputs during submission
+        if (this.elements.email) {
+            this.elements.email.disabled = isSubmitting;
+        }
+        if (this.elements.password) {
+            this.elements.password.disabled = isSubmitting;
+        }
+        if (this.elements.togglePassword) {
+            this.elements.togglePassword.disabled = isSubmitting;
         }
     }
 

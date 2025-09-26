@@ -8,7 +8,6 @@ class AuthButtons {
         this.isInitialized = false;
         this.currentUser = null;
         this.elements = {};
-        this.dropdownOpen = false;
         this.translations = null;
         
         this.init();
@@ -29,6 +28,12 @@ class AuthButtons {
             this.bindEvents();
             await this.loadTranslations();
             await this.checkAuthState();
+            
+            // Add a delayed check to ensure auth state is properly detected after page load
+            setTimeout(() => {
+                this.checkAuthState();
+            }, 1000);
+            
             this.isInitialized = true;
             
             console.log('✅ Auth Buttons initialized successfully');
@@ -74,10 +79,7 @@ class AuthButtons {
             container: document.getElementById('auth-buttons'),
             loggedOut: document.getElementById('auth-buttons-logged-out'),
             loggedIn: document.getElementById('auth-buttons-logged-in'),
-            userButton: document.getElementById('auth-user-button'),
-            userDropdown: document.getElementById('auth-user-dropdown'),
             userName: document.getElementById('auth-user-name'),
-            avatarText: document.getElementById('auth-avatar-text'),
             logoutButton: document.getElementById('auth-logout-button'),
             loginButton: document.querySelector('[data-auth-action="login"]'),
             signupButton: document.querySelector('[data-auth-action="signup"]')
@@ -96,14 +98,6 @@ class AuthButtons {
      * Bind event listeners
      */
     bindEvents() {
-        // User dropdown toggle
-        if (this.elements.userButton) {
-            this.elements.userButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.toggleDropdown();
-            });
-        }
-
         // Logout button
         if (this.elements.logoutButton) {
             this.elements.logoutButton.addEventListener('click', (e) => {
@@ -124,20 +118,6 @@ class AuthButtons {
                 this.elements.signupButton.href = '/auth/?action=signup';
             });
         }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (this.dropdownOpen && !this.elements.userButton.contains(e.target)) {
-                this.closeDropdown();
-            }
-        });
-
-        // Close dropdown on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.dropdownOpen) {
-                this.closeDropdown();
-            }
-        });
 
         // Listen for auth state changes (defer until Supabase is available)
         this.setupSupabaseListener();
@@ -161,10 +141,13 @@ class AuthButtons {
      */
     setupSupabaseListener() {
         if (window.supabase && window.supabase.auth) {
+            console.log('🔐 Setting up Supabase auth state listener');
             window.supabase.auth.onAuthStateChange((event, session) => {
+                console.log('🔐 Auth state changed:', event, session?.user?.email);
                 this.handleAuthStateChange(event, session);
             });
         } else {
+            console.log('⏳ Supabase not ready, retrying in 100ms...');
             setTimeout(() => {
                 this.setupSupabaseListener();
             }, 100);
@@ -243,12 +226,15 @@ class AuthButtons {
      */
     async checkAuthState() {
         try {
+            console.log('🔐 Checking authentication state...');
+            
             // Show loading screen if available
             if (window.loadingScreen) {
                 window.loadingScreen.updateText('Checking authentication...');
             }
 
             if (!window.supabase || !window.supabase.auth) {
+                console.log('❌ Supabase not available, showing logged out state');
                 this.showLoggedOutState();
                 return;
             }
@@ -256,18 +242,21 @@ class AuthButtons {
             const { data: { session }, error } = await window.supabase.auth.getSession();
             
             if (error) {
+                console.error('❌ Error getting session:', error);
                 throw error;
             }
 
             if (session && session.user) {
+                console.log('✅ User is logged in:', session.user.email);
                 this.currentUser = session.user;
                 this.showLoggedInState();
             } else {
+                console.log('❌ No active session, showing logged out state');
                 this.currentUser = null;
                 this.showLoggedOutState();
             }
         } catch (error) {
-            console.error('Error checking auth state:', error);
+            console.error('❌ Error checking auth state:', error);
             this.showLoggedOutState();
         }
     }
@@ -276,15 +265,18 @@ class AuthButtons {
      * Handle authentication state changes
      */
     async handleAuthStateChange(event, session) {
-        console.log('Auth state changed:', event, session);
+        console.log('🔐 Auth state changed:', event, session?.user?.email);
         
         if (event === 'SIGNED_IN' && session) {
+            console.log('✅ User signed in, updating UI');
             this.currentUser = session.user;
             this.showLoggedInState();
         } else if (event === 'SIGNED_OUT') {
+            console.log('❌ User signed out, updating UI');
             this.currentUser = null;
             this.showLoggedOutState();
         } else if (event === 'TOKEN_REFRESHED' && session) {
+            console.log('🔄 Token refreshed, updating UI');
             this.currentUser = session.user;
             this.showLoggedInState();
         }
@@ -294,6 +286,7 @@ class AuthButtons {
      * Show logged out state
      */
     showLoggedOutState() {
+        console.log('🔓 Showing logged out state');
         this.hideAllStates();
         if (this.elements.loggedOut) {
             this.elements.loggedOut.style.display = 'flex';
@@ -304,9 +297,11 @@ class AuthButtons {
      * Show logged in state
      */
     showLoggedInState() {
+        console.log('🔒 Showing logged in state');
         this.hideAllStates();
         if (this.elements.loggedIn) {
-            this.elements.loggedIn.style.display = 'block';
+            // Ensure flex layout to match CSS and preserve spacing/gap
+            this.elements.loggedIn.style.display = 'flex';
             this.elements.loggedIn.classList.remove('auth-buttons__logged-in--hidden');
             this.updateUserInfo();
         }
@@ -334,67 +329,15 @@ class AuthButtons {
         // Get translated "User" text
         const defaultUserName = this.translations?.[this.getCurrentLanguage()]?.translation?.['auth.user'] || 'User';
 
-        // Update user name
+        // Update user name - only use username from user_metadata or email prefix as fallback
         if (this.elements.userName) {
-            const displayName = this.currentUser.user_metadata?.full_name || 
-                               this.currentUser.user_metadata?.name || 
+            const displayName = this.currentUser.user_metadata?.username || 
                                this.currentUser.email?.split('@')[0] || 
                                defaultUserName;
             this.elements.userName.textContent = displayName;
         }
-
-        // Update avatar
-        if (this.elements.avatarText) {
-            const displayName = this.currentUser.user_metadata?.full_name || 
-                               this.currentUser.user_metadata?.name || 
-                               this.currentUser.email?.split('@')[0] || 
-                               defaultUserName;
-            this.elements.avatarText.textContent = displayName.charAt(0).toUpperCase();
-        }
     }
 
-    /**
-     * Toggle user dropdown menu
-     */
-    toggleDropdown() {
-        if (this.dropdownOpen) {
-            this.closeDropdown();
-        } else {
-            this.openDropdown();
-        }
-    }
-
-    /**
-     * Open user dropdown menu
-     */
-    openDropdown() {
-        if (this.elements.userDropdown && this.elements.userButton) {
-            this.elements.userDropdown.style.display = 'block';
-            this.elements.userDropdown.classList.remove('auth-buttons__dropdown--hidden');
-            this.elements.userDropdown.classList.add('show');
-            this.elements.userButton.setAttribute('aria-expanded', 'true');
-            this.dropdownOpen = true;
-        }
-    }
-
-    /**
-     * Close user dropdown menu
-     */
-    closeDropdown() {
-        if (this.elements.userDropdown && this.elements.userButton) {
-            this.elements.userDropdown.classList.remove('show');
-            this.elements.userButton.setAttribute('aria-expanded', 'false');
-            this.dropdownOpen = false;
-            
-            // Hide after animation
-            setTimeout(() => {
-                if (this.elements.userDropdown) {
-                    this.elements.userDropdown.style.display = 'none';
-                    this.elements.userDropdown.classList.add('auth-buttons__dropdown--hidden');
-                }
-            }, 200);
-        }
-    }
 
     /**
      * Handle logout
@@ -472,10 +415,6 @@ class AuthButtons {
      */
     destroy() {
         // Remove event listeners
-        if (this.elements.userButton) {
-            this.elements.userButton.removeEventListener('click', this.toggleDropdown);
-        }
-        
         if (this.elements.logoutButton) {
             this.elements.logoutButton.removeEventListener('click', this.handleLogout);
         }
@@ -483,7 +422,6 @@ class AuthButtons {
         // Reset state
         this.isInitialized = false;
         this.currentUser = null;
-        this.dropdownOpen = false;
     }
 }
 
