@@ -8,7 +8,11 @@
       "verify.goHome": "Go to Home",
       "verify.errorTitle": "Verification Failed",
       "verify.errorMessage": "There was an error verifying your email. The link may have expired or is invalid.",
-      "verify.tryAgain": "Try Again"
+      "verify.tryAgain": "Try Again",
+      "verify.resendEmail": "Resend Verification Email",
+      "verify.resendSuccess": "Verification email sent! Please check your inbox.",
+      "verify.resendError": "Failed to resend email. Please try again.",
+      "verify.resending": "Sending..."
     }
   },
   "fr": {
@@ -20,7 +24,11 @@
       "verify.goHome": "Aller à l'accueil",
       "verify.errorTitle": "Échec de la vérification",
       "verify.errorMessage": "Une erreur s'est produite lors de la vérification de votre e-mail. Le lien a peut-être expiré ou est invalide.",
-      "verify.tryAgain": "Réessayer"
+      "verify.tryAgain": "Réessayer",
+      "verify.resendEmail": "Renvoyer l'e-mail de vérification",
+      "verify.resendSuccess": "E-mail de vérification envoyé ! Veuillez vérifier votre boîte de réception.",
+      "verify.resendError": "Échec de l'envoi de l'e-mail. Veuillez réessayer.",
+      "verify.resending": "Envoi en cours..."
     }
   }
 }

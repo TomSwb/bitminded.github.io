@@ -18,7 +18,11 @@
       "signup.error": "An error occurred during signup. Please try again.",
       "signup.thankYouTitle": "Thank You for Signing Up!",
       "signup.thankYouMessage": "We've sent a verification email to your inbox. Please check your email and click the verification link to activate your account.",
-      "signup.checkEmailReminder": "Don't forget to check your spam folder if you don't see the email in your inbox."
+      "signup.checkEmailReminder": "Don't forget to check your spam folder if you don't see the email in your inbox.",
+      "signup.resendEmail": "Resend Verification Email",
+      "signup.resendSuccess": "Verification email sent! Please check your inbox.",
+      "signup.resendError": "Failed to resend email. Please try again.",
+      "signup.resending": "Sending..."
     }
   },
   "fr": {
@@ -40,7 +44,11 @@
       "signup.error": "Une erreur s'est produite lors de l'inscription. Veuillez réessayer.",
       "signup.thankYouTitle": "Merci de vous être inscrit !",
       "signup.thankYouMessage": "Nous avons envoyé un e-mail de vérification dans votre boîte de réception. Veuillez vérifier votre e-mail et cliquer sur le lien de vérification pour activer votre compte.",
-      "signup.checkEmailReminder": "N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'e-mail dans votre boîte de réception."
+      "signup.checkEmailReminder": "N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'e-mail dans votre boîte de réception.",
+      "signup.resendEmail": "Renvoyer l'e-mail de vérification",
+      "signup.resendSuccess": "E-mail de vérification envoyé ! Veuillez vérifier votre boîte de réception.",
+      "signup.resendError": "Échec de l'envoi de l'e-mail. Veuillez réessayer.",
+      "signup.resending": "Envoi en cours..."
     }
   }
 }
