@@ -462,10 +462,15 @@ class AuthPageLoader {
             termsContainer.classList.add('hidden');
         }
 
-        // Hide CAPTCHA for login
+        // Check if CAPTCHA is needed for login (due to failed attempts)
         const captchaContainer = document.getElementById('captcha-container');
         if (captchaContainer) {
-            captchaContainer.classList.add('hidden');
+            // Only hide if login form doesn't require CAPTCHA
+            if (window.loginForm && !window.loginForm.requiresCaptcha()) {
+                captchaContainer.classList.add('hidden');
+            } else if (window.loginForm && window.loginForm.requiresCaptcha()) {
+                captchaContainer.classList.remove('hidden');
+            }
         }
 
         // Show login form
