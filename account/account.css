@@ -9,7 +9,7 @@
 
 .account-container {
     width: 100%;
-    max-width: 800px; /* Wider than auth page for account management */
+    max-width: 1200px; /* Wider to accommodate sidebar positioning */
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
 }
