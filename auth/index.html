@@ -33,6 +33,8 @@
     <link rel="stylesheet" href="../css/main.css">
     <!-- Auth page specific CSS -->
     <link rel="stylesheet" href="auth.css">
+    <!-- CAPTCHA Component CSS -->
+    <link rel="stylesheet" href="../components/captcha/captcha.css">
 </head>
 
 <body>
@@ -65,6 +67,16 @@
             <!-- Terms Checkbox Component will be loaded here -->
             <div id="terms-checkbox-container" class="auth-form-container hidden"></div>
             
+            <!-- CAPTCHA Component will be loaded here -->
+            <div id="captcha-container" class="auth-form-container captcha-container hidden">
+                <div id="captcha-widget" class="captcha-widget"></div>
+                <div id="captcha-error" role="alert" aria-live="polite"></div>
+                <div id="captcha-loading" style="display: none;">
+                    <div class="captcha-spinner"></div>
+                    <span class="captcha-loading-text">Loading security verification...</span>
+                </div>
+            </div>
+            
             <!-- Universal Submit Button -->
             <div class="auth-submit-container">
                 <button type="button" class="auth-submit-button" id="auth-submit-button">
@@ -94,6 +106,8 @@
     <script src="auth-page-loader.js"></script>
     <!-- Universal submit button -->
     <script src="universal-submit-button.js"></script>
+    <!-- CAPTCHA Component -->
+    <script src="../components/captcha/captcha.js"></script>
     <!-- other scripts -->
     <script src="../js/script.js"></script>
 
