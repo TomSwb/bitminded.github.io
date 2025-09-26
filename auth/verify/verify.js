@@ -15,6 +15,7 @@ class EmailVerification {
     async init() {
         try {
             this.cacheElements();
+            this.bindEvents();
             await this.loadTranslations();
             await this.handleVerification();
             this.isInitialized = true;
@@ -34,7 +35,8 @@ class EmailVerification {
             loading: document.getElementById('verify-loading'),
             success: document.getElementById('verify-success'),
             error: document.getElementById('verify-error'),
-            errorMessage: document.getElementById('verify-error-message')
+            errorMessage: document.getElementById('verify-error-message'),
+            resendButton: document.getElementById('resend-verification-btn')
         };
     }
 
@@ -169,6 +171,18 @@ class EmailVerification {
     }
 
     /**
+     * Bind event listeners
+     */
+    bindEvents() {
+        // Bind resend button click event
+        if (this.elements.resendButton) {
+            this.elements.resendButton.addEventListener('click', () => {
+                this.handleResendVerification();
+            });
+        }
+    }
+
+    /**
      * Wait for Supabase to be available
      */
     async waitForSupabase() {
@@ -243,6 +257,69 @@ class EmailVerification {
         // Update error message
         if (this.elements.errorMessage) {
             this.elements.errorMessage.textContent = message;
+        }
+    }
+
+    /**
+     * Handle resend verification email
+     */
+    async handleResendVerification() {
+        if (!this.elements.resendButton) return;
+
+        try {
+            // Disable button and show loading state
+            this.elements.resendButton.disabled = true;
+            const originalText = this.elements.resendButton.textContent;
+            this.elements.resendButton.textContent = this.getTranslation('verify.resending') || 'Sending...';
+
+            // Wait for Supabase to be available
+            await this.waitForSupabase();
+
+            // Get user email from URL parameters or session
+            const urlParams = this.parseUrlParameters();
+            let userEmail = null;
+
+            // Try to get email from URL parameters first
+            if (urlParams.email) {
+                userEmail = urlParams.email;
+            } else {
+                // Try to get from current session
+                const { data: sessionData } = await window.supabase.auth.getSession();
+                if (sessionData?.session?.user?.email) {
+                    userEmail = sessionData.session.user.email;
+                }
+            }
+
+            if (!userEmail) {
+                throw new Error('No email address found for resending verification');
+            }
+
+            console.log('🔄 Resending verification email to:', userEmail);
+
+            // Resend verification email
+            const { error } = await window.supabase.auth.resend({
+                type: 'signup',
+                email: userEmail
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            // Show success message
+            const successMessage = this.getTranslation('verify.resendSuccess') || 'Verification email sent! Please check your inbox.';
+            alert(successMessage);
+
+            console.log('✅ Verification email resent successfully');
+
+        } catch (error) {
+            console.error('❌ Failed to resend verification email:', error);
+            const errorMessage = this.getTranslation('verify.resendError') || 'Failed to resend email. Please try again.';
+            alert(errorMessage);
+        } finally {
+            // Re-enable button and restore original text
+            this.elements.resendButton.disabled = false;
+            this.elements.resendButton.textContent = this.getTranslation('verify.resendEmail') || 'Resend Verification Email';
         }
     }
 }

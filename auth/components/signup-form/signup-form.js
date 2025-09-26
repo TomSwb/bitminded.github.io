@@ -498,11 +498,83 @@ class SignupForm {
             </div>
             <h2 style="color: var(--color-text); margin-bottom: 1rem; font-size: 1.5rem; font-weight: 600;">${title}</h2>
             <p style="color: var(--color-text-secondary); margin-bottom: 1rem; line-height: 1.6;">${message}</p>
-            <p style="color: var(--color-text-muted); font-size: 0.9rem; font-style: italic;">${reminder}</p>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem; font-style: italic; margin-bottom: 1.5rem;">${reminder}</p>
+            <button id="signup-resend-verification-btn" style="
+                background: var(--color-primary);
+                color: var(--color-primary-text);
+                border: 1px solid var(--color-primary);
+                padding: 0.75rem 1.5rem;
+                border-radius: 6px;
+                font-weight: 500;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                min-width: 200px;
+            " onmouseover="this.style.background='var(--color-primary-hover)'" onmouseout="this.style.background='var(--color-primary)'">
+                ${this.getTranslation('signup.resendEmail') || 'Resend Verification Email'}
+            </button>
         `;
         
         // Show the thank you message
         thankYouContainer.style.display = 'flex';
+        
+        // Bind resend button event
+        const resendButton = document.getElementById('signup-resend-verification-btn');
+        if (resendButton) {
+            resendButton.addEventListener('click', () => {
+                this.handleResendVerification();
+            });
+        }
+    }
+
+    /**
+     * Handle resend verification email from signup form
+     */
+    async handleResendVerification() {
+        const resendButton = document.getElementById('signup-resend-verification-btn');
+        if (!resendButton) return;
+
+        try {
+            // Disable button and show loading state
+            resendButton.disabled = true;
+            resendButton.textContent = this.getTranslation('signup.resending') || 'Sending...';
+
+            // Wait for Supabase to be available
+            await this.waitForSupabase();
+
+            // Get user email from form
+            const userEmail = this.elements.email?.value?.trim();
+            if (!userEmail) {
+                throw new Error('No email address found');
+            }
+
+            console.log('🔄 Resending verification email to:', userEmail);
+
+            // Resend verification email
+            const { error } = await window.supabase.auth.resend({
+                type: 'signup',
+                email: userEmail
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            // Show success message
+            const successMessage = this.getTranslation('signup.resendSuccess') || 'Verification email sent! Please check your inbox.';
+            alert(successMessage);
+
+            console.log('✅ Verification email resent successfully');
+
+        } catch (error) {
+            console.error('❌ Failed to resend verification email:', error);
+            const errorMessage = this.getTranslation('signup.resendError') || 'Failed to resend email. Please try again.';
+            alert(errorMessage);
+        } finally {
+            // Re-enable button and restore original text
+            resendButton.disabled = false;
+            resendButton.textContent = this.getTranslation('signup.resendEmail') || 'Resend Verification Email';
+        }
     }
 
     /**
