@@ -39,10 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load Auth Buttons Component
     loadAuthButtons();
     
-    // Account page specific initialization
-    if (window.location.pathname.includes('/account')) {
-        initializeAccountPage();
-    }
+    // Account page specific initialization is now handled by account-page-loader.js
     
     // Any additional initialization code can go here
 });
@@ -106,56 +103,8 @@ async function loadAuthButtons() {
     }
 }
 
-// ===== ACCOUNT PAGE INITIALIZATION =====
-
-async function initializeAccountPage() {
-    console.log('🔄 Script: Initializing account page...');
-    
-    try {
-        // Check if user is authenticated
-        await checkAuthenticationStatus();
-        
-        console.log('✅ Script: Account page initialized successfully');
-        
-    } catch (error) {
-        console.error('❌ Script: Failed to initialize account page:', error);
-    }
-}
-
-/**
- * Check if user is authenticated and redirect if not
- */
-async function checkAuthenticationStatus() {
-    try {
-        if (typeof window.supabase === 'undefined') {
-            console.error('❌ Supabase client not available');
-            return;
-        }
-
-        const { data: { user }, error } = await window.supabase.auth.getUser();
-        
-        if (error) {
-            console.error('❌ Error checking authentication:', error);
-            showAccountError('Authentication check failed');
-            return;
-        }
-
-        if (!user) {
-            console.log('🔄 User not authenticated, redirecting to auth page...');
-            window.location.href = '/auth/';
-            return;
-        }
-
-        console.log('✅ User authenticated:', user.email);
-        
-        // TODO: Load user data and initialize account components
-        // initializeAccountComponents(user);
-
-    } catch (error) {
-        console.error('❌ Authentication check failed:', error);
-        showAccountError('Authentication check failed');
-    }
-}
+// ===== ACCOUNT PAGE FUNCTIONS =====
+// These functions are used by account-page-loader.js
 
 /**
  * Show error message on account page
@@ -205,7 +154,8 @@ function hideAccountSuccess() {
     }
 }
 
-// Export account page functions for use by other scripts
+// Export account page functions for use by account-page-loader.js
+
 window.accountPage = {
     showError: showAccountError,
     showSuccess: showAccountSuccess,

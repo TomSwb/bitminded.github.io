@@ -55,8 +55,15 @@ class ComponentLoader {
      * @param {Object} options - Loading options
      */
     async loadComponentFiles(componentName, options) {
-        // Use absolute path from root, not relative to current page
-        const componentPath = `components/${componentName}`;
+        // Determine component path based on component name
+        let componentPath;
+        if (componentName.startsWith('account-')) {
+            // Account-specific components
+            componentPath = `account/components/${componentName}`;
+        } else {
+            // Regular components
+            componentPath = `components/${componentName}`;
+        }
         
         // Load CSS
         await this.loadComponentCSS(componentPath, componentName);
@@ -166,6 +173,9 @@ class ComponentLoader {
                 } else if (componentName === 'theme-switcher' && window.themeSwitcher) {
                     // Special handling for theme-switcher component
                     window.themeSwitcher.init(config);
+                } else if (componentName === 'account-layout' && window.accountLayout) {
+                    // Special handling for account-layout component
+                    window.accountLayout.init(config);
                 }
                 resolve();
             };

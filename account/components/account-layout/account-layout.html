@@ -1,0 +1,133 @@
+<!-- Account Layout Component -->
+<div class="account-layout" id="account-layout">
+    <!-- Account Navigation Sidebar -->
+    <aside class="account-layout__sidebar" id="account-sidebar">
+        <nav class="account-layout__nav">
+            <ul class="account-layout__nav-list">
+                <li class="account-layout__nav-item">
+                    <button class="account-layout__nav-button active" data-section="profile" id="nav-profile">
+                        <span class="account-layout__nav-icon">👤</span>
+                        <span class="account-layout__nav-text translatable-content">Profile</span>
+                    </button>
+                </li>
+                <li class="account-layout__nav-item">
+                    <button class="account-layout__nav-button" data-section="security" id="nav-security">
+                        <span class="account-layout__nav-icon">🔒</span>
+                        <span class="account-layout__nav-text translatable-content">Security</span>
+                    </button>
+                </li>
+                <li class="account-layout__nav-item">
+                    <button class="account-layout__nav-button" data-section="subscription" id="nav-subscription">
+                        <span class="account-layout__nav-icon">💳</span>
+                        <span class="account-layout__nav-text translatable-content">Subscription</span>
+                    </button>
+                </li>
+                <li class="account-layout__nav-item">
+                    <button class="account-layout__nav-button" data-section="apps" id="nav-apps">
+                        <span class="account-layout__nav-icon">📱</span>
+                        <span class="account-layout__nav-text translatable-content">Apps</span>
+                    </button>
+                </li>
+                <li class="account-layout__nav-item">
+                    <button class="account-layout__nav-button" data-section="notifications" id="nav-notifications">
+                        <span class="account-layout__nav-icon">🔔</span>
+                        <span class="account-layout__nav-text translatable-content">Notifications</span>
+                    </button>
+                </li>
+                <li class="account-layout__nav-item">
+                    <button class="account-layout__nav-button" data-section="actions" id="nav-actions">
+                        <span class="account-layout__nav-icon">⚙️</span>
+                        <span class="account-layout__nav-text translatable-content">Actions</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Account Content Area -->
+    <main class="account-layout__content" id="account-content">
+        <!-- Profile Section -->
+        <section class="account-layout__section active" id="section-profile" data-section="profile">
+            <div class="account-layout__section-header">
+                <h2 class="account-layout__section-title translatable-content">Profile Information</h2>
+                <p class="account-layout__section-description translatable-content">Manage your personal information and profile settings</p>
+            </div>
+            <div class="account-layout__section-content" id="profile-content">
+                <!-- Profile Management Component will be loaded here -->
+                <div class="account-layout__placeholder">
+                    <p class="translatable-content">Profile management component will be loaded here</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Section -->
+        <section class="account-layout__section" id="section-security" data-section="security">
+            <div class="account-layout__section-header">
+                <h2 class="account-layout__section-title translatable-content">Security Settings</h2>
+                <p class="account-layout__section-description translatable-content">Manage your password, two-factor authentication, and login activity</p>
+            </div>
+            <div class="account-layout__section-content" id="security-content">
+                <!-- Security components will be loaded here -->
+                <div class="account-layout__placeholder">
+                    <p class="translatable-content">Security components will be loaded here</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Subscription Section -->
+        <section class="account-layout__section" id="section-subscription" data-section="subscription">
+            <div class="account-layout__section-header">
+                <h2 class="account-layout__section-title translatable-content">Subscription & Billing</h2>
+                <p class="account-layout__section-description translatable-content">Manage your subscription plan, payment methods, and billing history</p>
+            </div>
+            <div class="account-layout__section-content" id="subscription-content">
+                <!-- Subscription components will be loaded here -->
+                <div class="account-layout__placeholder">
+                    <p class="translatable-content">Subscription components will be loaded here</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Apps Section -->
+        <section class="account-layout__section" id="section-apps" data-section="apps">
+            <div class="account-layout__section-header">
+                <h2 class="account-layout__section-title translatable-content">App Entitlements</h2>
+                <p class="account-layout__section-description translatable-content">View and manage your app access and permissions</p>
+            </div>
+            <div class="account-layout__section-content" id="apps-content">
+                <!-- App entitlements component will be loaded here -->
+                <div class="account-layout__placeholder">
+                    <p class="translatable-content">App entitlements component will be loaded here</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Notifications Section -->
+        <section class="account-layout__section" id="section-notifications" data-section="notifications">
+            <div class="account-layout__section-header">
+                <h2 class="account-layout__section-title translatable-content">Notifications & Preferences</h2>
+                <p class="account-layout__section-description translatable-content">Configure your notification preferences and account settings</p>
+            </div>
+            <div class="account-layout__section-content" id="notifications-content">
+                <!-- Notifications components will be loaded here -->
+                <div class="account-layout__placeholder">
+                    <p class="translatable-content">Notifications components will be loaded here</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions Section -->
+        <section class="account-layout__section" id="section-actions" data-section="actions">
+            <div class="account-layout__section-header">
+                <h2 class="account-layout__section-title translatable-content">Account Actions</h2>
+                <p class="account-layout__section-description translatable-content">Manage your account, export data, or delete your account</p>
+            </div>
+            <div class="account-layout__section-content" id="actions-content">
+                <!-- Account actions component will be loaded here -->
+                <div class="account-layout__placeholder">
+                    <p class="translatable-content">Account actions component will be loaded here</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
