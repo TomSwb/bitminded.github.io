@@ -39,7 +39,7 @@ class AuthButtons {
             // Set active state for account button if on account page
             this.updateAccountButtonActiveState();
             
-            console.log('✅ Auth Buttons initialized successfully');
+            // Auth Buttons initialized successfully
         } catch (error) {
             console.error('❌ Failed to initialize Auth Buttons:', error);
             this.showError('Failed to initialize authentication');
@@ -127,7 +127,7 @@ class AuthButtons {
 
         // Listen for language changes
         window.addEventListener('languageChanged', (e) => {
-            console.log('Auth buttons received language change event:', e.detail.language);
+            // Auth buttons received language change event
             
             // Don't refresh translations if we're on the auth page
             if (this.isOnAuthPage()) {
@@ -144,9 +144,9 @@ class AuthButtons {
      */
     setupSupabaseListener() {
         if (window.supabase && window.supabase.auth) {
-            console.log('🔐 Setting up Supabase auth state listener');
+            // Setting up Supabase auth state listener
             window.supabase.auth.onAuthStateChange((event, session) => {
-                console.log('🔐 Auth state changed:', event, session?.user?.email);
+                // Auth state changed
                 this.handleAuthStateChange(event, session);
             });
         } else {
@@ -167,7 +167,7 @@ class AuthButtons {
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Auth buttons translations loaded');
+                // Auth buttons translations loaded
             } else {
                 console.warn('Failed to load auth buttons translations:', response.status);
             }
@@ -229,7 +229,7 @@ class AuthButtons {
      */
     async checkAuthState() {
         try {
-            console.log('🔐 Checking authentication state...');
+            // Checking authentication state
             
             // Show loading screen if available
             if (window.loadingScreen) {
@@ -250,7 +250,7 @@ class AuthButtons {
             }
 
             if (session && session.user) {
-                console.log('✅ User is logged in:', session.user.email);
+                // User is logged in
                 this.currentUser = session.user;
                 this.showLoggedInState();
             } else {
@@ -300,7 +300,7 @@ class AuthButtons {
      * Show logged in state
      */
     showLoggedInState() {
-        console.log('🔒 Showing logged in state');
+        // Showing logged in state
         this.hideAllStates();
         if (this.elements.loggedIn) {
             // Ensure flex layout to match CSS and preserve spacing/gap
@@ -354,6 +354,8 @@ class AuthButtons {
 
             if (!window.supabase || !window.supabase.auth) {
                 this.showLoggedOutState();
+                // Redirect to home page even if Supabase is not available
+                window.location.href = '/';
                 return;
             }
 
@@ -365,6 +367,9 @@ class AuthButtons {
 
             // State change will be handled by the auth state change listener
             console.log('User logged out successfully');
+            
+            // Redirect to home page after successful logout
+            window.location.href = '/';
         } catch (error) {
             console.error('Error during logout:', error);
             this.showError('Failed to logout. Please try again.');
@@ -426,7 +431,7 @@ class AuthButtons {
         accountButton.classList.toggle('active', isOnAccountPage);
         
         if (isOnAccountPage) {
-            console.log('✅ Account button set to active state');
+            // Account button set to active state
         }
     }
 

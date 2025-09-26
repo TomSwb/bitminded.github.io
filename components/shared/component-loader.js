@@ -32,7 +32,7 @@ class ComponentLoader {
                 return this.loadedComponents.get(componentName);
             }
 
-            console.log(`🔄 ComponentLoader: Loading component: ${componentName}`);
+            // Component loading in progress
 
             // Load component files
             const component = await this.loadComponentFiles(componentName, finalOptions);
@@ -40,7 +40,7 @@ class ComponentLoader {
             // Store loaded component
             this.loadedComponents.set(componentName, component);
 
-            console.log(`✅ ComponentLoader: Component ${componentName} loaded successfully`);
+            // Component loaded successfully
             return component;
 
         } catch (error) {
@@ -173,9 +173,14 @@ class ComponentLoader {
                 } else if (componentName === 'theme-switcher' && window.themeSwitcher) {
                     // Special handling for theme-switcher component
                     window.themeSwitcher.init(config);
-                } else if (componentName === 'account-layout' && window.accountLayout) {
+                } else if (componentName === 'account-layout') {
                     // Special handling for account-layout component
-                    window.accountLayout.init(config);
+                    if (window.AccountLayout && !window.accountLayout) {
+                        window.accountLayout = new window.AccountLayout();
+                    }
+                    if (window.accountLayout) {
+                        window.accountLayout.init(config);
+                    }
                 }
                 resolve();
             };
@@ -245,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             container: 'body',
             priority: 'critical'
         });
-        console.log('✅ Critical components auto-loaded');
+        // Critical components auto-loaded
     } catch (error) {
         console.error('❌ Failed to auto-load critical components:', error);
     }

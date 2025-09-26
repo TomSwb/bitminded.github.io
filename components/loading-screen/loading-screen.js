@@ -37,7 +37,7 @@ class LoadingScreen {
         // Set up timeout fallback
         this.setupTimeout();
         
-        console.log('🔄 Loading screen component initialized');
+        // Loading screen component initialized
     }
 
     /**
@@ -129,7 +129,7 @@ class LoadingScreen {
      */
     setReadyFlag(flag, value) {
         this.readyFlags[flag] = value;
-        console.log(`🔄 Loading screen ready flag set: ${flag} = ${value}`);
+        // Loading screen ready flag set
         
         // Safety check for options
         if (this.options && this.options.autoHide && this.isReadyToHide()) {
@@ -164,7 +164,7 @@ class LoadingScreen {
         if (this.loadingElement && this.isVisible) {
             this.loadingElement.classList.add('hidden');
             this.isVisible = false;
-            console.log('✅ Loading screen hidden');
+            // Loading screen hidden
             
             // Dispatch custom event
             document.dispatchEvent(new CustomEvent('loadingScreenHidden'));

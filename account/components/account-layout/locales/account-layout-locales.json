@@ -3,7 +3,7 @@
     "translation": {
       "Profile": "Profile",
       "Security": "Security",
-      "Subscription": "Subscription",
+      "Payments": "Payments",
       "Apps": "Apps",
       "Notifications": "Notifications",
       "Actions": "Actions",
@@ -11,8 +11,8 @@
       "Manage your personal information and profile settings": "Manage your personal information and profile settings",
       "Security Settings": "Security Settings",
       "Manage your password, two-factor authentication, and login activity": "Manage your password, two-factor authentication, and login activity",
-      "Subscription & Billing": "Subscription & Billing",
-      "Manage your subscription plan, payment methods, and billing history": "Manage your subscription plan, payment methods, and billing history",
+      "Payments & Billing": "Payments & Billing",
+      "Manage your payment methods, billing history, and purchase history": "Manage your payment methods, billing history, and purchase history",
       "App Entitlements": "App Entitlements",
       "View and manage your app access and permissions": "View and manage your app access and permissions",
       "Notifications & Preferences": "Notifications & Preferences",
@@ -21,17 +21,25 @@
       "Manage your account, export data, or delete your account": "Manage your account, export data, or delete your account",
       "Profile management component will be loaded here": "Profile management component will be loaded here",
       "Security components will be loaded here": "Security components will be loaded here",
-      "Subscription components will be loaded here": "Subscription components will be loaded here",
+      "Payments components will be loaded here": "Payments components will be loaded here",
       "App entitlements component will be loaded here": "App entitlements component will be loaded here",
       "Notifications components will be loaded here": "Notifications components will be loaded here",
-      "Account actions component will be loaded here": "Account actions component will be loaded here"
+      "Account actions component will be loaded here": "Account actions component will be loaded here",
+      "Profile Management - Coming Soon": "Profile Management - Coming Soon",
+      "Security Settings - Coming Soon": "Security Settings - Coming Soon",
+      "Payments & Billing - Coming Soon": "Payments & Billing - Coming Soon",
+      "App Entitlements - Coming Soon": "App Entitlements - Coming Soon",
+      "Notifications & Preferences - Coming Soon": "Notifications & Preferences - Coming Soon",
+      "Account Actions - Coming Soon": "Account Actions - Coming Soon",
+      "This section is currently under development.": "This section is currently under development.",
+      "Loading...": "Loading..."
     }
   },
   "fr": {
     "translation": {
       "Profile": "Profil",
       "Security": "Sécurité",
-      "Subscription": "Abonnement",
+      "Payments": "Paiements",
       "Apps": "Applications",
       "Notifications": "Notifications",
       "Actions": "Actions",
@@ -39,8 +47,8 @@
       "Manage your personal information and profile settings": "Gérez vos informations personnelles et paramètres de profil",
       "Security Settings": "Paramètres de Sécurité",
       "Manage your password, two-factor authentication, and login activity": "Gérez votre mot de passe, l'authentification à deux facteurs et l'activité de connexion",
-      "Subscription & Billing": "Abonnement et Facturation",
-      "Manage your subscription plan, payment methods, and billing history": "Gérez votre plan d'abonnement, méthodes de paiement et historique de facturation",
+      "Payments & Billing": "Paiements et Facturation",
+      "Manage your payment methods, billing history, and purchase history": "Gérez vos méthodes de paiement, historique de facturation et historique des achats",
       "App Entitlements": "Droits d'Application",
       "View and manage your app access and permissions": "Consultez et gérez l'accès et les permissions de vos applications",
       "Notifications & Preferences": "Notifications et Préférences",
@@ -49,10 +57,18 @@
       "Manage your account, export data, or delete your account": "Gérez votre compte, exportez des données ou supprimez votre compte",
       "Profile management component will be loaded here": "Le composant de gestion de profil sera chargé ici",
       "Security components will be loaded here": "Les composants de sécurité seront chargés ici",
-      "Subscription components will be loaded here": "Les composants d'abonnement seront chargés ici",
+      "Payments components will be loaded here": "Les composants de paiement seront chargés ici",
       "App entitlements component will be loaded here": "Le composant des droits d'application sera chargé ici",
       "Notifications components will be loaded here": "Les composants de notification seront chargés ici",
-      "Account actions component will be loaded here": "Le composant d'actions de compte sera chargé ici"
+      "Account actions component will be loaded here": "Le composant d'actions de compte sera chargé ici",
+      "Profile Management - Coming Soon": "Gestion de Profil - Bientôt Disponible",
+      "Security Settings - Coming Soon": "Paramètres de Sécurité - Bientôt Disponible",
+      "Payments & Billing - Coming Soon": "Paiements et Facturation - Bientôt Disponible",
+      "App Entitlements - Coming Soon": "Droits d'Application - Bientôt Disponible",
+      "Notifications & Preferences - Coming Soon": "Notifications et Préférences - Bientôt Disponible",
+      "Account Actions - Coming Soon": "Actions du Compte - Bientôt Disponible",
+      "This section is currently under development.": "Cette section est actuellement en développement.",
+      "Loading...": "Chargement..."
     }
   }
 }

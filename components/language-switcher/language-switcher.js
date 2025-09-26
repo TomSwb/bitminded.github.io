@@ -21,7 +21,7 @@ class LanguageSwitcher {
             return;
         }
 
-        console.log('🔄 Initializing language switcher...');
+        // Initializing language switcher
 
         this.config = {
             compact: false,
@@ -36,7 +36,7 @@ class LanguageSwitcher {
             return;
         }
 
-        console.log('✅ Language switcher element found:', this.element);
+        // Language switcher element found
 
         // Sync with i18next instance if available
         this.syncWithI18next();
@@ -47,35 +47,19 @@ class LanguageSwitcher {
         this.setAccessibilityAttributes();
         
         this.isInitialized = true;
-        console.log('✅ Language switcher initialized successfully');
+        // Language switcher initialized successfully
     }
 
     /**
      * Sync with i18next instance to get current language
      */
     syncWithI18next() {
-        console.log('🔄 Syncing with i18next...');
+        // Syncing with i18next
         
-        // Debug logging
-        console.log('Browser language:', navigator.language);
-        console.log('Stored language:', localStorage.getItem('language'));
-        console.log('i18next available:', typeof i18next !== 'undefined');
-        
-        if (typeof i18next !== 'undefined') {
-            console.log('i18next language:', i18next.language);
-            console.log('i18next isInitialized:', i18next.isInitialized);
-            
-            // Use i18next's current language if available
-            if (i18next.language) {
-                this.currentLanguage = i18next.language;
-                console.log('✅ Synced with i18next language:', this.currentLanguage);
-            }
-        }
-        
-        // Fallback to localStorage if i18next not ready
-        if (!this.currentLanguage) {
+        if (typeof i18next !== 'undefined' && i18next.language) {
+            this.currentLanguage = i18next.language;
+        } else {
             this.currentLanguage = localStorage.getItem('language') || 'en';
-            console.log('📦 Using localStorage language:', this.currentLanguage);
         }
     }
 

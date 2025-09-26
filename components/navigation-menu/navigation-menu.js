@@ -25,7 +25,7 @@ class NavigationMenu {
             return;
         }
 
-        console.log('🔄 Initializing navigation menu...');
+        // Initializing navigation menu
 
         this.config = {
             autoDetectPage: true,
@@ -48,7 +48,7 @@ class NavigationMenu {
             return;
         }
 
-        console.log('✅ Navigation menu elements found');
+        // Navigation menu elements found
 
         this.setupComponent();
         this.bindEvents();
@@ -59,7 +59,7 @@ class NavigationMenu {
         this.ensureContentVisible();
         
         this.isInitialized = true;
-        console.log('✅ Navigation menu initialized successfully');
+        // Navigation menu initialized successfully
     }
 
     /**
@@ -131,7 +131,7 @@ class NavigationMenu {
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Navigation menu translations loaded');
+                // Navigation menu translations loaded
             } else {
                 console.warn('Failed to load navigation menu translations:', response.status);
             }
