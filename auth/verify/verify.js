@@ -124,8 +124,23 @@ class EmailVerification {
             // Parse URL parameters
             const urlParams = this.parseUrlParameters();
             
+            console.log('🔍 URL parameters found:', urlParams);
+            
             if (!urlParams.access_token) {
-                throw new Error('No access token found in URL');
+                // Check if we can get the session from Supabase directly
+                const { data: sessionData, error: sessionError } = await window.supabase.auth.getSession();
+                
+                if (sessionError) {
+                    console.error('Session error:', sessionError);
+                }
+                
+                if (sessionData?.session?.user) {
+                    console.log('✅ Found existing session, user already verified');
+                    this.showSuccess();
+                    return;
+                }
+                
+                throw new Error('No access token found in URL and no existing session');
             }
 
             console.log('🔄 Processing email verification...');
