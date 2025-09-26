@@ -8,6 +8,8 @@ class LoginForm {
         this.elements = {};
         this.translations = null;
         this.isSubmitting = false;
+        this.failedAttempts = 0;
+        this.maxAttempts = 3;
         
         this.init();
     }
@@ -20,6 +22,7 @@ class LoginForm {
             this.cacheElements();
             this.bindEvents();
             await this.loadTranslations();
+            this.loadFailedAttempts();
             this.isInitialized = true;
             
             console.log('✅ Login Form initialized successfully');
@@ -140,6 +143,12 @@ class LoginForm {
     async handleSubmit() {
         if (this.isSubmitting) return;
 
+        // Check if CAPTCHA is required and verify it
+        if (this.requiresCaptcha() && !this.isCaptchaVerified()) {
+            this.showError('Please complete the security verification');
+            return;
+        }
+
         // Validate all fields
         const isEmailValid = this.validateEmail();
         const isPasswordValid = this.validatePassword();
@@ -166,13 +175,15 @@ class LoginForm {
             }
 
             if (data.user) {
+                // Reset failed attempts on successful login
+                this.resetFailedAttempts();
                 // Redirect to home page
                 window.location.href = '/';
             }
 
         } catch (error) {
             console.error('Login error:', error);
-            this.handleLoginError(error);
+            await this.handleLoginError(error);
         } finally {
             this.setSubmitting(false);
         }
@@ -199,13 +210,14 @@ class LoginForm {
      * Handle login errors
      * @param {Error} error - Supabase error
      */
-    handleLoginError(error) {
+    async handleLoginError(error) {
         let errorMessage = 'An error occurred during login';
 
         switch (error.message) {
             case 'Invalid login credentials':
                 errorMessage = 'Invalid email or password';
                 this.showFieldError('password', errorMessage);
+                await this.incrementFailedAttempts();
                 break;
             case 'Email not confirmed':
                 errorMessage = 'Please verify your email address before signing in';
@@ -217,6 +229,7 @@ class LoginForm {
                 break;
             default:
                 this.showError(error.message || errorMessage);
+                await this.incrementFailedAttempts();
         }
     }
 
@@ -333,6 +346,164 @@ class LoginForm {
             const action = isPassword ? 'Hide' : 'Show';
             toggleButton.setAttribute('aria-label', `${action} password visibility`);
         }
+    }
+
+    /**
+     * Load failed attempts from localStorage
+     */
+    loadFailedAttempts() {
+        try {
+            const stored = localStorage.getItem('login_failed_attempts');
+            this.failedAttempts = stored ? parseInt(stored, 10) : 0;
+            console.log(`🔍 Loaded failed attempts: ${this.failedAttempts}`);
+        } catch (error) {
+            console.warn('Failed to load failed attempts:', error);
+            this.failedAttempts = 0;
+        }
+    }
+
+    /**
+     * Save failed attempts to localStorage
+     */
+    saveFailedAttempts() {
+        try {
+            localStorage.setItem('login_failed_attempts', this.failedAttempts.toString());
+            console.log(`💾 Saved failed attempts: ${this.failedAttempts}`);
+        } catch (error) {
+            console.warn('Failed to save failed attempts:', error);
+        }
+    }
+
+    /**
+     * Increment failed attempts counter
+     */
+    async incrementFailedAttempts() {
+        this.failedAttempts++;
+        this.saveFailedAttempts();
+        
+        console.log(`❌ Failed attempt ${this.failedAttempts}/${this.maxAttempts}`);
+        
+        // Show CAPTCHA if threshold reached
+        if (this.failedAttempts >= this.maxAttempts) {
+            await this.showCaptcha();
+        }
+    }
+
+    /**
+     * Reset failed attempts counter
+     */
+    resetFailedAttempts() {
+        this.failedAttempts = 0;
+        this.saveFailedAttempts();
+        this.hideCaptcha();
+        console.log('✅ Reset failed attempts counter');
+    }
+
+    /**
+     * Check if CAPTCHA is required
+     * @returns {boolean} True if CAPTCHA is required
+     */
+    requiresCaptcha() {
+        const required = this.failedAttempts >= this.maxAttempts;
+        console.log(`🔍 CAPTCHA check: ${this.failedAttempts}/${this.maxAttempts} = ${required}`);
+        return required;
+    }
+
+    /**
+     * Check if CAPTCHA is verified
+     * @returns {boolean} True if CAPTCHA is verified
+     */
+    isCaptchaVerified() {
+        return window.captcha?.isCaptchaVerified();
+    }
+
+    /**
+     * Show CAPTCHA widget
+     */
+    async showCaptcha() {
+        const captchaContainer = document.getElementById('captcha-container');
+        if (captchaContainer) {
+            captchaContainer.classList.remove('hidden');
+            console.log('🔒 CAPTCHA required - showing widget');
+            
+            // Wait a bit for the container to be visible, then initialize CAPTCHA
+            setTimeout(async () => {
+                await this.ensureCaptchaInitialized();
+            }, 100);
+        }
+    }
+
+    /**
+     * Ensure CAPTCHA is initialized
+     */
+    async ensureCaptchaInitialized() {
+        try {
+            // Check if CAPTCHA component exists
+            if (!window.CaptchaComponent) {
+                console.error('❌ CAPTCHA component not loaded');
+                return;
+            }
+
+            // Check if container is visible
+            const captchaContainer = document.getElementById('captcha-container');
+            if (!captchaContainer) {
+                console.error('❌ CAPTCHA container not found');
+                return;
+            }
+
+            console.log('🔍 CAPTCHA container found:', captchaContainer);
+
+            // Initialize if not already done
+            if (!window.captcha) {
+                console.log('🔄 Initializing CAPTCHA for login...');
+                window.captcha = new window.CaptchaComponent({
+                    siteKey: '0x4AAAAAAB3ePnQXAhy39NwT',
+                    theme: 'auto',
+                    size: 'normal',
+                    callback: (token) => {
+                        console.log('✅ CAPTCHA verified for login:', token);
+                    },
+                    errorCallback: (error) => {
+                        console.error('❌ CAPTCHA error for login:', error);
+                    }
+                });
+            }
+
+            // Initialize the component if needed
+            if (window.captcha && !window.captcha.isInitialized) {
+                await window.captcha.init();
+                console.log('✅ CAPTCHA initialized for login');
+            }
+
+            // Force render the widget if it's not visible
+            if (window.captcha && window.captcha.isInitialized) {
+                console.log('🔄 Forcing CAPTCHA widget render...');
+                await window.captcha.renderWidget();
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize CAPTCHA for login:', error);
+        }
+    }
+
+    /**
+     * Hide CAPTCHA widget
+     */
+    hideCaptcha() {
+        const captchaContainer = document.getElementById('captcha-container');
+        if (captchaContainer) {
+            captchaContainer.classList.add('hidden');
+            console.log('🔓 CAPTCHA no longer required - hiding widget');
+        }
+    }
+
+    /**
+     * Clear failed attempts (for testing/debugging)
+     */
+    clearFailedAttempts() {
+        this.failedAttempts = 0;
+        this.saveFailedAttempts();
+        this.hideCaptcha();
+        console.log('🧹 Cleared failed attempts counter');
     }
 }
 
