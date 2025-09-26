@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document -->
+    <meta charset="UTF-8">
+    
+    <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--Browser Tab title-->
+    <title>Email Verification - BitMinded</title>
+    <!--Browser Tab icon-->
+    <link rel="icon" type="image/x-icon" href="../../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icons/favicon-32x32.png">
+
+    <!--Apple home-saved app icon-->
+    <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+    <!-- iOS status bar style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Critical CSS to prevent white flash -->
+    <link rel="stylesheet" href="../../css/critical.css">
+    
+    <!-- Critical JavaScript for immediate initialization -->
+    <script src="../../js/critical.js"></script>
+    
+    <!-- Component Loader -->
+    <script src="../../components/shared/component-loader.js"></script>
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../css/main.css">
+    <!-- Auth page specific CSS -->
+    <link rel="stylesheet" href="../auth.css">
+    <!-- Verify page specific CSS -->
+    <link rel="stylesheet" href="verify.css">
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+        
+        <!-- Language Switcher Component will be loaded here -->
+    </header>
+
+    <main class="auth-main">
+        <!-- Verification Container -->
+        <div class="auth-container">
+            <!-- Page Title -->
+            <h1 id="verify-title" class="translatable-content">Email Verification</h1>
+            
+            <!-- Loading State -->
+            <div id="verify-loading" class="verify-loading">
+                <div class="verify-spinner"></div>
+                <p class="translatable-content" data-translate="verify.verifying">Verifying your email...</p>
+            </div>
+            
+            <!-- Success State -->
+            <div id="verify-success" class="verify-success hidden">
+                <div class="verify-success-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h2 class="translatable-content" data-translate="verify.successTitle">Email Verified!</h2>
+                <p class="translatable-content" data-translate="verify.successMessage">Your email has been successfully verified. You can now sign in to your account.</p>
+                <div class="verify-actions">
+                    <a href="../index.html" class="verify-button verify-button-primary">
+                        <span class="translatable-content" data-translate="verify.signIn">Sign In</span>
+                    </a>
+                    <a href="../../index.html" class="verify-button verify-button-secondary">
+                        <span class="translatable-content" data-translate="verify.goHome">Go to Home</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Error State -->
+            <div id="verify-error" class="verify-error hidden">
+                <div class="verify-error-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h2 class="translatable-content" data-translate="verify.errorTitle">Verification Failed</h2>
+                <p id="verify-error-message" class="translatable-content" data-translate="verify.errorMessage">There was an error verifying your email. The link may have expired or is invalid.</p>
+                <div class="verify-actions">
+                    <a href="../index.html" class="verify-button verify-button-primary">
+                        <span class="translatable-content" data-translate="verify.tryAgain">Try Again</span>
+                    </a>
+                    <a href="../../index.html" class="verify-button verify-button-secondary">
+                        <span class="translatable-content" data-translate="verify.goHome">Go to Home</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../../js/supabase-config.js"></script>
+    <!-- i18next CDN language-switcher-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- language switcher-->
+    <script src="../lang-auth.js"></script>
+    <!-- Verify page script -->
+    <script src="verify.js"></script>
+    <!-- other scripts -->
+    <script src="../../js/script.js"></script>
+
+</body> 
+</html>
