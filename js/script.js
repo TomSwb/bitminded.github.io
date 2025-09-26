@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load Auth Buttons Component
     loadAuthButtons();
     
+    // Account page specific initialization
+    if (window.location.pathname.includes('/account')) {
+        initializeAccountPage();
+    }
+    
     // Any additional initialization code can go here
 });
 
@@ -100,3 +105,110 @@ async function loadAuthButtons() {
         console.error('❌ Script: Failed to load auth buttons component:', error);
     }
 }
+
+// ===== ACCOUNT PAGE INITIALIZATION =====
+
+async function initializeAccountPage() {
+    console.log('🔄 Script: Initializing account page...');
+    
+    try {
+        // Check if user is authenticated
+        await checkAuthenticationStatus();
+        
+        console.log('✅ Script: Account page initialized successfully');
+        
+    } catch (error) {
+        console.error('❌ Script: Failed to initialize account page:', error);
+    }
+}
+
+/**
+ * Check if user is authenticated and redirect if not
+ */
+async function checkAuthenticationStatus() {
+    try {
+        if (typeof window.supabase === 'undefined') {
+            console.error('❌ Supabase client not available');
+            return;
+        }
+
+        const { data: { user }, error } = await window.supabase.auth.getUser();
+        
+        if (error) {
+            console.error('❌ Error checking authentication:', error);
+            showAccountError('Authentication check failed');
+            return;
+        }
+
+        if (!user) {
+            console.log('🔄 User not authenticated, redirecting to auth page...');
+            window.location.href = '/auth/';
+            return;
+        }
+
+        console.log('✅ User authenticated:', user.email);
+        
+        // TODO: Load user data and initialize account components
+        // initializeAccountComponents(user);
+
+    } catch (error) {
+        console.error('❌ Authentication check failed:', error);
+        showAccountError('Authentication check failed');
+    }
+}
+
+/**
+ * Show error message on account page
+ * @param {string} message - Error message to display
+ */
+function showAccountError(message) {
+    const errorElement = document.getElementById('account-error');
+    const errorMessageElement = document.getElementById('account-error-message');
+    
+    if (errorElement && errorMessageElement) {
+        errorMessageElement.textContent = message;
+        errorElement.classList.remove('hidden');
+    }
+}
+
+/**
+ * Show success message on account page
+ * @param {string} message - Success message to display
+ */
+function showAccountSuccess(message) {
+    const successElement = document.getElementById('account-success');
+    const successMessageElement = document.getElementById('account-success-message');
+    
+    if (successElement && successMessageElement) {
+        successMessageElement.textContent = message;
+        successElement.classList.remove('hidden');
+    }
+}
+
+/**
+ * Hide error message on account page
+ */
+function hideAccountError() {
+    const errorElement = document.getElementById('account-error');
+    if (errorElement) {
+        errorElement.classList.add('hidden');
+    }
+}
+
+/**
+ * Hide success message on account page
+ */
+function hideAccountSuccess() {
+    const successElement = document.getElementById('account-success');
+    if (successElement) {
+        successElement.classList.add('hidden');
+    }
+}
+
+// Export account page functions for use by other scripts
+window.accountPage = {
+    showError: showAccountError,
+    showSuccess: showAccountSuccess,
+    hideError: hideAccountError,
+    hideSuccess: hideAccountSuccess
+};
