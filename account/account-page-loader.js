@@ -19,7 +19,7 @@ class AccountPageLoader {
             return;
         }
 
-        console.log('🔄 Initializing account page loader...');
+        // Initializing account page loader
 
         try {
             // Check authentication first
@@ -32,7 +32,10 @@ class AccountPageLoader {
             await this.loadSection('profile');
             
             this.isInitialized = true;
-            console.log('✅ Account page loader initialized successfully');
+            // Account page loader initialized successfully
+            
+            // Trigger language change event for loaded components
+            this.triggerLanguageChange();
         } catch (error) {
             console.error('❌ Failed to initialize account page loader:', error);
             this.showError('Failed to initialize account page');
@@ -60,7 +63,7 @@ class AccountPageLoader {
                 return;
             }
 
-            console.log('✅ User authenticated:', user.email);
+            // User authenticated
             return user;
 
         } catch (error) {
@@ -75,13 +78,13 @@ class AccountPageLoader {
      */
     async loadAccountLayout() {
         try {
-            console.log('🔄 Loading account layout component...');
+            // Loading account layout component
             
             if (window.componentLoader) {
                 await window.componentLoader.load('account-layout', {
                     container: '#account-layout-container'
                 });
-                console.log('✅ Account layout component loaded successfully');
+                // Account layout component loaded successfully
             } else {
                 throw new Error('ComponentLoader not available');
             }
@@ -104,12 +107,12 @@ class AccountPageLoader {
                 return;
             }
 
-            console.log(`🔄 Loading section: ${sectionName}`);
+            // Loading section
 
             const componentMap = {
                 'profile': 'profile-management',
                 'security': 'password-change', // Will load multiple security components
-                'subscription': 'subscription-management',
+                'payment': 'payment-management',
                 'apps': 'app-entitlements',
                 'notifications': 'notifications-preferences',
                 'actions': 'account-actions'
@@ -122,8 +125,9 @@ class AccountPageLoader {
             }
 
             // Check if component exists before trying to load
-            if (!await this.componentExists(componentName)) {
-                console.log(`📝 Component ${componentName} not yet implemented, showing placeholder`);
+            const componentExists = await this.componentExists(componentName);
+            if (!componentExists) {
+                // Component not yet implemented, showing placeholder
                 this.showPlaceholder(sectionName);
                 this.loadedComponents.set(sectionName, true);
                 return;
@@ -171,7 +175,7 @@ class AccountPageLoader {
                 console.log(`✅ Component exists: ${componentName}`);
                 return true;
             } else {
-                console.log(`📝 Component not found: ${componentName} (${response.status})`);
+                // Component not found
                 return false;
             }
         } catch (error) {
@@ -190,16 +194,32 @@ class AccountPageLoader {
         if (container) {
             const placeholder = container.querySelector('.account-layout__placeholder');
             if (placeholder) {
-                placeholder.innerHTML = `
-                    <div style="text-align: center; padding: 2rem;">
-                        <h3 style="color: var(--color-text-secondary); margin-bottom: 1rem;">
-                            🚧 ${this.getSectionTitle(sectionName)} - Coming Soon
-                        </h3>
-                        <p style="color: var(--color-text-secondary);">
-                            This section is currently under development.
-                        </p>
-                    </div>
-                `;
+                // Clear existing content
+                placeholder.innerHTML = '';
+                
+                // Create translatable placeholder content
+                const placeholderDiv = document.createElement('div');
+                placeholderDiv.style.cssText = 'text-align: center; padding: 2rem;';
+                
+                const title = document.createElement('h3');
+                title.style.cssText = 'color: var(--color-text-primary); margin-bottom: 1rem;';
+                title.className = 'translatable-content';
+                title.setAttribute('data-translation-key', `${this.getSectionTitle(sectionName)} - Coming Soon`);
+                title.textContent = `🚧 ${this.getSectionTitle(sectionName)} - Coming Soon`;
+                
+                const description = document.createElement('p');
+                description.style.cssText = 'color: var(--color-text-primary);';
+                description.className = 'translatable-content';
+                description.setAttribute('data-translation-key', 'This section is currently under development.');
+                description.textContent = 'This section is currently under development.';
+                
+                placeholderDiv.appendChild(title);
+                placeholderDiv.appendChild(description);
+                placeholder.appendChild(placeholderDiv);
+                
+                // Make content visible
+                title.classList.add('loaded');
+                description.classList.add('loaded');
             }
         }
     }
@@ -213,7 +233,7 @@ class AccountPageLoader {
         const titles = {
             'profile': 'Profile Management',
             'security': 'Security Settings',
-            'subscription': 'Subscription & Billing',
+            'payment': 'Payments & Billing',
             'apps': 'App Entitlements',
             'notifications': 'Notifications & Preferences',
             'actions': 'Account Actions'
@@ -278,7 +298,7 @@ class AccountPageLoader {
      * @param {string} message - Error message to display
      */
     showError(message) {
-        if (window.accountPage && window.accountPage.showError) {
+        if (window.accountPage?.showError) {
             window.accountPage.showError(message);
         } else {
             console.error('Account Page Loader Error:', message);
@@ -290,7 +310,7 @@ class AccountPageLoader {
      * @param {string} message - Success message to display
      */
     showSuccess(message) {
-        if (window.accountPage && window.accountPage.showSuccess) {
+        if (window.accountPage?.showSuccess) {
             window.accountPage.showSuccess(message);
         } else {
             console.log('Account Page Loader Success:', message);
@@ -301,7 +321,7 @@ class AccountPageLoader {
      * Hide error message
      */
     hideError() {
-        if (window.accountPage && window.accountPage.hideError) {
+        if (window.accountPage?.hideError) {
             window.accountPage.hideError();
         }
     }
@@ -310,9 +330,20 @@ class AccountPageLoader {
      * Hide success message
      */
     hideSuccess() {
-        if (window.accountPage && window.accountPage.hideSuccess) {
+        if (window.accountPage?.hideSuccess) {
             window.accountPage.hideSuccess();
         }
+    }
+
+    /**
+     * Trigger language change event for loaded components
+     */
+    triggerLanguageChange() {
+        const currentLanguage = localStorage.getItem('language') || 'en';
+        const languageChangedEvent = new CustomEvent('languageChanged', {
+            detail: { language: currentLanguage }
+        });
+        window.dispatchEvent(languageChangedEvent);
     }
 }
 

@@ -6,10 +6,8 @@
 // ===== PAGE READY CHECK =====
 
 function checkPageReady() {
-    console.log('🔍 checkPageReady called - translationReady:', window.translationReady);
     // Check if translation is ready
     if (window.translationReady) {
-        console.log('✅ Translation ready, hiding loading screen');
         // Use the loading screen component if available
         if (window.loadingScreen) {
             window.loadingScreen.setReadyFlag('page', true);
@@ -17,15 +15,13 @@ function checkPageReady() {
             // Fallback to old method
             document.documentElement.classList.add('page-loaded');
         }
-    } else {
-        console.log('⏳ Still waiting for ready flags...');
     }
 }
 
 // ===== INITIALIZATION =====
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('BitMinded website initialized');
+    // BitMinded website initialized
     
     // Load Navigation Menu Component
     loadNavigationMenu();
@@ -52,7 +48,7 @@ async function loadNavigationMenu() {
             container: 'header',
             priority: 'high'
         });
-        console.log('✅ Navigation menu component loaded');
+        // Navigation menu component loaded
     } catch (error) {
         console.error('❌ Failed to load navigation menu component:', error);
     }
@@ -64,7 +60,7 @@ async function loadLanguageSwitcher() {
             container: 'header',
             priority: 'high'
         });
-        console.log('✅ Language switcher component loaded');
+        // Language switcher component loaded
     } catch (error) {
         console.error('❌ Failed to load language switcher component:', error);
     }
@@ -76,7 +72,7 @@ async function loadThemeSwitcher() {
             container: 'footer',
             priority: 'medium'
         });
-        console.log('✅ Theme switcher component loaded');
+        // Theme switcher component loaded
     } catch (error) {
         console.error('❌ Failed to load theme switcher component:', error);
     }
@@ -89,14 +85,14 @@ async function loadAuthButtons() {
         return;
     }
     
-    console.log('🔄 Script: Loading auth buttons component...');
+        // Loading auth buttons component
     try {
         // Load auth buttons into header (for desktop positioning)
         await componentLoader.load('auth-buttons', {
             container: 'header',
             priority: 'high'
         });
-        console.log('✅ Script: Auth buttons component loaded');
+        // Auth buttons component loaded
         
     } catch (error) {
         console.error('❌ Script: Failed to load auth buttons component:', error);

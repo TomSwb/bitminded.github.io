@@ -1,22 +1,42 @@
 document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('language') || 'en';
     
-    fetch('locales/account-locales.json')
-        .then(response => response.json())
-        .then(resources => {
-            i18next.init({
-                lng: savedLang,
-                debug: false,
-                resources
-            }, function(err, t) {
-                updateContent();
-            });
-        })
-        .catch(error => {
-            console.error('Failed to load account translations:', error);
-            // Still show content even if translation fails
-            showContent();
+    // Load both account page and account-layout translations
+    Promise.all([
+        fetch('locales/account-locales.json'),
+        fetch('components/account-layout/locales/account-layout-locales.json')
+    ])
+    .then(responses => Promise.all(responses.map(response => response.json())))
+    .then(([accountResources, layoutResources]) => {
+        // Merge both resource sets
+        const mergedResources = {
+            en: {
+                translation: {
+                    ...accountResources.en.translation,
+                    ...layoutResources.en.translation
+                }
+            },
+            fr: {
+                translation: {
+                    ...accountResources.fr.translation,
+                    ...layoutResources.fr.translation
+                }
+            }
+        };
+        
+        i18next.init({
+            lng: savedLang,
+            debug: false,
+            resources: mergedResources
+        }, function(err, t) {
+            updateContent();
         });
+    })
+    .catch(error => {
+        console.error('Failed to load account translations:', error);
+        // Still show content even if translation fails
+        showContent();
+    });
 
     function updateContent() {
         // Account page specific translations
@@ -36,6 +56,14 @@ document.addEventListener('DOMContentLoaded', function() {
             element.classList.add('loaded');
         });
         
+        // Update account-layout translations if component is loaded
+        // Use setTimeout to ensure component is fully loaded
+        setTimeout(() => {
+            if (window.accountLayout?.updateTranslations) {
+                window.accountLayout.updateTranslations();
+            }
+        }, 100);
+        
         // Signal that translation is ready
         window.translationReady = true;
         
@@ -48,8 +76,11 @@ document.addEventListener('DOMContentLoaded', function() {
             checkPageReady();
         }
         
-        // Note: Don't dispatch languageChanged event here to avoid infinite recursion
-        // The language-switcher component will handle this
+        // Dispatch languageChanged event for form components
+        const languageChangedEvent = new CustomEvent('languageChanged', {
+            detail: { language: i18next.language }
+        });
+        window.dispatchEvent(languageChangedEvent);
     }
 
     function showContent() {
@@ -58,6 +89,14 @@ document.addEventListener('DOMContentLoaded', function() {
         translatableElements.forEach(element => {
             element.classList.add('loaded');
         });
+        
+        // Update account-layout translations if component is loaded
+        // Use setTimeout to ensure component is fully loaded
+        setTimeout(() => {
+            if (window.accountLayout?.updateTranslations) {
+                window.accountLayout.updateTranslations();
+            }
+        }, 100);
         
         // Signal that translation is ready (even if failed)
         window.translationReady = true;
@@ -80,6 +119,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         localStorage.setItem('language', lng);
-        i18next.changeLanguage(lng, updateContent);
+        i18next.changeLanguage(lng, function() {
+            updateContent();
+            // Update account-layout translations after language change
+            setTimeout(() => {
+                if (window.accountLayout && window.accountLayout.updateTranslations) {
+                    window.accountLayout.updateTranslations();
+                }
+            }, 100);
+            
+            // Dispatch languageChanged event for form components
+            const languageChangedEvent = new CustomEvent('languageChanged', {
+                detail: { language: lng }
+            });
+            window.dispatchEvent(languageChangedEvent);
+        });
     };
 });

@@ -7,7 +7,7 @@ class AccountLayout {
     constructor() {
         this.currentSection = 'profile';
         this.isInitialized = false;
-        this.sections = ['profile', 'security', 'subscription', 'apps', 'notifications', 'actions'];
+        this.sections = ['profile', 'security', 'payment', 'apps', 'notifications', 'actions'];
         this.loadedComponents = new Set();
     }
 
@@ -16,7 +16,12 @@ class AccountLayout {
      */
     async init() {
         try {
-            console.log('🔄 Account Layout: Initializing...');
+            if (this.isInitialized) {
+                console.log('Account Layout already initialized');
+                return;
+            }
+            
+            // Account Layout: Initializing
             
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -25,15 +30,53 @@ class AccountLayout {
                 this.setupEventListeners();
             }
             
+            // Check URL for initial section
+            const urlParams = new URLSearchParams(window.location.search);
+            const sectionParam = urlParams.get('section');
+            if (sectionParam && this.sections.includes(sectionParam)) {
+                this.currentSection = sectionParam;
+            }
+            
+            // Ensure the current section is properly shown and others are hidden
+            this.initializeSectionVisibility();
+            
+            // Initialize navigation state
+            this.updateNavigationState(this.currentSection);
+            
             // Load initial section
             await this.loadSection(this.currentSection);
             
             this.isInitialized = true;
-            console.log('✅ Account Layout: Initialized successfully');
+            // Account Layout: Initialized successfully
+            
+            // Make sure all translatable content is visible
+            this.showTranslatableContent();
+            
+            // Wait for i18next to be ready, then update translations
+            this.waitForTranslationsAndUpdate();
             
         } catch (error) {
             console.error('❌ Account Layout: Failed to initialize:', error);
             this.showError('Failed to initialize account layout');
+        }
+    }
+
+    /**
+     * Initialize section visibility - ensure only current section is visible
+     */
+    initializeSectionVisibility() {
+        // Hide all sections first
+        this.sections.forEach(sectionName => {
+            const sectionElement = document.getElementById(`section-${sectionName}`);
+            if (sectionElement) {
+                sectionElement.classList.remove('active');
+            }
+        });
+        
+        // Show only the current section
+        const currentSectionElement = document.getElementById(`section-${this.currentSection}`);
+        if (currentSectionElement) {
+            currentSectionElement.classList.add('active');
         }
     }
 
@@ -55,13 +98,13 @@ class AccountLayout {
 
         // Handle browser back/forward navigation
         window.addEventListener('popstate', (e) => {
-            if (e.state && e.state.section) {
+            if (e.state?.section) {
                 this.switchSection(e.state.section, false);
             }
         });
 
         // Handle language changes
-        window.addEventListener('languageChanged', () => {
+        window.addEventListener('languageChanged', (e) => {
             this.updateTranslations();
         });
     }
@@ -161,7 +204,7 @@ class AccountLayout {
                 return; // Already loaded
             }
 
-            console.log(`🔄 Account Layout: Loading section: ${sectionName}`);
+            // Account Layout: Loading section
 
             // Add loading state
             const sectionElement = document.getElementById(`section-${sectionName}`);
@@ -180,7 +223,7 @@ class AccountLayout {
                 sectionElement.classList.remove('loading');
             }
 
-            console.log(`✅ Account Layout: Section loaded: ${sectionName}`);
+            // Account Layout: Section loaded
 
         } catch (error) {
             console.error(`❌ Account Layout: Failed to load section ${sectionName}:`, error);
@@ -196,7 +239,7 @@ class AccountLayout {
         const componentMap = {
             'profile': 'profile-management',
             'security': 'password-change', // Will load multiple security components
-            'subscription': 'subscription-management',
+            'payment': 'payment-management',
             'apps': 'app-entitlements',
             'notifications': 'notifications-preferences',
             'actions': 'account-actions'
@@ -208,6 +251,14 @@ class AccountLayout {
             return;
         }
 
+        // Check if component exists before trying to load
+        const componentExists = await this.componentExists(componentName);
+        if (!componentExists) {
+            // Component not yet implemented, showing placeholder
+            this.showPlaceholder(sectionName);
+            return;
+        }
+
         // Load component using the component loader
         if (window.componentLoader) {
             const containerId = `#${sectionName}-content`;
@@ -216,23 +267,145 @@ class AccountLayout {
             });
         } else {
             console.warn('⚠️ Account Layout: componentLoader not available');
+            this.showPlaceholder(sectionName);
         }
+    }
+
+    /**
+     * Check if a component exists
+     * @param {string} componentName - Component name to check
+     * @returns {boolean} Whether the component exists
+     */
+    async componentExists(componentName) {
+        try {
+            // All account page components are in account/components/
+            const componentPath = `account/components/${componentName}`;
+            const htmlPath = `/${componentPath}/${componentName}.html`;
+            
+            // Use a more robust check that doesn't log 404s to console
+            const response = await fetch(htmlPath, { 
+                method: 'HEAD',
+                cache: 'no-cache'
+            });
+            
+            if (response.ok) {
+                console.log(`✅ Component exists: ${componentName}`);
+                return true;
+            } else {
+                // Component not found
+                return false;
+            }
+        } catch (error) {
+            // Network errors or other issues
+            console.log(`📝 Component check failed: ${componentName} (${error.message})`);
+            return false;
+        }
+    }
+
+    /**
+     * Show placeholder content for unimplemented sections
+     * @param {string} sectionName - Section name
+     */
+    showPlaceholder(sectionName) {
+        const container = document.getElementById(`${sectionName}-content`);
+        if (container) {
+            const placeholder = container.querySelector('.account-layout__placeholder');
+            if (placeholder) {
+                // Clear existing content
+                placeholder.innerHTML = '';
+                
+                // Create translatable placeholder content
+                const placeholderDiv = document.createElement('div');
+                placeholderDiv.style.cssText = 'text-align: center; padding: 2rem;';
+                
+                const title = document.createElement('h3');
+                title.style.cssText = 'color: var(--color-text-primary); margin-bottom: 1rem;';
+                title.className = 'translatable-content';
+                title.setAttribute('data-translation-key', `${this.getSectionTitle(sectionName)} - Coming Soon`);
+                title.textContent = `🚧 ${this.getSectionTitle(sectionName)} - Coming Soon`;
+                
+                const description = document.createElement('p');
+                description.style.cssText = 'color: var(--color-text-primary);';
+                description.className = 'translatable-content';
+                description.setAttribute('data-translation-key', 'This section is currently under development.');
+                description.textContent = 'This section is currently under development.';
+                
+                placeholderDiv.appendChild(title);
+                placeholderDiv.appendChild(description);
+                placeholder.appendChild(placeholderDiv);
+                
+                // Make content visible
+                title.classList.add('loaded');
+                description.classList.add('loaded');
+            }
+        }
+    }
+
+    /**
+     * Get section title for placeholder
+     * @param {string} sectionName - Section name
+     * @returns {string} Section title
+     */
+    getSectionTitle(sectionName) {
+        const titles = {
+            'profile': 'Profile Management',
+            'security': 'Security Settings',
+            'payment': 'Payments & Billing',
+            'apps': 'App Entitlements',
+            'notifications': 'Notifications & Preferences',
+            'actions': 'Account Actions'
+        };
+        return titles[sectionName] || sectionName;
+    }
+
+
+    /**
+     * Wait for translations to be ready and then update
+     */
+    waitForTranslationsAndUpdate() {
+        const checkTranslations = () => {
+            if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+                this.updateTranslations();
+            } else if (window.translationReady) {
+                this.updateTranslations();
+            } else {
+                setTimeout(checkTranslations, 100);
+            }
+        };
+        
+        // Start checking immediately
+        checkTranslations();
     }
 
     /**
      * Update translations for the layout
      */
     updateTranslations() {
-        if (typeof i18next === 'undefined') {
+        if (typeof i18next === 'undefined' || !i18next.isInitialized) {
             return;
         }
 
         const translatableElements = document.querySelectorAll('.account-layout .translatable-content');
+        
         translatableElements.forEach(element => {
             const key = element.dataset.translationKey || element.textContent.trim();
             if (key && i18next.exists(key)) {
                 element.textContent = i18next.t(key);
             }
+            // Make translatable content visible
+            element.classList.add('loaded');
+        });
+    }
+
+    /**
+     * Show translatable content (make it visible)
+     */
+    showTranslatableContent() {
+        const translatableElements = document.querySelectorAll('.account-layout .translatable-content');
+        translatableElements.forEach(element => {
+            element.classList.add('loaded');
+            // Force visibility as fallback
+            element.style.opacity = '1';
         });
     }
 
@@ -241,7 +414,7 @@ class AccountLayout {
      * @param {string} message - Error message to display
      */
     showError(message) {
-        if (window.accountPage && window.accountPage.showError) {
+        if (window.accountPage?.showError) {
             window.accountPage.showError(message);
         } else {
             console.error('Account Layout Error:', message);
@@ -278,8 +451,11 @@ class AccountLayout {
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname.includes('/account')) {
-        window.accountLayout = new AccountLayout();
-        window.accountLayout.init();
+        // Only initialize if not already initialized by the component loader
+        if (!window.accountLayout) {
+            window.accountLayout = new AccountLayout();
+            window.accountLayout.init();
+        }
     }
 });
 

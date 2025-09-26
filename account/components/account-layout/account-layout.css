@@ -11,12 +11,13 @@
 /* ===== SIDEBAR ===== */
 .account-layout__sidebar {
     flex: 0 0 280px;
-    background-color: var(--color-background-secondary);
     border-radius: var(--radius-md);
+    border: 2px solid var(--border-color-primary);
     padding: var(--spacing-lg);
     height: fit-content;
     position: sticky;
     top: var(--spacing-xl);
+    color: var(--color-text-primary);
 }
 
 .account-layout__nav-list {
@@ -41,7 +42,7 @@
     background: none;
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     cursor: pointer;
     transition: all var(--transition-fast);
     text-align: left;
@@ -78,10 +79,11 @@
 /* ===== CONTENT AREA ===== */
 .account-layout__content {
     flex: 1;
-    background-color: var(--color-background-secondary);
     border-radius: var(--radius-md);
+    border: 2px solid var(--border-color-primary);
     padding: var(--spacing-xl);
     min-height: 500px;
+    color: var(--color-text-primary);
 }
 
 .account-layout__section {
@@ -90,6 +92,7 @@
 
 .account-layout__section.active {
     display: block;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 .account-layout__section-header {
@@ -107,7 +110,7 @@
 
 .account-layout__section-description {
     font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     margin: 0;
     line-height: var(--line-height-relaxed);
 }
@@ -124,7 +127,7 @@
     background-color: var(--color-background-primary);
     border: 2px dashed var(--border-color-primary);
     border-radius: var(--radius-sm);
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     font-style: italic;
 }
 
@@ -199,17 +202,30 @@
 }
 
 .account-layout__section.loading::after {
-    content: '';
+    content: 'Loading...';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(var(--color-background-primary-rgb), 0.8);
+    background-color: rgba(255, 255, 255, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+    z-index: 10;
+}
+
+/* ===== TRANSLATABLE CONTENT ===== */
+.translatable-content {
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.translatable-content.loaded {
+    opacity: 1;
 }
 
 /* ===== ACCESSIBILITY ===== */
@@ -223,9 +239,6 @@
 }
 
 /* ===== ANIMATIONS ===== */
-.account-layout__section {
-    animation: fadeIn 0.3s ease-in-out;
-}
 
 @keyframes fadeIn {
     from {

@@ -26,7 +26,7 @@ class ThemeSwitcher {
             return;
         }
 
-        console.log('🔄 Initializing theme switcher...');
+        // Initializing theme switcher
 
         this.config = {
             ...this.config,
@@ -47,14 +47,14 @@ class ThemeSwitcher {
             return;
         }
 
-        console.log('✅ Theme switcher elements found');
+        // Theme switcher elements found
 
         this.setupComponent();
         this.bindEvents();
         this.applySavedTheme();
         
         this.isInitialized = true;
-        console.log('✅ Theme switcher initialized successfully');
+        // Theme switcher initialized successfully
     }
 
     /**
