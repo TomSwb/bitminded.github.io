@@ -1,0 +1,88 @@
+/* Account Page Styles */
+.account-main {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: var(--spacing-6xl); /* Simple spacing from top */
+}
+
+.account-container {
+    width: 100%;
+    max-width: 800px; /* Wider than auth page for account management */
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+.account-error {
+    background-color: var(--color-error-bg, #fee);
+    border: 2px solid var(--color-error, #e53e3e);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-error, #e53e3e);
+}
+
+.account-error.hidden {
+    display: none;
+}
+
+.account-success {
+    background-color: var(--color-success-bg, #f0fff4);
+    border: 2px solid var(--color-success, #38a169);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-success, #38a169);
+}
+
+.account-success.hidden {
+    display: none;
+}
+
+#account-title {
+    text-align: center;
+    font-size: var(--font-size-3xl);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Account Layout Container */
+#account-layout-container {
+    margin-top: var(--spacing-lg);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Responsive adjustments */
+@media (min-width: 1200px) {
+    .account-container {
+        max-width: 900px; /* Even wider on large screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .account-main {
+        padding-top: calc(var(--spacing-5xl)); /* Basic nav clearance */
+    }
+    
+    .account-container {
+        max-width: 90vw;
+        padding: 0 var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .account-main {
+        padding-top: calc(var(--spacing-l)); /* Basic nav clearance */
+    }
+    
+    .account-container {
+        max-width: 95vw;
+        padding: 0 var(--spacing-sm);
+    }
+    
+    #account-title {
+        font-size: var(--font-size-2xl);
+    }
+}

@@ -104,6 +104,19 @@
     outline: none;
 }
 
+/* ===== ACTIVE STATE ===== */
+.auth-buttons__button--account.active {
+    background-color: var(--color-primary)!important; 
+    color: var(--color-text-secondary);
+    border-color: var(--color-primary);
+}
+
+.auth-buttons__button--account.active:hover {
+    background-color: var(--color-primary);
+    color: var(--color-text-secondary);
+    border-color: var(--color-primary);
+}
+
 /* ===== MOBILE TOUCH EFFECTS ===== */
 @media (max-width: 768px) {
     .auth-buttons__button:active {

@@ -1,0 +1,16 @@
+{
+  "en": {
+    "translation": {
+      "account-title": "Account Management",
+      "account-error-message": "An error occurred",
+      "account-success-message": "Operation completed successfully"
+    }
+  },
+  "fr": {
+    "translation": {
+      "account-title": "Gestion du compte",
+      "account-error-message": "Une erreur s'est produite",
+      "account-success-message": "Opération terminée avec succès"
+    }
+  }
+}

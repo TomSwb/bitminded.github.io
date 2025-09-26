@@ -36,6 +36,9 @@ class AuthButtons {
             
             this.isInitialized = true;
             
+            // Set active state for account button if on account page
+            this.updateAccountButtonActiveState();
+            
             console.log('✅ Auth Buttons initialized successfully');
         } catch (error) {
             console.error('❌ Failed to initialize Auth Buttons:', error);
@@ -408,6 +411,23 @@ class AuthButtons {
      */
     isAuthenticated() {
         return !!this.currentUser;
+    }
+
+    /**
+     * Update active state for account button based on current page
+     */
+    updateAccountButtonActiveState() {
+        const accountButton = document.getElementById('auth-account-button');
+        if (!accountButton) {
+            return;
+        }
+
+        const isOnAccountPage = window.location.pathname.includes('/account');
+        accountButton.classList.toggle('active', isOnAccountPage);
+        
+        if (isOnAccountPage) {
+            console.log('✅ Account button set to active state');
+        }
     }
 
     /**

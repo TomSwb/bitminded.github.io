@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document -->
+    <meta charset="UTF-8">
+    
+    <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--Browser Tab title-->
+    <title>Account Management - BitMinded</title>
+    <!--Browser Tab icon-->
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+
+    <!--Apple home-saved app icon-->
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+    <!-- iOS status bar style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Critical CSS to prevent white flash -->
+    <link rel="stylesheet" href="../css/critical.css">
+    
+    <!-- Critical JavaScript for immediate initialization -->
+    <script src="../js/critical.js"></script>
+    
+    <!-- Component Loader -->
+    <script src="../components/shared/component-loader.js"></script>
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+    <!-- Account page specific CSS -->
+    <link rel="stylesheet" href="account.css">
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+        
+        <!-- Language Switcher Component will be loaded here -->
+    </header>
+
+    <main class="account-main">
+        <!-- Account Container -->
+        <div class="account-container">
+            <!-- Page Title -->
+            <h1 id="account-title" class="translatable-content">Account Management</h1>
+            
+            <!-- Error Display Area -->
+            <div id="account-error" class="account-error hidden" role="alert">
+                <span id="account-error-message" class="translatable-content"></span>
+            </div>
+            
+            <!-- Success Display Area -->
+            <div id="account-success" class="account-success hidden" role="alert">
+                <span id="account-success-message" class="translatable-content"></span>
+            </div>
+            
+            <!-- Account Layout Component will be loaded here -->
+            <div id="account-layout-container"></div>
+        </div>
+    </main>
+
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../js/supabase-config.js"></script>
+    <!-- i18next CDN language-switcher-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!--- language switcher-->
+    <script src="lang-account.js"></script>
+    <!-- other scripts -->
+    <script src="../js/script.js"></script>
+
+</body> 
+
+</html>

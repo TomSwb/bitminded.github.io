@@ -212,6 +212,8 @@ class NavigationMenu {
             return 'contact';
         } else if (path.includes('/auth')) {
             return 'auth'; // Special case for auth page
+        } else if (path.includes('/account')) {
+            return 'account'; // Account page
         }
         return 'home'; // Default fallback
     }
