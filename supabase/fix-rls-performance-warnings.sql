@@ -62,3 +62,49 @@ DROP POLICY IF EXISTS "Users can view own subscription" ON public.user_subscript
 
 CREATE POLICY "Users can view own subscription" ON public.user_subscriptions
     FOR SELECT USING ((select auth.uid()) = user_id);
+
+-- Fix 9: Optimize user_consents policies
+-- Drop existing policies
+DROP POLICY IF EXISTS "Users can view own consents" ON public.user_consents;
+DROP POLICY IF EXISTS "Users can insert own consents" ON public.user_consents;
+DROP POLICY IF EXISTS "Admins can view all consents" ON public.user_consents;
+
+-- Create optimized single policy for user_consents
+CREATE POLICY "Users can manage own consents" ON public.user_consents
+    FOR ALL USING (
+        (select auth.uid()) = user_id OR
+        EXISTS (
+            SELECT 1 FROM public.user_roles 
+            WHERE user_id = (select auth.uid()) AND role = 'admin'
+        )
+    );
+
+-- Fix 10: Optimize consent_versions policies
+-- Drop existing policies
+DROP POLICY IF EXISTS "Anyone can view consent versions" ON public.consent_versions;
+DROP POLICY IF EXISTS "Admins can manage consent versions" ON public.consent_versions;
+
+-- Create optimized single policy for consent_versions
+CREATE POLICY "Consent versions access" ON public.consent_versions
+    FOR ALL USING (
+        true OR
+        EXISTS (
+            SELECT 1 FROM public.user_roles 
+            WHERE user_id = (select auth.uid()) AND role = 'admin'
+        )
+    );
+
+-- Fix 11: Optimize consent_audit_log policies
+-- Drop existing policies
+DROP POLICY IF EXISTS "Users can view own consent audit log" ON public.consent_audit_log;
+DROP POLICY IF EXISTS "Admins can view all consent audit logs" ON public.consent_audit_log;
+
+-- Create optimized single policy for consent_audit_log
+CREATE POLICY "Consent audit log access" ON public.consent_audit_log
+    FOR ALL USING (
+        (select auth.uid()) = user_id OR
+        EXISTS (
+            SELECT 1 FROM public.user_roles 
+            WHERE user_id = (select auth.uid()) AND role = 'admin'
+        )
+    );
