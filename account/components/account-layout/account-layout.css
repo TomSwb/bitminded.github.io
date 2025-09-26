@@ -6,6 +6,7 @@
     max-width: 1200px;
     padding-top: var(--spacing-2xl);
     min-height: 60vh;
+    margin-left: 0; /* Align to left edge */
 }
 
 /* ===== SIDEBAR ===== */
@@ -18,6 +19,7 @@
     position: sticky;
     top: var(--spacing-xl);
     color: var(--color-text-primary);
+    margin-left: var(--spacing-sm); /* Small margin from left edge */
 }
 
 .account-layout__nav-list {
