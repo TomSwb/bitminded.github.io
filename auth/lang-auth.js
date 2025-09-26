@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('language') || 'en';
-    fetch('../locales/auth-locales.json')
+    // Determine the correct path based on current location
+    const isVerifyPage = window.location.pathname.includes('/verify');
+    const localesPath = isVerifyPage ? '../locales/auth-locales.json' : 'locales/auth-locales.json';
+    fetch(localesPath)
         .then(response => response.json())
         .then(resources => {
             i18next.init({
