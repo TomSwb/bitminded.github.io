@@ -254,22 +254,45 @@ class SignupForm {
      */
     handleSignupError(error) {
         let errorMessage = 'An error occurred during signup';
+        let showFieldError = false;
+        let fieldName = '';
 
-        switch (error.message) {
-            case 'User already registered':
-                errorMessage = 'An account with this email already exists';
-                this.showFieldError('email', errorMessage);
-                break;
-            case 'Password should be at least 6 characters':
-                errorMessage = 'Password must be at least 6 characters long';
-                this.showFieldError('password', errorMessage);
-                break;
-            case 'Invalid email':
-                errorMessage = 'Please enter a valid email address';
-                this.showFieldError('email', errorMessage);
-                break;
-            default:
-                this.showError(error.message || errorMessage);
+        // Handle different types of errors
+        if (error.message) {
+            if (error.message.includes('Email address') && error.message.includes('is invalid')) {
+                errorMessage = this.getTranslation('signup.errorInvalidEmail') || 'Please enter a valid email address. Check for typos in your email.';
+                showFieldError = true;
+                fieldName = 'email';
+            } else if (error.message.includes('User already registered')) {
+                errorMessage = this.getTranslation('signup.errorUserExists') || 'An account with this email already exists. Try signing in instead.';
+                showFieldError = true;
+                fieldName = 'email';
+            } else if (error.message.includes('Password should be at least 6 characters')) {
+                errorMessage = this.getTranslation('signup.errorPasswordLength') || 'Password must be at least 6 characters long.';
+                showFieldError = true;
+                fieldName = 'password';
+            } else if (error.message.includes('Invalid email')) {
+                errorMessage = this.getTranslation('signup.errorInvalidEmail') || 'Please enter a valid email address.';
+                showFieldError = true;
+                fieldName = 'email';
+            } else if (error.message.includes('Username')) {
+                errorMessage = this.getTranslation('signup.errorUsername') || 'Please choose a different username.';
+                showFieldError = true;
+                fieldName = 'username';
+            } else {
+                // For other errors, show the actual error message
+                errorMessage = error.message;
+            }
+        } else {
+            // Fallback for errors without message
+            errorMessage = this.getTranslation('signup.errorGeneral') || 'An error occurred during signup. Please try again.';
+        }
+
+        // Show field-specific error or general error
+        if (showFieldError && fieldName) {
+            this.showFieldError(fieldName, errorMessage);
+        } else {
+            this.showError(errorMessage);
         }
     }
 

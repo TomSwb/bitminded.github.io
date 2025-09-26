@@ -22,7 +22,12 @@
       "signup.resendEmail": "Resend Verification Email",
       "signup.resendSuccess": "Verification email sent! Please check your inbox.",
       "signup.resendError": "Failed to resend email. Please try again.",
-      "signup.resending": "Sending..."
+      "signup.resending": "Sending...",
+      "signup.errorInvalidEmail": "Please enter a valid email address. Check for typos in your email.",
+      "signup.errorUserExists": "An account with this email already exists. Try signing in instead.",
+      "signup.errorPasswordLength": "Password must be at least 6 characters long.",
+      "signup.errorUsername": "Please choose a different username.",
+      "signup.errorGeneral": "An error occurred during signup. Please try again."
     }
   },
   "fr": {
@@ -48,7 +53,12 @@
       "signup.resendEmail": "Renvoyer l'e-mail de vérification",
       "signup.resendSuccess": "E-mail de vérification envoyé ! Veuillez vérifier votre boîte de réception.",
       "signup.resendError": "Échec de l'envoi de l'e-mail. Veuillez réessayer.",
-      "signup.resending": "Envoi en cours..."
+      "signup.resending": "Envoi en cours...",
+      "signup.errorInvalidEmail": "Veuillez saisir une adresse e-mail valide. Vérifiez les erreurs de frappe dans votre e-mail.",
+      "signup.errorUserExists": "Un compte avec cet e-mail existe déjà. Essayez de vous connecter à la place.",
+      "signup.errorPasswordLength": "Le mot de passe doit contenir au moins 6 caractères.",
+      "signup.errorUsername": "Veuillez choisir un autre nom d'utilisateur.",
+      "signup.errorGeneral": "Une erreur s'est produite lors de l'inscription. Veuillez réessayer."
     }
   }
 }
