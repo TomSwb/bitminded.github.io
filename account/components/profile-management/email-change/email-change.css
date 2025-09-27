@@ -151,7 +151,7 @@
     border: 2px solid var(--color-border);
     border-radius: var(--border-radius-sm);
     font-size: 1rem;
-    color: var(--color-text-secondary);
+    color: var(--color-text-dark);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     box-sizing: border-box;
 }
