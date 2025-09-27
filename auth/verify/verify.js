@@ -120,6 +120,9 @@ class EmailVerification {
      */
     async handleVerification() {
         try {
+            console.log('🔧 Verify page loaded, starting verification process...');
+            console.log('🔧 Current URL:', window.location.href);
+            
             // Wait for Supabase to be available
             await this.waitForSupabase();
 
@@ -127,7 +130,43 @@ class EmailVerification {
             const urlParams = this.parseUrlParameters();
             
             console.log('🔍 URL parameters found:', urlParams);
+            console.log('🔍 Full URL:', window.location.href);
+            console.log('🔍 Hash:', window.location.hash);
+            console.log('🔍 Search:', window.location.search);
             
+            // Handle email change verification
+            if (urlParams.type === 'email_change' && urlParams.token) {
+                console.log('🔄 Processing email change verification...');
+                console.log('🔄 Token:', urlParams.token);
+                console.log('🔄 Type:', urlParams.type);
+                
+                const { data, error } = await window.supabase.auth.verifyOtp({
+                    token_hash: urlParams.token,
+                    type: 'email_change'
+                });
+                
+                console.log('📧 Email change verification response:', { data, error });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (data.user) {
+                    console.log('✅ Email change verification successful');
+                    console.log('✅ User after email change:', data.user);
+                    console.log('✅ User email after change:', data.user.email);
+                    this.showSuccess();
+                    // Redirect to account profile after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = '/account/?section=profile';
+                    }, 3000);
+                    return;
+                } else {
+                    throw new Error('No user data received from email change verification');
+                }
+            }
+            
+            // Handle regular signup verification
             if (!urlParams.access_token) {
                 // Check if we can get the session from Supabase directly
                 const { data: sessionData, error: sessionError } = await window.supabase.auth.getSession();

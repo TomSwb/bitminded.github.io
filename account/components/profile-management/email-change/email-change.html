@@ -1,0 +1,83 @@
+<!-- Email Change Component -->
+<div class="email-change" id="email-change">
+    <button type="button" id="change-email-btn" class="email-change__change-btn">
+        <span class="email-change__change-icon">📧</span>
+        <span class="email-change__change-text translatable-content" data-translation-key="Change Email">Change Email</span>
+    </button>
+    
+    <button type="button" id="resend-verification-btn" class="email-change__verify-btn hidden">
+        <span class="email-change__verify-icon">📬</span>
+        <span class="email-change__verify-text translatable-content" data-translation-key="Resend Verification">Resend Verification</span>
+    </button>
+
+    <form id="email-change-form" class="email-change__form hidden">
+        <div class="email-change__form-group">
+            <label for="new-email" class="email-change__label">
+                <span class="translatable-content" data-translation-key="New Email Address">New Email Address</span>
+            </label>
+            <input 
+                type="email" 
+                id="new-email" 
+                name="email" 
+                class="email-change__input"
+                placeholder="Enter your new email address"
+                required
+            />
+            <div class="email-change__input-help">
+                <span class="translatable-content" data-translation-key="We'll send a verification link to your new email address">We'll send a verification link to your new email address</span>
+            </div>
+        </div>
+
+        <div class="email-change__form-group">
+            <label for="confirm-password" class="email-change__label">
+                <span class="translatable-content" data-translation-key="Confirm Password">Confirm Password</span>
+            </label>
+            <input 
+                type="password" 
+                id="confirm-password" 
+                name="password" 
+                class="email-change__input"
+                placeholder="Enter your current password"
+                required
+            />
+            <div class="email-change__input-help">
+                <span class="translatable-content" data-translation-key="Enter your current password to confirm this change">Enter your current password to confirm this change</span>
+            </div>
+        </div>
+
+        <div class="email-change__form-actions">
+            <button type="button" id="cancel-email-btn" class="email-change__cancel-btn">
+                <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+            </button>
+            <button type="submit" id="save-email-btn" class="email-change__save-btn" disabled>
+                <span class="email-change__save-icon">📧</span>
+                <span class="translatable-content" data-translation-key="Send Verification">Send Verification</span>
+            </button>
+        </div>
+    </form>
+
+    <!-- Email verification status -->
+    <div id="email-verification-info" class="email-change__verification-info hidden">
+        <div class="email-change__verification-icon">📬</div>
+        <div class="email-change__verification-text">
+            <h4 class="translatable-content" data-translation-key="Verification Email Sent">Verification Email Sent</h4>
+            <p class="translatable-content" data-translation-key="Check your new email address and click the verification link to complete the change">Check your new email address and click the verification link to complete the change</p>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="email-loading" class="email-change__loading hidden">
+        <div class="email-change__loading-spinner"></div>
+        <span id="email-loading-text" class="translatable-content" data-translation-key="Processing...">Processing...</span>
+    </div>
+
+    <!-- Error display -->
+    <div id="email-error" class="email-change__error hidden" role="alert">
+        <span id="email-error-message" class="email-change__error-message"></span>
+    </div>
+
+    <!-- Success display -->
+    <div id="email-success" class="email-change__success hidden" role="alert">
+        <span id="email-success-message" class="email-change__success-message"></span>
+    </div>
+</div>

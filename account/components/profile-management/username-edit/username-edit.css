@@ -1,0 +1,266 @@
+/* Username Edit Component Styles */
+.username-edit {
+    width: 100%;
+}
+
+/* Current Username Display */
+.username-edit__current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    margin-bottom: 1rem;
+}
+
+.username-edit__display {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.username-edit__label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.username-edit__value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+}
+
+.username-edit__edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.username-edit__edit-btn:hover {
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
+    transform: translateY(-1px);
+}
+
+.username-edit__edit-btn:active {
+    transform: translateY(0);
+}
+
+.username-edit__edit-icon {
+    font-size: 1rem;
+}
+
+/* Edit Form */
+.username-edit__form {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.username-edit__form-group {
+    margin-bottom: 1.5rem;
+}
+
+.username-edit__form-group .username-edit__label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.username-edit__input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.username-edit__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.username-edit__input:invalid {
+    border-color: var(--color-error);
+}
+
+.username-edit__input:valid {
+    border-color: var(--color-success);
+}
+
+.username-edit__input-help {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+}
+
+/* Form Actions */
+.username-edit__form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.username-edit__cancel-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.username-edit__cancel-btn:hover {
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
+    transform: translateY(-1px);
+}
+
+.username-edit__cancel-btn:active {
+    transform: translateY(0);
+}
+
+.username-edit__save-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.username-edit__save-btn:disabled {
+    color: var(--color-text-primary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.username-edit__save-btn:not(:disabled):hover {
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
+    transform: translateY(-1px);
+}
+
+.username-edit__save-btn:not(:disabled):active {
+    transform: translateY(0);
+}
+
+.username-edit__save-icon {
+    font-size: 1rem;
+}
+
+/* Availability Indicator */
+.username-edit__availability {
+    padding: 0.75rem;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.username-edit__availability.available {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+.username-edit__availability.unavailable {
+    background: var(--color-error-bg);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
+
+.username-edit__availability.checking {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+
+/* Loading State */
+.username-edit__loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 1rem;
+}
+
+.username-edit__loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-border);
+    border-top: 2px solid var(--color-primary);
+    border-radius: 50%;
+    animation: username-spin 1s linear infinite;
+}
+
+@keyframes username-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .username-edit__current {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    /* Form actions already use column layout */
+    
+    .username-edit__save-btn,
+    .username-edit__cancel-btn {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .username-edit__form {
+        padding: 1rem;
+    }
+    
+    .username-edit__current {
+        padding: 0.75rem;
+    }
+}

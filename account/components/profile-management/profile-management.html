@@ -1,0 +1,53 @@
+<!-- Profile Management Component -->
+<div class="profile-management" id="profile-management">
+    <!-- Profile Header -->
+    <div class="profile-management__header">
+        <div class="profile-management__avatar-section">
+            <div class="profile-management__avatar-container" id="profile-avatar-container">
+                <img id="profile-avatar" class="profile-management__avatar" src="" alt="" style="display: none;" />
+                <div id="profile-avatar-initial" class="profile-management__avatar-initial"></div>
+                <div class="profile-management__avatar-overlay">
+                    <button type="button" id="avatar-upload-btn" class="profile-management__avatar-upload-btn">
+                        <span class="profile-management__avatar-upload-icon">📷</span>
+                        <span class="profile-management__avatar-upload-text translatable-content" data-translation-key="Change Avatar">Change Avatar</span>
+                    </button>
+                </div>
+            </div>
+            <div class="profile-management__avatar-label">
+                <span class="translatable-content" data-translation-key="Profile Avatar">Profile Avatar</span>
+            </div>
+            <input type="file" id="avatar-file-input" accept="image/*" class="profile-management__file-input hidden" />
+        </div>
+        
+        <div class="profile-management__user-info">
+            <h3 id="profile-username" class="profile-management__username"></h3>
+            <p id="profile-email" class="profile-management__email"></p>
+            <p id="profile-member-since" class="profile-management__member-since">
+                <span class="translatable-content" data-translation-key="Member since">Member since</span>
+                <span id="profile-created-date"></span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Profile Action Buttons -->
+    <div class="profile-management__actions">
+        <div id="username-component-container"></div>
+        <div id="email-component-container"></div>
+    </div>
+
+    <!-- Loading States -->
+    <div id="profile-loading" class="profile-management__loading hidden">
+        <div class="profile-management__loading-spinner"></div>
+        <p class="profile-management__loading-text translatable-content" data-translation-key="Loading profile information...">Loading profile information...</p>
+    </div>
+
+    <!-- Error Display -->
+    <div id="profile-error" class="profile-management__error hidden" role="alert">
+        <span id="profile-error-message" class="profile-management__error-message"></span>
+    </div>
+
+    <!-- Success Display -->
+    <div id="profile-success" class="profile-management__success hidden" role="alert">
+        <span id="profile-success-message" class="profile-management__success-message"></span>
+    </div>
+</div>
