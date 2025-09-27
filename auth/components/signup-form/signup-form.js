@@ -81,7 +81,10 @@ class SignupForm {
         // Real-time validation - only bind if elements exist
         if (this.elements.username) this.elements.username.addEventListener('blur', () => this.validateUsername());
         if (this.elements.email) this.elements.email.addEventListener('blur', () => this.validateEmail());
-        if (this.elements.password) this.elements.password.addEventListener('blur', () => this.validatePassword());
+        if (this.elements.password) {
+            this.elements.password.addEventListener('blur', () => this.validatePassword());
+            this.elements.password.addEventListener('input', () => this.updatePasswordRequirements());
+        }
         if (this.elements.confirmPassword) this.elements.confirmPassword.addEventListener('blur', () => this.validateConfirmPassword());
 
         // Password visibility toggles - only bind if elements exist
@@ -271,6 +274,22 @@ class SignupForm {
                 errorMessage = this.getTranslation('signup.errorPasswordLength') || 'Password must be at least 6 characters long.';
                 showFieldError = true;
                 fieldName = 'password';
+            } else if (error.message.includes('Password must contain at least one lowercase letter')) {
+                errorMessage = this.getTranslation('signup.errorPasswordLowercase') || 'Password must contain at least one lowercase letter.';
+                showFieldError = true;
+                fieldName = 'password';
+            } else if (error.message.includes('Password must contain at least one uppercase letter')) {
+                errorMessage = this.getTranslation('signup.errorPasswordUppercase') || 'Password must contain at least one uppercase letter.';
+                showFieldError = true;
+                fieldName = 'password';
+            } else if (error.message.includes('Password must contain at least one digit')) {
+                errorMessage = this.getTranslation('signup.errorPasswordDigit') || 'Password must contain at least one digit.';
+                showFieldError = true;
+                fieldName = 'password';
+            } else if (error.message.includes('Password must contain at least one symbol')) {
+                errorMessage = this.getTranslation('signup.errorPasswordSymbol') || 'Password must contain at least one symbol.';
+                showFieldError = true;
+                fieldName = 'password';
             } else if (error.message.includes('Invalid email')) {
                 errorMessage = this.getTranslation('signup.errorInvalidEmail') || 'Please enter a valid email address.';
                 showFieldError = true;
@@ -363,7 +382,33 @@ class SignupForm {
         }
 
         if (password.length < 6) {
-            this.showFieldError('password', 'Password must be at least 6 characters long');
+            this.showFieldError('password', this.getTranslation('signup.errorPasswordLength') || 'Password must be at least 6 characters long');
+            return false;
+        }
+
+        // Check for required character types
+        const hasLowercase = /[a-z]/.test(password);
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasDigit = /\d/.test(password);
+        const hasSymbol = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+
+        if (!hasLowercase) {
+            this.showFieldError('password', this.getTranslation('signup.errorPasswordLowercase') || 'Password must contain at least one lowercase letter');
+            return false;
+        }
+
+        if (!hasUppercase) {
+            this.showFieldError('password', this.getTranslation('signup.errorPasswordUppercase') || 'Password must contain at least one uppercase letter');
+            return false;
+        }
+
+        if (!hasDigit) {
+            this.showFieldError('password', this.getTranslation('signup.errorPasswordDigit') || 'Password must contain at least one digit');
+            return false;
+        }
+
+        if (!hasSymbol) {
+            this.showFieldError('password', this.getTranslation('signup.errorPasswordSymbol') || 'Password must contain at least one symbol');
             return false;
         }
 
@@ -621,6 +666,40 @@ class SignupForm {
             const action = isPassword ? 'Hide' : 'Show';
             toggleButton.setAttribute('aria-label', `${action} password visibility`);
         }
+    }
+
+    /**
+     * Update password requirements display in real-time
+     */
+    updatePasswordRequirements() {
+        const password = this.elements.password.value;
+        const requirementsContainer = document.getElementById('signup-password-requirements');
+        
+        if (!requirementsContainer) return;
+
+        // Check each requirement
+        const requirements = {
+            length: password.length >= 6,
+            lowercase: /[a-z]/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            digit: /\d/.test(password),
+            symbol: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)
+        };
+
+        // Update each requirement display
+        Object.entries(requirements).forEach(([requirement, isValid]) => {
+            const requirementElement = requirementsContainer.querySelector(`[data-requirement="${requirement}"]`);
+            if (requirementElement) {
+                const icon = requirementElement.querySelector('.signup-form__requirement-icon');
+                if (icon) {
+                    icon.textContent = isValid ? '✅' : '❌';
+                }
+                
+                // Update classes for styling
+                requirementElement.classList.remove('valid', 'invalid');
+                requirementElement.classList.add(isValid ? 'valid' : 'invalid');
+            }
+        });
     }
 
     /**

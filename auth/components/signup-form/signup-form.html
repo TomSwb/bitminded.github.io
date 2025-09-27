@@ -52,6 +52,7 @@
                     autocomplete="new-password"
                     placeholder="Create a password"
                     minlength="6"
+                    title="Password must contain at least 6 characters, including uppercase, lowercase, digit, and symbol"
                 >
                 <button type="button" class="signup-form__toggle-password" id="signup-toggle-password" aria-label="Toggle password visibility">
                     <svg class="signup-form__eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -61,6 +62,28 @@
                 </button>
             </div>
             <div class="signup-form__error" id="signup-password-error" role="alert"></div>
+            <div class="signup-form__password-requirements" id="signup-password-requirements">
+                <div class="signup-form__requirement" data-requirement="length">
+                    <span class="signup-form__requirement-icon">❌</span>
+                    <span class="signup-form__requirement-text">At least 6 characters</span>
+                </div>
+                <div class="signup-form__requirement" data-requirement="lowercase">
+                    <span class="signup-form__requirement-icon">❌</span>
+                    <span class="signup-form__requirement-text">One lowercase letter</span>
+                </div>
+                <div class="signup-form__requirement" data-requirement="uppercase">
+                    <span class="signup-form__requirement-icon">❌</span>
+                    <span class="signup-form__requirement-text">One uppercase letter</span>
+                </div>
+                <div class="signup-form__requirement" data-requirement="digit">
+                    <span class="signup-form__requirement-icon">❌</span>
+                    <span class="signup-form__requirement-text">One digit</span>
+                </div>
+                <div class="signup-form__requirement" data-requirement="symbol">
+                    <span class="signup-form__requirement-icon">❌</span>
+                    <span class="signup-form__requirement-text">One symbol (!@#$%^&*)</span>
+                </div>
+            </div>
         </div>
 
         <!-- Confirm Password Field -->
