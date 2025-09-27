@@ -91,7 +91,7 @@
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     cursor: pointer;
     padding: var(--spacing-sm);
     border-radius: var(--radius-sm);
@@ -99,7 +99,7 @@
 }
 
 .signup-form__toggle-password:hover {
-    color: var(--color-text-primary);
+    color: var(--color-secondary);
 }
 
 .signup-form__toggle-password:focus {
@@ -126,6 +126,50 @@
 
 .signup-form__field.error .signup-form__input {
     border-color: var(--color-error);
+}
+
+/* ===== PASSWORD REQUIREMENTS ===== */
+.signup-form__password-requirements {
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background-color: var(--color-background-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+}
+
+.signup-form__requirement {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+}
+
+.signup-form__requirement:last-child {
+    margin-bottom: 0;
+}
+
+.signup-form__requirement-icon {
+    font-size: var(--font-size-sm);
+    min-width: 16px;
+    text-align: center;
+}
+
+.signup-form__requirement.valid .signup-form__requirement-icon {
+    color: var(--color-success, #28a745);
+}
+
+.signup-form__requirement.invalid .signup-form__requirement-icon {
+    color: var(--color-error, #dc3545);
+}
+
+.signup-form__requirement-text {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xs);
+}
+
+.signup-form__requirement.valid .signup-form__requirement-text {
+    color: var(--color-success, #28a745);
 }
 
 /* ===== ACTIONS ===== */

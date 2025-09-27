@@ -26,6 +26,10 @@
       "signup.errorInvalidEmail": "Please enter a valid email address. Check for typos in your email.",
       "signup.errorUserExists": "An account with this email already exists. Try signing in instead.",
       "signup.errorPasswordLength": "Password must be at least 6 characters long.",
+      "signup.errorPasswordLowercase": "Password must contain at least one lowercase letter.",
+      "signup.errorPasswordUppercase": "Password must contain at least one uppercase letter.",
+      "signup.errorPasswordDigit": "Password must contain at least one digit.",
+      "signup.errorPasswordSymbol": "Password must contain at least one symbol (!@#$%^&*).",
       "signup.errorUsername": "Please choose a different username.",
       "signup.errorGeneral": "An error occurred during signup. Please try again."
     }
@@ -57,6 +61,10 @@
       "signup.errorInvalidEmail": "Veuillez saisir une adresse e-mail valide. Vérifiez les erreurs de frappe dans votre e-mail.",
       "signup.errorUserExists": "Un compte avec cet e-mail existe déjà. Essayez de vous connecter à la place.",
       "signup.errorPasswordLength": "Le mot de passe doit contenir au moins 6 caractères.",
+      "signup.errorPasswordLowercase": "Le mot de passe doit contenir au moins une lettre minuscule.",
+      "signup.errorPasswordUppercase": "Le mot de passe doit contenir au moins une lettre majuscule.",
+      "signup.errorPasswordDigit": "Le mot de passe doit contenir au moins un chiffre.",
+      "signup.errorPasswordSymbol": "Le mot de passe doit contenir au moins un symbole (!@#$%^&*).",
       "signup.errorUsername": "Veuillez choisir un autre nom d'utilisateur.",
       "signup.errorGeneral": "Une erreur s'est produite lors de l'inscription. Veuillez réessayer."
     }
