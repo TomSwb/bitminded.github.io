@@ -287,7 +287,7 @@ class ProfileManagement {
         const createdDateEl = document.getElementById('profile-created-date');
         if (createdDateEl && this.userProfile.created_at) {
             const date = new Date(this.userProfile.created_at);
-            createdDateEl.textContent = date.toLocaleDateString();
+            createdDateEl.textContent = date.toLocaleDateString('en-GB');
         }
 
         // Update avatar
