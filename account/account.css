@@ -2,16 +2,14 @@
 .account-main {
     min-height: 100vh;
     display: flex;
-    align-items: flex-start;
     justify-content: center;
     padding-top: var(--spacing-6xl); /* Simple spacing from top */
 }
 
 .account-container {
     width: 100%;
-    max-width: 1200px; /* Wider to accommodate sidebar positioning */
-    margin: 0 auto;
-    padding: 0 var(--spacing-lg);
+    margin: 0;
+    padding: 0;
 }
 
 .account-error {
@@ -47,18 +45,11 @@
     margin-bottom: var(--spacing-lg);
 }
 
-/* Account Layout Container */
-#account-layout-container {
-    margin-top: var(--spacing-lg);
-    width: 100%;
-    box-sizing: border-box;
-}
+
 
 /* Responsive adjustments */
 @media (min-width: 1200px) {
-    .account-container {
-        max-width: 900px; /* Even wider on large screens */
-    }
+    /* No width constraints - use full width */
 }
 
 @media (max-width: 768px) {
@@ -67,16 +58,12 @@
     }
     
     .account-container {
-        max-width: 90vw;
-        padding: 0 var(--spacing-md);
+        /* No width constraints - use full width */
+        padding: 0;
     }
     
     #account-title {
         margin-bottom: var(--spacing-xs); /* Minimal space below title */
-    }
-    
-    #account-layout-container {
-        margin-top: var(--spacing-xs); /* Minimal space above navigation */
     }
 }
 
@@ -86,8 +73,8 @@
     }
     
     .account-container {
-        max-width: 95vw;
-        padding: 0 var(--spacing-sm);
+        /* No width constraints - use full width */
+        padding: 0;
     }
     
     #account-title {

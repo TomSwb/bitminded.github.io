@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Change Confirmation - BitMinded</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #cfde67;
+            margin-bottom: 10px;
+        }
+        .tagline {
+            color: #666;
+            font-size: 14px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            background: #cfde67;
+            color: #272b2e;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background: #d286bd;
+            color: white;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        .highlight {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #cfde67;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">BitMinded</div>
+            <div class="tagline">Professional Digital Solutions</div>
+        </div>
+        
+        <div class="content">
+            <h2>Email Address Change Request</h2>
+            
+            <p>An email address change has been requested for your BitMinded account. This email is being sent to both your current and new email addresses as a security measure.</p>
+            
+            <div class="highlight">
+                <strong>Current Email:</strong> {{ .Email }}<br>
+                <strong>Requested New Email:</strong> {{ .NewEmail }}
+            </div>
+            
+            <p><strong>What you need to do:</strong></p>
+            <ul style="text-align: left; margin: 20px 0; padding-left: 20px;">
+                <li><strong>If you requested this change:</strong> Click the confirmation button below to approve the email change.</li>
+                <li><strong>If you did NOT request this change:</strong> Do NOT click the button. Contact our support team immediately as your account may be compromised.</li>
+            </ul>
+            
+            <a href="{{ .ConfirmationURL }}" class="button">Confirm Email Change</a>
+            
+            <p style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <strong>Security Notice:</strong> This email change requires confirmation from BOTH email addresses to complete. You will receive this same email at both addresses. Only click the confirmation button if you requested this change.
+            </p>
+            
+            <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px;">{{ .ConfirmationURL }}</p>
+            
+            <p><strong>Important:</strong> This confirmation link will expire in 24 hours. Both email addresses must be confirmed for the change to complete.</p>
+        </div>
+        
+        <div class="footer">
+            <p>This email was sent to {{ .Email }}. If you didn't request an email change, please contact our support team immediately.</p>
+            <p>© 2025 BitMinded. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

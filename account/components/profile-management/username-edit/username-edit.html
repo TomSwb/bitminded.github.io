@@ -1,0 +1,50 @@
+<!-- Username Edit Component -->
+<div class="username-edit" id="username-edit">
+    <button type="button" id="edit-username-btn" class="username-edit__edit-btn">
+        <span class="username-edit__edit-icon">✏️</span>
+        <span class="username-edit__edit-text translatable-content" data-translation-key="Edit Username">Edit Username</span>
+    </button>
+
+    <form id="username-edit-form" class="username-edit__form hidden">
+        <div class="username-edit__form-group">
+            <label for="new-username" class="username-edit__label">
+                <span class="translatable-content" data-translation-key="New Username">New Username</span>
+            </label>
+            <input 
+                type="text" 
+                id="new-username" 
+                name="username" 
+                class="username-edit__input"
+                placeholder="Enter your new username"
+                maxlength="30"
+                pattern="[a-zA-Z0-9_]+"
+                title="Username can only contain letters, numbers, and underscores"
+                required
+            />
+            <div class="username-edit__input-help">
+                <span class="translatable-content" data-translation-key="Username requirements: 3-30 characters, letters, numbers, and underscores only">Username requirements: 3-30 characters, letters, numbers, and underscores only</span>
+            </div>
+        </div>
+
+        <div class="username-edit__form-actions">
+            <button type="button" id="cancel-username-btn" class="username-edit__cancel-btn">
+                <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+            </button>
+            <button type="submit" id="save-username-btn" class="username-edit__save-btn" disabled>
+                <span class="username-edit__save-icon">💾</span>
+                <span class="translatable-content" data-translation-key="Save Username">Save Username</span>
+            </button>
+        </div>
+    </form>
+
+    <!-- Username availability indicator -->
+    <div id="username-availability" class="username-edit__availability hidden">
+        <span id="username-availability-message"></span>
+    </div>
+
+    <!-- Loading state -->
+    <div id="username-loading" class="username-edit__loading hidden">
+        <div class="username-edit__loading-spinner"></div>
+        <span class="translatable-content" data-translation-key="Checking availability...">Checking availability...</span>
+    </div>
+</div>

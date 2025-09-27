@@ -2,11 +2,10 @@
 
 .account-layout {
     display: flex;
-    gap: var(--spacing-xl);
-    max-width: 1200px;
-    padding-top: var(--spacing-2xl);
-    min-height: 60vh;
-    margin-left: 0; /* Align to left edge */
+    gap: var(--spacing-lg);
+    padding: var(--spacing-2xl) var(--spacing-lg) 0 var(--spacing-lg);
+    margin: 0;
+    width: 100%;
 }
 
 /* ===== SIDEBAR ===== */
@@ -19,7 +18,7 @@
     position: sticky;
     top: var(--spacing-xl);
     color: var(--color-text-primary);
-    margin-left: var(--spacing-sm); /* Small margin from left edge */
+    margin-left: var(--spacing-sm);
 }
 
 .account-layout__nav-list {
@@ -84,8 +83,9 @@
     border-radius: var(--radius-md);
     border: 2px solid var(--border-color-primary);
     padding: var(--spacing-xl);
-    min-height: 500px;
     color: var(--color-text-primary);
+    min-width: 0;
+    width: 100%;
 }
 
 .account-layout__section {
@@ -118,14 +118,14 @@
 }
 
 .account-layout__section-content {
-    min-height: 300px;
+    /* Dynamic height based on content */
 }
 
 .account-layout__placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 200px;
+    padding: var(--spacing-xl);
     background-color: var(--color-background-primary);
     border: 2px dashed var(--border-color-primary);
     border-radius: var(--radius-sm);

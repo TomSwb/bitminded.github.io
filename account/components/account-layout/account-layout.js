@@ -43,8 +43,8 @@ class AccountLayout {
             // Initialize navigation state
             this.updateNavigationState(this.currentSection);
             
-            // Load initial section
-            await this.loadSection(this.currentSection);
+            // Note: Section loading is handled by AccountPageLoader
+            // to prevent duplicate component loading
             
             this.isInitialized = true;
             // Account Layout: Initialized successfully
@@ -136,8 +136,13 @@ class AccountLayout {
             // Show new section
             this.showSection(sectionName);
 
-            // Load section content if not already loaded
-            await this.loadSection(sectionName);
+            // Load section content using AccountPageLoader to prevent duplicates
+            if (window.accountPageLoader) {
+                await window.accountPageLoader.switchSection(sectionName);
+            } else {
+                // Fallback to local loading if AccountPageLoader not available
+                await this.loadSection(sectionName);
+            }
 
             // Update current section
             this.currentSection = sectionName;
@@ -263,7 +268,8 @@ class AccountLayout {
         if (window.componentLoader) {
             const containerId = `#${sectionName}-content`;
             await window.componentLoader.load(componentName, {
-                container: containerId
+                container: containerId,
+                basePath: 'account/components'
             });
         } else {
             console.warn('⚠️ Account Layout: componentLoader not available');

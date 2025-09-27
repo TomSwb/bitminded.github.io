@@ -50,14 +50,48 @@ class ComponentLoader {
     }
 
     /**
+     * Load profile management sub-components
+     */
+    async loadProfileManagementSubComponents() {
+        const subComponents = [
+            'avatar-upload',
+            'username-edit', 
+            'email-change'
+        ];
+
+        const loadPromises = subComponents.map(componentName => {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = `/account/components/profile-management/${componentName}/${componentName}.js`;
+                script.onload = () => {
+                    console.log(`✅ Loaded sub-component: ${componentName}`);
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.warn(`⚠️ Failed to load sub-component: ${componentName}`);
+                    resolve(); // Don't fail if one sub-component is missing
+                };
+                document.head.appendChild(script);
+            });
+        });
+
+        await Promise.all(loadPromises);
+        console.log('✅ All profile management sub-components loaded');
+    }
+
+    /**
      * Load component files (HTML, CSS, JS)
      * @param {string} componentName - Component name
      * @param {Object} options - Loading options
      */
     async loadComponentFiles(componentName, options) {
-        // Determine component path based on component name
+        // Determine component path based on component name and options
         let componentPath;
-        if (componentName.startsWith('account-')) {
+        
+        // Check if basePath is specified in options (for account components)
+        if (options.basePath) {
+            componentPath = `${options.basePath}/${componentName}`;
+        } else if (componentName.startsWith('account-')) {
             // Account-specific components
             componentPath = `account/components/${componentName}`;
         } else {
@@ -181,6 +215,23 @@ class ComponentLoader {
                     if (window.accountLayout) {
                         window.accountLayout.init(config);
                     }
+                } else if (componentName === 'profile-management') {
+                    // Load profile management translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/account/components/profile-management/profile-management-translations.js';
+                    translationScript.onload = () => {
+                        // Load sub-components for profile management
+                        this.loadProfileManagementSubComponents().then(() => {
+                            // Initialize profile management component after translations and sub-components are loaded
+                            if (window.ProfileManagement && !window.profileManagement) {
+                                window.profileManagement = new window.ProfileManagement();
+                            }
+                            if (window.profileManagement) {
+                                window.profileManagement.init(config);
+                            }
+                        });
+                    };
+                    document.head.appendChild(translationScript);
                 }
                 resolve();
             };

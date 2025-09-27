@@ -137,7 +137,8 @@ class AccountPageLoader {
             if (window.componentLoader) {
                 const containerId = `#${sectionName}-content`;
                 await window.componentLoader.load(componentName, {
-                    container: containerId
+                    container: containerId,
+                    basePath: 'account/components'
                 });
                 
                 // Mark as loaded
@@ -258,6 +259,11 @@ class AccountPageLoader {
 
             // Update current section
             this.currentSection = sectionName;
+            
+            // Update account layout current section if available
+            if (window.accountLayout) {
+                window.accountLayout.currentSection = sectionName;
+            }
 
             console.log(`✅ Switched to section: ${sectionName}`);
 
