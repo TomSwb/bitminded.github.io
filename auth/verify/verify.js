@@ -250,24 +250,27 @@ class EmailVerification {
         console.log('Hash:', window.location.hash);
         console.log('Search:', window.location.search);
         
-        // Parse hash parameters (Supabase auth uses hash)
-        const hash = window.location.hash.substring(1);
-        if (hash) {
-            const hashParams = new URLSearchParams(hash);
-            console.log('Hash params:', Object.fromEntries(hashParams.entries()));
-            
-            hashParams.forEach((value, key) => {
-                params[key] = value;
-            });
-        }
-        
-        // Parse search parameters
+        // Parse search parameters first (production)
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.size > 0) {
             console.log('Search params:', Object.fromEntries(searchParams.entries()));
             
             searchParams.forEach((value, key) => {
                 params[key] = value;
+            });
+        }
+        
+        // Parse hash parameters (Supabase auth uses hash, and live server fallback)
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+            const hashParams = new URLSearchParams(hash);
+            console.log('Hash params:', Object.fromEntries(hashParams.entries()));
+            
+            hashParams.forEach((value, key) => {
+                // Only use hash params if search params don't have this key (live server fallback)
+                if (!params[key]) {
+                    params[key] = value;
+                }
             });
         }
         
