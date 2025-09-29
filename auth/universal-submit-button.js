@@ -5,7 +5,7 @@
 class UniversalSubmitButton {
     constructor() {
         this.isInitialized = false;
-        this.currentMode = 'login'; // 'login' or 'signup'
+        this.currentMode = 'login'; // 'login', 'signup', or 'forgot-password'
         this.isSubmitting = false;
         this.elements = {};
         
@@ -71,12 +71,10 @@ class UniversalSubmitButton {
      */
     async loadTranslations() {
         try {
-            console.log('🔄 Loading universal submit button translations...');
             const response = await fetch('locales/auth-locales.json');
             
             if (response.ok) {
                 this.translations = await response.json();
-                console.log('✅ Universal submit button translations loaded');
                 this.updateTranslations(this.getCurrentLanguage());
             } else {
                 console.warn('Failed to load universal submit button translations:', response.status);
@@ -137,6 +135,11 @@ class UniversalSubmitButton {
             this.elements.loadingText.setAttribute('data-translate', 'auth.submitting');
             this.elements.text.textContent = 'Sign In';
             this.elements.loadingText.textContent = 'Signing in...';
+        } else if (this.currentMode === 'forgot-password') {
+            this.elements.text.setAttribute('data-translate', 'forgotPassword.submit');
+            this.elements.loadingText.setAttribute('data-translate', 'forgotPassword.submitting');
+            this.elements.text.textContent = 'Send Reset Link';
+            this.elements.loadingText.textContent = 'Sending...';
         } else {
             this.elements.text.setAttribute('data-translate', 'auth.submitSignup');
             this.elements.loadingText.setAttribute('data-translate', 'auth.submittingSignup');
@@ -161,6 +164,8 @@ class UniversalSubmitButton {
         try {
             if (this.currentMode === 'login') {
                 await this.handleLogin();
+            } else if (this.currentMode === 'forgot-password') {
+                await this.handleForgotPassword();
             } else {
                 await this.handleSignup();
             }
@@ -206,6 +211,18 @@ class UniversalSubmitButton {
             await window.signupForm.handleSubmit();
         } else {
             throw new Error('Signup form not available');
+        }
+    }
+
+    /**
+     * Handle forgot password form submission
+     */
+    async handleForgotPassword() {
+        // Use the forgot password form's validation and submission logic
+        if (window.forgotPasswordForm?.handleSubmit) {
+            await window.forgotPasswordForm.handleSubmit();
+        } else {
+            throw new Error('Forgot password form not available');
         }
     }
 

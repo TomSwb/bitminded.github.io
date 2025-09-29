@@ -79,37 +79,37 @@
     opacity: 0.7;
 }
 
+
 /* ===== PASSWORD CONTAINER ===== */
 .login-form__password-container {
     position: relative;
 }
 
-.login-form__toggle-password {
-    position: absolute;
-    right: var(--spacing-md);
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    padding: var(--spacing-sm);
-    border-radius: var(--radius-sm);
+/* ===== FORGOT PASSWORD ===== */
+.login-form__forgot-password {
+    text-align: right;
+    margin-bottom: var(--spacing-lg);
+}
+
+.login-form__forgot-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
     transition: color var(--transition-fast);
 }
 
-.login-form__toggle-password:hover {
-    color: var(--color-text-primary);
+.login-form__forgot-link:hover {
+    color: var(--color-secondary);
+    text-decoration: underline;
 }
 
-.login-form__toggle-password:focus {
+.login-form__forgot-link:focus {
     outline: none;
-    color: var(--color-primary);
+    color: var(--color-secondary);
+    text-decoration: underline;
 }
 
-.login-form__eye-icon {
-    display: block;
-}
 
 /* ===== ERROR MESSAGES ===== */
 .login-form__error {
@@ -233,29 +233,11 @@
 /* ===== ACCESSIBILITY ===== */
 @media (prefers-reduced-motion: reduce) {
     .login-form__submit,
-    .login-form__input,
-    .login-form__toggle-password {
+    .login-form__input {
         transition: none;
     }
     
     .login-form__spinner {
         animation: none;
-    }
-}
-
-/* ===== DARK MODE SUPPORT ===== */
-@media (prefers-color-scheme: dark) {
-    .login-form {
-        background-color: var(--color-background-primary);
-        border-color: var(--border-color-primary);
-    }
-    
-    .login-form__input {
-        background-color: var(--color-background-primary);
-        color: var(--color-text-primary);
-    }
-    
-    .login-form__input::placeholder {
-        color: var(--color-text-secondary);
     }
 }
