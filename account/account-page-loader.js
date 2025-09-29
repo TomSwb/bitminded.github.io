@@ -8,6 +8,7 @@ class AccountPageLoader {
         this.isInitialized = false;
         this.loadedComponents = new Map();
         this.currentSection = 'profile';
+        this.sections = ['profile', 'security', 'payment', 'apps', 'notifications', 'actions'];
     }
 
     /**
@@ -28,8 +29,16 @@ class AccountPageLoader {
             // Load account layout component
             await this.loadAccountLayout();
             
-            // Load initial section (profile)
-            await this.loadSection('profile');
+            // Check URL for initial section
+            const urlParams = new URLSearchParams(window.location.search);
+            const sectionParam = urlParams.get('section');
+            const initialSection = sectionParam && this.sections.includes(sectionParam) ? sectionParam : 'profile';
+            
+            // Load initial section
+            await this.loadSection(initialSection);
+            
+            // Update current section
+            this.currentSection = initialSection;
             
             this.isInitialized = true;
             // Account page loader initialized successfully
@@ -111,7 +120,7 @@ class AccountPageLoader {
 
             const componentMap = {
                 'profile': 'profile-management',
-                'security': 'password-change', // Will load multiple security components
+                'security': 'security-management', // Security management container
                 'payment': 'payment-management',
                 'apps': 'app-entitlements',
                 'notifications': 'notifications-preferences',

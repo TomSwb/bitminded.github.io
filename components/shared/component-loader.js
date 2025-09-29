@@ -232,6 +232,20 @@ class ComponentLoader {
                         });
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'security-management') {
+                    // Load security management translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/account/components/security-management/security-management-translations.js';
+                    translationScript.onload = () => {
+                        // Initialize security management component after translations are loaded
+                        if (window.SecurityManagement && !window.securityManagement) {
+                            window.securityManagement = new window.SecurityManagement();
+                        }
+                        if (window.securityManagement) {
+                            window.securityManagement.init(config);
+                        }
+                    };
+                    document.head.appendChild(translationScript);
                 }
                 resolve();
             };

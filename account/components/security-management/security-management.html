@@ -1,0 +1,108 @@
+<!-- Security Management Container Component -->
+<div class="security-management" id="security-management">
+    <!-- Security Status Overview -->
+    <div class="security-management__status" id="security-status">
+        <div class="security-management__status-item">
+            <div class="security-management__status-icon">🔒</div>
+            <div class="security-management__status-content">
+                <div class="security-management__status-title translatable-content" data-translation-key="Password">Password</div>
+                <div class="security-management__status-description translatable-content" data-translation-key="Last changed: Recently">Last changed: Recently</div>
+            </div>
+            <div class="security-management__status-action">
+                <button class="security-management__action-btn" data-action="password" id="password-action-btn">
+                    <span class="translatable-content" data-translation-key="Change">Change</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="security-management__status-item">
+            <div class="security-management__status-icon">🔐</div>
+            <div class="security-management__status-content">
+                <div class="security-management__status-title translatable-content" data-translation-key="Two-Factor Authentication">Two-Factor Authentication</div>
+                <div class="security-management__status-description" id="2fa-status-description">
+                    <span class="translatable-content" data-translation-key="Not enabled">Not enabled</span>
+                </div>
+            </div>
+            <div class="security-management__status-action">
+                <button class="security-management__action-btn" data-action="2fa" id="2fa-action-btn">
+                    <span class="translatable-content" data-translation-key="Setup">Setup</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="security-management__status-item">
+            <div class="security-management__status-icon">📱</div>
+            <div class="security-management__status-content">
+                <div class="security-management__status-title translatable-content" data-translation-key="Login Activity">Login Activity</div>
+                <div class="security-management__status-description translatable-content" data-translation-key="View recent login history">View recent login history</div>
+            </div>
+            <div class="security-management__status-action">
+                <button class="security-management__action-btn" data-action="activity" id="activity-action-btn">
+                    <span class="translatable-content" data-translation-key="View">View</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Content Area -->
+    <div class="security-management__content" id="security-content">
+        <!-- Password Change Section -->
+        <div class="security-management__section" id="password-section" data-section="password" style="display: none;">
+            <div class="security-management__section-header">
+                <button class="security-management__back-btn" data-back="overview" id="password-back-btn">
+                    <span class="security-management__back-icon">←</span>
+                    <span class="translatable-content" data-translation-key="Back to Security Overview">Back to Security Overview</span>
+                </button>
+                <h3 class="security-management__section-title translatable-content" data-translation-key="Password Management">Password Management</h3>
+            </div>
+            <div class="security-management__section-content" id="password-content">
+                <!-- Password Change Component will be loaded here -->
+            </div>
+        </div>
+
+        <!-- 2FA Section -->
+        <div class="security-management__section" id="2fa-section" data-section="2fa" style="display: none;">
+            <div class="security-management__section-header">
+                <button class="security-management__back-btn" data-back="overview" id="2fa-back-btn">
+                    <span class="security-management__back-icon">←</span>
+                    <span class="translatable-content" data-translation-key="Back to Security Overview">Back to Security Overview</span>
+                </button>
+                <h3 class="security-management__section-title translatable-content" data-translation-key="Two-Factor Authentication">Two-Factor Authentication</h3>
+            </div>
+            <div class="security-management__section-content" id="2fa-content">
+                <!-- 2FA Component will be loaded here -->
+                <div class="security-management__placeholder">
+                    <p class="translatable-content" data-translation-key="2FA component coming soon">2FA component coming soon</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Activity Section -->
+        <div class="security-management__section" id="activity-section" data-section="activity" style="display: none;">
+            <div class="security-management__section-header">
+                <button class="security-management__back-btn" data-back="overview" id="activity-back-btn">
+                    <span class="security-management__back-icon">←</span>
+                    <span class="translatable-content" data-translation-key="Back to Security Overview">Back to Security Overview</span>
+                </button>
+                <h3 class="security-management__section-title translatable-content" data-translation-key="Login Activity">Login Activity</h3>
+            </div>
+            <div class="security-management__section-content" id="activity-content">
+                <!-- Login Activity Component will be loaded here -->
+                <div class="security-management__placeholder">
+                    <p class="translatable-content" data-translation-key="Login activity component coming soon">Login activity component coming soon</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Section (Default) -->
+        <div class="security-management__section active" id="overview-section" data-section="overview">
+            <div class="security-management__overview">
+                <div class="security-management__overview-content">
+                    <div class="security-management__overview-icon">🛡️</div>
+                    <h3 class="security-management__overview-title translatable-content" data-translation-key="Security Overview">Security Overview</h3>
+                    <p class="security-management__overview-description translatable-content" data-translation-key="Choose a security option above to manage your account security settings">Choose a security option above to manage your account security settings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
