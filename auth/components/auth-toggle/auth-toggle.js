@@ -37,13 +37,11 @@ class AuthToggle {
         const urlParams = new URLSearchParams(window.location.search);
         const action = urlParams.get('action');
         
-        if (action === 'login' || action === 'signup') {
+        if (action === 'login' || action === 'signup' || action === 'forgot-password') {
             this.currentMode = action;
-            console.log(`🔍 Auth toggle initial mode determined from URL: ${action}`);
         } else {
             // Default to signup if no action specified
             this.currentMode = 'signup';
-            console.log('🔍 Auth toggle initial mode defaulted to: signup');
         }
         
         // Update button states immediately based on determined mode
@@ -62,13 +60,18 @@ class AuthToggle {
         this.elements.loginButton.classList.toggle('auth-toggle__button--active', this.currentMode === 'login');
         this.elements.signupButton.classList.toggle('auth-toggle__button--active', this.currentMode === 'signup');
         
+        // Hide toggle buttons when in forgot-password mode
+        const toggleContainer = document.querySelector('.auth-toggle');
+        if (toggleContainer) {
+            toggleContainer.style.display = this.currentMode === 'forgot-password' ? 'none' : 'block';
+        }
+        
         // Notify universal submit button of mode change
         const modeChangedEvent = new CustomEvent('authModeChanged', {
             detail: { mode: this.currentMode }
         });
         window.dispatchEvent(modeChangedEvent);
         
-        console.log(`🔄 Button states updated. Login active: ${this.currentMode === 'login'}, Signup active: ${this.currentMode === 'signup'}`);
     }
 
     /**
@@ -113,15 +116,10 @@ class AuthToggle {
      */
     async loadTranslations() {
         try {
-            console.log('🔄 Loading auth toggle translations...');
             const response = await fetch('components/auth-toggle/locales/auth-toggle-locales.json');
-            console.log('📁 Auth toggle translations response:', response.status, response.ok);
-            
             if (response.ok) {
                 this.translations = await response.json();
-                console.log('📚 Auth toggle translations loaded:', this.translations);
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Auth toggle translations loaded');
             } else {
                 console.warn('Failed to load auth toggle translations:', response.status);
             }
@@ -135,21 +133,15 @@ class AuthToggle {
      * @param {string} language - Language code
      */
     updateTranslations(language = this.getCurrentLanguage()) {
-        console.log('🔄 Updating auth toggle translations for language:', language);
-        console.log('📚 Available translations:', this.translations);
-        
         if (this.translations?.[language]) {
             const t = this.translations[language].translation;
-            console.log('🎯 Translation object for', language, ':', t);
             
             // Update all translatable elements
             const translatableElements = this.elements.container.querySelectorAll('[data-translate]');
-            console.log('🔍 Found translatable elements:', translatableElements.length);
             
             translatableElements.forEach(element => {
                 const key = element.getAttribute('data-translate');
                 const translatedText = t[key];
-                console.log(`🔤 Updating ${key}: "${translatedText}"`);
                 if (translatedText) {
                     element.textContent = translatedText;
                 }
@@ -184,16 +176,13 @@ class AuthToggle {
     }
 
     /**
-     * Set the current mode (login or signup)
-     * @param {string} mode - 'login' or 'signup'
+     * Set the current mode (login, signup, or forgot-password)
+     * @param {string} mode - 'login', 'signup', or 'forgot-password'
      */
     setMode(mode) {
         if (mode === this.currentMode) {
-            console.log(`🔄 Auth mode already set to ${mode}, no change needed`);
             return;
         }
-
-        console.log(`🔄 Switching auth mode from ${this.currentMode} to ${mode}`);
 
         // Update current mode
         this.currentMode = mode;
@@ -205,9 +194,10 @@ class AuthToggle {
         if (window.authPageLoader) {
             if (mode === 'login') {
                 window.authPageLoader.showLoginForm();
-            } else {
+            } else if (mode === 'signup') {
                 window.authPageLoader.showSignupForm();
             }
+            // Don't switch forms for forgot-password mode - it's handled by authFormSwitch event
         }
 
         // Dispatch custom event for other components
@@ -216,7 +206,6 @@ class AuthToggle {
         });
         window.dispatchEvent(modeChangedEvent);
 
-        console.log(`✅ Auth mode switched to: ${mode}`);
     }
 
     /**
@@ -229,7 +218,7 @@ class AuthToggle {
 
     /**
      * Initialize with a specific mode
-     * @param {string} mode - 'login' or 'signup'
+     * @param {string} mode - 'login', 'signup', or 'forgot-password'
      */
     initializeWithMode(mode) {
         this.setMode(mode);

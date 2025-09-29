@@ -18,6 +18,10 @@ class LoginForm {
      * Initialize the login form component
      */
     async init() {
+        if (this.isInitialized) {
+            return;
+        }
+        
         try {
             this.cacheElements();
             this.bindEvents();
@@ -29,6 +33,21 @@ class LoginForm {
         } catch (error) {
             console.error('❌ Failed to initialize Login Form:', error);
             this.showError('Failed to initialize login form');
+        }
+    }
+
+    /**
+     * Re-initialize the component after HTML injection
+     */
+    async reinit() {
+        try {
+            this.cacheElements();
+            this.bindEvents();
+            this.updateTranslations();
+            this.loadFailedAttempts();
+            console.log('✅ Login Form re-initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to re-initialize Login Form:', error);
         }
     }
 
@@ -45,9 +64,10 @@ class LoginForm {
             emailError: document.getElementById('login-email-error'),
             passwordError: document.getElementById('login-password-error'),
             
-            // Password toggle button
-            togglePassword: document.getElementById('login-toggle-password')
+            // Forgot password link
+            forgotPassword: document.getElementById('login-forgot-password')
         };
+        
     }
 
     /**
@@ -62,8 +82,10 @@ class LoginForm {
         this.elements.email.addEventListener('blur', () => this.validateEmail());
         this.elements.password.addEventListener('blur', () => this.validatePassword());
 
-        // Password visibility toggle
-        this.elements.togglePassword.addEventListener('click', () => this.togglePasswordVisibility());
+        // Forgot password link
+        if (this.elements.forgotPassword) {
+            this.elements.forgotPassword.addEventListener('click', (e) => this.handleForgotPassword(e));
+        }
 
         // Listen for language changes
         window.addEventListener('languageChanged', async (e) => {
@@ -84,7 +106,6 @@ class LoginForm {
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Login form translations loaded');
             } else {
                 console.warn('Failed to load login form translations:', response.status);
             }
@@ -326,26 +347,19 @@ class LoginForm {
         if (this.elements.password) {
             this.elements.password.disabled = isSubmitting;
         }
-        if (this.elements.togglePassword) {
-            this.elements.togglePassword.disabled = isSubmitting;
-        }
     }
 
     /**
-     * Toggle password visibility
+     * Handle forgot password link click
+     * @param {Event} e - Click event
      */
-    togglePasswordVisibility() {
-        const field = this.elements.password;
-        const toggleButton = this.elements.togglePassword;
+    handleForgotPassword(e) {
+        e.preventDefault();
         
-        if (field && toggleButton) {
-            const isPassword = field.type === 'password';
-            field.type = isPassword ? 'text' : 'password';
-            
-            // Update button aria-label
-            const action = isPassword ? 'Hide' : 'Show';
-            toggleButton.setAttribute('aria-label', `${action} password visibility`);
-        }
+        // Dispatch custom event to switch to forgot password form
+        window.dispatchEvent(new CustomEvent('authFormSwitch', {
+            detail: { form: 'forgot-password' }
+        }));
     }
 
     /**
@@ -355,7 +369,6 @@ class LoginForm {
         try {
             const stored = localStorage.getItem('login_failed_attempts');
             this.failedAttempts = stored ? parseInt(stored, 10) : 0;
-            console.log(`🔍 Loaded failed attempts: ${this.failedAttempts}`);
         } catch (error) {
             console.warn('Failed to load failed attempts:', error);
             this.failedAttempts = 0;
@@ -368,7 +381,6 @@ class LoginForm {
     saveFailedAttempts() {
         try {
             localStorage.setItem('login_failed_attempts', this.failedAttempts.toString());
-            console.log(`💾 Saved failed attempts: ${this.failedAttempts}`);
         } catch (error) {
             console.warn('Failed to save failed attempts:', error);
         }
@@ -381,7 +393,6 @@ class LoginForm {
         this.failedAttempts++;
         this.saveFailedAttempts();
         
-        console.log(`❌ Failed attempt ${this.failedAttempts}/${this.maxAttempts}`);
         
         // Show CAPTCHA if threshold reached
         if (this.failedAttempts >= this.maxAttempts) {

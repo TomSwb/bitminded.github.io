@@ -18,7 +18,6 @@ class AuthPageLoader {
             return;
         }
 
-        console.log('🔄 Initializing auth page loader...');
 
         try {
             // Load auth toggle first
@@ -29,6 +28,8 @@ class AuthPageLoader {
             
             if (authAction === 'login') {
                 await this.loadLoginForm();
+            } else if (authAction === 'forgot-password') {
+                await this.loadForgotPasswordForm();
             } else {
                 // Default to signup form
                 await this.loadSignupForm();
@@ -36,6 +37,9 @@ class AuthPageLoader {
             
             // Auth toggle will now handle its own initialization based on URL parameters
             // No need to manually sync since it reads the URL during initialization
+            
+            // Listen for form switch events
+            this.bindFormSwitchEvents();
             
             this.isInitialized = true;
             console.log('✅ Auth page loader initialized successfully');
@@ -46,17 +50,14 @@ class AuthPageLoader {
 
     /**
      * Detect which auth action was clicked
-     * @returns {string} 'login' or 'signup'
+     * @returns {string} 'login', 'signup', or 'forgot-password'
      */
     detectAuthAction() {
         // Check URL parameters first
         const urlParams = new URLSearchParams(window.location.search);
         const action = urlParams.get('action');
         
-        console.log(`🔍 Detecting auth action. URL params: ${window.location.search}, action: ${action}`);
-        
-        if (action === 'login' || action === 'signup') {
-            console.log(`✅ Auth action detected from URL: ${action}`);
+        if (action === 'login' || action === 'signup' || action === 'forgot-password') {
             return action;
         }
 
@@ -65,13 +66,11 @@ class AuthPageLoader {
             const referrer = new URL(document.referrer);
             if (referrer.pathname === '/' || referrer.pathname === '/index.html') {
                 // If coming from home page, default to signup
-                console.log('Auth action: defaulting to signup (from home page)');
                 return 'signup';
             }
         }
 
         // Default to signup
-        console.log('Auth action: defaulting to signup');
         return 'signup';
     }
 
@@ -80,7 +79,6 @@ class AuthPageLoader {
      */
     async loadAuthToggle() {
         try {
-            console.log('🔄 Loading auth toggle component...');
 
             // Load HTML
             const htmlResponse = await fetch('components/auth-toggle/auth-toggle.html');
@@ -106,7 +104,6 @@ class AuthPageLoader {
             const container = document.getElementById('auth-toggle-container');
             if (container) {
                 container.innerHTML = htmlContent;
-                console.log('✅ Auth toggle HTML loaded');
             } else {
                 throw new Error('Auth toggle container not found');
             }
@@ -124,7 +121,6 @@ class AuthPageLoader {
             });
 
             this.loadedComponents.set('auth-toggle', true);
-            console.log('✅ Auth toggle component loaded successfully');
             this.triggerLanguageChange();
 
         } catch (error) {
@@ -277,6 +273,75 @@ class AuthPageLoader {
     }
 
     /**
+     * Load forgot password form component
+     */
+    async loadForgotPasswordForm() {
+        try {
+            console.log('🔄 Loading forgot password form component...');
+
+            // Load HTML
+            const htmlResponse = await fetch('components/forgot-password/forgot-password.html');
+            if (!htmlResponse.ok) {
+                throw new Error(`Failed to load forgot password form HTML: ${htmlResponse.status}`);
+            }
+            const htmlContent = await htmlResponse.text();
+
+            // Load CSS
+            const cssResponse = await fetch('components/forgot-password/forgot-password.css');
+            if (!cssResponse.ok) {
+                throw new Error(`Failed to load forgot password form CSS: ${cssResponse.status}`);
+            }
+            const cssContent = await cssResponse.text();
+
+
+            // Inject CSS
+            const styleElement = document.createElement('style');
+            styleElement.textContent = cssContent;
+            document.head.appendChild(styleElement);
+
+            // Inject HTML into container
+            const container = document.getElementById('forgot-password-form-container');
+            if (container) {
+                container.innerHTML = htmlContent;
+                container.classList.remove('hidden');
+            } else {
+                throw new Error('Forgot password form container not found');
+            }
+
+            // Load JavaScript (only if not already loaded)
+            const existingScript = document.querySelector('script[data-component="forgot-password-form"]');
+            if (!existingScript) {
+                const scriptElement = document.createElement('script');
+                scriptElement.src = 'components/forgot-password/forgot-password.js';
+                scriptElement.setAttribute('data-component', 'forgot-password-form');
+                document.head.appendChild(scriptElement);
+
+                // Wait for script to load
+                await new Promise((resolve, reject) => {
+                    scriptElement.onload = resolve;
+                    scriptElement.onerror = reject;
+                });
+            }
+
+            // Initialize the forgot password form after HTML is loaded
+            if (window.forgotPasswordForm && !window.forgotPasswordForm.isInitialized) {
+                await window.forgotPasswordForm.init();
+            }
+
+            // Mark as loaded
+            this.loadedComponents.set('forgot-password-form', true);
+
+            console.log('✅ Forgot password form component loaded successfully');
+            
+            // Trigger language change event for the loaded component
+            this.triggerLanguageChange();
+        } catch (error) {
+            console.error('❌ Failed to load forgot password form component:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Load login form component
      */
     async loadLoginForm() {
@@ -313,17 +378,20 @@ class AuthPageLoader {
                 throw new Error('Login form container not found');
             }
 
-            // Load JavaScript
-            const scriptElement = document.createElement('script');
-            scriptElement.src = 'components/login-form/login-form.js';
-            scriptElement.setAttribute('data-component', 'login-form');
-            document.head.appendChild(scriptElement);
+            // Load JavaScript (only if not already loaded)
+            const existingScript = document.querySelector('script[data-component="login-form"]');
+            if (!existingScript) {
+                const scriptElement = document.createElement('script');
+                scriptElement.src = 'components/login-form/login-form.js';
+                scriptElement.setAttribute('data-component', 'login-form');
+                document.head.appendChild(scriptElement);
 
-            // Wait for script to load
-            await new Promise((resolve, reject) => {
-                scriptElement.onload = resolve;
-                scriptElement.onerror = reject;
-            });
+                // Wait for script to load
+                await new Promise((resolve, reject) => {
+                    scriptElement.onload = resolve;
+                    scriptElement.onerror = reject;
+                });
+            }
 
             // Initialize the login form after HTML is loaded
             if (window.loginForm && !window.loginForm.isInitialized) {
@@ -393,7 +461,6 @@ class AuthPageLoader {
             detail: { language: currentLanguage }
         });
         window.dispatchEvent(languageChangedEvent);
-        console.log(`🔄 Triggered language change event for: ${currentLanguage}`);
     }
 
     /**
@@ -488,6 +555,141 @@ class AuthPageLoader {
         if (window.authToggle) {
             window.authToggle.setMode('login');
             console.log('🔄 Auth toggle updated to login mode');
+        }
+    }
+
+    /**
+     * Bind form switch event listeners
+     */
+    bindFormSwitchEvents() {
+        window.addEventListener('authFormSwitch', async (e) => {
+            const { form } = e.detail;
+            console.log(`🔄 Switching to ${form} form`);
+            
+            try {
+                if (form === 'login') {
+                    await this.switchToLoginForm();
+                } else if (form === 'signup') {
+                    await this.switchToSignupForm();
+                } else if (form === 'forgot-password') {
+                    await this.switchToForgotPasswordForm();
+                }
+            } catch (error) {
+                console.error(`❌ Failed to switch to ${form} form:`, error);
+            }
+        });
+    }
+
+    /**
+     * Switch to login form
+     */
+    async switchToLoginForm() {
+        // Hide other form containers
+        const forgotPasswordContainer = document.getElementById('forgot-password-form-container');
+        if (forgotPasswordContainer) {
+            forgotPasswordContainer.classList.add('hidden');
+        }
+
+        // Load login form if not already loaded
+        if (!this.loadedComponents.has('login-form')) {
+            await this.loadLoginForm();
+        } else {
+            // If already loaded, just inject the HTML
+            const htmlResponse = await fetch('components/login-form/login-form.html');
+            if (htmlResponse.ok) {
+                const htmlContent = await htmlResponse.text();
+                const container = document.getElementById('login-form-container');
+                if (container) {
+                    container.innerHTML = htmlContent;
+                    container.classList.remove('hidden');
+                    
+                    // Re-initialize the login form after HTML injection
+                    if (window.loginForm) {
+                        await window.loginForm.reinit();
+                    }
+                }
+            }
+        }
+
+        // Update auth toggle state
+        if (window.authToggle) {
+            window.authToggle.setMode('login');
+            console.log('🔄 Auth toggle updated to login mode');
+        }
+    }
+
+    /**
+     * Switch to signup form
+     */
+    async switchToSignupForm() {
+        // Hide other form containers
+        const forgotPasswordContainer = document.getElementById('forgot-password-form-container');
+        if (forgotPasswordContainer) {
+            forgotPasswordContainer.classList.add('hidden');
+        }
+
+        // Load signup form if not already loaded
+        if (!this.loadedComponents.has('signup-form')) {
+            await this.loadSignupForm();
+        } else {
+            // If already loaded, just inject the HTML
+            const htmlResponse = await fetch('components/signup-form/signup-form.html');
+            if (htmlResponse.ok) {
+                const htmlContent = await htmlResponse.text();
+                const container = document.getElementById('signup-form-container');
+                if (container) {
+                    container.innerHTML = htmlContent;
+                    container.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Update auth toggle state
+        if (window.authToggle) {
+            window.authToggle.setMode('signup');
+            console.log('🔄 Auth toggle updated to signup mode');
+        }
+    }
+
+    /**
+     * Switch to forgot password form
+     */
+    async switchToForgotPasswordForm() {
+        // Hide other form containers
+        const loginContainer = document.getElementById('login-form-container');
+        if (loginContainer) {
+            loginContainer.classList.add('hidden');
+        }
+        const signupContainer = document.getElementById('signup-form-container');
+        if (signupContainer) {
+            signupContainer.classList.add('hidden');
+        }
+
+        // Load forgot password form if not already loaded
+        if (!this.loadedComponents.has('forgot-password-form')) {
+            await this.loadForgotPasswordForm();
+        } else {
+            // If already loaded, just inject the HTML
+            const htmlResponse = await fetch('components/forgot-password/forgot-password.html');
+            if (htmlResponse.ok) {
+                const htmlContent = await htmlResponse.text();
+                const container = document.getElementById('forgot-password-form-container');
+                if (container) {
+                    container.innerHTML = htmlContent;
+                    container.classList.remove('hidden');
+                    
+                    // Re-initialize the forgot password form after HTML injection
+                    if (window.forgotPasswordForm) {
+                        await window.forgotPasswordForm.reinit();
+                    }
+                }
+            }
+        }
+
+        // Update auth toggle state
+        if (window.authToggle) {
+            window.authToggle.setMode('forgot-password');
+            console.log('🔄 Auth toggle updated to forgot-password mode');
         }
     }
 }
