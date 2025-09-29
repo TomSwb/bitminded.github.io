@@ -20,18 +20,27 @@ class AuthPageLoader {
 
 
         try {
+            console.log('🚀 AuthPageLoader initializing...');
+            console.log('📍 Document ready state:', document.readyState);
+            console.log('🌐 Initial URL:', window.location.href);
+            
             // Load auth toggle first
             await this.loadAuthToggle();
             
             // Determine which form to show based on URL parameters or referrer
             const authAction = this.detectAuthAction();
             
+            console.log('🔄 Loading form for action:', authAction);
+            
             if (authAction === 'login') {
                 await this.loadLoginForm();
             } else if (authAction === 'forgot-password') {
                 await this.loadForgotPasswordForm();
+            } else if (authAction === 'reset-password') {
+                await this.loadResetPasswordForm();
             } else {
                 // Default to signup form
+                console.log('🔄 Defaulting to signup form');
                 await this.loadSignupForm();
             }
             
@@ -50,14 +59,28 @@ class AuthPageLoader {
 
     /**
      * Detect which auth action was clicked
-     * @returns {string} 'login', 'signup', or 'forgot-password'
+     * @returns {string} 'login', 'signup', 'forgot-password', or 'reset-password'
      */
     detectAuthAction() {
         // Check URL parameters first
-        const urlParams = new URLSearchParams(window.location.search);
-        const action = urlParams.get('action');
+        console.log('🌐 Full URL:', window.location.href);
+        console.log('🔗 Search string:', window.location.search);
+        console.log('🔗 Hash:', window.location.hash);
         
-        if (action === 'login' || action === 'signup' || action === 'forgot-password') {
+        const urlParams = new URLSearchParams(window.location.search);
+        let action = urlParams.get('action');
+        
+        // Fallback: Check hash for action (for live server compatibility)
+        if (!action && window.location.hash) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            action = hashParams.get('action');
+            console.log('🔍 Checking hash for action:', action);
+        }
+        
+        console.log('🔍 Detecting auth action. URL params:', window.location.search, 'action:', action);
+        
+        if (action === 'login' || action === 'signup' || action === 'forgot-password' || action === 'reset-password') {
+            console.log('✅ Auth action detected from URL:', action);
             return action;
         }
 
@@ -71,6 +94,7 @@ class AuthPageLoader {
         }
 
         // Default to signup
+        console.log('⚠️ No valid action found, defaulting to signup');
         return 'signup';
     }
 
@@ -573,6 +597,8 @@ class AuthPageLoader {
                     await this.switchToSignupForm();
                 } else if (form === 'forgot-password') {
                     await this.switchToForgotPasswordForm();
+                } else if (form === 'reset-password') {
+                    await this.switchToResetPasswordForm();
                 }
             } catch (error) {
                 console.error(`❌ Failed to switch to ${form} form:`, error);
@@ -690,6 +716,123 @@ class AuthPageLoader {
         if (window.authToggle) {
             window.authToggle.setMode('forgot-password');
             console.log('🔄 Auth toggle updated to forgot-password mode');
+        }
+    }
+
+    /**
+     * Load reset password form component
+     */
+    async loadResetPasswordForm() {
+        try {
+            console.log('🔄 Loading reset password form component...');
+
+            // Load HTML
+            const htmlResponse = await fetch('components/reset-password/reset-password.html');
+            if (!htmlResponse.ok) {
+                throw new Error(`Failed to load reset password form HTML: ${htmlResponse.status}`);
+            }
+            const htmlContent = await htmlResponse.text();
+
+            // Load CSS
+            const cssResponse = await fetch('components/reset-password/reset-password.css');
+            if (!cssResponse.ok) {
+                throw new Error(`Failed to load reset password form CSS: ${cssResponse.status}`);
+            }
+            const cssContent = await cssResponse.text();
+
+            // Inject CSS
+            const styleElement = document.createElement('style');
+            styleElement.textContent = cssContent;
+            document.head.appendChild(styleElement);
+
+            // Inject HTML into container
+            const container = document.getElementById('reset-password-form-container');
+            if (container) {
+                container.innerHTML = htmlContent;
+                container.classList.remove('hidden');
+            } else {
+                throw new Error('Reset password form container not found');
+            }
+
+            // Load JavaScript (only if not already loaded)
+            const existingScript = document.querySelector('script[data-component="reset-password-form"]');
+            if (!existingScript) {
+                const scriptElement = document.createElement('script');
+                scriptElement.src = 'components/reset-password/reset-password.js';
+                scriptElement.setAttribute('data-component', 'reset-password-form');
+                document.head.appendChild(scriptElement);
+
+                // Wait for script to load
+                await new Promise((resolve, reject) => {
+                    scriptElement.onload = resolve;
+                    scriptElement.onerror = reject;
+                });
+            }
+
+            // Initialize the reset password form after HTML is loaded
+            if (window.resetPasswordForm) {
+                // Re-initialize to pick up the newly injected HTML
+                await window.resetPasswordForm.reinit();
+            } else {
+                console.warn('Reset password form instance not found');
+            }
+
+            // Mark as loaded
+            this.loadedComponents.set('reset-password-form', true);
+
+            console.log('✅ Reset password form component loaded successfully');
+            
+            // Trigger language change event for the loaded component
+            this.triggerLanguageChange();
+        } catch (error) {
+            console.error('❌ Failed to load reset password form component:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Switch to reset password form
+     */
+    async switchToResetPasswordForm() {
+        // Hide other form containers
+        const loginContainer = document.getElementById('login-form-container');
+        if (loginContainer) {
+            loginContainer.classList.add('hidden');
+        }
+        const signupContainer = document.getElementById('signup-form-container');
+        if (signupContainer) {
+            signupContainer.classList.add('hidden');
+        }
+        const forgotPasswordContainer = document.getElementById('forgot-password-form-container');
+        if (forgotPasswordContainer) {
+            forgotPasswordContainer.classList.add('hidden');
+        }
+
+        // Load reset password form if not already loaded
+        if (!this.loadedComponents.has('reset-password-form')) {
+            await this.loadResetPasswordForm();
+        } else {
+            // If already loaded, just inject the HTML
+            const htmlResponse = await fetch('components/reset-password/reset-password.html');
+            if (htmlResponse.ok) {
+                const htmlContent = await htmlResponse.text();
+                const container = document.getElementById('reset-password-form-container');
+                if (container) {
+                    container.innerHTML = htmlContent;
+                    container.classList.remove('hidden');
+                    
+                    // Re-initialize the reset password form after HTML injection
+                    if (window.resetPasswordForm) {
+                        await window.resetPasswordForm.reinit();
+                    }
+                }
+            }
+        }
+
+        // Update auth toggle state
+        if (window.authToggle) {
+            window.authToggle.setMode('reset-password');
+            console.log('🔄 Auth toggle updated to reset-password mode');
         }
     }
 }
