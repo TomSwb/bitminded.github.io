@@ -190,7 +190,7 @@
 }
 
 /* Mobile responsive layout */
-@media (max-width: 768px) {
+@media (max-width: 880px) {
     .profile-management__actions {
         flex-direction: column;
         gap: 1rem;
@@ -279,32 +279,38 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 880px) {
     .profile-management {
         padding: 1rem;
         margin: 0;
         border-radius: 0;
     }
-    
+
     .profile-management__header {
         flex-direction: column;
         text-align: center;
         gap: 1.5rem;
+        align-items: center;
     }
-    
-    .profile-management__avatar-container {
-        width: 100px;
-        height: 100px;
+
+    .profile-management__avatar-section {
+        width: 100%;
+        margin-bottom: 1rem;
     }
-    
+
+    .profile-management__user-info {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
     .profile-management__username {
         font-size: 1.5rem;
     }
-    
+
     .profile-management__email {
         font-size: 1rem;
     }
-    
+
     .profile-management__section {
         padding: 1rem;
     }
@@ -319,10 +325,7 @@
         gap: 1rem;
     }
     
-    .profile-management__avatar-container {
-        width: 80px;
-        height: 80px;
-    }
+
     
     .profile-management__username {
         font-size: 1.25rem;
