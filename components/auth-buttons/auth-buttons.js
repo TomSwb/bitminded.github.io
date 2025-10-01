@@ -10,6 +10,9 @@ class AuthButtons {
         this.elements = {};
         this.translations = null;
         
+        // Bind methods
+        this.handleProfileUpdate = this.handleProfileUpdate.bind(this);
+        
         this.init();
     }
 
@@ -30,8 +33,8 @@ class AuthButtons {
             await this.checkAuthState();
             
             // Add a delayed check to ensure auth state is properly detected after page load
-            setTimeout(() => {
-                this.checkAuthState();
+            setTimeout(async () => {
+                await this.checkAuthState();
             }, 1000);
             
             this.isInitialized = true;
@@ -126,7 +129,7 @@ class AuthButtons {
         this.setupSupabaseListener();
 
         // Listen for language changes
-        window.addEventListener('languageChanged', (e) => {
+        window.addEventListener('languageChanged', async (e) => {
             // Auth buttons received language change event
             
             // Don't refresh translations if we're on the auth page
@@ -135,7 +138,13 @@ class AuthButtons {
                 return;
             }
             
-            this.refreshTranslations(e.detail.language);
+            await this.refreshTranslations(e.detail.language);
+        });
+
+        // Listen for profile updates (like username changes)
+        window.addEventListener('profileUpdated', (e) => {
+            console.log('🔄 Profile updated event received:', e.detail);
+            this.handleProfileUpdate(e.detail);
         });
     }
 
@@ -252,7 +261,7 @@ class AuthButtons {
             if (session && session.user) {
                 // User is logged in
                 this.currentUser = session.user;
-                this.showLoggedInState();
+                await this.showLoggedInState();
             } else {
                 console.log('❌ No active session, showing logged out state');
                 this.currentUser = null;
@@ -273,7 +282,7 @@ class AuthButtons {
         if (event === 'SIGNED_IN' && session) {
             console.log('✅ User signed in, updating UI');
             this.currentUser = session.user;
-            this.showLoggedInState();
+            await this.showLoggedInState();
         } else if (event === 'SIGNED_OUT') {
             console.log('❌ User signed out, updating UI');
             this.currentUser = null;
@@ -281,7 +290,7 @@ class AuthButtons {
         } else if (event === 'TOKEN_REFRESHED' && session) {
             console.log('🔄 Token refreshed, updating UI');
             this.currentUser = session.user;
-            this.showLoggedInState();
+            await this.showLoggedInState();
         }
     }
 
@@ -289,24 +298,41 @@ class AuthButtons {
      * Show logged out state
      */
     showLoggedOutState() {
-        console.log('🔓 Showing logged out state');
-        this.hideAllStates();
-        if (this.elements.loggedOut) {
-            this.elements.loggedOut.style.display = 'flex';
+        try {
+            console.log('🔓 Showing logged out state');
+            this.hideAllStates();
+            if (this.elements.loggedOut) {
+                this.elements.loggedOut.style.display = 'flex';
+                console.log('✅ Logged out state displayed');
+            } else {
+                console.error('❌ Logged out element not found');
+            }
+        } catch (error) {
+            console.error('❌ Error showing logged out state:', error);
         }
     }
 
     /**
      * Show logged in state
      */
-    showLoggedInState() {
-        // Showing logged in state
-        this.hideAllStates();
-        if (this.elements.loggedIn) {
-            // Ensure flex layout to match CSS and preserve spacing/gap
-            this.elements.loggedIn.style.display = 'flex';
-            this.elements.loggedIn.classList.remove('auth-buttons__logged-in--hidden');
-            this.updateUserInfo();
+    async showLoggedInState() {
+        try {
+            console.log('🔄 Showing logged in state');
+            // Showing logged in state
+            this.hideAllStates();
+            if (this.elements.loggedIn) {
+                // Ensure flex layout to match CSS and preserve spacing/gap
+                this.elements.loggedIn.style.display = 'flex';
+                this.elements.loggedIn.classList.remove('auth-buttons__logged-in--hidden');
+                console.log('✅ Logged in state displayed');
+                await this.updateUserInfo();
+            } else {
+                console.error('❌ Logged in element not found');
+            }
+        } catch (error) {
+            console.error('❌ Error showing logged in state:', error);
+            // Fallback: try to show logged out state
+            this.showLoggedOutState();
         }
     }
 
@@ -324,20 +350,81 @@ class AuthButtons {
     }
 
     /**
+     * Handle profile update events
+     */
+    async handleProfileUpdate(eventDetail) {
+        try {
+            console.log('🔄 Handling profile update in auth-buttons:', eventDetail);
+            
+            // If username was updated, refresh user data to get the new username
+            if (eventDetail.component === 'username' && eventDetail.username) {
+                // Update the current user's metadata with the new username
+                if (this.currentUser) {
+                    if (!this.currentUser.user_metadata) {
+                        this.currentUser.user_metadata = {};
+                    }
+                    this.currentUser.user_metadata.username = eventDetail.username;
+                }
+                
+                // Update the UI immediately with the new username
+                await this.updateUserInfo();
+            }
+        } catch (error) {
+            console.error('❌ Failed to handle profile update in auth-buttons:', error);
+        }
+    }
+
+    /**
      * Update user information display
      */
-    updateUserInfo() {
-        if (!this.currentUser) return;
+    async updateUserInfo() {
+        try {
+            if (!this.currentUser) return;
 
-        // Get translated "User" text
-        const defaultUserName = this.translations?.[this.getCurrentLanguage()]?.translation?.['auth.user'] || 'User';
+            // Get translated "User" text
+            const defaultUserName = this.translations?.[this.getCurrentLanguage()]?.translation?.['auth.user'] || 'User';
 
-        // Update user name - only use username from user_metadata or email prefix as fallback
-        if (this.elements.userName) {
-            const displayName = this.currentUser.user_metadata?.username || 
-                               this.currentUser.email?.split('@')[0] || 
-                               defaultUserName;
-            this.elements.userName.textContent = displayName;
+            // Try to get username from user_metadata first
+            let displayName = this.currentUser.user_metadata?.username;
+            
+            // If no username in metadata, try to fetch from user_profiles table
+            if (!displayName && window.supabase) {
+                try {
+                    const { data: profile, error } = await window.supabase
+                        .from('user_profiles')
+                        .select('username')
+                        .eq('id', this.currentUser.id)
+                        .single();
+                    
+                    if (!error && profile?.username) {
+                        displayName = profile.username;
+                        // Update user_metadata for future use
+                        if (!this.currentUser.user_metadata) {
+                            this.currentUser.user_metadata = {};
+                        }
+                        this.currentUser.user_metadata.username = profile.username;
+                    }
+                } catch (error) {
+                    console.warn('Failed to fetch username from profile:', error);
+                }
+            }
+            
+            // Fallback to email prefix or default
+            if (!displayName) {
+                displayName = this.currentUser.email?.split('@')[0] || defaultUserName;
+            }
+
+            // Update the UI
+            if (this.elements.userName) {
+                this.elements.userName.textContent = displayName;
+            }
+        } catch (error) {
+            console.error('Error updating user info:', error);
+            // Fallback to basic display
+            if (this.elements.userName && this.currentUser) {
+                const displayName = this.currentUser.email?.split('@')[0] || 'User';
+                this.elements.userName.textContent = displayName;
+            }
         }
     }
 
@@ -390,7 +477,7 @@ class AuthButtons {
      * Refresh translations (called when language changes)
      * @param {string} language - Language code from event
      */
-    refreshTranslations(language) {
+    async refreshTranslations(language) {
         // Safety check: don't refresh if we're on auth page
         if (this.isOnAuthPage()) {
             console.log('🔒 Skipping auth buttons translation refresh on auth page (safety check)');
@@ -400,7 +487,7 @@ class AuthButtons {
         this.updateTranslations(language);
         // Update user info with new translations
         if (this.currentUser) {
-            this.updateUserInfo();
+            await this.updateUserInfo();
         }
     }
 
@@ -443,6 +530,9 @@ class AuthButtons {
         if (this.elements.logoutButton) {
             this.elements.logoutButton.removeEventListener('click', this.handleLogout);
         }
+
+        // Remove profile update event listener
+        window.removeEventListener('profileUpdated', this.handleProfileUpdate);
 
         // Reset state
         this.isInitialized = false;

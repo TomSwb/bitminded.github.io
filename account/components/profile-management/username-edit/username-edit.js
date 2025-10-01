@@ -273,7 +273,8 @@ class UsernameEdit {
             throw new Error('User not authenticated');
         }
 
-        const { error } = await window.supabase
+        // Update username in user_profiles table
+        const { error: profileError } = await window.supabase
             .from('user_profiles')
             .update({ 
                 username: newUsername,
@@ -281,11 +282,24 @@ class UsernameEdit {
             })
             .eq('id', user.id);
 
-        if (error) {
-            if (error.code === '23505') { // Unique constraint violation
+        if (profileError) {
+            if (profileError.code === '23505') { // Unique constraint violation
                 throw new Error('Username is already taken');
             }
-            throw new Error('Failed to update username');
+            throw new Error('Failed to update username in profile');
+        }
+
+        // Also update user_metadata to keep it in sync
+        const { error: metadataError } = await window.supabase.auth.updateUser({
+            data: {
+                username: newUsername
+            }
+        });
+
+        if (metadataError) {
+            console.warn('Failed to update username in user metadata:', metadataError);
+            // Don't throw error here as the profile update succeeded
+            // The username will still work, just might not persist across refreshes
         }
     }
 
