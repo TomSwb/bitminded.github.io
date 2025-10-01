@@ -317,14 +317,14 @@
             
             <p>You requested to reset your BitMinded account password. Click the button below to create a new password:</p>
             
-            <a href="{{ .ConfirmationURL }}" class="button">Reset My Password</a>
+            <a href="{{ .RedirectTo }}" class="button">Reset My Password</a>
             
             <div class="security-notice">
                 <strong>Security Notice:</strong> This password reset link will expire in 1 hour for your security. If you didn't request a password reset, please ignore this email and consider changing your password.
             </div>
             
             <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
-            <p style="word-break: break-all; background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px;">{{ .ConfirmationURL }}</p>
+            <p style="word-break: break-all; background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px;">{{ .RedirectTo }}</p>
             
             <p><strong>Password Tips:</strong></p>
             <ul>

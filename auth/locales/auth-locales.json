@@ -6,7 +6,9 @@
       "auth.submit": "Sign In",
       "auth.submitting": "Signing in...",
       "auth.submitSignup": "Create Account",
-      "auth.submittingSignup": "Creating account..."
+      "auth.submittingSignup": "Creating account...",
+      "resetPassword.submit": "Update Password",
+      "resetPassword.submitting": "Updating..."
     }
   },
   "fr": {
@@ -16,7 +18,9 @@
       "auth.submit": "Se connecter",
       "auth.submitting": "Connexion en cours...",
       "auth.submitSignup": "Créer un compte",
-      "auth.submittingSignup": "Création du compte..."
+      "auth.submittingSignup": "Création du compte...",
+      "resetPassword.submit": "Mettre à jour le mot de passe",
+      "resetPassword.submitting": "Mise à jour..."
     }
   }
 }

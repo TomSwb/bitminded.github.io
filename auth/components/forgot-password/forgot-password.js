@@ -169,9 +169,8 @@ class ForgotPasswordForm {
         try {
             const email = this.elements.email.value.trim();
             
-            // TODO: Implement Supabase password reset
-            // For now, simulate success
-            await this.simulatePasswordReset(email);
+            // Send password reset email via Supabase
+            await this.sendPasswordResetEmail(email);
             
             this.showSuccess();
             this.elements.form.reset();
@@ -185,20 +184,34 @@ class ForgotPasswordForm {
     }
 
     /**
-     * Simulate password reset (replace with actual Supabase implementation)
+     * Send password reset email via Supabase
      * @param {string} email - User email
      */
-    async simulatePasswordReset(email) {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+    async sendPasswordResetEmail(email) {
         console.log('🔐 Password reset requested for:', email);
         
-        // TODO: Replace with actual Supabase call:
-        // const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        //     redirectTo: `${window.location.origin}/auth/reset-password`
-        // });
-        // if (error) throw error;
+        // Wait for Supabase to be available
+        if (!window.supabase) {
+            throw new Error('Supabase client not available');
+        }
+        
+        const redirectUrl = `${window.location.origin}/auth/index.html?action=reset-password`;
+        console.log('🔗 Redirect URL being sent to Supabase:', redirectUrl);
+        
+        // Send password reset email
+        const { data, error } = await window.supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: redirectUrl
+        });
+        
+        console.log('📧 Password reset response:', { data, error });
+        
+        if (error) {
+            console.error('❌ Supabase password reset error:', error);
+            throw new Error(error.message || 'Failed to send password reset email');
+        }
+        
+        console.log('✅ Password reset email sent successfully');
+        console.log('⚠️ Make sure this URL is in your Supabase Redirect URLs:', redirectUrl);
     }
 
     /**
@@ -289,6 +302,20 @@ class ForgotPasswordForm {
         if (this.elements.successMessage) {
             this.elements.successMessage.classList.add('show');
         }
+        
+        // Hide the email field
+        if (this.elements.email) {
+            const emailFieldContainer = this.elements.email.closest('.forgot-password-form__field');
+            if (emailFieldContainer) {
+                emailFieldContainer.style.display = 'none';
+            }
+        }
+        
+        // Hide the submit button
+        const submitButton = document.querySelector('.auth-submit-container');
+        if (submitButton) {
+            submitButton.style.display = 'none';
+        }
     }
 
     /**
@@ -323,8 +350,10 @@ class ForgotPasswordForm {
     }
 }
 
-// Create global instance
-window.forgotPasswordForm = new ForgotPasswordForm();
+// Create global instance only if it doesn't exist
+if (!window.forgotPasswordForm) {
+    window.forgotPasswordForm = new ForgotPasswordForm();
+}
 
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

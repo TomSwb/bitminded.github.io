@@ -23,7 +23,13 @@ class ResetPasswordForm {
         try {
             this.cacheElements();
             this.bindEvents();
+            this.showTranslatableContent(); // Show content immediately
+            this.initializePasswordRequirements(); // Initialize requirements display
             await this.loadTranslations();
+            
+            // Verify user has a valid session from the reset link
+            await this.verifyResetSession();
+            
             this.isInitialized = true;
             
             console.log('✅ Reset Password Form initialized successfully');
@@ -40,6 +46,8 @@ class ResetPasswordForm {
         try {
             this.cacheElements();
             this.bindEvents();
+            this.showTranslatableContent(); // Show content immediately
+            this.initializePasswordRequirements(); // Initialize requirements display
             this.updateTranslations();
             console.log('✅ Reset Password Form re-initialized successfully');
         } catch (error) {
@@ -53,12 +61,15 @@ class ResetPasswordForm {
     cacheElements() {
         this.elements = {
             form: document.getElementById('reset-password-form'),
+            email: document.getElementById('reset-password-email'),
             newPassword: document.getElementById('reset-password-new'),
             confirmPassword: document.getElementById('reset-password-confirm'),
-            toggleNewPassword: document.getElementById('reset-password-toggle-new'),
-            toggleConfirmPassword: document.getElementById('reset-password-toggle-confirm'),
+            // Password toggle elements (commented out)
+            // toggleNewPassword: document.getElementById('reset-password-toggle-new'),
+            // toggleConfirmPassword: document.getElementById('reset-password-toggle-confirm'),
             
             // Error elements
+            emailError: document.getElementById('reset-password-email-error'),
             newPasswordError: document.getElementById('reset-password-new-error'),
             confirmPasswordError: document.getElementById('reset-password-confirm-error'),
             
@@ -68,14 +79,12 @@ class ResetPasswordForm {
             // Back to login link
             backToLogin: document.getElementById('reset-password-back-to-login'),
             
-            // Password strength elements
-            strengthFill: document.getElementById('reset-password-strength-fill'),
-            strengthText: document.getElementById('reset-password-strength-text'),
+            // Password requirements elements
             requirementsContainer: document.getElementById('reset-password-requirements')
         };
 
         // Debug: Log missing elements (only for non-critical elements)
-        const criticalElements = ['form', 'newPassword', 'confirmPassword', 'toggleNewPassword', 'toggleConfirmPassword'];
+        const criticalElements = ['form', 'newPassword', 'confirmPassword'];
         const missingCritical = [];
         criticalElements.forEach(key => {
             if (!this.elements[key]) {
@@ -97,27 +106,21 @@ class ResetPasswordForm {
         // Form submission
         this.elements.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
-        // Password visibility toggles
+        // Password visibility toggles (commented out)
+        /*
         if (this.elements.toggleNewPassword) {
-            console.log('Binding toggle for new password');
             this.elements.toggleNewPassword.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('New password toggle clicked');
                 this.togglePasswordVisibility('new');
             });
-        } else {
-            console.log('Toggle button for new password not found');
         }
         if (this.elements.toggleConfirmPassword) {
-            console.log('Binding toggle for confirm password');
             this.elements.toggleConfirmPassword.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Confirm password toggle clicked');
                 this.togglePasswordVisibility('confirm');
             });
-        } else {
-            console.log('Toggle button for confirm password not found');
         }
+        */
 
         // Back to login link
         if (this.elements.backToLogin) {
@@ -126,7 +129,15 @@ class ResetPasswordForm {
 
         // Password strength checking
         if (this.elements.newPassword) {
-            this.elements.newPassword.addEventListener('input', () => this.updatePasswordStrength());
+            this.elements.newPassword.addEventListener('input', () => {
+                this.updatePasswordStrength();
+                this.validatePasswordMatch(); // Also check match when new password changes
+            });
+        }
+
+        // Password match validation
+        if (this.elements.confirmPassword) {
+            this.elements.confirmPassword.addEventListener('input', () => this.validatePasswordMatch());
         }
 
         // Listen for language changes
@@ -193,6 +204,56 @@ class ResetPasswordForm {
     }
 
     /**
+     * Verify that user has a valid session from the reset link
+     */
+    async verifyResetSession() {
+        try {
+            // Wait for Supabase to be available
+            if (!window.supabase) {
+                throw new Error('Supabase client not available');
+            }
+
+            // Check URL parameters for password reset type
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const urlType = hashParams.get('type');
+            
+            console.log('🔍 Checking reset link type:', urlType);
+            console.log('🔍 URL hash params:', Array.from(hashParams.entries()));
+
+            // Small delay to ensure Supabase has processed the URL tokens
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Get current session
+            const { data: { session }, error } = await window.supabase.auth.getSession();
+            
+            if (error) {
+                console.error('❌ Session verification error:', error);
+                throw new Error('Unable to verify reset session');
+            }
+
+            if (!session) {
+                console.error('❌ No active session found for password reset');
+                this.showError('Invalid or expired reset link. Please request a new password reset link from the forgot password page.');
+                // Disable the form
+                if (this.elements.email) this.elements.email.disabled = true;
+                if (this.elements.newPassword) this.elements.newPassword.disabled = true;
+                if (this.elements.confirmPassword) this.elements.confirmPassword.disabled = true;
+                throw new Error('No active session');
+            }
+
+            console.log('✅ Valid reset session found for user:', session.user.email);
+            
+            // Populate email field for password manager detection
+            if (this.elements.email && session.user.email) {
+                this.elements.email.value = session.user.email;
+            }
+        } catch (error) {
+            console.error('❌ Session verification failed:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Handle form submission
      * @param {Event} e - Submit event
      */
@@ -240,6 +301,16 @@ class ResetPasswordForm {
             throw new Error('Supabase client not available');
         }
         
+        // Check if we have a session
+        const { data: { session } } = await window.supabase.auth.getSession();
+        
+        if (!session) {
+            console.error('❌ No active session found');
+            throw new Error('You must access this page through the password reset link sent to your email. The link contains authentication tokens required to update your password.');
+        }
+        
+        console.log('✅ Active session found, updating password...');
+        
         // Update password
         const { error } = await window.supabase.auth.updateUser({
             password: newPassword
@@ -254,20 +325,16 @@ class ResetPasswordForm {
     }
 
     /**
-     * Toggle password visibility
+     * Toggle password visibility (commented out - not used)
      * @param {string} field - Field to toggle ('new' or 'confirm')
      */
+    /*
     togglePasswordVisibility(field) {
-        console.log('Toggling password visibility for:', field);
         const input = field === 'new' ? this.elements.newPassword : this.elements.confirmPassword;
         const toggle = field === 'new' ? this.elements.toggleNewPassword : this.elements.toggleConfirmPassword;
         
-        console.log('Input element:', input);
-        console.log('Toggle element:', toggle);
-        
         if (input && toggle) {
             const isPassword = input.type === 'password';
-            console.log('Current type:', input.type, 'Switching to:', isPassword ? 'text' : 'password');
             
             // Force browser to re-render the input
             input.style.webkitTextSecurity = isPassword ? 'disc' : 'none';
@@ -285,11 +352,9 @@ class ResetPasswordForm {
             // Update button aria-label
             const action = isPassword ? 'Hide' : 'Show';
             toggle.setAttribute('aria-label', `${action} password visibility`);
-            console.log('Password visibility toggled successfully');
-        } else {
-            console.error('Missing input or toggle element:', { input, toggle });
         }
     }
+    */
 
     /**
      * Validate form
@@ -331,6 +396,7 @@ class ResetPasswordForm {
         const errorElement = field === 'new' ? this.elements.newPasswordError : this.elements.confirmPasswordError;
         if (errorElement) {
             errorElement.textContent = message;
+            errorElement.style.display = 'block';
         }
     }
 
@@ -340,19 +406,59 @@ class ResetPasswordForm {
     clearErrors() {
         if (this.elements.newPasswordError) {
             this.elements.newPasswordError.textContent = '';
+            this.elements.newPasswordError.style.display = 'none';
         }
         if (this.elements.confirmPasswordError) {
             this.elements.confirmPasswordError.textContent = '';
+            this.elements.confirmPasswordError.style.display = 'none';
         }
     }
 
     /**
-     * Show success message
+     * Show success message and redirect to login
      */
     showSuccess() {
         if (this.elements.success) {
             this.elements.success.classList.remove('hidden');
+            
+            // Ensure translatable content in success message is visible
+            const successTranslatables = this.elements.success.querySelectorAll('.translatable-content');
+            successTranslatables.forEach(el => {
+                el.classList.add('loaded');
+                el.style.opacity = '1';
+            });
         }
+        
+        // Hide the form fields
+        if (this.elements.form) {
+            // Hide password fields
+            const passwordFields = this.elements.form.querySelectorAll('.reset-password-form__field');
+            passwordFields.forEach(field => {
+                field.style.display = 'none';
+            });
+        }
+        
+        // Hide the back to login link
+        if (this.elements.backToLogin) {
+            const backToLoginContainer = this.elements.backToLogin.parentElement;
+            if (backToLoginContainer) {
+                backToLoginContainer.style.display = 'none';
+            }
+        }
+        
+        // Hide the universal submit button
+        const submitButton = document.querySelector('.auth-submit-container');
+        if (submitButton) {
+            submitButton.style.display = 'none';
+        }
+        
+        // Redirect to login after 5 seconds
+        console.log('✅ Password updated successfully, redirecting to login...');
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('authFormSwitch', {
+                detail: { form: 'login' }
+            }));
+        }, 5000);
     }
 
     /**
@@ -369,13 +475,8 @@ class ResetPasswordForm {
      */
     updatePasswordStrength() {
         const password = this.elements.newPassword.value;
-        const strengthFill = this.elements.strengthFill;
-        const strengthText = this.elements.strengthText;
-        
-        if (!strengthFill || !strengthText) return;
 
-        // Calculate password strength
-        let score = 0;
+        // Calculate password requirements
         const requirements = {
             length: password.length >= 8,
             uppercase: /[A-Z]/.test(password),
@@ -384,31 +485,21 @@ class ResetPasswordForm {
             special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
         };
 
-        // Count fulfilled requirements
-        Object.values(requirements).forEach(met => {
-            if (met) score++;
-        });
-
-        // Update strength bar
-        strengthFill.className = 'reset-password-form__strength-fill';
-        if (score <= 1) {
-            strengthFill.classList.add('weak');
-            strengthText.textContent = 'Weak';
-        } else if (score <= 2) {
-            strengthFill.classList.add('fair');
-            strengthText.textContent = 'Fair';
-        } else if (score <= 3) {
-            strengthFill.classList.add('good');
-            strengthText.textContent = 'Good';
-        } else if (score <= 4) {
-            strengthFill.classList.add('strong');
-            strengthText.textContent = 'Strong';
-        } else {
-            strengthFill.classList.add('very-strong');
-            strengthText.textContent = 'Very Strong';
-        }
-
         // Update requirements indicators
+        this.updatePasswordRequirements(requirements);
+    }
+
+    /**
+     * Initialize password requirements display with all invalid
+     */
+    initializePasswordRequirements() {
+        const requirements = {
+            length: false,
+            uppercase: false,
+            lowercase: false,
+            number: false,
+            special: false
+        };
         this.updatePasswordRequirements(requirements);
     }
 
@@ -429,6 +520,40 @@ class ResetPasswordForm {
                 requirementElement.className = `reset-password-form__requirement ${met ? 'valid' : 'invalid'}`;
             }
         });
+    }
+
+    /**
+     * Validate that passwords match
+     */
+    validatePasswordMatch() {
+        const newPassword = this.elements.newPassword?.value || '';
+        const confirmPassword = this.elements.confirmPassword?.value || '';
+        
+        // Only show error if user has started typing in confirm field
+        if (confirmPassword.length > 0) {
+            if (newPassword !== confirmPassword) {
+                this.showFieldError('confirm', 'Passwords do not match');
+                // Add error styling to input field
+                if (this.elements.confirmPassword) {
+                    this.elements.confirmPassword.classList.add('error');
+                }
+            } else {
+                // Clear error if passwords match
+                if (this.elements.confirmPasswordError) {
+                    this.elements.confirmPasswordError.textContent = '';
+                    this.elements.confirmPasswordError.style.display = 'none';
+                }
+                // Remove error styling from input field
+                if (this.elements.confirmPassword) {
+                    this.elements.confirmPassword.classList.remove('error');
+                }
+            }
+        } else {
+            // Clear error styling if field is empty
+            if (this.elements.confirmPassword) {
+                this.elements.confirmPassword.classList.remove('error');
+            }
+        }
     }
 
     /**

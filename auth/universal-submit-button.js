@@ -5,7 +5,7 @@
 class UniversalSubmitButton {
     constructor() {
         this.isInitialized = false;
-        this.currentMode = 'login'; // 'login', 'signup', or 'forgot-password'
+        this.currentMode = 'login'; // 'login', 'signup', 'forgot-password', or 'reset-password'
         this.isSubmitting = false;
         this.elements = {};
         
@@ -48,8 +48,8 @@ class UniversalSubmitButton {
         if (!this.elements.button) return;
 
         // Button click handler
-        this.elements.button.addEventListener('click', () => {
-            this.handleSubmit();
+        this.elements.button.addEventListener('click', (e) => {
+            this.handleSubmit(e);
         });
 
         // Listen for auth mode changes
@@ -140,6 +140,11 @@ class UniversalSubmitButton {
             this.elements.loadingText.setAttribute('data-translate', 'forgotPassword.submitting');
             this.elements.text.textContent = 'Send Reset Link';
             this.elements.loadingText.textContent = 'Sending...';
+        } else if (this.currentMode === 'reset-password') {
+            this.elements.text.setAttribute('data-translate', 'resetPassword.submit');
+            this.elements.loadingText.setAttribute('data-translate', 'resetPassword.submitting');
+            this.elements.text.textContent = 'Update Password';
+            this.elements.loadingText.textContent = 'Updating...';
         } else {
             this.elements.text.setAttribute('data-translate', 'auth.submitSignup');
             this.elements.loadingText.setAttribute('data-translate', 'auth.submittingSignup');
@@ -155,19 +160,22 @@ class UniversalSubmitButton {
 
     /**
      * Handle form submission
+     * @param {Event} e - Submit event
      */
-    async handleSubmit() {
+    async handleSubmit(e) {
         if (this.isSubmitting) return;
 
         this.setSubmitting(true);
 
         try {
             if (this.currentMode === 'login') {
-                await this.handleLogin();
+                await this.handleLogin(e);
             } else if (this.currentMode === 'forgot-password') {
-                await this.handleForgotPassword();
+                await this.handleForgotPassword(e);
+            } else if (this.currentMode === 'reset-password') {
+                await this.handleResetPassword(e);
             } else {
-                await this.handleSignup();
+                await this.handleSignup(e);
             }
         } catch (error) {
             console.error('Form submission error:', error);
@@ -217,12 +225,25 @@ class UniversalSubmitButton {
     /**
      * Handle forgot password form submission
      */
-    async handleForgotPassword() {
+    async handleForgotPassword(e) {
         // Use the forgot password form's validation and submission logic
         if (window.forgotPasswordForm?.handleSubmit) {
-            await window.forgotPasswordForm.handleSubmit();
+            await window.forgotPasswordForm.handleSubmit(e);
         } else {
             throw new Error('Forgot password form not available');
+        }
+    }
+
+    /**
+     * Handle reset password form submission
+     * @param {Event} e - Submit event
+     */
+    async handleResetPassword(e) {
+        // Use the reset password form's validation and submission logic
+        if (window.resetPasswordForm?.handleSubmit) {
+            await window.resetPasswordForm.handleSubmit(e);
+        } else {
+            throw new Error('Reset password form not available');
         }
     }
 

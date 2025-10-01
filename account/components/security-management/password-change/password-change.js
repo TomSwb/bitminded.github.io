@@ -2,7 +2,7 @@
  * Password Change Component
  * Handles secure password change functionality with validation and Supabase integration
  */
-
+if (typeof window.PasswordChange === 'undefined') {
 class PasswordChange {
     constructor() {
         this.isInitialized = false;
@@ -568,16 +568,6 @@ class PasswordChange {
     }
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize if we're on the account page and the component exists
-    if (window.location.pathname.includes('/account') && document.getElementById('password-change')) {
-        if (!window.passwordChange) {
-            window.passwordChange = new PasswordChange();
-            window.passwordChange.init();
-        }
-    }
-});
-
 // Export for use in other scripts
-window.passwordChange = PasswordChange;
+window.PasswordChange = PasswordChange;
+} // End of if statement to prevent duplicate class declaration

@@ -24,13 +24,15 @@ class AuthPageLoader {
             console.log('📍 Document ready state:', document.readyState);
             console.log('🌐 Initial URL:', window.location.href);
             
-            // Load auth toggle first
-            await this.loadAuthToggle();
-            
             // Determine which form to show based on URL parameters or referrer
             const authAction = this.detectAuthAction();
             
             console.log('🔄 Loading form for action:', authAction);
+            
+            // Load auth toggle only for login, signup, and forgot-password pages
+            if (authAction !== 'reset-password') {
+                await this.loadAuthToggle();
+            }
             
             if (authAction === 'login') {
                 await this.loadLoginForm();
@@ -610,10 +612,37 @@ class AuthPageLoader {
      * Switch to login form
      */
     async switchToLoginForm() {
-        // Hide other form containers
+        // Hide all other form containers
         const forgotPasswordContainer = document.getElementById('forgot-password-form-container');
         if (forgotPasswordContainer) {
             forgotPasswordContainer.classList.add('hidden');
+        }
+        
+        const resetPasswordContainer = document.getElementById('reset-password-form-container');
+        if (resetPasswordContainer) {
+            resetPasswordContainer.classList.add('hidden');
+        }
+        
+        const signupContainer = document.getElementById('signup-form-container');
+        if (signupContainer) {
+            signupContainer.classList.add('hidden');
+        }
+
+        // Show auth toggle if it was hidden (e.g., from reset password page)
+        const authToggleContainer = document.getElementById('auth-toggle-container');
+        if (authToggleContainer) {
+            authToggleContainer.style.display = '';
+        }
+        
+        // Show submit button if it was hidden
+        const submitButton = document.querySelector('.auth-submit-container');
+        if (submitButton) {
+            submitButton.style.display = '';
+        }
+
+        // Load or show auth toggle if needed
+        if (!this.loadedComponents.has('auth-toggle')) {
+            await this.loadAuthToggle();
         }
 
         // Load login form if not already loaded
@@ -642,16 +671,48 @@ class AuthPageLoader {
             window.authToggle.setMode('login');
             console.log('🔄 Auth toggle updated to login mode');
         }
+        
+        // Update submit button to login mode
+        if (window.universalSubmitButton) {
+            window.universalSubmitButton.setMode('login');
+        }
     }
 
     /**
      * Switch to signup form
      */
     async switchToSignupForm() {
-        // Hide other form containers
+        // Hide all other form containers
         const forgotPasswordContainer = document.getElementById('forgot-password-form-container');
         if (forgotPasswordContainer) {
             forgotPasswordContainer.classList.add('hidden');
+        }
+        
+        const resetPasswordContainer = document.getElementById('reset-password-form-container');
+        if (resetPasswordContainer) {
+            resetPasswordContainer.classList.add('hidden');
+        }
+        
+        const loginContainer = document.getElementById('login-form-container');
+        if (loginContainer) {
+            loginContainer.classList.add('hidden');
+        }
+
+        // Show auth toggle if it was hidden
+        const authToggleContainer = document.getElementById('auth-toggle-container');
+        if (authToggleContainer) {
+            authToggleContainer.style.display = '';
+        }
+        
+        // Show submit button if it was hidden
+        const submitButton = document.querySelector('.auth-submit-container');
+        if (submitButton) {
+            submitButton.style.display = '';
+        }
+
+        // Load or show auth toggle if needed
+        if (!this.loadedComponents.has('auth-toggle')) {
+            await this.loadAuthToggle();
         }
 
         // Load signup form if not already loaded
@@ -674,6 +735,11 @@ class AuthPageLoader {
         if (window.authToggle) {
             window.authToggle.setMode('signup');
             console.log('🔄 Auth toggle updated to signup mode');
+        }
+        
+        // Update submit button to signup mode
+        if (window.universalSubmitButton) {
+            window.universalSubmitButton.setMode('signup');
         }
     }
 
@@ -725,6 +791,12 @@ class AuthPageLoader {
     async loadResetPasswordForm() {
         try {
             console.log('🔄 Loading reset password form component...');
+
+            // Hide auth toggle container on reset password page
+            const authToggleContainer = document.getElementById('auth-toggle-container');
+            if (authToggleContainer) {
+                authToggleContainer.style.display = 'none';
+            }
 
             // Load HTML
             const htmlResponse = await fetch('components/reset-password/reset-password.html');
@@ -779,6 +851,11 @@ class AuthPageLoader {
 
             // Mark as loaded
             this.loadedComponents.set('reset-password-form', true);
+
+            // Notify universal submit button of mode change
+            window.dispatchEvent(new CustomEvent('authModeChanged', {
+                detail: { mode: 'reset-password' }
+            }));
 
             console.log('✅ Reset password form component loaded successfully');
             
