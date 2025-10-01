@@ -189,6 +189,9 @@ class SecurityManagement {
                 // Mark as loaded
                 this.loadedComponents.add(sectionName);
                 console.log(`✅ Security Management: Loaded component: ${componentName}`);
+                
+                // Update translations after component is loaded
+                this.updateTranslations();
             } else {
                 console.warn('⚠️ Security Management: componentLoader not available');
             }

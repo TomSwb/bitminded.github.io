@@ -246,6 +246,14 @@ class ComponentLoader {
                         }
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'password-change') {
+                    // Special handling for password-change component
+                    if (window.PasswordChange && !window.passwordChange) {
+                        window.passwordChange = new window.PasswordChange();
+                    }
+                    if (window.passwordChange) {
+                        window.passwordChange.init(config);
+                    }
                 }
                 resolve();
             };

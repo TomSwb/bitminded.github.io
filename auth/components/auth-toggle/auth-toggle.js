@@ -37,7 +37,7 @@ class AuthToggle {
         const urlParams = new URLSearchParams(window.location.search);
         const action = urlParams.get('action');
         
-        if (action === 'login' || action === 'signup' || action === 'forgot-password') {
+        if (action === 'login' || action === 'signup' || action === 'forgot-password' || action === 'reset-password') {
             this.currentMode = action;
         } else {
             // Default to signup if no action specified
@@ -60,10 +60,10 @@ class AuthToggle {
         this.elements.loginButton.classList.toggle('auth-toggle__button--active', this.currentMode === 'login');
         this.elements.signupButton.classList.toggle('auth-toggle__button--active', this.currentMode === 'signup');
         
-        // Hide toggle buttons when in forgot-password mode
+        // Hide toggle buttons when in forgot-password or reset-password mode
         const toggleContainer = document.querySelector('.auth-toggle');
         if (toggleContainer) {
-            toggleContainer.style.display = this.currentMode === 'forgot-password' ? 'none' : 'block';
+            toggleContainer.style.display = (this.currentMode === 'forgot-password' || this.currentMode === 'reset-password') ? 'none' : 'block';
         }
         
         // Notify universal submit button of mode change
@@ -177,7 +177,7 @@ class AuthToggle {
 
     /**
      * Set the current mode (login, signup, or forgot-password)
-     * @param {string} mode - 'login', 'signup', or 'forgot-password'
+     * @param {string} mode - 'login', 'signup', 'forgot-password', or 'reset-password'
      */
     setMode(mode) {
         if (mode === this.currentMode) {
@@ -197,7 +197,7 @@ class AuthToggle {
             } else if (mode === 'signup') {
                 window.authPageLoader.showSignupForm();
             }
-            // Don't switch forms for forgot-password mode - it's handled by authFormSwitch event
+            // Don't switch forms for forgot-password or reset-password mode - they're handled by authFormSwitch event
         }
 
         // Dispatch custom event for other components
@@ -210,7 +210,7 @@ class AuthToggle {
 
     /**
      * Get current mode
-     * @returns {string} Current mode ('login' or 'signup')
+     * @returns {string} Current mode ('login', 'signup', 'forgot-password', or 'reset-password')
      */
     getCurrentMode() {
         return this.currentMode;
@@ -218,7 +218,7 @@ class AuthToggle {
 
     /**
      * Initialize with a specific mode
-     * @param {string} mode - 'login', 'signup', or 'forgot-password'
+     * @param {string} mode - 'login', 'signup', 'forgot-password', or 'reset-password'
      */
     initializeWithMode(mode) {
         this.setMode(mode);
