@@ -49,8 +49,16 @@ class PasswordChange {
                 this.setupComponent();
             }
 
+            // Initialize translations
+            await this.initializeTranslations();
+
             this.isInitialized = true;
             console.log('✅ Password Change: Initialized successfully');
+            
+            // Final translation update to ensure everything is translated
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 100);
 
         } catch (error) {
             console.error('❌ Password Change: Failed to initialize:', error);
@@ -83,6 +91,9 @@ class PasswordChange {
         
         // Make translatable content visible
         this.showTranslatableContent();
+        
+        // Update translations after component is set up
+        this.updateTranslations();
     }
 
     /**
@@ -93,9 +104,19 @@ class PasswordChange {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
         // Input validation on change with live verification
-        this.currentPasswordInput.addEventListener('input', () => this.handleCurrentPasswordInput());
-        this.newPasswordInput.addEventListener('input', () => this.validateNewPassword());
-        this.confirmPasswordInput.addEventListener('input', () => this.validateConfirmPassword());
+        this.currentPasswordInput.addEventListener('input', () => {
+            this.handleCurrentPasswordInput();
+            this.validateForm();
+        });
+        this.newPasswordInput.addEventListener('input', () => {
+            this.validateNewPassword();
+            this.updateRequirementsDisplay(this.newPasswordInput.value);
+            this.validateForm();
+        });
+        this.confirmPasswordInput.addEventListener('input', () => {
+            this.validateConfirmPassword();
+            this.validateForm();
+        });
 
         // Password visibility toggles
         const toggleButtons = document.querySelectorAll('.password-change__toggle-visibility');
@@ -108,8 +129,12 @@ class PasswordChange {
             this.cancelButton.addEventListener('click', () => this.handleCancel());
         }
 
-        // Real-time password strength checking
-        this.newPasswordInput.addEventListener('input', () => this.updatePasswordStrength());
+        // Close success message button
+        const closeSuccessButton = document.getElementById('close-password-change-success');
+        if (closeSuccessButton) {
+            closeSuccessButton.addEventListener('click', () => this.handleCloseSuccess());
+        }
+
     }
 
     /**
@@ -142,11 +167,8 @@ class PasswordChange {
             // Change password using Supabase
             await this.changePassword(currentPassword, newPassword);
 
-            // Show success message
-            this.showSuccess('Password changed successfully!');
-            
-            // Reset form
-            this.resetForm();
+            // Hide form and show success message
+            this.showSuccessState();
 
             console.log('✅ Password Change: Password changed successfully');
 
@@ -236,7 +258,8 @@ class PasswordChange {
         
         // If empty, show required message
         if (!value) {
-            this.showFieldError('current-password-error', 'Current password is required');
+            const message = this.getTranslation('Current password is required');
+            this.showFieldError('current-password-error', message);
             this.disableNewPasswordFields();
             return;
         }
@@ -269,18 +292,22 @@ class PasswordChange {
             this.currentPasswordVerified = true;
             this.updateCurrentPasswordUI('verified');
             this.enableNewPasswordFields();
+            this.validateForm();
             
         } catch (error) {
             // Verification failed
             this.currentPasswordVerified = false;
             this.updateCurrentPasswordUI('error');
             this.disableNewPasswordFields();
+            this.validateForm();
             
             // Show specific error message
             if (error.message.includes('Current password is incorrect')) {
-                this.showFieldError('current-password-error', 'Current password is incorrect');
+                const message = this.getTranslation('Current password is incorrect');
+                this.showFieldError('current-password-error', message);
             } else {
-                this.showFieldError('current-password-error', 'Unable to verify current password');
+                const message = this.getTranslation('Unable to verify current password. Please try again.');
+                this.showFieldError('current-password-error', message);
             }
         } finally {
             this.verificationInProgress = false;
@@ -317,8 +344,9 @@ class PasswordChange {
      * Enable new password fields
      */
     enableNewPasswordFields() {
-        this.newPasswordInput.disabled = false;
-        this.confirmPasswordInput.disabled = false;
+        // Use readOnly instead of disabled to allow autofill
+        this.newPasswordInput.readOnly = false;
+        this.confirmPasswordInput.readOnly = false;
         
         // Remove disabled styling
         this.newPasswordInput.classList.remove('disabled');
@@ -333,8 +361,9 @@ class PasswordChange {
      * Disable new password fields
      */
     disableNewPasswordFields() {
-        this.newPasswordInput.disabled = true;
-        this.confirmPasswordInput.disabled = true;
+        // Use readOnly instead of disabled to allow autofill
+        this.newPasswordInput.readOnly = true;
+        this.confirmPasswordInput.readOnly = true;
         
         // Remove enabled styling
         this.newPasswordInput.classList.remove('enabled');
@@ -347,7 +376,9 @@ class PasswordChange {
         // Clear new password fields
         this.newPasswordInput.value = '';
         this.confirmPasswordInput.value = '';
-        this.updatePasswordStrength();
+        
+        // Reset requirements display
+        this.updateRequirementsDisplay('');
     }
 
     /**
@@ -357,12 +388,14 @@ class PasswordChange {
         const value = this.currentPasswordInput.value;
         
         if (!value) {
-            this.showFieldError('current-password-error', 'Current password is required');
+            const message = this.getTranslation('Current password is required');
+            this.showFieldError('current-password-error', message);
             return false;
         }
 
         if (!this.currentPasswordVerified) {
-            this.showFieldError('current-password-error', 'Please verify your current password first');
+            const message = this.getTranslation('Please verify your current password first');
+            this.showFieldError('current-password-error', message);
             return false;
         }
 
@@ -377,7 +410,8 @@ class PasswordChange {
         const value = this.newPasswordInput.value;
         
         if (!value) {
-            this.showFieldError('new-password-error', 'New password is required');
+            const message = this.getTranslation('New password is required');
+            this.showFieldError('new-password-error', message);
             return false;
         }
 
@@ -400,12 +434,14 @@ class PasswordChange {
         const newPassword = this.newPasswordInput.value;
         
         if (!value) {
-            this.showFieldError('confirm-password-error', 'Please confirm your new password');
+            const message = this.getTranslation('Please confirm your new password');
+            this.showFieldError('confirm-password-error', message);
             return false;
         }
 
         if (value !== newPassword) {
-            this.showFieldError('confirm-password-error', 'Passwords do not match');
+            const message = this.getTranslation('Passwords do not match');
+            this.showFieldError('confirm-password-error', message);
             return false;
         }
 
@@ -443,54 +479,6 @@ class PasswordChange {
         };
     }
 
-    /**
-     * Update password strength indicator
-     */
-    updatePasswordStrength() {
-        const password = this.newPasswordInput.value;
-        const strengthFill = document.getElementById('strength-fill');
-        const strengthText = document.getElementById('strength-text');
-
-        if (!password) {
-            strengthFill.className = 'password-change__strength-fill';
-            strengthText.className = 'password-change__strength-text';
-            strengthText.textContent = '';
-            return;
-        }
-
-        // Calculate strength score
-        let score = 0;
-        const requirements = this.requirements;
-
-        if (requirements.length.regex.test(password)) score++;
-        if (requirements.uppercase.regex.test(password)) score++;
-        if (requirements.lowercase.regex.test(password)) score++;
-        if (requirements.number.regex.test(password)) score++;
-        if (requirements.special.regex.test(password)) score++;
-
-        // Update strength display
-        let strengthClass, strengthLabel;
-        if (score < 2) {
-            strengthClass = 'weak';
-            strengthLabel = 'Weak';
-        } else if (score < 3) {
-            strengthClass = 'fair';
-            strengthLabel = 'Fair';
-        } else if (score < 5) {
-            strengthClass = 'good';
-            strengthLabel = 'Good';
-        } else {
-            strengthClass = 'strong';
-            strengthLabel = 'Strong';
-        }
-
-        strengthFill.className = `password-change__strength-fill ${strengthClass}`;
-        strengthText.className = `password-change__strength-text ${strengthClass}`;
-        strengthText.textContent = strengthLabel;
-
-        // Update requirements display
-        this.updateRequirementsDisplay(password);
-    }
 
     /**
      * Update password requirements display
@@ -503,7 +491,15 @@ class PasswordChange {
             const element = document.querySelector(`[data-requirement="${requirement}"]`);
             if (element) {
                 const isValid = requirements[requirement].regex.test(password);
+                const iconElement = element.querySelector('.password-change__requirement-icon');
+                
+                // Update element class
                 element.className = `password-change__requirement ${isValid ? 'valid' : 'invalid'}`;
+                
+                // Update icon text
+                if (iconElement) {
+                    iconElement.textContent = isValid ? '✅' : '❌';
+                }
             }
         });
     }
@@ -556,11 +552,27 @@ class PasswordChange {
     }
 
     /**
+     * Handle close success message button click
+     */
+    handleCloseSuccess() {
+        this.resetForm();
+        this.hideMessages();
+    }
+
+    /**
      * Reset form to initial state
      */
     resetForm() {
+        // Show the form again (in case it was hidden after success)
         if (this.form) {
+            this.form.style.display = 'block';
             this.form.reset();
+        }
+        
+        // Hide success message
+        const successElement = document.getElementById('password-change-success');
+        if (successElement) {
+            successElement.style.display = 'none';
         }
         
         // Clear verification timeout
@@ -576,8 +588,6 @@ class PasswordChange {
         this.updateCurrentPasswordUI('typing');
         this.disableNewPasswordFields();
         
-        // Reset password strength
-        this.updatePasswordStrength();
         
         // Reset validation
         this.validateForm();
@@ -688,24 +698,24 @@ class PasswordChange {
         if (error.message) {
             // Current password verification errors
             if (error.message.includes('Current password is incorrect')) {
-                return 'Current password is incorrect';
+                return this.getTranslation('Current password is incorrect');
             }
             if (error.message.includes('Unable to verify current password')) {
-                return 'Unable to verify current password. Please try again.';
+                return this.getTranslation('Unable to verify current password. Please try again.');
             }
             // Supabase Auth error messages
             if (error.message.includes('Invalid login credentials')) {
-                return 'Current password is incorrect';
+                return this.getTranslation('Current password is incorrect');
             }
             if (error.message.includes('Password should be at least')) {
-                return 'Password does not meet minimum requirements';
+                return this.getTranslation('Password does not meet minimum requirements');
             }
             if (error.message.includes('Unable to validate email address')) {
-                return 'Unable to update password. Please try again.';
+                return this.getTranslation('Unable to update password. Please try again.');
             }
             return error.message;
         }
-        return 'An unexpected error occurred. Please try again.';
+        return this.getTranslation('An unexpected error occurred. Please try again.');
     }
 
     /**
@@ -720,22 +730,68 @@ class PasswordChange {
     }
 
     /**
+     * Initialize translations for the component
+     */
+    async initializeTranslations() {
+        try {
+            if (window.passwordChangeTranslations) {
+                await window.passwordChangeTranslations.init();
+                // Update translations immediately after initialization
+                this.updateTranslations();
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize password change translations:', error);
+        }
+    }
+
+    /**
      * Update translations for the component
      */
     updateTranslations() {
-        if (typeof i18next === 'undefined' || !i18next.isInitialized) {
-            return;
-        }
-
-        const translatableElements = document.querySelectorAll('.password-change .translatable-content');
-        
-        translatableElements.forEach(element => {
-            const key = element.dataset.translationKey || element.textContent.trim();
-            if (key && i18next.exists(key)) {
-                element.textContent = i18next.t(key);
+        if (window.passwordChangeTranslations && window.passwordChangeTranslations.isReady()) {
+            window.passwordChangeTranslations.updateTranslations();
+        } else {
+            // If translations aren't ready yet, try to initialize them
+            if (window.passwordChangeTranslations) {
+                window.passwordChangeTranslations.init().then(() => {
+                    window.passwordChangeTranslations.updateTranslations();
+                });
             }
-            element.classList.add('loaded');
-        });
+        }
+    }
+
+    /**
+     * Get translation for a specific key
+     * @param {string} key - Translation key
+     * @returns {string} Translated text
+     */
+    getTranslation(key) {
+        if (window.passwordChangeTranslations && window.passwordChangeTranslations.isReady()) {
+            return window.passwordChangeTranslations.getTranslation(key);
+        }
+        return key; // Fallback to key if translations not ready
+    }
+
+    /**
+     * Show success state (hide form, show success message)
+     */
+    showSuccessState() {
+        // Hide the form
+        if (this.form) {
+            this.form.style.display = 'none';
+        }
+        
+        // Show success message
+        const successElement = document.getElementById('password-change-success');
+        if (successElement) {
+            successElement.style.display = 'block';
+        }
+        
+        // Update success message text
+        const messageElement = successElement?.querySelector('.password-change__success-message');
+        if (messageElement) {
+            messageElement.textContent = this.getTranslation('Password changed successfully!');
+        }
     }
 
     /**
