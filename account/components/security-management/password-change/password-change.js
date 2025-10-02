@@ -14,13 +14,19 @@ class PasswordChange {
         this.cancelButton = null;
         this.isSubmitting = false;
         
+        // Live verification state
+        this.currentPasswordVerified = false;
+        this.verificationInProgress = false;
+        this.verificationTimeout = null;
+        this.verificationDelay = 500; // 500ms delay after user stops typing
+        
         // Password strength requirements
         this.requirements = {
             length: { min: 8, regex: /.{8,}/ },
             uppercase: { regex: /[A-Z]/ },
             lowercase: { regex: /[a-z]/ },
             number: { regex: /\d/ },
-            special: { regex: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/ }
+            special: { regex: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/ }
         };
     }
 
@@ -86,8 +92,8 @@ class PasswordChange {
         // Form submission
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
-        // Input validation on change
-        this.currentPasswordInput.addEventListener('input', () => this.validateCurrentPassword());
+        // Input validation on change with live verification
+        this.currentPasswordInput.addEventListener('input', () => this.handleCurrentPasswordInput());
         this.newPasswordInput.addEventListener('input', () => this.validateNewPassword());
         this.confirmPasswordInput.addEventListener('input', () => this.validateConfirmPassword());
 
@@ -163,7 +169,10 @@ class PasswordChange {
             throw new Error('Supabase client not available');
         }
 
-        // Update password using Supabase Auth
+        // First, verify the current password by attempting to re-authenticate
+        await this.verifyCurrentPassword(currentPassword);
+
+        // If verification succeeds, update to the new password
         const { error } = await window.supabase.auth.updateUser({
             password: newPassword
         });
@@ -174,14 +183,186 @@ class PasswordChange {
     }
 
     /**
-     * Validate current password field
+     * Verify current password by attempting to re-authenticate
+     * @param {string} currentPassword - Current password to verify
+     */
+    async verifyCurrentPassword(currentPassword) {
+        if (typeof window.supabase === 'undefined') {
+            throw new Error('Supabase client not available');
+        }
+
+        // Get current user
+        const { data: { user }, error: userError } = await window.supabase.auth.getUser();
+        
+        if (userError || !user) {
+            throw new Error('Unable to verify current password. Please try again.');
+        }
+
+        // Attempt to sign in with current credentials to verify password
+        const { error } = await window.supabase.auth.signInWithPassword({
+            email: user.email,
+            password: currentPassword
+        });
+
+        if (error) {
+            // Check for specific authentication errors
+            if (error.message.includes('Invalid login credentials')) {
+                throw new Error('Current password is incorrect');
+            }
+            throw new Error('Unable to verify current password. Please try again.');
+        }
+
+        // Re-authentication successful, password is correct
+        console.log('✅ Password verification successful');
+        
+        // Note: The user is now re-authenticated with the same session
+        // This is expected behavior for password verification
+    }
+
+    /**
+     * Handle current password input with live verification
+     */
+    handleCurrentPasswordInput() {
+        const value = this.currentPasswordInput.value;
+        
+        // Clear previous timeout
+        if (this.verificationTimeout) {
+            clearTimeout(this.verificationTimeout);
+        }
+        
+        // Reset verification state
+        this.currentPasswordVerified = false;
+        this.updateCurrentPasswordUI('typing');
+        
+        // If empty, show required message
+        if (!value) {
+            this.showFieldError('current-password-error', 'Current password is required');
+            this.disableNewPasswordFields();
+            return;
+        }
+        
+        // Hide error message while typing
+        this.hideFieldError('current-password-error');
+        
+        // Set timeout for verification after user stops typing
+        this.verificationTimeout = setTimeout(() => {
+            this.verifyCurrentPasswordLive(value);
+        }, this.verificationDelay);
+    }
+
+    /**
+     * Live verification of current password
+     * @param {string} password - Password to verify
+     */
+    async verifyCurrentPasswordLive(password) {
+        if (this.verificationInProgress) {
+            return; // Prevent multiple simultaneous verifications
+        }
+        
+        try {
+            this.verificationInProgress = true;
+            this.updateCurrentPasswordUI('verifying');
+            
+            await this.verifyCurrentPassword(password);
+            
+            // Verification successful
+            this.currentPasswordVerified = true;
+            this.updateCurrentPasswordUI('verified');
+            this.enableNewPasswordFields();
+            
+        } catch (error) {
+            // Verification failed
+            this.currentPasswordVerified = false;
+            this.updateCurrentPasswordUI('error');
+            this.disableNewPasswordFields();
+            
+            // Show specific error message
+            if (error.message.includes('Current password is incorrect')) {
+                this.showFieldError('current-password-error', 'Current password is incorrect');
+            } else {
+                this.showFieldError('current-password-error', 'Unable to verify current password');
+            }
+        } finally {
+            this.verificationInProgress = false;
+        }
+    }
+
+    /**
+     * Update current password field UI based on verification state
+     * @param {string} state - 'typing', 'verifying', 'verified', 'error'
+     */
+    updateCurrentPasswordUI(state) {
+        const input = this.currentPasswordInput;
+        
+        // Remove all state classes
+        input.classList.remove('verifying', 'verified', 'error', 'typing');
+        
+        switch (state) {
+            case 'typing':
+                input.classList.add('typing');
+                break;
+            case 'verifying':
+                input.classList.add('verifying');
+                break;
+            case 'verified':
+                input.classList.add('verified');
+                break;
+            case 'error':
+                input.classList.add('error');
+                break;
+        }
+    }
+
+    /**
+     * Enable new password fields
+     */
+    enableNewPasswordFields() {
+        this.newPasswordInput.disabled = false;
+        this.confirmPasswordInput.disabled = false;
+        
+        // Remove disabled styling
+        this.newPasswordInput.classList.remove('disabled');
+        this.confirmPasswordInput.classList.remove('disabled');
+        
+        // Add enabled styling
+        this.newPasswordInput.classList.add('enabled');
+        this.confirmPasswordInput.classList.add('enabled');
+    }
+
+    /**
+     * Disable new password fields
+     */
+    disableNewPasswordFields() {
+        this.newPasswordInput.disabled = true;
+        this.confirmPasswordInput.disabled = true;
+        
+        // Remove enabled styling
+        this.newPasswordInput.classList.remove('enabled');
+        this.confirmPasswordInput.classList.remove('enabled');
+        
+        // Add disabled styling
+        this.newPasswordInput.classList.add('disabled');
+        this.confirmPasswordInput.classList.add('disabled');
+        
+        // Clear new password fields
+        this.newPasswordInput.value = '';
+        this.confirmPasswordInput.value = '';
+        this.updatePasswordStrength();
+    }
+
+    /**
+     * Validate current password field (legacy method for form submission)
      */
     validateCurrentPassword() {
         const value = this.currentPasswordInput.value;
-        const errorElement = document.getElementById('current-password-error');
         
         if (!value) {
             this.showFieldError('current-password-error', 'Current password is required');
+            return false;
+        }
+
+        if (!this.currentPasswordVerified) {
+            this.showFieldError('current-password-error', 'Please verify your current password first');
             return false;
         }
 
@@ -194,7 +375,6 @@ class PasswordChange {
      */
     validateNewPassword() {
         const value = this.newPasswordInput.value;
-        const errorElement = document.getElementById('new-password-error');
         
         if (!value) {
             this.showFieldError('new-password-error', 'New password is required');
@@ -218,7 +398,6 @@ class PasswordChange {
     validateConfirmPassword() {
         const value = this.confirmPasswordInput.value;
         const newPassword = this.newPasswordInput.value;
-        const errorElement = document.getElementById('confirm-password-error');
         
         if (!value) {
             this.showFieldError('confirm-password-error', 'Please confirm your new password');
@@ -356,8 +535,8 @@ class PasswordChange {
      */
     validateForm() {
         const currentValid = this.validateCurrentPassword();
-        const newValid = this.validateNewPassword();
-        const confirmValid = this.validateConfirmPassword();
+        const newValid = this.currentPasswordVerified ? this.validateNewPassword() : false;
+        const confirmValid = this.currentPasswordVerified ? this.validateConfirmPassword() : false;
 
         const isValid = currentValid && newValid && confirmValid;
         
@@ -383,6 +562,19 @@ class PasswordChange {
         if (this.form) {
             this.form.reset();
         }
+        
+        // Clear verification timeout
+        if (this.verificationTimeout) {
+            clearTimeout(this.verificationTimeout);
+        }
+        
+        // Reset verification state
+        this.currentPasswordVerified = false;
+        this.verificationInProgress = false;
+        
+        // Reset UI state
+        this.updateCurrentPasswordUI('typing');
+        this.disableNewPasswordFields();
         
         // Reset password strength
         this.updatePasswordStrength();
@@ -494,6 +686,13 @@ class PasswordChange {
      */
     getErrorMessage(error) {
         if (error.message) {
+            // Current password verification errors
+            if (error.message.includes('Current password is incorrect')) {
+                return 'Current password is incorrect';
+            }
+            if (error.message.includes('Unable to verify current password')) {
+                return 'Unable to verify current password. Please try again.';
+            }
             // Supabase Auth error messages
             if (error.message.includes('Invalid login credentials')) {
                 return 'Current password is incorrect';
