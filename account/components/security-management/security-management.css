@@ -143,8 +143,8 @@
 
 .security-management__section-header {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 1rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--color-border, #e9ecef);
@@ -153,7 +153,6 @@
 .security-management__back-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: var(--color-background-secondary, #f8f9fa);
     color: var(--color-text-secondary, #6c757d);
