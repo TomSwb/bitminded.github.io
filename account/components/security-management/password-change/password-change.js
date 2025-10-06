@@ -170,6 +170,9 @@ class PasswordChange {
             // Hide form and show success message
             this.showSuccessState();
 
+            // Update password status in security management
+            this.updatePasswordStatus();
+
             console.log('✅ Password Change: Password changed successfully');
 
         } catch (error) {
@@ -791,6 +794,65 @@ class PasswordChange {
         const messageElement = successElement?.querySelector('.password-change__success-message');
         if (messageElement) {
             messageElement.textContent = this.getTranslation('Password changed successfully!');
+        }
+    }
+
+    /**
+     * Update password status in security management
+     */
+    async updatePasswordStatus() {
+        try {
+            console.log('🔧 Password Change: Starting password status update...');
+            
+            // Get current user
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError) {
+                console.error('❌ Password Change: Failed to get user:', userError);
+                return;
+            }
+            
+            if (!user) {
+                console.error('❌ Password Change: No user found');
+                return;
+            }
+            
+            console.log('🔧 Password Change: User found:', user.id, user.email);
+            
+            // First, check if user profile exists
+            const { data: existingProfile, error: selectError } = await supabase
+                .from('user_profiles')
+                .select('id, username, password_last_changed')
+                .eq('id', user.id)
+                .single();
+            
+            if (selectError) {
+                console.error('❌ Password Change: Failed to check existing profile:', selectError);
+                return;
+            }
+            
+            console.log('🔧 Password Change: Existing profile:', existingProfile);
+            
+            // Update password_last_changed in database
+            const { data: updateData, error: updateError } = await supabase
+                .from('user_profiles')
+                .update({ password_last_changed: new Date().toISOString() })
+                .eq('id', user.id)
+                .select();
+            
+            if (updateError) {
+                console.error('❌ Password Change: Failed to update password status in database:', updateError);
+            } else {
+                console.log('✅ Password Change: Password status updated in database:', updateData);
+            }
+            
+            // Update security management status if available
+            if (window.securityManagement && window.securityManagement.updatePasswordStatus) {
+                window.securityManagement.updatePasswordStatus(new Date());
+            }
+            
+        } catch (error) {
+            console.error('❌ Password Change: Failed to update password status:', error);
         }
     }
 

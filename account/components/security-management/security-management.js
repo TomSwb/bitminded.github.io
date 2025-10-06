@@ -49,8 +49,8 @@ class SecurityManagement {
         // Initialize translations
         await this.initializeTranslations();
         
-        // Load initial state
-        this.loadSecurityStatus();
+        // Load security status
+        await this.loadSecurityStatus();
         
         // Update translations after UI is ready
         this.updateTranslations();
@@ -266,13 +266,91 @@ class SecurityManagement {
      */
     async loadPasswordStatus() {
         try {
-            // TODO: Implement password status check
-            // For now, show "Recently" - will be updated when we have password change tracking
-            console.log('📝 Security Management: Password status loaded (placeholder)');
+            console.log('🔧 Security Management: Loading password status...');
+            
+            // Get password last changed date from database
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError) {
+                console.error('❌ Security Management: Failed to get user:', userError);
+                this.updatePasswordStatus(null);
+                return;
+            }
+            
+            if (!user) {
+                console.error('❌ Security Management: No user found');
+                this.updatePasswordStatus(null);
+                return;
+            }
+            
+            console.log('🔧 Security Management: User found:', user.id, user.email);
+            
+            const { data: profile, error } = await supabase
+                .from('user_profiles')
+                .select('password_last_changed')
+                .eq('id', user.id)
+                .single();
+            
+            if (error) {
+                console.error('❌ Security Management: Failed to load password status:', error);
+                this.updatePasswordStatus(null);
+            } else if (profile && profile.password_last_changed) {
+                console.log('🔧 Security Management: Password last changed found:', profile.password_last_changed);
+                this.updatePasswordStatus(new Date(profile.password_last_changed));
+            } else {
+                console.log('🔧 Security Management: No password_last_changed date found, showing "Recently"');
+                // If no date stored, show "Recently" as fallback
+                this.updatePasswordStatus(null);
+            }
+
+            console.log('📝 Security Management: Password status loaded');
 
         } catch (error) {
             console.error('❌ Security Management: Failed to load password status:', error);
+            this.updatePasswordStatus(null);
         }
+    }
+
+    /**
+     * Update password status display
+     * @param {Date|null} lastChangedDate - Date when password was last changed
+     */
+    updatePasswordStatus(lastChangedDate) {
+        const statusElement = document.querySelector('#security-status .security-management__status-description');
+        
+        if (statusElement) {
+            if (lastChangedDate) {
+                const formattedDate = this.formatEuropeanDateTime(lastChangedDate);
+                // Remove the translatable-content class and data-translation-key to prevent translation override
+                statusElement.classList.remove('translatable-content');
+                statusElement.removeAttribute('data-translation-key');
+                statusElement.textContent = `Last changed: ${formattedDate}`;
+                console.log('🔧 Security Management: Updated password status display:', `Last changed: ${formattedDate}`);
+            } else {
+                // Restore translatable content for "Recently"
+                statusElement.classList.add('translatable-content');
+                statusElement.setAttribute('data-translation-key', 'Last changed: Recently');
+                statusElement.textContent = 'Last changed: Recently';
+                console.log('🔧 Security Management: Updated password status display: Recently');
+            }
+        } else {
+            console.error('❌ Security Management: Status element not found');
+        }
+    }
+
+    /**
+     * Format date and time in European format (dd.mm.yyyy HH:mm)
+     * @param {Date} date - Date to format
+     * @returns {string} Formatted date string
+     */
+    formatEuropeanDateTime(date) {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        
+        return `${day}.${month}.${year} ${hours}:${minutes}`;
     }
 
     /**
@@ -312,14 +390,6 @@ class SecurityManagement {
         }
     }
 
-    /**
-     * Update password status display
-     * @param {string} lastChanged - When password was last changed
-     */
-    updatePasswordStatus(lastChanged) {
-        // TODO: Implement password status update
-        console.log('📝 Security Management: Password status updated:', lastChanged);
-    }
 
     /**
      * Update login activity status display
