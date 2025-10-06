@@ -135,6 +135,11 @@ class PasswordChange {
             closeSuccessButton.addEventListener('click', () => this.handleCloseSuccess());
         }
 
+        // Listen for language changes
+        window.addEventListener('languageChanged', (e) => {
+            this.updateTranslations();
+        });
+
     }
 
     /**
@@ -418,6 +423,14 @@ class PasswordChange {
             return false;
         }
 
+        // Check if new password is different from current password
+        const currentPassword = this.currentPasswordInput.value;
+        if (currentPassword && value === currentPassword) {
+            const message = this.getTranslation('New password must be different from current password');
+            this.showFieldError('new-password-error', message);
+            return false;
+        }
+
         // Check password requirements
         const validation = this.validatePasswordRequirements(value);
         if (!validation.isValid) {
@@ -616,37 +629,28 @@ class PasswordChange {
     }
 
     /**
-     * Show field error message
+     * Show field error message (disabled - no error elements)
      * @param {string} errorId - Error element ID
      * @param {string} message - Error message
      */
     showFieldError(errorId, message) {
-        const errorElement = document.getElementById(errorId);
-        if (errorElement) {
-            errorElement.textContent = message;
-            errorElement.classList.add('show');
-        }
+        // Error elements removed - no-op
+        console.log(`Field error (${errorId}): ${message}`);
     }
 
     /**
-     * Hide field error message
+     * Hide field error message (disabled - no error elements)
      * @param {string} errorId - Error element ID
      */
     hideFieldError(errorId) {
-        const errorElement = document.getElementById(errorId);
-        if (errorElement) {
-            errorElement.classList.remove('show');
-        }
+        // Error elements removed - no-op
     }
 
     /**
-     * Hide all field error messages
+     * Hide all field error messages (disabled - no error elements)
      */
     hideAllFieldErrors() {
-        const errorElements = document.querySelectorAll('.password-change__error');
-        errorElements.forEach(element => {
-            element.classList.remove('show');
-        });
+        // Error elements removed - no-op
     }
 
     /**
@@ -769,10 +773,26 @@ class PasswordChange {
      * @returns {string} Translated text
      */
     getTranslation(key) {
+        // Try to get translation from password change translations
         if (window.passwordChangeTranslations && window.passwordChangeTranslations.isReady()) {
             return window.passwordChangeTranslations.getTranslation(key);
         }
-        return key; // Fallback to key if translations not ready
+        
+        // Fallback: try to get translation from global translation system
+        if (window.profileManagementTranslations && window.profileManagementTranslations.isInitialized) {
+            return window.profileManagementTranslations.getTranslation(key);
+        }
+        
+        // Fallback: try to get translation even if not ready (more robust)
+        if (window.passwordChangeTranslations) {
+            const translation = window.passwordChangeTranslations.getTranslation(key);
+            if (translation !== key) {
+                return translation;
+            }
+        }
+        
+        // Final fallback: return the key
+        return key;
     }
 
     /**
