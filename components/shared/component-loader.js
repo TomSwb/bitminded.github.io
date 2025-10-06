@@ -247,13 +247,24 @@ class ComponentLoader {
                     };
                     document.head.appendChild(translationScript);
                 } else if (componentName === 'password-change') {
-                    // Special handling for password-change component
-                    if (window.PasswordChange && !window.passwordChange) {
-                        window.passwordChange = new window.PasswordChange();
-                    }
-                    if (window.passwordChange) {
-                        window.passwordChange.init(config);
-                    }
+                    // Load password change translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/account/components/security-management/password-change/password-change-translations.js';
+                    translationScript.onload = () => {
+                        // Wait for DOM to be ready before initializing password change component
+                        const initPasswordChange = () => {
+                            if (window.PasswordChange && !window.passwordChange) {
+                                window.passwordChange = new window.PasswordChange();
+                            }
+                            if (window.passwordChange) {
+                                window.passwordChange.init(config);
+                            }
+                        };
+                        
+                        // Use setTimeout to ensure HTML is fully parsed
+                        setTimeout(initPasswordChange, 50);
+                    };
+                    document.head.appendChild(translationScript);
                 }
                 resolve();
             };
