@@ -128,10 +128,24 @@ class SecurityManagement {
     }
 
     /**
+     * Get element ID for a section (handles special cases like 2fa)
+     * @param {string} sectionName - Section name
+     * @returns {string} Valid element ID
+     */
+    getSectionId(sectionName) {
+        // Handle sections that start with numbers (invalid CSS selectors)
+        if (sectionName === '2fa') {
+            return 'twofa';
+        }
+        return sectionName;
+    }
+
+    /**
      * Hide the current section
      */
     hideCurrentSection() {
-        const currentSectionElement = document.getElementById(`${this.currentSection}-section`);
+        const sectionId = this.getSectionId(this.currentSection);
+        const currentSectionElement = document.getElementById(`${sectionId}-section`);
         if (currentSectionElement) {
             currentSectionElement.classList.remove('active');
             currentSectionElement.style.display = 'none';
@@ -143,7 +157,8 @@ class SecurityManagement {
      * @param {string} sectionName - Section to show
      */
     showSectionElement(sectionName) {
-        const sectionElement = document.getElementById(`${sectionName}-section`);
+        const sectionId = this.getSectionId(sectionName);
+        const sectionElement = document.getElementById(`${sectionId}-section`);
         if (sectionElement) {
             sectionElement.style.display = 'block';
             sectionElement.classList.add('active');
@@ -180,7 +195,8 @@ class SecurityManagement {
 
             // Load component using the component loader
             if (window.componentLoader) {
-                const containerId = `#${sectionName}-content`;
+                const sectionId = this.getSectionId(sectionName);
+                const containerId = `#${sectionId}-content`;
                 await window.componentLoader.load(componentName, {
                     container: containerId,
                     basePath: 'account/components/security-management'
