@@ -1,0 +1,286 @@
+/* Two-Factor Authentication Component Styles */
+
+.two-factor-auth {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background: var(--color-background-secondary, #f8f9fa);
+    border-radius: 12px;
+    border: 1px solid var(--color-border, #e9ecef);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.two-factor-auth__header {
+    margin-bottom: 1.5rem;
+}
+
+.two-factor-auth__title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    gap: 1rem;
+}
+
+.two-factor-auth__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #212529);
+    margin: 0;
+}
+
+.two-factor-auth__status-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+
+.two-factor-auth__description {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #6c757d);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.two-factor-auth__content {
+    width: 100%;
+}
+
+/* Status Information */
+.two-factor-auth__status-info {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--color-background-primary, #ffffff);
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #e9ecef);
+}
+
+.two-factor-auth__status-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.two-factor-auth__status-label {
+    font-weight: 600;
+    color: var(--color-text-primary, #212529);
+    font-size: 0.9rem;
+}
+
+.two-factor-auth__status-text {
+    color: var(--color-text-secondary, #6c757d);
+    font-size: 0.9rem;
+}
+
+.two-factor-auth__status-text.enabled {
+    color: var(--color-success, #28a745);
+    font-weight: 500;
+}
+
+.two-factor-auth__status-text.disabled {
+    color: var(--color-text-secondary, #6c757d);
+}
+
+.two-factor-auth__last-verified {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-border, #e9ecef);
+    margin-top: 0.5rem;
+}
+
+.two-factor-auth__verified-label {
+    font-weight: 500;
+    color: var(--color-text-secondary, #6c757d);
+    font-size: 0.85rem;
+}
+
+.two-factor-auth__verified-date {
+    color: var(--color-text-primary, #212529);
+    font-size: 0.85rem;
+}
+
+/* Action Button */
+.two-factor-auth__actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.two-factor-auth__action-btn {
+    padding: 0.75rem 2rem;
+    background: var(--color-primary, #007bff);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.two-factor-auth__action-btn:hover {
+    background: var(--color-primary-dark, #0056b3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.two-factor-auth__action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.two-factor-auth__action-btn:disabled {
+    background: var(--color-background-muted, #e9ecef);
+    color: var(--color-text-muted, #6c757d);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.two-factor-auth__action-btn.danger {
+    background: var(--color-error, #dc3545);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+.two-factor-auth__action-btn.danger:hover {
+    background: var(--color-error-dark, #c82333);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.two-factor-auth__action-btn.secondary {
+    background: var(--color-secondary, #6c757d);
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+.two-factor-auth__action-btn.secondary:hover {
+    background: var(--color-secondary-dark, #545b62);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Loading State */
+.two-factor-auth__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1rem;
+}
+
+.two-factor-auth__loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--color-border, #e9ecef);
+    border-top-color: var(--color-primary, #007bff);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.two-factor-auth__loading-text {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #6c757d);
+    margin: 0;
+}
+
+/* Error Message */
+.two-factor-auth__error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--color-error-light, #f8d7da);
+    border: 1px solid var(--color-error, #dc3545);
+    border-radius: 8px;
+    margin-top: 1rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.two-factor-auth__error-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.two-factor-auth__error-text {
+    font-size: 0.9rem;
+    color: var(--color-error-dark, #721c24);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .two-factor-auth {
+        padding: 1rem;
+    }
+
+    .two-factor-auth__title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .two-factor-auth__title {
+        font-size: 1.25rem;
+    }
+
+    .two-factor-auth__status-badge {
+        align-self: flex-start;
+    }
+
+    .two-factor-auth__action-btn {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .two-factor-auth__title {
+        font-size: 1.125rem;
+    }
+
+    .two-factor-auth__description {
+        font-size: 0.85rem;
+    }
+
+    .two-factor-auth__status-row {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+
+
+/* Translatable content visibility */
+.two-factor-auth .translatable-content {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.two-factor-auth .translatable-content.loaded {
+    opacity: 1;
+}

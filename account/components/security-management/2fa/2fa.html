@@ -1,0 +1,57 @@
+<!-- Two-Factor Authentication Status Component -->
+<div class="two-factor-auth" id="two-factor-auth">
+    <div class="two-factor-auth__header">
+        <div class="two-factor-auth__title-row">
+            <h3 class="two-factor-auth__title translatable-content" data-translation-key="Two-Factor Authentication">Two-Factor Authentication</h3>
+            <div class="two-factor-auth__status-badge" id="2fa-status-badge">
+                <span class="translatable-content" data-translation-key="Inactive">Inactive</span>
+            </div>
+        </div>
+        <p class="two-factor-auth__description translatable-content" data-translation-key="2FA adds an extra layer of security to your account by requiring a code from your phone in addition to your password">
+            2FA adds an extra layer of security to your account by requiring a code from your phone in addition to your password
+        </p>
+    </div>
+
+    <div class="two-factor-auth__content">
+        <!-- Status Information -->
+        <div class="two-factor-auth__status-info" id="2fa-status-info">
+            <div class="two-factor-auth__status-row">
+                <span class="two-factor-auth__status-label translatable-content" data-translation-key="Status">Status:</span>
+                <span class="two-factor-auth__status-text" id="2fa-status-text">
+                    <span class="translatable-content" data-translation-key="2FA is not enabled">2FA is not enabled</span>
+                </span>
+            </div>
+            
+            <!-- Last Verified (only shown when active) -->
+            <div class="two-factor-auth__last-verified" id="2fa-last-verified" style="display: none;">
+                <span class="two-factor-auth__verified-label translatable-content" data-translation-key="Last verified">Last verified:</span>
+                <span class="two-factor-auth__verified-date" id="2fa-verified-date">
+                    <span class="translatable-content" data-translation-key="Never">Never</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="two-factor-auth__actions">
+            <button 
+                type="button" 
+                class="two-factor-auth__action-btn" 
+                id="2fa-action-btn"
+            >
+                <span class="translatable-content" data-translation-key="Enable 2FA">Enable 2FA</span>
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div class="two-factor-auth__loading" id="2fa-loading" style="display: none;">
+            <div class="two-factor-auth__loading-spinner"></div>
+            <p class="two-factor-auth__loading-text">Loading...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="two-factor-auth__error-message" id="2fa-error" style="display: none;">
+            <div class="two-factor-auth__error-icon">⚠️</div>
+            <div class="two-factor-auth__error-text" id="2fa-error-text"></div>
+        </div>
+    </div>
+</div>

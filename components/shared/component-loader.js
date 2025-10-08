@@ -265,6 +265,25 @@ class ComponentLoader {
                         setTimeout(initPasswordChange, 50);
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === '2fa') {
+                    // Load 2FA translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/account/components/security-management/2fa/2fa-translations.js';
+                    translationScript.onload = () => {
+                        // Wait for DOM to be ready before initializing 2FA component
+                        const init2FA = () => {
+                            if (window.TwoFactorAuth && !window.twoFactorAuth) {
+                                window.twoFactorAuth = new window.TwoFactorAuth();
+                            }
+                            if (window.twoFactorAuth) {
+                                window.twoFactorAuth.init(config);
+                            }
+                        };
+                        
+                        // Use setTimeout to ensure HTML is fully parsed
+                        setTimeout(init2FA, 50);
+                    };
+                    document.head.appendChild(translationScript);
                 }
                 resolve();
             };
