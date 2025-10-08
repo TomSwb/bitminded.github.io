@@ -246,18 +246,37 @@ class SecurityManagement {
      */
     async load2FAStatus() {
         try {
-            // TODO: Implement 2FA status check when 2FA component is ready
-            const statusElement = document.getElementById('2fa-status-description');
-            const actionButton = document.getElementById('2fa-action-btn');
+            console.log('🔧 Security Management: Loading 2FA status...');
             
-            if (statusElement && actionButton) {
-                // For now, show "Not enabled" - will be updated when 2FA is implemented
-                statusElement.innerHTML = '<span class="translatable-content" data-translation-key="Not enabled">Not enabled</span>';
-                actionButton.innerHTML = '<span class="translatable-content" data-translation-key="Setup">Setup</span>';
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError || !user) {
+                console.error('❌ Security Management: Failed to get user for 2FA status');
+                this.update2FAStatus(false);
+                return;
             }
+
+            // Query user_2fa table
+            const { data: twoFAData, error } = await supabase
+                .from('user_2fa')
+                .select('is_enabled')
+                .eq('user_id', user.id)
+                .maybeSingle();
+            
+            if (error) {
+                console.error('❌ Security Management: Failed to load 2FA status:', error);
+                this.update2FAStatus(false);
+                return;
+            }
+
+            // Update UI based on status
+            const isEnabled = twoFAData?.is_enabled || false;
+            console.log('✅ Security Management: 2FA status loaded - Enabled:', isEnabled);
+            this.update2FAStatus(isEnabled);
 
         } catch (error) {
             console.error('❌ Security Management: Failed to load 2FA status:', error);
+            this.update2FAStatus(false);
         }
     }
 

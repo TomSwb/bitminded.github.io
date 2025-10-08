@@ -4,7 +4,7 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 1.5rem;
-    background: var(--color-background-secondary, #f8f9fa);
+    background: var(--color-background-primary);
     border-radius: 12px;
     border: 1px solid var(--color-border, #e9ecef);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -18,13 +18,13 @@
 .security-management__title {
     font-size: 1.75rem;
     font-weight: 600;
-    color: var(--color-text-primary, #212529);
+    color: var(--color-text-primary);
     margin: 0 0 0.5rem 0;
 }
 
 .security-management__description {
     font-size: 1rem;
-    color: var(--color-text-secondary, #6c757d);
+    color: var(--color-text-secondary);
     margin: 0;
     line-height: 1.5;
 }
@@ -36,7 +36,7 @@
     gap: 1rem;
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: var(--color-background-primary, #ffffff);
+    background: var(--color-background-primary);
     border-radius: 12px;
     border: 1px solid var(--color-border, #e9ecef);
 }
@@ -46,7 +46,7 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: var(--color-background-secondary, #f8f9fa);
+    background: var(--color-background-primary);
     border-radius: 8px;
     border: 1px solid var(--color-border, #e9ecef);
     transition: all 0.2s ease;
@@ -78,13 +78,13 @@
 .security-management__status-title {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--color-text-primary, #212529);
+    color: var(--color-text-primary);
     margin: 0 0 0.25rem 0;
 }
 
 .security-management__status-description {
     font-size: 0.9rem;
-    color: var(--color-text-secondary, #6c757d);
+    color: var(--color-text-primary);
     margin: 0;
 }
 
@@ -94,7 +94,7 @@
 
 .security-management__action-btn {
     padding: 0.5rem 1rem;
-    background: var(--color-primary, #007bff);
+    background: var(--color-primary);
     color: var(--color-text-dark);
     border: none;
     border-radius: 6px;
@@ -106,7 +106,8 @@
 }
 
 .security-management__action-btn:hover {
-    background: var(--color-primary-dark, #0056b3);
+    background: var(--color-secondary);
+    color: var(--color-text-light);
     transform: translateY(-1px);
 }
 
@@ -154,9 +155,8 @@
     display: flex;
     align-items: center;
     padding: 0.5rem 1rem;
-    background: var(--color-background-secondary, #f8f9fa);
-    color: var(--color-text-secondary, #6c757d);
-    border: 1px solid var(--color-border, #e9ecef);
+    background: var(--color-primary);
+    color: var(--color-text-dark);
     border-radius: 6px;
     font-size: 0.9rem;
     cursor: pointer;
@@ -165,9 +165,8 @@
 }
 
 .security-management__back-btn:hover {
-    background: var(--color-background-hover, #e9ecef);
-    color: var(--color-text-primary, #212529);
-    border-color: var(--color-primary, #007bff);
+    background: var(--color-secondary);
+    color: var(--color-text-light);
 }
 
 .security-management__back-icon {
@@ -224,12 +223,12 @@
     padding: 3rem 1rem;
     color: var(--color-text-secondary, #6c757d);
     font-style: italic;
-    background: var(--color-background-secondary, #f8f9fa);
+    background: var(--color-background-primary);
     border-radius: 8px;
     border: 2px dashed var(--color-border, #e9ecef);
 }
 
-/* Status Indicators */
+/* Status Indicators 
 .security-management__status-item.enabled {
     border-color: var(--color-success, #28a745);
     background: var(--color-success-light, #d4edda);
@@ -242,15 +241,17 @@
 }
 
 .security-management__status-item.disabled {
-    border-color: var(--color-warning, #ffc107);
-    background: var(--color-warning-light, #fff3cd);
-}
-
+    /* Neutral styling - no yellow warning colors *//*
+    border-color: var(--color-border, #e9ecef);
+    background: var(--color-background-secondary, #f8f9fa);
+}*/
+/*
 .security-management__status-item.disabled .security-management__status-icon {
-    border-color: var(--color-warning, #ffc107);
-    background: var(--color-warning, #ffc107);
-    color: white;
-}
+    /* Neutral styling - subtle gray *//*
+    border-color: var(--color-border, #e9ecef);
+    background: var(--color-background-muted, #e9ecef);
+    color: var(--color-text-secondary, #6c757d);
+}*/
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
@@ -346,76 +347,3 @@
     }
 }
 
-/* Dark Theme Support */
-@media (prefers-color-scheme: dark) {
-    .security-management {
-        background: var(--color-background-secondary-dark, #2d3748);
-        border-color: var(--color-border-dark, #4a5568);
-    }
-
-    .security-management__title {
-        color: var(--color-text-primary-dark, #f7fafc);
-    }
-
-    .security-management__description {
-        color: var(--color-text-secondary-dark, #a0aec0);
-    }
-
-    .security-management__status {
-        background: var(--color-background-primary-dark, #1a202c);
-        border-color: var(--color-border-dark, #4a5568);
-    }
-
-    .security-management__status-item {
-        background: var(--color-background-secondary-dark, #2d3748);
-        border-color: var(--color-border-dark, #4a5568);
-    }
-
-    .security-management__status-item:hover {
-        border-color: var(--color-primary-dark, #63b3ed);
-        box-shadow: 0 2px 8px rgba(99, 179, 237, 0.1);
-    }
-
-    .security-management__status-icon {
-        background: var(--color-background-primary-dark, #1a202c);
-        border-color: var(--color-border-dark, #4a5568);
-    }
-
-    .security-management__status-title {
-        color: var(--color-text-primary-dark, #f7fafc);
-    }
-
-    .security-management__status-description {
-        color: var(--color-text-secondary-dark, #a0aec0);
-    }
-
-    .security-management__back-btn {
-        background: var(--color-background-secondary-dark, #2d3748);
-        color: var(--color-text-secondary-dark, #a0aec0);
-        border-color: var(--color-border-dark, #4a5568);
-    }
-
-    .security-management__back-btn:hover {
-        background: var(--color-background-hover-dark, #4a5568);
-        color: var(--color-text-primary-dark, #f7fafc);
-        border-color: var(--color-primary-dark, #63b3ed);
-    }
-
-    .security-management__section-title {
-        color: var(--color-text-primary-dark, #f7fafc);
-    }
-
-    .security-management__overview-title {
-        color: var(--color-text-primary-dark, #f7fafc);
-    }
-
-    .security-management__overview-description {
-        color: var(--color-text-secondary-dark, #a0aec0);
-    }
-
-    .security-management__placeholder {
-        background: var(--color-background-secondary-dark, #2d3748);
-        border-color: var(--color-border-dark, #4a5568);
-        color: var(--color-text-secondary-dark, #a0aec0);
-    }
-}
