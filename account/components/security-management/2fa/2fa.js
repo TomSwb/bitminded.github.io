@@ -7,15 +7,11 @@ class TwoFactorAuth {
     constructor() {
         this.isInitialized = false;
         this.is2FAEnabled = false;
-        this.lastVerifiedAt = null;
         this.setupWindow = null;
         
         // UI elements
         this.statusBadge = null;
-        this.statusText = null;
         this.actionButton = null;
-        this.lastVerifiedContainer = null;
-        this.lastVerifiedDate = null;
         this.loadingContainer = null;
         this.errorContainer = null;
         this.errorText = null;
@@ -63,15 +59,12 @@ class TwoFactorAuth {
     async setupComponent() {
         // Get UI elements
         this.statusBadge = document.getElementById('2fa-status-badge');
-        this.statusText = document.getElementById('2fa-status-text');
-        this.actionButton = document.getElementById('2fa-action-btn');
-        this.lastVerifiedContainer = document.getElementById('2fa-last-verified');
-        this.lastVerifiedDate = document.getElementById('2fa-verified-date');
+        this.actionButton = document.getElementById('2fa-component-action-btn');
         this.loadingContainer = document.getElementById('2fa-loading');
         this.errorContainer = document.getElementById('2fa-error');
         this.errorText = document.getElementById('2fa-error-text');
 
-        if (!this.statusBadge || !this.statusText || !this.actionButton) {
+        if (!this.statusBadge || !this.actionButton) {
             console.error('❌ 2FA: Required elements not found');
             return;
         }
@@ -187,11 +180,10 @@ class TwoFactorAuth {
     /**
      * Update UI based on 2FA status
      * @param {boolean} isEnabled - Whether 2FA is enabled
-     * @param {string|null} lastVerified - Last verification timestamp
+     * @param {string|null} lastVerified - Last verification timestamp (not used currently)
      */
     update2FAStatus(isEnabled, lastVerified) {
         this.is2FAEnabled = isEnabled;
-        this.lastVerifiedAt = lastVerified;
 
         // Update status badge
         if (this.statusBadge) {
@@ -202,38 +194,6 @@ class TwoFactorAuth {
             if (badgeText) {
                 badgeText.setAttribute('data-translation-key', isEnabled ? 'Active' : 'Inactive');
                 badgeText.textContent = isEnabled ? 'Active' : 'Inactive';
-            }
-        }
-
-        // Update status text
-        if (this.statusText) {
-            this.statusText.className = 'two-factor-auth__status-text';
-            this.statusText.classList.add(isEnabled ? 'enabled' : 'disabled');
-            
-            const statusTextContent = this.statusText.querySelector('.translatable-content');
-            if (statusTextContent) {
-                const key = isEnabled 
-                    ? '2FA is enabled and protecting your account' 
-                    : '2FA is not enabled';
-                statusTextContent.setAttribute('data-translation-key', key);
-                statusTextContent.textContent = key;
-            }
-        }
-
-        // Update last verified timestamp
-        if (this.lastVerifiedContainer && this.lastVerifiedDate) {
-            if (isEnabled && lastVerified) {
-                this.lastVerifiedContainer.style.display = 'flex';
-                const formattedDate = this.formatEuropeanDateTime(new Date(lastVerified));
-                const dateContent = this.lastVerifiedDate.querySelector('.translatable-content');
-                if (dateContent) {
-                    // Remove translation for dynamic date
-                    dateContent.classList.remove('translatable-content');
-                    dateContent.removeAttribute('data-translation-key');
-                }
-                this.lastVerifiedDate.textContent = formattedDate;
-            } else {
-                this.lastVerifiedContainer.style.display = 'none';
             }
         }
 

@@ -40,6 +40,14 @@
     transition: all 0.3s ease;
 }
 
+.two-factor-auth__status-badge.inactive {
+    color: var(--color-error, #dc3545);
+}
+
+.two-factor-auth__status-badge.active {
+    color: var(--color-success, #28a745);
+}
+
 
 .two-factor-auth__description {
     font-size: 0.9rem;

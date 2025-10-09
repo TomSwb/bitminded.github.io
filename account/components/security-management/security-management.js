@@ -407,22 +407,20 @@ class SecurityManagement {
      */
     update2FAStatus(isEnabled) {
         const statusElement = document.getElementById('2fa-status-description');
-        const actionButton = document.getElementById('2fa-action-btn');
-        const statusItem = actionButton?.closest('.security-management__status-item');
+        const statusItem = document.getElementById('2fa-action-btn')?.closest('.security-management__status-item');
         
-        if (statusElement && actionButton) {
+        if (statusElement) {
             if (isEnabled) {
                 statusElement.innerHTML = '<span class="translatable-content" data-translation-key="Enabled">Enabled</span>';
-                actionButton.innerHTML = '<span class="translatable-content" data-translation-key="Manage">Manage</span>';
                 statusItem?.classList.add('enabled');
                 statusItem?.classList.remove('disabled');
             } else {
                 statusElement.innerHTML = '<span class="translatable-content" data-translation-key="Not enabled">Not enabled</span>';
-                actionButton.innerHTML = '<span class="translatable-content" data-translation-key="Setup">Setup</span>';
                 statusItem?.classList.add('disabled');
                 statusItem?.classList.remove('enabled');
             }
         }
+        // Note: Button text stays as "Setup" - not changed based on status
     }
 
 
