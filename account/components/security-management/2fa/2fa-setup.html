@@ -17,6 +17,9 @@
     <!-- Libraries - Load synchronously before our script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/otpauth@9.2.3/dist/otpauth.umd.min.js"></script>
+    
+    <!-- Translations -->
+    <script src="/account/components/security-management/2fa/2fa-translations.js"></script>
 </head>
 <body>
     <div class="setup-container">
@@ -25,46 +28,46 @@
             <div class="setup-progress" id="setup-progress">
                 <div class="setup-progress__step" data-step="0">
                     <div class="setup-progress__circle">1</div>
-                    <div class="setup-progress__label">Start</div>
+                    <div class="setup-progress__label translatable-content" data-translation-key="Start">Start</div>
                 </div>
                 <div class="setup-progress__line"></div>
                 <div class="setup-progress__step" data-step="1">
                     <div class="setup-progress__circle">2</div>
-                    <div class="setup-progress__label">Scan</div>
+                    <div class="setup-progress__label translatable-content" data-translation-key="Scan">Scan</div>
                 </div>
                 <div class="setup-progress__line"></div>
                 <div class="setup-progress__step" data-step="2">
                     <div class="setup-progress__circle">3</div>
-                    <div class="setup-progress__label">Verify</div>
+                    <div class="setup-progress__label translatable-content" data-translation-key="Verify">Verify</div>
                 </div>
                 <div class="setup-progress__line"></div>
                 <div class="setup-progress__step" data-step="3">
                     <div class="setup-progress__circle">4</div>
-                    <div class="setup-progress__label">Backup</div>
+                    <div class="setup-progress__label translatable-content" data-translation-key="Backup">Backup</div>
                 </div>
                 <div class="setup-progress__line"></div>
                 <div class="setup-progress__step" data-step="4">
                     <div class="setup-progress__circle">5</div>
-                    <div class="setup-progress__label">Done</div>
+                    <div class="setup-progress__label translatable-content" data-translation-key="Done">Done</div>
                 </div>
             </div>
 
             <!-- Step 0: Introduction -->
             <div class="setup-step active" id="step-intro" data-step="0">
                 <div class="setup-step__icon">🔐</div>
-                <h1 class="setup-step__title">Set Up Two-Factor Authentication</h1>
-                <p class="setup-step__description">
+                <h1 class="setup-step__title translatable-content" data-translation-key="Set Up Two-Factor Authentication">Set Up Two-Factor Authentication</h1>
+                <p class="setup-step__description translatable-content" data-translation-key="Add an extra layer of security to your account. You'll need an authenticator app on your phone.">
                     Add an extra layer of security to your account. You'll need an authenticator app on your phone.
                 </p>
                 
                 <div class="setup-step__info">
-                    <h3>What you'll need:</h3>
+                    <h3 class="translatable-content" data-translation-key="What you'll need:">What you'll need:</h3>
                     <ul>
-                        <li>📱 A smartphone with an authenticator app</li>
-                        <li>⏱️ About 2 minutes of your time</li>
+                        <li>📱 <span class="translatable-content" data-translation-key="A smartphone with an authenticator app">A smartphone with an authenticator app</span></li>
+                        <li>⏱️ <span class="translatable-content" data-translation-key="About 2 minutes of your time">About 2 minutes of your time</span></li>
                     </ul>
                     
-                    <h3>Recommended apps:</h3>
+                    <h3 class="translatable-content" data-translation-key="Recommended apps:">Recommended apps:</h3>
                     <ul>
                         <li>Bitwarden</li>
                         <li>Google Authenticator</li>
@@ -73,15 +76,15 @@
                 </div>
 
                 <div class="setup-step__actions">
-                    <button class="btn btn-secondary" onclick="window.close()">Cancel</button>
-                    <button class="btn btn-primary" id="btn-start">Get Started</button>
+                    <button class="btn btn-secondary translatable-content" data-translation-key="Cancel" onclick="window.close()">Cancel</button>
+                    <button class="btn btn-primary translatable-content" data-translation-key="Get Started" id="btn-start">Get Started</button>
                 </div>
             </div>
 
             <!-- Step 1: QR Code -->
             <div class="setup-step" id="step-qr" data-step="1">
-                <h2 class="setup-step__title">Scan QR Code</h2>
-                <p class="setup-step__description">
+                <h2 class="setup-step__title translatable-content" data-translation-key="Scan QR Code">Scan QR Code</h2>
+                <p class="setup-step__description translatable-content" data-translation-key="Open your authenticator app and scan this QR code">
                     Open your authenticator app and scan this QR code
                 </p>
 
@@ -90,26 +93,26 @@
                 </div>
 
                 <div class="manual-entry">
-                    <button class="btn-link" id="btn-show-manual">Can't scan? Enter manually</button>
+                    <button class="btn-link" id="btn-show-manual"><span class="translatable-content" data-translation-key="Can't scan? Enter manually">Can't scan? Enter manually</span></button>
                     <div class="manual-entry__content" id="manual-entry-content" style="display: none;">
-                        <p>Enter this code in your authenticator app:</p>
+                        <p class="translatable-content" data-translation-key="Enter this code in your authenticator app:">Enter this code in your authenticator app:</p>
                         <div class="secret-key-display">
                             <code id="secret-key-text"></code>
-                            <button class="btn btn-small" id="btn-copy-secret">Copy</button>
+                            <button class="btn btn-small translatable-content" data-translation-key="Copy" id="btn-copy-secret">Copy</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="setup-step__actions">
-                    <button class="btn btn-secondary" id="btn-qr-back">Back</button>
-                    <button class="btn btn-primary" id="btn-qr-continue">Continue</button>
+                    <button class="btn btn-secondary translatable-content" data-translation-key="Back" id="btn-qr-back">Back</button>
+                    <button class="btn btn-primary translatable-content" data-translation-key="Continue" id="btn-qr-continue">Continue</button>
                 </div>
             </div>
 
             <!-- Step 2: Verify Code -->
             <div class="setup-step" id="step-verify" data-step="2">
-                <h2 class="setup-step__title">Verify Your Code</h2>
-                <p class="setup-step__description">
+                <h2 class="setup-step__title translatable-content" data-translation-key="Verify Your Code">Verify Your Code</h2>
+                <p class="setup-step__description translatable-content" data-translation-key="Enter the 6-digit code from your authenticator app">
                     Enter the 6-digit code from your authenticator app
                 </p>
 
@@ -131,15 +134,15 @@
                 </div>
 
                 <div class="setup-step__actions">
-                    <button class="btn btn-secondary" id="btn-verify-back">Back</button>
-                    <button class="btn btn-primary" id="btn-verify" disabled>Verify Code</button>
+                    <button class="btn btn-secondary translatable-content" data-translation-key="Back" id="btn-verify-back">Back</button>
+                    <button class="btn btn-primary translatable-content" data-translation-key="Verify Code" id="btn-verify" disabled>Verify Code</button>
                 </div>
             </div>
 
             <!-- Step 3: Backup Codes -->
             <div class="setup-step" id="step-backup" data-step="3">
-                <h2 class="setup-step__title">Save Your Backup Codes</h2>
-                <p class="setup-step__description warning">
+                <h2 class="setup-step__title translatable-content" data-translation-key="Save Your Backup Codes">Save Your Backup Codes</h2>
+                <p class="setup-step__description warning translatable-content" data-translation-key="Store these codes safely. You can use them to access your account if you lose your phone.">
                     ⚠️ Store these codes safely. You can use them to access your account if you lose your phone.
                 </p>
 
@@ -151,22 +154,22 @@
 
                 <div class="backup-actions">
                     <button class="btn btn-secondary" id="btn-download-codes">
-                        📥 Download Codes
+                        <span class="translatable-content" data-translation-key="Download Codes">📥 Download Codes</span>
                     </button>
                     <button class="btn btn-secondary" id="btn-print-codes">
-                        🖨️ Print Codes
+                        <span class="translatable-content" data-translation-key="Print Codes">🖨️ Print Codes</span>
                     </button>
                 </div>
 
                 <div class="confirmation-checkbox">
                     <label>
                         <input type="checkbox" id="codes-saved-checkbox">
-                        <span>I have saved these codes in a safe place</span>
+                        <span class="translatable-content" data-translation-key="I have saved these codes in a safe place">I have saved these codes in a safe place</span>
                     </label>
                 </div>
 
                 <div class="setup-step__actions">
-                    <button class="btn btn-primary" id="btn-complete" disabled>Complete Setup</button>
+                    <button class="btn btn-primary translatable-content" data-translation-key="Complete Setup" id="btn-complete" disabled>Complete Setup</button>
                 </div>
             </div>
 
@@ -175,28 +178,28 @@
                 <div class="success-animation">
                     <div class="success-icon">✅</div>
                 </div>
-                <h2 class="setup-step__title">2FA Enabled Successfully!</h2>
-                <p class="setup-step__description">
+                <h2 class="setup-step__title translatable-content" data-translation-key="2FA Enabled Successfully!">2FA Enabled Successfully!</h2>
+                <p class="setup-step__description translatable-content" data-translation-key="Your account is now protected with two-factor authentication.">
                     Your account is now protected with two-factor authentication.
                 </p>
 
                 <div class="success-info">
-                    <p>From now on, you'll need to:</p>
+                    <p class="translatable-content" data-translation-key="From now on, you'll need to:">From now on, you'll need to:</p>
                     <ul>
-                        <li>Enter your password</li>
-                        <li>Provide a 6-digit code from your authenticator app</li>
+                        <li class="translatable-content" data-translation-key="Enter your password">Enter your password</li>
+                        <li class="translatable-content" data-translation-key="Provide a 6-digit code from your authenticator app">Provide a 6-digit code from your authenticator app</li>
                     </ul>
                 </div>
 
                 <div class="setup-step__actions">
-                    <button class="btn btn-primary" id="btn-close">Close</button>
+                    <button class="btn btn-primary translatable-content" data-translation-key="Close" id="btn-close">Close</button>
                 </div>
             </div>
 
             <!-- Loading Overlay -->
             <div class="loading-overlay" id="loading-overlay" style="display: none;">
                 <div class="loading-spinner"></div>
-                <p class="loading-text">Processing...</p>
+                <p class="loading-text translatable-content" data-translation-key="Processing...">Processing...</p>
             </div>
         </div>
     </div>

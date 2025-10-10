@@ -21,6 +21,9 @@ class TwoFactorAuthSetup {
         try {
             console.log('🔐 2FA Setup: Initializing...');
 
+            // Initialize translations
+            await this.initializeTranslations();
+
             // Get current user
             const { data: { user }, error } = await supabase.auth.getUser();
             if (error || !user) {
@@ -43,12 +46,44 @@ class TwoFactorAuthSetup {
             // Show first step
             this.showStep(0);
 
+            // Update translations
+            this.updateTranslations();
+
             console.log('✅ 2FA Setup: Initialized successfully');
 
         } catch (error) {
             console.error('❌ 2FA Setup: Failed to initialize:', error);
             alert('Failed to initialize 2FA setup. Please try again.');
             window.close();
+        }
+    }
+
+    /**
+     * Initialize translations
+     */
+    async initializeTranslations() {
+        if (window.twoFactorAuthTranslations) {
+            await window.twoFactorAuthTranslations.init();
+        }
+    }
+
+    /**
+     * Update all translations
+     */
+    updateTranslations() {
+        if (window.twoFactorAuthTranslations && window.twoFactorAuthTranslations.isReady()) {
+            const currentLanguage = localStorage.getItem('language') || 'en';
+            const translations = window.twoFactorAuthTranslations.translations[currentLanguage] || window.twoFactorAuthTranslations.translations['en'] || {};
+
+            // Update all translatable content
+            document.querySelectorAll('.translatable-content').forEach(element => {
+                const key = element.getAttribute('data-translation-key');
+                if (key && translations[key]) {
+                    element.textContent = translations[key];
+                }
+            });
+
+            console.log(`✅ Wizard translations updated for language: ${currentLanguage}`);
         }
     }
 
@@ -218,14 +253,40 @@ class TwoFactorAuthSetup {
     toggleManualEntry() {
         const content = document.getElementById('manual-entry-content');
         const btn = document.getElementById('btn-show-manual');
+        const btnText = btn.querySelector('.translatable-content');
+        
+        const translations = this.getTranslations();
         
         if (content.style.display === 'none') {
             content.style.display = 'block';
-            btn.textContent = 'Hide manual entry';
+            const text = translations['Hide manual entry'] || 'Hide manual entry';
+            if (btnText) {
+                btnText.textContent = text;
+                btnText.setAttribute('data-translation-key', 'Hide manual entry');
+            } else {
+                btn.textContent = text;
+            }
         } else {
             content.style.display = 'none';
-            btn.textContent = "Can't scan? Enter manually";
+            const text = translations["Can't scan? Enter manually"] || "Can't scan? Enter manually";
+            if (btnText) {
+                btnText.textContent = text;
+                btnText.setAttribute('data-translation-key', "Can't scan? Enter manually");
+            } else {
+                btn.textContent = text;
+            }
         }
+    }
+
+    /**
+     * Get current translations
+     */
+    getTranslations() {
+        const currentLanguage = localStorage.getItem('language') || 'en';
+        if (window.twoFactorAuthTranslations && window.twoFactorAuthTranslations.translations) {
+            return window.twoFactorAuthTranslations.translations[currentLanguage] || window.twoFactorAuthTranslations.translations['en'] || {};
+        }
+        return {};
     }
 
     /**
@@ -235,10 +296,16 @@ class TwoFactorAuthSetup {
         try {
             await navigator.clipboard.writeText(this.secretKey);
             const btn = document.getElementById('btn-copy-secret');
+            const translations = this.getTranslations();
             const originalText = btn.textContent;
-            btn.textContent = 'Copied!';
+            const originalKey = btn.getAttribute('data-translation-key');
+            
+            btn.textContent = translations['Copied!'] || 'Copied!';
+            btn.setAttribute('data-translation-key', 'Copied!');
+            
             setTimeout(() => {
-                btn.textContent = originalText;
+                btn.textContent = translations[originalKey] || originalText;
+                btn.setAttribute('data-translation-key', originalKey);
             }, 2000);
         } catch (error) {
             console.error('Failed to copy:', error);
@@ -304,10 +371,13 @@ class TwoFactorAuthSetup {
     /**
      * Show verification error
      */
-    showVerifyError(message) {
+    showVerifyError(messageKey) {
         const input = document.getElementById('verify-code-input');
         const errorDiv = document.getElementById('verify-error');
         const errorText = document.getElementById('verify-error-text');
+
+        const translations = this.getTranslations();
+        const message = translations[messageKey] || messageKey;
 
         input.classList.add('error');
         errorText.textContent = message;

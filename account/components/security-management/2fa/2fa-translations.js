@@ -75,8 +75,8 @@ class TwoFactorAuthTranslations {
         const currentLanguage = localStorage.getItem('language') || 'en';
         const languageTranslations = this.translations[currentLanguage] || this.translations['en'] || {};
 
-        // Update all translatable content in 2FA component
-        const translatableElements = document.querySelectorAll('.two-factor-auth .translatable-content');
+        // Update all translatable content in 2FA component AND wizard
+        const translatableElements = document.querySelectorAll('.translatable-content');
         
         translatableElements.forEach(element => {
             const key = element.dataset.translationKey;
