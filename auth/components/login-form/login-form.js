@@ -198,8 +198,24 @@ class LoginForm {
             if (data.user) {
                 // Reset failed attempts on successful login
                 this.resetFailedAttempts();
-                // Redirect to home page
-                window.location.href = '/';
+                
+                // Check if user has 2FA enabled
+                const { data: twoFAData, error: twoFAError } = await window.supabase
+                    .from('user_2fa')
+                    .select('is_enabled')
+                    .eq('user_id', data.user.id)
+                    .maybeSingle();
+
+                if (!twoFAError && twoFAData?.is_enabled) {
+                    // User has 2FA enabled - redirect to verification
+                    console.log('🔐 2FA enabled for user - redirecting to verification');
+                    sessionStorage.setItem('pending_2fa_user', data.user.id);
+                    sessionStorage.setItem('pending_2fa_time', Date.now().toString());
+                    window.location.href = '/auth/2fa-verify/';
+                } else {
+                    // No 2FA - normal redirect
+                    window.location.href = '/';
+                }
             }
 
         } catch (error) {
