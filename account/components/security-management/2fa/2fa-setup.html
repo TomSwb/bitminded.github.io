@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Factor Authentication Setup - BitMinded</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/account/components/security-management/2fa/2fa-setup.css">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/otpauth@9.2.3/dist/otpauth.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-config.js"></script>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-card">
+            <!-- Progress Indicator -->
+            <div class="setup-progress" id="setup-progress">
+                <div class="setup-progress__step" data-step="0">
+                    <div class="setup-progress__circle">1</div>
+                    <div class="setup-progress__label">Start</div>
+                </div>
+                <div class="setup-progress__line"></div>
+                <div class="setup-progress__step" data-step="1">
+                    <div class="setup-progress__circle">2</div>
+                    <div class="setup-progress__label">Scan</div>
+                </div>
+                <div class="setup-progress__line"></div>
+                <div class="setup-progress__step" data-step="2">
+                    <div class="setup-progress__circle">3</div>
+                    <div class="setup-progress__label">Verify</div>
+                </div>
+                <div class="setup-progress__line"></div>
+                <div class="setup-progress__step" data-step="3">
+                    <div class="setup-progress__circle">4</div>
+                    <div class="setup-progress__label">Backup</div>
+                </div>
+                <div class="setup-progress__line"></div>
+                <div class="setup-progress__step" data-step="4">
+                    <div class="setup-progress__circle">5</div>
+                    <div class="setup-progress__label">Done</div>
+                </div>
+            </div>
+
+            <!-- Step 0: Introduction -->
+            <div class="setup-step active" id="step-intro" data-step="0">
+                <div class="setup-step__icon">🔐</div>
+                <h1 class="setup-step__title">Set Up Two-Factor Authentication</h1>
+                <p class="setup-step__description">
+                    Add an extra layer of security to your account. You'll need an authenticator app on your phone.
+                </p>
+                
+                <div class="setup-step__info">
+                    <h3>What you'll need:</h3>
+                    <ul>
+                        <li>📱 A smartphone with an authenticator app</li>
+                        <li>⏱️ About 2 minutes of your time</li>
+                    </ul>
+                    
+                    <h3>Recommended apps:</h3>
+                    <ul>
+                        <li>Bitwarden</li>
+                        <li>Google Authenticator</li>
+                        <li>Microsoft Authenticator</li>
+                    </ul>
+                </div>
+
+                <div class="setup-step__actions">
+                    <button class="btn btn-secondary" onclick="window.close()">Cancel</button>
+                    <button class="btn btn-primary" id="btn-start">Get Started</button>
+                </div>
+            </div>
+
+            <!-- Step 1: QR Code -->
+            <div class="setup-step" id="step-qr" data-step="1">
+                <h2 class="setup-step__title">Scan QR Code</h2>
+                <p class="setup-step__description">
+                    Open your authenticator app and scan this QR code
+                </p>
+
+                <div class="qr-container">
+                    <canvas id="qr-canvas"></canvas>
+                </div>
+
+                <div class="manual-entry">
+                    <button class="btn-link" id="btn-show-manual">Can't scan? Enter manually</button>
+                    <div class="manual-entry__content" id="manual-entry-content" style="display: none;">
+                        <p>Enter this code in your authenticator app:</p>
+                        <div class="secret-key-display">
+                            <code id="secret-key-text"></code>
+                            <button class="btn btn-small" id="btn-copy-secret">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setup-step__actions">
+                    <button class="btn btn-secondary" id="btn-qr-back">Back</button>
+                    <button class="btn btn-primary" id="btn-qr-continue">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Verify Code -->
+            <div class="setup-step" id="step-verify" data-step="2">
+                <h2 class="setup-step__title">Verify Your Code</h2>
+                <p class="setup-step__description">
+                    Enter the 6-digit code from your authenticator app
+                </p>
+
+                <div class="code-input-container">
+                    <input 
+                        type="text" 
+                        id="verify-code-input" 
+                        class="code-input" 
+                        maxlength="6" 
+                        pattern="[0-9]{6}"
+                        placeholder="000000"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="error-message" id="verify-error" style="display: none;">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text" id="verify-error-text"></span>
+                </div>
+
+                <div class="setup-step__actions">
+                    <button class="btn btn-secondary" id="btn-verify-back">Back</button>
+                    <button class="btn btn-primary" id="btn-verify" disabled>Verify Code</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Backup Codes -->
+            <div class="setup-step" id="step-backup" data-step="3">
+                <h2 class="setup-step__title">Save Your Backup Codes</h2>
+                <p class="setup-step__description warning">
+                    ⚠️ Store these codes safely. You can use them to access your account if you lose your phone.
+                </p>
+
+                <div class="backup-codes-container">
+                    <div class="backup-codes-grid" id="backup-codes-grid">
+                        <!-- Codes will be generated here -->
+                    </div>
+                </div>
+
+                <div class="backup-actions">
+                    <button class="btn btn-secondary" id="btn-download-codes">
+                        📥 Download Codes
+                    </button>
+                    <button class="btn btn-secondary" id="btn-print-codes">
+                        🖨️ Print Codes
+                    </button>
+                </div>
+
+                <div class="confirmation-checkbox">
+                    <label>
+                        <input type="checkbox" id="codes-saved-checkbox">
+                        <span>I have saved these codes in a safe place</span>
+                    </label>
+                </div>
+
+                <div class="setup-step__actions">
+                    <button class="btn btn-primary" id="btn-complete" disabled>Complete Setup</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Success -->
+            <div class="setup-step" id="step-success" data-step="4">
+                <div class="success-animation">
+                    <div class="success-icon">✅</div>
+                </div>
+                <h2 class="setup-step__title">2FA Enabled Successfully!</h2>
+                <p class="setup-step__description">
+                    Your account is now protected with two-factor authentication.
+                </p>
+
+                <div class="success-info">
+                    <p>From now on, you'll need to:</p>
+                    <ul>
+                        <li>Enter your password</li>
+                        <li>Provide a 6-digit code from your authenticator app</li>
+                    </ul>
+                </div>
+
+                <div class="setup-step__actions">
+                    <button class="btn btn-primary" id="btn-close">Close</button>
+                </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loading-overlay" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Processing...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/account/components/security-management/2fa/2fa-setup.js"></script>
+</body>
+</html>
+
