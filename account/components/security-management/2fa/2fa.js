@@ -202,11 +202,11 @@ class TwoFactorAuth {
             this.actionButton.className = 'two-factor-auth__action-btn';
             
             if (isEnabled) {
-                this.actionButton.classList.add('secondary');
+                this.actionButton.classList.add('danger');
                 const buttonText = this.actionButton.querySelector('.translatable-content');
                 if (buttonText) {
-                    buttonText.setAttribute('data-translation-key', 'Manage 2FA');
-                    buttonText.textContent = 'Manage 2FA';
+                    buttonText.setAttribute('data-translation-key', 'Disable 2FA');
+                    buttonText.textContent = 'Disable 2FA';
                 }
             } else {
                 const buttonText = this.actionButton.querySelector('.translatable-content');
@@ -228,12 +228,68 @@ class TwoFactorAuth {
      */
     handleActionClick() {
         if (this.is2FAEnabled) {
-            // TODO: Open management page (disable, regenerate codes, etc.)
-            console.log('🔧 2FA: Manage clicked (not yet implemented)');
-            alert('2FA management features coming soon!\n\nThis will allow you to:\n- Disable 2FA\n- Regenerate backup codes\n- View 2FA history');
+            // Disable 2FA
+            this.disable2FA();
         } else {
             // Open setup page in new window
             this.openSetupWindow();
+        }
+    }
+
+    /**
+     * Disable 2FA
+     */
+    async disable2FA() {
+        // Confirm with user
+        const confirmed = confirm(
+            'Are you sure you want to disable Two-Factor Authentication?\n\n' +
+            'This will reduce the security of your account.\n\n' +
+            'You can enable it again at any time.'
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        this.showLoading(true);
+        this.hideError();
+
+        try {
+            console.log('🔧 2FA: Disabling...');
+
+            // Get current user
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError || !user) {
+                throw new Error('Failed to get user');
+            }
+
+            // Update database - set is_enabled to false
+            const { error } = await supabase
+                .from('user_2fa')
+                .update({ 
+                    is_enabled: false,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', user.id);
+
+            if (error) {
+                throw error;
+            }
+
+            console.log('✅ 2FA: Disabled successfully');
+
+            // Refresh status
+            await this.load2FAStatus();
+
+            // Show success message (optional)
+            alert('Two-Factor Authentication has been disabled.');
+
+        } catch (error) {
+            console.error('❌ 2FA: Failed to disable:', error);
+            this.showError('Failed to disable 2FA. Please try again.');
+        } finally {
+            this.showLoading(false);
         }
     }
 
