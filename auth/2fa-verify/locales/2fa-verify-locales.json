@@ -1,0 +1,51 @@
+{
+  "en": {
+    "Two-Factor Authentication": "Two-Factor Authentication",
+    "Enter the 6-digit code from your authenticator app to continue": "Enter the 6-digit code from your authenticator app to continue",
+    "Verify": "Verify",
+    "Open your authenticator app and enter the current 6-digit code": "Open your authenticator app and enter the current 6-digit code",
+    "Cancel and return to login": "Cancel and return to login",
+    "Verifying...": "Verifying...",
+    "Invalid code. Please try again.": "Invalid code. Please try again.",
+    "Failed to verify code. Please try again.": "Failed to verify code. Please try again.",
+    "Session expired. Please log in again.": "Session expired. Please log in again.",
+    "No pending 2FA verification found. Please log in again.": "No pending 2FA verification found. Please log in again."
+  },
+  "es": {
+    "Two-Factor Authentication": "Autenticación de Dos Factores",
+    "Enter the 6-digit code from your authenticator app to continue": "Ingresa el código de 6 dígitos de tu aplicación de autenticación para continuar",
+    "Verify": "Verificar",
+    "Open your authenticator app and enter the current 6-digit code": "Abre tu aplicación de autenticación e ingresa el código actual de 6 dígitos",
+    "Cancel and return to login": "Cancelar y volver al inicio de sesión",
+    "Verifying...": "Verificando...",
+    "Invalid code. Please try again.": "Código inválido. Por favor intenta de nuevo.",
+    "Failed to verify code. Please try again.": "Error al verificar el código. Por favor intenta de nuevo.",
+    "Session expired. Please log in again.": "Sesión expirada. Por favor inicia sesión nuevamente.",
+    "No pending 2FA verification found. Please log in again.": "No se encontró verificación 2FA pendiente. Por favor inicia sesión nuevamente."
+  },
+  "fr": {
+    "Two-Factor Authentication": "Authentification à Deux Facteurs",
+    "Enter the 6-digit code from your authenticator app to continue": "Entrez le code à 6 chiffres de votre application d'authentification pour continuer",
+    "Verify": "Vérifier",
+    "Open your authenticator app and enter the current 6-digit code": "Ouvrez votre application d'authentification et entrez le code actuel à 6 chiffres",
+    "Cancel and return to login": "Annuler et retourner à la connexion",
+    "Verifying...": "Vérification...",
+    "Invalid code. Please try again.": "Code invalide. Veuillez réessayer.",
+    "Failed to verify code. Please try again.": "Échec de la vérification du code. Veuillez réessayer.",
+    "Session expired. Please log in again.": "Session expirée. Veuillez vous reconnecter.",
+    "No pending 2FA verification found. Please log in again.": "Aucune vérification 2FA en attente trouvée. Veuillez vous reconnecter."
+  },
+  "de": {
+    "Two-Factor Authentication": "Zwei-Faktor-Authentifizierung",
+    "Enter the 6-digit code from your authenticator app to continue": "Geben Sie den 6-stelligen Code aus Ihrer Authentifizierungs-App ein, um fortzufahren",
+    "Verify": "Verifizieren",
+    "Open your authenticator app and enter the current 6-digit code": "Öffnen Sie Ihre Authentifizierungs-App und geben Sie den aktuellen 6-stelligen Code ein",
+    "Cancel and return to login": "Abbrechen und zur Anmeldung zurückkehren",
+    "Verifying...": "Verifizierung...",
+    "Invalid code. Please try again.": "Ungültiger Code. Bitte versuchen Sie es erneut.",
+    "Failed to verify code. Please try again.": "Fehler beim Verifizieren des Codes. Bitte versuchen Sie es erneut.",
+    "Session expired. Please log in again.": "Sitzung abgelaufen. Bitte melden Sie sich erneut an.",
+    "No pending 2FA verification found. Please log in again.": "Keine ausstehende 2FA-Verifizierung gefunden. Bitte melden Sie sich erneut an."
+  }
+}
+

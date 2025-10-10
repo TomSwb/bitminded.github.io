@@ -68,7 +68,7 @@ serve(async (req) => {
       .from('user_2fa')
       .select('secret_key, is_enabled')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !twoFAData) {
       console.error('Failed to fetch 2FA data:', fetchError)

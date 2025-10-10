@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Two-Factor Authentication - BitMinded</title>
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="/css/critical.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/auth/2fa-verify/2fa-verify.css">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-config.js"></script>
+    
+    <!-- Translations -->
+    <script src="/auth/2fa-verify/2fa-verify-translations.js"></script>
+</head>
+
+<body>
+    <div class="verify-container">
+        <div class="verify-card">
+            <!-- Header -->
+            <div class="verify-header">
+                <div class="verify-icon">🔐</div>
+                <h1 class="verify-title translatable-content" data-translation-key="Two-Factor Authentication">Two-Factor Authentication</h1>
+                <p class="verify-description translatable-content" data-translation-key="Enter the 6-digit code from your authenticator app to continue">
+                    Enter the 6-digit code from your authenticator app to continue
+                </p>
+            </div>
+
+            <!-- Code Input -->
+            <div class="verify-content">
+                <div class="code-input-container">
+                    <input 
+                        type="text" 
+                        id="code-input" 
+                        class="code-input" 
+                        maxlength="6" 
+                        pattern="[0-9]{6}"
+                        placeholder="000000"
+                        autocomplete="off"
+                        autofocus
+                    >
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message" id="error-message" style="display: none;">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text" id="error-text"></span>
+                </div>
+
+                <!-- Verify Button -->
+                <button class="btn btn-primary" id="btn-verify" disabled>
+                    <span class="translatable-content" data-translation-key="Verify">Verify</span>
+                </button>
+
+                <!-- Help Text -->
+                <div class="help-text">
+                    <p class="translatable-content" data-translation-key="Open your authenticator app and enter the current 6-digit code">
+                        Open your authenticator app and enter the current 6-digit code
+                    </p>
+                </div>
+
+                <!-- Cancel Link -->
+                <div class="cancel-link">
+                    <a href="/auth/" class="link translatable-content" data-translation-key="Cancel and return to login">
+                        Cancel and return to login
+                    </a>
+                </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loading-overlay" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p class="loading-text translatable-content" data-translation-key="Verifying...">Verifying...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/auth/2fa-verify/2fa-verify.js"></script>
+</body>
+
+</html>
+
