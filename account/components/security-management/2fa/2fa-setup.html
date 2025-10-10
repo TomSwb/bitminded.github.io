@@ -10,13 +10,13 @@
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/account/components/security-management/2fa/2fa-setup.css">
     
-    <!-- Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/otpauth@9.2.3/dist/otpauth.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/supabase-config.js"></script>
+    
+    <!-- Libraries - Load synchronously before our script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/otpauth@9.2.3/dist/otpauth.umd.min.js"></script>
 </head>
 <body>
     <div class="setup-container">
@@ -85,8 +85,8 @@
                     Open your authenticator app and scan this QR code
                 </p>
 
-                <div class="qr-container">
-                    <canvas id="qr-canvas"></canvas>
+                <div class="qr-container" id="qr-canvas">
+                    <!-- QR code will be generated here -->
                 </div>
 
                 <div class="manual-entry">

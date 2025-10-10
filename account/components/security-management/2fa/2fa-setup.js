@@ -171,16 +171,33 @@ class TwoFactorAuthSetup {
      */
     async generateQRCode() {
         try {
-            const canvas = document.getElementById('qr-canvas');
+            // Wait for QRCode library to be available
+            if (typeof QRCode === 'undefined') {
+                console.log('Waiting for QRCode library...');
+                await new Promise(resolve => {
+                    const checkLibrary = setInterval(() => {
+                        if (typeof QRCode !== 'undefined') {
+                            clearInterval(checkLibrary);
+                            resolve();
+                        }
+                    }, 100);
+                });
+            }
+
+            const container = document.getElementById('qr-canvas');
             const otpauthUrl = this.totp.toString();
 
-            await QRCode.toCanvas(canvas, otpauthUrl, {
+            // Clear any existing QR code
+            container.innerHTML = '<div id="qr-code-display"></div>';
+            
+            // Generate QR code
+            new QRCode(document.getElementById('qr-code-display'), {
+                text: otpauthUrl,
                 width: 256,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
+                height: 256,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
             });
 
             // Display manual entry code
@@ -190,7 +207,8 @@ class TwoFactorAuthSetup {
 
         } catch (error) {
             console.error('❌ Failed to generate QR code:', error);
-            alert('Failed to generate QR code. Please try again.');
+            // Don't alert since QR is showing - just log error
+            console.log('Continuing anyway - manual entry available');
         }
     }
 
@@ -258,25 +276,16 @@ class TwoFactorAuthSetup {
         this.showLoading(true);
 
         try {
-            // Get Supabase project URL
-            const supabaseUrl = supabase.supabaseUrl || window.location.origin;
-            const functionUrl = `${supabaseUrl}/functions/v1/verify-2fa-code`;
-
-            // Call Edge Function to verify code
-            const response = await fetch(functionUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: this.userId,
-                    code: code
-                })
+            // Verify code client-side during setup (secret not in DB yet)
+            // Use a time window to allow for clock skew
+            const delta = this.totp.validate({ 
+                token: code, 
+                window: 1  // Allow ±30 seconds clock skew
             });
+            
+            const isValid = delta !== null;
 
-            const result = await response.json();
-
-            if (result.success) {
+            if (isValid) {
                 console.log('✅ Code verified successfully');
                 this.nextStep();
             } else {
