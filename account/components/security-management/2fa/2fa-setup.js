@@ -436,22 +436,33 @@ If you lose access to your authenticator app, you can use these codes to log in.
                 btoa(code) // Base64 encode (in production, use proper hashing)
             );
 
-            // Save to database
-            const { error } = await supabase
+            // First, delete any existing 2FA record to ensure fresh setup
+            // This prevents issues with old secrets when re-enabling
+            const { error: deleteError } = await supabase
                 .from('user_2fa')
-                .upsert({
+                .delete()
+                .eq('user_id', this.userId);
+
+            // Note: delete error is OK if no record exists
+            if (deleteError && deleteError.code !== 'PGRST116') {
+                console.warn('Delete warning:', deleteError);
+            }
+
+            // Insert fresh 2FA record with new secret
+            const { error: insertError } = await supabase
+                .from('user_2fa')
+                .insert({
                     user_id: this.userId,
                     secret_key: this.secretKey,
                     backup_codes: hashedCodes,
-                    is_enabled: true,
-                    updated_at: new Date().toISOString()
+                    is_enabled: true
                 });
 
-            if (error) {
-                throw error;
+            if (insertError) {
+                throw insertError;
             }
 
-            console.log('✅ 2FA saved to database');
+            console.log('✅ 2FA saved to database with fresh secret');
 
             // Show success step
             this.nextStep();
