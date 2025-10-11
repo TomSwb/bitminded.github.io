@@ -36,24 +36,55 @@
             <div class="verify-header">
                 <div class="verify-icon">🔐</div>
                 <h1 class="verify-title translatable-content" data-translation-key="Two-Factor Authentication">Two-Factor Authentication</h1>
-                <p class="verify-description translatable-content" data-translation-key="Enter the 6-digit code from your authenticator app to continue">
+                <!-- <p class="verify-description translatable-content" data-translation-key="Enter the 6-digit code from your authenticator app to continue">
                     Enter the 6-digit code from your authenticator app to continue
-                </p>
+                </p>-->
             </div>
 
             <!-- Code Input -->
             <div class="verify-content">
-                <div class="code-input-container">
-                    <input 
-                        type="text" 
-                        id="code-input" 
-                        class="code-input" 
-                        maxlength="6" 
-                        pattern="[0-9]{6}"
-                        placeholder="000000"
-                        autocomplete="off"
-                        autofocus
-                    >
+                <!-- TOTP Input (default) -->
+                <div id="totp-input-section">
+                    <div class="code-input-container">
+                        <input 
+                            type="text" 
+                            id="code-input" 
+                            class="code-input" 
+                            maxlength="6" 
+                            pattern="[0-9]{6}"
+                            placeholder="000000"
+                            autocomplete="off"
+                            autofocus
+                        >
+                    </div>
+
+                    <!-- Help Text -->
+                    <div class="help-text">
+                        <p class="translatable-content" data-translation-key="Open your authenticator app and enter the current 6-digit code">
+                            Open your authenticator app and enter the current 6-digit code
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Backup Code Input (hidden by default) -->
+                <div id="backup-input-section" style="display: none;">
+                    <div class="backup-code-input-container">
+                        <input 
+                            type="text" 
+                            id="backup-code-input" 
+                            class="backup-code-input" 
+                            maxlength="14"
+                            placeholder="XXXX-XXXX-XXXX"
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <!-- Help Text -->
+                    <div class="help-text">
+                        <p class="translatable-content" data-translation-key="Enter one of your backup codes. Each code can only be used once.">
+                            Enter one of your backup codes. Each code can only be used once.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Error Message -->
@@ -67,11 +98,11 @@
                     <span class="translatable-content" data-translation-key="Verify">Verify</span>
                 </button>
 
-                <!-- Help Text -->
-                <div class="help-text">
-                    <p class="translatable-content" data-translation-key="Open your authenticator app and enter the current 6-digit code">
-                        Open your authenticator app and enter the current 6-digit code
-                    </p>
+                <!-- Toggle to Backup Code -->
+                <div class="backup-toggle">
+                    <button class="link-button" id="toggle-backup">
+                        <span class="translatable-content" data-translation-key="Lost your phone? Use a backup code">Lost your phone? Use a backup code</span>
+                    </button>
                 </div>
 
                 <!-- Cancel Link -->

@@ -9,7 +9,11 @@
     "Invalid code. Please try again.": "Invalid code. Please try again.",
     "Failed to verify code. Please try again.": "Failed to verify code. Please try again.",
     "Session expired. Please log in again.": "Session expired. Please log in again.",
-    "No pending 2FA verification found. Please log in again.": "No pending 2FA verification found. Please log in again."
+    "No pending 2FA verification found. Please log in again.": "No pending 2FA verification found. Please log in again.",
+    "Lost your phone? Use a backup code": "Lost your phone? Use a backup code",
+    "Use authenticator app code": "Use authenticator app code",
+    "Enter one of your backup codes. Each code can only be used once.": "Enter one of your backup codes. Each code can only be used once.",
+    "Invalid backup code. Please try again.": "Invalid backup code. Please try again."
   },
   "es": {
     "Two-Factor Authentication": "Autenticación de Dos Factores",
@@ -21,7 +25,11 @@
     "Invalid code. Please try again.": "Código inválido. Por favor intenta de nuevo.",
     "Failed to verify code. Please try again.": "Error al verificar el código. Por favor intenta de nuevo.",
     "Session expired. Please log in again.": "Sesión expirada. Por favor inicia sesión nuevamente.",
-    "No pending 2FA verification found. Please log in again.": "No se encontró verificación 2FA pendiente. Por favor inicia sesión nuevamente."
+    "No pending 2FA verification found. Please log in again.": "No se encontró verificación 2FA pendiente. Por favor inicia sesión nuevamente.",
+    "Lost your phone? Use a backup code": "¿Perdiste tu teléfono? Usa un código de respaldo",
+    "Use authenticator app code": "Usar código de la aplicación",
+    "Enter one of your backup codes. Each code can only be used once.": "Ingresa uno de tus códigos de respaldo. Cada código solo se puede usar una vez.",
+    "Invalid backup code. Please try again.": "Código de respaldo inválido. Por favor intenta de nuevo."
   },
   "fr": {
     "Two-Factor Authentication": "Authentification à Deux Facteurs",
@@ -33,7 +41,11 @@
     "Invalid code. Please try again.": "Code invalide. Veuillez réessayer.",
     "Failed to verify code. Please try again.": "Échec de la vérification du code. Veuillez réessayer.",
     "Session expired. Please log in again.": "Session expirée. Veuillez vous reconnecter.",
-    "No pending 2FA verification found. Please log in again.": "Aucune vérification 2FA en attente trouvée. Veuillez vous reconnecter."
+    "No pending 2FA verification found. Please log in again.": "Aucune vérification 2FA en attente trouvée. Veuillez vous reconnecter.",
+    "Lost your phone? Use a backup code": "Téléphone perdu? Utilisez un code de sauvegarde",
+    "Use authenticator app code": "Utiliser le code de l'application",
+    "Enter one of your backup codes. Each code can only be used once.": "Entrez l'un de vos codes de sauvegarde. Chaque code ne peut être utilisé qu'une seule fois.",
+    "Invalid backup code. Please try again.": "Code de sauvegarde invalide. Veuillez réessayer."
   },
   "de": {
     "Two-Factor Authentication": "Zwei-Faktor-Authentifizierung",
@@ -45,7 +57,11 @@
     "Invalid code. Please try again.": "Ungültiger Code. Bitte versuchen Sie es erneut.",
     "Failed to verify code. Please try again.": "Fehler beim Verifizieren des Codes. Bitte versuchen Sie es erneut.",
     "Session expired. Please log in again.": "Sitzung abgelaufen. Bitte melden Sie sich erneut an.",
-    "No pending 2FA verification found. Please log in again.": "Keine ausstehende 2FA-Verifizierung gefunden. Bitte melden Sie sich erneut an."
+    "No pending 2FA verification found. Please log in again.": "Keine ausstehende 2FA-Verifizierung gefunden. Bitte melden Sie sich erneut an.",
+    "Lost your phone? Use a backup code": "Telefon verloren? Verwenden Sie einen Backup-Code",
+    "Use authenticator app code": "App-Code verwenden",
+    "Enter one of your backup codes. Each code can only be used once.": "Geben Sie einen Ihrer Backup-Codes ein. Jeder Code kann nur einmal verwendet werden.",
+    "Invalid backup code. Please try again.": "Ungültiger Backup-Code. Bitte versuchen Sie es erneut."
   }
 }
 

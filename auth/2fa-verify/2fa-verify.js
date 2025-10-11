@@ -7,11 +7,15 @@ class TwoFactorVerify {
     constructor() {
         this.isInitialized = false;
         this.userId = null;
+        this.isUsingBackupCode = false;
         this.codeInput = null;
+        this.backupCodeInput = null;
         this.verifyButton = null;
         this.errorContainer = null;
         this.errorText = null;
         this.loadingOverlay = null;
+        this.totpSection = null;
+        this.backupSection = null;
     }
 
     /**
@@ -79,17 +83,20 @@ class TwoFactorVerify {
      */
     setupElements() {
         this.codeInput = document.getElementById('code-input');
+        this.backupCodeInput = document.getElementById('backup-code-input');
         this.verifyButton = document.getElementById('btn-verify');
         this.errorContainer = document.getElementById('error-message');
         this.errorText = document.getElementById('error-text');
         this.loadingOverlay = document.getElementById('loading-overlay');
+        this.totpSection = document.getElementById('totp-input-section');
+        this.backupSection = document.getElementById('backup-input-section');
     }
 
     /**
      * Setup event listeners
      */
     setupEventListeners() {
-        // Code input
+        // TOTP code input
         if (this.codeInput) {
             this.codeInput.addEventListener('input', (e) => this.handleCodeInput(e));
             this.codeInput.addEventListener('keypress', (e) => {
@@ -97,6 +104,22 @@ class TwoFactorVerify {
                     this.handleVerify();
                 }
             });
+        }
+
+        // Backup code input
+        if (this.backupCodeInput) {
+            this.backupCodeInput.addEventListener('input', (e) => this.handleBackupCodeInput(e));
+            this.backupCodeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !this.verifyButton.disabled) {
+                    this.handleVerify();
+                }
+            });
+        }
+
+        // Toggle backup code
+        const toggleBtn = document.getElementById('toggle-backup');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggleBackupCodeMode());
         }
 
         // Verify button
@@ -111,7 +134,50 @@ class TwoFactorVerify {
     }
 
     /**
-     * Handle code input
+     * Toggle between TOTP and backup code mode
+     */
+    toggleBackupCodeMode() {
+        this.isUsingBackupCode = !this.isUsingBackupCode;
+        
+        const toggleBtn = document.getElementById('toggle-backup');
+        const toggleText = toggleBtn.querySelector('.translatable-content');
+        const translations = this.getTranslations();
+
+        if (this.isUsingBackupCode) {
+            // Show backup code input
+            this.totpSection.style.display = 'none';
+            this.backupSection.style.display = 'block';
+            this.backupCodeInput.focus();
+            
+            // Update toggle button text
+            const text = translations['Use authenticator app code'] || 'Use authenticator app code';
+            if (toggleText) {
+                toggleText.textContent = text;
+                toggleText.setAttribute('data-translation-key', 'Use authenticator app code');
+            }
+        } else {
+            // Show TOTP input
+            this.backupSection.style.display = 'none';
+            this.totpSection.style.display = 'block';
+            this.codeInput.focus();
+            
+            // Update toggle button text
+            const text = translations['Lost your phone? Use a backup code'] || 'Lost your phone? Use a backup code';
+            if (toggleText) {
+                toggleText.textContent = text;
+                toggleText.setAttribute('data-translation-key', 'Lost your phone? Use a backup code');
+            }
+        }
+
+        // Reset inputs
+        this.codeInput.value = '';
+        this.backupCodeInput.value = '';
+        this.verifyButton.disabled = true;
+        this.hideError();
+    }
+
+    /**
+     * Handle TOTP code input
      */
     handleCodeInput(e) {
         const input = e.target;
@@ -127,12 +193,41 @@ class TwoFactorVerify {
     }
 
     /**
+     * Handle backup code input
+     */
+    handleBackupCodeInput(e) {
+        const input = e.target;
+        let code = input.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+        
+        // Auto-insert dashes at positions 4 and 8
+        if (code.length > 4 && code[4] !== '-') {
+            code = code.slice(0, 4) + '-' + code.slice(4);
+        }
+        if (code.length > 9 && code[9] !== '-') {
+            code = code.slice(0, 9) + '-' + code.slice(9);
+        }
+        
+        input.value = code;
+
+        // Enable verify button when complete (XXXX-XXXX-XXXX = 14 chars)
+        this.verifyButton.disabled = code.length !== 14;
+
+        // Remove error styling
+        input.classList.remove('error');
+        this.hideError();
+    }
+
+    /**
      * Handle verification
      */
     async handleVerify() {
-        const code = this.codeInput.value;
+        const code = this.isUsingBackupCode 
+            ? this.backupCodeInput.value 
+            : this.codeInput.value;
         
-        if (code.length !== 6) {
+        const expectedLength = this.isUsingBackupCode ? 14 : 6;
+        
+        if (code.length !== expectedLength) {
             return;
         }
 
@@ -140,7 +235,7 @@ class TwoFactorVerify {
         this.hideError();
 
         try {
-            console.log('🔧 2FA Verify: Verifying code...');
+            console.log(`🔧 2FA Verify: Verifying ${this.isUsingBackupCode ? 'backup code' : 'TOTP code'}...`);
 
             // Get current session token
             const { data: { session } } = await supabase.auth.getSession();
@@ -162,7 +257,8 @@ class TwoFactorVerify {
                 },
                 body: JSON.stringify({
                     userId: this.userId,
-                    code: code
+                    code: code,
+                    type: this.isUsingBackupCode ? 'backup' : 'totp'
                 })
             });
 
@@ -179,7 +275,10 @@ class TwoFactorVerify {
                 window.location.href = '/account/';
             } else {
                 console.log('❌ 2FA Verify: Invalid code');
-                this.showVerifyError('Invalid code. Please try again.');
+                const errorMsg = this.isUsingBackupCode 
+                    ? 'Invalid backup code. Please try again.'
+                    : 'Invalid code. Please try again.';
+                this.showVerifyError(errorMsg);
             }
 
         } catch (error) {
