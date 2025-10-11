@@ -284,6 +284,25 @@ class ComponentLoader {
                         setTimeout(init2FA, 50);
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'login-activity') {
+                    // Load login activity translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/account/components/security-management/login-activity/login-activity-translations.js';
+                    translationScript.onload = () => {
+                        // Wait for DOM to be ready before initializing login activity component
+                        const initLoginActivity = () => {
+                            if (window.LoginActivity && !window.loginActivity) {
+                                window.loginActivity = new window.LoginActivity();
+                            }
+                            if (window.loginActivity) {
+                                window.loginActivity.init(config);
+                            }
+                        };
+                        
+                        // Use setTimeout to ensure HTML is fully parsed
+                        setTimeout(initLoginActivity, 50);
+                    };
+                    document.head.appendChild(translationScript);
                 }
                 resolve();
             };

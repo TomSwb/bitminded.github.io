@@ -1,0 +1,35 @@
+<!-- Login Activity Component -->
+<div class="login-activity" id="login-activity">
+    <div class="login-activity__header">
+        <h3 class="login-activity__title translatable-content" data-translation-key="Login Activity">Login Activity</h3>
+        <p class="login-activity__description translatable-content" data-translation-key="View your recent login history and monitor account security">
+            View your recent login history and monitor account security
+        </p>
+    </div>
+
+    <div class="login-activity__content">
+        <!-- Loading State -->
+        <div class="login-activity__loading" id="activity-loading" style="display: none;">
+            <div class="login-activity__loading-spinner"></div>
+            <p class="login-activity__loading-text translatable-content" data-translation-key="Loading activity...">Loading activity...</p>
+        </div>
+
+        <!-- Activity List -->
+        <div class="login-activity__list" id="activity-list">
+            <!-- Activity items will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="login-activity__empty" id="activity-empty" style="display: none;">
+            <div class="login-activity__empty-icon">📋</div>
+            <p class="login-activity__empty-text translatable-content" data-translation-key="No login activity found">No login activity found</p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="login-activity__error-message" id="activity-error" style="display: none;">
+            <div class="login-activity__error-icon">⚠️</div>
+            <div class="login-activity__error-text" id="activity-error-text"></div>
+        </div>
+    </div>
+</div>
+

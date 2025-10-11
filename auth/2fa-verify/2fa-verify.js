@@ -267,6 +267,9 @@ class TwoFactorVerify {
             if (result.success) {
                 console.log('✅ 2FA Verify: Code verified successfully');
                 
+                // Log successful 2FA verification
+                await this.logLoginAttempt(this.userId, true, null, true);
+                
                 // Clear pending session
                 sessionStorage.removeItem('pending_2fa_user');
                 sessionStorage.removeItem('pending_2fa_time');
@@ -275,6 +278,11 @@ class TwoFactorVerify {
                 window.location.href = '/account/';
             } else {
                 console.log('❌ 2FA Verify: Invalid code');
+                
+                // Log failed 2FA verification
+                const failureReason = this.isUsingBackupCode ? 'invalid_backup_code' : 'invalid_2fa';
+                await this.logLoginAttempt(this.userId, false, failureReason, false);
+                
                 const errorMsg = this.isUsingBackupCode 
                     ? 'Invalid backup code. Please try again.'
                     : 'Invalid code. Please try again.';
@@ -371,6 +379,66 @@ class TwoFactorVerify {
         if (window.twoFactorVerifyTranslations && window.twoFactorVerifyTranslations.isReady()) {
             window.twoFactorVerifyTranslations.updateTranslations();
         }
+    }
+
+    /**
+     * Log login attempt to database
+     */
+    async logLoginAttempt(userId, success, failureReason = null, used2FA = false) {
+        try {
+            const userAgent = navigator.userAgent;
+            const deviceInfo = this.parseUserAgent(userAgent);
+
+            const logData = {
+                user_id: userId,
+                success: success,
+                failure_reason: failureReason,
+                user_agent: userAgent,
+                device_type: deviceInfo.deviceType,
+                browser: deviceInfo.browser,
+                os: deviceInfo.os,
+                used_2fa: used2FA
+            };
+
+            await supabase
+                .from('user_login_activity')
+                .insert(logData);
+
+            console.log(`📊 Login attempt logged: ${success ? 'Success with 2FA' : 'Failed 2FA'}`);
+
+        } catch (error) {
+            console.error('Failed to log login attempt:', error);
+        }
+    }
+
+    /**
+     * Parse user agent to extract device info
+     */
+    parseUserAgent(userAgent) {
+        const ua = userAgent.toLowerCase();
+        
+        let deviceType = 'desktop';
+        if (/mobile|android|iphone|ipod|blackberry|windows phone/.test(ua)) {
+            deviceType = 'mobile';
+        } else if (/ipad|tablet|playbook|silk/.test(ua)) {
+            deviceType = 'tablet';
+        }
+
+        let browser = 'Unknown';
+        if (ua.includes('firefox')) browser = 'Firefox';
+        else if (ua.includes('edge')) browser = 'Edge';
+        else if (ua.includes('chrome')) browser = 'Chrome';
+        else if (ua.includes('safari')) browser = 'Safari';
+        else if (ua.includes('opera')) browser = 'Opera';
+
+        let os = 'Unknown';
+        if (ua.includes('windows')) os = 'Windows';
+        else if (ua.includes('mac')) os = 'macOS';
+        else if (ua.includes('linux')) os = 'Linux';
+        else if (ua.includes('android')) os = 'Android';
+        else if (ua.includes('ios') || ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
+
+        return { deviceType, browser, os };
     }
 }
 

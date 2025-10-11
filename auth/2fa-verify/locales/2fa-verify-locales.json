@@ -13,7 +13,9 @@
     "Lost your phone? Use a backup code": "Lost your phone? Use a backup code",
     "Use authenticator app code": "Use authenticator app code",
     "Enter one of your backup codes. Each code can only be used once.": "Enter one of your backup codes. Each code can only be used once.",
-    "Invalid backup code. Please try again.": "Invalid backup code. Please try again."
+    "Invalid backup code. Please try again.": "Invalid backup code. Please try again.",
+    "Invalid 2FA code": "Invalid 2FA code",
+    "Invalid backup code": "Invalid backup code"
   },
   "es": {
     "Two-Factor Authentication": "Autenticación de Dos Factores",
@@ -29,7 +31,9 @@
     "Lost your phone? Use a backup code": "¿Perdiste tu teléfono? Usa un código de respaldo",
     "Use authenticator app code": "Usar código de la aplicación",
     "Enter one of your backup codes. Each code can only be used once.": "Ingresa uno de tus códigos de respaldo. Cada código solo se puede usar una vez.",
-    "Invalid backup code. Please try again.": "Código de respaldo inválido. Por favor intenta de nuevo."
+    "Invalid backup code. Please try again.": "Código de respaldo inválido. Por favor intenta de nuevo.",
+    "Invalid 2FA code": "Código 2FA inválido",
+    "Invalid backup code": "Código de respaldo inválido"
   },
   "fr": {
     "Two-Factor Authentication": "Authentification à Deux Facteurs",
@@ -45,7 +49,9 @@
     "Lost your phone? Use a backup code": "Téléphone perdu? Utilisez un code de sauvegarde",
     "Use authenticator app code": "Utiliser le code de l'application",
     "Enter one of your backup codes. Each code can only be used once.": "Entrez l'un de vos codes de sauvegarde. Chaque code ne peut être utilisé qu'une seule fois.",
-    "Invalid backup code. Please try again.": "Code de sauvegarde invalide. Veuillez réessayer."
+    "Invalid backup code. Please try again.": "Code de sauvegarde invalide. Veuillez réessayer.",
+    "Invalid 2FA code": "Code 2FA invalide",
+    "Invalid backup code": "Code de sauvegarde invalide"
   },
   "de": {
     "Two-Factor Authentication": "Zwei-Faktor-Authentifizierung",
@@ -61,7 +67,9 @@
     "Lost your phone? Use a backup code": "Telefon verloren? Verwenden Sie einen Backup-Code",
     "Use authenticator app code": "App-Code verwenden",
     "Enter one of your backup codes. Each code can only be used once.": "Geben Sie einen Ihrer Backup-Codes ein. Jeder Code kann nur einmal verwendet werden.",
-    "Invalid backup code. Please try again.": "Ungültiger Backup-Code. Bitte versuchen Sie es erneut."
+    "Invalid backup code. Please try again.": "Ungültiger Backup-Code. Bitte versuchen Sie es erneut.",
+    "Invalid 2FA code": "Ungültiger 2FA-Code",
+    "Invalid backup code": "Ungültiger Backup-Code"
   }
 }
 

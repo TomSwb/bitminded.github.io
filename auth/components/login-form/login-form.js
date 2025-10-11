@@ -206,14 +206,17 @@ class LoginForm {
                     .eq('user_id', data.user.id)
                     .maybeSingle();
 
-                if (!twoFAError && twoFAData?.is_enabled) {
-                    // User has 2FA enabled - redirect to verification
+                const has2FA = !twoFAError && twoFAData?.is_enabled;
+
+                if (has2FA) {
+                    // User has 2FA enabled - DON'T log yet, wait for 2FA verification
                     console.log('🔐 2FA enabled for user - redirecting to verification');
                     sessionStorage.setItem('pending_2fa_user', data.user.id);
                     sessionStorage.setItem('pending_2fa_time', Date.now().toString());
                     window.location.href = '/auth/2fa-verify/';
                 } else {
-                    // No 2FA - normal redirect
+                    // No 2FA - log successful login and redirect
+                    await this.logLoginAttempt(data.user.id, true, null, false);
                     window.location.href = '/';
                 }
             }
@@ -249,6 +252,7 @@ class LoginForm {
      */
     async handleLoginError(error) {
         let errorMessage = 'An error occurred during login';
+        let failureReason = 'unknown_error';
 
         switch (error.message) {
             case 'Invalid login credentials':
@@ -268,6 +272,9 @@ class LoginForm {
                 this.showError(error.message || errorMessage);
                 await this.incrementFailedAttempts();
         }
+        
+        // Note: We don't log failed password attempts because we don't know the user_id
+        // Only successful logins and failed 2FA attempts (where we know the user) are logged
     }
 
     /**
@@ -531,6 +538,76 @@ class LoginForm {
         this.saveFailedAttempts();
         this.hideCaptcha();
         console.log('🧹 Cleared failed attempts counter');
+    }
+
+    /**
+     * Log login attempt to database
+     * @param {string} userId - User ID (null for failed attempts with unknown user)
+     * @param {boolean} success - Whether login was successful
+     * @param {string} failureReason - Reason for failure if unsuccessful
+     * @param {boolean} used2FA - Whether 2FA was used
+     */
+    async logLoginAttempt(userId, success, failureReason = null, used2FA = false) {
+        try {
+            // Parse user agent for device info
+            const userAgent = navigator.userAgent;
+            const deviceInfo = this.parseUserAgent(userAgent);
+
+            const logData = {
+                user_id: userId,
+                success: success,
+                failure_reason: failureReason,
+                user_agent: userAgent,
+                device_type: deviceInfo.deviceType,
+                browser: deviceInfo.browser,
+                os: deviceInfo.os,
+                used_2fa: used2FA
+                // Note: IP and location are typically set server-side for security
+            };
+
+            await window.supabase
+                .from('user_login_activity')
+                .insert(logData);
+
+            console.log(`📊 Login attempt logged: ${success ? 'Success' : 'Failed'}`);
+
+        } catch (error) {
+            // Don't fail login if logging fails
+            console.error('Failed to log login attempt:', error);
+        }
+    }
+
+    /**
+     * Parse user agent to extract device info
+     */
+    parseUserAgent(userAgent) {
+        const ua = userAgent.toLowerCase();
+        
+        // Detect device type
+        let deviceType = 'desktop';
+        if (/mobile|android|iphone|ipod|blackberry|windows phone/.test(ua)) {
+            deviceType = 'mobile';
+        } else if (/ipad|tablet|playbook|silk/.test(ua)) {
+            deviceType = 'tablet';
+        }
+
+        // Detect browser
+        let browser = 'Unknown';
+        if (ua.includes('firefox')) browser = 'Firefox';
+        else if (ua.includes('edge')) browser = 'Edge';
+        else if (ua.includes('chrome')) browser = 'Chrome';
+        else if (ua.includes('safari')) browser = 'Safari';
+        else if (ua.includes('opera')) browser = 'Opera';
+
+        // Detect OS
+        let os = 'Unknown';
+        if (ua.includes('windows')) os = 'Windows';
+        else if (ua.includes('mac')) os = 'macOS';
+        else if (ua.includes('linux')) os = 'Linux';
+        else if (ua.includes('android')) os = 'Android';
+        else if (ua.includes('ios') || ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
+
+        return { deviceType, browser, os };
     }
 }
 
