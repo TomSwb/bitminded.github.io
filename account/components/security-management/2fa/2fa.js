@@ -8,10 +8,13 @@ class TwoFactorAuth {
         this.isInitialized = false;
         this.is2FAEnabled = false;
         this.setupWindow = null;
+        this.regeneratedCodes = [];
         
         // UI elements
         this.statusBadge = null;
         this.actionButton = null;
+        this.regenerateButton = null;
+        this.backupCodesModal = null;
         this.loadingContainer = null;
         this.errorContainer = null;
         this.errorText = null;
@@ -60,6 +63,8 @@ class TwoFactorAuth {
         // Get UI elements
         this.statusBadge = document.getElementById('2fa-status-badge');
         this.actionButton = document.getElementById('2fa-component-action-btn');
+        this.regenerateButton = document.getElementById('2fa-regenerate-codes-btn');
+        this.backupCodesModal = document.getElementById('backup-codes-modal');
         this.loadingContainer = document.getElementById('2fa-loading');
         this.errorContainer = document.getElementById('2fa-error');
         this.errorText = document.getElementById('2fa-error-text');
@@ -89,6 +94,35 @@ class TwoFactorAuth {
         // Action button click
         if (this.actionButton) {
             this.actionButton.addEventListener('click', () => this.handleActionClick());
+        }
+
+        // Regenerate codes button
+        if (this.regenerateButton) {
+            this.regenerateButton.addEventListener('click', () => this.handleRegenerateCodes());
+        }
+
+        // Modal close button
+        const modalClose = document.getElementById('modal-close');
+        if (modalClose) {
+            modalClose.addEventListener('click', () => this.closeModal());
+        }
+
+        // Modal overlay click
+        const modalOverlay = document.getElementById('modal-overlay');
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', () => this.closeModal());
+        }
+
+        // Download regenerated codes
+        const downloadBtn = document.getElementById('btn-download-regenerated');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => this.downloadBackupCodes());
+        }
+
+        // Print regenerated codes
+        const printBtn = document.getElementById('btn-print-regenerated');
+        if (printBtn) {
+            printBtn.addEventListener('click', () => this.printBackupCodes());
         }
 
         // Listen for language changes
@@ -215,6 +249,11 @@ class TwoFactorAuth {
                     buttonText.textContent = 'Enable 2FA';
                 }
             }
+        }
+
+        // Show/hide regenerate backup codes button
+        if (this.regenerateButton) {
+            this.regenerateButton.style.display = isEnabled ? 'inline-block' : 'none';
         }
 
         // Trigger translation update
@@ -346,6 +385,175 @@ class TwoFactorAuth {
         if (this.errorContainer) {
             this.errorContainer.style.display = 'none';
         }
+    }
+
+    /**
+     * Handle regenerate backup codes
+     */
+    async handleRegenerateCodes() {
+        const confirmed = confirm(
+            'Regenerate backup codes?\n\n' +
+            'This will create new backup codes and invalidate your old ones.\n\n' +
+            'Make sure to save the new codes!'
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        this.showLoading(true);
+
+        try {
+            // Generate new codes
+            this.regeneratedCodes = [];
+            for (let i = 0; i < 10; i++) {
+                this.regeneratedCodes.push(this.generateBackupCode());
+            }
+
+            // Hash codes before storing
+            const hashedCodes = this.regeneratedCodes.map(code => btoa(code));
+
+            // Get current user
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError || !user) {
+                throw new Error('Failed to get user');
+            }
+
+            // Update database with new codes
+            const { error } = await supabase
+                .from('user_2fa')
+                .update({ 
+                    backup_codes: hashedCodes,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', user.id);
+
+            if (error) {
+                throw error;
+            }
+
+            console.log('✅ Backup codes regenerated successfully');
+
+            // Show codes in modal
+            this.showBackupCodesModal();
+
+        } catch (error) {
+            console.error('❌ Failed to regenerate backup codes:', error);
+            this.showError('Failed to regenerate backup codes. Please try again.');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    /**
+     * Generate a single backup code
+     */
+    generateBackupCode() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = '';
+        
+        for (let i = 0; i < 12; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+            if (i === 3 || i === 7) {
+                code += '-';
+            }
+        }
+        
+        return code;
+    }
+
+    /**
+     * Show backup codes modal
+     */
+    showBackupCodesModal() {
+        const grid = document.getElementById('regenerated-codes-grid');
+        if (grid) {
+            grid.innerHTML = '';
+            this.regeneratedCodes.forEach(code => {
+                const codeDiv = document.createElement('div');
+                codeDiv.className = 'backup-code';
+                codeDiv.textContent = code;
+                grid.appendChild(codeDiv);
+            });
+        }
+
+        if (this.backupCodesModal) {
+            this.backupCodesModal.style.display = 'flex';
+        }
+    }
+
+    /**
+     * Close backup codes modal
+     */
+    closeModal() {
+        if (this.backupCodesModal) {
+            this.backupCodesModal.style.display = 'none';
+        }
+    }
+
+    /**
+     * Download backup codes
+     */
+    async downloadBackupCodes() {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        const content = `BitMinded - Two-Factor Authentication Backup Codes
+Generated: ${new Date().toLocaleString()}
+Account: ${user?.email || 'Unknown'}
+
+IMPORTANT: Store these codes safely. Each code can only be used once.
+Your old backup codes are no longer valid.
+
+${this.regeneratedCodes.join('\n')}
+
+If you lose access to your authenticator app, you can use these codes to log in.
+`;
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bitminded-2fa-backup-codes-${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        console.log('✅ Backup codes downloaded');
+    }
+
+    /**
+     * Print backup codes
+     */
+    async printBackupCodes() {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>BitMinded - 2FA Backup Codes</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 2rem; }
+                    h1 { color: #333; }
+                    .code { font-family: 'Courier New', monospace; font-size: 1.2rem; margin: 0.5rem 0; }
+                    .warning { color: #d9534f; font-weight: bold; margin: 1rem 0; }
+                </style>
+            </head>
+            <body>
+                <h1>BitMinded - 2FA Backup Codes</h1>
+                <p>Generated: ${new Date().toLocaleString()}</p>
+                <p>Account: ${user?.email || 'Unknown'}</p>
+                <p class="warning">⚠️ Store these codes safely. Your old backup codes are no longer valid.</p>
+                ${this.regeneratedCodes.map(code => `<div class="code">${code}</div>`).join('')}
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+
+        console.log('✅ Backup codes printed');
     }
 
     /**
