@@ -13,7 +13,7 @@
     </div>
 
     <div class="two-factor-auth__content">
-        <!-- Action Button -->
+        <!-- Action Buttons -->
         <div class="two-factor-auth__actions">
             <button 
                 type="button" 
@@ -21,6 +21,14 @@
                 id="2fa-component-action-btn"
             >
                 <span class="translatable-content" data-translation-key="Enable 2FA">Enable 2FA</span>
+            </button>
+            <button 
+                type="button" 
+                class="two-factor-auth__action-btn secondary" 
+                id="2fa-regenerate-codes-btn"
+                style="display: none;"
+            >
+                <span class="translatable-content" data-translation-key="Regenerate Backup Codes">Regenerate Backup Codes</span>
             </button>
         </div>
 
@@ -34,6 +42,33 @@
         <div class="two-factor-auth__error-message" id="2fa-error" style="display: none;">
             <div class="two-factor-auth__error-icon">⚠️</div>
             <div class="two-factor-auth__error-text" id="2fa-error-text"></div>
+        </div>
+
+        <!-- Backup Codes Modal -->
+        <div class="backup-codes-modal" id="backup-codes-modal" style="display: none;">
+            <div class="backup-codes-modal__overlay" id="modal-overlay"></div>
+            <div class="backup-codes-modal__content">
+                <div class="backup-codes-modal__header">
+                    <h3 class="translatable-content" data-translation-key="Your New Backup Codes">Your New Backup Codes</h3>
+                    <button class="backup-codes-modal__close" id="modal-close">×</button>
+                </div>
+                <div class="backup-codes-modal__body">
+                    <p class="backup-codes-modal__warning translatable-content" data-translation-key="Save these codes safely. Your old backup codes are no longer valid.">
+                        ⚠️ Save these codes safely. Your old backup codes are no longer valid.
+                    </p>
+                    <div class="backup-codes-grid" id="regenerated-codes-grid">
+                        <!-- Codes will be generated here -->
+                    </div>
+                    <div class="backup-codes-modal__actions">
+                        <button class="btn btn-secondary" id="btn-download-regenerated">
+                            📥 <span class="translatable-content" data-translation-key="Download Codes">Download Codes</span>
+                        </button>
+                        <button class="btn btn-secondary" id="btn-print-regenerated">
+                            🖨️ <span class="translatable-content" data-translation-key="Print Codes">Print Codes</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -55,7 +55,10 @@
     "Enter your password": "Enter your password",
     "Provide a 6-digit code from your authenticator app": "Provide a 6-digit code from your authenticator app",
     "Close": "Close",
-    "Processing...": "Processing..."
+    "Processing...": "Processing...",
+    "Regenerate Backup Codes": "Regenerate Backup Codes",
+    "Your New Backup Codes": "Your New Backup Codes",
+    "Save these codes safely. Your old backup codes are no longer valid.": "Save these codes safely. Your old backup codes are no longer valid."
   },
   "es": {
     "Two-Factor Authentication": "Autenticación de Dos Factores",
@@ -113,7 +116,10 @@
     "Enter your password": "Ingresar tu contraseña",
     "Provide a 6-digit code from your authenticator app": "Proporcionar un código de 6 dígitos de tu aplicación de autenticación",
     "Close": "Cerrar",
-    "Processing...": "Procesando..."
+    "Processing...": "Procesando...",
+    "Regenerate Backup Codes": "Regenerar Códigos de Respaldo",
+    "Your New Backup Codes": "Tus Nuevos Códigos de Respaldo",
+    "Save these codes safely. Your old backup codes are no longer valid.": "Guarda estos códigos de forma segura. Tus códigos antiguos ya no son válidos."
   },
   "fr": {
     "Two-Factor Authentication": "Authentification à Deux Facteurs",
@@ -171,7 +177,10 @@
     "Enter your password": "Entrer votre mot de passe",
     "Provide a 6-digit code from your authenticator app": "Fournir un code à 6 chiffres de votre application d'authentification",
     "Close": "Fermer",
-    "Processing...": "Traitement..."
+    "Processing...": "Traitement...",
+    "Regenerate Backup Codes": "Régénérer les Codes de Sauvegarde",
+    "Your New Backup Codes": "Vos Nouveaux Codes de Sauvegarde",
+    "Save these codes safely. Your old backup codes are no longer valid.": "Conservez ces codes en toute sécurité. Vos anciens codes de sauvegarde ne sont plus valides."
   },
   "de": {
     "Two-Factor Authentication": "Zwei-Faktor-Authentifizierung",
@@ -229,6 +238,9 @@
     "Enter your password": "Ihr Passwort eingeben",
     "Provide a 6-digit code from your authenticator app": "Einen 6-stelligen Code aus Ihrer Authentifizierungs-App bereitstellen",
     "Close": "Schließen",
-    "Processing...": "Verarbeitung..."
+    "Processing...": "Verarbeitung...",
+    "Regenerate Backup Codes": "Backup-Codes Neu Generieren",
+    "Your New Backup Codes": "Ihre Neuen Backup-Codes",
+    "Save these codes safely. Your old backup codes are no longer valid.": "Bewahren Sie diese Codes sicher auf. Ihre alten Backup-Codes sind nicht mehr gültig."
   }
 }
