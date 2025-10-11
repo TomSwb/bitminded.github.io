@@ -9,6 +9,7 @@ class SecurityManagement {
         this.currentSection = 'overview';
         this.loadedComponents = new Set();
         this.sections = ['overview', 'password', '2fa', 'activity'];
+        this.lastPasswordChangedDate = null; // Store for language change updates
     }
 
     /**
@@ -85,6 +86,10 @@ class SecurityManagement {
         // Handle language changes
         window.addEventListener('languageChanged', (e) => {
             this.updateTranslations();
+            // Re-update password status with new language
+            if (this.lastPasswordChangedDate !== undefined) {
+                this.updatePasswordStatus(this.lastPasswordChangedDate);
+            }
         });
     }
 
@@ -328,13 +333,16 @@ class SecurityManagement {
             
             if (error) {
                 console.error('❌ Security Management: Failed to load password status:', error);
+                this.lastPasswordChangedDate = null;
                 this.updatePasswordStatus(null);
             } else if (profile && profile.password_last_changed) {
                 console.log('🔧 Security Management: Password last changed found:', profile.password_last_changed);
-                this.updatePasswordStatus(new Date(profile.password_last_changed));
+                this.lastPasswordChangedDate = new Date(profile.password_last_changed);
+                this.updatePasswordStatus(this.lastPasswordChangedDate);
             } else {
                 console.log('🔧 Security Management: No password_last_changed date found, showing "Recently"');
                 // If no date stored, show "Recently" as fallback
+                this.lastPasswordChangedDate = null;
                 this.updatePasswordStatus(null);
             }
 
@@ -342,6 +350,7 @@ class SecurityManagement {
 
         } catch (error) {
             console.error('❌ Security Management: Failed to load password status:', error);
+            this.lastPasswordChangedDate = null;
             this.updatePasswordStatus(null);
         }
     }
@@ -356,16 +365,28 @@ class SecurityManagement {
         if (statusElement) {
             if (lastChangedDate) {
                 const formattedDate = this.formatEuropeanDateTime(lastChangedDate);
+                
+                // Get translation for "Last changed: " (note: key has trailing space)
+                let lastChangedText = 'Last changed: ';
+                if (window.securityManagementTranslations) {
+                    lastChangedText = window.securityManagementTranslations.getTranslation('Last changed: ');
+                }
+                
                 // Remove the translatable-content class and data-translation-key to prevent translation override
                 statusElement.classList.remove('translatable-content');
                 statusElement.removeAttribute('data-translation-key');
-                statusElement.textContent = `Last changed: ${formattedDate}`;
-                console.log('🔧 Security Management: Updated password status display:', `Last changed: ${formattedDate}`);
+                statusElement.textContent = `${lastChangedText}${formattedDate}`;
+                console.log('🔧 Security Management: Updated password status display:', `${lastChangedText}${formattedDate}`);
             } else {
                 // Restore translatable content for "Recently"
                 statusElement.classList.add('translatable-content');
                 statusElement.setAttribute('data-translation-key', 'Last changed: Recently');
-                statusElement.textContent = 'Last changed: Recently';
+                
+                let recentlyText = 'Last changed: Recently';
+                if (window.securityManagementTranslations) {
+                    recentlyText = window.securityManagementTranslations.getTranslation('Last changed: Recently');
+                }
+                statusElement.textContent = recentlyText;
                 console.log('🔧 Security Management: Updated password status display: Recently');
             }
         } else {
