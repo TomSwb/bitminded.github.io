@@ -21,6 +21,9 @@ class TwoFactorVerify {
         try {
             console.log('🔐 2FA Verify: Initializing...');
 
+            // Apply saved theme
+            this.applySavedTheme();
+
             // Initialize translations first
             await this.initializeTranslations();
 
@@ -230,6 +233,15 @@ class TwoFactorVerify {
         if (this.loadingOverlay) {
             this.loadingOverlay.style.display = show ? 'flex' : 'none';
         }
+    }
+
+    /**
+     * Apply saved theme from localStorage
+     */
+    applySavedTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        console.log(`🎨 Theme applied: ${savedTheme}`);
     }
 
     /**
