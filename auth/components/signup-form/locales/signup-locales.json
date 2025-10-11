@@ -34,6 +34,41 @@
       "signup.errorGeneral": "An error occurred during signup. Please try again."
     }
   },
+  "es": {
+    "translation": {
+      "signup.title": "Crear Cuenta",
+      "signup.subtitle": "Únete a BitMinded hoy",
+      "signup.username": "Nombre de Usuario",
+      "signup.email": "Dirección de Correo Electrónico",
+      "signup.password": "Contraseña",
+      "signup.confirmPassword": "Confirmar Contraseña",
+      "signup.agreeTerms": "Acepto los",
+      "signup.termsLink": "Términos de Servicio",
+      "signup.and": "y la",
+      "signup.privacyLink": "Política de Privacidad",
+      "signup.submit": "Crear Cuenta",
+      "signup.creating": "Creando cuenta...",
+      "signup.successTitle": "¡Cuenta Creada!",
+      "signup.successMessage": "Por favor revisa tu correo electrónico para verificar tu cuenta.",
+      "signup.error": "Ocurrió un error durante el registro. Por favor intenta de nuevo.",
+      "signup.thankYouTitle": "¡Gracias por Registrarte!",
+      "signup.thankYouMessage": "Hemos enviado un correo electrónico de verificación a tu bandeja de entrada. Por favor revisa tu correo y haz clic en el enlace de verificación para activar tu cuenta.",
+      "signup.checkEmailReminder": "No olvides revisar tu carpeta de spam si no ves el correo en tu bandeja de entrada.",
+      "signup.resendEmail": "Reenviar Correo de Verificación",
+      "signup.resendSuccess": "¡Correo de verificación enviado! Por favor revisa tu bandeja de entrada.",
+      "signup.resendError": "Error al reenviar el correo. Por favor intenta de nuevo.",
+      "signup.resending": "Enviando...",
+      "signup.errorInvalidEmail": "Por favor ingresa una dirección de correo electrónico válida. Verifica errores tipográficos en tu correo.",
+      "signup.errorUserExists": "Ya existe una cuenta con este correo electrónico. Intenta iniciar sesión en su lugar.",
+      "signup.errorPasswordLength": "La contraseña debe tener al menos 6 caracteres.",
+      "signup.errorPasswordLowercase": "La contraseña debe contener al menos una letra minúscula.",
+      "signup.errorPasswordUppercase": "La contraseña debe contener al menos una letra mayúscula.",
+      "signup.errorPasswordDigit": "La contraseña debe contener al menos un dígito.",
+      "signup.errorPasswordSymbol": "La contraseña debe contener al menos un símbolo (!@#$%^&*).",
+      "signup.errorUsername": "Por favor elige un nombre de usuario diferente.",
+      "signup.errorGeneral": "Ocurrió un error durante el registro. Por favor intenta de nuevo."
+    }
+  },
   "fr": {
     "translation": {
       "signup.title": "Créer un compte",
@@ -67,6 +102,41 @@
       "signup.errorPasswordSymbol": "Le mot de passe doit contenir au moins un symbole (!@#$%^&*).",
       "signup.errorUsername": "Veuillez choisir un autre nom d'utilisateur.",
       "signup.errorGeneral": "Une erreur s'est produite lors de l'inscription. Veuillez réessayer."
+    }
+  },
+  "de": {
+    "translation": {
+      "signup.title": "Konto Erstellen",
+      "signup.subtitle": "Treten Sie BitMinded heute bei",
+      "signup.username": "Benutzername",
+      "signup.email": "E-Mail-Adresse",
+      "signup.password": "Passwort",
+      "signup.confirmPassword": "Passwort Bestätigen",
+      "signup.agreeTerms": "Ich akzeptiere die",
+      "signup.termsLink": "Nutzungsbedingungen",
+      "signup.and": "und die",
+      "signup.privacyLink": "Datenschutzrichtlinie",
+      "signup.submit": "Konto Erstellen",
+      "signup.creating": "Konto wird erstellt...",
+      "signup.successTitle": "Konto Erstellt!",
+      "signup.successMessage": "Bitte überprüfen Sie Ihre E-Mail, um Ihr Konto zu verifizieren.",
+      "signup.error": "Während der Registrierung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+      "signup.thankYouTitle": "Vielen Dank für Ihre Registrierung!",
+      "signup.thankYouMessage": "Wir haben eine Verifizierungs-E-Mail an Ihren Posteingang gesendet. Bitte überprüfen Sie Ihre E-Mail und klicken Sie auf den Verifizierungslink, um Ihr Konto zu aktivieren.",
+      "signup.checkEmailReminder": "Vergessen Sie nicht, Ihren Spam-Ordner zu überprüfen, wenn Sie die E-Mail nicht in Ihrem Posteingang sehen.",
+      "signup.resendEmail": "Verifizierungs-E-Mail Erneut Senden",
+      "signup.resendSuccess": "Verifizierungs-E-Mail gesendet! Bitte überprüfen Sie Ihren Posteingang.",
+      "signup.resendError": "Fehler beim erneuten Senden der E-Mail. Bitte versuchen Sie es erneut.",
+      "signup.resending": "Wird gesendet...",
+      "signup.errorInvalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein. Überprüfen Sie Ihre E-Mail auf Tippfehler.",
+      "signup.errorUserExists": "Ein Konto mit dieser E-Mail existiert bereits. Versuchen Sie stattdessen, sich anzumelden.",
+      "signup.errorPasswordLength": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+      "signup.errorPasswordLowercase": "Das Passwort muss mindestens einen Kleinbuchstaben enthalten.",
+      "signup.errorPasswordUppercase": "Das Passwort muss mindestens einen Großbuchstaben enthalten.",
+      "signup.errorPasswordDigit": "Das Passwort muss mindestens eine Ziffer enthalten.",
+      "signup.errorPasswordSymbol": "Das Passwort muss mindestens ein Symbol (!@#$%^&*) enthalten.",
+      "signup.errorUsername": "Bitte wählen Sie einen anderen Benutzernamen.",
+      "signup.errorGeneral": "Während der Registrierung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
     }
   }
 }

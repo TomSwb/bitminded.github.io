@@ -6,11 +6,25 @@
       "account-success-message": "Operation completed successfully"
     }
   },
+  "es": {
+    "translation": {
+      "account-title": "Gestión de Cuenta",
+      "account-error-message": "Ocurrió un error",
+      "account-success-message": "Operación completada exitosamente"
+    }
+  },
   "fr": {
     "translation": {
       "account-title": "Gestion du compte",
       "account-error-message": "Une erreur s'est produite",
       "account-success-message": "Opération terminée avec succès"
+    }
+  },
+  "de": {
+    "translation": {
+      "account-title": "Kontoverwaltung",
+      "account-error-message": "Ein Fehler ist aufgetreten",
+      "account-success-message": "Operation erfolgreich abgeschlossen"
     }
   }
 }

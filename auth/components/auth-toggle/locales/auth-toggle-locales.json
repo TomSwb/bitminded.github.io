@@ -5,10 +5,22 @@
       "authToggle.signup": "Sign Up"
     }
   },
+  "es": {
+    "translation": {
+      "authToggle.login": "Iniciar Sesión",
+      "authToggle.signup": "Registrarse"
+    }
+  },
   "fr": {
     "translation": {
       "authToggle.login": "Connexion",
       "authToggle.signup": "Inscription"
+    }
+  },
+  "de": {
+    "translation": {
+      "authToggle.login": "Anmelden",
+      "authToggle.signup": "Registrieren"
     }
   }
 }

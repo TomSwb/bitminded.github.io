@@ -5,10 +5,22 @@
       "nav-contact": "Contact"
     }
   },
+  "es": {
+    "translation": {
+      "nav-home": "Inicio",
+      "nav-contact": "Contacto"
+    }
+  },
   "fr": {
     "translation": {
       "nav-home": "Accueil",
       "nav-contact": "Contact"
+    }
+  },
+  "de": {
+    "translation": {
+      "nav-home": "Startseite",
+      "nav-contact": "Kontakt"
     }
   }
 }

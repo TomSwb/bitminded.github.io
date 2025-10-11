@@ -8,6 +8,15 @@
       "captcha.timeout": "Security verification timed out. Please try again."
     }
   },
+  "es": {
+    "translation": {
+      "captcha.loading": "Cargando verificación de seguridad...",
+      "captcha.error": "La verificación de seguridad falló. Por favor intenta de nuevo.",
+      "captcha.required": "Por favor completa la verificación de seguridad",
+      "captcha.expired": "La verificación de seguridad expiró. Por favor intenta de nuevo.",
+      "captcha.timeout": "La verificación de seguridad agotó el tiempo. Por favor intenta de nuevo."
+    }
+  },
   "fr": {
     "translation": {
       "captcha.loading": "Chargement de la vérification de sécurité...",
@@ -15,6 +24,15 @@
       "captcha.required": "Veuillez compléter la vérification de sécurité",
       "captcha.expired": "La vérification de sécurité a expiré. Veuillez réessayer.",
       "captcha.timeout": "La vérification de sécurité a expiré. Veuillez réessayer."
+    }
+  },
+  "de": {
+    "translation": {
+      "captcha.loading": "Lade Sicherheitsüberprüfung...",
+      "captcha.error": "Sicherheitsüberprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "captcha.required": "Bitte schließen Sie die Sicherheitsüberprüfung ab",
+      "captcha.expired": "Sicherheitsüberprüfung abgelaufen. Bitte versuchen Sie es erneut.",
+      "captcha.timeout": "Zeitüberschreitung bei der Sicherheitsüberprüfung. Bitte versuchen Sie es erneut."
     }
   }
 }

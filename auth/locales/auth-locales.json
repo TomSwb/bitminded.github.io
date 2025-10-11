@@ -11,6 +11,18 @@
       "resetPassword.submitting": "Updating..."
     }
   },
+  "es": {
+    "translation": {
+      "auth-title": "Autenticación",
+      "auth-error-message": "Ocurrió un error",
+      "auth.submit": "Iniciar Sesión",
+      "auth.submitting": "Iniciando sesión...",
+      "auth.submitSignup": "Crear Cuenta",
+      "auth.submittingSignup": "Creando cuenta...",
+      "resetPassword.submit": "Actualizar Contraseña",
+      "resetPassword.submitting": "Actualizando..."
+    }
+  },
   "fr": {
     "translation": {
       "auth-title": "Authentification",
@@ -21,6 +33,18 @@
       "auth.submittingSignup": "Création du compte...",
       "resetPassword.submit": "Mettre à jour le mot de passe",
       "resetPassword.submitting": "Mise à jour..."
+    }
+  },
+  "de": {
+    "translation": {
+      "auth-title": "Authentifizierung",
+      "auth-error-message": "Ein Fehler ist aufgetreten",
+      "auth.submit": "Anmelden",
+      "auth.submitting": "Anmeldung läuft...",
+      "auth.submitSignup": "Konto Erstellen",
+      "auth.submittingSignup": "Konto wird erstellt...",
+      "resetPassword.submit": "Passwort Aktualisieren",
+      "resetPassword.submitting": "Aktualisierung läuft..."
     }
   }
 }
