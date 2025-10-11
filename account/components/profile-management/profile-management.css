@@ -64,7 +64,7 @@
 .profile-management__avatar-initial {
     font-size: 3rem;
     font-weight: 600;
-    color: var(--color-text-primary);
+    color: var(--color-text-light);
     text-transform: uppercase;
     -webkit-user-select: none;
     user-select: none;
