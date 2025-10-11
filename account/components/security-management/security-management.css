@@ -6,7 +6,7 @@
     padding: 1.5rem;
     background: var(--color-background-primary);
     border-radius: 12px;
-    border: 1px solid var(--color-border, #e9ecef);
+    border: 1px solid var(--color-text-primary);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -38,7 +38,7 @@
     padding: 1.5rem;
     background: var(--color-background-primary);
     border-radius: 12px;
-    border: 1px solid var(--color-border, #e9ecef);
+    border: 1px solid var(--color-text-primary);
 }
 
 .security-management__status-item {
@@ -48,7 +48,7 @@
     padding: 1rem;
     background: var(--color-background-primary);
     border-radius: 8px;
-    border: 1px solid var(--color-border, #e9ecef);
+    border: 1px solid var(--color-text-primary);
     transition: all 0.2s ease;
 }
 
@@ -66,7 +66,7 @@
     justify-content: center;
     background: var(--color-background-primary, #ffffff);
     border-radius: 50%;
-    border: 2px solid var(--color-border, #e9ecef);
+    border: 2px solid var(--color-background-secondary);
     flex-shrink: 0;
 }
 
@@ -148,7 +148,7 @@
     align-items: center;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border, #e9ecef);
+    border-bottom: 1px solid var(--color-text-primary);
 }
 
 .security-management__back-btn {
