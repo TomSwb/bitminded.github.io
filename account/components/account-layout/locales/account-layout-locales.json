@@ -35,6 +35,42 @@
       "Loading...": "Loading..."
     }
   },
+  "es": {
+    "translation": {
+      "Profile": "Perfil",
+      "Security": "Seguridad",
+      "Payments": "Pagos",
+      "Apps": "Aplicaciones",
+      "Notifications": "Notificaciones",
+      "Actions": "Acciones",
+      "Profile Information": "Información del Perfil",
+      "Manage your personal information and profile settings": "Administra tu información personal y configuración de perfil",
+      "Security Settings": "Configuración de Seguridad",
+      "Manage your password, two-factor authentication, and login activity": "Administra tu contraseña, autenticación de dos factores y actividad de inicio de sesión",
+      "Payments & Billing": "Pagos y Facturación",
+      "Manage your payment methods, billing history, and purchase history": "Administra tus métodos de pago, historial de facturación e historial de compras",
+      "App Entitlements": "Permisos de Aplicaciones",
+      "View and manage your app access and permissions": "Ver y administrar el acceso y permisos de tus aplicaciones",
+      "Notifications & Preferences": "Notificaciones y Preferencias",
+      "Configure your notification preferences and account settings": "Configura tus preferencias de notificación y configuración de cuenta",
+      "Account Actions": "Acciones de Cuenta",
+      "Manage your account, export data, or delete your account": "Administra tu cuenta, exporta datos o elimina tu cuenta",
+      "Profile management component will be loaded here": "El componente de gestión de perfil se cargará aquí",
+      "Security components will be loaded here": "Los componentes de seguridad se cargarán aquí",
+      "Payments components will be loaded here": "Los componentes de pagos se cargarán aquí",
+      "App entitlements component will be loaded here": "El componente de permisos de aplicaciones se cargará aquí",
+      "Notifications components will be loaded here": "Los componentes de notificaciones se cargarán aquí",
+      "Account actions component will be loaded here": "El componente de acciones de cuenta se cargará aquí",
+      "Profile Management - Coming Soon": "Gestión de Perfil - Próximamente",
+      "Security Settings - Coming Soon": "Configuración de Seguridad - Próximamente",
+      "Payments & Billing - Coming Soon": "Pagos y Facturación - Próximamente",
+      "App Entitlements - Coming Soon": "Permisos de Aplicaciones - Próximamente",
+      "Notifications & Preferences - Coming Soon": "Notificaciones y Preferencias - Próximamente",
+      "Account Actions - Coming Soon": "Acciones de Cuenta - Próximamente",
+      "This section is currently under development.": "Esta sección está actualmente en desarrollo.",
+      "Loading...": "Cargando..."
+    }
+  },
   "fr": {
     "translation": {
       "Profile": "Profil",
@@ -69,6 +105,42 @@
       "Account Actions - Coming Soon": "Actions du Compte - Bientôt Disponible",
       "This section is currently under development.": "Cette section est actuellement en développement.",
       "Loading...": "Chargement..."
+    }
+  },
+  "de": {
+    "translation": {
+      "Profile": "Profil",
+      "Security": "Sicherheit",
+      "Payments": "Zahlungen",
+      "Apps": "Anwendungen",
+      "Notifications": "Benachrichtigungen",
+      "Actions": "Aktionen",
+      "Profile Information": "Profilinformationen",
+      "Manage your personal information and profile settings": "Verwalten Sie Ihre persönlichen Informationen und Profileinstellungen",
+      "Security Settings": "Sicherheitseinstellungen",
+      "Manage your password, two-factor authentication, and login activity": "Verwalten Sie Ihr Passwort, Zwei-Faktor-Authentifizierung und Anmeldeaktivität",
+      "Payments & Billing": "Zahlungen & Abrechnung",
+      "Manage your payment methods, billing history, and purchase history": "Verwalten Sie Ihre Zahlungsmethoden, Rechnungshistorie und Kaufhistorie",
+      "App Entitlements": "App-Berechtigungen",
+      "View and manage your app access and permissions": "Anzeigen und verwalten Sie Ihren App-Zugriff und Ihre Berechtigungen",
+      "Notifications & Preferences": "Benachrichtigungen & Einstellungen",
+      "Configure your notification preferences and account settings": "Konfigurieren Sie Ihre Benachrichtigungseinstellungen und Kontoeinstellungen",
+      "Account Actions": "Kontoaktionen",
+      "Manage your account, export data, or delete your account": "Verwalten Sie Ihr Konto, exportieren Sie Daten oder löschen Sie Ihr Konto",
+      "Profile management component will be loaded here": "Die Profilverwaltungskomponente wird hier geladen",
+      "Security components will be loaded here": "Die Sicherheitskomponenten werden hier geladen",
+      "Payments components will be loaded here": "Die Zahlungskomponenten werden hier geladen",
+      "App entitlements component will be loaded here": "Die App-Berechtigungskomponente wird hier geladen",
+      "Notifications components will be loaded here": "Die Benachrichtigungskomponenten werden hier geladen",
+      "Account actions component will be loaded here": "Die Kontoaktionskomponente wird hier geladen",
+      "Profile Management - Coming Soon": "Profilverwaltung - Demnächst Verfügbar",
+      "Security Settings - Coming Soon": "Sicherheitseinstellungen - Demnächst Verfügbar",
+      "Payments & Billing - Coming Soon": "Zahlungen & Abrechnung - Demnächst Verfügbar",
+      "App Entitlements - Coming Soon": "App-Berechtigungen - Demnächst Verfügbar",
+      "Notifications & Preferences - Coming Soon": "Benachrichtigungen & Einstellungen - Demnächst Verfügbar",
+      "Account Actions - Coming Soon": "Kontoaktionen - Demnächst Verfügbar",
+      "This section is currently under development.": "Dieser Bereich ist derzeit in Entwicklung.",
+      "Loading...": "Laden..."
     }
   }
 }

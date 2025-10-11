@@ -10,15 +10,37 @@
       "login.signingIn": "Signing in..."
     }
   },
+  "es": {
+    "translation": {
+      "login.title": "Bienvenido de Nuevo",
+      "login.subtitle": "Inicia sesión en tu cuenta",
+      "login.email": "Dirección de Correo Electrónico",
+      "login.password": "Contraseña",
+      "login.forgotPassword": "¿Olvidaste tu contraseña?",
+      "login.submit": "Iniciar Sesión",
+      "login.signingIn": "Iniciando sesión..."
+    }
+  },
   "fr": {
     "translation": {
-  "login.title": "Bienvenue",
+      "login.title": "Bienvenue",
       "login.subtitle": "Connectez-vous à votre compte",
       "login.email": "Adresse e-mail",
       "login.password": "Mot de passe",
       "login.forgotPassword": "Mot de passe oublié ?",
       "login.submit": "Se connecter",
       "login.signingIn": "Connexion en cours..."
+    }
+  },
+  "de": {
+    "translation": {
+      "login.title": "Willkommen Zurück",
+      "login.subtitle": "Melden Sie sich bei Ihrem Konto an",
+      "login.email": "E-Mail-Adresse",
+      "login.password": "Passwort",
+      "login.forgotPassword": "Passwort vergessen?",
+      "login.submit": "Anmelden",
+      "login.signingIn": "Anmeldung läuft..."
     }
   }
 }

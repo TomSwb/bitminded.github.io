@@ -1,11 +1,29 @@
 <div class="language-switcher" id="language-switcher">
-    <div class="language-switcher__container">
+    <button 
+        class="language-switcher__toggle" 
+        id="language-switcher-toggle"
+        aria-label="Select language"
+        aria-expanded="false"
+        aria-haspopup="true"
+        title="Language">
+        <span class="language-switcher__globe">🌐</span>
+    </button>
+    <div class="language-switcher__dropdown" id="language-switcher-dropdown">
         <button 
             class="language-switcher__button" 
             data-lang="en" 
             aria-label="Switch to English"
             title="English">
             <span class="language-switcher__flag">🇬🇧</span>
+            <span class="language-switcher__name">English</span>
+        </button>
+        <button 
+            class="language-switcher__button" 
+            data-lang="es" 
+            aria-label="Switch to Spanish"
+            title="Español">
+            <span class="language-switcher__flag">🇪🇸</span>
+            <span class="language-switcher__name">Español</span>
         </button>
         <button 
             class="language-switcher__button" 
@@ -13,6 +31,15 @@
             aria-label="Switch to French"
             title="Français">
             <span class="language-switcher__flag">🇫🇷</span>
+            <span class="language-switcher__name">Français</span>
+        </button>
+        <button 
+            class="language-switcher__button" 
+            data-lang="de" 
+            aria-label="Switch to German"
+            title="Deutsch">
+            <span class="language-switcher__flag">🇩🇪</span>
+            <span class="language-switcher__name">Deutsch</span>
         </button>
     </div>
 </div>

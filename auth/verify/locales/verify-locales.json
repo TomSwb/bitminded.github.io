@@ -15,6 +15,22 @@
       "verify.resending": "Sending..."
     }
   },
+  "es": {
+    "translation": {
+      "verify.verifying": "Verificando tu correo electrónico...",
+      "verify.successTitle": "¡Correo Electrónico Verificado!",
+      "verify.successMessage": "Tu correo electrónico ha sido verificado exitosamente. Ahora puedes iniciar sesión en tu cuenta.",
+      "verify.signIn": "Iniciar Sesión",
+      "verify.goHome": "Ir al Inicio",
+      "verify.errorTitle": "Verificación Fallida",
+      "verify.errorMessage": "Hubo un error al verificar tu correo electrónico. El enlace puede haber expirado o es inválido.",
+      "verify.tryAgain": "Intentar de Nuevo",
+      "verify.resendEmail": "Reenviar Correo de Verificación",
+      "verify.resendSuccess": "¡Correo de verificación enviado! Por favor revisa tu bandeja de entrada.",
+      "verify.resendError": "Error al reenviar el correo. Por favor intenta de nuevo.",
+      "verify.resending": "Enviando..."
+    }
+  },
   "fr": {
     "translation": {
       "verify.verifying": "Vérification de votre e-mail...",
@@ -29,6 +45,22 @@
       "verify.resendSuccess": "E-mail de vérification envoyé ! Veuillez vérifier votre boîte de réception.",
       "verify.resendError": "Échec de l'envoi de l'e-mail. Veuillez réessayer.",
       "verify.resending": "Envoi en cours..."
+    }
+  },
+  "de": {
+    "translation": {
+      "verify.verifying": "Ihre E-Mail wird verifiziert...",
+      "verify.successTitle": "E-Mail Verifiziert!",
+      "verify.successMessage": "Ihre E-Mail wurde erfolgreich verifiziert. Sie können sich jetzt bei Ihrem Konto anmelden.",
+      "verify.signIn": "Anmelden",
+      "verify.goHome": "Zur Startseite",
+      "verify.errorTitle": "Verifizierung Fehlgeschlagen",
+      "verify.errorMessage": "Bei der Verifizierung Ihrer E-Mail ist ein Fehler aufgetreten. Der Link ist möglicherweise abgelaufen oder ungültig.",
+      "verify.tryAgain": "Erneut Versuchen",
+      "verify.resendEmail": "Verifizierungs-E-Mail Erneut Senden",
+      "verify.resendSuccess": "Verifizierungs-E-Mail gesendet! Bitte überprüfen Sie Ihren Posteingang.",
+      "verify.resendError": "Fehler beim erneuten Senden der E-Mail. Bitte versuchen Sie es erneut.",
+      "verify.resending": "Wird gesendet..."
     }
   }
 }

@@ -5,10 +5,22 @@
       "subtitle": "Site under construction"
     }
   },
+  "es": {
+    "translation": {
+      "main-title": "¡Bienvenido a BitMinded!",
+      "subtitle": "Sitio en construcción"
+    }
+  },
   "fr": {
     "translation": {
       "main-title": "Bienvenue sur BitMinded!",
       "subtitle": "Site en construction"
+    }
+  },
+  "de": {
+    "translation": {
+      "main-title": "Willkommen bei BitMinded!",
+      "subtitle": "Seite im Aufbau"
     }
   }
 }

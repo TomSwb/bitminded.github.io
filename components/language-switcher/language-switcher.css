@@ -6,26 +6,99 @@
     z-index: var(--z-popover);
 }
 
-.language-switcher__container {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-}
-
-.language-switcher__button {
-    font-size: var(--font-size-base);
+/* Globe toggle button */
+.language-switcher__toggle {
+    font-size: var(--font-size-xl);
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-xl);
     border: 2px solid var(--border-color-primary);
     background: var(--color-background);
     color: var(--color-primary);
     cursor: pointer;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: all var(--transition-fast);
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 2.5rem;
-    min-height: 2.5rem;
+    min-width: 3rem;
+    min-height: 3rem;
+}
+
+.language-switcher__toggle:hover {
+    background: var(--color-primary);
+    color: var(--color-background);
+    transform: scale(1.05);
+}
+
+.language-switcher__toggle:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.language-switcher__toggle:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.language-switcher__toggle[aria-expanded="true"] {
+    background: var(--color-primary);
+    color: var(--color-background);
+}
+
+.language-switcher__globe {
+    font-size: var(--font-size-xl);
+    line-height: 1;
+    transition: transform var(--transition-fast);
+}
+
+.language-switcher__toggle[aria-expanded="true"] .language-switcher__globe {
+    transform: rotate(180deg);
+}
+
+/* Dropdown container */
+.language-switcher__dropdown {
+    position: absolute;
+    top: calc(100% + var(--spacing-xs));
+    left: 0;
+    background: var(--color-background);
+    border: 2px solid var(--border-color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: var(--spacing-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity var(--transition-fast), 
+                transform var(--transition-fast),
+                visibility 0s var(--transition-fast);
+    min-width: 150px;
+}
+
+.language-switcher__dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity var(--transition-fast), 
+                transform var(--transition-fast),
+                visibility 0s;
+}
+
+/* Language option buttons */
+.language-switcher__button {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: none;
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    text-align: left;
 }
 
 .language-switcher__button:hover {
@@ -36,11 +109,18 @@
 .language-switcher__button.active {
     background: var(--color-primary);
     color: var(--color-background);
+    font-weight: 600;
 }
 
 .language-switcher__flag {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-lg);
     line-height: 1;
+    flex-shrink: 0;
+}
+
+.language-switcher__name {
+    font-size: var(--font-size-sm);
+    flex-grow: 1;
 }
 
 /* Mobile Responsive Styles */
@@ -48,14 +128,16 @@
     .language-switcher {
         top: var(--spacing-sm);
         left: var(--spacing-sm);
-        z-index: var(--z-popover);
     }
     
-    .language-switcher__button {
-        font-size: var(--font-size-xl);
-        padding: 0.4em 0.7em;
-        border-radius: var(--radius-lg);
-        margin: 0 0.15em;
+    .language-switcher__toggle {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .language-switcher__dropdown {
+        min-width: 140px;
     }
 }
 
@@ -66,12 +148,14 @@
     left: auto;
 }
 
-.language-switcher.compact .language-switcher__container {
-    gap: var(--spacing-sm);
+.language-switcher.compact .language-switcher__toggle {
+    width: 100%;
 }
 
-.language-switcher.compact .language-switcher__button {
-    margin: 0;
+.language-switcher.compact .language-switcher__dropdown {
+    position: relative;
+    top: 0;
+    margin-top: var(--spacing-xs);
 }
 
 /* Animation for language change */

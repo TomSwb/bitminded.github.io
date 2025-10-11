@@ -8,21 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
     ])
     .then(responses => Promise.all(responses.map(response => response.json())))
     .then(([accountResources, layoutResources]) => {
-        // Merge both resource sets
-        const mergedResources = {
-            en: {
+        // Dynamically merge both resource sets for all available languages
+        const mergedResources = {};
+        
+        // Get all available languages from both resource sets
+        const allLanguages = new Set([
+            ...Object.keys(accountResources),
+            ...Object.keys(layoutResources)
+        ]);
+        
+        // Merge translations for each language
+        allLanguages.forEach(lang => {
+            mergedResources[lang] = {
                 translation: {
-                    ...accountResources.en.translation,
-                    ...layoutResources.en.translation
+                    ...(accountResources[lang]?.translation || {}),
+                    ...(layoutResources[lang]?.translation || {})
                 }
-            },
-            fr: {
-                translation: {
-                    ...accountResources.fr.translation,
-                    ...layoutResources.fr.translation
-                }
-            }
-        };
+            };
+        });
         
         i18next.init({
             lng: savedLang,

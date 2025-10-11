@@ -38,6 +38,10 @@ class LanguageSwitcher {
 
         // Language switcher element found
 
+        this.toggleButton = document.getElementById('language-switcher-toggle');
+        this.dropdown = document.getElementById('language-switcher-dropdown');
+        this.isOpen = false;
+
         // Sync with i18next instance if available
         this.syncWithI18next();
 
@@ -92,11 +96,36 @@ class LanguageSwitcher {
      * Bind event listeners
      */
     bindEvents() {
+        // Toggle button click
+        if (this.toggleButton) {
+            this.toggleButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleDropdown();
+            });
+        }
+
+        // Language button clicks
         this.buttons.forEach(button => {
             button.addEventListener('click', (e) => {
                 const lang = e.currentTarget.dataset.lang;
                 this.changeLanguage(lang);
+                this.closeDropdown();
             });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (this.isOpen && !this.element.contains(e.target)) {
+                this.closeDropdown();
+            }
+        });
+
+        // Close dropdown on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen) {
+                this.closeDropdown();
+                this.toggleButton?.focus();
+            }
         });
 
         // Listen for language changes from other sources
@@ -115,7 +144,9 @@ class LanguageSwitcher {
             const lang = button.dataset.lang;
             const languageNames = {
                 'en': 'English',
-                'fr': 'Français'
+                'es': 'Español',
+                'fr': 'Français',
+                'de': 'Deutsch'
             };
             
             const languageName = languageNames[lang] || lang;
@@ -125,12 +156,42 @@ class LanguageSwitcher {
     }
 
     /**
+     * Toggle dropdown open/closed
+     */
+    toggleDropdown() {
+        if (this.isOpen) {
+            this.closeDropdown();
+        } else {
+            this.openDropdown();
+        }
+    }
+
+    /**
+     * Open dropdown
+     */
+    openDropdown() {
+        this.isOpen = true;
+        this.dropdown?.classList.add('open');
+        this.toggleButton?.setAttribute('aria-expanded', 'true');
+    }
+
+    /**
+     * Close dropdown
+     */
+    closeDropdown() {
+        this.isOpen = false;
+        this.dropdown?.classList.remove('open');
+        this.toggleButton?.setAttribute('aria-expanded', 'false');
+    }
+
+    /**
      * Change language and emit event
      * @param {string} language - Language code to switch to
      */
     changeLanguage(language) {
         if (language === this.currentLanguage) {
             console.log('Language already set to:', language);
+            this.closeDropdown();
             return;
         }
 

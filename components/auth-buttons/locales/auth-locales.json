@@ -9,6 +9,16 @@
       "auth.user": "User"
     }
   },
+  "es": {
+    "translation": {
+      "auth.login": "Iniciar Sesión",
+      "auth.signup": "Registrarse",
+      "auth.account": "Cuenta",
+      "auth.preferences": "Preferencias",
+      "auth.logout": "Cerrar Sesión",
+      "auth.user": "Usuario"
+    }
+  },
   "fr": {
     "translation": {
       "auth.login": "Connexion",
@@ -17,6 +27,16 @@
       "auth.preferences": "Préférences",
       "auth.logout": "Déconnexion",
       "auth.user": "Utilisateur"
+    }
+  },
+  "de": {
+    "translation": {
+      "auth.login": "Anmelden",
+      "auth.signup": "Registrieren",
+      "auth.account": "Konto",
+      "auth.preferences": "Einstellungen",
+      "auth.logout": "Abmelden",
+      "auth.user": "Benutzer"
     }
   }
 }
