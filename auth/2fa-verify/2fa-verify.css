@@ -172,7 +172,6 @@ body {
     padding: 1rem;
     background: var(--color-background-primary);
     border-radius: 10px;
-    border: 1px solid var(--color-primary);
 }
 
 .help-text p {
@@ -180,6 +179,62 @@ body {
     font-size: 0.9rem;
     color: var(--color-text-primary, #495057);
     line-height: 1.5;
+}
+
+/* Backup Code Input */
+.backup-code-input-container {
+    display: flex;
+    justify-content: center;
+}
+
+.backup-code-input {
+    width: 280px;
+    height: 70px;
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 4px;
+    font-family: 'Courier New', monospace;
+    border: 2px solid var(--color-border, #dee2e6);
+    border-radius: 12px;
+    background: var(--color-background-primary, #ffffff);
+    color: var(--color-text-primary, #212529);
+    transition: all 0.2s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.backup-code-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+}
+
+.backup-code-input.error {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    animation: shake 0.5s ease;
+}
+
+/* Backup Toggle */
+.backup-toggle {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: var(--color-secondary);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: underline;
+    padding: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.link-button:hover {
+    color: var(--color-primary);
 }
 
 /* Cancel Link */

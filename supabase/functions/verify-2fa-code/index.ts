@@ -28,7 +28,7 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { userId, code } = await req.json()
+    const { userId, code, type = 'totp' } = await req.json()
     
     // Validate required fields
     if (!userId || !code) {
@@ -44,11 +44,24 @@ serve(async (req) => {
       })
     }
 
-    // Validate code format (6 digits)
-    if (!/^\d{6}$/.test(code)) {
+    // Validate code format based on type
+    if (type === 'totp' && !/^\d{6}$/.test(code)) {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: 'Code must be 6 digits' 
+        error: 'TOTP code must be 6 digits' 
+      }), {
+        status: 400,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      })
+    }
+
+    if (type === 'backup' && !/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Invalid backup code format' 
       }), {
         status: 400,
         headers: { 
@@ -63,10 +76,10 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Get user's 2FA secret from database
+    // Get user's 2FA data from database
     const { data: twoFAData, error: fetchError } = await supabase
       .from('user_2fa')
-      .select('secret_key, is_enabled')
+      .select('secret_key, is_enabled, backup_codes')
       .eq('user_id', userId)
       .maybeSingle()
 
@@ -78,7 +91,7 @@ serve(async (req) => {
         user_id: userId,
         success: false,
         failure_reason: 'No 2FA setup found',
-        attempt_type: 'totp',
+        attempt_type: type,
         ip_address: req.headers.get('x-forwarded-for') || null,
         user_agent: req.headers.get('user-agent') || null,
       })
@@ -95,41 +108,69 @@ serve(async (req) => {
       })
     }
 
-    // Create TOTP instance with user's secret
-    const totp = new OTPAuth.TOTP({
-      issuer: 'BitMinded',
-      label: 'BitMinded',
-      algorithm: 'SHA1',
-      digits: 6,
-      period: 30,
-      secret: twoFAData.secret_key
-    })
+    let isValid = false
 
-    // Verify the code (allow 1 time window before/after for clock skew)
-    const delta = totp.validate({ 
-      token: code, 
-      window: 1  // Allow ±30 seconds clock skew
-    })
-    
-    const isValid = delta !== null
+    // Verify based on type
+    if (type === 'backup') {
+      // Verify backup code
+      const hashedCode = btoa(code) // Use same encoding as when saving
+      const backupCodes = twoFAData.backup_codes || []
+      
+      // Check if code exists in backup codes
+      const codeIndex = backupCodes.indexOf(hashedCode)
+      isValid = codeIndex !== -1
+
+      if (isValid) {
+        // Remove used backup code from array
+        const updatedCodes = backupCodes.filter((_, index) => index !== codeIndex)
+        
+        await supabase
+          .from('user_2fa')
+          .update({ 
+            backup_codes: updatedCodes,
+            last_verified_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+        
+        console.log(`Backup code used. Remaining codes: ${updatedCodes.length}`)
+      }
+    } else {
+      // Verify TOTP code
+      const totp = new OTPAuth.TOTP({
+        issuer: 'BitMinded',
+        label: 'BitMinded',
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+        secret: twoFAData.secret_key
+      })
+
+      // Verify the code (allow 1 time window before/after for clock skew)
+      const delta = totp.validate({ 
+        token: code, 
+        window: 1  // Allow ±30 seconds clock skew
+      })
+      
+      isValid = delta !== null
+
+      // If valid, update last_verified_at timestamp
+      if (isValid) {
+        await supabase
+          .from('user_2fa')
+          .update({ last_verified_at: new Date().toISOString() })
+          .eq('user_id', userId)
+      }
+    }
 
     // Log the attempt
     await supabase.from('user_2fa_attempts').insert({
       user_id: userId,
       success: isValid,
       failure_reason: isValid ? null : 'Invalid code',
-      attempt_type: 'totp',
+      attempt_type: type,
       ip_address: req.headers.get('x-forwarded-for') || null,
       user_agent: req.headers.get('user-agent') || null,
     })
-
-    // If valid, update last_verified_at timestamp
-    if (isValid) {
-      await supabase
-        .from('user_2fa')
-        .update({ last_verified_at: new Date().toISOString() })
-        .eq('user_id', userId)
-    }
 
     // Log verification result (for debugging)
     console.log('2FA verification:', {
