@@ -21,6 +21,9 @@ class TwoFactorAuthSetup {
         try {
             console.log('🔐 2FA Setup: Initializing...');
 
+            // Apply saved theme
+            this.applySavedTheme();
+
             // Initialize translations
             await this.initializeTranslations();
 
@@ -56,6 +59,15 @@ class TwoFactorAuthSetup {
             alert('Failed to initialize 2FA setup. Please try again.');
             window.close();
         }
+    }
+
+    /**
+     * Apply saved theme from localStorage
+     */
+    applySavedTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        console.log(`🎨 Theme applied: ${savedTheme}`);
     }
 
     /**
