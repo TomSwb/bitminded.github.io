@@ -1,0 +1,51 @@
+{
+  "en": {
+    "Login Activity": "Login Activity",
+    "View your recent login history and monitor account security": "View your recent login history and monitor account security",
+    "Loading activity...": "Loading activity...",
+    "No login activity found": "No login activity found",
+    "Successful": "Successful",
+    "Failed": "Failed",
+    "Invalid credentials": "Invalid credentials",
+    "Invalid 2FA code": "Invalid 2FA code",
+    "Account locked": "Account locked",
+    "Session expired": "Session expired"
+  },
+  "es": {
+    "Login Activity": "Actividad de Inicio de Sesión",
+    "View your recent login history and monitor account security": "Ve tu historial reciente de inicio de sesión y monitorea la seguridad de tu cuenta",
+    "Loading activity...": "Cargando actividad...",
+    "No login activity found": "No se encontró actividad de inicio de sesión",
+    "Successful": "Exitoso",
+    "Failed": "Fallido",
+    "Invalid credentials": "Credenciales inválidas",
+    "Invalid 2FA code": "Código 2FA inválido",
+    "Account locked": "Cuenta bloqueada",
+    "Session expired": "Sesión expirada"
+  },
+  "fr": {
+    "Login Activity": "Activité de Connexion",
+    "View your recent login history and monitor account security": "Consultez votre historique de connexion récent et surveillez la sécurité du compte",
+    "Loading activity...": "Chargement de l'activité...",
+    "No login activity found": "Aucune activité de connexion trouvée",
+    "Successful": "Réussi",
+    "Failed": "Échoué",
+    "Invalid credentials": "Identifiants invalides",
+    "Invalid 2FA code": "Code 2FA invalide",
+    "Account locked": "Compte verrouillé",
+    "Session expired": "Session expirée"
+  },
+  "de": {
+    "Login Activity": "Anmeldeaktivität",
+    "View your recent login history and monitor account security": "Sehen Sie Ihre letzten Anmeldungen und überwachen Sie die Kontosicherheit",
+    "Loading activity...": "Aktivität wird geladen...",
+    "No login activity found": "Keine Anmeldeaktivität gefunden",
+    "Successful": "Erfolgreich",
+    "Failed": "Fehlgeschlagen",
+    "Invalid credentials": "Ungültige Anmeldedaten",
+    "Invalid 2FA code": "Ungültiger 2FA-Code",
+    "Account locked": "Konto gesperrt",
+    "Session expired": "Sitzung abgelaufen"
+  }
+}
+
