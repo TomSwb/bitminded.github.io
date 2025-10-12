@@ -148,6 +148,11 @@ class TwoFactorAuth {
             if (event.data && event.data.type === '2fa-setup-complete') {
                 console.log('✅ 2FA: Setup completed, refreshing status...');
                 this.refresh2FAStatus();
+                
+                // Send notification email for 2FA enabled
+                if (typeof window.notificationHelper !== 'undefined') {
+                    window.notificationHelper.twoFAEnabled();
+                }
             }
         });
     }
@@ -320,6 +325,11 @@ class TwoFactorAuth {
 
             // Refresh status
             await this.load2FAStatus();
+
+            // Send notification email
+            if (typeof window.notificationHelper !== 'undefined') {
+                await window.notificationHelper.twoFADisabled();
+            }
 
             // Show success message (optional)
             alert('Two-Factor Authentication has been disabled.');

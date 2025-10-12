@@ -180,6 +180,14 @@ class PasswordChange {
 
             console.log('✅ Password Change: Password changed successfully');
 
+            // Send notification email
+            if (typeof window.notificationHelper !== 'undefined') {
+                await window.notificationHelper.passwordChanged({
+                    device: navigator.userAgent.match(/Chrome|Firefox|Safari|Edge/)?.[0] || 'Unknown',
+                    location: 'Unknown'
+                });
+            }
+
         } catch (error) {
             console.error('❌ Password Change: Failed to change password:', error);
             this.showError(this.getErrorMessage(error));
