@@ -207,6 +207,9 @@ class LanguageSwitcher {
         // Update active button immediately
         this.updateActiveLanguage(language);
 
+        // Save to database if user is authenticated
+        this.saveLanguageToDatabase(language);
+
         // Emit language change event
         this.emitLanguageChangeEvent(language);
 
@@ -225,6 +228,44 @@ class LanguageSwitcher {
         }
         
         console.log('✅ Language change completed');
+    }
+
+    /**
+     * Save language preference to database for authenticated users
+     * @param {string} language - Language to save
+     */
+    async saveLanguageToDatabase(language) {
+        try {
+            // Check if Supabase is available
+            if (typeof window.supabase === 'undefined') {
+                console.log('Supabase not available, skipping database save');
+                return;
+            }
+
+            // Check if user is authenticated
+            const { data: { user }, error: userError } = await window.supabase.auth.getUser();
+            
+            if (userError || !user) {
+                console.log('User not authenticated, language saved to localStorage only');
+                return;
+            }
+
+            // Update language in database
+            const { error } = await window.supabase
+                .from('user_preferences')
+                .update({ language: language })
+                .eq('user_id', user.id);
+
+            if (error) {
+                console.error('Failed to save language to database:', error);
+            } else {
+                console.log(`✅ Language saved to database: ${language}`);
+            }
+
+        } catch (error) {
+            console.error('Error saving language to database:', error);
+            // Don't fail the language change if database save fails
+        }
     }
 
     /**

@@ -410,8 +410,6 @@ class TwoFactorVerify {
             if (success && typeof window.notificationHelper !== 'undefined') {
                 await window.notificationHelper.newLogin({
                     device: deviceInfo.deviceType || 'Unknown',
-                    location: 'Unknown', // Could be enhanced with IP geolocation
-                    ip: 'Hidden for privacy',
                     browser: deviceInfo.browser || 'Unknown'
                 });
             }

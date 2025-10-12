@@ -101,6 +101,7 @@ All emails include:
 - Info boxes with details
 - Centered action buttons
 - Footer with preferences link
+- **Multi-language support** - Emails sent in user's preferred language (EN/ES/FR/DE)
 
 ---
 

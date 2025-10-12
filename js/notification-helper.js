@@ -58,12 +58,22 @@ class NotificationHelper {
 
             console.log(`📧 Sending ${type} notification to user ${user.id}`);
 
-            // Call Edge Function
+            // Format timestamp in user's timezone and language
+            const userLanguage = (typeof i18next !== 'undefined' && i18next.language) || 'en';
+            const formattedTimestamp = new Date().toLocaleString(userLanguage, {
+                dateStyle: 'long',
+                timeStyle: 'short'
+            });
+
+            // Call Edge Function with formatted timestamp
             const { data: result, error } = await supabase.functions.invoke('send-notification-email', {
                 body: {
                     userId: user.id,
                     type: type,
-                    data: data
+                    data: {
+                        ...data,
+                        timestamp: formattedTimestamp
+                    }
                 }
             });
 
@@ -88,12 +98,11 @@ class NotificationHelper {
 
     /**
      * Send password changed notification
-     * @param {object} options - { device, location, resetUrl }
+     * @param {object} options - { device, resetUrl }
      */
     async passwordChanged(options = {}) {
         return this.send('password_changed', {
             device: options.device || this.getDeviceInfo(),
-            location: options.location || 'Unknown',
             resetUrl: options.resetUrl || `${window.location.origin}/auth`,
             preferencesUrl: `${window.location.origin}/account?section=notifications`
         });
@@ -132,13 +141,11 @@ class NotificationHelper {
 
     /**
      * Send new login notification
-     * @param {object} options - { device, location, ip, browser }
+     * @param {object} options - { device, browser }
      */
     async newLogin(options = {}) {
         return this.send('new_login', {
             device: options.device || this.getDeviceInfo(),
-            location: options.location || 'Unknown',
-            ip: options.ip || 'Unknown',
             browser: options.browser || this.getBrowserInfo(),
             securityUrl: `${window.location.origin}/account?section=security`,
             preferencesUrl: `${window.location.origin}/account?section=notifications`
