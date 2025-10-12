@@ -33,7 +33,95 @@ class NotificationHelper {
     }
 
     /**
-     * Send a notification email
+     * Create in-app notification directly in database
+     * @private
+     */
+    async createInAppNotification(userId, type, data, language, preferences) {
+        // Notification templates with translations
+        const templates = {
+            password_changed: {
+                en: { title: 'Password Changed', message: 'Your password was successfully changed.', icon: '🔒' },
+                es: { title: 'Contraseña Cambiada', message: 'Tu contraseña ha sido cambiada exitosamente.', icon: '🔒' },
+                fr: { title: 'Mot de passe modifié', message: 'Votre mot de passe a été modifié avec succès.', icon: '🔒' },
+                de: { title: 'Passwort geändert', message: 'Ihr Passwort wurde erfolgreich geändert.', icon: '🔒' }
+            },
+            two_fa_enabled: {
+                en: { title: '2FA Enabled', message: 'Two-factor authentication has been enabled on your account.', icon: '🔐' },
+                es: { title: '2FA Activado', message: 'La autenticación de dos factores ha sido activada en tu cuenta.', icon: '🔐' },
+                fr: { title: '2FA activé', message: 'L\'authentification à deux facteurs a été activée sur votre compte.', icon: '🔐' },
+                de: { title: '2FA aktiviert', message: 'Die Zwei-Faktor-Authentifizierung wurde für Ihr Konto aktiviert.', icon: '🔐' }
+            },
+            two_fa_disabled: {
+                en: { title: '2FA Disabled', message: 'Two-factor authentication has been disabled on your account.', icon: '🔓' },
+                es: { title: '2FA Desactivado', message: 'La autenticación de dos factores ha sido desactivada en tu cuenta.', icon: '🔓' },
+                fr: { title: '2FA désactivé', message: 'L\'authentification à deux facteurs a été désactivée sur votre compte.', icon: '🔓' },
+                de: { title: '2FA deaktiviert', message: 'Die Zwei-Faktor-Authentifizierung wurde für Ihr Konto deaktiviert.', icon: '🔓' }
+            },
+            new_login: {
+                en: { title: 'New Login', message: 'A new login was detected on your account.', icon: '🔑' },
+                es: { title: 'Nuevo Inicio de Sesión', message: 'Se detectó un nuevo inicio de sesión en tu cuenta.', icon: '🔑' },
+                fr: { title: 'Nouvelle connexion', message: 'Une nouvelle connexion a été détectée sur votre compte.', icon: '🔑' },
+                de: { title: 'Neue Anmeldung', message: 'Eine neue Anmeldung wurde in Ihrem Konto erkannt.', icon: '🔑' }
+            },
+            username_changed: {
+                en: { title: 'Username Changed', message: 'Your username was successfully updated.', icon: '👤' },
+                es: { title: 'Nombre de Usuario Cambiado', message: 'Tu nombre de usuario ha sido actualizado exitosamente.', icon: '👤' },
+                fr: { title: 'Nom d\'utilisateur modifié', message: 'Votre nom d\'utilisateur a été mis à jour avec succès.', icon: '👤' },
+                de: { title: 'Benutzername geändert', message: 'Ihr Benutzername wurde erfolgreich aktualisiert.', icon: '👤' }
+            }
+        };
+
+        const typeCategories = {
+            password_changed: 'security',
+            two_fa_enabled: 'security',
+            two_fa_disabled: 'security',
+            new_login: 'security',
+            username_changed: 'account'
+        };
+
+        // Check if user wants in-app notifications for this type
+        const preferenceKey = type.replace('two_fa_enabled', 'two_fa').replace('two_fa_disabled', 'two_fa');
+        const isEnabled = preferences[preferenceKey] !== false;
+
+        if (!isEnabled) {
+            return { skipped: true, reason: `User disabled ${preferenceKey} in-app notifications` };
+        }
+
+        // Get template
+        const template = templates[type];
+        if (!template) {
+            return { error: new Error(`Unknown notification type: ${type}`) };
+        }
+
+        const translation = template[language] || template.en;
+        const notificationType = typeCategories[type] || 'account';
+
+        // Use the basic message - details will be shown separately in the details box
+        try {
+            const { data: result, error } = await supabase
+                .from('user_notifications')
+                .insert({
+                    user_id: userId,
+                    type: notificationType,
+                    title: translation.title,
+                    message: translation.message,
+                    icon: translation.icon,
+                    link: '/account?section=notifications',
+                    data: data || {}
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            return { success: true, data: result };
+        } catch (error) {
+            return { error };
+        }
+    }
+
+    /**
+     * Send a notification (both email and in-app)
      * @param {string} type - Notification type (password_changed, email_changed, etc.)
      * @param {object} data - Additional data for the email template
      * @returns {Promise<object>} Result of the notification
@@ -65,30 +153,61 @@ class NotificationHelper {
                 timeStyle: 'short'
             });
 
-            // Call Edge Function with formatted timestamp
-            const { data: result, error } = await supabase.functions.invoke('send-notification-email', {
-                body: {
-                    userId: user.id,
-                    type: type,
-                    data: {
-                        ...data,
-                        timestamp: formattedTimestamp
+            // Get user's preferences
+            const { data: preferences } = await supabase
+                .from('user_preferences')
+                .select('notification_preferences')
+                .eq('user_id', user.id)
+                .single();
+
+            const inappPrefs = preferences?.notification_preferences?.inapp || {};
+
+            // Send both email and in-app notification in parallel
+            const [emailResult, inAppResult] = await Promise.all([
+                // Send email notification
+                supabase.functions.invoke('send-notification-email', {
+                    body: {
+                        userId: user.id,
+                        type: type,
+                        data: {
+                            ...data,
+                            timestamp: formattedTimestamp
+                        }
                     }
-                }
-            });
+                }),
+                
+                // Create in-app notification directly in database
+                this.createInAppNotification(user.id, type, data, userLanguage, inappPrefs)
+            ]);
 
-            if (error) {
-                console.error('❌ Failed to send notification:', error);
-                return { success: false, error: error.message };
-            }
-
-            if (result.skipped) {
-                console.log(`⏭️ Notification skipped: ${result.reason}`);
+            // Check email result
+            if (emailResult.error) {
+                console.error('❌ Failed to send email:', emailResult.error);
+            } else if (emailResult.data?.skipped) {
+                console.log(`⏭️ Email skipped: ${emailResult.data.reason}`);
             } else {
-                console.log(`✅ Notification sent: ${type}`);
+                console.log(`✅ Email sent: ${type}`);
             }
 
-            return { success: true, ...result };
+            // Check in-app result
+            if (inAppResult.error) {
+                console.error('❌ Failed to create in-app notification:', inAppResult.error);
+            } else if (inAppResult.skipped) {
+                console.log(`⏭️ In-app notification skipped: ${inAppResult.reason}`);
+            } else {
+                console.log(`✅ In-app notification created: ${type}`);
+                
+                // Refresh notification center if it exists
+                if (typeof window.notificationCenter !== 'undefined' && window.notificationCenter.refresh) {
+                    window.notificationCenter.refresh();
+                }
+            }
+
+            return { 
+                success: true, 
+                email: emailResult.data,
+                inApp: inAppResult.data
+            };
 
         } catch (error) {
             console.error('❌ Error sending notification:', error);

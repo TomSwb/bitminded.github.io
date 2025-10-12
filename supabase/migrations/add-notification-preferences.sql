@@ -14,6 +14,14 @@ ADD COLUMN IF NOT EXISTS notification_preferences JSONB DEFAULT '{
     "username_changed": true,
     "product_updates": false,
     "marketing": false
+  },
+  "inapp": {
+    "password_changed": true,
+    "two_fa": true,
+    "new_login": true,
+    "username_changed": true,
+    "product_updates": false,
+    "marketing": false
   }
 }'::jsonb;
 
@@ -25,6 +33,14 @@ IS 'Granular notification preferences per channel and type. Contains email, push
 UPDATE public.user_preferences
 SET notification_preferences = '{
   "email": {
+    "password_changed": true,
+    "two_fa": true,
+    "new_login": true,
+    "username_changed": true,
+    "product_updates": false,
+    "marketing": false
+  },
+  "inapp": {
     "password_changed": true,
     "two_fa": true,
     "new_login": true,
