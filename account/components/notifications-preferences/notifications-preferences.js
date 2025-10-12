@@ -1,0 +1,408 @@
+/**
+ * Notifications & Preferences Component
+ * Handles notification preferences and settings management
+ */
+if (typeof window.NotificationsPreferences === 'undefined') {
+class NotificationsPreferences {
+    constructor() {
+        this.isInitialized = false;
+        this.form = null;
+        this.saveButton = null;
+        this.messageContainer = null;
+        this.isSubmitting = false;
+        
+        // Individual notification type checkboxes
+        this.passwordChangedCheckbox = null;
+        this.twoFACheckbox = null;
+        this.newLoginCheckbox = null;
+        this.usernameChangedCheckbox = null;
+        
+        // Current user
+        this.user = null;
+        this.preferences = null;
+    }
+
+    /**
+     * Initialize the notifications preferences component
+     */
+    async init() {
+        try {
+            if (this.isInitialized) {
+                console.log('Notifications Preferences: Already initialized');
+                return;
+            }
+
+            console.log('🔔 Notifications Preferences: Initializing...');
+
+            // Wait for Supabase to be ready
+            await this.waitForSupabase();
+
+            // Get current user
+            await this.loadUser();
+
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => this.setupComponent());
+            } else {
+                this.setupComponent();
+            }
+
+            // Initialize translations
+            await this.initializeTranslations();
+
+            this.isInitialized = true;
+            console.log('✅ Notifications Preferences: Initialized successfully');
+            
+            // Final translation update
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 100);
+
+        } catch (error) {
+            console.error('❌ Notifications Preferences: Failed to initialize:', error);
+            this.showError('Failed to initialize notifications preferences');
+        }
+    }
+
+    /**
+     * Wait for Supabase to be available
+     */
+    async waitForSupabase() {
+        return new Promise((resolve) => {
+            const checkSupabase = () => {
+                if (typeof supabase !== 'undefined' && supabase) {
+                    resolve();
+                } else {
+                    setTimeout(checkSupabase, 100);
+                }
+            };
+            checkSupabase();
+        });
+    }
+
+    /**
+     * Load current user
+     */
+    async loadUser() {
+        try {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            
+            if (error) throw error;
+            
+            if (!user) {
+                throw new Error('No user logged in');
+            }
+            
+            this.user = user;
+            console.log('✅ Notifications Preferences: User loaded');
+            
+            // Load user preferences
+            await this.loadPreferences();
+            
+        } catch (error) {
+            console.error('❌ Notifications Preferences: Failed to load user:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Load user preferences from database
+     */
+    async loadPreferences() {
+        try {
+            const { data, error } = await supabase
+                .from('user_preferences')
+                .select('email_notifications, notification_preferences')
+                .eq('user_id', this.user.id)
+                .single();
+            
+            if (error) {
+                console.error('Error loading preferences:', error);
+                // Use defaults if no preferences exist
+                this.preferences = {
+                    email_notifications: true,
+                    notification_preferences: {
+                        email: {
+                            security_alerts: true,
+                            account_updates: true
+                        }
+                    }
+                };
+            } else {
+                this.preferences = data;
+                // Ensure notification_preferences has the expected structure
+                if (!this.preferences.notification_preferences) {
+                    this.preferences.notification_preferences = {
+                        email: {
+                            security_alerts: true,
+                            account_updates: true
+                        }
+                    };
+                }
+            }
+            
+            console.log('✅ Notifications Preferences: Preferences loaded', this.preferences);
+            
+        } catch (error) {
+            console.error('❌ Notifications Preferences: Failed to load preferences:', error);
+            // Use defaults on error
+            this.preferences = {
+                email_notifications: true,
+                notification_preferences: {
+                    email: {
+                        security_alerts: true,
+                        account_updates: true
+                    }
+                }
+            };
+        }
+    }
+
+    /**
+     * Setup component elements and event listeners
+     */
+    setupComponent() {
+        // Get form elements
+        this.form = document.getElementById('notifications-preferences-form');
+        this.saveButton = document.getElementById('save-preferences-btn');
+        this.messageContainer = document.getElementById('notifications-preferences-message');
+        
+        // Get checkbox inputs for individual notification types
+        this.passwordChangedCheckbox = document.getElementById('email-password-changed');
+        this.twoFACheckbox = document.getElementById('email-two-fa');
+        this.newLoginCheckbox = document.getElementById('email-new-login');
+        this.usernameChangedCheckbox = document.getElementById('email-username-changed');
+
+        if (!this.form) {
+            console.error('❌ Notifications Preferences: Form not found');
+            return;
+        }
+
+        // Apply saved preferences to checkboxes
+        this.applyPreferences();
+
+        // Setup event listeners
+        this.setupEventListeners();
+        
+        // Make translatable content visible
+        this.showTranslatableContent();
+        
+        // Update translations after component is set up
+        this.updateTranslations();
+    }
+
+    /**
+     * Apply loaded preferences to form
+     */
+    applyPreferences() {
+        if (!this.preferences) return;
+
+        const emailPrefs = this.preferences.notification_preferences?.email || {};
+
+        // Apply individual notification preferences
+        if (this.passwordChangedCheckbox) {
+            this.passwordChangedCheckbox.checked = emailPrefs.password_changed !== false;
+        }
+
+        if (this.twoFACheckbox) {
+            this.twoFACheckbox.checked = emailPrefs.two_fa !== false;
+        }
+
+        if (this.newLoginCheckbox) {
+            this.newLoginCheckbox.checked = emailPrefs.new_login !== false;
+        }
+
+        if (this.usernameChangedCheckbox) {
+            this.usernameChangedCheckbox.checked = emailPrefs.username_changed !== false;
+        }
+    }
+
+    /**
+     * Setup event listeners
+     */
+    setupEventListeners() {
+        // Form submission
+        if (this.form) {
+            this.form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleSave();
+            });
+        }
+
+        // Listen for language changes
+        window.addEventListener('languageChanged', () => {
+            this.updateTranslations();
+        });
+    }
+
+    /**
+     * Handle save preferences
+     */
+    async handleSave() {
+        if (this.isSubmitting) return;
+
+        try {
+            this.isSubmitting = true;
+            this.setLoading(true);
+
+            // Gather form data with individual notification types
+            const preferences = {
+                notification_preferences: {
+                    email: {
+                        password_changed: this.passwordChangedCheckbox?.checked ?? true,
+                        two_fa: this.twoFACheckbox?.checked ?? true,
+                        new_login: this.newLoginCheckbox?.checked ?? true,
+                        username_changed: this.usernameChangedCheckbox?.checked ?? true,
+                        product_updates: false, // Not yet implemented
+                        marketing: false // Not yet implemented
+                    }
+                }
+            };
+
+            // Update in database
+            const { error } = await supabase
+                .from('user_preferences')
+                .update(preferences)
+                .eq('user_id', this.user.id);
+
+            if (error) throw error;
+
+            // Update local preferences
+            this.preferences = { ...this.preferences, ...preferences };
+
+            console.log('✅ Notifications Preferences: Preferences saved');
+            this.showSuccess(this.getTranslation('Preferences saved successfully'));
+
+        } catch (error) {
+            console.error('❌ Notifications Preferences: Failed to save:', error);
+            this.showError(this.getTranslation('Failed to save preferences'));
+        } finally {
+            this.isSubmitting = false;
+            this.setLoading(false);
+        }
+    }
+
+    /**
+     * Set loading state
+     */
+    setLoading(loading) {
+        const component = document.getElementById('notifications-preferences-component');
+        
+        if (loading) {
+            component?.classList.add('notifications-preferences--loading');
+            if (this.saveButton) {
+                this.saveButton.disabled = true;
+            }
+        } else {
+            component?.classList.remove('notifications-preferences--loading');
+            if (this.saveButton) {
+                this.saveButton.disabled = false;
+            }
+        }
+    }
+
+    /**
+     * Show success message
+     */
+    showSuccess(message) {
+        this.showMessage(message, 'success');
+    }
+
+    /**
+     * Show error message
+     */
+    showError(message) {
+        this.showMessage(message, 'error');
+    }
+
+    /**
+     * Show message
+     */
+    showMessage(message, type) {
+        if (!this.messageContainer) return;
+
+        this.messageContainer.textContent = message;
+        this.messageContainer.className = `notifications-preferences__message notifications-preferences__message--${type}`;
+        this.messageContainer.style.display = 'block';
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            this.messageContainer.style.display = 'none';
+        }, 5000);
+    }
+
+    /**
+     * Initialize translations
+     */
+    async initializeTranslations() {
+        return new Promise((resolve) => {
+            const checkTranslations = () => {
+                if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+                    this.updateTranslations();
+                    resolve();
+                } else {
+                    setTimeout(checkTranslations, 100);
+                }
+            };
+            checkTranslations();
+        });
+    }
+
+    /**
+     * Update translations
+     */
+    updateTranslations() {
+        if (typeof i18next === 'undefined' || !i18next.isInitialized) {
+            return;
+        }
+
+        const translatableElements = document.querySelectorAll('.notifications-preferences .translatable-content');
+        
+        translatableElements.forEach(element => {
+            const key = element.dataset.translationKey;
+            if (key && i18next.exists(key)) {
+                // Preserve the element type (button, span, etc.)
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                    element.placeholder = i18next.t(key);
+                } else {
+                    element.textContent = i18next.t(key);
+                }
+            }
+            // Make translatable content visible
+            element.classList.add('loaded');
+        });
+    }
+
+    /**
+     * Show translatable content
+     */
+    showTranslatableContent() {
+        const translatableElements = document.querySelectorAll('.notifications-preferences .translatable-content');
+        translatableElements.forEach(element => {
+            element.classList.add('loaded');
+        });
+    }
+
+    /**
+     * Get translation
+     */
+    getTranslation(key) {
+        if (typeof i18next !== 'undefined' && i18next.isInitialized && i18next.exists(key)) {
+            return i18next.t(key);
+        }
+        return key;
+    }
+
+    /**
+     * Destroy component
+     */
+    destroy() {
+        this.isInitialized = false;
+        // Clean up event listeners if needed
+    }
+}
+
+// Export
+window.NotificationsPreferences = NotificationsPreferences;
+}
+

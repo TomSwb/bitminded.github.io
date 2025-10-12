@@ -406,6 +406,16 @@ class TwoFactorVerify {
 
             console.log(`📊 Login attempt logged: ${success ? 'Success with 2FA' : 'Failed 2FA'}`);
 
+            // Send new login notification if login was successful
+            if (success && typeof window.notificationHelper !== 'undefined') {
+                await window.notificationHelper.newLogin({
+                    device: deviceInfo.deviceType || 'Unknown',
+                    location: 'Unknown', // Could be enhanced with IP geolocation
+                    ip: 'Hidden for privacy',
+                    browser: deviceInfo.browser || 'Unknown'
+                });
+            }
+
         } catch (error) {
             console.error('Failed to log login attempt:', error);
         }

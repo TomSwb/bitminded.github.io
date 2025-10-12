@@ -169,6 +169,7 @@ class UsernameEdit {
             this.showLoading(true);
             this.hideError();
 
+            const oldUsername = this.currentUsername;
             await this.updateUsername(newUsername);
             
             this.currentUsername = newUsername;
@@ -177,6 +178,11 @@ class UsernameEdit {
             this.clearForm();
             
             this.showSuccess('Username updated successfully');
+            
+            // Send notification email
+            if (typeof window.notificationHelper !== 'undefined') {
+                await window.notificationHelper.usernameChanged(oldUsername, newUsername);
+            }
             
             // Trigger profile update event
             this.triggerProfileUpdate();

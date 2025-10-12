@@ -303,6 +303,25 @@ class ComponentLoader {
                         setTimeout(initLoginActivity, 50);
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'notifications-preferences') {
+                    // Load notifications preferences translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/account/components/notifications-preferences/notifications-preferences-translations.js';
+                    translationScript.onload = () => {
+                        // Wait for DOM to be ready before initializing notifications preferences component
+                        const initNotificationsPreferences = () => {
+                            if (window.NotificationsPreferences && !window.notificationsPreferences) {
+                                window.notificationsPreferences = new window.NotificationsPreferences();
+                            }
+                            if (window.notificationsPreferences) {
+                                window.notificationsPreferences.init(config);
+                            }
+                        };
+                        
+                        // Use setTimeout to ensure HTML is fully parsed
+                        setTimeout(initNotificationsPreferences, 50);
+                    };
+                    document.head.appendChild(translationScript);
                 }
                 resolve();
             };

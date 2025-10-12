@@ -1,0 +1,359 @@
+<!-- Notifications & Preferences Component -->
+<div class="notifications-preferences" id="notifications-preferences-component">
+    <!-- Header -->
+    <div class="notifications-preferences__header">
+        <h2 class="translatable-content" data-translation-key="Notifications & Preferences">
+            Notifications & Preferences
+        </h2>
+        <p class="notifications-preferences__subtitle translatable-content" 
+           data-translation-key="Configure how you receive notifications and updates">
+            Configure how you receive notifications and updates
+        </p>
+    </div>
+
+    <!-- Notification Preferences Table -->
+    <section class="notifications-preferences__section">
+        <form id="notifications-preferences-form" class="notifications-preferences__form">
+            
+            <!-- Table Header -->
+            <div class="notifications-preferences__table">
+                <div class="notifications-preferences__table-header">
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--header">
+                        <span class="translatable-content" data-translation-key="Notification Type">
+                            Notification Type
+                        </span>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--header notifications-preferences__table-cell--center">
+                        <span class="translatable-content" data-translation-key="Email">
+                            Email
+                        </span>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--header notifications-preferences__table-cell--center">
+                        <span class="translatable-content" data-translation-key="In-App">
+                            In-App
+                        </span>
+                        <span class="notifications-preferences__badge notifications-preferences__badge--small translatable-content" 
+                              data-translation-key="Coming Soon">
+                            Coming Soon
+                        </span>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--header notifications-preferences__table-cell--center">
+                        <span class="translatable-content" data-translation-key="Push">
+                            Push
+                        </span>
+                        <span class="notifications-preferences__badge notifications-preferences__badge--small translatable-content" 
+                              data-translation-key="Coming Soon">
+                            Coming Soon
+                        </span>
+                    </div>
+                </div>
+
+                <!-- SECURITY SECTION -->
+                <div class="notifications-preferences__table-section-header">
+                    <span>🔒</span>
+                    <span class="translatable-content" data-translation-key="Security">Security</span>
+                </div>
+
+                <!-- Row: New Login -->
+                <div class="notifications-preferences__table-row">
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--main">
+                        <div class="notifications-preferences__cell-content">
+                            <span class="notifications-preferences__cell-title translatable-content" 
+                                  data-translation-key="New Login">
+                                New Login
+                            </span>
+                            <span class="notifications-preferences__cell-description translatable-content" 
+                                  data-translation-key="When someone logs into your account">
+                                When someone logs into your account
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="email-new-login" 
+                                   name="new_login_email" 
+                                   checked>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="inapp-new-login" 
+                                   name="new_login_inapp" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="push-new-login" 
+                                   name="new_login_push" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Row: Password Changed -->
+                <div class="notifications-preferences__table-row">
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--main">
+                        <div class="notifications-preferences__cell-content">
+                            <span class="notifications-preferences__cell-title translatable-content" 
+                                  data-translation-key="Password Changed">
+                                Password Changed
+                            </span>
+                            <span class="notifications-preferences__cell-description translatable-content" 
+                                  data-translation-key="When your password is updated">
+                                When your password is updated
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="email-password-changed" 
+                                   name="password_changed_email" 
+                                   checked>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="inapp-password-changed" 
+                                   name="password_changed_inapp" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="push-password-changed" 
+                                   name="password_changed_push" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Row: Two-Factor Authentication -->
+                <div class="notifications-preferences__table-row">
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--main">
+                        <div class="notifications-preferences__cell-content">
+                            <span class="notifications-preferences__cell-title translatable-content" 
+                                  data-translation-key="Two-Factor Authentication">
+                                Two-Factor Authentication
+                            </span>
+                            <span class="notifications-preferences__cell-description translatable-content" 
+                                  data-translation-key="When 2FA is enabled or disabled">
+                                When 2FA is enabled or disabled
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="email-two-fa" 
+                                   name="two_fa_email" 
+                                   checked>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="inapp-two-fa" 
+                                   name="two_fa_inapp" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="push-two-fa" 
+                                   name="two_fa_push" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ACCOUNT SECTION -->
+                <div class="notifications-preferences__table-section-header">
+                    <span>👤</span>
+                    <span class="translatable-content" data-translation-key="Account">Account</span>
+                </div>
+
+                <!-- Row: Username Changed -->
+                <div class="notifications-preferences__table-row">
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--main">
+                        <div class="notifications-preferences__cell-content">
+                            <span class="notifications-preferences__cell-title translatable-content" 
+                                  data-translation-key="Username Changed">
+                                Username Changed
+                            </span>
+                            <span class="notifications-preferences__cell-description translatable-content" 
+                                  data-translation-key="When your username is updated">
+                                When your username is updated
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="email-username-changed" 
+                                   name="username_changed_email" 
+                                   checked>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="inapp-username-changed" 
+                                   name="username_changed_inapp" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="push-username-changed" 
+                                   name="username_changed_push" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- FUTURE SECTION -->
+                <div class="notifications-preferences__table-section-header">
+                    <span>🚀</span>
+                    <span class="translatable-content" data-translation-key="Future Features">Future Features</span>
+                </div>
+
+                <!-- Row: Product Updates -->
+                <div class="notifications-preferences__table-row notifications-preferences__table-row--disabled">
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--main">
+                        <div class="notifications-preferences__cell-content">
+                            <span class="notifications-preferences__cell-title translatable-content" 
+                                  data-translation-key="Product Updates">
+                                Product Updates
+                            </span>
+                            <span class="notifications-preferences__cell-description translatable-content" 
+                                  data-translation-key="New apps, features, and improvements">
+                                New apps, features, and improvements
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="email-product-updates" 
+                                   name="product_updates_email" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="inapp-product-updates" 
+                                   name="product_updates_inapp" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="push-product-updates" 
+                                   name="product_updates_push" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Row 4: Marketing -->
+                <div class="notifications-preferences__table-row notifications-preferences__table-row--disabled">
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--main">
+                        <div class="notifications-preferences__cell-content">
+                            <span class="notifications-preferences__cell-title translatable-content" 
+                                  data-translation-key="Marketing">
+                                Marketing
+                            </span>
+                            <span class="notifications-preferences__cell-description translatable-content" 
+                                  data-translation-key="Newsletters and special offers">
+                                Newsletters and special offers
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="email-marketing" 
+                                   name="marketing_email" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="inapp-marketing" 
+                                   name="marketing_inapp" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                    <div class="notifications-preferences__table-cell notifications-preferences__table-cell--center notifications-preferences__table-cell--disabled">
+                        <label class="notifications-preferences__checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="push-marketing" 
+                                   name="marketing_push" 
+                                   disabled>
+                            <span class="notifications-preferences__checkbox-custom"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="notifications-preferences__actions">
+                <button type="submit" 
+                        id="save-preferences-btn" 
+                        class="btn btn--primary translatable-content" 
+                        data-translation-key="Save Preferences">
+                    Save Preferences
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Coming Soon Notice -->
+    <section class="notifications-preferences__notice">
+        <div class="notifications-preferences__notice-content">
+            <span class="notifications-preferences__notice-icon">ℹ️</span>
+            <div>
+                <p class="notifications-preferences__notice-title translatable-content" 
+                   data-translation-key="More notification options will be available when our app catalog launches!">
+                    More notification options will be available when our app catalog launches!
+                </p>
+                <p class="notifications-preferences__notice-text translatable-content" 
+                   data-translation-key="In-app and push notifications coming soon!">
+                    In-app and push notifications coming soon!
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success/Error Messages -->
+    <div id="notifications-preferences-message" class="notifications-preferences__message" style="display: none;"></div>
+</div>

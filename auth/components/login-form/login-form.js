@@ -571,6 +571,17 @@ class LoginForm {
 
             console.log(`📊 Login attempt logged: ${success ? 'Success' : 'Failed'}`);
 
+            // Send new login notification ONLY if login was successful AND 2FA was NOT used
+            // (If 2FA is enabled, notification will be sent from 2fa-verify.js instead)
+            if (success && !used2FA && typeof window.notificationHelper !== 'undefined') {
+                await window.notificationHelper.newLogin({
+                    device: deviceInfo.deviceType || 'Unknown',
+                    location: 'Unknown', // Could be enhanced with IP geolocation
+                    ip: 'Hidden for privacy',
+                    browser: deviceInfo.browser || 'Unknown'
+                });
+            }
+
         } catch (error) {
             // Don't fail login if logging fails
             console.error('Failed to log login attempt:', error);
