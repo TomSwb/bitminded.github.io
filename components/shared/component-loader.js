@@ -322,6 +322,22 @@ class ComponentLoader {
                         setTimeout(initNotificationsPreferences, 50);
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'notification-center') {
+                    // Load notification center translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/components/notification-center/notification-center-translations.js';
+                    translationScript.onload = () => {
+                        // Wait for DOM to be ready before initializing notification center
+                        const initNotificationCenter = () => {
+                            if (window.NotificationCenter && window.notificationCenter) {
+                                window.notificationCenter.init(config);
+                            }
+                        };
+                        
+                        // Use setTimeout to ensure HTML is fully parsed
+                        setTimeout(initNotificationCenter, 50);
+                    };
+                    document.head.appendChild(translationScript);
                 }
                 resolve();
             };

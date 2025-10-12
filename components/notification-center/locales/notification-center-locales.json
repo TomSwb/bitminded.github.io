@@ -1,0 +1,72 @@
+{
+  "en": {
+    "Notifications": "Notifications",
+    "Mark all as read": "Mark all as read",
+    "Delete all": "Delete all",
+    "View preferences": "View preferences",
+    "Loading notifications...": "Loading notifications...",
+    "You're all caught up!": "You're all caught up!",
+    "No new notifications": "No new notifications",
+    "Just now": "Just now",
+    "minutes ago": "minutes ago",
+    "hours ago": "hours ago",
+    "days ago": "days ago",
+    "weeks ago": "weeks ago",
+    "Delete": "Delete",
+    "Mark as read": "Mark as read",
+    "Mark as unread": "Mark as unread"
+  },
+  "es": {
+    "Notifications": "Notificaciones",
+    "Mark all as read": "Marcar todo como leído",
+    "Delete all": "Eliminar todo",
+    "View preferences": "Ver preferencias",
+    "Loading notifications...": "Cargando notificaciones...",
+    "You're all caught up!": "¡Estás al día!",
+    "No new notifications": "No hay notificaciones nuevas",
+    "Just now": "Justo ahora",
+    "minutes ago": "minutos atrás",
+    "hours ago": "horas atrás",
+    "days ago": "días atrás",
+    "weeks ago": "semanas atrás",
+    "Delete": "Eliminar",
+    "Mark as read": "Marcar como leído",
+    "Mark as unread": "Marcar como no leído"
+  },
+  "fr": {
+    "Notifications": "Notifications",
+    "Mark all as read": "Tout marquer comme lu",
+    "Delete all": "Tout supprimer",
+    "View preferences": "Voir les préférences",
+    "Loading notifications...": "Chargement des notifications...",
+    "You're all caught up!": "Vous êtes à jour!",
+    "No new notifications": "Aucune nouvelle notification",
+    "Just now": "À l'instant",
+    "minutes ago": "minutes",
+    "hours ago": "heures",
+    "days ago": "jours",
+    "weeks ago": "semaines",
+    "Delete": "Supprimer",
+    "Mark as read": "Marquer comme lu",
+    "Mark as unread": "Marquer comme non lu"
+  },
+  "de": {
+    "Notifications": "Benachrichtigungen",
+    "Mark all as read": "Alle als gelesen markieren",
+    "Delete all": "Alle löschen",
+    "View preferences": "Einstellungen anzeigen",
+    "Loading notifications...": "Benachrichtigungen werden geladen...",
+    "You're all caught up!": "Sie sind auf dem neuesten Stand!",
+    "No new notifications": "Keine neuen Benachrichtigungen",
+    "Just now": "Gerade eben",
+    "minutes ago": "Minuten",
+    "hours ago": "Stunden",
+    "days ago": "Tage",
+    "weeks ago": "Wochen",
+    "Delete": "Löschen",
+    "Mark as read": "Als gelesen markieren",
+    "Mark as unread": "Als ungelesen markieren"
+  }
+}
+
+

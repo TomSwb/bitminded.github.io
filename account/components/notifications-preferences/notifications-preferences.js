@@ -11,11 +11,17 @@ class NotificationsPreferences {
         this.messageContainer = null;
         this.isSubmitting = false;
         
-        // Individual notification type checkboxes
+        // Individual notification type checkboxes - Email
         this.passwordChangedCheckbox = null;
         this.twoFACheckbox = null;
         this.newLoginCheckbox = null;
         this.usernameChangedCheckbox = null;
+        
+        // Individual notification type checkboxes - In-App
+        this.inappPasswordChangedCheckbox = null;
+        this.inappTwoFACheckbox = null;
+        this.inappNewLoginCheckbox = null;
+        this.inappUsernameChangedCheckbox = null;
         
         // Current user
         this.user = null;
@@ -167,11 +173,17 @@ class NotificationsPreferences {
         this.saveButton = document.getElementById('save-preferences-btn');
         this.messageContainer = document.getElementById('notifications-preferences-message');
         
-        // Get checkbox inputs for individual notification types
+        // Get checkbox inputs for individual notification types - Email
         this.passwordChangedCheckbox = document.getElementById('email-password-changed');
         this.twoFACheckbox = document.getElementById('email-two-fa');
         this.newLoginCheckbox = document.getElementById('email-new-login');
         this.usernameChangedCheckbox = document.getElementById('email-username-changed');
+        
+        // Get checkbox inputs for individual notification types - In-App
+        this.inappPasswordChangedCheckbox = document.getElementById('inapp-password-changed');
+        this.inappTwoFACheckbox = document.getElementById('inapp-two-fa');
+        this.inappNewLoginCheckbox = document.getElementById('inapp-new-login');
+        this.inappUsernameChangedCheckbox = document.getElementById('inapp-username-changed');
 
         if (!this.form) {
             console.error('❌ Notifications Preferences: Form not found');
@@ -198,8 +210,9 @@ class NotificationsPreferences {
         if (!this.preferences) return;
 
         const emailPrefs = this.preferences.notification_preferences?.email || {};
+        const inappPrefs = this.preferences.notification_preferences?.inapp || {};
 
-        // Apply individual notification preferences
+        // Apply email notification preferences
         if (this.passwordChangedCheckbox) {
             this.passwordChangedCheckbox.checked = emailPrefs.password_changed !== false;
         }
@@ -214,6 +227,23 @@ class NotificationsPreferences {
 
         if (this.usernameChangedCheckbox) {
             this.usernameChangedCheckbox.checked = emailPrefs.username_changed !== false;
+        }
+
+        // Apply in-app notification preferences
+        if (this.inappPasswordChangedCheckbox) {
+            this.inappPasswordChangedCheckbox.checked = inappPrefs.password_changed !== false;
+        }
+
+        if (this.inappTwoFACheckbox) {
+            this.inappTwoFACheckbox.checked = inappPrefs.two_fa !== false;
+        }
+
+        if (this.inappNewLoginCheckbox) {
+            this.inappNewLoginCheckbox.checked = inappPrefs.new_login !== false;
+        }
+
+        if (this.inappUsernameChangedCheckbox) {
+            this.inappUsernameChangedCheckbox.checked = inappPrefs.username_changed !== false;
         }
     }
 
@@ -253,6 +283,14 @@ class NotificationsPreferences {
                         two_fa: this.twoFACheckbox?.checked ?? true,
                         new_login: this.newLoginCheckbox?.checked ?? true,
                         username_changed: this.usernameChangedCheckbox?.checked ?? true,
+                        product_updates: false, // Not yet implemented
+                        marketing: false // Not yet implemented
+                    },
+                    inapp: {
+                        password_changed: this.inappPasswordChangedCheckbox?.checked ?? true,
+                        two_fa: this.inappTwoFACheckbox?.checked ?? true,
+                        new_login: this.inappNewLoginCheckbox?.checked ?? true,
+                        username_changed: this.inappUsernameChangedCheckbox?.checked ?? true,
                         product_updates: false, // Not yet implemented
                         marketing: false // Not yet implemented
                     }

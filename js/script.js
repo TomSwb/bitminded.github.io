@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load Theme Switcher Component
     loadThemeSwitcher();
     
+    // Load Notification Center Component (for authenticated users)
+    loadNotificationCenter();
+    
     // Load Auth Buttons Component
     loadAuthButtons();
     
@@ -75,6 +78,32 @@ async function loadThemeSwitcher() {
         // Theme switcher component loaded
     } catch (error) {
         console.error('❌ Failed to load theme switcher component:', error);
+    }
+}
+
+async function loadNotificationCenter() {
+    try {
+        // Check if user is authenticated
+        if (typeof supabase === 'undefined') {
+            console.log('🔔 Supabase not ready, waiting...');
+            setTimeout(loadNotificationCenter, 500);
+            return;
+        }
+
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+            console.log('🔔 User not authenticated, skipping notification center');
+            return;
+        }
+
+        await componentLoader.load('notification-center', {
+            container: 'header',
+            priority: 'high'
+        });
+        console.log('✅ Notification center component loaded');
+    } catch (error) {
+        console.error('❌ Failed to load notification center component:', error);
     }
 }
 

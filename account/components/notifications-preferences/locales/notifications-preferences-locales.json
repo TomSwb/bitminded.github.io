@@ -44,8 +44,8 @@
     "Failed to save preferences": "Failed to save preferences",
     
     "Coming Soon": "Coming Soon",
-    "In-app and push notifications coming soon!": "In-app and push notifications coming soon!",
-    "More notification options will be available when our app catalog launches!": "More notification options will be available when our app catalog launches!"
+    "In-app notifications are now available!": "In-app notifications are now available!",
+    "Push notifications coming soon with our app catalog launch": "Push notifications coming soon with our app catalog launch"
   },
   "es": {
     "Notifications & Preferences": "Notificaciones y Preferencias",
@@ -92,8 +92,8 @@
     "Failed to save preferences": "Error al guardar preferencias",
     
     "Coming Soon": "Próximamente",
-    "In-app and push notifications coming soon!": "¡Notificaciones en la app y push próximamente!",
-    "More notification options will be available when our app catalog launches!": "¡Más opciones de notificación estarán disponibles cuando lancemos nuestro catálogo de apps!"
+    "In-app notifications are now available!": "¡Las notificaciones en la app ya están disponibles!",
+    "Push notifications coming soon with our app catalog launch": "Notificaciones push próximamente con el lanzamiento de nuestro catálogo de apps"
   },
   "fr": {
     "Notifications & Preferences": "Notifications et Préférences",
@@ -140,8 +140,8 @@
     "Failed to save preferences": "Échec de l'enregistrement des préférences",
     
     "Coming Soon": "Prochainement",
-    "In-app and push notifications coming soon!": "Notifications dans l'application et push bientôt disponibles!",
-    "More notification options will be available when our app catalog launches!": "Plus d'options de notification seront disponibles lors du lancement de notre catalogue d'applications!"
+    "In-app notifications are now available!": "Les notifications dans l'application sont maintenant disponibles!",
+    "Push notifications coming soon with our app catalog launch": "Notifications push bientôt disponibles avec le lancement de notre catalogue d'applications"
   },
   "de": {
     "Notifications & Preferences": "Benachrichtigungen und Einstellungen",
@@ -188,8 +188,8 @@
     "Failed to save preferences": "Fehler beim Speichern der Einstellungen",
     
     "Coming Soon": "Demnächst",
-    "In-app and push notifications coming soon!": "In-App- und Push-Benachrichtigungen kommen bald!",
-    "More notification options will be available when our app catalog launches!": "Weitere Benachrichtigungsoptionen werden verfügbar sein, wenn unser App-Katalog startet!"
+    "In-app notifications are now available!": "In-App-Benachrichtigungen sind jetzt verfügbar!",
+    "Push notifications coming soon with our app catalog launch": "Push-Benachrichtigungen kommen bald mit dem Start unseres App-Katalogs"
   }
 }
 
