@@ -182,10 +182,7 @@ class PasswordChange {
 
             // Send notification email
             if (typeof window.notificationHelper !== 'undefined') {
-                await window.notificationHelper.passwordChanged({
-                    device: navigator.userAgent.match(/Chrome|Firefox|Safari|Edge/)?.[0] || 'Unknown',
-                    location: 'Unknown'
-                });
+                await window.notificationHelper.passwordChanged();
             }
 
         } catch (error) {
