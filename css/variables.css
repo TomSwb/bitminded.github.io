@@ -26,6 +26,18 @@
   --border-color-primary: var(--color-accent-green);
   --border-color-secondary: var(--color-accent-pink);
   
+  /* Status Colors */
+  --color-error: #dc2626;           /* Red for errors/danger */
+  --color-error-bg: rgba(220, 38, 38, 0.1);
+  --color-success: #16a34a;         /* Green for success */
+  --color-success-bg: rgba(22, 163, 74, 0.1);
+  --color-warning: #ea580c;         /* Orange for warnings */
+  --color-warning-bg: rgba(234, 88, 12, 0.1);
+  
+  /* Additional Backgrounds */
+  --color-background-tertiary: rgba(255, 255, 255, 0.05);
+  --color-border: rgba(255, 255, 255, 0.1);
+  
   /* Typography Scale */
   --font-size-xs: 0.75rem;    /* 12px */
   --font-size-sm: 0.875rem;   /* 14px */
