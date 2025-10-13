@@ -1,15 +1,82 @@
 {
   "en": {
-    "Active Sessions": "Active Sessions"
+    "Active Sessions": "Active Sessions",
+    "Manage devices where you're currently logged in": "Manage devices where you're currently logged in",
+    "Loading sessions...": "Loading sessions...",
+    "Logout All Other Devices": "Logout All Other Devices",
+    "Logout": "Logout",
+    "Current Device": "Current Device",
+    "No active sessions found": "No active sessions found",
+    "Unknown Device": "Unknown Device",
+    "Unknown Browser": "Unknown Browser",
+    "Just now": "Just now",
+    "minutes ago": "minutes ago",
+    "hours ago": "hours ago",
+    "days ago": "days ago",
+    "Failed to load sessions": "Failed to load sessions. Please try again.",
+    "Failed to logout session": "Failed to logout session. Please try again.",
+    "Session logged out successfully": "Session logged out successfully",
+    "All other sessions logged out successfully": "All other sessions logged out successfully",
+    "Are you sure you want to logout all other devices?": "Are you sure you want to logout all other devices? You'll need to login again on those devices."
   },
   "fr": {
-    "Active Sessions": "Sessions actives"
+    "Active Sessions": "Sessions actives",
+    "Manage devices where you're currently logged in": "Gérez les appareils où vous êtes actuellement connecté",
+    "Loading sessions...": "Chargement des sessions...",
+    "Logout All Other Devices": "Déconnecter tous les autres appareils",
+    "Logout": "Déconnecter",
+    "Current Device": "Appareil actuel",
+    "No active sessions found": "Aucune session active trouvée",
+    "Unknown Device": "Appareil inconnu",
+    "Unknown Browser": "Navigateur inconnu",
+    "Just now": "À l'instant",
+    "minutes ago": "minutes",
+    "hours ago": "heures",
+    "days ago": "jours",
+    "Failed to load sessions": "Échec du chargement des sessions. Veuillez réessayer.",
+    "Failed to logout session": "Échec de la déconnexion. Veuillez réessayer.",
+    "Session logged out successfully": "Session déconnectée avec succès",
+    "All other sessions logged out successfully": "Toutes les autres sessions ont été déconnectées",
+    "Are you sure you want to logout all other devices?": "Voulez-vous vraiment déconnecter tous les autres appareils ? Vous devrez vous reconnecter sur ces appareils."
   },
   "de": {
-    "Active Sessions": "Aktive Sitzungen"
+    "Active Sessions": "Aktive Sitzungen",
+    "Manage devices where you're currently logged in": "Verwalten Sie Geräte, auf denen Sie angemeldet sind",
+    "Loading sessions...": "Sitzungen werden geladen...",
+    "Logout All Other Devices": "Alle anderen Geräte abmelden",
+    "Logout": "Abmelden",
+    "Current Device": "Aktuelles Gerät",
+    "No active sessions found": "Keine aktiven Sitzungen gefunden",
+    "Unknown Device": "Unbekanntes Gerät",
+    "Unknown Browser": "Unbekannter Browser",
+    "Just now": "Gerade eben",
+    "minutes ago": "Minuten",
+    "hours ago": "Stunden",
+    "days ago": "Tage",
+    "Failed to load sessions": "Fehler beim Laden der Sitzungen. Bitte versuchen Sie es erneut.",
+    "Failed to logout session": "Fehler beim Abmelden. Bitte versuchen Sie es erneut.",
+    "Session logged out successfully": "Sitzung erfolgreich abgemeldet",
+    "All other sessions logged out successfully": "Alle anderen Sitzungen wurden abgemeldet",
+    "Are you sure you want to logout all other devices?": "Möchten Sie wirklich alle anderen Geräte abmelden? Sie müssen sich auf diesen Geräten erneut anmelden."
   },
   "es": {
-    "Active Sessions": "Sesiones activas"
+    "Active Sessions": "Sesiones activas",
+    "Manage devices where you're currently logged in": "Administra los dispositivos donde has iniciado sesión",
+    "Loading sessions...": "Cargando sesiones...",
+    "Logout All Other Devices": "Cerrar sesión en todos los demás dispositivos",
+    "Logout": "Cerrar sesión",
+    "Current Device": "Dispositivo actual",
+    "No active sessions found": "No se encontraron sesiones activas",
+    "Unknown Device": "Dispositivo desconocido",
+    "Unknown Browser": "Navegador desconocido",
+    "Just now": "Justo ahora",
+    "minutes ago": "minutos",
+    "hours ago": "horas",
+    "days ago": "días",
+    "Failed to load sessions": "Error al cargar las sesiones. Por favor, inténtalo de nuevo.",
+    "Failed to logout session": "Error al cerrar sesión. Por favor, inténtalo de nuevo.",
+    "Session logged out successfully": "Sesión cerrada exitosamente",
+    "All other sessions logged out successfully": "Todas las demás sesiones han sido cerradas",
+    "Are you sure you want to logout all other devices?": "¿Estás seguro de que quieres cerrar sesión en todos los demás dispositivos? Deberás iniciar sesión nuevamente en esos dispositivos."
   }
 }
-

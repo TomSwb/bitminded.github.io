@@ -134,7 +134,7 @@ class AccountActions {
             }
 
             // Load component based on type
-            if (componentName === 'export-data' || componentName === 'delete-account') {
+            if (componentName === 'export-data' || componentName === 'delete-account' || componentName === 'active-sessions') {
                 // These components have their own translation system
                 this.loadComponentWithTranslations(componentName);
             } else {

@@ -267,8 +267,12 @@ class TwoFactorVerify {
             if (result.success) {
                 console.log('✅ 2FA Verify: Code verified successfully');
                 
-                // Log successful 2FA verification
-                await this.logLoginAttempt(this.userId, true, null, true);
+                // Get current session to capture session ID
+                const { data: sessionData } = await supabase.auth.getSession();
+                const sessionId = sessionData?.session?.access_token || null;
+                
+                // Log successful 2FA verification with session ID
+                await this.logLoginAttempt(this.userId, true, null, true, sessionId);
                 
                 // Clear pending session
                 sessionStorage.removeItem('pending_2fa_user');
@@ -279,9 +283,9 @@ class TwoFactorVerify {
             } else {
                 console.log('❌ 2FA Verify: Invalid code');
                 
-                // Log failed 2FA verification
+                // Log failed 2FA verification (no session ID for failed attempts)
                 const failureReason = this.isUsingBackupCode ? 'invalid_backup_code' : 'invalid_2fa';
-                await this.logLoginAttempt(this.userId, false, failureReason, false);
+                await this.logLoginAttempt(this.userId, false, failureReason, false, null);
                 
                 const errorMsg = this.isUsingBackupCode 
                     ? 'Invalid backup code. Please try again.'
@@ -384,7 +388,7 @@ class TwoFactorVerify {
     /**
      * Log login attempt to database
      */
-    async logLoginAttempt(userId, success, failureReason = null, used2FA = false) {
+    async logLoginAttempt(userId, success, failureReason = null, used2FA = false, sessionId = null) {
         try {
             const userAgent = navigator.userAgent;
             const deviceInfo = this.parseUserAgent(userAgent);
@@ -397,14 +401,15 @@ class TwoFactorVerify {
                 device_type: deviceInfo.deviceType,
                 browser: deviceInfo.browser,
                 os: deviceInfo.os,
-                used_2fa: used2FA
+                used_2fa: used2FA,
+                session_id: sessionId  // Capture session ID for tracking
             };
 
             await supabase
                 .from('user_login_activity')
                 .insert(logData);
 
-            console.log(`📊 Login attempt logged: ${success ? 'Success with 2FA' : 'Failed 2FA'}`);
+            console.log(`📊 Login attempt logged: ${success ? 'Success with 2FA' : 'Failed 2FA'}${sessionId ? ' (session tracked)' : ''}`);
 
             // Send new login notification if login was successful
             if (success && typeof window.notificationHelper !== 'undefined') {
