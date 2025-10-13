@@ -27,6 +27,18 @@
   resize: vertical;
 }
 
+/* Locked email field for logged-in users */
+.contact-form input.email-locked {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: center;
+  cursor: default;
+  opacity: 1;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
 .contact-form button.contact {
   align-self: flex;
   padding: 0.75rem 2rem;
