@@ -87,6 +87,12 @@ class ActiveSessions {
             this.logoutAllBtn.addEventListener('click', () => this.handleLogoutAll());
         }
 
+        // Listen for language changes and re-render sessions
+        window.addEventListener('languageChanged', () => {
+            console.log('🌐 Active Sessions: Language changed, re-rendering sessions');
+            this.displaySessions();
+        });
+
         // Make translatable content visible
         this.showTranslatableContent();
         
@@ -188,6 +194,23 @@ class ActiveSessions {
 
         // Add current session
         const deviceInfo = this.getDeviceInfo();
+        
+        // Try to get IP address for current session from login activity
+        let currentIpAddress = null;
+        try {
+            const { data: currentLoginData, error } = await window.supabase
+                .from('user_login_activity')
+                .select('ip_address')
+                .eq('session_id', currentSession.access_token)
+                .single();
+            
+            if (!error && currentLoginData) {
+                currentIpAddress = currentLoginData.ip_address;
+            }
+        } catch (error) {
+            console.log('Could not fetch IP for current session:', error);
+        }
+        
         sessions.push({
             id: currentSession.access_token,
             isCurrent: true,
@@ -196,10 +219,11 @@ class ActiveSessions {
             os: deviceInfo.os,
             icon: deviceInfo.icon,
             lastActive: new Date(),
-            createdAt: new Date(currentSession.user.last_sign_in_at || Date.now())
+            createdAt: new Date(currentSession.user.last_sign_in_at || Date.now()),
+            ipAddress: currentIpAddress  // Add IP address for current session
         });
 
-        // Get recent successful logins with session IDs
+        // Get recent successful logins with session IDs (including revoked ones)
         try {
             const { data: loginActivity, error } = await window.supabase
                 .from('user_login_activity')
@@ -213,6 +237,8 @@ class ActiveSessions {
             if (!error && loginActivity) {
                 // Group by session_id to get unique sessions
                 const seenSessions = new Set([currentSession.access_token]);
+                const TOKEN_LIFETIME = 60 * 60 * 1000; // 1 hour
+                const now = Date.now();
                 
                 for (const activity of loginActivity) {
                     // Skip if we've already seen this session
@@ -220,16 +246,26 @@ class ActiveSessions {
                         continue;
                     }
                     
-                    // Check age of this login
-                    const activityAge = Date.now() - new Date(activity.login_time).getTime();
-                    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+                    const loginTime = new Date(activity.login_time);
+                    const tokenExpiresAt = loginTime.getTime() + TOKEN_LIFETIME;
                     
-                    // Skip if too old (>7 days)
+                    // Skip if token has expired (login was more than 1 hour ago)
+                    if (now > tokenExpiresAt) {
+                        continue;
+                    }
+                    
+                    // Check if too old to display (>7 days)
+                    const activityAge = now - loginTime.getTime();
+                    const sevenDays = 7 * 24 * 60 * 60 * 1000;
                     if (activityAge > sevenDays) {
                         continue;
                     }
                     
                     seenSessions.add(activity.session_id);
+                    
+                    // Check if session is revoked
+                    const isRevoked = activity.revoked_at !== null;
+                    const revokedAt = activity.revoked_at ? new Date(activity.revoked_at) : null;
                     
                     sessions.push({
                         id: activity.session_id,  // Use actual session ID
@@ -239,8 +275,11 @@ class ActiveSessions {
                         os: activity.os || 'Unknown OS',
                         icon: this.getDeviceIcon(activity.device_type),
                         lastActive: new Date(activity.login_time),
-                        createdAt: new Date(activity.login_time),
-                        location: activity.location_city || activity.location_country || null
+                        createdAt: loginTime,  // When the session was created (login time)
+                        location: activity.location_city || activity.location_country || null,
+                        ipAddress: activity.ip_address || null,  // IP address for distinction
+                        revoked: isRevoked,  // Mark if revoked
+                        revokedAt: revokedAt  // When it was revoked
                     });
                 }
             }
@@ -378,6 +417,14 @@ class ActiveSessions {
         osDetail.textContent = session.os;
         details.appendChild(osDetail);
 
+        // IP Address (if available)
+        if (session.ipAddress) {
+            const ipDetail = document.createElement('span');
+            ipDetail.className = 'active-sessions__session-detail';
+            ipDetail.textContent = `IP: ${session.ipAddress}`;
+            details.appendChild(ipDetail);
+        }
+
         // Location (if available)
         if (session.location) {
             const locationDetail = document.createElement('span');
@@ -399,11 +446,23 @@ class ActiveSessions {
         if (session.revoked) {
             const warning = document.createElement('div');
             warning.className = 'active-sessions__revoked-warning';
-            warning.innerHTML = `
-                <strong>⚠️ Session Revoked</strong><br>
-                This session was logged out but the access token remains valid for 
-                <span class="active-sessions__timer" data-session-id="${session.id}">calculating...</span>
-            `;
+            
+            const strongEl = document.createElement('strong');
+            strongEl.textContent = this.t('⚠️ Session Revoked');
+            warning.appendChild(strongEl);
+            
+            const br = document.createElement('br');
+            warning.appendChild(br);
+            
+            const textNode = document.createTextNode(this.t('This session was logged out but the access token remains valid for') + ' ');
+            warning.appendChild(textNode);
+            
+            const timerSpan = document.createElement('span');
+            timerSpan.className = 'active-sessions__timer';
+            timerSpan.dataset.sessionId = session.id;
+            timerSpan.textContent = 'calculating...';
+            warning.appendChild(timerSpan);
+            
             info.appendChild(warning);
             
             // Start timer for this session
@@ -450,9 +509,9 @@ class ActiveSessions {
      * Start countdown timer for revoked session
      */
     startSessionTimer(session) {
-        // JWT tokens typically expire after 1 hour (3600 seconds)
+        // JWT tokens expire 1 hour after they were created (not when revoked!)
         const TOKEN_LIFETIME = 60 * 60 * 1000; // 1 hour in milliseconds
-        const expiresAt = session.revokedAt.getTime() + TOKEN_LIFETIME;
+        const expiresAt = session.createdAt.getTime() + TOKEN_LIFETIME;  // Based on login time!
         
         // Clear existing timer if any
         if (this.timerIntervals.has(session.id)) {

@@ -386,28 +386,32 @@ class TwoFactorVerify {
     }
 
     /**
-     * Log login attempt to database
+     * Log login attempt to database via Edge Function (captures IP address)
      */
     async logLoginAttempt(userId, success, failureReason = null, used2FA = false, sessionId = null) {
         try {
             const userAgent = navigator.userAgent;
             const deviceInfo = this.parseUserAgent(userAgent);
 
-            const logData = {
-                user_id: userId,
-                success: success,
-                failure_reason: failureReason,
-                user_agent: userAgent,
-                device_type: deviceInfo.deviceType,
-                browser: deviceInfo.browser,
-                os: deviceInfo.os,
-                used_2fa: used2FA,
-                session_id: sessionId  // Capture session ID for tracking
-            };
+            // Call Edge Function to log (captures IP address server-side)
+            const { data, error } = await supabase.functions.invoke('log-login', {
+                body: {
+                    user_id: userId,
+                    success: success,
+                    failure_reason: failureReason,
+                    user_agent: userAgent,
+                    device_type: deviceInfo.deviceType,
+                    browser: deviceInfo.browser,
+                    os: deviceInfo.os,
+                    used_2fa: used2FA,
+                    session_id: sessionId
+                }
+            });
 
-            await supabase
-                .from('user_login_activity')
-                .insert(logData);
+            if (error) {
+                console.error('❌ Error logging login attempt:', error);
+                return;
+            }
 
             console.log(`📊 Login attempt logged: ${success ? 'Success with 2FA' : 'Failed 2FA'}${sessionId ? ' (session tracked)' : ''}`);
 

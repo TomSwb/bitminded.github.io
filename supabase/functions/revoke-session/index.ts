@@ -85,16 +85,16 @@ serve(async (req) => {
           if (session.session_id && session.session_id !== token) {
             try {
               // Note: We can't directly revoke sessions via Supabase Auth API
-              // but we can mark them as logged out in our database
-              // In a production system, you'd also need to invalidate the JWT
+              // but we can mark them as revoked in our database
+              // The JWT token remains valid until it expires (typically 1 hour from creation)
               // This is a limitation of Supabase Auth currently
               
-              // Mark session as logged out by deleting from login activity
-              // or you could add a 'logged_out_at' column
+              // Mark session as revoked (don't delete so it persists across refreshes)
               await supabaseAdmin
                 .from('user_login_activity')
-                .delete()
+                .update({ revoked_at: new Date().toISOString() })
                 .eq('session_id', session.session_id)
+                .is('revoked_at', null) // Only update if not already revoked
               
               revokedCount++
             } catch (error) {
@@ -150,14 +150,15 @@ serve(async (req) => {
         )
       }
 
-      // Delete the session record
-      const { error: deleteError } = await supabaseAdmin
+      // Mark the session as revoked (don't delete)
+      const { error: updateError } = await supabaseAdmin
         .from('user_login_activity')
-        .delete()
+        .update({ revoked_at: new Date().toISOString() })
         .eq('session_id', session_id)
+        .is('revoked_at', null) // Only update if not already revoked
       
-      if (deleteError) {
-        console.error('Error deleting session:', deleteError)
+      if (updateError) {
+        console.error('Error revoking session:', updateError)
         return new Response(
           JSON.stringify({ error: 'Failed to revoke session' }), 
           { 
