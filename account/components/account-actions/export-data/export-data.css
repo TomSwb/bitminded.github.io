@@ -1,0 +1,203 @@
+/* Export Data Component Styles */
+.export-data {
+    width: 100%;
+}
+
+.export-data__card {
+    background: var(--color-background-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.export-data__card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.export-data__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.export-data__icon {
+    font-size: 2rem;
+}
+
+.export-data__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+/* Description */
+.export-data__description {
+    margin-bottom: 2rem;
+}
+
+.export-data__description p {
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* Export Button */
+.export-data__btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    background: var(--color-primary);
+    color: var(--color-text-dark);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.export-data__btn:hover {
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.export-data__btn:active {
+    transform: translateY(0);
+}
+
+.export-data__btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.export-data__btn-icon {
+    font-size: 1.25rem;
+}
+
+/* Progress Indicator */
+.export-data__progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    background: var(--color-background-tertiary);
+    border-radius: var(--radius-sm);
+}
+
+.export-data__progress-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-border);
+    border-top: 2px solid var(--color-primary);
+    border-radius: 50%;
+    animation: export-spin 1s linear infinite;
+}
+
+@keyframes export-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.export-data__progress-text {
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+/* Success Message */
+.export-data__success {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    background: var(--color-success-bg);
+    border: 1px solid var(--color-success);
+    border-radius: var(--radius-sm);
+}
+
+.export-data__success-icon {
+    font-size: 1.25rem;
+}
+
+.export-data__success-text {
+    font-size: 0.875rem;
+    color: var(--color-success);
+    font-weight: 500;
+}
+
+/* Error Message */
+.export-data__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    background: var(--color-error-bg);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-sm);
+}
+
+.export-data__error-icon {
+    font-size: 1.25rem;
+}
+
+.export-data__error-text {
+    font-size: 0.875rem;
+    color: var(--color-error);
+    font-weight: 500;
+}
+
+/* Utility */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .export-data__card {
+        padding: 1rem;
+    }
+
+    .export-data__header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .export-data__title {
+        font-size: 1.125rem;
+    }
+
+    .export-data__description p {
+        font-size: 0.8125rem;
+    }
+
+    .export-data__btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .export-data__card {
+        padding: 0.875rem;
+    }
+}

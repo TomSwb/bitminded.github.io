@@ -1,0 +1,142 @@
+/* Account Actions Component Styles */
+.account-actions {
+    width: 100%;
+    margin: 0;
+    padding: 2rem;
+}
+
+/* Account Actions Header */
+.account-actions__header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.account-actions__title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.account-actions__description {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* Action Cards Grid */
+.account-actions__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.account-actions__card-container {
+    width: 100%;
+}
+
+/* Loading States */
+.account-actions__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+}
+
+.account-actions__loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
+    border-radius: 50%;
+    animation: actions-spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes actions-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.account-actions__loading-text {
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+}
+
+/* Error and Success Messages */
+.account-actions__error {
+    background: var(--color-error-bg);
+    border: 1px solid var(--color-error);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.account-actions__error-message {
+    color: var(--color-error);
+    font-size: 0.875rem;
+}
+
+.account-actions__success {
+    background: var(--color-success-bg);
+    border: 1px solid var(--color-success);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.account-actions__success-message {
+    color: var(--color-success);
+    font-size: 0.875rem;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 880px) {
+    .account-actions {
+        padding: 1rem;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .account-actions__cards {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .account-actions__header {
+        text-align: center;
+    }
+
+    .account-actions__title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .account-actions {
+        padding: 0.75rem;
+    }
+
+    .account-actions__cards {
+        gap: 0.75rem;
+    }
+
+    .account-actions__title {
+        font-size: 1.25rem;
+    }
+
+    .account-actions__description {
+        font-size: 0.875rem;
+    }
+}
+

@@ -1,0 +1,23 @@
+{
+  "en": {
+    "Account Actions": "Account Actions",
+    "Manage your data, sessions, and account lifecycle": "Manage your data, sessions, and account lifecycle",
+    "Loading account actions...": "Loading account actions..."
+  },
+  "fr": {
+    "Account Actions": "Actions du compte",
+    "Manage your data, sessions, and account lifecycle": "Gérez vos données, sessions et cycle de vie du compte",
+    "Loading account actions...": "Chargement des actions du compte..."
+  },
+  "de": {
+    "Account Actions": "Kontoaktionen",
+    "Manage your data, sessions, and account lifecycle": "Verwalten Sie Ihre Daten, Sitzungen und Kontolebenszyklus",
+    "Loading account actions...": "Kontoaktionen werden geladen..."
+  },
+  "es": {
+    "Account Actions": "Acciones de cuenta",
+    "Manage your data, sessions, and account lifecycle": "Administre sus datos, sesiones y ciclo de vida de la cuenta",
+    "Loading account actions...": "Cargando acciones de cuenta..."
+  }
+}
+

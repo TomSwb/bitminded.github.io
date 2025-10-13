@@ -1,0 +1,38 @@
+<!-- Export Data Component -->
+<div class="export-data" id="export-data">
+    <div class="export-data__card">
+        <div class="export-data__header">
+            <div class="export-data__icon">📦</div>
+            <h4 class="export-data__title translatable-content" data-translation-key="Export My Data">Export My Data</h4>
+        </div>
+
+        <div class="export-data__description">
+            <p class="translatable-content" data-translation-key="Download all your data in JSON format. This includes your profile, preferences, notifications, and activity history.">
+                Download all your data in JSON format. This includes your profile, preferences, notifications, and activity history.
+            </p>
+        </div>
+
+        <button type="button" id="export-data-btn" class="export-data__btn">
+            <span class="export-data__btn-icon">⬇️</span>
+            <span class="export-data__btn-text translatable-content" data-translation-key="Download Data">Download Data</span>
+        </button>
+
+        <!-- Progress Indicator -->
+        <div id="export-data-progress" class="export-data__progress hidden">
+            <div class="export-data__progress-spinner"></div>
+            <span class="export-data__progress-text translatable-content" data-translation-key="Preparing your data...">Preparing your data...</span>
+        </div>
+
+        <!-- Success Message -->
+        <div id="export-data-success" class="export-data__success hidden">
+            <span class="export-data__success-icon">✅</span>
+            <span class="export-data__success-text translatable-content" data-translation-key="Data exported successfully!">Data exported successfully!</span>
+        </div>
+
+        <!-- Error Message -->
+        <div id="export-data-error" class="export-data__error hidden">
+            <span class="export-data__error-icon">❌</span>
+            <span id="export-data-error-message" class="export-data__error-text"></span>
+        </div>
+    </div>
+</div>
