@@ -542,7 +542,7 @@ class LoginForm {
     }
 
     /**
-     * Log login attempt to database
+     * Log login attempt to database via Edge Function (captures IP address)
      * @param {string} userId - User ID (null for failed attempts with unknown user)
      * @param {boolean} success - Whether login was successful
      * @param {string} failureReason - Reason for failure if unsuccessful
@@ -555,22 +555,25 @@ class LoginForm {
             const userAgent = navigator.userAgent;
             const deviceInfo = this.parseUserAgent(userAgent);
 
-            const logData = {
-                user_id: userId,
-                success: success,
-                failure_reason: failureReason,
-                user_agent: userAgent,
-                device_type: deviceInfo.deviceType,
-                browser: deviceInfo.browser,
-                os: deviceInfo.os,
-                used_2fa: used2FA,
-                session_id: sessionId  // Capture session ID for tracking
-                // Note: IP and location are typically set server-side for security
-            };
+            // Call Edge Function to log (captures IP address server-side)
+            const { data, error } = await window.supabase.functions.invoke('log-login', {
+                body: {
+                    user_id: userId,
+                    success: success,
+                    failure_reason: failureReason,
+                    user_agent: userAgent,
+                    device_type: deviceInfo.deviceType,
+                    browser: deviceInfo.browser,
+                    os: deviceInfo.os,
+                    used_2fa: used2FA,
+                    session_id: sessionId
+                }
+            });
 
-            await window.supabase
-                .from('user_login_activity')
-                .insert(logData);
+            if (error) {
+                console.error('❌ Error logging login attempt:', error);
+                return;
+            }
 
             console.log(`📊 Login attempt logged: ${success ? 'Success' : 'Failed'}${sessionId ? ' (session tracked)' : ''}`);
 

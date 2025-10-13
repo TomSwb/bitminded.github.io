@@ -17,7 +17,9 @@
     "Failed to logout session": "Failed to logout session. Please try again.",
     "Session logged out successfully": "Session logged out successfully",
     "All other sessions logged out successfully": "All other sessions logged out successfully",
-    "Are you sure you want to logout all other devices?": "Are you sure you want to logout all other devices? You'll need to login again on those devices."
+    "Are you sure you want to logout all other devices?": "Are you sure you want to logout all other devices? You'll need to login again on those devices.",
+    "⚠️ Session Revoked": "⚠️ Session Revoked",
+    "This session was logged out but the access token remains valid for": "This session was logged out but the access token remains valid for"
   },
   "fr": {
     "Active Sessions": "Sessions actives",
@@ -37,7 +39,9 @@
     "Failed to logout session": "Échec de la déconnexion. Veuillez réessayer.",
     "Session logged out successfully": "Session déconnectée avec succès",
     "All other sessions logged out successfully": "Toutes les autres sessions ont été déconnectées",
-    "Are you sure you want to logout all other devices?": "Voulez-vous vraiment déconnecter tous les autres appareils ? Vous devrez vous reconnecter sur ces appareils."
+    "Are you sure you want to logout all other devices?": "Voulez-vous vraiment déconnecter tous les autres appareils ? Vous devrez vous reconnecter sur ces appareils.",
+    "⚠️ Session Revoked": "⚠️ Session révoquée",
+    "This session was logged out but the access token remains valid for": "Cette session a été déconnectée mais le jeton d'accès reste valide pendant"
   },
   "de": {
     "Active Sessions": "Aktive Sitzungen",
@@ -57,7 +61,9 @@
     "Failed to logout session": "Fehler beim Abmelden. Bitte versuchen Sie es erneut.",
     "Session logged out successfully": "Sitzung erfolgreich abgemeldet",
     "All other sessions logged out successfully": "Alle anderen Sitzungen wurden abgemeldet",
-    "Are you sure you want to logout all other devices?": "Möchten Sie wirklich alle anderen Geräte abmelden? Sie müssen sich auf diesen Geräten erneut anmelden."
+    "Are you sure you want to logout all other devices?": "Möchten Sie wirklich alle anderen Geräte abmelden? Sie müssen sich auf diesen Geräten erneut anmelden.",
+    "⚠️ Session Revoked": "⚠️ Sitzung widerrufen",
+    "This session was logged out but the access token remains valid for": "Diese Sitzung wurde abgemeldet, aber das Zugriffstoken bleibt gültig für"
   },
   "es": {
     "Active Sessions": "Sesiones activas",
@@ -77,6 +83,8 @@
     "Failed to logout session": "Error al cerrar sesión. Por favor, inténtalo de nuevo.",
     "Session logged out successfully": "Sesión cerrada exitosamente",
     "All other sessions logged out successfully": "Todas las demás sesiones han sido cerradas",
-    "Are you sure you want to logout all other devices?": "¿Estás seguro de que quieres cerrar sesión en todos los demás dispositivos? Deberás iniciar sesión nuevamente en esos dispositivos."
+    "Are you sure you want to logout all other devices?": "¿Estás seguro de que quieres cerrar sesión en todos los demás dispositivos? Deberás iniciar sesión nuevamente en esos dispositivos.",
+    "⚠️ Session Revoked": "⚠️ Sesión revocada",
+    "This session was logged out but the access token remains valid for": "Esta sesión fue cerrada pero el token de acceso sigue siendo válido por"
   }
 }
