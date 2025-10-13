@@ -158,7 +158,6 @@
         flex: 1;
         margin-bottom: 0;
         border-bottom: none;
-        border-right: 2px solid var(--color-border);
     }
     
     .profile-management__actions {

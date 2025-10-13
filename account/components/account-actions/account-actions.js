@@ -98,7 +98,6 @@ class AccountActions {
     async loadSubComponents() {
         const components = [
             { name: 'export-data', container: 'export-data-container' },
-            { name: 'account-summary', container: 'account-summary-container' },
             { name: 'delete-account', container: 'delete-account-container' },
             { name: 'active-sessions', container: 'active-sessions-container' }
         ];
@@ -135,8 +134,8 @@ class AccountActions {
             }
 
             // Load component based on type
-            if (componentName === 'export-data') {
-                // Export data has its own translation system
+            if (componentName === 'export-data' || componentName === 'delete-account') {
+                // These components have their own translation system
                 this.loadComponentWithTranslations(componentName);
             } else {
                 // Other components don't have translations yet

@@ -759,7 +759,7 @@ serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'BitMinded <notifications@resend.dev>',
+        from: 'BitMinded <notifications@bitminded.ch>',
         to: emailData.to,
         subject: emailData.subject,
         html: emailData.html

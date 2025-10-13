@@ -1,15 +1,82 @@
 {
   "en": {
-    "Delete Account": "Delete Account"
+    "Delete Account": "Delete Account",
+    "Permanently delete your account and all associated data. This action cannot be undone.": "Permanently delete your account and all associated data. This action cannot be undone.",
+    "Delete My Account": "Delete My Account",
+    "Warning: This is permanent": "Warning: This is permanent",
+    "Once confirmed, your account will be scheduled for deletion. You will have 30 days to cancel.": "Once confirmed, your account will be scheduled for deletion. You will have 30 days to cancel.",
+    "What will be deleted:": "What will be deleted:",
+    "Your profile information": "Your profile information",
+    "All your preferences and settings": "All your preferences and settings",
+    "Your notification history": "Your notification history",
+    "Your login activity records": "Your login activity records",
+    "What will be preserved:": "What will be preserved:",
+    "Your purchased app access (ethical commitment)": "Your purchased app access (ethical commitment)",
+    "Confirm your password to continue": "Confirm your password to continue",
+    "Cancel": "Cancel",
+    "Confirm Deletion": "Confirm Deletion",
+    "Processing deletion request...": "Processing deletion request...",
+    "Deletion Scheduled": "Deletion Scheduled",
+    "Your account will be deleted in 30 days. You can cancel anytime before then.": "Your account will be deleted in 30 days. You can cancel anytime before then."
   },
   "fr": {
-    "Delete Account": "Supprimer le compte"
+    "Delete Account": "Supprimer le compte",
+    "Permanently delete your account and all associated data. This action cannot be undone.": "Supprimez définitivement votre compte et toutes les données associées. Cette action est irréversible.",
+    "Delete My Account": "Supprimer mon compte",
+    "Warning: This is permanent": "Attention : C'est permanent",
+    "Once confirmed, your account will be scheduled for deletion. You will have 30 days to cancel.": "Une fois confirmé, votre compte sera programmé pour suppression. Vous aurez 30 jours pour annuler.",
+    "What will be deleted:": "Ce qui sera supprimé :",
+    "Your profile information": "Vos informations de profil",
+    "All your preferences and settings": "Toutes vos préférences et paramètres",
+    "Your notification history": "Votre historique de notifications",
+    "Your login activity records": "Vos enregistrements d'activité de connexion",
+    "What will be preserved:": "Ce qui sera préservé :",
+    "Your purchased app access (ethical commitment)": "Votre accès aux applications achetées (engagement éthique)",
+    "Confirm your password to continue": "Confirmez votre mot de passe pour continuer",
+    "Cancel": "Annuler",
+    "Confirm Deletion": "Confirmer la suppression",
+    "Processing deletion request...": "Traitement de la demande de suppression...",
+    "Deletion Scheduled": "Suppression programmée",
+    "Your account will be deleted in 30 days. You can cancel anytime before then.": "Votre compte sera supprimé dans 30 jours. Vous pouvez annuler à tout moment avant."
   },
   "de": {
-    "Delete Account": "Konto löschen"
+    "Delete Account": "Konto löschen",
+    "Permanently delete your account and all associated data. This action cannot be undone.": "Löschen Sie Ihr Konto und alle zugehörigen Daten dauerhaft. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "Delete My Account": "Mein Konto löschen",
+    "Warning: This is permanent": "Warnung: Dies ist dauerhaft",
+    "Once confirmed, your account will be scheduled for deletion. You will have 30 days to cancel.": "Nach Bestätigung wird Ihr Konto zur Löschung geplant. Sie haben 30 Tage Zeit zum Abbrechen.",
+    "What will be deleted:": "Was gelöscht wird:",
+    "Your profile information": "Ihre Profilinformationen",
+    "All your preferences and settings": "Alle Ihre Einstellungen und Präferenzen",
+    "Your notification history": "Ihr Benachrichtigungsverlauf",
+    "Your login activity records": "Ihre Anmeldeaktivitätsprotokolle",
+    "What will be preserved:": "Was erhalten bleibt:",
+    "Your purchased app access (ethical commitment)": "Ihr gekaufter App-Zugang (ethisches Engagement)",
+    "Confirm your password to continue": "Bestätigen Sie Ihr Passwort, um fortzufahren",
+    "Cancel": "Abbrechen",
+    "Confirm Deletion": "Löschung bestätigen",
+    "Processing deletion request...": "Löschanfrage wird verarbeitet...",
+    "Deletion Scheduled": "Löschung geplant",
+    "Your account will be deleted in 30 days. You can cancel anytime before then.": "Ihr Konto wird in 30 Tagen gelöscht. Sie können jederzeit vorher abbrechen."
   },
   "es": {
-    "Delete Account": "Eliminar cuenta"
+    "Delete Account": "Eliminar cuenta",
+    "Permanently delete your account and all associated data. This action cannot be undone.": "Elimine permanentemente su cuenta y todos los datos asociados. Esta acción no se puede deshacer.",
+    "Delete My Account": "Eliminar mi cuenta",
+    "Warning: This is permanent": "Advertencia: Esto es permanente",
+    "Once confirmed, your account will be scheduled for deletion. You will have 30 days to cancel.": "Una vez confirmado, su cuenta se programará para eliminación. Tendrá 30 días para cancelar.",
+    "What will be deleted:": "Qué se eliminará:",
+    "Your profile information": "Su información de perfil",
+    "All your preferences and settings": "Todas sus preferencias y configuraciones",
+    "Your notification history": "Su historial de notificaciones",
+    "Your login activity records": "Sus registros de actividad de inicio de sesión",
+    "What will be preserved:": "Qué se preservará:",
+    "Your purchased app access (ethical commitment)": "Su acceso a aplicaciones compradas (compromiso ético)",
+    "Confirm your password to continue": "Confirme su contraseña para continuar",
+    "Cancel": "Cancelar",
+    "Confirm Deletion": "Confirmar eliminación",
+    "Processing deletion request...": "Procesando solicitud de eliminación...",
+    "Deletion Scheduled": "Eliminación programada",
+    "Your account will be deleted in 30 days. You can cancel anytime before then.": "Su cuenta se eliminará en 30 días. Puede cancelar en cualquier momento antes."
   }
 }
-

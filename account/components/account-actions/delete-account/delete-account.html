@@ -1,5 +1,99 @@
-<!-- Delete Account Component - Placeholder -->
+<!-- Delete Account Component -->
 <div class="delete-account" id="delete-account">
-    <!-- Content will be implemented -->
-</div>
+    <div class="delete-account__card">
+        <div class="delete-account__header">
+            <div class="delete-account__icon">🗑️</div>
+            <h4 class="delete-account__title translatable-content" data-translation-key="Delete Account">Delete Account</h4>
+        </div>
 
+        <div class="delete-account__description">
+            <p class="translatable-content" data-translation-key="Permanently delete your account and all associated data. This action cannot be undone.">
+                Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+        </div>
+
+        <!-- Initial Button -->
+        <button type="button" id="delete-account-btn" class="delete-account__btn">
+            <span class="delete-account__btn-icon">⚠️</span>
+            <span class="delete-account__btn-text translatable-content" data-translation-key="Delete My Account">Delete My Account</span>
+        </button>
+
+        <!-- Confirmation Form (Hidden Initially) -->
+        <div id="delete-account-form-container" class="delete-account__form-container hidden">
+            <div class="delete-account__warning">
+                <div class="delete-account__warning-icon">⚠️</div>
+                <div class="delete-account__warning-content">
+                    <h5 class="delete-account__warning-title translatable-content" data-translation-key="Warning: This is permanent">Warning: This is permanent</h5>
+                    <p class="translatable-content" data-translation-key="Once confirmed, your account will be scheduled for deletion. You will have 30 days to cancel.">
+                        Once confirmed, your account will be scheduled for deletion. You will have 30 days to cancel.
+                    </p>
+                </div>
+            </div>
+
+            <div class="delete-account__info-box">
+                <h6 class="translatable-content" data-translation-key="What will be deleted:">What will be deleted:</h6>
+                <ul>
+                    <li class="translatable-content" data-translation-key="Your profile information">Your profile information</li>
+                    <li class="translatable-content" data-translation-key="All your preferences and settings">All your preferences and settings</li>
+                    <li class="translatable-content" data-translation-key="Your notification history">Your notification history</li>
+                    <li class="translatable-content" data-translation-key="Your login activity records">Your login activity records</li>
+                </ul>
+                
+                <h6 class="translatable-content" data-translation-key="What will be preserved:">What will be preserved:</h6>
+                <ul>
+                    <li class="translatable-content" data-translation-key="Your purchased app access (ethical commitment)">Your purchased app access (ethical commitment)</li>
+                </ul>
+            </div>
+
+            <form id="delete-account-form" class="delete-account__form">
+                <div class="delete-account__form-group">
+                    <label for="delete-password" class="delete-account__label">
+                        <span class="translatable-content" data-translation-key="Confirm your password to continue">Confirm your password to continue</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="delete-password" 
+                        name="password" 
+                        class="delete-account__input"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    />
+                </div>
+
+                <div class="delete-account__form-actions">
+                    <button type="button" id="cancel-delete-btn" class="delete-account__cancel-btn">
+                        <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                    </button>
+                    <button type="submit" id="confirm-delete-btn" class="delete-account__confirm-btn">
+                        <span class="delete-account__confirm-icon">🗑️</span>
+                        <span class="translatable-content" data-translation-key="Confirm Deletion">Confirm Deletion</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Processing State -->
+        <div id="delete-account-processing" class="delete-account__processing hidden">
+            <div class="delete-account__processing-spinner"></div>
+            <span class="delete-account__processing-text translatable-content" data-translation-key="Processing deletion request...">Processing deletion request...</span>
+        </div>
+
+        <!-- Success Message -->
+        <div id="delete-account-success" class="delete-account__success hidden">
+            <span class="delete-account__success-icon">✅</span>
+            <div class="delete-account__success-content">
+                <h5 class="translatable-content" data-translation-key="Deletion Scheduled">Deletion Scheduled</h5>
+                <p class="translatable-content" data-translation-key="Your account will be deleted in 30 days. You can cancel anytime before then.">
+                    Your account will be deleted in 30 days. You can cancel anytime before then.
+                </p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="delete-account-error" class="delete-account__error hidden">
+            <span class="delete-account__error-icon">❌</span>
+            <span id="delete-account-error-message" class="delete-account__error-text"></span>
+        </div>
+    </div>
+</div>
