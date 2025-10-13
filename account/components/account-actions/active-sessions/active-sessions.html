@@ -1,5 +1,46 @@
-<!-- Active Sessions Component - Placeholder -->
+<!-- Active Sessions Component -->
 <div class="active-sessions" id="active-sessions">
-    <!-- Content will be implemented -->
-</div>
+    <div class="active-sessions__card">
+        <div class="active-sessions__header">
+            <div class="active-sessions__icon">💻</div>
+            <div class="active-sessions__title-wrapper">
+                <h3 class="active-sessions__title translatable-content" data-translation-key="Active Sessions">Active Sessions</h3>
+                <p class="active-sessions__description translatable-content" data-translation-key="Manage devices where you're currently logged in">
+                    Manage devices where you're currently logged in
+                </p>
+            </div>
+        </div>
 
+        <!-- Loading State -->
+        <div class="active-sessions__loading" id="sessions-loading">
+            <div class="active-sessions__spinner"></div>
+            <p class="translatable-content" data-translation-key="Loading sessions...">Loading sessions...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="active-sessions__error" id="sessions-error" style="display: none;">
+            <p class="active-sessions__error-message" id="sessions-error-message"></p>
+        </div>
+
+        <!-- Sessions List -->
+        <div class="active-sessions__content" id="sessions-content" style="display: none;">
+            <!-- Logout All Button -->
+            <div class="active-sessions__action-bar">
+                <button class="active-sessions__logout-all-btn" id="logout-all-btn">
+                    <span class="translatable-content" data-translation-key="Logout All Other Devices">Logout All Other Devices</span>
+                </button>
+                <span class="active-sessions__session-count" id="session-count"></span>
+            </div>
+
+            <!-- Sessions List Container -->
+            <div class="active-sessions__list" id="sessions-list">
+                <!-- Sessions will be dynamically inserted here -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="active-sessions__empty" id="sessions-empty" style="display: none;">
+                <p class="translatable-content" data-translation-key="No active sessions found">No active sessions found</p>
+            </div>
+        </div>
+    </div>
+</div>

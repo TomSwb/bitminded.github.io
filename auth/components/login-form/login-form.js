@@ -215,8 +215,9 @@ class LoginForm {
                     sessionStorage.setItem('pending_2fa_time', Date.now().toString());
                     window.location.href = '/auth/2fa-verify/';
                 } else {
-                    // No 2FA - log successful login and redirect
-                    await this.logLoginAttempt(data.user.id, true, null, false);
+                    // No 2FA - log successful login and redirect with session ID
+                    const sessionId = data.session?.access_token || null;
+                    await this.logLoginAttempt(data.user.id, true, null, false, sessionId);
                     window.location.href = '/';
                 }
             }
@@ -546,8 +547,9 @@ class LoginForm {
      * @param {boolean} success - Whether login was successful
      * @param {string} failureReason - Reason for failure if unsuccessful
      * @param {boolean} used2FA - Whether 2FA was used
+     * @param {string} sessionId - Session ID/access token (optional)
      */
-    async logLoginAttempt(userId, success, failureReason = null, used2FA = false) {
+    async logLoginAttempt(userId, success, failureReason = null, used2FA = false, sessionId = null) {
         try {
             // Parse user agent for device info
             const userAgent = navigator.userAgent;
@@ -561,7 +563,8 @@ class LoginForm {
                 device_type: deviceInfo.deviceType,
                 browser: deviceInfo.browser,
                 os: deviceInfo.os,
-                used_2fa: used2FA
+                used_2fa: used2FA,
+                session_id: sessionId  // Capture session ID for tracking
                 // Note: IP and location are typically set server-side for security
             };
 
@@ -569,7 +572,7 @@ class LoginForm {
                 .from('user_login_activity')
                 .insert(logData);
 
-            console.log(`📊 Login attempt logged: ${success ? 'Success' : 'Failed'}`);
+            console.log(`📊 Login attempt logged: ${success ? 'Success' : 'Failed'}${sessionId ? ' (session tracked)' : ''}`);
 
             // Send new login notification ONLY if login was successful AND 2FA was NOT used
             // (If 2FA is enabled, notification will be sent from 2fa-verify.js instead)
