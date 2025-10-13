@@ -338,6 +338,25 @@ class ComponentLoader {
                         setTimeout(initNotificationCenter, 50);
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'account-actions') {
+                    // Load account actions translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/account/components/account-actions/account-actions-translations.js';
+                    translationScript.onload = () => {
+                        // Wait for DOM to be ready before initializing account actions
+                        const initAccountActions = () => {
+                            if (window.AccountActions && !window.accountActions) {
+                                window.accountActions = new window.AccountActions();
+                            }
+                            if (window.accountActions) {
+                                window.accountActions.init(config);
+                            }
+                        };
+                        
+                        // Use setTimeout to ensure HTML is fully parsed
+                        setTimeout(initAccountActions, 50);
+                    };
+                    document.head.appendChild(translationScript);
                 }
                 resolve();
             };
