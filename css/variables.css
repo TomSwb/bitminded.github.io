@@ -108,10 +108,12 @@
 [data-theme="light"] {
   --color-background-primary: var(--color-bg-light);
   --color-background-secondary: var(--color-bg-dark);
+  --color-background-tertiary: rgba(0, 0, 0, 0.05); /* Dark overlay for light mode */
   --color-primary: var(--color-accent-pink); /* light mode primary */
   --color-secondary: var(--color-accent-green);
   --color-text-primary: var(--color-text-dark);
   --color-text-secondary: var(--color-text-light);
   --border-color-primary: var(--color-accent-pink); /* pink borders in light mode */
   --color-text-secondary: var(--color-text-light);
+  --color-border: rgba(0, 0, 0, 0.1); /* Dark borders for light mode */
 }
