@@ -4,6 +4,7 @@
       "auth.login": "Login",
       "auth.signup": "Sign Up",
       "auth.account": "Account",
+      "auth.admin_panel": "Admin Panel",
       "auth.preferences": "Preferences",
       "auth.logout": "Logout",
       "auth.user": "User"
@@ -14,6 +15,7 @@
       "auth.login": "Iniciar Sesión",
       "auth.signup": "Registrarse",
       "auth.account": "Cuenta",
+      "auth.admin_panel": "Panel de Administración",
       "auth.preferences": "Preferencias",
       "auth.logout": "Cerrar Sesión",
       "auth.user": "Usuario"
@@ -24,6 +26,7 @@
       "auth.login": "Connexion",
       "auth.signup": "S'inscrire",
       "auth.account": "Compte",
+      "auth.admin_panel": "Panneau d'Administration",
       "auth.preferences": "Préférences",
       "auth.logout": "Déconnexion",
       "auth.user": "Utilisateur"
@@ -34,6 +37,7 @@
       "auth.login": "Anmelden",
       "auth.signup": "Registrieren",
       "auth.account": "Konto",
+      "auth.admin_panel": "Admin-Panel",
       "auth.preferences": "Einstellungen",
       "auth.logout": "Abmelden",
       "auth.user": "Benutzer"

@@ -42,6 +42,9 @@ class AuthButtons {
             // Set active state for account button if on account page
             this.updateAccountButtonActiveState();
             
+            // Set active state for admin button if on admin page
+            this.updateAdminButtonActiveState();
+            
             // Auth Buttons initialized successfully
         } catch (error) {
             console.error('❌ Failed to initialize Auth Buttons:', error);
@@ -86,6 +89,7 @@ class AuthButtons {
             loggedOut: document.getElementById('auth-buttons-logged-out'),
             loggedIn: document.getElementById('auth-buttons-logged-in'),
             userName: document.getElementById('auth-user-name'),
+            adminButton: document.getElementById('auth-admin-button'),
             logoutButton: document.getElementById('auth-logout-button'),
             loginButton: document.querySelector('[data-auth-action="login"]'),
             signupButton: document.querySelector('[data-auth-action="signup"]')
@@ -418,6 +422,9 @@ class AuthButtons {
             if (this.elements.userName) {
                 this.elements.userName.textContent = displayName;
             }
+
+            // Check and show admin button if user is admin
+            await this.updateAdminButton();
         } catch (error) {
             console.error('Error updating user info:', error);
             // Fallback to basic display
@@ -425,6 +432,79 @@ class AuthButtons {
                 const displayName = this.currentUser.email?.split('@')[0] || 'User';
                 this.elements.userName.textContent = displayName;
             }
+        }
+    }
+
+    /**
+     * Check if current user has admin role
+     * @returns {boolean} True if user is admin
+     */
+    async checkAdminRole() {
+        try {
+            if (!this.currentUser || !window.supabase) {
+                console.log('🔍 Admin check: No user or Supabase');
+                return false;
+            }
+
+            console.log('🔍 Checking admin role for user:', this.currentUser.id);
+
+            const { data, error } = await window.supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', this.currentUser.id)
+                .eq('role', 'admin')
+                .maybeSingle(); // Use maybeSingle instead of single to avoid error when no row
+            
+            if (error) {
+                console.error('❌ Error checking admin role:', error);
+                return false;
+            }
+
+            const isAdmin = !!(data && data.role === 'admin');
+            console.log('🔍 Admin check result:', isAdmin, 'Data:', data);
+            
+            return isAdmin;
+        } catch (error) {
+            console.error('❌ Failed to check admin role:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Update admin button visibility based on user role
+     */
+    async updateAdminButton() {
+        try {
+            const isAdmin = await this.checkAdminRole();
+            
+            console.log('🔧 Updating admin button visibility. isAdmin:', isAdmin);
+            
+            // Update ALL admin buttons (original + mobile clone)
+            const allAdminButtons = document.querySelectorAll('#auth-admin-button');
+            
+            console.log('🔍 Found', allAdminButtons.length, 'admin button(s)');
+            
+            allAdminButtons.forEach((button, index) => {
+                if (isAdmin === true) {
+                    button.classList.remove('auth-buttons__button--hidden');
+                    console.log(`👑 Admin button ${index + 1} shown (removed hidden class)`);
+                } else {
+                    button.classList.add('auth-buttons__button--hidden');
+                    console.log(`🔒 Admin button ${index + 1} hidden (added hidden class)`);
+                }
+            });
+
+            // Update active state if on admin page (only if showing)
+            if (isAdmin) {
+                this.updateAdminButtonActiveState();
+            }
+        } catch (error) {
+            console.error('❌ Failed to update admin button:', error);
+            // Ensure all buttons are hidden on error
+            const allAdminButtons = document.querySelectorAll('#auth-admin-button');
+            allAdminButtons.forEach(button => {
+                button.classList.add('auth-buttons__button--hidden');
+            });
         }
     }
 
@@ -519,6 +599,23 @@ class AuthButtons {
         
         if (isOnAccountPage) {
             // Account button set to active state
+        }
+    }
+
+    /**
+     * Update active state for admin button based on current page
+     */
+    updateAdminButtonActiveState() {
+        const adminButton = document.getElementById('auth-admin-button');
+        if (!adminButton) {
+            return;
+        }
+
+        const isOnAdminPage = window.location.pathname.includes('/admin');
+        adminButton.classList.toggle('active', isOnAdminPage);
+        
+        if (isOnAdminPage) {
+            console.log('👑 Admin button set to active state');
         }
     }
 
