@@ -1,0 +1,73 @@
+{
+  "en": {
+    "translation": {
+      "Admin Panel": "Admin Panel",
+      "Management Dashboard": "Management Dashboard",
+      "Dashboard": "Dashboard",
+      "Users": "Users",
+      "Access Control": "Access Control",
+      "Subscriptions": "Subscriptions",
+      "Products": "Products",
+      "Revenue": "Revenue",
+      "Analytics": "Analytics",
+      "Communications": "Communications",
+      "Bulk Operations": "Bulk Operations",
+      "Loading...": "Loading..."
+    }
+  },
+  "es": {
+    "translation": {
+      "Admin Panel": "Panel de Administración",
+      "Management Dashboard": "Panel de Gestión",
+      "Dashboard": "Panel Principal",
+      "Users": "Usuarios",
+      "Access Control": "Control de Acceso",
+      "Subscriptions": "Suscripciones",
+      "Products": "Productos",
+      "Revenue": "Ingresos",
+      "Analytics": "Análisis",
+      "Communications": "Comunicaciones",
+      "Bulk Operations": "Operaciones Masivas",
+      "Admin": "Admin",
+      "Back to Site": "Volver al Sitio",
+      "Loading...": "Cargando..."
+    }
+  },
+  "fr": {
+    "translation": {
+      "Admin Panel": "Panneau d'Administration",
+      "Management Dashboard": "Tableau de Bord de Gestion",
+      "Dashboard": "Tableau de Bord",
+      "Users": "Utilisateurs",
+      "Access Control": "Contrôle d'Accès",
+      "Subscriptions": "Abonnements",
+      "Products": "Produits",
+      "Revenue": "Revenus",
+      "Analytics": "Analyses",
+      "Communications": "Communications",
+      "Bulk Operations": "Opérations en Masse",
+      "Admin": "Admin",
+      "Back to Site": "Retour au Site",
+      "Loading...": "Chargement..."
+    }
+  },
+  "de": {
+    "translation": {
+      "Admin Panel": "Admin-Panel",
+      "Management Dashboard": "Verwaltungs-Dashboard",
+      "Dashboard": "Dashboard",
+      "Users": "Benutzer",
+      "Access Control": "Zugriffskontrolle",
+      "Subscriptions": "Abonnements",
+      "Products": "Produkte",
+      "Revenue": "Einnahmen",
+      "Analytics": "Analysen",
+      "Communications": "Kommunikation",
+      "Bulk Operations": "Massenoperationen",
+      "Admin": "Admin",
+      "Back to Site": "Zurück zur Seite",
+      "Loading...": "Laden..."
+    }
+  }
+}
+

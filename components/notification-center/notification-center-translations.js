@@ -59,9 +59,17 @@ class NotificationCenterTranslations {
         }
 
         try {
+            // Check if i18next methods are available
+            if (typeof i18next.addResourceBundle !== 'function') {
+                console.log('ℹ️ i18next methods not ready, using standalone translations');
+                return;
+            }
+            
             Object.keys(this.translations).forEach(lang => {
-                if (i18next.hasResourceBundle(lang, 'translation')) {
-                    i18next.addResources(lang, 'translation', this.translations[lang]);
+                if (typeof i18next.hasResourceBundle === 'function' && i18next.hasResourceBundle(lang, 'translation')) {
+                    if (typeof i18next.addResources === 'function') {
+                        i18next.addResources(lang, 'translation', this.translations[lang]);
+                    }
                 } else {
                     i18next.addResourceBundle(lang, 'translation', this.translations[lang], true, true);
                 }
@@ -70,7 +78,7 @@ class NotificationCenterTranslations {
 
             console.log('✅ Notification center translations added to i18next');
         } catch (error) {
-            console.error('❌ Failed to add notification center translations to i18next:', error);
+            console.warn('⚠️ Could not add to i18next (using standalone):', error);
         }
     }
 

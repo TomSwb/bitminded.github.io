@@ -131,14 +131,14 @@
 }
 
 .auth-buttons__button--admin.active {
-    background-color: var(--color-background-primary)!important; 
+    background-color: var(--color-background-secondary)!important; 
     color: var(--color-background-primary);
     border-color: var(--color-background-secondary);
 }
 
 .auth-buttons__button--admin.active:hover {
     background-color: var(--color-background-secondary);
-    color: var(--color-text-primary);
+    color: var(--color-text-secondary);
     border-color: var(--color-accent);
 }
 

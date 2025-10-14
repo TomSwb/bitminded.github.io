@@ -1,0 +1,158 @@
+<!-- Admin Layout Component -->
+<div class="admin-layout" id="admin-layout">
+    <!-- Admin Sidebar Navigation -->
+    <aside class="admin-layout__sidebar" id="admin-sidebar">
+        <!-- Admin Header -->
+        <div class="admin-layout__header">
+            <h2 class="admin-layout__title translatable-content" data-translation-key="Admin Panel">Admin Panel</h2>
+            <p class="admin-layout__subtitle translatable-content" data-translation-key="Management Dashboard">Management Dashboard</p>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="admin-layout__nav" id="admin-nav">
+            <!-- Phase 1: Core Foundation -->
+            <button class="admin-layout__nav-item active" data-section="dashboard">
+                <span class="admin-layout__nav-icon">📊</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Dashboard">Dashboard</span>
+            </button>
+
+            <button class="admin-layout__nav-item" data-section="users">
+                <span class="admin-layout__nav-icon">👥</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Users">Users</span>
+            </button>
+
+            <button class="admin-layout__nav-item" data-section="access-control">
+                <span class="admin-layout__nav-icon">🔐</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Access Control">Access Control</span>
+            </button>
+
+            <!-- Phase 2: Subscriptions & Products -->
+            <div class="admin-layout__nav-divider"></div>
+
+            <button class="admin-layout__nav-item" data-section="subscriptions">
+                <span class="admin-layout__nav-icon">💳</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Subscriptions">Subscriptions</span>
+            </button>
+
+            <button class="admin-layout__nav-item" data-section="products">
+                <span class="admin-layout__nav-icon">📦</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Products">Products</span>
+            </button>
+
+            <button class="admin-layout__nav-item" data-section="revenue">
+                <span class="admin-layout__nav-icon">💰</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Revenue">Revenue</span>
+            </button>
+
+            <!-- Phase 3: Analytics & Communication -->
+            <div class="admin-layout__nav-divider"></div>
+
+            <button class="admin-layout__nav-item" data-section="analytics">
+                <span class="admin-layout__nav-icon">📈</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Analytics">Analytics</span>
+            </button>
+
+            <button class="admin-layout__nav-item" data-section="communications">
+                <span class="admin-layout__nav-icon">📧</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Communications">Communications</span>
+            </button>
+
+            <button class="admin-layout__nav-item" data-section="bulk-operations">
+                <span class="admin-layout__nav-icon">⚙️</span>
+                <span class="admin-layout__nav-text translatable-content" data-translation-key="Bulk Operations">Bulk Operations</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="admin-layout__mobile-toggle" id="admin-mobile-toggle" aria-label="Toggle admin menu">
+        <span class="admin-layout__hamburger"></span>
+    </button>
+
+    <!-- Main Content Area -->
+    <main class="admin-layout__main" id="admin-main">
+        <!-- Dashboard Section -->
+        <section class="admin-layout__section active" id="dashboard-section" data-section="dashboard">
+            <div class="admin-layout__section-container" id="dashboard-content">
+                <!-- Dashboard component will be loaded here -->
+            </div>
+        </section>
+
+        <!-- User Management Section -->
+        <section class="admin-layout__section" id="users-section" data-section="users">
+            <div class="admin-layout__section-container" id="users-content">
+                <!-- User management component will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Access Control Section -->
+        <section class="admin-layout__section" id="access-control-section" data-section="access-control">
+            <div class="admin-layout__section-container" id="access-control-content">
+                <!-- Access control component will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Subscriptions Section -->
+        <section class="admin-layout__section" id="subscriptions-section" data-section="subscriptions">
+            <div class="admin-layout__section-container" id="subscriptions-content">
+                <!-- Subscription management component will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="admin-layout__section" id="products-section" data-section="products">
+            <div class="admin-layout__section-container" id="products-content">
+                <!-- Product management component will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Revenue Section -->
+        <section class="admin-layout__section" id="revenue-section" data-section="revenue">
+            <div class="admin-layout__section-container" id="revenue-content">
+                <!-- Revenue reports component will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section class="admin-layout__section" id="analytics-section" data-section="analytics">
+            <div class="admin-layout__section-container" id="analytics-content">
+                <!-- Analytics dashboard component will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Communications Section -->
+        <section class="admin-layout__section" id="communications-section" data-section="communications">
+            <div class="admin-layout__section-container" id="communications-content">
+                <!-- Communication center component will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Bulk Operations Section -->
+        <section class="admin-layout__section" id="bulk-operations-section" data-section="bulk-operations">
+            <div class="admin-layout__section-container" id="bulk-operations-content">
+                <!-- Bulk operations component will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="admin-layout__loading hidden" id="admin-loading">
+        <div class="admin-layout__spinner"></div>
+        <p class="translatable-content" data-translation-key="Loading...">Loading...</p>
+    </div>
+
+    <!-- Error Display -->
+    <div class="admin-layout__error hidden" id="admin-error" role="alert">
+        <span class="admin-layout__error-icon">⚠️</span>
+        <span class="admin-layout__error-message translatable-content" id="admin-error-message"></span>
+        <button class="admin-layout__error-close" id="admin-error-close" aria-label="Close error">×</button>
+    </div>
+
+    <!-- Success Display -->
+    <div class="admin-layout__success hidden" id="admin-success" role="alert">
+        <span class="admin-layout__success-icon">✓</span>
+        <span class="admin-layout__success-message translatable-content" id="admin-success-message"></span>
+        <button class="admin-layout__success-close" id="admin-success-close" aria-label="Close success">×</button>
+    </div>
+</div>
+
