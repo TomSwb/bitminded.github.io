@@ -155,7 +155,18 @@
 .language-switcher.compact .language-switcher__dropdown {
     position: relative;
     top: 0;
+    margin-top: 0;
+    max-height: 0;
+    overflow: hidden;
+    border: none;
+    padding: 0;
+}
+
+.language-switcher.compact .language-switcher__dropdown.open {
+    max-height: 300px;
     margin-top: var(--spacing-xs);
+    border: 2px solid var(--border-color-primary);
+    padding: var(--spacing-xs);
 }
 
 /* Animation for language change */
