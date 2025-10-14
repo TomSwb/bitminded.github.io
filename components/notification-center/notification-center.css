@@ -383,28 +383,46 @@
     opacity: 0.8;
 }
 
-/\/\*\*/ End of Selection */
-```
+/* Compact mode for mobile hamburger menu */
+.notification-center.compact {
+    position: static;
+    top: auto;
+    left: auto;
+    margin: 0;
+    padding: 0;
+}
+
+.notification-center.compact .notification-center__bell {
+    width: 100%;
+    margin: 0;
+}
+
+.notification-center.compact .notification-center__dropdown {
+    position: relative;
+    top: 0;
+    margin-top: 0;
+    left: auto;
+    right: auto;
+    width: 100%;
+    max-width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    border: none;
+    padding: 0;
+}
+
+.notification-center.compact .notification-center__dropdown[aria-hidden="false"] {
+    max-height: 500px;
+    margin-top: var(--spacing-xs);
+    border: 2px solid var(--border-color-primary);
+    padding: 0;
+}
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-    .notification-center {
-        top: var(--spacing-md);
-        left: calc(var(--spacing-sm) + 3rem);
-    }
-
-    .notification-center__bell {
-        min-width: 2.5rem;
-        min-height: 2.5rem;
-        padding: var(--spacing-xs);
-    }
-
-    .notification-center__dropdown {
-        position: fixed;
-        top: 60px;
-        right: var(--spacing-sm);
-        left: var(--spacing-sm);
-        width: auto;
+    /* Hide desktop notification center on mobile (but not the one in mobile menu) */
+    .notification-center:not(.navigation-menu__mobile-components .notification-center) {
+        display: none !important;
     }
 }
 

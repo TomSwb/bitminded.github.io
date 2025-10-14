@@ -236,6 +236,13 @@
         max-width: 300px;
     }
     
+    /* Ensure component containers don't add extra spacing */
+    .navigation-menu__mobile-components > div {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
     /* Remove browser highlight effects from mobile language switcher */
     .navigation-menu__mobile-components .language-switcher__button {
         -webkit-tap-highlight-color: transparent;
@@ -248,6 +255,16 @@
     
     /* Remove browser highlight effects from mobile theme switcher */
     .navigation-menu__mobile-components .theme-switcher__button {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* Remove browser highlight effects from mobile notification center */
+    .navigation-menu__mobile-components .notification-center__bell {
         -webkit-tap-highlight-color: transparent;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
@@ -269,6 +286,11 @@
     
     /* Ensure desktop language switcher is visible */
     .language-switcher {
+        display: block !important;
+    }
+    
+    /* Ensure desktop notification center is visible */
+    .notification-center {
         display: block !important;
     }
     

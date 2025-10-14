@@ -299,7 +299,7 @@ class NavigationMenu {
     }
 
     /**
-     * Load mobile components (Language Switcher, Theme Switcher, and Auth Buttons)
+     * Load mobile components (Language Switcher, Notification Center, Theme Switcher, and Auth Buttons)
      */
     async loadMobileComponents() {
         // Move existing Language Switcher to mobile container
@@ -330,6 +330,36 @@ class NavigationMenu {
             }
         } else {
             console.log('❌ Language switcher not loaded - conditions not met');
+        }
+
+        // Move existing Notification Center to mobile container
+        const existingNotificationCenter = document.querySelector('.notification-center');
+        const mobileNotificationContainer = this.mobileComponents.querySelector('#mobile-notification-center');
+        
+        if (existingNotificationCenter && mobileNotificationContainer && !mobileNotificationContainer.querySelector('.notification-center')) {
+            // Clone the existing notification center
+            const notificationClone = existingNotificationCenter.cloneNode(true);
+            notificationClone.classList.add('compact');
+            mobileNotificationContainer.appendChild(notificationClone);
+            
+            // Prevent notification center clicks from closing the menu
+            const notificationBell = notificationClone.querySelector('.notification-center__bell');
+            if (notificationBell) {
+                notificationBell.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+            
+            // Re-initialize the cloned notification center
+            if (window.notificationCenter) {
+                // Create a new instance for the mobile version
+                const mobileNotificationCenter = new NotificationCenter();
+                mobileNotificationCenter.element = notificationClone;
+                mobileNotificationCenter.init({ compact: true });
+                console.log('✅ Mobile notification center moved and initialized');
+            } else {
+                console.warn('⚠️ window.notificationCenter not available');
+            }
         }
 
         // Move existing Theme Switcher to mobile container
