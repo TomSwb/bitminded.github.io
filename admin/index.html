@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document -->
+    <meta charset="UTF-8">
+    
+    <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Browser Tab title -->
+    <title>Admin Panel - BitMinded</title>
+    
+    <!-- Browser Tab icon -->
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+
+    <!-- Apple home-saved app icon -->
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+    <!-- iOS status bar style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Critical CSS to prevent white flash -->
+    <link rel="stylesheet" href="../css/critical.css">
+    
+    <!-- Critical JavaScript for immediate initialization -->
+    <script src="../js/critical.js"></script>
+    
+    <!-- Component Loader -->
+    <script src="../components/shared/component-loader.js"></script>
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+    
+    <!-- Admin layout specific CSS -->
+    <link rel="stylesheet" href="components/admin-layout/admin-layout.css">
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+        
+        <!-- Language Switcher Component will be loaded here -->
+    </header>
+
+    <!-- Admin Layout Container -->
+    <div id="admin-layout-container">
+        <!-- Admin layout component will be loaded here -->
+    </div>
+
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    
+    <!-- Supabase configuration -->
+    <script src="../js/supabase-config.js"></script>
+    
+    <!-- Notification helper for email notifications -->
+    <script src="../js/notification-helper.js"></script>
+    
+    <!-- i18next CDN language-switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    
+    <!-- Other scripts (loads language switcher and other components) -->
+    <script src="../js/script.js"></script>
+    
+    <!-- Language initialization for admin page -->
+    <script src="lang-admin.js"></script>
+    
+    <!-- Admin layout translations -->
+    <script src="components/admin-layout/admin-layout-translations.js"></script>
+    
+    <!-- Admin layout component -->
+    <script src="components/admin-layout/admin-layout.js"></script>
+    
+    <!-- Admin page loader -->
+    <script src="admin-page-loader.js"></script>
+</body>
+
+</html>
+

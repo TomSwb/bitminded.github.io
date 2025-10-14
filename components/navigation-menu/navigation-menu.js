@@ -214,6 +214,8 @@ class NavigationMenu {
             return 'auth'; // Special case for auth page
         } else if (path.includes('/account')) {
             return 'account'; // Account page
+        } else if (path.includes('/admin')) {
+            return 'admin'; // Admin page - no nav item should be active
         }
         return 'home'; // Default fallback
     }
@@ -225,8 +227,8 @@ class NavigationMenu {
     setActivePage(pageId) {
         const navLinks = this.links.querySelectorAll('.navigation-menu__link');
         
-        // Special case: if we're on auth page, don't show any active navigation items
-        if (pageId === 'auth') {
+        // Special case: if we're on auth or admin page, don't show any active navigation items
+        if (pageId === 'auth' || pageId === 'admin') {
             navLinks.forEach(link => {
                 link.classList.remove('active');
             });

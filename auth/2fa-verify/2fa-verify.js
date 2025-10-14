@@ -278,8 +278,8 @@ class TwoFactorVerify {
                 sessionStorage.removeItem('pending_2fa_user');
                 sessionStorage.removeItem('pending_2fa_time');
 
-                // Redirect to account page
-                window.location.href = '/account/';
+                // Redirect to home page after successful 2FA
+                window.location.href = '/';
             } else {
                 console.log('❌ 2FA Verify: Invalid code');
                 
