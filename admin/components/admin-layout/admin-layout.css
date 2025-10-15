@@ -176,6 +176,8 @@
     flex: 1;
     margin-left: 280px;
     padding: var(--spacing-xl);
+    padding-top: 180px; /* Extra space for fixed nav menu at top */
+    padding-right: 150px; /* Extra space for fixed components on right (nav menu, language, notification, auth) */
     min-height: 100vh;
     transition: margin-left var(--transition-normal);
 }

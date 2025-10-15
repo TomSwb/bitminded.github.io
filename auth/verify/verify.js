@@ -155,6 +155,19 @@ class EmailVerification {
                     console.log('✅ Email change verification successful');
                     console.log('✅ User after email change:', data.user);
                     console.log('✅ User email after change:', data.user.email);
+                    
+                    // Update email in user_profiles table to keep in sync
+                    const { error: updateError } = await window.supabase
+                        .from('user_profiles')
+                        .update({ email: data.user.email })
+                        .eq('id', data.user.id);
+                    
+                    if (updateError) {
+                        console.error('❌ Failed to update email in user_profiles:', updateError);
+                    } else {
+                        console.log('✅ Email updated in user_profiles');
+                    }
+                    
                     this.showSuccess();
                     // Redirect to account profile after 3 seconds
                     setTimeout(() => {
