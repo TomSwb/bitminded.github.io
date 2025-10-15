@@ -416,11 +416,7 @@
 /* ===== MOBILE RESPONSIVENESS ===== */
 @media (max-width: 1024px) {
     .user-management__table-container {
-        overflow-x: scroll;
-    }
-    
-    .user-management__table {
-        min-width: 800px;
+        overflow-x: auto;
     }
 }
 
@@ -484,6 +480,7 @@
         border: 1px solid var(--color-border);
         border-radius: var(--radius-sm);
         padding: var(--spacing-md);
+        background-color: var(--color-background-primary);
     }
 
     .user-management__table td {
@@ -504,11 +501,17 @@
     }
 
     .user-management__actions-cell {
-        flex-direction: column;
+        flex-direction: row;
+        gap: var(--spacing-md);
+        padding-top: var(--spacing-sm);
     }
 
     .user-management__action-button {
-        width: 100%;
+        flex: 1;
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-size-base);
+        font-weight: 600;
+        min-height: 44px;
     }
 }
 
