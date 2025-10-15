@@ -1,0 +1,133 @@
+<!-- User Management Component -->
+<div class="user-management" id="user-management">
+    <!-- Header -->
+    <div class="user-management__header">
+        <div class="user-management__title-section">
+            <h1 class="user-management__title translatable-content" data-translation-key="User Management">User Management</h1>
+            <p class="user-management__count" id="user-count">
+                <span class="translatable-content" data-translation-key="Total Users">Total Users</span>: 
+                <span id="user-count-number">0</span>
+            </p>
+        </div>
+        
+        <div class="user-management__actions">
+            <button class="user-management__button user-management__button--secondary" id="export-users-button">
+                <span class="translatable-content" data-translation-key="Export Users">Export Users</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="user-management__controls">
+        <!-- Search Bar -->
+        <div class="user-management__search">
+            <input 
+                type="text" 
+                class="user-management__search-input translatable-content" 
+                id="user-search-input"
+                data-translation-key="Search users..."
+                placeholder="Search users...">
+        </div>
+
+        <!-- Filters -->
+        <div class="user-management__filters">
+            <select class="user-management__filter" id="filter-status">
+                <option value="" class="translatable-content" data-translation-key="All Status">All Status</option>
+                <option value="active" class="translatable-content" data-translation-key="Active">Active</option>
+                <option value="suspended" class="translatable-content" data-translation-key="Suspended">Suspended</option>
+            </select>
+
+            <!-- Role filter commented out - will be needed when multiple roles exist -->
+            <!--
+            <select class="user-management__filter" id="filter-role">
+                <option value="" class="translatable-content" data-translation-key="All Roles">All Roles</option>
+                <option value="user" class="translatable-content" data-translation-key="User">User</option>
+                <option value="admin" class="translatable-content" data-translation-key="Admin">Admin</option>
+            </select>
+            -->
+
+            <select class="user-management__filter" id="filter-subscription">
+                <option value="" class="translatable-content" data-translation-key="All Subscriptions">All Subscriptions</option>
+                <option value="active" class="translatable-content" data-translation-key="Active Subscription">Active Subscription</option>
+                <option value="none" class="translatable-content" data-translation-key="No Subscription">No Subscription</option>
+            </select>
+
+            <button class="user-management__button user-management__button--text" id="clear-filters-button">
+                <span class="translatable-content" data-translation-key="Clear Filters">Clear Filters</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="user-management__table-container">
+        <table class="user-management__table" id="users-table">
+            <thead>
+                <tr>
+                    <th class="user-management__sortable-header" data-sort="username">
+                        <span class="translatable-content" data-translation-key="Username">Username</span>
+                        <span class="user-management__sort-indicator"></span>
+                    </th>
+                    <th class="user-management__sortable-header" data-sort="email">
+                        <span class="translatable-content" data-translation-key="Email">Email</span>
+                        <span class="user-management__sort-indicator"></span>
+                    </th>
+                    <th class="translatable-content" data-translation-key="Role">Role</th>
+                    <th class="translatable-content" data-translation-key="Status">Status</th>
+                    <th class="translatable-content" data-translation-key="Subscriptions">Subscriptions</th>
+                    <th class="translatable-content" data-translation-key="Registered">Registered</th>
+                    <th class="translatable-content" data-translation-key="Last Login">Last Login</th>
+                    <th class="translatable-content" data-translation-key="Actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                <!-- User rows will be inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Loading State -->
+        <div class="user-management__loading hidden" id="users-loading">
+            <div class="user-management__spinner"></div>
+            <p class="translatable-content" data-translation-key="Loading users...">Loading users...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="user-management__empty hidden" id="users-empty">
+            <p class="translatable-content" data-translation-key="No users found">No users found</p>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="user-management__pagination" id="users-pagination">
+        <div class="user-management__pagination-info">
+            <span class="translatable-content" data-translation-key="Showing">Showing</span>
+            <span id="pagination-start">0</span>-<span id="pagination-end">0</span>
+            <span class="translatable-content" data-translation-key="of">of</span>
+            <span id="pagination-total">0</span>
+        </div>
+
+        <div class="user-management__pagination-controls">
+            <button class="user-management__pagination-button" id="pagination-prev" disabled>
+                <span class="translatable-content" data-translation-key="Previous">Previous</span>
+            </button>
+            
+            <div class="user-management__pagination-pages" id="pagination-pages">
+                <!-- Page numbers will be inserted here -->
+            </div>
+            
+            <button class="user-management__pagination-button" id="pagination-next" disabled>
+                <span class="translatable-content" data-translation-key="Next">Next</span>
+            </button>
+        </div>
+
+        <div class="user-management__pagination-size">
+            <label class="translatable-content" data-translation-key="Items per page">Items per page:</label>
+            <select class="user-management__filter" id="items-per-page">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+</div>
+

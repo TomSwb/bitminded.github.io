@@ -52,6 +52,8 @@ class AdminLayout {
             // Show translatable content by adding loaded class
             this.showTranslatableContent();
             
+            // User detail is now a separate page, no need to load modal component
+            
             // Check URL for initial section
             const urlParams = new URLSearchParams(window.location.search);
             const sectionParam = urlParams.get('section');
@@ -346,6 +348,9 @@ class AdminLayout {
                     basePath: 'admin/components'
                 });
                 
+                // Initialize component if it has an init class
+                await this.initializeComponent(sectionName, componentName);
+                
                 this.loadedComponents.set(sectionName, true);
                 console.log(`✅ Component loaded: ${componentName}`);
             } else {
@@ -382,6 +387,78 @@ class AdminLayout {
             return false;
         }
     }
+
+    /**
+     * Initialize component after loading
+     * @param {string} sectionName - Section name
+     * @param {string} componentName - Component name
+     */
+    async initializeComponent(sectionName, componentName) {
+        try {
+            // Load translations file if exists
+            await this.loadComponentTranslations(componentName);
+            
+            // Map component names to their class names
+            const componentClassMap = {
+                'user-management': 'UserManagement',
+                'dashboard': 'Dashboard',
+                'access-control': 'AccessControl',
+                'subscription-management': 'SubscriptionManagement',
+                'product-management': 'ProductManagement',
+                'revenue-reports': 'RevenueReports',
+                'analytics-dashboard': 'AnalyticsDashboard',
+                'communication-center': 'CommunicationCenter',
+                'bulk-operations': 'BulkOperations'
+            };
+
+            const className = componentClassMap[componentName];
+            if (!className || !window[className]) {
+                console.log(`ℹ️ Component ${componentName} has no JavaScript class to initialize`);
+                return;
+            }
+
+            // Create and initialize component instance
+            console.log(`🔧 Initializing ${className}...`);
+            const instance = new window[className]();
+            await instance.init();
+            
+            // Store instance for later use
+            window[`${sectionName}Component`] = instance;
+            
+            console.log(`✅ ${className} initialized`);
+
+        } catch (error) {
+            console.error(`❌ Failed to initialize component ${componentName}:`, error);
+        }
+    }
+
+    /**
+     * Load component translations file
+     * @param {string} componentName - Component name
+     */
+    async loadComponentTranslations(componentName) {
+        try {
+            const translationsPath = `/admin/components/${componentName}/${componentName}-translations.js`;
+            
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = translationsPath;
+                script.onload = () => {
+                    console.log(`✅ Loaded translations for ${componentName}`);
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.log(`ℹ️ No translations file for ${componentName}`);
+                    resolve(); // Don't fail if translations missing
+                };
+                document.head.appendChild(script);
+            });
+        } catch (error) {
+            console.warn(`Failed to load translations for ${componentName}:`, error);
+        }
+    }
+
+    // User detail component loading removed - now using separate page
 
     /**
      * Show placeholder for unimplemented sections
