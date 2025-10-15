@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Detail - BitMinded Admin</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="/css/critical.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/utilities.css">
+    
+    <!-- User Detail CSS -->
+    <link rel="stylesheet" href="/admin/components/user-detail/user-detail.css">
+    
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- i18next -->
+    <script src="https://unpkg.com/i18next@23/dist/umd/i18next.min.js"></script>
+    <script src="https://unpkg.com/i18next-browser-languagedetector@7/dist/umd/i18nextBrowserLanguageDetector.min.js"></script>
+    
+    <!-- Loading Screen -->
+    <link rel="stylesheet" href="/components/loading-screen/loading-screen.css">
+    
+    <style>
+        /* Page-specific styles */
+        .user-detail-page {
+            min-height: 100vh;
+            background-color: var(--color-background-primary);
+        }
+        
+        .user-detail-page__main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+        
+        @media (max-width: 768px) {
+            .user-detail-page__main {
+                padding: var(--spacing-lg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- User Detail Page -->
+    <div class="user-detail-page">
+        <!-- Main Content -->
+        <main class="user-detail-page__main">
+            <!-- Back Button -->
+            <button id="back-to-users" class="user-detail__back-button">
+                <span class="translatable-content" data-translation-key="Back to Users">Back to Users</span>
+            </button>
+            
+            <!-- User Detail Content -->
+            <div class="user-detail" id="user-detail-container">
+                <!-- Header -->
+                <div class="user-detail__header">
+                    <div class="user-detail__user-info">
+                        <div class="user-detail__avatar">
+                            <img id="user-detail-avatar" src="" alt="" class="user-detail__avatar-image">
+                            <div id="user-detail-avatar-fallback" class="user-detail__avatar-fallback"></div>
+                        </div>
+                        <div class="user-detail__user-details">
+                            <h2 id="user-detail-username" class="user-detail__username"></h2>
+                            <p id="user-detail-email" class="user-detail__email"></p>
+                            <div class="user-detail__badges">
+                                <span id="user-detail-role-badge" class="user-detail__badge user-detail__badge--role"></span>
+                                <span id="user-detail-status-badge" class="user-detail__badge user-detail__badge--status"></span>
+                                <span id="user-detail-2fa-badge" class="user-detail__badge user-detail__badge--2fa"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="user-detail__tabs">
+                    <button class="user-detail__tab user-detail__tab--active" data-tab="overview">
+                        <span class="translatable-content" data-translation-key="Overview">Overview</span>
+                    </button>
+                    <button class="user-detail__tab" data-tab="subscriptions">
+                        <span class="translatable-content" data-translation-key="Subscriptions">Subscriptions</span>
+                    </button>
+                    <button class="user-detail__tab" data-tab="activity">
+                        <span class="translatable-content" data-translation-key="Activity">Activity</span>
+                    </button>
+                    <button class="user-detail__tab" data-tab="security">
+                        <span class="translatable-content" data-translation-key="Security">Security</span>
+                    </button>
+                    <button class="user-detail__tab" data-tab="actions">
+                        <span class="translatable-content" data-translation-key="Actions">Actions</span>
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="user-detail__content">
+                    <!-- Overview Tab -->
+                    <div class="user-detail__tab-content user-detail__tab-content--active" data-tab="overview">
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Basic Information">Basic Information</h3>
+                            <div class="user-detail__info-grid">
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="User ID">User ID</label>
+                                    <span id="user-detail-user-id" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Username">Username</label>
+                                    <span id="user-detail-username-value" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Email">Email</label>
+                                    <span id="user-detail-email-value" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Role">Role</label>
+                                    <span id="user-detail-role-value" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Status">Status</label>
+                                    <span id="user-detail-status-value" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="2FA Enabled">2FA Enabled</label>
+                                    <span id="user-detail-2fa-value" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Registered">Registered</label>
+                                    <span id="user-detail-registered" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Last Login">Last Login</label>
+                                    <span id="user-detail-last-login" class="user-detail__info-value"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Quick Stats">Quick Stats</h3>
+                            <div class="user-detail__stats-grid">
+                                <div class="user-detail__stat-card">
+                                    <div class="user-detail__stat-number" id="user-detail-subscription-count">0</div>
+                                    <div class="user-detail__stat-label translatable-content" data-translation-key="Active Subscriptions">Active Subscriptions</div>
+                                </div>
+                                <div class="user-detail__stat-card">
+                                    <div class="user-detail__stat-number" id="user-detail-login-count">0</div>
+                                    <div class="user-detail__stat-label translatable-content" data-translation-key="Total Logins">Total Logins</div>
+                                </div>
+                                <div class="user-detail__stat-card">
+                                    <div class="user-detail__stat-number" id="user-detail-session-count">0</div>
+                                    <div class="user-detail__stat-label translatable-content" data-translation-key="Active Sessions">Active Sessions</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Admin Notes">Admin Notes</h3>
+                            <div class="user-detail__notes">
+                                <textarea id="user-detail-notes-input" class="user-detail__notes-input" placeholder="Add admin notes about this user..."></textarea>
+                                <button id="user-detail-save-notes" class="user-detail__button user-detail__button--primary">
+                                    <span class="translatable-content" data-translation-key="Save Notes">Save Notes</span>
+                                </button>
+                            </div>
+                            <div id="user-detail-notes-history" class="user-detail__notes-history"></div>
+                        </div>
+                    </div>
+
+                    <!-- Subscriptions Tab -->
+                    <div class="user-detail__tab-content" data-tab="subscriptions">
+                        <div class="user-detail__section">
+                            <div class="user-detail__section-header">
+                                <h3 class="translatable-content" data-translation-key="Current Subscriptions">Current Subscriptions</h3>
+                                <button id="user-detail-grant-access" class="user-detail__button user-detail__button--secondary">
+                                    <span class="translatable-content" data-translation-key="Grant Access">Grant Access</span>
+                                </button>
+                            </div>
+                            <div id="user-detail-subscriptions-list" class="user-detail__subscriptions-list">
+                                <!-- Subscription items will be loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Subscription History">Subscription History</h3>
+                            <div id="user-detail-subscription-history" class="user-detail__history-list">
+                                <!-- Subscription history will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Tab -->
+                    <div class="user-detail__tab-content" data-tab="activity">
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Recent Login Activity">Recent Login Activity</h3>
+                            <div id="user-detail-login-activity" class="user-detail__activity-list">
+                                <!-- Login activity will be loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Admin Actions">Admin Actions</h3>
+                            <div id="user-detail-admin-actions" class="user-detail__activity-list">
+                                <!-- Admin actions will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div class="user-detail__tab-content" data-tab="security">
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Two-Factor Authentication">Two-Factor Authentication</h3>
+                            <div class="user-detail__security-item">
+                                <div class="user-detail__security-info">
+                                    <span class="translatable-content" data-translation-key="2FA Status">2FA Status</span>
+                                    <span id="user-detail-2fa-status" class="user-detail__security-status"></span>
+                                </div>
+                                <button id="user-detail-toggle-2fa" class="user-detail__button user-detail__button--secondary">
+                                    <span class="translatable-content" data-translation-key="Toggle 2FA">Toggle 2FA</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Active Sessions">Active Sessions</h3>
+                            <div id="user-detail-sessions-list" class="user-detail__sessions-list">
+                                <!-- Active sessions will be loaded here -->
+                            </div>
+                            <button id="user-detail-revoke-all-sessions" class="user-detail__button user-detail__button--danger">
+                                <span class="translatable-content" data-translation-key="Revoke All Sessions">Revoke All Sessions</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Actions Tab -->
+                    <div class="user-detail__tab-content" data-tab="actions">
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="User Actions">User Actions</h3>
+                            <div class="user-detail__actions-grid">
+                                <button id="user-detail-edit-user" class="user-detail__action-button user-detail__action-button--primary">
+                                    <span class="translatable-content" data-translation-key="Edit User">Edit User</span>
+                                </button>
+                                <button id="user-detail-reset-password" class="user-detail__action-button user-detail__action-button--secondary">
+                                    <span class="translatable-content" data-translation-key="Reset Password">Reset Password</span>
+                                </button>
+                                <button id="user-detail-send-email" class="user-detail__action-button user-detail__action-button--secondary">
+                                    <span class="translatable-content" data-translation-key="Send Email">Send Email</span>
+                                </button>
+                                <button id="user-detail-suspend-user" class="user-detail__action-button user-detail__action-button--warning">
+                                    <span class="translatable-content" data-translation-key="Suspend User">Suspend User</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="Danger Zone">Danger Zone</h3>
+                            <div class="user-detail__danger-zone">
+                                <p class="translatable-content" data-translation-key="danger-zone-description">These actions are irreversible and should be used with extreme caution.</p>
+                                <div class="user-detail__danger-actions">
+                                    <button id="user-detail-permanent-delete" class="user-detail__button user-detail__button--danger user-detail__button--large">
+                                        <span class="translatable-content" data-translation-key="Permanently Delete User">Permanently Delete User</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/supabase-config.js"></script>
+    <script src="/components/loading-screen/loading-screen.js"></script>
+    
+    <!-- User Detail Translations -->
+    <script src="/admin/components/user-detail/user-detail-translations.js"></script>
+    
+    <!-- User Detail Page Logic -->
+    <script src="/admin/components/user-detail/user-detail-page.js"></script>
+</body>
+</html>
