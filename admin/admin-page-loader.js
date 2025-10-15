@@ -4,7 +4,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🔄 Admin Page: Initializing...');
     
     try {
         // Load admin layout component
@@ -14,7 +13,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 basePath: 'admin/components'
             });
             
-            console.log('✅ Admin layout component loaded');
             
             // Initialize admin layout (it will hide loading screen when done)
             if (window.AdminLayout) {

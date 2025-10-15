@@ -87,12 +87,11 @@ if (typeof window.adminLayoutTranslations === 'undefined') {
          */
         updateTranslations() {
             if (!this.isInitialized) {
-                console.warn('⚠️ Admin layout translations not initialized');
+                // Silently return if not initialized yet
                 return;
             }
 
             const currentLanguage = this.getCurrentLanguage();
-            console.log('🔄 Updating admin layout translations to:', currentLanguage);
 
             // Update all translatable elements
             const elements = document.querySelectorAll('#admin-layout .translatable-content[data-translation-key]');

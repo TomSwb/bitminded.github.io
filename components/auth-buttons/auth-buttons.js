@@ -307,7 +307,6 @@ class AuthButtons {
             this.hideAllStates();
             if (this.elements.loggedOut) {
                 this.elements.loggedOut.style.display = 'flex';
-                console.log('✅ Logged out state displayed');
             } else {
                 console.error('❌ Logged out element not found');
             }
@@ -321,14 +320,12 @@ class AuthButtons {
      */
     async showLoggedInState() {
         try {
-            console.log('🔄 Showing logged in state');
             // Showing logged in state
             this.hideAllStates();
             if (this.elements.loggedIn) {
                 // Ensure flex layout to match CSS and preserve spacing/gap
                 this.elements.loggedIn.style.display = 'flex';
                 this.elements.loggedIn.classList.remove('auth-buttons__logged-in--hidden');
-                console.log('✅ Logged in state displayed');
                 await this.updateUserInfo();
             } else {
                 console.error('❌ Logged in element not found');
@@ -446,7 +443,6 @@ class AuthButtons {
                 return false;
             }
 
-            console.log('🔍 Checking admin role for user:', this.currentUser.id);
 
             const { data, error } = await window.supabase
                 .from('user_roles')
@@ -461,7 +457,6 @@ class AuthButtons {
             }
 
             const isAdmin = !!(data && data.role === 'admin');
-            console.log('🔍 Admin check result:', isAdmin, 'Data:', data);
             
             return isAdmin;
         } catch (error) {
@@ -477,20 +472,14 @@ class AuthButtons {
         try {
             const isAdmin = await this.checkAdminRole();
             
-            console.log('🔧 Updating admin button visibility. isAdmin:', isAdmin);
-            
             // Update ALL admin buttons (original + mobile clone)
             const allAdminButtons = document.querySelectorAll('#auth-admin-button');
             
-            console.log('🔍 Found', allAdminButtons.length, 'admin button(s)');
-            
-            allAdminButtons.forEach((button, index) => {
+            allAdminButtons.forEach((button) => {
                 if (isAdmin === true) {
                     button.classList.remove('auth-buttons__button--hidden');
-                    console.log(`👑 Admin button ${index + 1} shown (removed hidden class)`);
                 } else {
                     button.classList.add('auth-buttons__button--hidden');
-                    console.log(`🔒 Admin button ${index + 1} hidden (added hidden class)`);
                 }
             });
 
@@ -615,7 +604,6 @@ class AuthButtons {
         adminButton.classList.toggle('active', isOnAdminPage);
         
         if (isOnAdminPage) {
-            console.log('👑 Admin button set to active state');
         }
     }
 

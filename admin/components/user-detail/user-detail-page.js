@@ -952,7 +952,74 @@ class UserDetailPage {
 
     async permanentDeleteUser() {
         console.log('💥 Permanent delete clicked');
-        // TODO: Implement permanent delete functionality
+        
+        if (!this.currentUser || !window.supabase) return;
+        
+        // Prevent deleting yourself
+        const { data: { user: currentAdmin } } = await window.supabase.auth.getUser();
+        if (currentAdmin && currentAdmin.id === this.currentUser.id) {
+            this.showError('You cannot delete your own account from the admin panel');
+            return;
+        }
+        
+        // Confirm deletion with username verification
+        const confirmMessage = `⚠️ DANGER: PERMANENT USER DELETION ⚠️\n\nYou are about to permanently delete the user:\n\nUsername: ${this.currentUser.username}\nEmail: ${this.currentUser.email}\n\nThis action will:\n- Permanently delete the user account\n- Remove ALL user data from the database\n- Revoke all active sessions\n- Cancel all subscriptions\n- Delete all user content\n\n❌ THIS CANNOT BE UNDONE ❌\n\nType "${this.currentUser.username}" to confirm deletion:`;
+        
+        const confirmation = prompt(confirmMessage);
+        
+        if (confirmation !== this.currentUser.username) {
+            if (confirmation !== null) {
+                this.showError('Username confirmation did not match. Deletion cancelled.');
+            }
+            return;
+        }
+        
+        // Second confirmation
+        const doubleConfirm = confirm(`⚠️ FINAL CONFIRMATION ⚠️\n\nAre you ABSOLUTELY SURE you want to delete "${this.currentUser.username}"?\n\nClick OK to DELETE PERMANENTLY or Cancel to abort.`);
+        
+        if (!doubleConfirm) {
+            console.log('❌ Deletion cancelled by admin');
+            return;
+        }
+        
+        try {
+            console.log('🗑️ Proceeding with permanent deletion...');
+            
+            // Get current session
+            const { data: { session } } = await window.supabase.auth.getSession();
+            
+            if (!session) {
+                this.showError('You must be logged in to delete users');
+                return;
+            }
+            
+            console.log('🔑 Calling delete-user Edge Function with auth...');
+            
+            // Call the delete-user Edge Function
+            const { data, error } = await window.supabase.functions.invoke('delete-user', {
+                body: {
+                    user_id: this.currentUser.id,
+                    username: this.currentUser.username,
+                    reason: 'Deleted by admin from user detail page'
+                }
+            });
+            
+            if (error) {
+                console.error('❌ Failed to delete user:', error);
+                this.showError(`Failed to delete user: ${error.message || 'Unknown error'}`);
+                return;
+            }
+            
+            console.log('✅ User permanently deleted:', data);
+            alert(`User "${this.currentUser.username}" has been permanently deleted.\n\nYou will now be redirected to the user management page.`);
+            
+            // Redirect back to user management
+            window.location.href = '/admin/?section=users';
+            
+        } catch (error) {
+            console.error('❌ Error deleting user:', error);
+            this.showError(`Failed to delete user: ${error.message || 'Unknown error'}`);
+        }
     }
 
     /**
