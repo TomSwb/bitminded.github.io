@@ -320,10 +320,13 @@
 @media (max-width: 1024px) {
     .admin-layout__sidebar {
         transform: translateX(-100%);
+        background-color: var(--color-background-primary);
+        opacity: 1;
     }
 
     .admin-layout__sidebar.open {
         transform: translateX(0);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
     }
 
     .admin-layout__mobile-toggle {
