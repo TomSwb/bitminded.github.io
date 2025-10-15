@@ -62,5 +62,10 @@
         environment: isProduction ? 'production' : isDevelopment ? 'development' : 'staging',
         supabaseUrl: config.url
     });
+    
+    // Signal loading screen that environment config is ready
+    if (window.loadingScreen) {
+        window.loadingScreen.setReadyFlag('environment', true);
+    }
 })();
 
