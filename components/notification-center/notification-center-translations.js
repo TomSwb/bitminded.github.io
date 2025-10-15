@@ -17,13 +17,11 @@ class NotificationCenterTranslations {
         }
 
         try {
-            console.log('🔧 Initializing notification center translations...');
             
             await this.loadTranslations();
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Notification center translations initialized successfully');
             
         } catch (error) {
             console.error('❌ Failed to initialize notification center translations:', error);
@@ -41,7 +39,6 @@ class NotificationCenterTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Notification center translations loaded');
             
         } catch (error) {
             console.error('❌ Failed to load notification center translations:', error);
@@ -76,7 +73,6 @@ class NotificationCenterTranslations {
                 this.loadedLanguages.add(lang);
             });
 
-            console.log('✅ Notification center translations added to i18next');
         } catch (error) {
             console.warn('⚠️ Could not add to i18next (using standalone):', error);
         }

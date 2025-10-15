@@ -28,12 +28,10 @@ class AdminLayout {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('Admin Layout: Already initialized');
             return;
         }
 
         try {
-            console.log('👑 Admin Layout: Initializing...');
 
             // Check if user is admin (critical security check)
             const hasAccess = await this.checkAdminAccess();
@@ -65,7 +63,6 @@ class AdminLayout {
             await this.navigateToSection(initialSection);
 
             this.isInitialized = true;
-            console.log('✅ Admin Layout: Initialized successfully');
 
         } catch (error) {
             console.error('❌ Admin Layout: Failed to initialize:', error);
@@ -127,7 +124,6 @@ class AdminLayout {
                 has_2fa: twoFAData?.is_enabled || false
             });
 
-            console.log('✅ Admin access granted:', user.email);
             return true;
 
         } catch (error) {
@@ -254,7 +250,6 @@ class AdminLayout {
                 to: sectionName
             });
 
-            console.log(`✅ Navigated to section: ${sectionName}`);
 
         } catch (error) {
             console.error('❌ Failed to navigate:', error);
@@ -304,7 +299,6 @@ class AdminLayout {
      */
     async loadSectionContent(sectionName) {
         try {
-            console.log(`📦 Admin Layout: Loading content for section: ${sectionName}`);
 
             // Show loading
             this.showLoading();
@@ -352,7 +346,6 @@ class AdminLayout {
                 await this.initializeComponent(sectionName, componentName);
                 
                 this.loadedComponents.set(sectionName, true);
-                console.log(`✅ Component loaded: ${componentName}`);
             } else {
                 throw new Error('ComponentLoader not available');
             }
@@ -418,14 +411,11 @@ class AdminLayout {
             }
 
             // Create and initialize component instance
-            console.log(`🔧 Initializing ${className}...`);
             const instance = new window[className]();
             await instance.init();
             
             // Store instance for later use
             window[`${sectionName}Component`] = instance;
-            
-            console.log(`✅ ${className} initialized`);
 
         } catch (error) {
             console.error(`❌ Failed to initialize component ${componentName}:`, error);
@@ -444,7 +434,6 @@ class AdminLayout {
                 const script = document.createElement('script');
                 script.src = translationsPath;
                 script.onload = () => {
-                    console.log(`✅ Loaded translations for ${componentName}`);
                     resolve();
                 };
                 script.onerror = () => {
@@ -552,17 +541,14 @@ class AdminLayout {
             await window.supabase
                 .from('admin_activity')
                 .insert({
-                    admin_user_id: this.currentUser.id,
-                    action_type: actionType,
+                    admin_id: this.currentUser.id,
+                    action: actionType,
                     details: details,
                     ip_address: null // Could fetch from external API if needed
                 });
 
-            console.log(`📝 Admin action logged: ${actionType}`);
-
         } catch (error) {
-            console.error('❌ Failed to log admin action:', error);
-            // Don't throw - logging failure shouldn't break functionality
+            // Silently fail - logging failure shouldn't break functionality
         }
     }
 
@@ -598,7 +584,6 @@ class AdminLayout {
         translatableElements.forEach(element => {
             element.classList.add('loaded');
         });
-        console.log('✅ Admin Layout: Translatable content shown');
     }
 
     /**

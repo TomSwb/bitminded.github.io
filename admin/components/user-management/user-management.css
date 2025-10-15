@@ -291,6 +291,17 @@
     color: var(--color-background-primary);
 }
 
+.user-management__action-button--danger {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.user-management__action-button--danger:hover {
+    background-color: var(--color-error);
+    border-color: var(--color-error);
+    color: var(--color-background-primary);
+}
+
 /* ===== LOADING & EMPTY STATES ===== */
 .user-management__loading,
 .user-management__empty {

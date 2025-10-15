@@ -480,6 +480,9 @@ class UserManagement {
                 <button class="user-management__action-button" data-action="view" data-user-id="${user.id}">
                     View
                 </button>
+                <button class="user-management__action-button user-management__action-button--danger" data-action="delete" data-user-id="${user.id}">
+                    Delete
+                </button>
             </div>
         `;
 
@@ -487,15 +490,19 @@ class UserManagement {
         const viewButton = actionsCell.querySelector('[data-action="view"]');
         if (viewButton) {
             viewButton.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent row click
+                e.stopPropagation(); // Prevent any bubbling
                 this.viewUserDetail(user.id);
             });
         }
 
-        // Add click handler to row
-        tr.addEventListener('click', () => {
-            this.viewUserDetail(user.id);
-        });
+        // Add click handler to delete button
+        const deleteButton = actionsCell.querySelector('[data-action="delete"]');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent any bubbling
+                this.deleteUser(user.id, user.username);
+            });
+        }
 
         // Append cells
         tr.appendChild(usernameCell);
@@ -519,6 +526,86 @@ class UserManagement {
         
         // Open user detail page in new tab
         window.open(`/admin/components/user-detail/?id=${userId}`, '_blank');
+    }
+
+    /**
+     * Delete a user
+     * @param {string} userId - User ID to delete
+     * @param {string} username - Username for confirmation
+     */
+    async deleteUser(userId, username) {
+        console.log('🗑️ Attempting to delete user:', userId);
+        
+        if (!window.supabase) {
+            this.showError('Supabase not available');
+            return;
+        }
+        
+        // Confirm deletion with username verification
+        const confirmMessage = `Are you sure you want to permanently delete the user "${username}"?\n\nThis action cannot be undone and will:\n- Delete the user account\n- Remove all user data\n- Revoke all active sessions\n- Cancel all subscriptions\n\nType "${username}" to confirm:`;
+        
+        const confirmation = prompt(confirmMessage);
+        
+        if (confirmation !== username) {
+            if (confirmation !== null) {
+                this.showError('Username confirmation did not match. Deletion cancelled.');
+            }
+            return;
+        }
+        
+        try {
+            // Show loading state
+            this.showLoading();
+            
+            // Get current session
+            const { data: { session } } = await window.supabase.auth.getSession();
+            
+            if (!session) {
+                this.showError('You must be logged in to delete users');
+                this.hideLoading();
+                return;
+            }
+            
+            console.log('🔑 Session token available:', !!session.access_token);
+            console.log('🔑 Calling delete-user Edge Function with auth...');
+            
+            // Call the delete-user Edge Function with explicit headers
+            const response = await window.supabase.functions.invoke('delete-user', {
+                body: {
+                    user_id: userId,
+                    username: username,
+                    reason: 'Deleted by admin from user management'
+                },
+                headers: {
+                    Authorization: `Bearer ${session.access_token}`
+                }
+            });
+            
+            console.log('📡 Edge Function response:', response);
+            
+            if (response.error) {
+                console.error('❌ Edge Function error:', response.error);
+                console.error('❌ Error data:', response.data);
+                
+                // Try to extract error message from response
+                const errorMessage = response.data?.error || response.error.message || 'Unknown error';
+                this.showError(`Failed to delete user: ${errorMessage}`);
+                this.hideLoading();
+                return;
+            }
+            
+            console.log('✅ User deleted successfully:', response.data);
+            this.showSuccess(`User "${username}" has been permanently deleted`);
+            
+            // Reload users list
+            await this.loadUsers();
+            
+        } catch (error) {
+            console.error('❌ Error deleting user:', error);
+            this.showError(`Failed to delete user: ${error.message || 'Unknown error'}`);
+        } finally {
+            this.hideLoading();
+        }
     }
 
     /**
@@ -748,6 +835,43 @@ class UserManagement {
             window.adminLayout.showError(message);
         } else {
             console.error('User Management Error:', message);
+        }
+    }
+
+    /**
+     * Show success message
+     */
+    showSuccess(message) {
+        if (window.adminLayout) {
+            window.adminLayout.showSuccess(message);
+        } else {
+            console.log('User Management Success:', message);
+        }
+    }
+
+    /**
+     * Show loading state
+     */
+    showLoading() {
+        const loadingContainer = document.querySelector('.user-management__loading');
+        const tableBody = document.getElementById('users-table-body');
+        
+        if (loadingContainer && tableBody) {
+            loadingContainer.style.display = 'flex';
+            tableBody.style.display = 'none';
+        }
+    }
+
+    /**
+     * Hide loading state
+     */
+    hideLoading() {
+        const loadingContainer = document.querySelector('.user-management__loading');
+        const tableBody = document.getElementById('users-table-body');
+        
+        if (loadingContainer && tableBody) {
+            loadingContainer.style.display = 'none';
+            tableBody.style.display = 'table-row-group';
         }
     }
 }

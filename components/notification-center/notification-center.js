@@ -28,11 +28,9 @@ class NotificationCenter {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Notification Center: Already initialized');
                 return;
             }
 
-            console.log('🔔 Notification Center: Initializing...');
 
             // Wait for Supabase
             await this.waitForSupabase();
@@ -60,7 +58,6 @@ class NotificationCenter {
             await this.initializeTranslations();
 
             this.isInitialized = true;
-            console.log('✅ Notification Center: Initialized successfully');
 
         } catch (error) {
             console.error('❌ Notification Center: Failed to initialize:', error);
@@ -98,7 +95,6 @@ class NotificationCenter {
             }
             
             this.user = user;
-            console.log('✅ Notification Center: User loaded');
             
         } catch (error) {
             console.error('❌ Notification Center: Failed to load user:', error);
