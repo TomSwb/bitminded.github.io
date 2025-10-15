@@ -1,65 +1,113 @@
-# Supabase SQL Files Organization
+# Supabase Project Organization
 
-This directory contains all SQL files organized by purpose for easier navigation and maintenance.
+This folder contains all Supabase-related configurations, migrations, and Edge Functions.
 
-## Directory Structure
+## Folder Structure
 
-### 📁 `schema/`
-Core database schema and setup files:
-- `database-schema.sql` - Main database schema
-- `storage-setup.sql` - Storage bucket configuration
-- `consent-tracking-system.sql` - GDPR consent tracking
+```
+supabase/
+├── dev/                    # Dev environment tracking & config
+│   ├── deployed-functions.md
+│   ├── pending-migrations.md
+│   ├── SETUP_COMPLETE.md
+│   └── utils/             # Dev utility scripts
+│
+├── prod/                   # Production tracking & checklists
+│   ├── deployed-functions.md
+│   ├── applied-migrations.md
+│   └── DEPLOYMENT_CHECKLIST.md
+│
+├── functions/              # Edge Functions (deploy to both)
+├── migrations/             # SQL migrations (apply to both)
+├── schema/                 # Reference docs (don't run)
+├── debug/                  # Debug queries (dev only)
+├── fixes/                  # Historical fixes (reference)
+└── tools/                  # Utility tools (both envs)
+```
 
-### 📁 `migrations/`
-Database migrations and feature additions:
-- `add-password-tracking.sql` - Password change tracking feature
+## Development vs Production
 
-### 📁 `fixes/`
-Bug fixes and maintenance scripts:
-- `fix-function-search-path-security.sql` - Function security fixes
-- `fix-missing-foreign-key-index.sql` - Performance index fixes
-- `fix-rls-performance-warnings.sql` - RLS optimization
-- `fix-security-definer-view.sql` - Security definer fixes
-- `fix-security-warnings.sql` - General security fixes
-- `fix-user-roles-rls-recursion.sql` - RLS recursion fixes
-- `cleanup-test-users.sql` - Test data cleanup
-- `cleanup-test-users-updated.sql` - Updated cleanup script
-- `email-template-fix.html` - Email template fixes
-- `email-templates.md` - Email template documentation
+### Dev Environment
+- **Project**: `eygpejbljuqpxwwoawkn`
+- **URL**: https://eygpejbljuqpxwwoawkn.supabase.co
+- **Dashboard**: https://supabase.com/dashboard/project/eygpejbljuqpxwwoawkn
+- **Used when**: Running on localhost (127.0.0.1, ports 5500/5501/8080)
 
-### 📁 `debug/`
-Debugging and troubleshooting scripts:
-- `check-password-tracking.sql` - Verify password tracking setup
-- `debug-password-tracking.sql` - Debug password tracking issues
+### Production Environment
+- **Project**: `dynxqnrkmjcvgzsugxtm`
+- **URL**: https://dynxqnrkmjcvgzsugxtm.supabase.co
+- **Dashboard**: https://supabase.com/dashboard/project/dynxqnrkmjcvgzsugxtm
+- **Used when**: Deployed to bitminded.ch
 
-### 📁 `tools/`
-Utility and analysis scripts:
-- `find-all-users.sql` - User analysis queries
-- `supabase-test.html` - Testing utilities
+## Workflow for Database Changes
 
-### 📁 `functions/`
-Edge functions and serverless code:
-- `verify-captcha/` - CAPTCHA verification function
+### 1. Test in Dev First
+```bash
+# 1. Write your SQL migration
+# 2. Run it in DEV SQL Editor
+# 3. Test thoroughly on localhost
+# 4. Track in supabase/dev/pending-migrations.md
+```
 
-## Usage Guidelines
+### 2. Apply to Production
+```bash
+# 1. When ready, run the same SQL in PROD SQL Editor
+# 2. Move from pending-migrations.md to applied-migrations.md
+# 3. Test on bitminded.ch
+```
 
-1. **Schema changes**: Add new schema files to `schema/`
-2. **New features**: Add migration scripts to `migrations/`
-3. **Bug fixes**: Add fix scripts to `fixes/`
-4. **Debugging**: Use scripts in `debug/` for troubleshooting
-5. **Analysis**: Use scripts in `tools/` for data analysis
+### 3. Keep Both Synced
+- Always test in dev first
+- Document what's been applied to prod
+- Keep migration files in `migrations/` folder
+- Track deployment status in `prod/` and `dev/` folders
 
-## File Naming Convention
+## Edge Functions
 
-- **Schema**: `[feature]-schema.sql`
-- **Migrations**: `add-[feature].sql` or `update-[feature].sql`
-- **Fixes**: `fix-[issue].sql`
-- **Debug**: `check-[feature].sql` or `debug-[issue].sql`
-- **Tools**: `[purpose]-[feature].sql`
+Edge Functions are in `/functions/` and are deployed to BOTH environments:
 
-## Execution Order
+```bash
+# Deploy to dev
+supabase functions deploy <function-name> --project-ref eygpejbljuqpxwwoawkn
 
-1. Run `schema/` files first for initial setup
-2. Apply `migrations/` in chronological order
-3. Apply `fixes/` as needed
-4. Use `debug/` and `tools/` for maintenance
+# Deploy to prod
+supabase functions deploy <function-name> --project-ref dynxqnrkmjcvgzsugxtm
+```
+
+Track which functions are deployed where in:
+- `dev/deployed-functions.md`
+- `prod/deployed-functions.md`
+
+## Environment Detection
+
+The app automatically detects which environment to use based on hostname:
+- **localhost** → Dev Supabase
+- **bitminded.ch** → Production Supabase
+
+See `/js/env-config.js` for implementation.
+
+## Quick Links
+
+### Dev Setup
+- Setup guide: `/supabase/dev/SETUP.md`
+- Cron jobs: `/supabase/dev/cron-jobs.sql`
+- Environment vars: `/supabase/dev/environment-variables.md`
+
+### Production Deployment
+- Deployment checklist: `/supabase/prod/DEPLOYMENT_CHECKLIST.md`
+- Applied migrations: `/supabase/prod/applied-migrations.md`
+
+## Best Practices
+
+1. **Never test directly in production**
+2. **Always test migrations in dev first**
+3. **Document what's deployed where**
+4. **Keep service role keys secure** (not in git)
+5. **Use environment variables in Edge Functions**
+6. **Track pending vs applied migrations**
+
+## Getting Help
+
+- Check `/supabase/dev/` for dev environment docs
+- Check `/supabase/prod/` for production docs
+- Review `/supabase/shared/` for common patterns
