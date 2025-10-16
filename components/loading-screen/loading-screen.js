@@ -98,14 +98,20 @@ class LoadingScreen {
         });
 
         // Legacy support for window.translationReady
-        const checkTranslationReady = () => {
-            if (window.translationReady) {
-                this.setReadyFlag('translation', true);
-            } else {
-                setTimeout(checkTranslationReady, 100);
-            }
-        };
-        checkTranslationReady();
+        // Check immediately first in case it's already set
+        if (window.translationReady) {
+            this.setReadyFlag('translation', true);
+        } else {
+            // If not ready yet, start polling
+            const checkTranslationReady = () => {
+                if (window.translationReady) {
+                    this.setReadyFlag('translation', true);
+                } else {
+                    setTimeout(checkTranslationReady, 50); // Check more frequently
+                }
+            };
+            checkTranslationReady();
+        }
     }
 
     /**
