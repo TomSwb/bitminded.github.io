@@ -75,6 +75,7 @@
 
 /* Loading screen hidden state */
 #loading-screen.hidden {
+    display: none !important;
     opacity: 0;
     pointer-events: none;
 }
