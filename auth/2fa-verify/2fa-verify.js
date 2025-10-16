@@ -459,14 +459,42 @@ class TwoFactorVerify {
     }
 }
 
+    /**
+     * Cancel 2FA verification and sign out
+     */
+    async cancel() {
+        try {
+            console.log('🚫 Cancelling 2FA verification and signing out');
+            
+            // Sign out from Supabase
+            await window.supabase.auth.signOut();
+            
+            // Clear pending 2FA data
+            sessionStorage.removeItem('pending_2fa_user');
+            sessionStorage.removeItem('pending_2fa_time');
+            
+            // Redirect to login
+            window.location.href = '/auth/';
+        } catch (error) {
+            console.error('Error during cancel:', error);
+            // Redirect anyway
+            window.location.href = '/auth/';
+        }
+    }
+}
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         const verify = new TwoFactorVerify();
         verify.init();
+        // Expose globally for cancel button
+        window.twoFactorVerify = verify;
     });
 } else {
     const verify = new TwoFactorVerify();
     verify.init();
+    // Expose globally for cancel button
+    window.twoFactorVerify = verify;
 }
 
