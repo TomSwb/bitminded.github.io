@@ -191,8 +191,11 @@ class AvatarCropperPage {
             const croppedImage = await this.getCroppedImage();
             console.log('✅ Image cropped, data URL length:', croppedImage.length);
             
-            // Send cropped image to parent window via postMessage
-            if (window.opener && !window.opener.closed) {
+            // Check if we're in a popup window or full page
+            const isPopup = window.opener && !window.opener.closed;
+            
+            if (isPopup) {
+                // Send cropped image to parent window via postMessage
                 try {
                     console.log('📤 Sending cropped image to parent window...');
                     window.opener.postMessage({ 
@@ -200,22 +203,26 @@ class AvatarCropperPage {
                         imageData: croppedImage
                     }, window.location.origin);
                     console.log('✅ Message sent to parent');
+                    
+                    // Small delay before closing
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    
+                    // Close window
+                    window.close();
                 } catch (e) {
                     console.error('Could not post message to opener:', e);
                     alert('Failed to send image data. Please try again.');
                     return;
                 }
             } else {
-                console.error('Parent window not available');
-                alert('Parent window closed. Please try again.');
-                return;
+                // Full page mode (mobile) - store in sessionStorage and navigate back
+                console.log('📤 Storing cropped image in sessionStorage for mobile...');
+                sessionStorage.setItem('avatar_cropped_image', croppedImage);
+                sessionStorage.setItem('avatar_crop_confirmed', 'true');
+                
+                // Navigate back to account page
+                window.location.href = '/account/';
             }
-            
-            // Small delay before closing
-            await new Promise(resolve => setTimeout(resolve, 200));
-            
-            // Close window
-            window.close();
         } catch (error) {
             console.error('Error cropping image:', error);
             alert('Failed to crop image. Please try again.');
@@ -225,7 +232,18 @@ class AvatarCropperPage {
     handleCancel() {
         // Clean up sessionStorage
         sessionStorage.removeItem('avatar_crop_image');
-        window.close();
+        sessionStorage.removeItem('avatar_cropped_image');
+        sessionStorage.removeItem('avatar_crop_confirmed');
+        
+        // Check if we're in a popup or full page
+        const isPopup = window.opener && !window.opener.closed;
+        
+        if (isPopup) {
+            window.close();
+        } else {
+            // Navigate back to account page
+            window.location.href = '/account/';
+        }
     }
     
     async getCroppedImage() {
