@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Your Avatar - BitMinded</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="avatar-cropper-page.css">
+</head>
+<body>
+    <div class="cropper-page">
+        <div class="cropper-page__container">
+            <div class="cropper-page__header">
+                <h1 class="translatable-content" data-translation-key="avatar.cropper.title">Position Your Avatar</h1>
+                <p class="translatable-content" data-translation-key="avatar.cropper.subtitle">Drag to reposition • Use zoom buttons to adjust size</p>
+            </div>
+            
+            <div class="cropper-page__body">
+                <div class="cropper-page__preview-container">
+                    <div class="cropper-page__preview-circle">
+                        <img id="cropper-image" class="cropper-page__image" src="" alt="Preview" draggable="false" />
+                    </div>
+                </div>
+                
+                <div class="cropper-page__controls">
+                    <button type="button" id="zoom-out-btn" class="cropper-page__zoom-btn" title="Zoom Out">
+                        <span>−</span>
+                    </button>
+                    <span class="cropper-page__zoom-label translatable-content" data-translation-key="avatar.cropper.zoom">Zoom</span>
+                    <button type="button" id="zoom-in-btn" class="cropper-page__zoom-btn" title="Zoom In">
+                        <span>+</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cropper-page__footer">
+                <button type="button" id="cancel-btn" class="cropper-page__btn cropper-page__btn--secondary translatable-content" data-translation-key="avatar.cropper.cancel">
+                    Cancel
+                </button>
+                <button type="button" id="confirm-btn" class="cropper-page__btn cropper-page__btn--primary translatable-content" data-translation-key="avatar.cropper.confirm">
+                    Use This Photo
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="avatar-cropper-page.js"></script>
+</body>
+</html>
+

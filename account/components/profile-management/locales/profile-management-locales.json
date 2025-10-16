@@ -26,7 +26,16 @@
     "Avatar updated successfully": "Avatar updated successfully",
     "Username updated successfully": "Username updated successfully",
     "Verification email sent to your new email address": "Verification email sent to your new email address",
-    "Verification email sent successfully": "Verification email sent successfully"
+    "Verification email sent successfully": "Verification email sent successfully",
+    "avatar": {
+      "cropper": {
+        "title": "Position Your Avatar",
+        "subtitle": "Drag to reposition • Use zoom buttons to adjust size",
+        "zoom": "Zoom",
+        "cancel": "Cancel",
+        "confirm": "Use This Photo"
+      }
+    }
   },
   "es": {
     "Profile Information": "Información del Perfil",
@@ -55,7 +64,16 @@
     "Avatar updated successfully": "Avatar actualizado exitosamente",
     "Username updated successfully": "Nombre de usuario actualizado exitosamente",
     "Verification email sent to your new email address": "Correo de verificación enviado a tu nueva dirección de correo electrónico",
-    "Verification email sent successfully": "Correo de verificación enviado exitosamente"
+    "Verification email sent successfully": "Correo de verificación enviado exitosamente",
+    "avatar": {
+      "cropper": {
+        "title": "Posiciona Tu Avatar",
+        "subtitle": "Arrastra para reposicionar • Usa los botones de zoom para ajustar el tamaño",
+        "zoom": "Zoom",
+        "cancel": "Cancelar",
+        "confirm": "Usar Esta Foto"
+      }
+    }
   },
   "fr": {
     "Profile Information": "Informations du Profil",
@@ -84,7 +102,16 @@
     "Avatar updated successfully": "Avatar mis à jour avec succès",
     "Username updated successfully": "Nom d'utilisateur mis à jour avec succès",
     "Verification email sent to your new email address": "Email de vérification envoyé à votre nouvelle adresse email",
-    "Verification email sent successfully": "Email de vérification envoyé avec succès"
+    "Verification email sent successfully": "Email de vérification envoyé avec succès",
+    "avatar": {
+      "cropper": {
+        "title": "Positionnez Votre Avatar",
+        "subtitle": "Glissez pour repositionner • Utilisez les boutons de zoom pour ajuster la taille",
+        "zoom": "Zoom",
+        "cancel": "Annuler",
+        "confirm": "Utiliser Cette Photo"
+      }
+    }
   },
   "de": {
     "Profile Information": "Profilinformationen",
@@ -113,6 +140,15 @@
     "Avatar updated successfully": "Avatar erfolgreich aktualisiert",
     "Username updated successfully": "Benutzername erfolgreich aktualisiert",
     "Verification email sent to your new email address": "Verifizierungs-E-Mail an Ihre neue E-Mail-Adresse gesendet",
-    "Verification email sent successfully": "Verifizierungs-E-Mail erfolgreich gesendet"
+    "Verification email sent successfully": "Verifizierungs-E-Mail erfolgreich gesendet",
+    "avatar": {
+      "cropper": {
+        "title": "Positionieren Sie Ihr Avatar",
+        "subtitle": "Ziehen zum Neu positionieren • Verwenden Sie Zoom-Tasten zum Anpassen der Größe",
+        "zoom": "Zoom",
+        "cancel": "Abbrechen",
+        "confirm": "Dieses Foto Verwenden"
+      }
+    }
   }
 }

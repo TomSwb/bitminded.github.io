@@ -1,0 +1,175 @@
+/* Avatar Cropper Page Styles */
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.cropper-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+    background: var(--color-background-primary);
+}
+
+.cropper-page__container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.cropper-page__header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.cropper-page__header h1 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+}
+
+.cropper-page__header p {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.cropper-page__body {
+    margin-bottom: var(--spacing-xl);
+}
+
+.cropper-page__preview-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.cropper-page__preview-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cropper-page__preview-circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--color-primary);
+    position: relative;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.cropper-page__image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: none;
+    height: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: move;
+    transform-origin: center center;
+}
+
+.cropper-page__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.cropper-page__zoom-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xl);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cropper-page__zoom-btn:hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.cropper-page__zoom-label {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.cropper-page__footer {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+.cropper-page__btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    min-width: 140px;
+}
+
+.cropper-page__btn--primary {
+    background: var(--color-primary);
+    color: var(--color-text-dark);
+}
+
+.cropper-page__btn--primary:hover {
+    background: var(--color-secondary);
+    color: var(--color-text-light);
+}
+
+.cropper-page__btn--secondary {
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.cropper-page__btn--secondary:hover {
+    background: var(--color-background-tertiary);
+    color: var(--color-text-primary);
+}
+
+@media (max-width: 500px) {
+    .cropper-page {
+        padding: var(--spacing-md);
+    }
+    
+    .cropper-page__preview-container {
+        width: 280px;
+        height: 280px;
+    }
+    
+    .cropper-page__preview-circle {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .cropper-page__footer {
+        flex-direction: column-reverse;
+    }
+    
+    .cropper-page__btn {
+        width: 100%;
+    }
+}
+
