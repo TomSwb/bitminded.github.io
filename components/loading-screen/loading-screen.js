@@ -23,7 +23,7 @@ class LoadingScreen {
         const defaultOptions = {
             container: 'body',
             autoHide: true,
-            timeout: 5000 // 5 second timeout
+            timeout: 3000 // 3 second timeout
         };
         
         this.options = { ...defaultOptions, ...options };
@@ -100,12 +100,20 @@ class LoadingScreen {
         // Legacy support for window.translationReady
         // Check immediately first in case it's already set
         if (window.translationReady) {
+            console.log('✅ Translation already ready on init');
             this.setReadyFlag('translation', true);
         } else {
             // If not ready yet, start polling
+            let pollCount = 0;
+            const maxPolls = 60; // Max 3 seconds (60 * 50ms)
             const checkTranslationReady = () => {
+                pollCount++;
                 if (window.translationReady) {
+                    console.log('✅ Translation ready after polling:', pollCount, 'checks');
                     this.setReadyFlag('translation', true);
+                } else if (pollCount >= maxPolls) {
+                    console.warn('⚠️ Translation polling timeout, forcing hide');
+                    this.forceHide();
                 } else {
                     setTimeout(checkTranslationReady, 50); // Check more frequently
                 }
