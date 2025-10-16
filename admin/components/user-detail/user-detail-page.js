@@ -691,13 +691,53 @@ class UserDetailPage {
         if (!this.currentUser || !window.supabase) return;
 
         try {
-            // Load active sessions - sessions are displayed dynamically in the UI
-            // The session list is populated when the tab is shown
-            console.log('🔒 Security tab loaded - sessions will be displayed');
+            // Load session management component HTML
+            const response = await fetch('/admin/components/user-detail/components/session-management/session-management.html');
+            const html = await response.text();
+            
+            const container = document.getElementById('session-management-container');
+            if (container) {
+                container.innerHTML = html;
+                
+                // Load component CSS
+                if (!document.querySelector('link[href*="session-management.css"]')) {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = '/admin/components/user-detail/components/session-management/session-management.css';
+                    document.head.appendChild(link);
+                }
+                
+                // Load component JS and initialize
+                if (!window.SessionManagement) {
+                    await this.loadScript('/admin/components/user-detail/components/session-management/session-management.js');
+                }
+                
+                // Initialize session management component
+                if (window.SessionManagement) {
+                    const sessionMgmt = new window.SessionManagement();
+                    await sessionMgmt.init(this.currentUser.id);
+                    this.sessionManagement = sessionMgmt;
+                }
+            }
+
+            console.log('🔒 Security tab loaded with session management component');
 
         } catch (error) {
             console.error('❌ Error loading security data:', error);
         }
+    }
+    
+    /**
+     * Helper to load a script dynamically
+     */
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
     }
 
     /**
@@ -888,8 +928,62 @@ class UserDetailPage {
     }
 
     async revokeAllSessions() {
-        console.log('🚫 Revoke sessions clicked');
-        // TODO: Implement revoke sessions functionality
+        if (!this.currentUser || !window.supabase) return;
+        
+        try {
+            console.log('🚫 Revoking all sessions for user:', this.currentUser.email);
+            
+            // Confirm action
+            const confirmed = confirm(
+                `⚠️ REVOKE ALL SESSIONS\n\n` +
+                `User: ${this.currentUser.username}\n` +
+                `Email: ${this.currentUser.email}\n\n` +
+                `This will:\n` +
+                `- Log out the user from ALL devices\n` +
+                `- Revoke all active sessions\n` +
+                `- User will need to log in again\n\n` +
+                `Are you sure?`
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            this.showLoading(true);
+            
+            // Update all non-revoked sessions for this user
+            const { error } = await window.supabase
+                .from('user_login_activity')
+                .update({ revoked_at: new Date().toISOString() })
+                .eq('user_id', this.currentUser.id)
+                .is('revoked_at', null);
+            
+            if (error) {
+                throw error;
+            }
+            
+            this.showSuccess('All sessions revoked successfully');
+            console.log('✅ All sessions revoked successfully');
+            
+            // Log admin action
+            if (window.adminLayout) {
+                await window.adminLayout.logAdminAction(
+                    'all_sessions_revoked',
+                    `Revoked all sessions for user: ${this.currentUser.username} (${this.currentUser.email})`
+                );
+            }
+            
+            // Refresh the session management component
+            if (this.sessionManagement) {
+                await this.sessionManagement.refresh();
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to revoke all sessions:', error);
+            this.showError('Failed to revoke all sessions: ' + error.message);
+        } finally {
+            this.showLoading(false);
+        }
     }
 
     async editUser() {
