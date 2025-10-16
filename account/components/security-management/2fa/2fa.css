@@ -251,7 +251,7 @@
 
     .two-factor-auth__title-row {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 0.5rem;
     }
 
@@ -260,7 +260,7 @@
     }
 
     .two-factor-auth__status-badge {
-        align-self: flex-start;
+        align-self: center;
     }
 
     .two-factor-auth__action-btn {

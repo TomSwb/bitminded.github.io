@@ -40,6 +40,9 @@ body {
 
 .cropper-page__body {
     margin-bottom: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .cropper-page__preview-container {
