@@ -64,8 +64,15 @@
     });
     
     // Signal loading screen that environment config is ready
-    if (window.loadingScreen) {
-        window.loadingScreen.setReadyFlag('environment', true);
-    }
+    // Use a small delay to ensure loading screen is initialized
+    const setEnvReady = () => {
+        if (window.loadingScreen) {
+            window.loadingScreen.setReadyFlag('environment', true);
+        } else {
+            // If loading screen not ready yet, try again shortly
+            setTimeout(setEnvReady, 50);
+        }
+    };
+    setEnvReady();
 })();
 
