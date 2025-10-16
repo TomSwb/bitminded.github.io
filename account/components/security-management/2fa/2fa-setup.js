@@ -128,6 +128,7 @@ class TwoFactorAuthSetup {
      */
     setupEventListeners() {
         // Step 0: Introduction
+        document.getElementById('btn-cancel').addEventListener('click', () => this.handleCancel());
         document.getElementById('btn-start').addEventListener('click', () => this.handleStart());
 
         // Step 1: QR Code
@@ -558,21 +559,45 @@ If you lose access to your authenticator app, you can use these codes to log in.
     }
 
     /**
+     * Handle cancel button
+     */
+    handleCancel() {
+        const isPopup = window.opener && !window.opener.closed;
+        
+        if (isPopup) {
+            window.close();
+        } else {
+            // Navigate back to account page for mobile PWA
+            window.location.href = '/account/';
+        }
+    }
+    
+    /**
      * Close window and notify parent
      */
     closeWindow() {
-        // Send message to parent window
-        if (window.opener) {
+        // Check if we're in a popup or full page (mobile PWA)
+        const isPopup = window.opener && !window.opener.closed;
+        
+        if (isPopup) {
+            // Send message to parent window (desktop popup mode)
             window.opener.postMessage({
                 type: '2fa-setup-complete',
                 status: 'success'
             }, window.location.origin);
+            
+            // Close after a short delay
+            setTimeout(() => {
+                window.close();
+            }, 500);
+        } else {
+            // Store completion status in sessionStorage for mobile PWA
+            sessionStorage.setItem('2fa_setup_complete', 'true');
+            sessionStorage.setItem('2fa_setup_timestamp', Date.now().toString());
+            
+            // Navigate back to account page
+            window.location.href = '/account/';
         }
-
-        // Close after a short delay
-        setTimeout(() => {
-            window.close();
-        }, 500);
     }
 
     /**
