@@ -43,16 +43,13 @@ body {
 }
 
 .cropper-page__preview-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: var(--spacing-lg);
-}
-
-.cropper-page__preview-container {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: var(--spacing-lg);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .cropper-page__preview-circle {
@@ -76,6 +73,7 @@ body {
     -moz-user-select: none;
     cursor: move;
     transform-origin: center center;
+    transform: translate(-50%, -50%);
 }
 
 .cropper-page__controls {

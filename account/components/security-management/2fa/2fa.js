@@ -60,6 +60,14 @@ class TwoFactorAuth {
      * Setup component elements and event listeners
      */
     async setupComponent() {
+        // Check if we're returning from 2FA setup on mobile PWA
+        const setupComplete = sessionStorage.getItem('2fa_setup_complete');
+        if (setupComplete === 'true') {
+            console.log('📨 Detected 2FA setup completion (mobile mode)');
+            sessionStorage.removeItem('2fa_setup_complete');
+            sessionStorage.removeItem('2fa_setup_timestamp');
+        }
+        
         // Get UI elements
         this.statusBadge = document.getElementById('2fa-status-badge');
         this.actionButton = document.getElementById('2fa-component-action-btn');
@@ -348,18 +356,27 @@ class TwoFactorAuth {
     openSetupWindow() {
         try {
             const setupUrl = '/account/components/security-management/2fa/2fa-setup.html';
-            const windowFeatures = 'width=600,height=800,scrollbars=yes,resizable=yes';
             
-            console.log('🔧 2FA: Opening setup window...');
+            // Detect if we're on mobile/tablet or in PWA mode
+            const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
             
-            this.setupWindow = window.open(setupUrl, '2fa-setup', windowFeatures);
+            console.log('🔧 2FA: Opening setup window...', {isMobile, isPWA});
             
-            if (!this.setupWindow || this.setupWindow.closed || typeof this.setupWindow.closed === 'undefined') {
-                // Pop-up was blocked
-                console.warn('⚠️ 2FA: Setup window blocked by browser');
-                this.showError('Please enable pop-ups for this site to set up 2FA');
+            if (isMobile || isPWA) {
+                // On mobile/PWA, navigate to the setup page directly
+                window.location.href = setupUrl;
             } else {
-                console.log('✅ 2FA: Setup window opened');
+                // On desktop, use popup window
+                const windowFeatures = 'width=600,height=800,scrollbars=yes,resizable=yes';
+                this.setupWindow = window.open(setupUrl, '2fa-setup', windowFeatures);
+                
+                if (!this.setupWindow || this.setupWindow.closed || typeof this.setupWindow.closed === 'undefined') {
+                    // Fallback to full page navigation if popup blocked
+                    window.location.href = setupUrl;
+                } else {
+                    console.log('✅ 2FA: Setup window opened');
+                }
             }
         } catch (error) {
             console.error('❌ 2FA: Failed to open setup window:', error);
