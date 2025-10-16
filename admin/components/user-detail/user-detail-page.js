@@ -160,7 +160,22 @@ class UserDetailPage {
         // Back button
         if (this.elements.backButton) {
             this.elements.backButton.addEventListener('click', () => {
-                window.location.href = '/admin/?section=users';
+                // Check if this tab was opened as a new tab (no navigation history)
+                // or has an opener (opened via window.open or target="_blank")
+                if (window.opener || window.history.length <= 1) {
+                    // Close this tab and focus back to the opener
+                    window.close();
+                    
+                    // If window.close() didn't work (browser security), navigate instead
+                    setTimeout(() => {
+                        if (!window.closed) {
+                            window.location.href = '/admin/?section=users';
+                        }
+                    }, 100);
+                } else {
+                    // Normal navigation if this tab has history
+                    window.location.href = '/admin/?section=users';
+                }
             });
         }
 
@@ -518,6 +533,9 @@ class UserDetailPage {
         if (!this.currentUser) return;
 
         switch (tabName) {
+            case 'overview':
+                await this.refreshStats();
+                break;
             case 'subscriptions':
                 await this.loadSubscriptionsData();
                 break;
@@ -978,11 +996,52 @@ class UserDetailPage {
                 await this.sessionManagement.refresh();
             }
             
+            // Refresh the overview stats to update session count
+            await this.refreshStats();
+            
         } catch (error) {
             console.error('❌ Failed to revoke all sessions:', error);
             this.showError('Failed to revoke all sessions: ' + error.message);
         } finally {
             this.showLoading(false);
+        }
+    }
+    
+    /**
+     * Refresh user statistics (for updating counts after changes)
+     */
+    async refreshStats() {
+        try {
+            console.log('🔄 Refreshing stats for user:', this.currentUser.id);
+            
+            // Call get-user-sessions Edge Function to get accurate count
+            // (it also cleans up stale sessions, ensuring accurate count)
+            const { data: sessionsData, error } = await window.supabase.functions.invoke('get-user-sessions', {
+                body: { user_id: this.currentUser.id }
+            });
+            
+            if (error) {
+                console.error('❌ Error fetching sessions:', error);
+                throw error;
+            }
+            
+            console.log('📊 Sessions data received:', sessionsData);
+            
+            // Count the active sessions returned
+            const activeSessionCount = sessionsData?.sessions?.length || 0;
+            this.currentUser.active_sessions = activeSessionCount;
+            
+            console.log('✅ Updated active_sessions to:', this.currentUser.active_sessions);
+            
+            // Update display
+            if (this.elements.sessionCount) {
+                this.elements.sessionCount.textContent = this.currentUser.active_sessions;
+                console.log('✅ Updated sessionCount element to:', this.currentUser.active_sessions);
+            } else {
+                console.warn('⚠️ sessionCount element not found!');
+            }
+        } catch (error) {
+            console.error('❌ Could not refresh stats:', error);
         }
     }
 

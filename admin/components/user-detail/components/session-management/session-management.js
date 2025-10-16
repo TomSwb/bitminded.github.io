@@ -104,6 +104,11 @@ class SessionManagement {
             // Display sessions
             this.displaySessions();
             
+            // Notify parent to refresh stats if sessions were cleaned up
+            if (window.userDetailPage && typeof window.userDetailPage.refreshStats === 'function') {
+                await window.userDetailPage.refreshStats();
+            }
+            
         } catch (error) {
             console.error('❌ Failed to load sessions:', error);
             this.showError('Failed to load sessions: ' + error.message);
@@ -359,6 +364,11 @@ class SessionManagement {
             // Reload sessions
             console.log('🔄 Reloading sessions list...');
             await this.loadSessions();
+            
+            // Notify parent to refresh stats
+            if (window.userDetailPage && typeof window.userDetailPage.refreshStats === 'function') {
+                await window.userDetailPage.refreshStats();
+            }
             
         } catch (error) {
             console.error('❌ Failed to revoke session:', error);
