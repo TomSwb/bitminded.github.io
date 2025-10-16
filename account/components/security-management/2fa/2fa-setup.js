@@ -93,6 +93,8 @@ class TwoFactorAuthSetup {
                 if (key && translations[key]) {
                     element.textContent = translations[key];
                 }
+                // Add loaded class to make element visible
+                element.classList.add('loaded');
             });
 
             console.log(`✅ Wizard translations updated for language: ${currentLanguage}`);

@@ -379,6 +379,8 @@ class AvatarCropperPage {
                     element.textContent = value;
                 }
             }
+            // Add loaded class to make element visible
+            element.classList.add('loaded');
         });
     }
 }
