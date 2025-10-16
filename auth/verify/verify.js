@@ -168,6 +168,21 @@ class EmailVerification {
                         console.log('✅ Email updated in user_profiles');
                     }
                     
+                    // Log the login activity for email change verification (creates new session)
+                    try {
+                        const { error: logError } = await window.supabase.functions.invoke('log-login', {
+                            body: { user_id: data.user.id }
+                        });
+                        
+                        if (logError) {
+                            console.warn('⚠️ Failed to log login activity:', logError);
+                        } else {
+                            console.log('✅ Login activity logged');
+                        }
+                    } catch (logErr) {
+                        console.warn('⚠️ Error logging login activity:', logErr);
+                    }
+                    
                     this.showSuccess();
                     // Redirect to account profile after 3 seconds
                     setTimeout(() => {
@@ -190,6 +205,22 @@ class EmailVerification {
                 
                 if (sessionData?.session?.user) {
                     console.log('✅ Found existing session, user already verified');
+                    
+                    // Log the login activity if this is their first verified session
+                    try {
+                        const { error: logError } = await window.supabase.functions.invoke('log-login', {
+                            body: { user_id: sessionData.session.user.id }
+                        });
+                        
+                        if (logError) {
+                            console.warn('⚠️ Failed to log login activity:', logError);
+                        } else {
+                            console.log('✅ Login activity logged');
+                        }
+                    } catch (logErr) {
+                        console.warn('⚠️ Error logging login activity:', logErr);
+                    }
+                    
                     this.showSuccess();
                     return;
                 }
@@ -211,6 +242,24 @@ class EmailVerification {
 
             if (data.user) {
                 console.log('✅ Email verification successful');
+                
+                // Log the login activity for first-time login after email verification
+                try {
+                    const { error: logError } = await window.supabase.functions.invoke('log-login', {
+                        body: { user_id: data.user.id }
+                    });
+                    
+                    if (logError) {
+                        console.warn('⚠️ Failed to log login activity:', logError);
+                        // Don't throw error - login activity logging is not critical
+                    } else {
+                        console.log('✅ Login activity logged');
+                    }
+                } catch (logErr) {
+                    console.warn('⚠️ Error logging login activity:', logErr);
+                    // Continue anyway - this is not critical
+                }
+                
                 this.showSuccess();
             } else {
                 throw new Error('No user data received');
