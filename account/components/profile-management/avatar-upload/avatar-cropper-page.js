@@ -353,8 +353,13 @@ class AvatarCropperPage {
             // Update all translatable elements
             this.updateTranslations(languageTranslations);
             
+            // Remove hide-translatable class to show content
+            document.documentElement.classList.remove('hide-translatable');
+            
         } catch (error) {
             console.error('Failed to load translations:', error);
+            // Remove hide-translatable even if translations fail
+            document.documentElement.classList.remove('hide-translatable');
         }
     }
     

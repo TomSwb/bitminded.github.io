@@ -97,6 +97,9 @@ class TwoFactorAuthSetup {
 
             console.log(`✅ Wizard translations updated for language: ${currentLanguage}`);
         }
+        
+        // Remove hide-translatable class to show content
+        document.documentElement.classList.remove('hide-translatable');
     }
 
     /**
