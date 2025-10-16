@@ -10,6 +10,10 @@ class AvatarUpload {
         this.allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
         this.uploadProgress = 0;
         
+        // Avatar cropper window
+        this.cropperWindow = null;
+        this.currentFile = null;
+        
         // Bind methods
         this.handleFileSelect = this.handleFileSelect.bind(this);
         this.handleFileChange = this.handleFileChange.bind(this);
@@ -27,6 +31,19 @@ class AvatarUpload {
         try {
             // Set up event listeners
             this.setupEventListeners();
+            
+            // Listen for postMessage from cropper window
+            window.addEventListener('message', (event) => {
+                if (event.origin === window.location.origin && event.data.type === 'avatar_cropped') {
+                    console.log('📨 Received avatar_cropped message from cropper');
+                    if (event.data.imageData) {
+                        console.log('✅ Received image data, length:', event.data.imageData.length);
+                        this.handleCroppedImage(event.data.imageData);
+                    } else {
+                        console.error('❌ No image data in message');
+                    }
+                }
+            });
             
             this.isInitialized = true;
             console.log('✅ Avatar upload component initialized successfully');
@@ -78,29 +95,38 @@ class AvatarUpload {
             // Validate file
             this.validateFile(file);
             
-            // Show loading state
-            this.showLoading(true);
+            // Hide any errors
             this.hideError();
-            this.hideSuccess();
             
-            // Upload file
-            const avatarUrl = await this.uploadFile(file);
+            // Store file for later
+            this.currentFile = file;
             
-            // Update avatar display
-            await this.updateAvatarDisplay(avatarUrl);
-            
-            // Show success
-            this.showSuccess('Avatar updated successfully');
-            
-            // Trigger profile update event
-            this.triggerProfileUpdate();
+            // Convert file to data URL
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Store image data in sessionStorage
+                sessionStorage.setItem('avatar_crop_image', e.target.result);
+                sessionStorage.removeItem('avatar_crop_confirmed');
+                sessionStorage.removeItem('avatar_cropped_image');
+                
+                // Open cropper window
+                const cropperUrl = '/account/components/profile-management/avatar-upload/cropper.html';
+                const windowFeatures = 'width=600,height=700,scrollbars=no,resizable=yes';
+                
+                this.cropperWindow = window.open(cropperUrl, 'avatar-cropper', windowFeatures);
+                
+                if (!this.cropperWindow || this.cropperWindow.closed || typeof this.cropperWindow.closed === 'undefined') {
+                    this.showError('Please enable pop-ups for this site to crop your avatar');
+                    sessionStorage.removeItem('avatar_crop_image');
+                }
+            };
+            reader.readAsDataURL(file);
             
         } catch (error) {
-            console.error('❌ Failed to upload avatar:', error);
-            this.showError(error.message || 'Failed to upload avatar');
+            console.error('❌ Failed to process file:', error);
+            this.showError(error.message || 'Failed to process file');
         } finally {
-            this.showLoading(false);
-            // Clear file input
+            // Clear file input so same file can be selected again
             event.target.value = '';
         }
     }
@@ -126,6 +152,55 @@ class AvatarUpload {
     }
 
     /**
+     * Handle cropped image received from popup window
+     */
+    async handleCroppedImage(imageDataUrl) {
+        try {
+            console.log('🔄 Processing cropped image...');
+            
+            // Show loading state
+            this.showLoading(true);
+            this.hideError();
+            this.hideSuccess();
+            
+            // Convert data URL to File
+            const file = await this.dataURLtoFile(imageDataUrl, 'avatar.jpg');
+            console.log('✅ File created:', file.name, file.size, 'bytes');
+            
+            console.log('🔄 Uploading to Supabase...');
+            // Upload file
+            const avatarUrl = await this.uploadFile(file);
+            console.log('✅ Uploaded, URL:', avatarUrl);
+            
+            console.log('🔄 Updating avatar display...');
+            // Update avatar display
+            await this.updateAvatarDisplay(avatarUrl);
+            
+            // Show success
+            this.showSuccess('Avatar updated successfully');
+            console.log('✅ Avatar update complete!');
+            
+            // Trigger profile update event
+            this.triggerProfileUpdate();
+            
+        } catch (error) {
+            console.error('❌ Failed to upload avatar:', error);
+            this.showError(error.message || 'Failed to upload avatar');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+    
+    /**
+     * Convert data URL to File object
+     */
+    async dataURLtoFile(dataUrl, filename) {
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        return new File([blob], filename, { type: 'image/jpeg' });
+    }
+
+    /**
      * Upload file to Supabase Storage
      */
     async uploadFile(file) {
@@ -139,26 +214,44 @@ class AvatarUpload {
             throw new Error('User not authenticated');
         }
 
-        // Create unique filename
+        // Create unique filename with timestamp to bust cache
         const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/avatar.${fileExt}`;
+        const timestamp = Date.now();
+        const fileName = `${user.id}/avatar_${timestamp}.${fileExt}`;
+
+        // Delete old avatar files before uploading new one
+        try {
+            const { data: existingFiles } = await window.supabase.storage
+                .from('avatars')
+                .list(user.id);
+            
+            if (existingFiles && existingFiles.length > 0) {
+                const filesToDelete = existingFiles.map(f => `${user.id}/${f.name}`);
+                await window.supabase.storage
+                    .from('avatars')
+                    .remove(filesToDelete);
+            }
+        } catch (cleanupError) {
+            console.warn('Could not clean up old avatars:', cleanupError);
+            // Continue anyway - not critical
+        }
 
         // Upload file to storage
         const { data: uploadData, error: uploadError } = await window.supabase.storage
             .from('avatars')
             .upload(fileName, file, {
                 cacheControl: '3600',
-                upsert: true,
+                upsert: false, // Changed to false since we use unique filenames now
                 onUploadProgress: (progress) => {
                     this.updateProgress(progress.loaded / progress.total * 100);
                 }
             });
 
         if (uploadError) {
-            throw new Error('Failed to upload file to storage');
+            throw new Error('Failed to upload file to storage: ' + uploadError.message);
         }
 
-        // Get public URL
+        // Get public URL with cache-busting parameter
         const { data: urlData } = window.supabase.storage
             .from('avatars')
             .getPublicUrl(fileName);
@@ -167,7 +260,9 @@ class AvatarUpload {
             throw new Error('Failed to get avatar URL');
         }
 
-        return urlData.publicUrl;
+        // Add cache-busting parameter
+        const urlWithCacheBust = `${urlData.publicUrl}?t=${timestamp}`;
+        return urlWithCacheBust;
     }
 
     /**
@@ -324,8 +419,11 @@ class AvatarUpload {
         
         if (avatarImg && avatarInitial && avatarContainer) {
             if (url) {
+                // Add cache-busting parameter if not already present
+                const cacheBustedUrl = url.includes('?') ? url : `${url}?t=${Date.now()}`;
+                
                 // Show avatar image
-                avatarImg.src = url;
+                avatarImg.src = cacheBustedUrl;
                 avatarImg.style.display = 'block';
                 avatarInitial.style.display = 'none';
                 avatarContainer.classList.add('has-avatar');
