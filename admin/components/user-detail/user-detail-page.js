@@ -135,10 +135,9 @@ class UserDetailPage {
             
             // Action buttons
             grantAccessButton: document.getElementById('user-detail-grant-access'),
-            toggle2faButton: document.getElementById('user-detail-toggle-2fa'),
             revokeSessionsButton: document.getElementById('user-detail-revoke-all-sessions'),
             editUserButton: document.getElementById('user-detail-edit-user'),
-            resetPasswordButton: document.getElementById('user-detail-reset-password'),
+            sendPasswordResetButton: document.getElementById('user-detail-send-password-reset'),
             sendEmailButton: document.getElementById('user-detail-send-email'),
             suspendUserButton: document.getElementById('user-detail-suspend-user'),
             deleteUserButton: document.getElementById('user-detail-delete-user'),
@@ -182,10 +181,6 @@ class UserDetailPage {
             this.elements.grantAccessButton.addEventListener('click', () => this.grantAccess());
         }
 
-        if (this.elements.toggle2faButton) {
-            this.elements.toggle2faButton.addEventListener('click', () => this.toggle2FA());
-        }
-
         if (this.elements.revokeSessionsButton) {
             this.elements.revokeSessionsButton.addEventListener('click', () => this.revokeAllSessions());
         }
@@ -194,8 +189,8 @@ class UserDetailPage {
             this.elements.editUserButton.addEventListener('click', () => this.editUser());
         }
 
-        if (this.elements.resetPasswordButton) {
-            this.elements.resetPasswordButton.addEventListener('click', () => this.resetPassword());
+        if (this.elements.sendPasswordResetButton) {
+            this.elements.sendPasswordResetButton.addEventListener('click', () => this.sendPasswordReset());
         }
 
         if (this.elements.sendEmailButton) {
@@ -696,32 +691,9 @@ class UserDetailPage {
         if (!this.currentUser || !window.supabase) return;
 
         try {
-            // Load 2FA status (check if table exists first)
-            let twoFaData = null;
-            try {
-                const { data, error } = await window.supabase
-                    .from('user_2fa')
-                    .select('is_enabled')
-                    .eq('user_id', this.currentUser.id)
-                    .maybeSingle();
-                
-                if (!error) {
-                    twoFaData = data;
-                } else {
-                    console.warn('⚠️ 2FA table query failed:', error);
-                }
-            } catch (error) {
-                console.warn('⚠️ 2FA table does not exist:', error);
-            }
-
-            // Update 2FA status
-            const twoFaStatus = document.getElementById('user-detail-2fa-status');
-            if (twoFaStatus) {
-                twoFaStatus.textContent = twoFaData?.is_enabled ? 'Enabled' : 'Disabled';
-            }
-
-            // Load active sessions (placeholder)
-            console.log('🔒 Security data loaded');
+            // Load active sessions - sessions are displayed dynamically in the UI
+            // The session list is populated when the tab is shown
+            console.log('🔒 Security tab loaded - sessions will be displayed');
 
         } catch (error) {
             console.error('❌ Error loading security data:', error);
@@ -915,11 +887,6 @@ class UserDetailPage {
         // TODO: Implement grant access functionality
     }
 
-    async toggle2FA() {
-        console.log('🔐 Toggle 2FA clicked');
-        // TODO: Implement toggle 2FA functionality
-    }
-
     async revokeAllSessions() {
         console.log('🚫 Revoke sessions clicked');
         // TODO: Implement revoke sessions functionality
@@ -930,9 +897,53 @@ class UserDetailPage {
         // TODO: Implement edit user functionality
     }
 
-    async resetPassword() {
-        console.log('🔑 Reset password clicked');
-        // TODO: Implement reset password functionality
+    async sendPasswordReset() {
+        if (!this.currentUser || !window.supabase) return;
+        
+        try {
+            console.log('🔑 Sending password reset email...');
+            
+            // Confirm action
+            const confirmed = confirm(
+                `Send password reset email to:\n\n${this.currentUser.email}\n\n` +
+                `The user will receive an email with a link to reset their password.`
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            this.showLoading(true);
+            
+            // Send password reset email using Supabase
+            const { error } = await window.supabase.auth.resetPasswordForEmail(
+                this.currentUser.email,
+                {
+                    redirectTo: `${window.location.origin}/auth/?form=reset-password`
+                }
+            );
+            
+            if (error) {
+                throw error;
+            }
+            
+            this.showSuccess(`Password reset email sent to ${this.currentUser.email}`);
+            console.log('✅ Password reset email sent successfully');
+            
+            // Log admin action
+            if (window.adminLayout) {
+                await window.adminLayout.logAdminAction(
+                    'password_reset_sent',
+                    `Sent password reset email to user: ${this.currentUser.username} (${this.currentUser.email})`
+                );
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to send password reset email:', error);
+            this.showError('Failed to send password reset email: ' + error.message);
+        } finally {
+            this.showLoading(false);
+        }
     }
 
     async sendEmail() {
