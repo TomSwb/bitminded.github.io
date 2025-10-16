@@ -185,6 +185,8 @@ class LoadingScreen {
         if (this.loadingElement && this.isVisible) {
             console.log('✅ Hiding loading screen');
             this.loadingElement.classList.add('hidden');
+            // Force display none with inline style to override any CSS caching issues
+            this.loadingElement.style.display = 'none';
             this.isVisible = false;
             
             // Dispatch custom event
