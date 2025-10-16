@@ -334,6 +334,14 @@ class AvatarCropperPage {
     }
     
     async initializeTranslations() {
+        // Always show content first - add loaded class to all translatable elements
+        document.querySelectorAll('.translatable-content').forEach(element => {
+            element.classList.add('loaded');
+        });
+        
+        // Remove hide-translatable class to show content
+        document.documentElement.classList.remove('hide-translatable');
+        
         try {
             // Load profile management translations
             const response = await fetch('/account/components/profile-management/locales/profile-management-locales.json');
@@ -353,13 +361,8 @@ class AvatarCropperPage {
             // Update all translatable elements
             this.updateTranslations(languageTranslations);
             
-            // Remove hide-translatable class to show content
-            document.documentElement.classList.remove('hide-translatable');
-            
         } catch (error) {
             console.error('Failed to load translations:', error);
-            // Remove hide-translatable even if translations fail
-            document.documentElement.classList.remove('hide-translatable');
         }
     }
     
@@ -379,8 +382,6 @@ class AvatarCropperPage {
                     element.textContent = value;
                 }
             }
-            // Add loaded class to make element visible
-            element.classList.add('loaded');
         });
     }
 }

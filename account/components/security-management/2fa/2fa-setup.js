@@ -83,6 +83,15 @@ class TwoFactorAuthSetup {
      * Update all translations
      */
     updateTranslations() {
+        // Always show content - add loaded class to all translatable elements
+        document.querySelectorAll('.translatable-content').forEach(element => {
+            element.classList.add('loaded');
+        });
+        
+        // Remove hide-translatable class to show content
+        document.documentElement.classList.remove('hide-translatable');
+        
+        // Update translations if available
         if (window.twoFactorAuthTranslations && window.twoFactorAuthTranslations.isReady()) {
             const currentLanguage = localStorage.getItem('language') || 'en';
             const translations = window.twoFactorAuthTranslations.translations[currentLanguage] || window.twoFactorAuthTranslations.translations['en'] || {};
@@ -93,15 +102,12 @@ class TwoFactorAuthSetup {
                 if (key && translations[key]) {
                     element.textContent = translations[key];
                 }
-                // Add loaded class to make element visible
-                element.classList.add('loaded');
             });
 
             console.log(`✅ Wizard translations updated for language: ${currentLanguage}`);
+        } else {
+            console.warn('⚠️ Translations not ready yet, showing default content');
         }
-        
-        // Remove hide-translatable class to show content
-        document.documentElement.classList.remove('hide-translatable');
     }
 
     /**
