@@ -143,11 +143,18 @@ class LoadingScreen {
      */
     setReadyFlag(flag, value) {
         this.readyFlags[flag] = value;
-        // Loading screen ready flag set
+        console.log(`🏁 Ready flag set: ${flag} = ${value}`, this.readyFlags);
         
         // Safety check for options
         if (this.options && this.options.autoHide && this.isReadyToHide()) {
+            console.log('✅ All conditions met, attempting to hide');
             this.hide();
+        } else {
+            console.log('⏳ Not ready to hide yet:', {
+                hasOptions: !!this.options,
+                autoHide: this.options?.autoHide,
+                isReadyToHide: this.isReadyToHide()
+            });
         }
     }
 
@@ -176,12 +183,17 @@ class LoadingScreen {
      */
     hide() {
         if (this.loadingElement && this.isVisible) {
+            console.log('✅ Hiding loading screen');
             this.loadingElement.classList.add('hidden');
             this.isVisible = false;
-            // Loading screen hidden
             
             // Dispatch custom event
             document.dispatchEvent(new CustomEvent('loadingScreenHidden'));
+        } else {
+            console.warn('⚠️ hide() called but conditions not met:', {
+                hasElement: !!this.loadingElement,
+                isVisible: this.isVisible
+            });
         }
     }
 
