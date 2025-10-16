@@ -29,10 +29,27 @@ class AvatarUpload {
         }
 
         try {
+            // Check if we're returning from mobile cropper with a cropped image
+            const croppedImage = sessionStorage.getItem('avatar_cropped_image');
+            const cropConfirmed = sessionStorage.getItem('avatar_crop_confirmed');
+            
+            if (croppedImage && cropConfirmed === 'true') {
+                console.log('📨 Found cropped image in sessionStorage (mobile mode)');
+                // Clean up sessionStorage
+                sessionStorage.removeItem('avatar_cropped_image');
+                sessionStorage.removeItem('avatar_crop_confirmed');
+                sessionStorage.removeItem('avatar_crop_image');
+                
+                // Process the cropped image
+                setTimeout(() => {
+                    this.handleCroppedImage(croppedImage);
+                }, 100);
+            }
+            
             // Set up event listeners
             this.setupEventListeners();
             
-            // Listen for postMessage from cropper window
+            // Listen for postMessage from cropper window (desktop popup mode)
             window.addEventListener('message', (event) => {
                 if (event.origin === window.location.origin && event.data.type === 'avatar_cropped') {
                     console.log('📨 Received avatar_cropped message from cropper');
@@ -109,15 +126,24 @@ class AvatarUpload {
                 sessionStorage.removeItem('avatar_crop_confirmed');
                 sessionStorage.removeItem('avatar_cropped_image');
                 
+                // Detect if we're on mobile/tablet or desktop
+                const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
                 // Open cropper window
                 const cropperUrl = '/account/components/profile-management/avatar-upload/cropper.html';
-                const windowFeatures = 'width=600,height=700,scrollbars=no,resizable=yes';
                 
-                this.cropperWindow = window.open(cropperUrl, 'avatar-cropper', windowFeatures);
-                
-                if (!this.cropperWindow || this.cropperWindow.closed || typeof this.cropperWindow.closed === 'undefined') {
-                    this.showError('Please enable pop-ups for this site to crop your avatar');
-                    sessionStorage.removeItem('avatar_crop_image');
+                if (isMobile) {
+                    // On mobile, navigate to the cropper page directly
+                    window.location.href = cropperUrl;
+                } else {
+                    // On desktop, use popup window
+                    const windowFeatures = 'width=600,height=700,scrollbars=no,resizable=yes';
+                    this.cropperWindow = window.open(cropperUrl, 'avatar-cropper', windowFeatures);
+                    
+                    if (!this.cropperWindow || this.cropperWindow.closed || typeof this.cropperWindow.closed === 'undefined') {
+                        // Fallback to full page navigation if popup blocked
+                        window.location.href = cropperUrl;
+                    }
                 }
             };
             reader.readAsDataURL(file);
@@ -269,16 +295,28 @@ class AvatarUpload {
      * Update avatar display
      */
     async updateAvatarDisplay(avatarUrl) {
-        // Update avatar image
+        // Update avatar image with aggressive cache busting
         const avatarImg = document.getElementById('profile-avatar');
         const avatarInitial = document.getElementById('profile-avatar-initial');
         const avatarContainer = document.getElementById('profile-avatar-container');
         
         if (avatarImg && avatarInitial && avatarContainer) {
+            // Force reload by clearing src first
+            avatarImg.src = '';
+            
+            // Wait a moment then set new source with cache buster
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
             avatarImg.src = avatarUrl;
             avatarImg.style.display = 'block';
             avatarInitial.style.display = 'none';
             avatarContainer.classList.add('has-avatar');
+            
+            // Trigger a repaint
+            avatarImg.style.opacity = '0.99';
+            setTimeout(() => {
+                avatarImg.style.opacity = '1';
+            }, 10);
         }
 
         // Update database
@@ -303,6 +341,17 @@ class AvatarUpload {
         if (updateError) {
             throw new Error('Failed to update avatar in database');
         }
+        
+        // Force reload all avatar instances on the page
+        document.querySelectorAll('img[src*="avatars"]').forEach(img => {
+            if (img !== avatarImg) {
+                const currentSrc = img.src;
+                img.src = '';
+                setTimeout(() => {
+                    img.src = avatarUrl;
+                }, 50);
+            }
+        });
     }
 
     /**
