@@ -23,6 +23,14 @@ class LoginForm {
         }
         
         try {
+            // Security: If user navigated back from 2FA without completing, sign them out
+            if (sessionStorage.getItem('pending_2fa_user')) {
+                console.log('🔒 Pending 2FA detected on login page - signing out incomplete session');
+                await window.supabase.auth.signOut();
+                sessionStorage.removeItem('pending_2fa_user');
+                sessionStorage.removeItem('pending_2fa_time');
+            }
+            
             this.cacheElements();
             this.bindEvents();
             await this.loadTranslations();

@@ -63,6 +63,14 @@ class TwoFactorVerify {
 
             // Setup event listeners
             this.setupEventListeners();
+            
+            // Handle user navigating away (back button, etc.) without completing 2FA
+            window.addEventListener('beforeunload', async () => {
+                // If they're leaving without completing 2FA, sign them out
+                if (sessionStorage.getItem('pending_2fa_user')) {
+                    await window.supabase.auth.signOut();
+                }
+            });
 
             // Focus on input
             if (this.codeInput) {
