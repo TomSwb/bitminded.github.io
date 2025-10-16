@@ -145,7 +145,9 @@ class ComponentLoader {
         return new Promise((resolve, reject) => {
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = cssPath;
+            // Add cache-busting version parameter for critical components
+            const version = componentName === 'loading-screen' ? '?v=2' : '';
+            link.href = cssPath + version;
             link.onload = () => {
                 this.componentStyles.add(cssPath);
                 resolve();
