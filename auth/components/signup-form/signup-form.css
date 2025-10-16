@@ -236,7 +236,7 @@
 
 /* ===== SUCCESS MESSAGE ===== */
 .signup-form__success {
-    display: flex;
+    display: none; /* Hidden by default */
     align-items: center;
     gap: var(--spacing-md);
     padding: var(--spacing-lg);
@@ -244,6 +244,10 @@
     border: 2px solid var(--color-success);
     border-radius: var(--radius-sm);
     margin-top: var(--spacing-lg);
+}
+
+.signup-form__success.active {
+    display: flex; /* Show when active */
 }
 
 .signup-form__success-icon {

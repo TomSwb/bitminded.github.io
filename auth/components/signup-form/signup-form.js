@@ -506,7 +506,7 @@ class SignupForm {
         
         // Show the success message
         if (this.elements.success) {
-            this.elements.success.style.display = 'flex';
+            this.elements.success.classList.add('active');
         } else {
             console.warn('Success element not found, showing fallback message');
             // Use translated success message
