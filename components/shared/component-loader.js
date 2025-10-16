@@ -421,18 +421,19 @@ class ComponentLoader {
 window.componentLoader = new ComponentLoader();
 
 // Auto-load critical components when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
-    // Auto-load loading screen component (critical for all pages)
-    try {
-        await componentLoader.load('loading-screen', {
-            container: 'body',
-            priority: 'critical'
-        });
-        // Critical components auto-loaded
-    } catch (error) {
-        console.error('❌ Failed to auto-load critical components:', error);
-    }
-});
+// DISABLED: Loading screen causes stuck page issues and translations load fast enough without it
+// document.addEventListener('DOMContentLoaded', async () => {
+//     // Auto-load loading screen component (critical for all pages)
+//     try {
+//         await componentLoader.load('loading-screen', {
+//             container: 'body',
+//             priority: 'critical'
+//         });
+//         // Critical components auto-loaded
+//     } catch (error) {
+//         console.error('❌ Failed to auto-load critical components:', error);
+//     }
+// });
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
