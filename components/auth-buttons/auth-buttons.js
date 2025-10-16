@@ -515,6 +515,24 @@ class AuthButtons {
                 return;
             }
 
+            // Get current session before signing out (to clean up user_sessions)
+            const { data: { session } } = await window.supabase.auth.getSession();
+            const sessionToken = session?.access_token;
+
+            // Clean up user_sessions table BEFORE signing out (need auth context)
+            if (sessionToken) {
+                try {
+                    await window.supabase.functions.invoke('revoke-session', {
+                        body: { session_id: sessionToken }
+                    });
+                    console.log('✅ Session cleaned up from user_sessions');
+                } catch (cleanupError) {
+                    console.warn('⚠️ Could not clean up session:', cleanupError);
+                    // Don't fail logout if cleanup fails
+                }
+            }
+
+            // Sign out from Supabase (do this AFTER cleanup)
             const { error } = await window.supabase.auth.signOut();
             
             if (error) {

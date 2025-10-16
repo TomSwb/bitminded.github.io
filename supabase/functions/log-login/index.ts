@@ -88,6 +88,45 @@ serve(async (req) => {
     }
 
     console.log('✅ Login attempt logged successfully')
+    
+    // If login was successful and has session_id, also create/update user_sessions record
+    if (body.success && body.session_id) {
+      try {
+        console.log('📝 Creating user_sessions record...')
+        
+        // Decode JWT to get expiration
+        const jwtPayload = body.session_id.split('.')[1]
+        const decoded = JSON.parse(atob(jwtPayload))
+        const expiresAt = new Date(decoded.exp * 1000).toISOString()
+        
+        const { error: sessionError } = await supabaseAdmin
+          .from('user_sessions')
+          .upsert({
+            user_id: body.user_id,
+            session_token: body.session_id,
+            expires_at: expiresAt,
+            last_accessed: new Date().toISOString(),
+            user_agent: body.user_agent,
+            ip_address: ipAddress,
+            location: null, // TODO: Add geolocation lookup if needed
+            device_type: body.device_type,
+            browser: body.browser,
+            os: body.os
+          }, {
+            onConflict: 'session_token'
+          })
+        
+        if (sessionError) {
+          console.warn('⚠️ Failed to create user_sessions record:', sessionError)
+          // Don't fail the whole request if this fails
+        } else {
+          console.log('✅ User session record created')
+        }
+      } catch (e) {
+        console.warn('⚠️ Error creating user_sessions record:', e)
+        // Don't fail the whole request
+      }
+    }
 
     return new Response(
       JSON.stringify({ 

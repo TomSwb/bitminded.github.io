@@ -1,0 +1,25 @@
+<!-- Session Management Component -->
+<div class="session-management" id="session-management">
+    <!-- Sessions List -->
+    <div class="session-management__list" id="session-list">
+        <!-- Sessions will be loaded here -->
+    </div>
+    
+    <!-- No Sessions Message -->
+    <div class="session-management__empty" id="session-empty" style="display: none;">
+        <p class="translatable-content" data-translation-key="no_active_sessions">No active sessions found</p>
+    </div>
+    
+    <!-- Loading State -->
+    <div class="session-management__loading" id="session-loading" style="display: none;">
+        <div class="session-management__loading-spinner"></div>
+        <p class="translatable-content" data-translation-key="loading_sessions">Loading sessions...</p>
+    </div>
+    
+    <!-- Error Message -->
+    <div class="session-management__error" id="session-error" style="display: none;">
+        <span class="session-management__error-icon">⚠️</span>
+        <span class="session-management__error-text" id="session-error-text"></span>
+    </div>
+</div>
+
