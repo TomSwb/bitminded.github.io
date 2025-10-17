@@ -610,12 +610,12 @@ class UserDetailPage {
                             <table style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--color-primary);">
-                                        <th style="padding: var(--spacing-sm); text-align: left; color: var(--color-secondary);">Date/Time</th>
-                                        <th style="padding: var(--spacing-sm); text-align: left; color: var(--color-secondary);">Status</th>
-                                        <th style="padding: var(--spacing-sm); text-align: left; color: var(--color-secondary);">Device</th>
-                                        <th style="padding: var(--spacing-sm); text-align: left; color: var(--color-secondary);">Browser</th>
-                                        <th style="padding: var(--spacing-sm); text-align: left; color: var(--color-secondary);">IP Address</th>
-                                        <th style="padding: var(--spacing-sm); text-align: left; color: var(--color-secondary);">2FA</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Status</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Device</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Browser</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">IP Address</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">2FA</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -668,15 +668,15 @@ class UserDetailPage {
                                     <table style="width: 100%; border-collapse: collapse;">
                                         <thead>
                                             <tr style="border-bottom: 1px solid var(--color-primary);">
-                                                <th style="padding: var(--spacing-sm); text-align: left; color: var(--color-secondary);">Date/Time</th>
-                                                <th style="padding: var(--spacing-sm); text-align: left; color: var(--color-secondary);">Action</th>
+                                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
+                                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             ${adminActions.map(action => `
                                                 <tr style="border-bottom: 1px solid var(--color-primary);">
                                                     <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(action.created_at)}</td>
-                                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.escapeHtml(action.action)}</td>
+                                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.escapeHtml(action.action_type)}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
