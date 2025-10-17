@@ -33,7 +33,7 @@ class ActiveSessions {
                 return;
             }
 
-            console.log('💻 Active Sessions: Initializing...');
+            // Initializing
 
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -49,7 +49,7 @@ class ActiveSessions {
             await this.loadSessions();
 
             this.isInitialized = true;
-            console.log('✅ Active Sessions: Initialized successfully');
+            // Initialized
             
             // Final translation update to ensure everything is translated
             setTimeout(() => {
@@ -99,7 +99,7 @@ class ActiveSessions {
         // Update translations after component is set up
         this.updateTranslations();
 
-        console.log('✅ Active Sessions: Component setup complete');
+        // Setup complete
     }
 
     /**
@@ -192,100 +192,59 @@ class ActiveSessions {
     async buildSessionsFromLoginActivity(userId, currentSession) {
         const sessions = [];
 
-        // Add current session
+        // Get all sessions from user_sessions table (better than old approach)
         const deviceInfo = this.getDeviceInfo();
+        const currentToken = currentSession.access_token;
+        let currentSessionFound = false;
         
-        // Try to get IP address for current session from login activity
-        let currentIpAddress = null;
         try {
-            const { data: currentLoginData, error } = await window.supabase
-                .from('user_login_activity')
-                .select('ip_address')
-                .eq('session_id', currentSession.access_token)
-                .single();
-            
-            if (!error && currentLoginData) {
-                currentIpAddress = currentLoginData.ip_address;
-            }
-        } catch (error) {
-            console.log('Could not fetch IP for current session:', error);
-        }
-        
-        sessions.push({
-            id: currentSession.access_token,
-            isCurrent: true,
-            device: deviceInfo.device,
-            browser: deviceInfo.browser,
-            os: deviceInfo.os,
-            icon: deviceInfo.icon,
-            lastActive: new Date(),
-            createdAt: new Date(currentSession.user.last_sign_in_at || Date.now()),
-            ipAddress: currentIpAddress  // Add IP address for current session
-        });
-
-        // Get recent successful logins with session IDs (including revoked ones)
-        try {
-            const { data: loginActivity, error } = await window.supabase
-                .from('user_login_activity')
+            const { data: userSessions, error } = await window.supabase
+                .from('user_sessions')
                 .select('*')
                 .eq('user_id', userId)
-                .eq('success', true)
-                .not('session_id', 'is', null)  // Only get records with session IDs
-                .order('login_time', { ascending: false })
-                .limit(10);
-
-            if (!error && loginActivity) {
-                // Group by session_id to get unique sessions
-                const seenSessions = new Set([currentSession.access_token]);
-                const TOKEN_LIFETIME = 60 * 60 * 1000; // 1 hour
-                const now = Date.now();
-                
-                for (const activity of loginActivity) {
-                    // Skip if we've already seen this session
-                    if (!activity.session_id || seenSessions.has(activity.session_id)) {
-                        continue;
-                    }
-                    
-                    const loginTime = new Date(activity.login_time);
-                    const tokenExpiresAt = loginTime.getTime() + TOKEN_LIFETIME;
-                    
-                    // Skip if token has expired (login was more than 1 hour ago)
-                    if (now > tokenExpiresAt) {
-                        continue;
-                    }
-                    
-                    // Check if too old to display (>7 days)
-                    const activityAge = now - loginTime.getTime();
-                    const sevenDays = 7 * 24 * 60 * 60 * 1000;
-                    if (activityAge > sevenDays) {
-                        continue;
-                    }
-                    
-                    seenSessions.add(activity.session_id);
-                    
-                    // Check if session is revoked
-                    const isRevoked = activity.revoked_at !== null;
-                    const revokedAt = activity.revoked_at ? new Date(activity.revoked_at) : null;
+                .order('created_at', { ascending: false });
+            
+            if (!error && userSessions) {
+                // Add all sessions from user_sessions table
+                for (const session of userSessions) {
+                    // Check if this is the current session
+                    const isCurrent = session.session_token === currentToken;
+                    if (isCurrent) currentSessionFound = true;
                     
                     sessions.push({
-                        id: activity.session_id,  // Use actual session ID
-                        isCurrent: false,
-                        device: activity.device_type || 'Unknown Device',
-                        browser: activity.browser || 'Unknown Browser',
-                        os: activity.os || 'Unknown OS',
-                        icon: this.getDeviceIcon(activity.device_type),
-                        lastActive: new Date(activity.login_time),
-                        createdAt: loginTime,  // When the session was created (login time)
-                        location: activity.location_city || activity.location_country || null,
-                        ipAddress: activity.ip_address || null,  // IP address for distinction
-                        revoked: isRevoked,  // Mark if revoked
-                        revokedAt: revokedAt  // When it was revoked
+                        id: session.session_token,
+                        isCurrent: isCurrent,
+                        device: session.device_type || (isCurrent ? deviceInfo.device : 'Unknown'),
+                        browser: session.browser || (isCurrent ? deviceInfo.browser : 'Unknown'),
+                        os: session.os || (isCurrent ? deviceInfo.os : 'Unknown'),
+                        icon: this.getDeviceIcon(session.device_type || deviceInfo.device),
+                        lastActive: session.last_accessed ? new Date(session.last_accessed) : new Date(),
+                        createdAt: session.created_at ? new Date(session.created_at) : new Date(),
+                        ipAddress: session.ip_address
                     });
                 }
             }
         } catch (error) {
-            console.error('Error fetching login activity:', error);
+            console.error('Failed to load sessions from user_sessions:', error);
         }
+        
+        // If current session not found in user_sessions, add it manually (might be new session)
+        if (!currentSessionFound) {
+            sessions.unshift({
+                id: currentToken,
+                isCurrent: true,
+                device: deviceInfo.device,
+                browser: deviceInfo.browser,
+                os: deviceInfo.os,
+                icon: deviceInfo.icon,
+                lastActive: new Date(),
+                createdAt: new Date(currentSession.user.last_sign_in_at || Date.now()),
+                ipAddress: null
+            });
+        }
+
+        // All sessions now loaded from user_sessions table above
+        // Old login_activity query removed (was causing 406 errors with JWT in URL)
 
         return sessions;
     }

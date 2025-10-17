@@ -13,7 +13,7 @@ if (typeof window.userManagementTranslations === 'undefined') {
          */
         async init() {
             try {
-                console.log('🔧 Initializing user management translations...');
+                // Initializing translations
                 
                 const response = await fetch('/admin/components/user-management/locales/user-management-locales.json');
                 
@@ -22,10 +22,10 @@ if (typeof window.userManagementTranslations === 'undefined') {
                 }
 
                 this.translations = await response.json();
-                console.log('✅ User management translations loaded');
+                // Translations loaded
 
                 this.isInitialized = true;
-                console.log('✅ User management translations initialized successfully');
+                // Translations initialized
 
                 // Add translations to i18next if available
                 if (window.i18next && typeof window.i18next.addResourceBundle === 'function') {
@@ -39,7 +39,7 @@ if (typeof window.userManagementTranslations === 'undefined') {
                                 true
                             );
                         });
-                        console.log('✅ User management translations added to i18next');
+                        // Translations added
                     } catch (i18nextError) {
                         console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }

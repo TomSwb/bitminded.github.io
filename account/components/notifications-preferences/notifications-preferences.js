@@ -38,7 +38,7 @@ class NotificationsPreferences {
                 return;
             }
 
-            console.log('🔔 Notifications Preferences: Initializing...');
+            // Initializing
 
             // Wait for Supabase to be ready
             await this.waitForSupabase();
@@ -57,7 +57,7 @@ class NotificationsPreferences {
             await this.initializeTranslations();
 
             this.isInitialized = true;
-            console.log('✅ Notifications Preferences: Initialized successfully');
+            // Initialized
             
             // Final translation update
             setTimeout(() => {
@@ -100,7 +100,7 @@ class NotificationsPreferences {
             }
             
             this.user = user;
-            console.log('✅ Notifications Preferences: User loaded');
+            // User loaded
             
             // Load user preferences
             await this.loadPreferences();
@@ -147,7 +147,7 @@ class NotificationsPreferences {
                 }
             }
             
-            console.log('✅ Notifications Preferences: Preferences loaded', this.preferences);
+            // Preferences loaded
             
         } catch (error) {
             console.error('❌ Notifications Preferences: Failed to load preferences:', error);

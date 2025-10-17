@@ -23,7 +23,7 @@ class ProfileManagement {
         }
 
         try {
-            console.log('🔧 Initializing profile management component...');
+            // Initializing silently
             
             // Load user profile data
             await this.loadUserProfile();
@@ -41,7 +41,7 @@ class ProfileManagement {
             this.updateUI();
             
             this.isInitialized = true;
-            console.log('✅ Profile management component initialized successfully');
+            // Initialized silently
             
             // Dispatch initialization event for translations
             window.dispatchEvent(new CustomEvent('profileManagementInitialized'));

@@ -198,7 +198,7 @@ class NotificationCenter {
             this.updateUnreadCount();
             this.render();
 
-            console.log(`✅ Loaded ${this.notifications.length} notifications`);
+            // Notifications loaded
 
         } catch (error) {
             console.error('❌ Failed to load notifications:', error);

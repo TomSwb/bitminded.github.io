@@ -18,7 +18,7 @@ class NotificationsPreferencesTranslations {
         }
 
         try {
-            console.log('🔧 Initializing notifications preferences translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class NotificationsPreferencesTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Notifications preferences translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize notifications preferences translations:', error);
@@ -45,7 +45,7 @@ class NotificationsPreferencesTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Notifications preferences translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load notifications preferences translations:', error);
@@ -75,7 +75,7 @@ class NotificationsPreferencesTranslations {
                 this.loadedLanguages.add(lang);
             });
 
-            console.log('✅ Notifications preferences translations added to i18next');
+            // Translations added
         } catch (error) {
             console.error('❌ Failed to add notifications preferences translations to i18next:', error);
         }

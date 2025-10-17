@@ -23,7 +23,7 @@ class ExportData {
                 return;
             }
 
-            console.log('📦 Export Data: Initializing...');
+            // Initializing
 
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -36,7 +36,7 @@ class ExportData {
             await this.initializeTranslations();
 
             this.isInitialized = true;
-            console.log('✅ Export Data: Initialized successfully');
+            // Initialized
             
             // Final translation update to ensure everything is translated
             setTimeout(() => {

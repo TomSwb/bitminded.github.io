@@ -18,7 +18,7 @@ class SecurityManagementTranslations {
         }
 
         try {
-            console.log('🔧 Initializing security management translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class SecurityManagementTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Security management translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize security management translations:', error);
@@ -45,7 +45,7 @@ class SecurityManagementTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Security management translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load security management translations:', error);
@@ -88,7 +88,7 @@ class SecurityManagementTranslations {
             element.style.opacity = '1';
         });
 
-        console.log(`✅ Security management translations updated for language: ${currentLanguage}`);
+        // Translations updated
     }
 
     /**

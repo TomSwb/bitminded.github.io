@@ -212,7 +212,7 @@ class AdminLayout {
                 return; // Already on this section
             }
 
-            console.log(`🔄 Navigating to section: ${sectionName}`);
+            // Navigating
 
             // Hide current section
             this.hideCurrentSection();
