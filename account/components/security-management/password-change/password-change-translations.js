@@ -18,7 +18,7 @@ class PasswordChangeTranslations {
         }
 
         try {
-            console.log('🔧 Initializing password change translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class PasswordChangeTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Password change translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize password change translations:', error);
@@ -45,7 +45,7 @@ class PasswordChangeTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Password change translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load password change translations:', error);
@@ -88,7 +88,7 @@ class PasswordChangeTranslations {
             element.style.opacity = '1';
         });
 
-        console.log(`✅ Password change translations updated for language: ${currentLanguage}`);
+        // Translations updated
     }
 
     /**

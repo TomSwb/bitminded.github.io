@@ -18,7 +18,7 @@ class ProfileManagementTranslations {
         }
 
         try {
-            console.log('🔧 Initializing profile management translations...');
+            // Initializing silently
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class ProfileManagementTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Profile management translations initialized successfully');
+            // Initialized silently
             
         } catch (error) {
             console.error('❌ Failed to initialize profile management translations:', error);
@@ -45,7 +45,7 @@ class ProfileManagementTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Profile management translations loaded');
+            // Translations loaded silently
             
         } catch (error) {
             console.error('❌ Failed to load profile management translations:', error);
@@ -165,7 +165,7 @@ class ProfileManagementTranslations {
         // Update sub-components
         this.updateSubComponentTranslations(languageTranslations);
 
-        console.log(`✅ Profile management translations updated for language: ${currentLanguage}`);
+        // Translations updated
     }
 
     /**

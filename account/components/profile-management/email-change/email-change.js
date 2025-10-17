@@ -28,7 +28,7 @@ class EmailChange {
         }
 
         try {
-            console.log('🔧 Initializing email change component...');
+            // Initializing silently
             
             // Load user data
             await this.loadUserData();
@@ -40,7 +40,7 @@ class EmailChange {
             this.updateUI();
             
             this.isInitialized = true;
-            console.log('✅ Email change component initialized successfully');
+            // Initialized silently
             
         } catch (error) {
             console.error('❌ Failed to initialize email change component:', error);
@@ -87,11 +87,11 @@ class EmailChange {
         const emailInput = document.getElementById('new-email');
         const passwordInput = document.getElementById('confirm-password');
 
-        console.log('🔧 Setting up email event listeners:', { changeBtn, cancelBtn, form, resendBtn, emailInput, passwordInput });
+        // Setting up event listeners
 
         if (changeBtn) {
             changeBtn.addEventListener('click', this.handleChangeClick);
-            console.log('✅ Email change button event listener added');
+            // Event listener added silently
         } else {
             console.error('❌ Email change button not found for event listener');
         }
@@ -150,7 +150,7 @@ class EmailChange {
      * Handle change email button click
      */
     handleChangeClick() {
-        console.log('🔧 Change email button clicked');
+        // Change email button clicked
         this.isEditing = true;
         this.showEditForm();
     }

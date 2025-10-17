@@ -287,10 +287,9 @@ class AuthButtons {
      * Handle authentication state changes
      */
     async handleAuthStateChange(event, session) {
-        // Debug: Log token expiry to understand refresh pattern
+        // Check for expired tokens and force logout if needed
         if (session?.expires_at) {
             const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
-            console.log(`🔐 Auth state changed: ${event} (token expires in ${expiresIn}s)`, session?.user?.email);
             
             // If token is expired and this is INITIAL_SESSION, force logout
             if (event === 'INITIAL_SESSION' && expiresIn < 0) {
@@ -303,12 +302,10 @@ class AuthButtons {
                 this.showLoggedOutState();
                 return;
             }
-        } else {
-            console.log('🔐 Auth state changed:', event, session?.user?.email);
         }
         
         if (event === 'SIGNED_IN' && session) {
-            console.log('✅ User signed in, updating UI');
+            // User signed in, updating UI
             this.currentUser = session.user;
             await this.showLoggedInState();
         } else if (event === 'SIGNED_OUT') {
@@ -316,7 +313,7 @@ class AuthButtons {
             this.currentUser = null;
             this.showLoggedOutState();
         } else if (event === 'TOKEN_REFRESHED' && session) {
-            console.log('🔄 Token refreshed silently (no UI update needed)');
+            // Token refreshed silently (no UI update needed)
             // Just update the currentUser reference, don't trigger expensive UI updates
             this.currentUser = session.user;
             // NOTE: We don't call showLoggedInState() here because:
@@ -324,7 +321,7 @@ class AuthButtons {
             // 2. showLoggedInState() -> updateUserInfo() -> DB query -> getSession() -> triggers another refresh
             // 3. This creates an infinite loop causing rate limit (429 errors)
         } else if (event === 'INITIAL_SESSION' && session) {
-            console.log('📍 Initial session loaded, updating UI');
+            // Initial session loaded, updating UI
             this.currentUser = session.user;
             await this.showLoggedInState();
         } else if (event === 'INITIAL_SESSION' && !session) {

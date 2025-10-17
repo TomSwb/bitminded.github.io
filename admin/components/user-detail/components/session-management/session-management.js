@@ -437,7 +437,7 @@ class SessionManagement {
             this.currentLanguage = localStorage.getItem('language') || 'en';
             const response = await fetch('/admin/components/user-detail/components/session-management/locales/session-management-locales.json');
             this.translations = await response.json();
-            console.log('✅ Session management translations loaded');
+            // Translations loaded
         } catch (error) {
             console.warn('⚠️ Failed to load session management translations:', error);
             // Continue without translations - use English fallback in HTML

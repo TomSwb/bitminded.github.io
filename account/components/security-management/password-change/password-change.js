@@ -40,7 +40,7 @@ class PasswordChange {
                 return;
             }
 
-            console.log('🔐 Password Change: Initializing...');
+            // Initializing
 
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -53,7 +53,7 @@ class PasswordChange {
             await this.initializeTranslations();
 
             this.isInitialized = true;
-            console.log('✅ Password Change: Initialized successfully');
+            // Initialized
             
             // Final translation update to ensure everything is translated
             setTimeout(() => {
@@ -248,7 +248,7 @@ class PasswordChange {
         }
 
         // Re-authentication successful, password is correct
-        console.log('✅ Password verification successful');
+            // Password verified
         
         // Note: The user is now re-authenticated with the same session
         // This is expected behavior for password verification
@@ -640,7 +640,7 @@ class PasswordChange {
      */
     showFieldError(errorId, message) {
         // Error elements removed - no-op
-        console.log(`Field error (${errorId}): ${message}`);
+        // Field error
     }
 
     /**

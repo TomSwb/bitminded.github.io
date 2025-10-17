@@ -28,7 +28,7 @@ class UsernameEdit {
         }
 
         try {
-            console.log('🔧 Initializing username edit component...');
+            // Initializing silently
             
             // Load user profile data
             await this.loadUserProfile();
@@ -40,7 +40,7 @@ class UsernameEdit {
             this.updateUI();
             
             this.isInitialized = true;
-            console.log('✅ Username edit component initialized successfully');
+            // Initialized silently
             
         } catch (error) {
             console.error('❌ Failed to initialize username edit component:', error);
@@ -96,11 +96,11 @@ class UsernameEdit {
         const form = document.getElementById('username-edit-form');
         const input = document.getElementById('new-username');
 
-        console.log('🔧 Setting up event listeners:', { editBtn, cancelBtn, form, input });
+        // Setting up event listeners
 
         if (editBtn) {
             editBtn.addEventListener('click', this.handleEditClick);
-            console.log('✅ Edit button event listener added');
+            // Event listener added silently
         } else {
             console.error('❌ Edit button not found for event listener');
         }
@@ -132,7 +132,7 @@ class UsernameEdit {
      * Handle edit button click
      */
     handleEditClick() {
-        console.log('🔧 Edit username button clicked');
+        // Edit button clicked
         this.isEditing = true;
         this.showEditForm();
     }
@@ -316,18 +316,18 @@ class UsernameEdit {
         const form = document.getElementById('username-edit-form');
         const editBtn = document.getElementById('edit-username-btn');
         
-        console.log('🔧 Showing edit form:', { form, editBtn });
+        // Showing edit form
         
         if (form) {
             form.classList.remove('hidden');
-            console.log('✅ Form shown');
+            // Form shown
         } else {
             console.error('❌ Form not found');
         }
         
         if (editBtn) {
             editBtn.classList.add('hidden');
-            console.log('✅ Edit button hidden');
+            // Button hidden
         } else {
             console.error('❌ Edit button not found');
         }

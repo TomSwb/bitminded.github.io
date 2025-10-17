@@ -18,7 +18,7 @@ class ActiveSessionsTranslations {
         }
 
         try {
-            console.log('🔧 Initializing active sessions translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class ActiveSessionsTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Active sessions translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize active sessions translations:', error);
@@ -45,7 +45,7 @@ class ActiveSessionsTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Active sessions translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load active sessions translations:', error);
@@ -88,7 +88,7 @@ class ActiveSessionsTranslations {
             element.style.opacity = '1';
         });
 
-        console.log(`✅ Active sessions translations updated for language: ${currentLanguage}`);
+        // Translations updated
     }
 
     /**

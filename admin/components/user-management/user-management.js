@@ -34,7 +34,7 @@ class UserManagement {
         }
 
         try {
-            console.log('👥 User Management: Initializing...');
+            // Initializing
 
             // Setup event listeners
             this.setupEventListeners();
@@ -49,7 +49,7 @@ class UserManagement {
             await this.loadUsers();
 
             this.isInitialized = true;
-            console.log('✅ User Management: Initialized successfully');
+            // Initialized
 
         } catch (error) {
             console.error('❌ User Management: Failed to initialize:', error);
@@ -171,7 +171,7 @@ class UserManagement {
     async loadUsers() {
         try {
             this.showLoading();
-            console.log('📥 Loading users from database...');
+            // Loading users
 
             if (!window.supabase) {
                 throw new Error('Supabase not available');
@@ -226,7 +226,7 @@ class UserManagement {
                 };
             }));
 
-            console.log(`✅ Loaded ${this.users.length} users`);
+            // Users loaded
             
             // Apply initial filters and render
             this.filteredUsers = [...this.users];
