@@ -187,51 +187,64 @@ class ActiveSessions {
     }
 
     /**
-     * Build sessions list from login activity and current session
+     * Build sessions list from user_sessions (validated against auth.sessions)
      */
     async buildSessionsFromLoginActivity(userId, currentSession) {
         const sessions = [];
 
-        // Get all sessions from user_sessions table (better than old approach)
-        const deviceInfo = this.getDeviceInfo();
-        const currentToken = currentSession.access_token;
-        let currentSessionFound = false;
-        
+        // Use get-user-sessions Edge Function (same as admin panel - validates against auth.sessions)
         try {
-            const { data: userSessions, error } = await window.supabase
-                .from('user_sessions')
-                .select('*')
-                .eq('user_id', userId)
-                .order('created_at', { ascending: false });
+            const { data: sessionsData, error } = await window.supabase.functions.invoke('get-user-sessions', {
+                body: { user_id: userId }
+            });
             
-            if (!error && userSessions) {
-                // Add all sessions from user_sessions table
-                for (const session of userSessions) {
-                    // Check if this is the current session
-                    const isCurrent = session.session_token === currentToken;
-                    if (isCurrent) currentSessionFound = true;
-                    
-                    sessions.push({
-                        id: session.session_token,
-                        isCurrent: isCurrent,
-                        device: session.device_type || (isCurrent ? deviceInfo.device : 'Unknown'),
-                        browser: session.browser || (isCurrent ? deviceInfo.browser : 'Unknown'),
-                        os: session.os || (isCurrent ? deviceInfo.os : 'Unknown'),
-                        icon: this.getDeviceIcon(session.device_type || deviceInfo.device),
-                        lastActive: session.last_accessed ? new Date(session.last_accessed) : new Date(),
-                        createdAt: session.created_at ? new Date(session.created_at) : new Date(),
-                        ipAddress: session.ip_address
-                    });
-                }
+            if (error) {
+                console.error('Failed to load active sessions:', error);
+                throw error;
             }
+            
+            const deviceInfo = this.getDeviceInfo();
+            const currentToken = currentSession.access_token;
+            const activeSessions = sessionsData?.sessions || [];
+            
+            // Convert to display format
+            for (const session of activeSessions) {
+                const isCurrent = session.session_token === currentToken;
+                
+                sessions.push({
+                    id: session.session_token,
+                    isCurrent: isCurrent,
+                    device: session.device_type || (isCurrent ? deviceInfo.device : 'Unknown'),
+                    browser: session.browser || (isCurrent ? deviceInfo.browser : 'Unknown'),
+                    os: session.os || (isCurrent ? deviceInfo.os : 'Unknown'),
+                    icon: this.getDeviceIcon(session.device_type || deviceInfo.device),
+                    lastActive: session.last_accessed ? new Date(session.last_accessed) : new Date(),
+                    createdAt: session.created_at ? new Date(session.created_at) : new Date(),
+                    ipAddress: session.ip_address
+                });
+            }
+            
+            // If no sessions returned (shouldn't happen), add current session manually
+            if (sessions.length === 0) {
+                sessions.push({
+                    id: currentToken,
+                    isCurrent: true,
+                    device: deviceInfo.device,
+                    browser: deviceInfo.browser,
+                    os: deviceInfo.os,
+                    icon: deviceInfo.icon,
+                    lastActive: new Date(),
+                    createdAt: new Date(currentSession.user.last_sign_in_at || Date.now()),
+                    ipAddress: null
+                });
+            }
+            
         } catch (error) {
-            console.error('Failed to load sessions from user_sessions:', error);
-        }
-        
-        // If current session not found in user_sessions, add it manually (might be new session)
-        if (!currentSessionFound) {
-            sessions.unshift({
-                id: currentToken,
+            console.error('Failed to load active sessions:', error);
+            // Fallback: show current session only
+            const deviceInfo = this.getDeviceInfo();
+            sessions.push({
+                id: currentSession.access_token,
                 isCurrent: true,
                 device: deviceInfo.device,
                 browser: deviceInfo.browser,
@@ -242,9 +255,6 @@ class ActiveSessions {
                 ipAddress: null
             });
         }
-
-        // All sessions now loaded from user_sessions table above
-        // Old login_activity query removed (was causing 406 errors with JWT in URL)
 
         return sessions;
     }
