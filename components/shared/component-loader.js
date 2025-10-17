@@ -56,7 +56,8 @@ class ComponentLoader {
         const subComponents = [
             'avatar-upload',
             'username-edit', 
-            'email-change'
+            'email-change',
+            'personal-info'
         ];
 
         const loadPromises = subComponents.map(componentName => {
