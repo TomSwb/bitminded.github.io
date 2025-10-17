@@ -50,9 +50,31 @@ serve(async (req) => {
                       req.headers.get('cf-connecting-ip') ||
                       req.headers.get('x-real-ip') ||
                       null
+    
+    // Get location from IP address using ipapi.co (free geolocation API)
+    let location = null
+    if (ipAddress && ipAddress !== '127.0.0.1' && !ipAddress.startsWith('192.168.')) {
+      try {
+        const geoResponse = await fetch(`https://ipapi.co/${ipAddress}/json/`)
+        if (geoResponse.ok) {
+          const geoData = await geoResponse.json()
+          // Format: "City, Country" or just "Country" if no city
+          if (geoData.city && geoData.country_name) {
+            location = `${geoData.city}, ${geoData.country_name}`
+          } else if (geoData.country_name) {
+            location = geoData.country_name
+          }
+          console.log(`📍 Location resolved: ${location}`)
+        }
+      } catch (geoError) {
+        console.warn('⚠️ Failed to resolve location from IP:', geoError)
+        // Don't fail the whole request if geolocation fails
+      }
+    }
 
     console.log(`📊 Logging login attempt for user ${body.user_id}`)
     console.log(`   IP: ${ipAddress}`)
+    console.log(`   Location: ${location || 'Unknown'}`)
     console.log(`   Device: ${body.device_type} • ${body.browser} • ${body.os}`)
     console.log(`   Success: ${body.success}`)
     console.log(`   2FA: ${body.used_2fa}`)
@@ -108,7 +130,7 @@ serve(async (req) => {
             last_accessed: new Date().toISOString(),
             user_agent: body.user_agent,
             ip_address: ipAddress,
-            location: null, // TODO: Add geolocation lookup if needed
+            location: location, // Geolocation from IP address
             device_type: body.device_type,
             browser: body.browser,
             os: body.os
