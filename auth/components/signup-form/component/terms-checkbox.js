@@ -21,7 +21,7 @@ class TermsCheckbox {
             await this.loadTranslations();
             this.isInitialized = true;
             
-            console.log('✅ Terms Checkbox initialized successfully');
+            // Terms Checkbox initialized silently
         } catch (error) {
             console.error('❌ Failed to initialize Terms Checkbox:', error);
         }
@@ -66,7 +66,7 @@ class TermsCheckbox {
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Terms checkbox translations loaded');
+                // Translations loaded silently
             } else {
                 console.warn('Failed to load terms checkbox translations:', response.status);
             }

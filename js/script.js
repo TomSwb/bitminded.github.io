@@ -82,6 +82,11 @@ async function loadThemeSwitcher() {
 }
 
 async function loadNotificationCenter() {
+    // Don't load notification center on auth page
+    if (window.location.pathname.includes('/auth')) {
+        return;
+    }
+    
     try {
         // Always load the notification center component
         // It will check auth internally and hide itself if not authenticated
@@ -99,7 +104,7 @@ async function loadNotificationCenter() {
 async function loadAuthButtons() {
     // Don't load auth buttons on auth page
     if (window.location.pathname.includes('/auth')) {
-        console.log('🔒 Skipping auth buttons load on auth page');
+        // Skipping auth buttons on auth page
         return;
     }
     
