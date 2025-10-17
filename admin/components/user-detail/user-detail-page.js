@@ -21,7 +21,7 @@ class UserDetailPage {
         }
 
         try {
-            console.log('🔧 Initializing User Detail Page...');
+            // Initializing
             
             // Check authentication and admin access
             const hasAccess = await this.checkAdminAccess();
@@ -48,7 +48,7 @@ class UserDetailPage {
             await this.loadUserData(userId);
             
             this.isInitialized = true;
-            console.log('✅ User Detail Page initialized');
+            // Initialized
             
         } catch (error) {
             console.error('❌ User Detail Page: Failed to initialize:', error);
@@ -230,7 +230,7 @@ class UserDetailPage {
      */
     async loadUserData(userId) {
         try {
-            console.log('📥 Loading user data for ID:', userId);
+            // Loading user data
             
             if (!window.supabase) {
                 throw new Error('Supabase not available');
@@ -262,7 +262,7 @@ class UserDetailPage {
                 .rpc('get_user_statistics', { user_uuid: userId })
                 .maybeSingle();
 
-            console.log('📊 User statistics:', statsData);
+            // User statistics loaded
 
             // Get 2FA status (check if table exists first)
             let twoFaData = null;
@@ -301,12 +301,12 @@ class UserDetailPage {
             await this.loadOverviewData();
 
             // Hide loading screen using proper ready flag system
-            console.log('🔧 Hiding loading screen...');
+            // Hiding loading screen
             
             if (window.loadingScreen) {
                 // Set translation ready flag to true so loading screen can hide
                 window.loadingScreen.setReadyFlag('translation', true);
-                console.log('✅ Loading screen ready flag set');
+                // Loading screen ready
             } else {
                 // Fallback: hide directly if loading screen component not available
                 const loadingScreen = document.getElementById('loading-screen');
@@ -316,7 +316,7 @@ class UserDetailPage {
                 }
             }
 
-            console.log('✅ User data loaded successfully');
+            // User data loaded
 
         } catch (error) {
             console.error('❌ Failed to load user data:', error);
@@ -441,7 +441,7 @@ class UserDetailPage {
                 return;
             }
 
-            console.log('📝 Admin notes loaded:', data);
+            // Admin notes loaded
 
             // Display notes history
             const notesHistory = document.getElementById('user-detail-notes-history');
@@ -1012,7 +1012,7 @@ class UserDetailPage {
      */
     async refreshStats() {
         try {
-            console.log('🔄 Refreshing stats for user:', this.currentUser.id);
+            // Refreshing stats
             
             // Call get-user-sessions Edge Function to get accurate count
             // (it also cleans up stale sessions, ensuring accurate count)
@@ -1025,18 +1025,18 @@ class UserDetailPage {
                 throw error;
             }
             
-            console.log('📊 Sessions data received:', sessionsData);
+            // Sessions data received
             
             // Count the active sessions returned
             const activeSessionCount = sessionsData?.sessions?.length || 0;
             this.currentUser.active_sessions = activeSessionCount;
             
-            console.log('✅ Updated active_sessions to:', this.currentUser.active_sessions);
+            // Active sessions updated
             
             // Update display
             if (this.elements.sessionCount) {
                 this.elements.sessionCount.textContent = this.currentUser.active_sessions;
-                console.log('✅ Updated sessionCount element to:', this.currentUser.active_sessions);
+                // Session count updated
             } else {
                 console.warn('⚠️ sessionCount element not found!');
             }
