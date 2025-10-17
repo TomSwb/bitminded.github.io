@@ -206,10 +206,10 @@ class UserManagement {
                     .eq('user_id', profile.id)
                     .eq('active', true);
 
-                // Get last login
+                // Get last login with location
                 const { data: lastLogin } = await window.supabase
                     .from('user_login_activity')
-                    .select('login_time')
+                    .select('login_time, location_city, location_country')
                     .eq('user_id', profile.id)
                     .eq('success', true) // Only successful logins
                     .order('login_time', { ascending: false })
@@ -222,7 +222,9 @@ class UserManagement {
                     role: roleData?.role || 'user',
                     status: profile.status || 'active',
                     subscription_count: count || 0,
-                    last_login: lastLogin?.login_time || null
+                    last_login: lastLogin?.login_time || null,
+                    last_login_city: lastLogin?.location_city || null,
+                    last_login_country: lastLogin?.location_country || null
                 };
             }));
 
@@ -470,7 +472,25 @@ class UserManagement {
         // Last login cell
         const lastLoginCell = document.createElement('td');
         lastLoginCell.setAttribute('data-label', 'Last Login');
-        lastLoginCell.textContent = user.last_login ? this.formatDate(user.last_login) : 'Never';
+        
+        if (user.last_login) {
+            const loginDate = new Date(user.last_login);
+            const date = loginDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const time = loginDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const location = user.last_login_city && user.last_login_country 
+                ? `${user.last_login_city}, ${user.last_login_country}`
+                : user.last_login_country || 'Unknown';
+            
+            lastLoginCell.innerHTML = `
+                <div style="line-height: 1.4;">
+                    <div style="color: var(--color-text-primary);">${date}</div>
+                    <div style="color: var(--color-text-primary); font-size: 0.85em;">${time}</div>
+                    <div style="color: var(--color-text-primary); font-size: 0.85em;">📍 ${location}</div>
+                </div>
+            `;
+        } else {
+            lastLoginCell.textContent = 'Never';
+        }
 
         // Actions cell
         const actionsCell = document.createElement('td');
