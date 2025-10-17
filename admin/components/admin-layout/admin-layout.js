@@ -541,8 +541,8 @@ class AdminLayout {
             await window.supabase
                 .from('admin_activity')
                 .insert({
-                    admin_id: this.currentUser.id,
-                    action: actionType,
+                    admin_user_id: this.currentUser.id,  // Fixed: was 'admin_id'
+                    action_type: actionType,              // Fixed: was 'action'
                     details: details,
                     ip_address: null // Could fetch from external API if needed
                 });
