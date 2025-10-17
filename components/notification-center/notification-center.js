@@ -87,12 +87,22 @@ class NotificationCenter {
      */
     async loadUser() {
         try {
+            // First check if there's an active session (doesn't trigger auth errors)
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                // No session - hiding notification center silently
+                this.hideComponent();
+                return;
+            }
+            
+            // Session exists, get user details
             const { data: { user }, error } = await supabase.auth.getUser();
             
             if (error) throw error;
             
             if (!user) {
-                console.log('No user logged in, hiding notification center');
+                console.log('🔔 No user logged in, hiding notification center');
                 this.hideComponent();
                 return;
             }
@@ -497,7 +507,7 @@ class NotificationCenter {
             this.loadNotifications();
         }, 30000);
 
-        console.log('📡 Notification polling started (30s interval)');
+        // Notification polling started silently
     }
 
     /**
