@@ -590,7 +590,7 @@ class UserDetailPage {
                 .select('login_time, success, ip_address, user_agent, device_type, browser, os, used_2fa')
                 .eq('user_id', this.currentUser.id)
                 .order('login_time', { ascending: false })
-                .limit(20);
+                .limit(10);
 
             if (loginError) {
                 console.error('❌ Failed to load login activity:', error);
