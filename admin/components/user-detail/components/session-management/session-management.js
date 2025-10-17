@@ -29,7 +29,7 @@ class SessionManagement {
         }
 
         try {
-            console.log('🔒 Session Management: Initializing for user:', userId);
+            // Initializing
             
             this.currentUserId = userId;
             
@@ -55,7 +55,7 @@ class SessionManagement {
             await this.loadSessions();
             
             this.isInitialized = true;
-            console.log('✅ Session Management: Initialized successfully');
+            // Initialized
             
         } catch (error) {
             console.error('❌ Session Management: Failed to initialize:', error);
@@ -73,7 +73,7 @@ class SessionManagement {
             this.showLoading(true);
             this.hideError();
             
-            console.log('🔍 Fetching sessions for user:', this.currentUserId);
+            // Fetching sessions
             
             // Call Edge Function to get sessions (uses service role to query auth.sessions)
             const { data, error } = await window.supabase.functions.invoke('get-user-sessions', {
@@ -84,22 +84,15 @@ class SessionManagement {
                 throw error;
             }
             
-            console.log('📊 Edge Function response:', data);
-            console.log('📊 Sessions received:', data.sessions);
-            console.log('📊 Auth sessions available:', data.auth_sessions_available);
-            console.log('📊 Total auth sessions:', data.total_auth_sessions);
+            // Edge Function response
+            // Sessions received
+            // Auth sessions available
+            // Total auth sessions
             
             this.sessions = data.sessions || [];
-            console.log('✅ Active sessions to display:', this.sessions.length);
+            // Active sessions to display
             
-            // Log each session for debugging
-            this.sessions.forEach((s, i) => {
-                console.log(`Session ${i + 1}:`, {
-                    login_time: s.login_time,
-                    user_agent: s.user_agent,
-                    ip: s.ip_address
-                });
-            });
+            // Sessions loaded silently
             
             // Display sessions
             this.displaySessions();
@@ -198,7 +191,7 @@ class SessionManagement {
         // Add revoke button event listener
         const revokeBtn = row.querySelector('.session-management__revoke-btn');
         if (revokeBtn) {
-            console.log('✅ Attaching event listener to revoke button for session:', session.session_token.substring(0, 20) + '...');
+            // Attaching revoke listener
             revokeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
