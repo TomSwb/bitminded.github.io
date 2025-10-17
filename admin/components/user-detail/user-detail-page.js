@@ -127,6 +127,9 @@ class UserDetailPage {
             twoFaValue: document.getElementById('user-detail-2fa-value'),
             registered: document.getElementById('user-detail-registered'),
             lastLogin: document.getElementById('user-detail-last-login'),
+            age: document.getElementById('user-detail-age'),
+            country: document.getElementById('user-detail-country'),
+            gender: document.getElementById('user-detail-gender'),
             subscriptionCount: document.getElementById('user-detail-subscription-count'),
             loginCount: document.getElementById('user-detail-login-count'),
             sessionCount: document.getElementById('user-detail-session-count'),
@@ -239,7 +242,7 @@ class UserDetailPage {
             // Query user profile with all related data
             const { data: profileData, error: profileError } = await window.supabase
                 .from('user_profiles')
-                .select('id, username, avatar_url, created_at, email, status')
+                .select('id, username, avatar_url, created_at, email, status, date_of_birth, country, gender')
                 .eq('id', userId)
                 .single();
 
@@ -371,6 +374,38 @@ class UserDetailPage {
         this.elements.userId.textContent = userData.id || 'N/A';
         this.elements.usernameValue.textContent = userData.username || 'Unknown';
         this.elements.emailValue.textContent = userData.email || 'No email';
+        
+        // Personal info (age, country, gender)
+        if (this.elements.age) {
+            if (userData.date_of_birth) {
+                const age = this.calculateAge(new Date(userData.date_of_birth));
+                this.elements.age.textContent = age;
+            } else {
+                this.elements.age.textContent = '-';
+            }
+        }
+        
+        if (this.elements.country) {
+            if (userData.country) {
+                const flag = this.getCountryFlag(userData.country);
+                this.elements.country.textContent = `${flag} ${userData.country}`;
+            } else {
+                this.elements.country.textContent = '-';
+            }
+        }
+        
+        if (this.elements.gender) {
+            if (userData.gender === 'male') {
+                this.elements.gender.innerHTML = '<span style="color: #4A90E2;">♂ Male</span>';
+            } else if (userData.gender === 'female') {
+                this.elements.gender.innerHTML = '<span style="color: #E91E63;">♀ Female</span>';
+            } else if (userData.gender === 'prefer_not_say') {
+                this.elements.gender.textContent = 'Prefer not to say';
+            } else {
+                this.elements.gender.textContent = '-';
+            }
+        }
+        
         this.elements.roleValue.textContent = userData.role || 'user';
         this.elements.statusValue.textContent = userData.status || 'active';
         this.elements.twoFaValue.textContent = userData.has_2fa ? 'Yes' : 'No';
@@ -1205,6 +1240,43 @@ class UserDetailPage {
         } catch (error) {
             return 'Invalid Date';
         }
+    }
+
+    calculateAge(birthDate) {
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        return age;
+    }
+
+    getCountryFlag(countryName) {
+        // Map country names to flag emojis (same as personal-info component)
+        const flagMap = {
+            'Switzerland': '🇨🇭', 'United States': '🇺🇸', 'United Kingdom': '🇬🇧', 'Germany': '🇩🇪',
+            'France': '🇫🇷', 'Spain': '🇪🇸', 'Italy': '🇮🇹', 'Canada': '🇨🇦', 'Australia': '🇦🇺',
+            'Japan': '🇯🇵', 'China': '🇨🇳', 'India': '🇮🇳', 'Brazil': '🇧🇷', 'Mexico': '🇲🇽',
+            'Argentina': '🇦🇷', 'South Korea': '🇰🇷', 'Netherlands': '🇳🇱', 'Belgium': '🇧🇪',
+            'Sweden': '🇸🇪', 'Norway': '🇳🇴', 'Denmark': '🇩🇰', 'Finland': '🇫🇮', 'Austria': '🇦🇹',
+            'Poland': '🇵🇱', 'Portugal': '🇵🇹', 'Greece': '🇬🇷', 'Ireland': '🇮🇪', 'New Zealand': '🇳🇿',
+            'Singapore': '🇸🇬', 'Thailand': '🇹🇭', 'Vietnam': '🇻🇳', 'Philippines': '🇵🇭',
+            'Indonesia': '🇮🇩', 'Malaysia': '🇲🇾', 'South Africa': '🇿🇦', 'Egypt': '🇪🇬',
+            'Turkey': '🇹🇷', 'Russia': '🇷🇺', 'Ukraine': '🇺🇦', 'Czech Republic': '🇨🇿',
+            'Romania': '🇷🇴', 'Hungary': '🇭🇺', 'Israel': '🇮🇱', 'Saudi Arabia': '🇸🇦',
+            'United Arab Emirates': '🇦🇪', 'Pakistan': '🇵🇰', 'Bangladesh': '🇧🇩', 'Chile': '🇨🇱',
+            'Colombia': '🇨🇴', 'Peru': '🇵🇪', 'Venezuela': '🇻🇪', 'Nigeria': '🇳🇬', 'Kenya': '🇰🇪',
+            'Morocco': '🇲🇦', 'Algeria': '🇩🇿', 'Tunisia': '🇹🇳', 'Lebanon': '🇱🇧', 'Jordan': '🇯🇴',
+            'Iraq': '🇮🇶', 'Iran': '🇮🇷', 'Afghanistan': '🇦🇫', 'Sri Lanka': '🇱🇰', 'Nepal': '🇳🇵',
+            'Iceland': '🇮🇸', 'Croatia': '🇭🇷', 'Serbia': '🇷🇸', 'Bulgaria': '🇧🇬', 'Slovakia': '🇸🇰',
+            'Slovenia': '🇸🇮', 'Lithuania': '🇱🇹', 'Latvia': '🇱🇻', 'Estonia': '🇪🇪',
+            'Luxembourg': '🇱🇺', 'Malta': '🇲🇹', 'Cyprus': '🇨🇾', 'Taiwan': '🇹🇼', 'Hong Kong': '🇭🇰'
+        };
+        
+        return flagMap[countryName] || '🌍';
     }
 
     /**
