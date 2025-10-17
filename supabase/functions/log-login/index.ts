@@ -53,16 +53,22 @@ serve(async (req) => {
     
     // Get location from IP address using ipapi.co (free geolocation API)
     let location = null
+    let locationCity = null
+    let locationCountry = null
+    
     if (ipAddress && ipAddress !== '127.0.0.1' && !ipAddress.startsWith('192.168.')) {
       try {
         const geoResponse = await fetch(`https://ipapi.co/${ipAddress}/json/`)
         if (geoResponse.ok) {
           const geoData = await geoResponse.json()
-          // Format: "City, Country" or just "Country" if no city
-          if (geoData.city && geoData.country_name) {
-            location = `${geoData.city}, ${geoData.country_name}`
-          } else if (geoData.country_name) {
-            location = geoData.country_name
+          locationCity = geoData.city || null
+          locationCountry = geoData.country_name || null
+          
+          // Format combined location: "City, Country" or just "Country" if no city
+          if (locationCity && locationCountry) {
+            location = `${locationCity}, ${locationCountry}`
+          } else if (locationCountry) {
+            location = locationCountry
           }
           console.log(`📍 Location resolved: ${location}`)
         }
@@ -92,6 +98,8 @@ serve(async (req) => {
         device_type: body.device_type,
         browser: body.browser,
         os: body.os,
+        location_city: locationCity,
+        location_country: locationCountry,
         used_2fa: body.used_2fa,
         session_id: body.session_id
       })
