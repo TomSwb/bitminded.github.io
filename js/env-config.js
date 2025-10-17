@@ -58,9 +58,6 @@
     // Also export as SUPABASE_CONFIG for backward compatibility
     window.SUPABASE_CONFIG = config;
     
-    console.log('✅ Environment config loaded:', {
-        environment: isProduction ? 'production' : isDevelopment ? 'development' : 'staging',
-        supabaseUrl: config.url
-    });
+    // Environment config loaded silently (reduce console noise)
 })();
 

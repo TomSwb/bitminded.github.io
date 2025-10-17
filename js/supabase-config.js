@@ -18,7 +18,4 @@ const supabaseClient = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey
 // Export for use in other scripts
 window.supabase = supabaseClient;
 
-// Log which environment we're using
-if (window.ENV_CONFIG) {
-    console.log('🔗 Supabase connected:', window.ENV_CONFIG.isProduction ? 'PRODUCTION' : 'DEVELOPMENT');
-}
+// Supabase connected silently (reduce console noise)

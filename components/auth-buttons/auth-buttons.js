@@ -328,7 +328,7 @@ class AuthButtons {
             this.currentUser = session.user;
             await this.showLoggedInState();
         } else if (event === 'INITIAL_SESSION' && !session) {
-            console.log('📍 No initial session, showing logged out state');
+            // No initial session - showing logged out state silently
             this.currentUser = null;
             this.showLoggedOutState();
         }
@@ -339,7 +339,7 @@ class AuthButtons {
      */
     showLoggedOutState() {
         try {
-            console.log('🔓 Showing logged out state');
+            // Showing logged out state silently
             this.hideAllStates();
             if (this.elements.loggedOut) {
                 this.elements.loggedOut.style.display = 'flex';
@@ -726,7 +726,7 @@ window['auth-buttons'] = {
         // Find the auth-buttons element that was just loaded
         const element = document.getElementById('auth-buttons');
         if (element) {
-            console.log('✅ Auth Buttons: Initializing via component loader');
+            // Auth buttons initializing silently
             window.authButtons = new AuthButtons();
         }
     }

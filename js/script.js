@@ -90,7 +90,7 @@ async function loadNotificationCenter() {
             container: 'header',
             priority: 'high'
         });
-        console.log('✅ Notification center component loaded');
+        // Notification center loaded silently
     } catch (error) {
         console.error('❌ Failed to load notification center component:', error);
     }
