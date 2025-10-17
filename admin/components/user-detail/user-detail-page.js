@@ -587,7 +587,7 @@ class UserDetailPage {
             // Get login activity
             const { data: loginData, error: loginError } = await window.supabase
                 .from('user_login_activity')
-                .select('login_time, success, ip_address, user_agent, device_type, browser, os, used_2fa')
+                .select('login_time, success, ip_address, user_agent, device_type, browser, os, used_2fa, location_city, location_country')
                 .eq('user_id', this.currentUser.id)
                 .order('login_time', { ascending: false })
                 .limit(10);
@@ -612,6 +612,7 @@ class UserDetailPage {
                                     <tr style="border-bottom: 1px solid var(--color-primary);">
                                         <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
                                         <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Status</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Location</th>
                                         <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Device</th>
                                         <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Browser</th>
                                         <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">IP Address</th>
@@ -619,7 +620,11 @@ class UserDetailPage {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${loginData.map(activity => `
+                                    ${loginData.map(activity => {
+                                        const location = activity.location_city && activity.location_country 
+                                            ? `${activity.location_city}, ${activity.location_country}`
+                                            : activity.location_country || '-';
+                                        return `
                                         <tr style="border-bottom: 1px solid var(--color-primary);">
                                             <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(activity.login_time)}</td>
                                             <td style="padding: var(--spacing-sm);">
@@ -627,12 +632,14 @@ class UserDetailPage {
                                                     ${activity.success ? '✓ Success' : '✗ Failed'}
                                                 </span>
                                             </td>
+                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${location}</td>
                                             <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.device_type || '-'}</td>
                                             <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.browser || '-'}</td>
                                             <td style="padding: var(--spacing-sm); color: var(--color-text-primary); font-family: monospace;">${activity.ip_address || '-'}</td>
                                             <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.used_2fa ? 'Yes' : 'No'}</td>
                                         </tr>
-                                    `).join('')}
+                                        `;
+                                    }).join('')}
                                 </tbody>
                             </table>
                         </div>

@@ -220,7 +220,8 @@ class ActiveSessions {
                     icon: this.getDeviceIcon(session.device_type || deviceInfo.device),
                     lastActive: session.last_accessed ? new Date(session.last_accessed) : new Date(),
                     createdAt: session.created_at ? new Date(session.created_at) : new Date(),
-                    ipAddress: session.ip_address
+                    ipAddress: session.ip_address,
+                    location: session.location  // Add location from geolocation
                 });
             }
             
