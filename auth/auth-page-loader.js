@@ -20,14 +20,10 @@ class AuthPageLoader {
 
 
         try {
-            console.log('🚀 AuthPageLoader initializing...');
-            console.log('📍 Document ready state:', document.readyState);
-            console.log('🌐 Initial URL:', window.location.href);
+            // AuthPageLoader initializing silently
             
             // Determine which form to show based on URL parameters or referrer
             const authAction = this.detectAuthAction();
-            
-            console.log('🔄 Loading form for action:', authAction);
             
             // Load auth toggle only for login, signup, and forgot-password pages
             if (authAction !== 'reset-password') {
@@ -53,7 +49,7 @@ class AuthPageLoader {
             this.bindFormSwitchEvents();
             
             this.isInitialized = true;
-            console.log('✅ Auth page loader initialized successfully');
+            // Auth page loader initialized successfully
         } catch (error) {
             console.error('❌ Failed to initialize auth page loader:', error);
         }
@@ -65,9 +61,7 @@ class AuthPageLoader {
      */
     detectAuthAction() {
         // Check URL parameters first
-        console.log('🌐 Full URL:', window.location.href);
-        console.log('🔗 Search string:', window.location.search);
-        console.log('🔗 Hash:', window.location.hash);
+        // Detecting auth action from URL silently
         
         const urlParams = new URLSearchParams(window.location.search);
         let action = urlParams.get('action');
@@ -76,13 +70,10 @@ class AuthPageLoader {
         if (!action && window.location.hash) {
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             action = hashParams.get('action');
-            console.log('🔍 Checking hash for action:', action);
+            // Checking hash for action silently
         }
         
-        console.log('🔍 Detecting auth action. URL params:', window.location.search, 'action:', action);
-        
         if (action === 'login' || action === 'signup' || action === 'forgot-password' || action === 'reset-password') {
-            console.log('✅ Auth action detected from URL:', action);
             return action;
         }
 
