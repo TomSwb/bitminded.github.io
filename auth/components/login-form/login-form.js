@@ -37,7 +37,7 @@ class LoginForm {
             this.loadFailedAttempts();
             this.isInitialized = true;
             
-            console.log('✅ Login Form initialized successfully');
+            // Login Form initialized silently
         } catch (error) {
             console.error('❌ Failed to initialize Login Form:', error);
             this.showError('Failed to initialize login form');

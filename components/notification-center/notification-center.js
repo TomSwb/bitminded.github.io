@@ -108,6 +108,7 @@ class NotificationCenter {
             }
             
             this.user = user;
+            this.showComponent();
             
         } catch (error) {
             console.error('❌ Notification Center: Failed to load user:', error);
@@ -606,12 +607,22 @@ class NotificationCenter {
     }
 
     /**
+     * Show component (for authenticated users)
+     */
+    showComponent() {
+        const bellButton = document.getElementById('notification-bell');
+        if (bellButton) {
+            bellButton.classList.add('authenticated');
+        }
+    }
+
+    /**
      * Hide component (for non-authenticated users)
      */
     hideComponent() {
         const bellButton = document.getElementById('notification-bell');
         if (bellButton) {
-            bellButton.style.display = 'none';
+            bellButton.classList.remove('authenticated');
         }
         const dropdown = document.getElementById('notification-dropdown');
         if (dropdown) {

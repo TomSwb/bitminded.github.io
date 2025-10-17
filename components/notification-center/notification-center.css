@@ -21,11 +21,16 @@
     color: var(--color-primary);
     cursor: pointer;
     transition: all var(--transition-fast);
-    display: flex;
+    display: none; /* Hidden by default, shown via JS when user is authenticated */
     align-items: center;
     justify-content: center;
     min-width: 3rem;
     min-height: 3rem;
+}
+
+/* Show bell when user is authenticated */
+.notification-center__bell.authenticated {
+    display: flex;
 }
 
 .notification-center__bell:hover {
