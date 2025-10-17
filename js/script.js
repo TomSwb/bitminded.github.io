@@ -83,20 +83,9 @@ async function loadThemeSwitcher() {
 
 async function loadNotificationCenter() {
     try {
-        // Check if user is authenticated
-        if (typeof supabase === 'undefined') {
-            console.log('🔔 Supabase not ready, waiting...');
-            setTimeout(loadNotificationCenter, 500);
-            return;
-        }
-
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-            console.log('🔔 User not authenticated, skipping notification center');
-            return;
-        }
-
+        // Always load the notification center component
+        // It will check auth internally and hide itself if not authenticated
+        // This prevents duplicate getUser() calls that trigger token refreshes
         await componentLoader.load('notification-center', {
             container: 'header',
             priority: 'high'

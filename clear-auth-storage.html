@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Auth Storage</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            width: 100%;
+        }
+        button:hover {
+            background: #c82333;
+        }
+        .info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Clear Expired Auth Storage</h1>
+        
+        <div class="info">
+            <strong>⚠️ Issue Detected:</strong> Your auth token expired over an hour ago!<br>
+            This causes Supabase to keep trying to refresh it on every page load.
+        </div>
+        
+        <button onclick="clearAuthStorage()">Clear Expired Auth Data</button>
+        
+        <h3>Current Supabase Auth Keys:</h3>
+        <pre id="authKeys"></pre>
+    </div>
+
+    <script>
+        // Show current auth keys
+        const authKeysEl = document.getElementById('authKeys');
+        const authKeys = Object.keys(localStorage).filter(k => 
+            k.includes('supabase') || k.includes('sb-') || k.includes('auth')
+        );
+        
+        if (authKeys.length > 0) {
+            authKeysEl.textContent = authKeys.map(key => {
+                const value = localStorage.getItem(key);
+                // Show token expiry if it's auth data
+                try {
+                    const parsed = JSON.parse(value);
+                    if (parsed.expires_at) {
+                        const expiresIn = parsed.expires_at - Math.floor(Date.now() / 1000);
+                        return `${key}\n  → Expires in: ${expiresIn}s ${expiresIn < 0 ? '(EXPIRED!)' : ''}`;
+                    }
+                } catch (e) {}
+                return key;
+            }).join('\n\n');
+        } else {
+            authKeysEl.textContent = 'No auth keys found in localStorage';
+        }
+
+        function clearAuthStorage() {
+            console.log('🧹 Clearing auth storage...');
+            
+            // Get all auth-related keys
+            const keysToRemove = Object.keys(localStorage).filter(k => 
+                k.includes('supabase') || k.includes('sb-') || k.includes('auth')
+            );
+            
+            // Remove each key
+            keysToRemove.forEach(key => {
+                console.log('  Removing:', key);
+                localStorage.removeItem(key);
+            });
+            
+            // Also clear sessionStorage
+            sessionStorage.clear();
+            
+            alert(`✅ Cleared ${keysToRemove.length} auth keys!\n\nRefreshing page...`);
+            
+            // Redirect to home
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
+

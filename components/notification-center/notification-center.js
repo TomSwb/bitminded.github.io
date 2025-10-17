@@ -48,16 +48,18 @@ class NotificationCenter {
             // Setup component
             this.setupComponent();
 
-            // Load notifications
-            await this.loadNotifications();
-
-            // Start polling
-            this.startPolling();
-
             // Initialize translations
             await this.initializeTranslations();
 
             this.isInitialized = true;
+
+            // Defer loading notifications to avoid blocking page load and triggering token refreshes
+            // This prevents the DB query from happening during initial auth setup
+            setTimeout(async () => {
+                await this.loadNotifications();
+                // Start polling after initial load
+                this.startPolling();
+            }, 200);
 
         } catch (error) {
             console.error('❌ Notification Center: Failed to initialize:', error);
@@ -91,6 +93,7 @@ class NotificationCenter {
             
             if (!user) {
                 console.log('No user logged in, hiding notification center');
+                this.hideComponent();
                 return;
             }
             
@@ -98,6 +101,7 @@ class NotificationCenter {
             
         } catch (error) {
             console.error('❌ Notification Center: Failed to load user:', error);
+            this.hideComponent();
         }
     }
 
@@ -589,6 +593,20 @@ class NotificationCenter {
      */
     async refresh() {
         await this.loadNotifications();
+    }
+
+    /**
+     * Hide component (for non-authenticated users)
+     */
+    hideComponent() {
+        const bellButton = document.getElementById('notification-bell');
+        if (bellButton) {
+            bellButton.style.display = 'none';
+        }
+        const dropdown = document.getElementById('notification-dropdown');
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
     }
 
     /**
