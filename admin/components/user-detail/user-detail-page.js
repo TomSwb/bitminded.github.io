@@ -570,7 +570,7 @@ class UserDetailPage {
             }
 
             // TODO: Display subscriptions
-            console.log('📦 User subscriptions:', data);
+            // User subscriptions loaded
 
         } catch (error) {
             console.error('❌ Error loading subscriptions:', error);
@@ -597,7 +597,7 @@ class UserDetailPage {
                 return;
             }
 
-            console.log('📊 User login activity:', loginData);
+            // User login activity loaded
 
             // Display login activity
             const loginActivityContainer = document.getElementById('user-detail-login-activity');
@@ -644,13 +644,13 @@ class UserDetailPage {
             if (this.currentUser.role === 'admin') {
                 const { data: adminActions, error: adminError } = await window.supabase
                     .from('admin_activity')
-                    .select('action, created_at, admin_id')
-                    .eq('user_id', this.currentUser.id)
+                    .select('action_type, created_at, admin_user_id, details')
+                    .eq('admin_user_id', this.currentUser.id)  // Fixed: query by admin_user_id, not user_id
                     .order('created_at', { ascending: false })
                     .limit(10);
 
                 if (!adminError) {
-                    console.log('📊 Admin actions:', adminActions);
+                    // Admin actions loaded
                     
                     const adminActionsContainer = document.getElementById('user-detail-admin-actions');
                     if (adminActionsContainer) {
