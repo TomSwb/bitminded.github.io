@@ -738,7 +738,7 @@ class UserDetailPage {
                 }
             }
 
-            console.log('🔒 Security tab loaded with session management component');
+            // Security tab loaded
 
         } catch (error) {
             console.error('❌ Error loading security data:', error);
