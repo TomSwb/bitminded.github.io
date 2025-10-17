@@ -2,7 +2,7 @@
   "en": {
     "translation": {
       "privacy.title": "Privacy Policy",
-      "privacy.subtitle": "Last updated: September 2025",
+      "privacy.subtitle": "Last updated: October 2025",
       "privacy.section1.title": "1. Introduction",
       "privacy.section1.content1": "BitMinded (\"we,\" \"our,\" or \"us\") is committed to protecting your privacy and personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our artisanal software services.",
       "privacy.section1.content2": "By using our services, you agree to the collection and use of information in accordance with this policy. We will not use or share your information with anyone except as described in this Privacy Policy.",
@@ -11,6 +11,7 @@
       "privacy.section2.content1": "We may collect the following personal information:",
       "privacy.section2.item1": "Email address and password for account creation",
       "privacy.section2.item2": "Username and profile information",
+      "privacy.section2.item2b": "Optional demographic information (date of birth, country, gender) for profile personalization",
       "privacy.section2.item3": "Payment information (processed securely through Stripe)",
       "privacy.section2.item4": "Communication preferences and settings",
       "privacy.section2.subtitle2": "2.2 Technical Information",
@@ -27,6 +28,7 @@
       "privacy.section3.item3": "Authenticate users and secure accounts",
       "privacy.section3.item4": "Send important service updates and notifications",
       "privacy.section3.item5": "Improve our services and user experience",
+      "privacy.section3.item5b": "Personalize your profile and analyze demographic trends (optional data only)",
       "privacy.section3.item6": "Monitor and analyze usage patterns",
       "privacy.section3.item7": "Comply with legal obligations",
       "privacy.section4.title": "4. Data Storage and Security",
@@ -98,7 +100,7 @@
   "es": {
     "translation": {
       "privacy.title": "Política de Privacidad",
-      "privacy.subtitle": "Última actualización: Septiembre 2025",
+      "privacy.subtitle": "Última actualización: Octubre 2025",
       "privacy.section1.title": "1. Introducción",
       "privacy.section1.content1": "BitMinded (\"nosotros\", \"nuestro\" o \"nos\") está comprometido a proteger su privacidad e información personal. Esta Política de Privacidad explica cómo recopilamos, usamos, divulgamos y protegemos su información cuando utiliza nuestros servicios de software artesanal.",
       "privacy.section1.content2": "Al utilizar nuestros servicios, acepta la recopilación y el uso de información de acuerdo con esta política. No usaremos ni compartiremos su información con nadie excepto como se describe en esta Política de Privacidad.",
@@ -107,6 +109,7 @@
       "privacy.section2.content1": "Podemos recopilar la siguiente información personal:",
       "privacy.section2.item1": "Dirección de correo electrónico y contraseña para la creación de cuenta",
       "privacy.section2.item2": "Nombre de usuario e información de perfil",
+      "privacy.section2.item2b": "Información demográfica opcional (fecha de nacimiento, país, género) para personalización del perfil",
       "privacy.section2.item3": "Información de pago (procesada de forma segura a través de Stripe)",
       "privacy.section2.item4": "Preferencias de comunicación y configuración",
       "privacy.section2.subtitle2": "2.2 Información Técnica",
@@ -123,6 +126,7 @@
       "privacy.section3.item3": "Autenticar usuarios y asegurar cuentas",
       "privacy.section3.item4": "Enviar actualizaciones y notificaciones importantes del servicio",
       "privacy.section3.item5": "Mejorar nuestros servicios y experiencia del usuario",
+      "privacy.section3.item5b": "Personalizar su perfil y analizar tendencias demográficas (solo datos opcionales)",
       "privacy.section3.item6": "Monitorear y analizar patrones de uso",
       "privacy.section3.item7": "Cumplir con obligaciones legales",
       "privacy.section4.title": "4. Almacenamiento y Seguridad de Datos",
@@ -194,7 +198,7 @@
   "fr": {
     "translation": {
       "privacy.title": "Politique de confidentialité",
-      "privacy.subtitle": "Dernière mise à jour : Septembre 2025",
+      "privacy.subtitle": "Dernière mise à jour : Octobre 2025",
       "privacy.section1.title": "1. Introduction",
       "privacy.section1.content1": "BitMinded (« nous », « notre » ou « nos ») s'engage à protéger votre vie privée et vos informations personnelles. Cette Politique de confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez nos services de logiciels artisanaux.",
       "privacy.section1.content2": "En utilisant nos services, vous acceptez la collecte et l'utilisation d'informations conformément à cette politique. Nous n'utiliserons ni ne partagerons vos informations avec qui que ce soit, sauf comme décrit dans cette Politique de confidentialité.",
@@ -203,6 +207,7 @@
       "privacy.section2.content1": "Nous pouvons collecter les informations personnelles suivantes :",
       "privacy.section2.item1": "Adresse e-mail et mot de passe pour la création de compte",
       "privacy.section2.item2": "Nom d'utilisateur et informations de profil",
+      "privacy.section2.item2b": "Informations démographiques facultatives (date de naissance, pays, genre) pour la personnalisation du profil",
       "privacy.section2.item3": "Informations de paiement (traitées en toute sécurité via Stripe)",
       "privacy.section2.item4": "Préférences et paramètres de communication",
       "privacy.section2.subtitle2": "2.2 Informations techniques",
@@ -219,6 +224,7 @@
       "privacy.section3.item3": "Authentifier les utilisateurs et sécuriser les comptes",
       "privacy.section3.item4": "Envoyer des mises à jour importantes du service et des notifications",
       "privacy.section3.item5": "Améliorer nos services et l'expérience utilisateur",
+      "privacy.section3.item5b": "Personnaliser votre profil et analyser les tendances démographiques (données facultatives uniquement)",
       "privacy.section3.item6": "Surveiller et analyser les modèles d'utilisation",
       "privacy.section3.item7": "Se conformer aux obligations légales",
       "privacy.section4.title": "4. Stockage et sécurité des données",
@@ -290,7 +296,7 @@
   "de": {
     "translation": {
       "privacy.title": "Datenschutzrichtlinie",
-      "privacy.subtitle": "Letzte Aktualisierung: September 2025",
+      "privacy.subtitle": "Letzte Aktualisierung: Oktober 2025",
       "privacy.section1.title": "1. Einleitung",
       "privacy.section1.content1": "BitMinded (\"wir\", \"unser\" oder \"uns\") verpflichtet sich, Ihre Privatsphäre und persönlichen Informationen zu schützen. Diese Datenschutzrichtlinie erklärt, wie wir Ihre Informationen sammeln, verwenden, offenlegen und schützen, wenn Sie unsere handwerklichen Softwaredienste nutzen.",
       "privacy.section1.content2": "Durch die Nutzung unserer Dienste stimmen Sie der Erfassung und Nutzung von Informationen gemäß dieser Richtlinie zu. Wir werden Ihre Informationen nicht verwenden oder mit anderen teilen, außer wie in dieser Datenschutzrichtlinie beschrieben.",
@@ -299,6 +305,7 @@
       "privacy.section2.content1": "Wir können folgende persönliche Informationen erfassen:",
       "privacy.section2.item1": "E-Mail-Adresse und Passwort für die Kontoerstellung",
       "privacy.section2.item2": "Benutzername und Profilinformationen",
+      "privacy.section2.item2b": "Optionale demografische Informationen (Geburtsdatum, Land, Geschlecht) zur Profilpersonalisierung",
       "privacy.section2.item3": "Zahlungsinformationen (sicher über Stripe verarbeitet)",
       "privacy.section2.item4": "Kommunikationspräferenzen und Einstellungen",
       "privacy.section2.subtitle2": "2.2 Technische Informationen",
@@ -315,6 +322,7 @@
       "privacy.section3.item3": "Authentifizierung von Benutzern und Sicherung von Konten",
       "privacy.section3.item4": "Senden wichtiger Service-Updates und Benachrichtigungen",
       "privacy.section3.item5": "Verbesserung unserer Dienste und Benutzererfahrung",
+      "privacy.section3.item5b": "Personalisierung Ihres Profils und Analyse demografischer Trends (nur optionale Daten)",
       "privacy.section3.item6": "Überwachung und Analyse von Nutzungsmustern",
       "privacy.section3.item7": "Erfüllung rechtlicher Verpflichtungen",
       "privacy.section4.title": "4. Datenspeicherung und Sicherheit",
