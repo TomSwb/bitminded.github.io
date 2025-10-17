@@ -38,7 +38,7 @@ class AuthPageLoader {
                 await this.loadResetPasswordForm();
             } else {
                 // Default to signup form
-                console.log('🔄 Defaulting to signup form');
+                // Defaulting to signup form silently
                 await this.loadSignupForm();
             }
             
@@ -151,12 +151,12 @@ class AuthPageLoader {
      */
     async loadSignupForm() {
         try {
-            console.log('🔄 Loading signup form component...');
+            // Loading signup form silently
 
             // Load HTML
-            console.log('🔍 Fetching signup form HTML from: components/signup-form/signup-form.html');
+            // Fetching HTML silently
             const htmlResponse = await fetch(`components/signup-form/signup-form.html?t=${Date.now()}`);
-            console.log('🔍 HTML response status:', htmlResponse.status, htmlResponse.ok);
+            // HTML loaded silently
             if (!htmlResponse.ok) {
                 throw new Error(`Failed to load signup form HTML: ${htmlResponse.status}`);
             }
@@ -180,7 +180,7 @@ class AuthPageLoader {
             if (container) {
                 container.innerHTML = htmlContent;
                 container.classList.remove('hidden');
-                console.log('✅ Signup form HTML loaded');
+                // HTML loaded silently
             } else {
                 throw new Error('Signup form container not found');
             }
@@ -215,7 +215,7 @@ class AuthPageLoader {
             }
 
             this.loadedComponents.set('signup-form', true);
-            console.log('✅ Signup form component loaded successfully');
+            // Component loaded silently
             
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();
@@ -231,7 +231,7 @@ class AuthPageLoader {
      */
     async loadTermsCheckbox() {
         try {
-            console.log('🔄 Loading terms checkbox component...');
+            // Loading terms checkbox silently
 
             // Load HTML
             const htmlResponse = await fetch('components/signup-form/component/terms-checkbox.html');
@@ -258,7 +258,7 @@ class AuthPageLoader {
             if (container) {
                 container.innerHTML = htmlContent;
                 container.classList.remove('hidden');
-                console.log('✅ Terms checkbox HTML loaded');
+                // HTML loaded silently
             } else {
                 throw new Error('Terms checkbox container not found');
             }
@@ -281,7 +281,7 @@ class AuthPageLoader {
             }
 
             this.loadedComponents.set('terms-checkbox', true);
-            console.log('✅ Terms checkbox component loaded successfully');
+            // Component loaded silently
 
         } catch (error) {
             console.error('❌ Failed to load terms checkbox component:', error);
@@ -294,7 +294,7 @@ class AuthPageLoader {
      */
     async loadForgotPasswordForm() {
         try {
-            console.log('🔄 Loading forgot password form component...');
+            // Loading forgot password form silently
 
             // Load HTML
             const htmlResponse = await fetch('components/forgot-password/forgot-password.html');
@@ -348,7 +348,7 @@ class AuthPageLoader {
             // Mark as loaded
             this.loadedComponents.set('forgot-password-form', true);
 
-            console.log('✅ Forgot password form component loaded successfully');
+            // Component loaded silently
             
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();
@@ -363,7 +363,7 @@ class AuthPageLoader {
      */
     async loadLoginForm() {
         try {
-            console.log('🔄 Loading login form component...');
+            // Loading login form silently
 
             // Load HTML
             const htmlResponse = await fetch('components/login-form/login-form.html');
@@ -390,7 +390,7 @@ class AuthPageLoader {
             if (container) {
                 container.innerHTML = htmlContent;
                 container.classList.remove('hidden');
-                console.log('✅ Login form HTML loaded');
+                // HTML loaded silently
             } else {
                 throw new Error('Login form container not found');
             }
@@ -416,7 +416,7 @@ class AuthPageLoader {
             }
 
             this.loadedComponents.set('login-form', true);
-            console.log('✅ Login form component loaded successfully');
+            // Component loaded silently
             
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();
@@ -438,7 +438,7 @@ class AuthPageLoader {
                 return;
             }
 
-            console.log('🔄 Loading CAPTCHA component...');
+            // Loading CAPTCHA silently
 
             // Initialize CAPTCHA component
             if (window.CaptchaComponent && !window.captcha) {
@@ -461,7 +461,7 @@ class AuthPageLoader {
             }
 
             this.loadedComponents.set('captcha', true);
-            console.log('✅ CAPTCHA component loaded successfully');
+            // Component loaded silently
 
         } catch (error) {
             console.error('❌ Failed to load CAPTCHA component:', error);
@@ -781,7 +781,7 @@ class AuthPageLoader {
      */
     async loadResetPasswordForm() {
         try {
-            console.log('🔄 Loading reset password form component...');
+            // Loading reset password form silently
 
             // Hide auth toggle container on reset password page
             const authToggleContainer = document.getElementById('auth-toggle-container');
@@ -848,7 +848,7 @@ class AuthPageLoader {
                 detail: { mode: 'reset-password' }
             }));
 
-            console.log('✅ Reset password form component loaded successfully');
+            // Component loaded silently
             
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();

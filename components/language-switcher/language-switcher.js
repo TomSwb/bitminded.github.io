@@ -195,7 +195,7 @@ class LanguageSwitcher {
             return;
         }
 
-        console.log(`🔄 Changing language from ${this.currentLanguage} to: ${language}`);
+        // Changing language silently
 
         // Show loading animation
         this.showLoadingAnimation();
@@ -215,7 +215,7 @@ class LanguageSwitcher {
 
         // Call global changeLanguage function if it exists
         if (typeof window.changeLanguage === 'function') {
-            console.log('Calling global changeLanguage function');
+            // Calling changeLanguage silently
             window.changeLanguage(language);
         } else {
             console.warn('Global changeLanguage function not found');
@@ -223,11 +223,11 @@ class LanguageSwitcher {
 
         // Update i18next directly if available
         if (typeof i18next !== 'undefined' && i18next.changeLanguage) {
-            console.log('Updating i18next language');
+            // Updating i18next silently
             i18next.changeLanguage(language);
         }
         
-        console.log('✅ Language change completed');
+        // Language change completed silently
     }
 
     /**
@@ -246,7 +246,7 @@ class LanguageSwitcher {
             const { data: { user }, error: userError } = await window.supabase.auth.getUser();
             
             if (userError || !user) {
-                console.log('User not authenticated, language saved to localStorage only');
+                // Language saved to localStorage silently
                 return;
             }
 
@@ -307,7 +307,7 @@ class LanguageSwitcher {
         });
         
         window.dispatchEvent(event);
-        console.log(`📢 Language change event emitted: ${language}`);
+        // Language change event emitted silently
     }
 
     /**

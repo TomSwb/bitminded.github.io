@@ -99,8 +99,12 @@ class NotificationCenterTranslations {
      */
     setupEventListeners() {
         window.addEventListener('languageChanged', async () => {
-            console.log('🌐 Language changed, reloading notification center translations...');
-            await this.addToI18next();
+            // Only reload if notification center is visible (user is authenticated)
+            const bellButton = document.getElementById('notification-bell');
+            if (bellButton && bellButton.classList.contains('authenticated')) {
+                // Reloading translations silently
+                await this.addToI18next();
+            }
         });
 
         if (typeof i18next !== 'undefined') {

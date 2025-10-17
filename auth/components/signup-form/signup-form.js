@@ -27,7 +27,7 @@ class SignupForm {
             await this.loadTranslations();
             this.isInitialized = true;
             
-            console.log('✅ Signup Form initialized successfully');
+            // Signup Form initialized silently
         } catch (error) {
             console.error('❌ Failed to initialize Signup Form:', error);
             this.showError('Failed to initialize signup form');
@@ -57,17 +57,8 @@ class SignupForm {
             toggleConfirmPassword: document.getElementById('signup-toggle-confirm-password')
         };
 
-        // Debug: Log missing elements
-        const missingElements = [];
-        Object.entries(this.elements).forEach(([key, element]) => {
-            if (!element) {
-                missingElements.push(key);
-            }
-        });
-        
-        if (missingElements.length > 0) {
-            console.warn('Signup form missing elements:', missingElements);
-        }
+        // Some elements are optional (success, confirmPasswordError)
+        // No need to warn about missing optional elements
     }
 
     /**
@@ -110,7 +101,7 @@ class SignupForm {
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Signup form translations loaded');
+                // Translations loaded silently
             } else {
                 console.warn('Failed to load signup form translations:', response.status);
             }
