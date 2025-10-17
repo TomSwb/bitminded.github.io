@@ -1,0 +1,200 @@
+/* Personal Info Component Styles - Matches username-edit style */
+.personal-info {
+    width: 100%;
+}
+
+/* Edit Button */
+.personal-info__edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.personal-info__edit-btn:hover {
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
+    transform: translateY(-1px);
+}
+
+.personal-info__edit-btn:active {
+    transform: translateY(0);
+}
+
+.personal-info__edit-icon {
+    font-size: 1rem;
+}
+
+/* Display Mode (when not editing) */
+.personal-info__display {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.personal-info__field-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.personal-info__field-display:last-child {
+    margin-bottom: 0;
+}
+
+.personal-info__field-display .personal-info__label {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    min-width: 120px;
+}
+
+.personal-info__field-display .personal-info__value {
+    color: var(--color-text-primary);
+}
+
+.personal-info__age {
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+/* Edit Form */
+.personal-info__form {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.personal-info__form-group {
+    margin-bottom: 1.5rem;
+}
+
+.personal-info__form-group:last-of-type {
+    margin-bottom: 1.5rem; /* Keep spacing before actions */
+}
+
+.personal-info__form-group .personal-info__label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.personal-info__input,
+.personal-info__select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: var(--color-background);
+}
+
+.personal-info__input:focus,
+.personal-info__select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.personal-info__select {
+    cursor: pointer;
+}
+
+.personal-info__input-help {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+/* Form Actions */
+.personal-info__form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.personal-info__cancel-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.personal-info__cancel-btn:hover {
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
+    transform: translateY(-1px);
+}
+
+.personal-info__cancel-btn:active {
+    transform: translateY(0);
+}
+
+.personal-info__save-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.personal-info__save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--color-primary);
+}
+
+.personal-info__save-btn:hover:not(:disabled) {
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
+    transform: translateY(-1px);
+}
+
+.personal-info__save-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.personal-info__save-icon {
+    font-size: 1rem;
+}
+
+/* Hidden state */
+.hidden {
+    display: none !important;
+}

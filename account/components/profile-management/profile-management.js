@@ -135,6 +135,16 @@ class ProfileManagement {
                 this.components.set('email', emailComponent);
             }
 
+            // Load personal info component
+            await this.loadComponent('personal-info', '#personal-info-component-container');
+            
+            // Initialize personal info component after HTML is loaded
+            if (window.PersonalInfo) {
+                const personalInfoComponent = new window.PersonalInfo();
+                await personalInfoComponent.init();
+                this.components.set('personalInfo', personalInfoComponent);
+            }
+
         } catch (error) {
             console.error('❌ Failed to initialize sub-components:', error);
             throw error;

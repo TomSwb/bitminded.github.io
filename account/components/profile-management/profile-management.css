@@ -128,11 +128,18 @@
 .profile-management__email {
     font-size: 1.125rem;
     color: var(--color-text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.profile-management__personal-info {
+    font-size: 1.125rem;
+    color: var(--color-text-primary);
     margin: 0 0 0.5rem 0;
+    display: inline;
 }
 
 .profile-management__member-since {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--color-text-primary);
     margin: 0;
 }
