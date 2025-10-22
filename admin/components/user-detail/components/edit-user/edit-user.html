@@ -1,0 +1,195 @@
+<!-- Edit User Component - Form Only -->
+<div class="edit-user" id="edit-user-container">
+    <!-- Form Header with Close Button -->
+    <div class="edit-user__header">
+        <h3 class="edit-user__title">
+            <span class="translatable-content" data-translation-key="edit_user_profile">Edit User Profile</span>
+        </h3>
+        <button id="close-edit-user-btn" class="edit-user__close-btn">
+            <span class="translatable-content" data-translation-key="close">Close</span>
+        </button>
+    </div>
+
+    <!-- Edit Form -->
+    <div id="edit-user-form" class="edit-user__form">
+        <!-- Basic Information Section -->
+        <div class="edit-user__section">
+            <h3 class="edit-user__section-title">
+                <span class="translatable-content" data-translation-key="basic_information">Basic Information</span>
+            </h3>
+            
+            <!-- Username Editing -->
+            <div class="edit-user__field">
+                <label for="edit-username" class="edit-user__label">
+                    <span class="translatable-content" data-translation-key="username">Username</span>
+                </label>
+                <div class="edit-user__input-group">
+                    <input 
+                        type="text" 
+                        id="edit-username" 
+                        name="username" 
+                        class="edit-user__input" 
+                        placeholder="Enter new username"
+                        maxlength="30"
+                    >
+                    <div id="username-availability" class="edit-user__availability hidden">
+                        <span id="username-availability-message"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avatar Reset -->
+            <div class="edit-user__field">
+                <div class="edit-user__label">
+                    <span class="translatable-content" data-translation-key="avatar">Avatar</span>
+                </div>
+                <div class="edit-user__avatar-controls">
+                    <div class="edit-user__current-avatar">
+                        <img id="current-avatar-preview" src="" alt="" class="edit-user__avatar-preview">
+                        <div id="current-avatar-fallback" class="edit-user__avatar-fallback"></div>
+                    </div>
+                    <button id="reset-avatar-btn" class="edit-user__button edit-user__button--warning">
+                        <span class="translatable-content" data-translation-key="reset_avatar">Reset Avatar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Management Section -->
+        <div class="edit-user__section">
+            <h3 class="edit-user__section-title">
+                <span class="translatable-content" data-translation-key="email_settings">Email Settings</span>
+            </h3>
+            
+            <!-- Current Email Display -->
+            <div class="edit-user__field">
+                <div class="edit-user__label">
+                    <span class="translatable-content" data-translation-key="Current Email">Current Email</span>
+                </div>
+                <div class="edit-user__current-value" id="current-email-display"></div>
+            </div>
+
+            <!-- Email Change Request -->
+            <div class="edit-user__field">
+                <label for="new-email" class="edit-user__label">
+                    <span class="translatable-content" data-translation-key="send_email_change">Send Email Change</span>
+                </label>
+                <div class="edit-user__input-group">
+                    <input 
+                        type="email" 
+                        id="new-email" 
+                        name="email" 
+                        class="edit-user__input" 
+                        placeholder="Enter new email address"
+                    >
+                    <button id="send-email-change-btn" class="edit-user__button edit-user__button--secondary">
+                        <span class="translatable-content" data-translation-key="send_email_change">Send Request</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Management Section -->
+        <div class="edit-user__section">
+            <h3 class="edit-user__section-title">
+                <span class="translatable-content" data-translation-key="Password Management">Password Management</span>
+            </h3>
+            
+            <div class="edit-user__field">
+                <div class="edit-user__label">
+                    <span class="translatable-content" data-translation-key="Password Reset">Password Reset</span>
+                </div>
+                <div class="edit-user__password-controls">
+                    <p class="edit-user__help-text">
+                        <span class="translatable-content" data-translation-key="password_reset_help">Send a password reset email to the user. They will receive a link to set a new password.</span>
+                    </p>
+                    <button id="send-password-reset-btn" class="edit-user__button edit-user__button--secondary">
+                        <span class="translatable-content" data-translation-key="send_password_reset">Send Password Reset</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="edit-user__section">
+            <h3 class="edit-user__section-title">
+                <span class="translatable-content" data-translation-key="personal_information">Personal Information</span>
+            </h3>
+            
+            <!-- Date of Birth -->
+            <div class="edit-user__field">
+                <label for="edit-dob" class="edit-user__label">
+                    <span class="translatable-content" data-translation-key="date_of_birth">Date of Birth</span>
+                </label>
+                <input 
+                    type="date" 
+                    id="edit-dob" 
+                    name="date_of_birth" 
+                    class="edit-user__input"
+                >
+            </div>
+
+            <!-- Gender -->
+            <div class="edit-user__field">
+                <label for="edit-gender" class="edit-user__label">
+                    <span class="translatable-content" data-translation-key="gender">Gender</span>
+                </label>
+                <select id="edit-gender" name="gender" class="edit-user__select">
+                    <option value="">
+                        <span class="translatable-content" data-translation-key="Select Gender">Select Gender</span>
+                    </option>
+                    <option value="male">
+                        <span class="translatable-content" data-translation-key="male">Male</span>
+                    </option>
+                    <option value="female">
+                        <span class="translatable-content" data-translation-key="female">Other</span>
+                    </option>
+                    <option value="prefer_not_say">
+                        <span class="translatable-content" data-translation-key="Prefer not to say">Prefer not to say</span>
+                    </option>
+                </select>
+            </div>
+
+            <!-- Country -->
+            <div class="edit-user__field">
+                <label for="edit-country" class="edit-user__label">
+                    <span class="translatable-content" data-translation-key="country">Country</span>
+                </label>
+                <select id="edit-country" name="country" class="edit-user__select">
+                    <option value="">
+                        <span class="translatable-content" data-translation-key="Select Country">Select Country</span>
+                    </option>
+                    <!-- Countries will be populated by JavaScript -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="edit-user__actions">
+            <button id="save-user-changes-btn" class="edit-user__button edit-user__button--primary" disabled>
+                <span class="translatable-content" data-translation-key="save_changes">Save Changes</span>
+            </button>
+            <button id="cancel-edit-user-btn" class="edit-user__button edit-user__button--secondary">
+                <span class="translatable-content" data-translation-key="cancel">Cancel</span>
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="edit-user-loading" class="edit-user__loading hidden">
+            <div class="edit-user__spinner"></div>
+            <span id="edit-user-loading-text" class="edit-user__loading-text">
+                <span class="translatable-content" data-translation-key="processing">Processing...</span>
+            </span>
+        </div>
+
+        <!-- Error Message -->
+        <div id="edit-user-error" class="edit-user__error hidden">
+            <span id="edit-user-error-message" class="edit-user__error-message"></span>
+        </div>
+
+        <!-- Success Message -->
+        <div id="edit-user-success" class="edit-user__success hidden">
+            <span id="edit-user-success-message" class="edit-user__success-message"></span>
+        </div>
+    </div>
+</div>
