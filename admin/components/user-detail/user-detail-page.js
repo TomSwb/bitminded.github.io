@@ -140,7 +140,6 @@ class UserDetailPage {
             grantAccessButton: document.getElementById('user-detail-grant-access'),
             revokeSessionsButton: document.getElementById('user-detail-revoke-all-sessions'),
             editUserButton: document.getElementById('user-detail-edit-user'),
-            sendPasswordResetButton: document.getElementById('user-detail-send-password-reset'),
             sendEmailButton: document.getElementById('user-detail-send-email'),
             suspendUserButton: document.getElementById('user-detail-suspend-user'),
             deleteUserButton: document.getElementById('user-detail-delete-user'),
@@ -205,10 +204,6 @@ class UserDetailPage {
 
         if (this.elements.editUserButton) {
             this.elements.editUserButton.addEventListener('click', () => this.editUser());
-        }
-
-        if (this.elements.sendPasswordResetButton) {
-            this.elements.sendPasswordResetButton.addEventListener('click', () => this.sendPasswordReset());
         }
 
         if (this.elements.sendEmailButton) {
@@ -1089,7 +1084,77 @@ class UserDetailPage {
 
     async editUser() {
         console.log('✏️ Edit user clicked');
-        // TODO: Implement edit user functionality
+        
+        if (!this.currentUser) {
+            this.showError('No user data available');
+            return;
+        }
+
+        try {
+            // Check if component is already loaded
+            const formContainer = document.getElementById('edit-user-form-container');
+            if (!formContainer) {
+                this.showError('Edit user form container not found');
+                return;
+            }
+
+            // If component is already loaded, just show it
+            if (this.editUserComponent) {
+                formContainer.classList.remove('hidden');
+                this.editUserComponent.showEditForm();
+                return;
+            }
+
+            // Load edit user component HTML
+            const response = await fetch('/admin/components/user-detail/components/edit-user/edit-user.html');
+            const html = await response.text();
+            
+            // Load component into the container
+            formContainer.innerHTML = html;
+            formContainer.classList.remove('hidden');
+            
+            // Load component CSS
+            if (!document.querySelector('link[href*="edit-user.css"]')) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = '/admin/components/user-detail/components/edit-user/edit-user.css';
+                document.head.appendChild(link);
+            }
+            
+            // Load component JS and initialize
+            if (!window.EditUser) {
+                await this.loadScript('/admin/components/user-detail/components/edit-user/edit-user.js');
+            }
+            
+            // Load translation system
+            if (!window.editUserTranslations) {
+                await this.loadScript('/admin/components/user-detail/components/edit-user/edit-user-translations.js');
+            }
+            
+            // Initialize edit user component
+            if (window.EditUser) {
+                const editUserComponent = new window.EditUser();
+                await editUserComponent.init(this.currentUser);
+                this.editUserComponent = editUserComponent;
+                
+                // Listen for user update events
+                window.addEventListener('userUpdated', (event) => {
+                    console.log('🔄 User updated from edit component:', event.detail);
+                    // Reload user data and refresh UI
+                    this.loadUserData(this.currentUser.id);
+                });
+
+                // Listen for close events
+                window.addEventListener('editUserClosed', () => {
+                    console.log('🔄 Edit user form closed');
+                    formContainer.classList.add('hidden');
+                });
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to load edit user component:', error);
+            this.showError('Failed to load edit user component');
+        }
     }
 
     async sendPasswordReset() {

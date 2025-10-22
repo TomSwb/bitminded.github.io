@@ -1,0 +1,430 @@
+/* Edit User Component Styles */
+/* Follows profile management component patterns */
+
+.edit-user {
+    width: 100%;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* ===== BUTTON ===== */
+.edit-user__button {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: 2px solid var(--color-primary);
+    background-color: transparent;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    text-align: center;
+}
+
+.edit-user__button:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-background-primary);
+}
+
+.edit-user__button--primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-background-primary);
+}
+
+.edit-user__button--primary:hover {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-text-primary);
+}
+
+.edit-user__button--secondary {
+    border-color: var(--color-secondary);
+}
+
+.edit-user__button--secondary:hover {
+    background-color: var(--color-secondary);
+}
+
+.edit-user__button--warning {
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+.edit-user__button--warning:hover {
+    background-color: var(--color-warning);
+    color: var(--color-background-primary);
+}
+
+.edit-user__button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.edit-user__button:disabled:hover {
+    background-color: transparent;
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
+}
+
+/* ===== HEADER ===== */
+.edit-user__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-primary);
+}
+
+.edit-user__title {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.edit-user__close-btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-secondary);
+    background-color: transparent;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.edit-user__close-btn:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-background-primary);
+}
+
+/* ===== FORM ===== */
+.edit-user__form {
+    /* Form content styling - no background/border needed since container provides it */
+}
+
+/* ===== RESPONSIVE LAYOUT ===== */
+@media (min-width: 768px) {
+    .edit-user__form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: var(--spacing-xl);
+        align-items: start;
+    }
+    
+    .edit-user__section {
+        margin-bottom: 0;
+    }
+    
+    .edit-user__section:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .edit-user__form {
+        display: block;
+    }
+    
+    .edit-user__section {
+        margin-bottom: var(--spacing-2xl);
+    }
+}
+
+/* ===== SECTIONS ===== */
+.edit-user__section {
+    margin-bottom: var(--spacing-2xl);
+}
+
+.edit-user__section:last-child {
+    margin-bottom: 0;
+}
+
+.edit-user__section-title {
+    margin: 0 0 var(--spacing-lg) 0;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    border-bottom: 1px solid var(--color-primary);
+    padding-bottom: var(--spacing-sm);
+}
+
+/* ===== FIELDS ===== */
+.edit-user__field {
+    margin-bottom: var(--spacing-lg);
+}
+
+.edit-user__field:last-child {
+    margin-bottom: 0;
+}
+
+.edit-user__label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+.edit-user__input,
+.edit-user__select {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    transition: border-color var(--transition-fast);
+}
+
+.edit-user__input:focus,
+.edit-user__select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.edit-user__input::placeholder {
+    color: var(--color-text-secondary);
+}
+
+/* ===== INPUT GROUPS ===== */
+.edit-user__input-group {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+}
+
+.edit-user__input-group .edit-user__input {
+    flex: 1;
+}
+
+.edit-user__input-group .edit-user__button {
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+/* ===== AVATAR CONTROLS ===== */
+.edit-user__avatar-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.edit-user__current-avatar {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.edit-user__avatar-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.edit-user__avatar-fallback {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-background-primary);
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+}
+
+/* ===== CURRENT VALUE DISPLAY ===== */
+.edit-user__current-value {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--color-background-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-family: monospace;
+}
+
+/* ===== PASSWORD CONTROLS ===== */
+.edit-user__password-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.edit-user__help-text {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    font-style: italic;
+}
+
+/* ===== AVAILABILITY INDICATOR ===== */
+.edit-user__availability {
+    margin-top: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    text-align: center;
+}
+
+.edit-user__availability.checking {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+
+.edit-user__availability.available {
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+.edit-user__availability.unavailable {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
+
+.edit-user__availability.hidden {
+    display: none;
+}
+
+/* ===== FORM ACTIONS ===== */
+.edit-user__actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-primary);
+}
+
+/* ===== LOADING STATE ===== */
+.edit-user__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    background-color: var(--color-background-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+}
+
+.edit-user__loading.hidden {
+    display: none;
+}
+
+.edit-user__spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.edit-user__loading-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+}
+
+/* ===== MESSAGES ===== */
+.edit-user__error,
+.edit-user__success {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    text-align: center;
+}
+
+.edit-user__error {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
+
+.edit-user__success {
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+.edit-user__error.hidden,
+.edit-user__success.hidden {
+    display: none;
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 768px) {
+    .edit-user__form {
+        padding: var(--spacing-lg);
+    }
+
+    .edit-user__input-group {
+        flex-direction: column;
+    }
+
+    .edit-user__input-group .edit-user__button {
+        align-self: stretch;
+    }
+
+    .edit-user__avatar-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .edit-user__actions {
+        flex-direction: column;
+    }
+
+    .edit-user__password-controls {
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-user__form {
+        padding: var(--spacing-md);
+    }
+
+    .edit-user__section-title {
+        font-size: var(--font-size-base);
+    }
+
+    .edit-user__current-avatar {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* ===== ACCESSIBILITY ===== */
+.edit-user__button:focus,
+.edit-user__input:focus,
+.edit-user__select:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.edit-user__button:focus:not(:focus-visible),
+.edit-user__input:focus:not(:focus-visible),
+.edit-user__select:focus:not(:focus-visible) {
+    outline: none;
+}
