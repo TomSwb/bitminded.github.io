@@ -295,6 +295,9 @@ class EditUser {
             this.showLoading(true, 'Resetting avatar...');
             this.hideError();
 
+            // Store old avatar URL for logging
+            const oldAvatarUrl = this.currentUser.avatar_url;
+
             await this.resetAvatar();
             
             // Update local data
@@ -303,8 +306,16 @@ class EditUser {
             
             this.showSuccess('Avatar reset successfully');
             
-            // Log admin action
-            await this.logAdminAction('avatar_reset', 'Reset user avatar');
+            // Log admin action (non-blocking)
+            try {
+                await this.logAdminAction(
+                    'user_field_updated',
+                    `Updated user Avatar: "${oldAvatarUrl || '(no avatar)'}" → "(removed)"`,
+                    this.currentUser.id
+                );
+            } catch (error) {
+                console.warn('⚠️ Failed to log avatar reset action:', error);
+            }
             
         } catch (error) {
             console.error('❌ Failed to reset avatar:', error);
@@ -348,7 +359,11 @@ class EditUser {
             this.showSuccess('Email change request sent successfully');
             
             // Log admin action
-            await this.logAdminAction('email_change_sent', `Sent email change request to: ${newEmail}`);
+            try {
+                await this.logAdminAction('email_change_sent', `Sent email change request to: ${newEmail}`);
+            } catch (error) {
+                console.warn('⚠️ Failed to log email change action:', error);
+            }
             
         } catch (error) {
             console.error('❌ Failed to send email change request:', error);
@@ -375,7 +390,11 @@ class EditUser {
             this.showSuccess('Password reset email sent successfully');
             
             // Log admin action
-            await this.logAdminAction('password_reset_sent', 'Sent password reset email');
+            try {
+                await this.logAdminAction('password_reset_sent', 'Sent password reset email');
+            } catch (error) {
+                console.warn('⚠️ Failed to log password reset action:', error);
+            }
             
         } catch (error) {
             console.error('❌ Failed to send password reset email:', error);
@@ -416,12 +435,15 @@ class EditUser {
      * Collect form data
      */
     collectFormData() {
-        return {
+        const formData = {
             username: document.getElementById('edit-username')?.value.trim() || '',
             date_of_birth: document.getElementById('edit-dob')?.value || null,
             gender: document.getElementById('edit-gender')?.value || null,
             country: document.getElementById('edit-country')?.value || null
         };
+        
+        console.log('📝 Collected form data:', formData);
+        return formData;
     }
 
     /**
@@ -540,8 +562,21 @@ class EditUser {
             throw new Error('Supabase client not available');
         }
 
+        console.log('🔄 Updating user data:', formData);
+        console.log('🔄 Target user ID:', this.currentUser.id);
+
+        // Track what fields have changed
+        const changes = this.trackFieldChanges(formData);
+        
+        if (changes.length === 0) {
+            console.log('ℹ️ No changes detected, skipping update');
+            return;
+        }
+
+        console.log('📝 Detected changes:', changes);
+
         // Update user profile
-        const { error } = await window.supabase
+        const { data, error } = await window.supabase
             .from('user_profiles')
             .update({
                 username: formData.username,
@@ -553,14 +588,71 @@ class EditUser {
             .eq('id', this.currentUser.id);
 
         if (error) {
+            console.error('❌ Database update error:', error);
             if (error.code === '23505') { // Unique constraint violation
                 throw new Error('Username is already taken');
             }
             throw new Error('Failed to update user profile');
         }
 
-        // Log admin action
-        await this.logAdminAction('user_updated', 'Updated user profile information');
+        console.log('✅ User profile updated successfully');
+        console.log('📊 Update result data:', data);
+        
+        // Check if any rows were actually updated
+        if (data && data.length === 0) {
+            console.warn('⚠️ No rows were updated - this might indicate a permission issue or the user doesn\'t exist');
+        }
+
+        // Log each individual change
+        for (const change of changes) {
+            try {
+                await this.logAdminAction(
+                    'user_field_updated',
+                    `Updated user ${change.field}: "${change.oldValue}" → "${change.newValue}"`,
+                    this.currentUser.id
+                );
+            } catch (error) {
+                console.warn(`⚠️ Failed to log ${change.field} update:`, error);
+            }
+        }
+    }
+
+    /**
+     * Track what fields have changed between original and new data
+     * @param {Object} formData - New form data
+     * @returns {Array} Array of change objects
+     */
+    trackFieldChanges(formData) {
+        const changes = [];
+        
+        // Define field mappings with human-readable names
+        const fieldMappings = {
+            username: 'Username',
+            date_of_birth: 'Date of Birth',
+            gender: 'Gender',
+            country: 'Country'
+        };
+        
+        // Check each field for changes
+        Object.keys(fieldMappings).forEach(field => {
+            const oldValue = this.originalData[field] || '';
+            const newValue = formData[field] || '';
+            
+            // Normalize values for comparison (handle null/undefined)
+            const normalizedOld = oldValue === null || oldValue === undefined ? '' : String(oldValue);
+            const normalizedNew = newValue === null || newValue === undefined ? '' : String(newValue);
+            
+            if (normalizedOld !== normalizedNew) {
+                changes.push({
+                    field: fieldMappings[field],
+                    fieldKey: field,
+                    oldValue: normalizedOld || '(empty)',
+                    newValue: normalizedNew || '(empty)'
+                });
+            }
+        });
+        
+        return changes;
     }
 
     /**
@@ -655,20 +747,26 @@ class EditUser {
             const { data: { user: adminUser } } = await window.supabase.auth.getUser();
             if (!adminUser) return;
 
-            // Log to admin_activity table
-            await window.supabase
-                .from('admin_activity')
-                .insert({
-                    admin_id: adminUser.id,
-                    user_id: this.currentUser.id,
-                    action: actionType,
-                    details: {
-                        target_user: this.currentUser.username,
-                        target_email: this.currentUser.email,
-                        details: details,
-                        timestamp: new Date().toISOString()
-                    }
-                });
+            // Log to admin_activity table (optional - don't fail if this doesn't work)
+            try {
+                await window.supabase
+                    .from('admin_activity')
+                    .insert({
+                        admin_id: adminUser.id,
+                        user_id: this.currentUser.id,
+                        action: actionType,
+                        details: {
+                            target_user: this.currentUser.username,
+                            target_email: this.currentUser.email,
+                            details: details,
+                            timestamp: new Date().toISOString()
+                        }
+                    });
+                console.log('✅ Admin action logged successfully');
+            } catch (logError) {
+                console.warn('⚠️ Failed to log admin action:', logError.message);
+                // Don't throw error - admin logging is not critical
+            }
 
         } catch (error) {
             console.warn('⚠️ Failed to log admin action:', error);

@@ -177,6 +177,14 @@ class UserManagement {
                 throw new Error('Supabase not available');
             }
 
+            // Log admin action - viewing user list
+            if (window.adminLayout) {
+                await window.adminLayout.logAdminAction(
+                    'user_list_viewed',
+                    `Admin viewed user management list`
+                ); // No user_id - this is an admin-only action
+            }
+
             // Query users with all related data
             const { data, error } = await window.supabase
                 .from('user_profiles')

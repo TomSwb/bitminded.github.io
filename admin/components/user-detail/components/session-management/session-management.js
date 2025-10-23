@@ -346,7 +346,8 @@ class SessionManagement {
                 console.log('📝 Logging admin action...');
                 await window.adminLayout.logAdminAction(
                     'session_revoked',
-                    `Revoked session ${sessionId.substring(0, 8)}... for user`
+                    `Revoked session ${sessionId.substring(0, 8)}... for user`,
+                    this.currentUserId
                 );
                 console.log('✅ Admin action logged');
             }

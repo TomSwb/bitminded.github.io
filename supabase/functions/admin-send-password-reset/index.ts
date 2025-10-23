@@ -269,11 +269,13 @@ serve(async (req) => {
     const userLanguage = prefs?.language || 'en'
 
     // Generate password reset link using Supabase Admin API
+    // Use SITE_URL for dynamic redirect (works for both localhost and production)
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://bitminded.ch'
     const { data: resetData, error: resetError } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: user.email,
       options: {
-        redirectTo: `${Deno.env.get('SITE_URL') || 'https://bitminded.github.io'}/auth/?form=reset-password`
+        redirectTo: `${siteUrl}/auth/?action=reset-password`
       }
     })
 
@@ -289,7 +291,7 @@ serve(async (req) => {
       html: generatePasswordResetEmail({
         userEmail: user.email,
         resetUrl: resetData.properties.action_link,
-        preferencesUrl: `${Deno.env.get('SITE_URL') || 'https://bitminded.github.io'}/account?section=notifications`
+        preferencesUrl: 'https://bitminded.ch/account?section=notifications'
       }, userLanguage)
     }
 

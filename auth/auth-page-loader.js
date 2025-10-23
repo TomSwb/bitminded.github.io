@@ -77,6 +77,13 @@ class AuthPageLoader {
             return action;
         }
 
+        // Check if user is coming from Supabase password reset
+        // This happens when Supabase redirects after processing a recovery link
+        if (document.referrer && document.referrer.includes('supabase.co/auth/v1/verify')) {
+            console.log('🔍 Detected Supabase password reset redirect');
+            return 'reset-password';
+        }
+
         // Check if we can detect from referrer (less reliable)
         if (document.referrer) {
             const referrer = new URL(document.referrer);

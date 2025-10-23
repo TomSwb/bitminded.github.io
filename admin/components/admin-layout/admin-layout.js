@@ -119,10 +119,9 @@ class AdminLayout {
 
             // 4. Log admin access
             await this.logAdminAction('admin_panel_access', {
-                user_id: user.id,
                 email: user.email,
                 has_2fa: twoFAData?.is_enabled || false
-            });
+            }); // No user_id - this is an admin-only action
 
             return true;
 
@@ -248,7 +247,7 @@ class AdminLayout {
             await this.logAdminAction('section_navigation', {
                 from: this.currentSection,
                 to: sectionName
-            });
+            }); // No user_id - this is an admin-only action
 
 
         } catch (error) {
@@ -532,17 +531,19 @@ class AdminLayout {
     /**
      * Log admin action
      * @param {string} actionType - Type of action
-     * @param {Object} details - Action details
+     * @param {Object|string} details - Action details
+     * @param {string} userId - Optional: ID of user affected by the action
      */
-    async logAdminAction(actionType, details) {
+    async logAdminAction(actionType, details, userId = null) {
         try {
             if (!this.currentUser) return;
 
             await window.supabase
                 .from('admin_activity')
                 .insert({
-                    admin_user_id: this.currentUser.id,  // Fixed: was 'admin_id'
-                    action_type: actionType,              // Fixed: was 'action'
+                    admin_id: this.currentUser.id,        // Fixed: was 'admin_user_id'
+                    user_id: userId,                      // Target user ID (null for admin-only actions)
+                    action: actionType,                   // Fixed: was 'action_type'
                     details: details,
                     ip_address: null // Could fetch from external API if needed
                 });
