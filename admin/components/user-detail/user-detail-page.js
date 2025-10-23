@@ -618,6 +618,139 @@ class UserDetailPage {
         }
     }
 
+    async loadAdminActivityFilters() {
+        try {
+            console.log('🔍 Loading Admin Activity Filters component...');
+            
+            // Load CSS
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters.css';
+            document.head.appendChild(cssLink);
+            
+            // Load translations
+            const translationsScript = document.createElement('script');
+            translationsScript.src = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters-translations.js';
+            document.head.appendChild(translationsScript);
+            
+            // Wait for translations to load
+            await new Promise((resolve) => {
+                translationsScript.onload = resolve;
+            });
+            
+            // Load component script
+            const componentScript = document.createElement('script');
+            componentScript.src = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters.js';
+            document.head.appendChild(componentScript);
+            
+            // Wait for component to load
+            await new Promise((resolve) => {
+                componentScript.onload = resolve;
+            });
+            
+            // Load HTML
+            const response = await fetch('/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters.html');
+            const html = await response.text();
+            
+            // Insert HTML
+            const container = document.getElementById('admin-activity-filters-container');
+            if (container) {
+                container.innerHTML = html;
+                
+                // Initialize component
+                window.adminActivityFilters = new AdminActivityFilters();
+                await window.adminActivityFilters.init();
+                
+                // Set up event listener for filter changes
+                window.addEventListener('adminActivityFiltered', (event) => {
+                    this.renderAdminActivityTable(event.detail.filteredActivities);
+                });
+                
+                console.log('✅ Admin Activity Filters component loaded');
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to load Admin Activity Filters component:', error);
+        }
+    }
+
+    async renderAdminActivityTable(activities) {
+        const adminActionsContainer = document.getElementById('user-detail-admin-actions');
+        if (!adminActionsContainer) return;
+        
+        if (!activities || activities.length === 0) {
+            adminActionsContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No admin actions yet.</p>';
+            return;
+        }
+        
+        try {
+            // Get usernames for target users
+            const userIds = activities
+                .filter(action => action.user_id)
+                .map(action => action.user_id);
+            
+            let userMap = {};
+            if (userIds.length > 0) {
+                const { data: users } = await window.supabase
+                    .from('user_profiles')
+                    .select('id, username')
+                    .in('id', userIds);
+                
+                if (users) {
+                    userMap = users.reduce((acc, user) => {
+                        acc[user.id] = user.username;
+                        return acc;
+                    }, {});
+                }
+            }
+            
+            // Create table rows for all activities
+            const allRows = activities.map(action => {
+                // For user_field_updated actions, show the detailed change info
+                let actionDisplay = action.action;
+                if (action.action === 'user_field_updated' && action.details) {
+                    // Extract the detailed change information from details
+                    if (typeof action.details === 'string') {
+                        actionDisplay = action.details;
+                    } else if (action.details.details) {
+                        actionDisplay = action.details.details;
+                    }
+                }
+                
+                return `
+                <tr style="border-bottom: 1px solid var(--color-primary);">
+                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(action.created_at)}</td>
+                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.escapeHtml(actionDisplay)}</td>
+                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${action.user_id ? (userMap[action.user_id] || 'Unknown User') : 'N/A'}</td>
+                </tr>
+                `;
+            }).join('');
+            
+            adminActionsContainer.innerHTML = `
+                <div style="overflow-x: auto;">
+                    <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--color-primary); border-radius: var(--border-radius-sm);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead style="position: sticky; top: 0; background: var(--color-background-primary); z-index: 10;">
+                                <tr style="border-bottom: 1px solid var(--color-primary);">
+                                    <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
+                                    <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Action</th>
+                                    <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Target User</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${allRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+        } catch (error) {
+            console.error('❌ Failed to render admin activity table:', error);
+            adminActionsContainer.innerHTML = '<p style="color: var(--color-danger); text-align: center; padding: var(--spacing-xl);">Failed to load admin activities.</p>';
+        }
+    }
+
     /**
      * Load activity data
      */
@@ -694,12 +827,14 @@ class UserDetailPage {
                     .from('admin_activity')
                     .select('action, created_at, admin_id, user_id, details')
                     .eq('admin_id', this.currentUser.id)  // Fixed: query by admin_id, not admin_user_id
-                    .order('created_at', { ascending: false })
-                    .limit(10);
+                    .order('created_at', { ascending: false });
+                    // Removed limit to load ALL activities
 
                 if (!adminError) {
-                    // Admin actions loaded
+                    // Load admin activity filters component
+                    await this.loadAdminActivityFilters();
                     
+                    // Admin actions loaded
                     const adminActionsContainer = document.getElementById('user-detail-admin-actions');
                     if (adminActionsContainer) {
                         // Show the parent section
@@ -708,65 +843,16 @@ class UserDetailPage {
                             adminActionsSection.style.display = 'block';
                         }
                         
-                        if (!adminActions || adminActions.length === 0) {
-                            adminActionsContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No admin actions yet.</p>';
-                        } else {
-                            // Get usernames for target users
-                            const userIds = adminActions
-                                .filter(action => action.user_id)
-                                .map(action => action.user_id);
-                            
-                            let userMap = {};
-                            if (userIds.length > 0) {
-                                const { data: users } = await window.supabase
-                                    .from('user_profiles')
-                                    .select('id, username')
-                                    .in('id', userIds);
-                                
-                                if (users) {
-                                    userMap = users.reduce((acc, user) => {
-                                        acc[user.id] = user.username;
-                                        return acc;
-                                    }, {});
-                                }
-                            }
-                            
-                            adminActionsContainer.innerHTML = `
-                                <div style="overflow-x: auto;">
-                                    <table style="width: 100%; border-collapse: collapse;">
-                                        <thead>
-                                            <tr style="border-bottom: 1px solid var(--color-primary);">
-                                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
-                                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Action</th>
-                                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Target User</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${adminActions.map(action => {
-                                                // For user_field_updated actions, show the detailed change info
-                                                let actionDisplay = action.action;
-                                                if (action.action === 'user_field_updated' && action.details) {
-                                                    // Extract the detailed change information from details
-                                                    if (typeof action.details === 'string') {
-                                                        actionDisplay = action.details;
-                                                    } else if (action.details.details) {
-                                                        actionDisplay = action.details.details;
-                                                    }
-                                                }
-                                                
-                                                return `
-                                                <tr style="border-bottom: 1px solid var(--color-primary);">
-                                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(action.created_at)}</td>
-                                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.escapeHtml(actionDisplay)}</td>
-                                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${action.user_id ? (userMap[action.user_id] || 'Unknown User') : 'N/A'}</td>
-                                                </tr>
-                                                `;
-                                            }).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            `;
+                        // Store activities for filter component
+                        this.allAdminActivities = adminActions || [];
+                        
+                        // Initialize filter component with activities
+                        if (window.adminActivityFilters) {
+                            window.adminActivityFilters.setActivities(this.allAdminActivities);
                         }
+                        
+                        // Render initial table
+                        this.renderAdminActivityTable(this.allAdminActivities);
                     }
                 }
             } else {
@@ -1349,7 +1435,7 @@ class UserDetailPage {
         
         try {
             const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+            return date.toLocaleDateString('en-GB') + ' ' + date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
         } catch (error) {
             return 'Invalid Date';
         }
