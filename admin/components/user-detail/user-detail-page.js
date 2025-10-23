@@ -700,7 +700,7 @@ class UserDetailPage {
                 console.log('✅ Login Activity Filters component already loaded');
                 return;
             }
-            
+
             // Load CSS (only if not already loaded)
             if (!document.querySelector('link[href*="login-activity-filters.css"]')) {
                 const cssLink = document.createElement('link');
@@ -845,55 +845,55 @@ class UserDetailPage {
      * Render login activity table with scroll limit
      */
     renderLoginActivityTable(activities) {
-        const loginActivityContainer = document.getElementById('user-detail-login-activity');
+            const loginActivityContainer = document.getElementById('user-detail-login-activity');
         if (!loginActivityContainer) return;
 
         if (!activities || activities.length === 0) {
-            loginActivityContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No login activity yet.</p>';
+                    loginActivityContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No login activity yet.</p>';
             return;
         }
 
-        loginActivityContainer.innerHTML = `
-            <div style="overflow-x: auto;">
+                    loginActivityContainer.innerHTML = `
+                        <div style="overflow-x: auto;">
                 <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--color-primary); border-radius: var(--border-radius-sm);">
-                    <table style="width: 100%; border-collapse: collapse;">
+                            <table style="width: 100%; border-collapse: collapse;">
                         <thead style="position: sticky; top: 0; background: var(--color-background-primary); z-index: 10;">
-                            <tr style="border-bottom: 1px solid var(--color-primary);">
-                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
-                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Status</th>
-                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Location</th>
-                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Device</th>
-                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Browser</th>
-                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">IP Address</th>
-                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">2FA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                                    <tr style="border-bottom: 1px solid var(--color-primary);">
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Status</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Location</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Device</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Browser</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">IP Address</th>
+                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">2FA</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                             ${activities.map(activity => {
-                                const location = activity.location_city && activity.location_country 
-                                    ? `${activity.location_city}, ${activity.location_country}`
-                                    : activity.location_country || '-';
-                                return `
-                                <tr style="border-bottom: 1px solid var(--color-primary);">
-                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(activity.login_time)}</td>
-                                    <td style="padding: var(--spacing-sm);">
-                                        <span style="color: ${activity.success ? 'var(--color-success)' : 'var(--color-error)'}; font-weight: 600;">
-                                            ${activity.success ? '✓ Success' : '✗ Failed'}
-                                        </span>
-                                    </td>
-                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${location}</td>
-                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.device_type || '-'}</td>
-                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.browser || '-'}</td>
-                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary); font-family: monospace;">${activity.ip_address || '-'}</td>
-                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.used_2fa ? 'Yes' : 'No'}</td>
-                                </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
+                                        const location = activity.location_city && activity.location_country 
+                                            ? `${activity.location_city}, ${activity.location_country}`
+                                            : activity.location_country || '-';
+                                        return `
+                                        <tr style="border-bottom: 1px solid var(--color-primary);">
+                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(activity.login_time)}</td>
+                                            <td style="padding: var(--spacing-sm);">
+                                                <span style="color: ${activity.success ? 'var(--color-success)' : 'var(--color-error)'}; font-weight: 600;">
+                                                    ${activity.success ? '✓ Success' : '✗ Failed'}
+                                                </span>
+                                            </td>
+                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${location}</td>
+                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.device_type || '-'}</td>
+                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.browser || '-'}</td>
+                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary); font-family: monospace;">${activity.ip_address || '-'}</td>
+                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.used_2fa ? 'Yes' : 'No'}</td>
+                                        </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
                 </div>
-            </div>
-        `;
+                        </div>
+                    `;
     }
 
     /**
