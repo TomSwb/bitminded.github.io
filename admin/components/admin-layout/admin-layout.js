@@ -36,7 +36,6 @@ class AdminLayout {
             // Check if user is admin (critical security check)
             const hasAccess = await this.checkAdminAccess();
             if (!hasAccess) {
-                console.log('🔒 Admin Layout: Access denied, redirecting...');
                 this.redirectToHome();
                 return;
             }
@@ -85,7 +84,6 @@ class AdminLayout {
             const { data: { user }, error: userError } = await window.supabase.auth.getUser();
             
             if (userError || !user) {
-                console.log('🔒 User not authenticated');
                 return false;
             }
 
@@ -100,7 +98,6 @@ class AdminLayout {
                 .maybeSingle();
             
             if (roleError || !adminRole) {
-                console.log('🔒 User is not admin');
                 return false;
             }
 
@@ -111,9 +108,8 @@ class AdminLayout {
                 .eq('user_id', user.id)
                 .maybeSingle();
             
-            // Log if admin doesn't have 2FA (warning, not blocking)
+            // Check if admin has 2FA (optional but recommended)
             if (!twoFAData || !twoFAData.is_enabled) {
-                console.warn('⚠️ Admin user does not have 2FA enabled');
                 // TODO: Optionally enforce 2FA for admins
             }
 
@@ -135,7 +131,6 @@ class AdminLayout {
      * Redirect to home page (unauthorized access)
      */
     redirectToHome() {
-        console.log('🔄 Redirecting to home page...');
         window.location.href = '/';
     }
 
@@ -203,7 +198,6 @@ class AdminLayout {
     async navigateToSection(sectionName) {
         try {
             if (!this.sections.includes(sectionName)) {
-                console.error('❌ Invalid section:', sectionName);
                 return;
             }
 
@@ -211,7 +205,6 @@ class AdminLayout {
                 return; // Already on this section
             }
 
-            // Navigating
 
             // Hide current section
             this.hideCurrentSection();
@@ -247,7 +240,7 @@ class AdminLayout {
             await this.logAdminAction('section_navigation', {
                 from: this.currentSection,
                 to: sectionName
-            }); // No user_id - this is an admin-only action
+            });
 
 
         } catch (error) {
@@ -316,7 +309,6 @@ class AdminLayout {
 
             const componentName = componentMap[sectionName];
             if (!componentName) {
-                console.warn(`⚠️ No component mapped for section: ${sectionName}`);
                 this.showPlaceholder(sectionName);
                 this.loadedComponents.set(sectionName, true);
                 this.hideLoading();
@@ -326,7 +318,6 @@ class AdminLayout {
             // Check if component exists
             const componentExists = await this.componentExists(componentName);
             if (!componentExists) {
-                console.log(`📝 Component ${componentName} not yet implemented`);
                 this.showPlaceholder(sectionName);
                 this.loadedComponents.set(sectionName, true);
                 this.hideLoading();
@@ -405,7 +396,6 @@ class AdminLayout {
 
             const className = componentClassMap[componentName];
             if (!className || !window[className]) {
-                console.log(`ℹ️ Component ${componentName} has no JavaScript class to initialize`);
                 return;
             }
 
@@ -436,7 +426,6 @@ class AdminLayout {
                     resolve();
                 };
                 script.onerror = () => {
-                    console.log(`ℹ️ No translations file for ${componentName}`);
                     resolve(); // Don't fail if translations missing
                 };
                 document.head.appendChild(script);

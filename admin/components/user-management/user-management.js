@@ -9,19 +9,24 @@ class UserManagement {
         this.isInitialized = false;
         this.users = [];
         this.filteredUsers = [];
-        this.currentPage = 1;
-        this.itemsPerPage = 25;
         this.filters = {
             search: '',
-            status: '',
-            role: '',
-            subscription: ''
+            status: [], // Changed to array for multi-select
+            role: [], // Changed to array for multi-select
+            subscription: [], // Changed to array for multi-select
+            registrationDate: 'all', // New filter
+            lastLogin: 'all', // Renamed to Last Login Time
+            lastLoginLocation: [], // New filter for last login location
+            gender: [], // New filter for gender
+            country: [], // New filter for country
+            age: [] // New filter for age ranges
         };
         this.sort = {
             field: null,
             direction: 'asc'
         };
         this.searchTimeout = null;
+        this.elements = {}; // Store DOM elements
     }
 
     /**
@@ -29,15 +34,19 @@ class UserManagement {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('User Management: Already initialized');
             return;
         }
 
         try {
-            // Initializing
+
+            // Initialize DOM elements
+            this.initializeElements();
 
             // Setup event listeners
             this.setupEventListeners();
+            
+            // Load saved preferences
+            await this.loadPreferences();
             
             // Initialize translations
             await this.initializeTranslations();
@@ -48,8 +57,13 @@ class UserManagement {
             // Load users
             await this.loadUsers();
 
+            // Populate filter options
+            this.populateFilterOptions();
+
+            // Apply initial filters
+            this.applyFilters();
+
             this.isInitialized = true;
-            // Initialized
 
         } catch (error) {
             console.error('❌ User Management: Failed to initialize:', error);
@@ -62,53 +76,65 @@ class UserManagement {
      */
     setupEventListeners() {
         // Search input (debounced)
-        const searchInput = document.getElementById('user-search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
+        if (this.elements.searchInput) {
+            this.elements.searchInput.addEventListener('input', (e) => {
                 clearTimeout(this.searchTimeout);
                 this.searchTimeout = setTimeout(() => {
                     this.filters.search = e.target.value.toLowerCase();
                     this.applyFilters();
+                    this.savePreferences();
                 }, 300); // 300ms debounce
             });
         }
 
-        // Status filter
-        const statusFilter = document.getElementById('filter-status');
-        if (statusFilter) {
-            statusFilter.addEventListener('change', (e) => {
-                this.filters.status = e.target.value;
+        // Date filters
+        if (this.elements.registrationDateFilter) {
+            this.elements.registrationDateFilter.addEventListener('change', (e) => {
+                this.filters.registrationDate = e.target.value;
                 this.applyFilters();
+                this.savePreferences();
             });
         }
 
-        // Role filter (commented out - will be needed when multiple roles exist)
-        /*
-        const roleFilter = document.getElementById('filter-role');
-        if (roleFilter) {
-            roleFilter.addEventListener('change', (e) => {
-                this.filters.role = e.target.value;
+        if (this.elements.lastLoginFilter) {
+            this.elements.lastLoginFilter.addEventListener('change', (e) => {
+                this.filters.lastLogin = e.target.value;
                 this.applyFilters();
-            });
-        }
-        */
-
-        // Subscription filter
-        const subscriptionFilter = document.getElementById('filter-subscription');
-        if (subscriptionFilter) {
-            subscriptionFilter.addEventListener('change', (e) => {
-                this.filters.subscription = e.target.value;
-                this.applyFilters();
+                this.savePreferences();
             });
         }
 
-        // Clear filters button
-        const clearButton = document.getElementById('clear-filters-button');
-        if (clearButton) {
-            clearButton.addEventListener('click', () => {
-                this.clearFilters();
+        // Select All / Deselect All buttons
+        const filterTypes = ['status', 'role', 'subscription', 'gender', 'country', 'age', 'lastLoginLocation'];
+        filterTypes.forEach(filterType => {
+            const selectAllBtn = this.elements[`${filterType}SelectAll`];
+            const deselectAllBtn = this.elements[`${filterType}DeselectAll`];
+
+            if (selectAllBtn) {
+                selectAllBtn.addEventListener('click', () => {
+                    this.handleSelectAll(filterType);
+                });
+            }
+
+            if (deselectAllBtn) {
+                deselectAllBtn.addEventListener('click', () => {
+                    this.handleDeselectAll(filterType);
+                });
+            }
+        });
+
+        // Clear all filters button
+        if (this.elements.clearBtn) {
+            this.elements.clearBtn.addEventListener('click', () => {
+                this.clearAllFilters();
             });
         }
+
+        // Initialize dropdown functionality
+        this.initializeDropdowns();
+
+        // Initialize dropdown search functionality
+        this.initializeDropdownSearch();
 
         // Export button
         const exportButton = document.getElementById('export-users-button');
@@ -127,38 +153,6 @@ class UserManagement {
             });
         });
 
-        // Items per page
-        const itemsPerPage = document.getElementById('items-per-page');
-        if (itemsPerPage) {
-            itemsPerPage.addEventListener('change', (e) => {
-                this.itemsPerPage = parseInt(e.target.value);
-                this.currentPage = 1; // Reset to first page
-                this.renderUsers();
-            });
-        }
-
-        // Pagination buttons
-        const prevButton = document.getElementById('pagination-prev');
-        if (prevButton) {
-            prevButton.addEventListener('click', () => {
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                    this.renderUsers();
-                }
-            });
-        }
-
-        const nextButton = document.getElementById('pagination-next');
-        if (nextButton) {
-            nextButton.addEventListener('click', () => {
-                const totalPages = Math.ceil(this.filteredUsers.length / this.itemsPerPage);
-                if (this.currentPage < totalPages) {
-                    this.currentPage++;
-                    this.renderUsers();
-                }
-            });
-        }
-
         // Language change
         window.addEventListener('languageChanged', () => {
             this.updateTranslations();
@@ -171,7 +165,6 @@ class UserManagement {
     async loadUsers() {
         try {
             this.showLoading();
-            // Loading users
 
             if (!window.supabase) {
                 throw new Error('Supabase not available');
@@ -188,13 +181,14 @@ class UserManagement {
             // Query users with all related data
             const { data, error } = await window.supabase
                 .from('user_profiles')
-                .select('id, username, avatar_url, created_at, email, status')
+                .select('id, username, avatar_url, created_at, email, status, date_of_birth, gender, country')
                 .order('created_at', { ascending: false });
 
             if (error) {
                 console.error('❌ Database query error:', error);
                 throw error;
             }
+
 
             // Enrich user data with roles and subscriptions
             this.users = await Promise.all(data.map(async (profile) => {
@@ -232,15 +226,16 @@ class UserManagement {
                     subscription_count: count || 0,
                     last_login: lastLogin?.login_time || null,
                     last_login_city: lastLogin?.location_city || null,
-                    last_login_country: lastLogin?.location_country || null
+                    last_login_country: lastLogin?.location_country || null,
+                    last_login_location: lastLogin ? 
+                        [lastLogin.location_city, lastLogin.location_country].filter(Boolean).join(', ') : 
+                        null
                 };
             }));
 
-            // Users loaded
             
             // Apply initial filters and render
-            this.filteredUsers = [...this.users];
-            this.renderUsers();
+            this.applyFilters();
             this.hideLoading();
 
         } catch (error) {
@@ -255,6 +250,7 @@ class UserManagement {
      * Apply filters to users list
      */
     applyFilters() {
+        
         this.filteredUsers = this.users.filter(user => {
             // Search filter
             if (this.filters.search) {
@@ -266,25 +262,119 @@ class UserManagement {
                 if (!matchesSearch) return false;
             }
 
-            // Status filter
-            if (this.filters.status) {
-                if (user.status !== this.filters.status) return false;
+            // Status filter (multi-select)
+            if (this.filters.status.length > 0) {
+                if (!this.filters.status.includes(user.status)) return false;
             }
 
-            // Role filter
-            if (this.filters.role) {
-                if (user.role !== this.filters.role) return false;
+            // Role filter (multi-select)
+            if (this.filters.role.length > 0) {
+                if (!this.filters.role.includes(user.role)) return false;
             }
 
-            // Subscription filter
-            if (this.filters.subscription === 'active') {
-                if (user.subscription_count === 0) return false;
-            } else if (this.filters.subscription === 'none') {
-                if (user.subscription_count > 0) return false;
+            // Subscription filter (multi-select)
+            if (this.filters.subscription.length > 0) {
+                const userSubscriptionStatus = user.subscription_count > 0 ? 'active' : 'none';
+                if (!this.filters.subscription.includes(userSubscriptionStatus)) return false;
+            }
+
+            // Registration date filter
+            if (this.filters.registrationDate !== 'all') {
+                const registrationDate = new Date(user.created_at);
+                const now = new Date();
+                const daysDiff = Math.floor((now - registrationDate) / (1000 * 60 * 60 * 24));
+                
+                switch (this.filters.registrationDate) {
+                    case '7d':
+                        if (daysDiff > 7) return false;
+                        break;
+                    case '30d':
+                        if (daysDiff > 30) return false;
+                        break;
+                    case '90d':
+                        if (daysDiff > 90) return false;
+                        break;
+                    case '1y':
+                        if (daysDiff > 365) return false;
+                        break;
+                }
+            }
+
+            // Last login filter
+            if (this.filters.lastLogin !== 'all') {
+                if (!user.last_login) {
+                    // User has never logged in
+                    if (this.filters.lastLogin !== 'never') return false;
+                } else {
+                    const lastLoginDate = new Date(user.last_login);
+                    const now = new Date();
+                    const daysDiff = Math.floor((now - lastLoginDate) / (1000 * 60 * 60 * 24));
+                    
+                    switch (this.filters.lastLogin) {
+                        case 'never':
+                            return false; // User has logged in, so doesn't match "never"
+                        case '7d':
+                            if (daysDiff > 7) return false;
+                            break;
+                        case '30d':
+                            if (daysDiff > 30) return false;
+                            break;
+                        case '90d':
+                            if (daysDiff > 90) return false;
+                            break;
+                    }
+                }
+            }
+
+            // Gender filter (multi-select)
+            if (this.filters.gender.length > 0) {
+                if (!user.gender || !this.filters.gender.includes(user.gender)) return false;
+            }
+
+            // Country filter (multi-select)
+            if (this.filters.country.length > 0) {
+                if (!user.country || !this.filters.country.includes(user.country)) return false;
+            }
+
+            // Age filter (multi-select)
+            if (this.filters.age.length > 0) {
+                if (!user.date_of_birth) return false; // Skip users without birth date
+                
+                const birthDate = new Date(user.date_of_birth);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                
+                // Determine age range
+                let ageRange;
+                if (age < 18) {
+                    ageRange = 'Under 18';
+                } else if (age >= 18 && age <= 25) {
+                    ageRange = '18-25';
+                } else if (age >= 26 && age <= 35) {
+                    ageRange = '26-35';
+                } else if (age >= 36 && age <= 50) {
+                    ageRange = '36-50';
+                } else if (age >= 51 && age <= 65) {
+                    ageRange = '51-65';
+                } else {
+                    ageRange = '65+';
+                }
+                
+                if (!this.filters.age.includes(ageRange)) return false;
+            }
+
+            // Last Login Location filter (multi-select)
+            if (this.filters.lastLoginLocation.length > 0) {
+                if (!user.last_login_location || !this.filters.lastLoginLocation.includes(user.last_login_location)) return false;
             }
 
             return true;
         });
+
 
         // Apply sorting if active
         if (this.sort.field) {
@@ -293,6 +383,9 @@ class UserManagement {
 
         // Reset to first page when filtering
         this.currentPage = 1;
+        
+        // Update filter summary
+        this.updateFilterSummary();
         
         // Render filtered results
         this.renderUsers();
@@ -396,18 +489,20 @@ class UserManagement {
      */
     renderUsers() {
         const tbody = document.getElementById('users-table-body');
-        if (!tbody) return;
+        if (!tbody) {
+            console.error('❌ Table body not found');
+            return;
+        }
 
-        // Calculate pagination
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const end = start + this.itemsPerPage;
-        const pageUsers = this.filteredUsers.slice(start, end);
+        // Show all filtered users (no pagination)
+        const allUsers = this.filteredUsers;
 
-        // Clear table
+        // Clear table and ensure tbody is visible
         tbody.innerHTML = '';
+        tbody.style.display = 'table-row-group'; // Explicitly show the tbody
 
         // Check if empty
-        if (pageUsers.length === 0) {
+        if (allUsers.length === 0) {
             this.showEmpty();
             this.hideTable();
             return;
@@ -417,16 +512,10 @@ class UserManagement {
         this.hideEmpty();
 
         // Render each user
-        pageUsers.forEach(user => {
+        allUsers.forEach((user, index) => {
             const row = this.createUserRow(user);
             tbody.appendChild(row);
         });
-
-        // Update pagination
-        this.updatePagination();
-        
-        // Update total count
-        this.updateTotalCount();
     }
 
     /**
@@ -435,24 +524,38 @@ class UserManagement {
      * @returns {HTMLElement} Table row element
      */
     createUserRow(user) {
+        
         const tr = document.createElement('tr');
         tr.dataset.userId = user.id;
+        tr.style.borderBottom = '1px solid var(--color-primary)';
+        
         
         // Username cell
         const usernameCell = document.createElement('td');
         usernameCell.setAttribute('data-label', 'Username');
+        usernameCell.style.padding = 'var(--spacing-sm)';
+        usernameCell.style.color = 'var(--color-text-primary)';
         usernameCell.textContent = user.username;
 
         // Email cell
         const emailCell = document.createElement('td');
         emailCell.setAttribute('data-label', 'Email');
+        emailCell.style.padding = 'var(--spacing-sm)';
+        emailCell.style.color = 'var(--color-text-primary)';
         emailCell.textContent = user.email;
 
         // Role cell
         const roleCell = document.createElement('td');
         roleCell.setAttribute('data-label', 'Role');
+        roleCell.style.padding = 'var(--spacing-sm)';
+        
+        // Different styling for User vs Admin roles
+        const roleStyle = user.role === 'user' 
+            ? 'background-color: var(--color-background-primary); color: var(--color-primary); border: 1px solid var(--color-primary);'
+            : 'background-color: var(--color-primary); color: var(--color-background-primary);';
+            
         roleCell.innerHTML = `
-            <span class="user-management__badge user-management__badge--${user.role}">
+            <span style="display: inline-block; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-size-xs); font-weight: 600; text-transform: uppercase; ${roleStyle}">
                 ${user.role}
             </span>
         `;
@@ -460,26 +563,63 @@ class UserManagement {
         // Status cell
         const statusCell = document.createElement('td');
         statusCell.setAttribute('data-label', 'Status');
+        statusCell.style.padding = 'var(--spacing-sm)';
         const status = user.status || 'active';
         statusCell.innerHTML = `
-            <span class="user-management__badge user-management__badge--${status}">
+            <span style="display: inline-block; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-size-xs); font-weight: 600; text-transform: uppercase; background-color: var(--color-success); color: var(--color-background-primary);">
                 ${status}
             </span>
+        `;
+
+        // User Info cell
+        const userInfoCell = document.createElement('td');
+        userInfoCell.setAttribute('data-label', 'User Info');
+        userInfoCell.style.padding = 'var(--spacing-sm)';
+        userInfoCell.style.color = 'var(--color-text-primary)';
+        
+        // Calculate age from date_of_birth
+        let ageText = '';
+        if (user.date_of_birth) {
+            const birthDate = new Date(user.date_of_birth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            ageText = `${age} years`;
+        }
+        
+        // Format user info
+        const userInfo = [];
+        if (user.gender) userInfo.push(user.gender);
+        if (ageText) userInfo.push(ageText);
+        if (user.country) userInfo.push(user.country);
+        
+        userInfoCell.innerHTML = `
+            <div style="line-height: 1.4;">
+                ${userInfo.length > 0 ? userInfo.join('<br>') : 'Not provided'}
+            </div>
         `;
 
         // Subscriptions cell
         const subsCell = document.createElement('td');
         subsCell.setAttribute('data-label', 'Subscriptions');
+        subsCell.style.padding = 'var(--spacing-sm)';
+        subsCell.style.color = 'var(--color-text-primary)';
         subsCell.textContent = user.subscription_count;
 
         // Registered cell
         const registeredCell = document.createElement('td');
         registeredCell.setAttribute('data-label', 'Registered');
+        registeredCell.style.padding = 'var(--spacing-sm)';
+        registeredCell.style.color = 'var(--color-text-primary)';
         registeredCell.textContent = this.formatDate(user.created_at);
 
         // Last login cell
         const lastLoginCell = document.createElement('td');
         lastLoginCell.setAttribute('data-label', 'Last Login');
+        lastLoginCell.style.padding = 'var(--spacing-sm)';
         
         if (user.last_login) {
             const loginDate = new Date(user.last_login);
@@ -503,12 +643,13 @@ class UserManagement {
         // Actions cell
         const actionsCell = document.createElement('td');
         actionsCell.setAttribute('data-label', 'Actions');
+        actionsCell.style.padding = 'var(--spacing-sm)';
         actionsCell.innerHTML = `
-            <div class="user-management__actions-cell">
-                <button class="user-management__action-button" data-action="view" data-user-id="${user.id}">
+            <div style="display: flex; gap: var(--spacing-sm);">
+                <button class="user-management__action-btn user-management__action-btn--view" data-action="view" data-user-id="${user.id}">
                     View
                 </button>
-                <button class="user-management__action-button user-management__action-button--danger" data-action="delete" data-user-id="${user.id}">
+                <button class="user-management__action-btn user-management__action-btn--delete" data-action="delete" data-user-id="${user.id}">
                     Delete
                 </button>
             </div>
@@ -537,10 +678,12 @@ class UserManagement {
         tr.appendChild(emailCell);
         tr.appendChild(roleCell);
         tr.appendChild(statusCell);
+        tr.appendChild(userInfoCell);
         tr.appendChild(subsCell);
         tr.appendChild(registeredCell);
         tr.appendChild(lastLoginCell);
         tr.appendChild(actionsCell);
+
 
         return tr;
     }
@@ -550,7 +693,6 @@ class UserManagement {
      * @param {string} userId - User ID
      */
     viewUserDetail(userId) {
-        console.log('👤 Opening user details in new tab for:', userId);
         
         // Open user detail page in new tab
         window.open(`/admin/components/user-detail/?id=${userId}`, '_blank');
@@ -562,7 +704,6 @@ class UserManagement {
      * @param {string} username - Username for confirmation
      */
     async deleteUser(userId, username) {
-        console.log('🗑️ Attempting to delete user:', userId);
         
         if (!window.supabase) {
             this.showError('Supabase not available');
@@ -594,8 +735,6 @@ class UserManagement {
                 return;
             }
             
-            console.log('🔑 Session token available:', !!session.access_token);
-            console.log('🔑 Calling delete-user Edge Function with auth...');
             
             // Call the delete-user Edge Function with explicit headers
             const response = await window.supabase.functions.invoke('delete-user', {
@@ -609,7 +748,6 @@ class UserManagement {
                 }
             });
             
-            console.log('📡 Edge Function response:', response);
             
             if (response.error) {
                 console.error('❌ Edge Function error:', response.error);
@@ -622,7 +760,6 @@ class UserManagement {
                 return;
             }
             
-            console.log('✅ User deleted successfully:', response.data);
             this.showSuccess(`User "${username}" has been permanently deleted`);
             
             // Reload users list
@@ -650,35 +787,6 @@ class UserManagement {
         });
     }
 
-    /**
-     * Update pagination controls
-     */
-    updatePagination() {
-        const totalPages = Math.ceil(this.filteredUsers.length / this.itemsPerPage);
-        
-        // Update pagination info
-        const start = (this.currentPage - 1) * this.itemsPerPage + 1;
-        const end = Math.min(this.currentPage * this.itemsPerPage, this.filteredUsers.length);
-        
-        document.getElementById('pagination-start').textContent = this.filteredUsers.length > 0 ? start : 0;
-        document.getElementById('pagination-end').textContent = end;
-        document.getElementById('pagination-total').textContent = this.filteredUsers.length;
-
-        // Update button states
-        const prevButton = document.getElementById('pagination-prev');
-        const nextButton = document.getElementById('pagination-next');
-        
-        if (prevButton) {
-            prevButton.disabled = this.currentPage === 1;
-        }
-        
-        if (nextButton) {
-            nextButton.disabled = this.currentPage >= totalPages;
-        }
-
-        // Update page numbers
-        this.renderPageNumbers(totalPages);
-    }
 
     /**
      * Render page numbers
@@ -716,20 +824,9 @@ class UserManagement {
     }
 
     /**
-     * Update total count display
-     */
-    updateTotalCount() {
-        const countNumber = document.getElementById('user-count-number');
-        if (countNumber) {
-            countNumber.textContent = this.users.length;
-        }
-    }
-
-    /**
      * Export users to CSV
      */
     exportUsers() {
-        console.log('📤 Exporting users...');
         
         // Create CSV content
         const headers = ['Username', 'Email', 'Role', 'Status', 'Subscriptions', 'Registered', 'Last Login'];
@@ -759,7 +856,6 @@ class UserManagement {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
 
-        console.log('✅ Users exported');
     }
 
     /**
@@ -811,6 +907,8 @@ class UserManagement {
         const table = document.getElementById('users-table');
         if (table) {
             table.style.display = 'table';
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
         }
     }
 
@@ -891,18 +989,483 @@ class UserManagement {
     }
 
     /**
-     * Hide loading state
+     * Initialize DOM elements
      */
-    hideLoading() {
-        const loadingContainer = document.querySelector('.user-management__loading');
-        const tableBody = document.getElementById('users-table-body');
-        
-        if (loadingContainer && tableBody) {
-            loadingContainer.style.display = 'none';
-            tableBody.style.display = 'table-row-group';
+    initializeElements() {
+        this.elements = {
+            // Search
+            searchInput: document.getElementById('user-search-input'),
+            
+            // Dropdown buttons
+            statusDropdownBtn: document.getElementById('status-dropdown-btn'),
+            roleDropdownBtn: document.getElementById('role-dropdown-btn'),
+            subscriptionDropdownBtn: document.getElementById('subscription-dropdown-btn'),
+            genderDropdownBtn: document.getElementById('gender-dropdown-btn'),
+            countryDropdownBtn: document.getElementById('country-dropdown-btn'),
+            ageDropdownBtn: document.getElementById('age-dropdown-btn'),
+            lastLoginLocationDropdownBtn: document.getElementById('last-login-location-dropdown-btn'),
+            
+            // Dropdown content
+            statusDropdown: document.getElementById('status-dropdown'),
+            roleDropdown: document.getElementById('role-dropdown'),
+            subscriptionDropdown: document.getElementById('subscription-dropdown'),
+            genderDropdown: document.getElementById('gender-dropdown'),
+            countryDropdown: document.getElementById('country-dropdown'),
+            ageDropdown: document.getElementById('age-dropdown'),
+            lastLoginLocationDropdown: document.getElementById('last-login-location-dropdown'),
+            
+            // Options containers
+            statusOptions: document.getElementById('status-options'),
+            roleOptions: document.getElementById('role-options'),
+            subscriptionOptions: document.getElementById('subscription-options'),
+            genderOptions: document.getElementById('gender-options'),
+            countryOptions: document.getElementById('country-options'),
+            ageOptions: document.getElementById('age-options'),
+            lastLoginLocationOptions: document.getElementById('last-login-location-options'),
+            
+            // Search inputs within dropdowns
+            statusSearch: document.getElementById('status-search'),
+            roleSearch: document.getElementById('role-search'),
+            subscriptionSearch: document.getElementById('subscription-search'),
+            genderSearch: document.getElementById('gender-search'),
+            countrySearch: document.getElementById('country-search'),
+            ageSearch: document.getElementById('age-search'),
+            lastLoginLocationSearch: document.getElementById('last-login-location-search'),
+            
+            // Action buttons
+            statusSelectAll: document.getElementById('status-select-all'),
+            statusDeselectAll: document.getElementById('status-deselect-all'),
+            roleSelectAll: document.getElementById('role-select-all'),
+            roleDeselectAll: document.getElementById('role-deselect-all'),
+            subscriptionSelectAll: document.getElementById('subscription-select-all'),
+            subscriptionDeselectAll: document.getElementById('subscription-deselect-all'),
+            genderSelectAll: document.getElementById('gender-select-all'),
+            genderDeselectAll: document.getElementById('gender-deselect-all'),
+            countrySelectAll: document.getElementById('country-select-all'),
+            countryDeselectAll: document.getElementById('country-deselect-all'),
+            ageSelectAll: document.getElementById('age-select-all'),
+            ageDeselectAll: document.getElementById('age-deselect-all'),
+            lastLoginLocationSelectAll: document.getElementById('last-login-location-select-all'),
+            lastLoginLocationDeselectAll: document.getElementById('last-login-location-deselect-all'),
+            
+            // Date filters
+            registrationDateFilter: document.getElementById('registration-date-filter'),
+            lastLoginFilter: document.getElementById('last-login-filter'),
+            
+            // Summary and clear
+            clearBtn: document.getElementById('user-clear-filters-btn'),
+            filterSummary: document.querySelector('.user-management__summary .user-management__count')
+        };
+    }
+
+    /**
+     * Load saved filter preferences from database
+     */
+    async loadPreferences() {
+        try {
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (!user) return;
+
+            const { data: preferences } = await window.supabase
+                .from('admin_preferences')
+                .select('preferences')
+                .eq('admin_id', user.id)
+                .single();
+
+            if (preferences && preferences.preferences.userManagementFilters) {
+                this.filters = {
+                    ...this.filters,
+                    ...preferences.preferences.userManagementFilters
+                };
+            }
+        } catch (error) {
+            console.error('❌ Failed to load preferences:', error);
         }
     }
-}
+
+    /**
+     * Save filter preferences to database
+     */
+    async savePreferences() {
+        try {
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (!user) return;
+
+            // Get existing preferences
+            const { data: existingPrefs } = await window.supabase
+                .from('admin_preferences')
+                .select('preferences')
+                .eq('admin_id', user.id)
+                .single();
+
+            const currentPreferences = existingPrefs?.preferences || {};
+            currentPreferences.userManagementFilters = this.filters;
+
+            await window.supabase
+                .from('admin_preferences')
+                .upsert({
+                    admin_id: user.id,
+                    preferences: currentPreferences
+                }, { onConflict: 'admin_id' });
+
+        } catch (error) {
+            console.error('❌ Failed to save preferences:', error);
+        }
+    }
+
+    /**
+     * Populate filter options dynamically from user data
+     */
+    populateFilterOptions() {
+        if (!this.users.length) return;
+
+        // Get unique values for each filter type
+        const statuses = [...new Set(this.users.map(user => user.status))];
+        const roles = [...new Set(this.users.map(user => user.role))];
+        const subscriptions = [...new Set(this.users.map(user => user.subscription_count > 0 ? 'active' : 'none'))];
+        const genders = [...new Set(this.users.map(user => user.gender).filter(Boolean))];
+        const countries = [...new Set(this.users.map(user => user.country).filter(Boolean))];
+        
+        // Calculate age ranges from users with date_of_birth
+        const ageRanges = this.calculateAgeRanges();
+        
+        // Get unique last login locations from users with last_login data
+        const lastLoginLocations = [...new Set(this.users.map(user => user.last_login_location).filter(Boolean))];
+        
+        console.log('🔍 Last login locations found:', lastLoginLocations);
+
+        // Render options for each filter
+        this.renderFilterOptions('status', statuses);
+        this.renderFilterOptions('role', roles);
+        this.renderFilterOptions('subscription', subscriptions);
+        this.renderFilterOptions('gender', genders);
+        this.renderFilterOptions('country', countries);
+        this.renderFilterOptions('age', ageRanges);
+        this.renderFilterOptions('lastLoginLocation', lastLoginLocations);
+    }
+
+    /**
+     * Calculate age ranges from users with date_of_birth
+     */
+    calculateAgeRanges() {
+        const ageRanges = new Set();
+        
+        this.users.forEach(user => {
+            if (user.date_of_birth) {
+                const birthDate = new Date(user.date_of_birth);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                
+                // Categorize into age ranges
+                if (age < 18) {
+                    ageRanges.add('Under 18');
+                } else if (age >= 18 && age <= 25) {
+                    ageRanges.add('18-25');
+                } else if (age >= 26 && age <= 35) {
+                    ageRanges.add('26-35');
+                } else if (age >= 36 && age <= 50) {
+                    ageRanges.add('36-50');
+                } else if (age >= 51 && age <= 65) {
+                    ageRanges.add('51-65');
+                } else {
+                    ageRanges.add('65+');
+                }
+            }
+        });
+        
+        return Array.from(ageRanges).sort();
+    }
+
+    /**
+     * Render filter options for a specific filter type
+     */
+    renderFilterOptions(filterType, options) {
+        const optionsContainer = this.elements[`${filterType}Options`];
+        if (!optionsContainer) return;
+
+        optionsContainer.innerHTML = '';
+
+        options.forEach(option => {
+            if (!option) return; // Skip null/undefined values
+
+            const optionElement = document.createElement('label');
+            optionElement.className = 'user-management__option';
+            optionElement.innerHTML = `
+                <input type="checkbox" value="${option}" class="user-management__checkbox">
+                <span>${option}</span>
+            `;
+
+            // Set initial state based on saved preferences
+            const checkbox = optionElement.querySelector('input');
+            if (this.filters[filterType].includes(option)) {
+                checkbox.checked = true;
+            }
+
+            // Add event listener
+            checkbox.addEventListener('change', () => {
+                this.handleFilterToggle(filterType, option, checkbox.checked);
+            });
+
+            optionsContainer.appendChild(optionElement);
+        });
+    }
+
+    /**
+     * Handle filter toggle for multi-select filters
+     */
+    handleFilterToggle(filterType, option, isChecked) {
+
+        if (isChecked) {
+            // Add to filter if not already present
+            if (!this.filters[filterType].includes(option)) {
+                this.filters[filterType].push(option);
+            }
+        } else {
+            // Remove from filter
+            this.filters[filterType] = this.filters[filterType].filter(item => item !== option);
+        }
+
+        this.applyFilters();
+        this.savePreferences();
+    }
+
+    /**
+     * Handle select all for a filter type
+     */
+    handleSelectAll(filterType) {
+        const optionsContainer = this.elements[`${filterType}Options`];
+        if (!optionsContainer) return;
+
+        const checkboxes = optionsContainer.querySelectorAll('input[type="checkbox"]');
+        const allValues = Array.from(checkboxes).map(cb => cb.value);
+
+        // Set all checkboxes as checked
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+
+        // Update filter
+        this.filters[filterType] = [...allValues];
+        this.applyFilters();
+        this.savePreferences();
+    }
+
+    /**
+     * Handle deselect all for a filter type
+     */
+    handleDeselectAll(filterType) {
+        const optionsContainer = this.elements[`${filterType}Options`];
+        if (!optionsContainer) return;
+
+        const checkboxes = optionsContainer.querySelectorAll('input[type="checkbox"]');
+
+        // Set all checkboxes as unchecked
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Update filter
+        this.filters[filterType] = [];
+        this.applyFilters();
+        this.savePreferences();
+    }
+
+    /**
+     * Update filter summary text
+     */
+    updateFilterSummary() {
+        if (!this.elements.filterSummary) return;
+
+        const totalCount = this.users.length;
+        const filteredCount = this.filteredUsers.length;
+
+        let summaryText;
+        if (filteredCount === totalCount) {
+            summaryText = `Showing all users`;
+        } else {
+            summaryText = `Showing ${filteredCount} of ${totalCount} users`;
+        }
+
+        this.elements.filterSummary.textContent = summaryText;
+    }
+
+    /**
+     * Clear all filters
+     */
+    clearAllFilters() {
+
+        // Reset filter state
+        this.filters = {
+            search: '',
+            status: [],
+            role: [],
+            subscription: [],
+            registrationDate: 'all',
+            lastLogin: 'all',
+            lastLoginLocation: [],
+            gender: [],
+            country: [],
+            age: []
+        };
+
+        // Clear search input
+        if (this.elements.searchInput) {
+            this.elements.searchInput.value = '';
+        }
+
+        // Clear date filters
+        if (this.elements.registrationDateFilter) {
+            this.elements.registrationDateFilter.value = 'all';
+        }
+        if (this.elements.lastLoginFilter) {
+            this.elements.lastLoginFilter.value = 'all';
+        }
+
+        // Clear all checkboxes
+        ['status', 'role', 'subscription'].forEach(filterType => {
+            const optionsContainer = this.elements[`${filterType}Options`];
+            if (optionsContainer) {
+                const checkboxes = optionsContainer.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            }
+        });
+
+        // Apply filters and save preferences
+        this.applyFilters();
+        this.savePreferences();
+    }
+
+    /**
+     * Initialize dropdown functionality
+     */
+    initializeDropdowns() {
+        const dropdownButtons = [
+            'statusDropdownBtn',
+            'roleDropdownBtn', 
+            'subscriptionDropdownBtn',
+            'genderDropdownBtn',
+            'countryDropdownBtn',
+            'ageDropdownBtn',
+            'lastLoginLocationDropdownBtn'
+        ];
+
+
+        dropdownButtons.forEach(btnKey => {
+            const btn = this.elements[btnKey];
+            const dropdown = this.elements[btnKey.replace('Btn', '')];
+
+
+            if (btn && dropdown) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleDropdown(btn, dropdown);
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                        this.closeDropdown(btn, dropdown);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Initialize dropdown search functionality
+     */
+    initializeDropdownSearch() {
+        const searchInputs = [
+            'statusSearch',
+            'roleSearch', 
+            'subscriptionSearch',
+            'genderSearch',
+            'countrySearch',
+            'ageSearch',
+            'lastLoginLocationSearch'
+        ];
+
+        searchInputs.forEach(searchKey => {
+            const searchInput = this.elements[searchKey];
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const filterType = searchKey.replace('Search', '');
+                    this.filterDropdownOptions(filterType, e.target.value);
+                });
+            }
+        });
+    }
+
+    /**
+     * Filter dropdown options based on search input
+     */
+    filterDropdownOptions(filterType, searchTerm) {
+        const optionsContainer = this.elements[`${filterType}Options`];
+        if (!optionsContainer) return;
+
+        const options = optionsContainer.querySelectorAll('.user-management__option');
+        const searchLower = searchTerm.toLowerCase();
+
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            const isVisible = text.includes(searchLower);
+            option.style.display = isVisible ? 'block' : 'none';
+        });
+    }
+
+    /**
+     * Toggle dropdown visibility
+     */
+    toggleDropdown(btn, dropdown) {
+        const isOpen = dropdown.classList.contains('show');
+        
+        // Close all other dropdowns
+        this.closeAllDropdowns();
+        
+        if (!isOpen) {
+            dropdown.classList.add('show');
+            btn.classList.add('active');
+        }
+    }
+
+    /**
+     * Close specific dropdown
+     */
+    closeDropdown(btn, dropdown) {
+        dropdown.classList.remove('show');
+        btn.classList.remove('active');
+    }
+
+    /**
+     * Close all dropdowns
+     */
+    closeAllDropdowns() {
+        const dropdowns = [
+            'statusDropdown',
+            'roleDropdown',
+            'subscriptionDropdown',
+            'genderDropdown',
+            'countryDropdown',
+            'ageDropdown',
+            'lastLoginLocationDropdown'
+        ];
+
+        dropdowns.forEach(dropdownKey => {
+            const btn = this.elements[dropdownKey.replace('Dropdown', 'DropdownBtn')];
+            const dropdown = this.elements[dropdownKey];
+            
+            if (btn && dropdown) {
+                this.closeDropdown(btn, dropdown);
+            }
+        });
+    }
+} // End of UserManagement class
 
 // Export for use in other scripts
 window.UserManagement = UserManagement;
