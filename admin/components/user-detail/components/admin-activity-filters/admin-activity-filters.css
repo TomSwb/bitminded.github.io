@@ -226,18 +226,21 @@
 /* Footer Layout - Separate elements on same row */
 .admin-activity-filters__footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     gap: var(--spacing-md);
     margin-top: var(--spacing-lg);
 }
 
 .admin-activity-filters__summary {
+    flex-shrink: 0; /* Don't grow, size to content */
     padding: var(--spacing-sm);
     background: var(--color-background-primary);
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--color-primary);
-    flex: 1;
+    display: flex;
+    align-items: center;
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .admin-activity-filters__count {
@@ -256,6 +259,7 @@
     font-size: 0.8rem;
     transition: all 0.2s ease;
     white-space: nowrap;
+    flex-shrink: 0; /* Don't shrink the button */
 }
 
 .admin-activity-filters__clear-btn:hover {

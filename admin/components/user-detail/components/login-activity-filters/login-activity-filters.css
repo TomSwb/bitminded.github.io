@@ -1,0 +1,245 @@
+/* Login Activity Filters Component Styles */
+
+.login-activity-filters {
+    background: var(--color-background-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Header Layout */
+.login-activity-filters__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+/* Controls Grid Layout */
+.login-activity-filters__controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+/* Summary Row Layout - Same row as filters */
+.login-activity-filters__summary-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+}
+
+/* Filter Group */
+.login-activity-filters__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.login-activity-filters__label {
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+/* Select Dropdown */
+.login-activity-filters__select {
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.login-activity-filters__select:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+}
+
+/* Custom Dropdown */
+.login-activity-filters__dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.login-activity-filters__dropdown-btn {
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+    font-size: 0.9rem;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: border-color 0.2s ease;
+}
+
+.login-activity-filters__dropdown-btn:hover {
+    border-color: var(--color-secondary);
+}
+
+.login-activity-filters__dropdown-arrow {
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+.login-activity-filters__dropdown-btn.active .login-activity-filters__dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.login-activity-filters__dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-background-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.login-activity-filters__dropdown-content.show {
+    display: block;
+}
+
+/* Search Input */
+.login-activity-filters__search {
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-primary);
+}
+
+.login-activity-filters__search-input {
+    width: 100%;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-xs);
+    font-size: 0.8rem;
+}
+
+.login-activity-filters__search-input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+}
+
+/* Options */
+.login-activity-filters__options {
+    padding: var(--spacing-xs);
+}
+
+.login-activity-filters__option {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs);
+    cursor: pointer;
+    border-radius: var(--border-radius-sm);
+    transition: background-color 0.2s ease;
+}
+
+.login-activity-filters__option:hover {
+    background: var(--color-primary);
+}
+
+.login-activity-filters__checkbox {
+    margin: 0;
+}
+
+.login-activity-filters__option span {
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+}
+
+/* Action Buttons */
+.login-activity-filters__actions {
+    padding: var(--spacing-sm);
+    border-top: 1px solid var(--color-primary);
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.login-activity-filters__action-btn {
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.login-activity-filters__action-btn:hover {
+    background: var(--color-primary);
+    color: var(--color-text-primary);
+}
+
+/* Summary and Clear Button - Same row layout */
+.login-activity-filters__summary {
+    flex-shrink: 0; /* Don't grow, size to content */
+    padding: var(--spacing-sm);
+    background: var(--color-background-primary);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-primary);
+    display: flex;
+    align-items: center;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.login-activity-filters__count {
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.login-activity-filters__clear-btn {
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-error);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0; /* Don't shrink the button */
+}
+
+.login-activity-filters__clear-btn:hover {
+    background: var(--color-error);
+    color: var(--color-text-primary);
+    border-color: var(--color-error);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-activity-filters__controls {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .login-activity-filters__summary-row {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: stretch;
+    }
+
+    .login-activity-filters__clear-btn {
+        align-self: flex-end;
+    }
+}
