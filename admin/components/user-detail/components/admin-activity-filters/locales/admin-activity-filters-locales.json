@@ -1,0 +1,142 @@
+{
+  "en": {
+    "translation": {
+      "filter_admin_activity": "Filter Admin Activity",
+      "clear_all_filters": "Clear All Filters",
+      "date_range": "Date Range",
+      "all_time": "All Time",
+      "last_7_days": "Last 7 days",
+      "last_30_days": "Last 30 days",
+      "last_3_months": "Last 3 months",
+      "last_6_months": "Last 6 months",
+      "last_year": "Last year",
+      "action_types": "Action Types",
+      "all_actions": "All Actions",
+      "target_users": "Target Users",
+      "all_users": "All Users",
+      "search_actions": "Search actions...",
+      "search_users": "Search users...",
+      "select_all": "Select All",
+      "deselect_all": "Deselect All",
+      "showing_all_activities": "Showing all activities",
+      "showing_filtered_activities": "Showing {filteredCount} of {totalCount} activities",
+      "action_names": {
+        "user_detail_viewed": "View User Detail",
+        "user_field_updated": "Update User Field",
+        "email_change_sent": "Send Email Change",
+        "password_reset_sent": "Send Password Reset",
+        "all_sessions_revoked": "Revoke All Sessions",
+        "session_revoked": "Revoke Session",
+        "admin_panel_access": "Admin Panel Access",
+        "section_navigation": "Section Navigation",
+        "user_list_viewed": "View User List"
+      },
+      "admin_actions": "Admin Actions"
+    }
+  },
+  "es": {
+    "translation": {
+      "filter_admin_activity": "Filtrar Actividad de Administrador",
+      "clear_all_filters": "Limpiar Todos los Filtros",
+      "date_range": "Rango de Fechas",
+      "all_time": "Todo el Tiempo",
+      "last_7_days": "Últimos 7 días",
+      "last_30_days": "Últimos 30 días",
+      "last_3_months": "Últimos 3 meses",
+      "last_6_months": "Últimos 6 meses",
+      "last_year": "Último año",
+      "action_types": "Tipos de Acción",
+      "all_actions": "Todas las Acciones",
+      "target_users": "Usuarios Objetivo",
+      "all_users": "Todos los Usuarios",
+      "search_actions": "Buscar acciones...",
+      "search_users": "Buscar usuarios...",
+      "select_all": "Seleccionar Todo",
+      "deselect_all": "Deseleccionar Todo",
+      "showing_all_activities": "Mostrando todas las actividades",
+      "showing_filtered_activities": "Mostrando {filteredCount} de {totalCount} actividades",
+      "action_names": {
+        "user_detail_viewed": "Ver Detalle de Usuario",
+        "user_field_updated": "Actualizar Campo de Usuario",
+        "email_change_sent": "Enviar Cambio de Email",
+        "password_reset_sent": "Enviar Restablecimiento de Contraseña",
+        "all_sessions_revoked": "Revocar Todas las Sesiones",
+        "session_revoked": "Revocar Sesión",
+        "admin_panel_access": "Acceso al Panel de Administrador",
+        "section_navigation": "Navegación de Sección",
+        "user_list_viewed": "Ver Lista de Usuarios"
+      },
+      "admin_actions": "Acciones del Administrador"
+    }
+  },
+  "fr": {
+    "translation": {
+      "filter_admin_activity": "Filtrer l'Activité d'Administrateur",
+      "clear_all_filters": "Effacer Tous les Filtres",
+      "date_range": "Plage de Dates",
+      "all_time": "Tout le Temps",
+      "last_7_days": "7 derniers jours",
+      "last_30_days": "30 derniers jours",
+      "last_3_months": "3 derniers mois",
+      "last_6_months": "6 derniers mois",
+      "last_year": "Dernière année",
+      "action_types": "Types d'Action",
+      "all_actions": "Toutes les Actions",
+      "target_users": "Utilisateurs Cibles",
+      "all_users": "Tous les Utilisateurs",
+      "search_actions": "Rechercher des actions...",
+      "search_users": "Rechercher des utilisateurs...",
+      "select_all": "Tout Sélectionner",
+      "deselect_all": "Tout Désélectionner",
+      "showing_all_activities": "Affichage de toutes les activités",
+      "showing_filtered_activities": "Affichage de {filteredCount} sur {totalCount} activités",
+      "action_names": {
+        "user_detail_viewed": "Voir le Détail de l'Utilisateur",
+        "user_field_updated": "Mettre à Jour le Champ Utilisateur",
+        "email_change_sent": "Envoyer le Changement d'Email",
+        "password_reset_sent": "Envoyer la Réinitialisation du Mot de Passe",
+        "all_sessions_revoked": "Révoquer Toutes les Sessions",
+        "session_revoked": "Révoquer la Session",
+        "admin_panel_access": "Accès au Panneau d'Administrateur",
+        "section_navigation": "Navigation de Section",
+        "user_list_viewed": "Voir la Liste des Utilisateurs"
+      },
+      "admin_actions": "Actions d'Administrateur"
+    }
+  },
+  "de": {
+    "translation": {
+      "filter_admin_activity": "Admin-Aktivität Filtern",
+      "clear_all_filters": "Alle Filter Löschen",
+      "date_range": "Datumsbereich",
+      "all_time": "Alle Zeiten",
+      "last_7_days": "Letzte 7 Tage",
+      "last_30_days": "Letzte 30 Tage",
+      "last_3_months": "Letzte 3 Monate",
+      "last_6_months": "Letzte 6 Monate",
+      "last_year": "Letztes Jahr",
+      "action_types": "Aktionstypen",
+      "all_actions": "Alle Aktionen",
+      "target_users": "Zielbenutzer",
+      "all_users": "Alle Benutzer",
+      "search_actions": "Aktionen suchen...",
+      "search_users": "Benutzer suchen...",
+      "select_all": "Alle Auswählen",
+      "deselect_all": "Alle Abwählen",
+      "showing_all_activities": "Alle Aktivitäten anzeigen",
+      "showing_filtered_activities": "{filteredCount} von {totalCount} Aktivitäten anzeigen",
+      "action_names": {
+        "user_detail_viewed": "Benutzerdetail Anzeigen",
+        "user_field_updated": "Benutzerfeld Aktualisieren",
+        "email_change_sent": "E-Mail-Änderung Senden",
+        "password_reset_sent": "Passwort-Zurücksetzung Senden",
+        "all_sessions_revoked": "Alle Sessions Widerrufen",
+        "session_revoked": "Session Widerrufen",
+        "admin_panel_access": "Admin-Panel-Zugriff",
+        "section_navigation": "Abschnitts-Navigation",
+        "user_list_viewed": "Benutzerliste Anzeigen"
+      },
+      "admin_actions": "Admin-Aktionen"
+    }
+  }
+}
