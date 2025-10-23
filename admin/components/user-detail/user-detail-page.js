@@ -622,31 +622,43 @@ class UserDetailPage {
         try {
             console.log('🔍 Loading Admin Activity Filters component...');
             
-            // Load CSS
-            const cssLink = document.createElement('link');
-            cssLink.rel = 'stylesheet';
-            cssLink.href = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters.css';
-            document.head.appendChild(cssLink);
+            // Check if component already exists
+            if (window.adminActivityFilters) {
+                console.log('✅ Admin Activity Filters component already loaded');
+                return;
+            }
             
-            // Load translations
-            const translationsScript = document.createElement('script');
-            translationsScript.src = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters-translations.js';
-            document.head.appendChild(translationsScript);
+            // Load CSS (only if not already loaded)
+            if (!document.querySelector('link[href*="admin-activity-filters.css"]')) {
+                const cssLink = document.createElement('link');
+                cssLink.rel = 'stylesheet';
+                cssLink.href = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters.css';
+                document.head.appendChild(cssLink);
+            }
             
-            // Wait for translations to load
-            await new Promise((resolve) => {
-                translationsScript.onload = resolve;
-            });
+            // Load translations (only if not already loaded)
+            if (!document.querySelector('script[src*="admin-activity-filters-translations.js"]')) {
+                const translationsScript = document.createElement('script');
+                translationsScript.src = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters-translations.js';
+                document.head.appendChild(translationsScript);
+                
+                // Wait for translations to load
+                await new Promise((resolve) => {
+                    translationsScript.onload = resolve;
+                });
+            }
             
-            // Load component script
-            const componentScript = document.createElement('script');
-            componentScript.src = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters.js';
-            document.head.appendChild(componentScript);
-            
-            // Wait for component to load
-            await new Promise((resolve) => {
-                componentScript.onload = resolve;
-            });
+            // Load component script (only if not already loaded)
+            if (!document.querySelector('script[src*="admin-activity-filters.js"]')) {
+                const componentScript = document.createElement('script');
+                componentScript.src = '/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters.js';
+                document.head.appendChild(componentScript);
+                
+                // Wait for component to load
+                await new Promise((resolve) => {
+                    componentScript.onload = resolve;
+                });
+            }
             
             // Load HTML
             const response = await fetch('/admin/components/user-detail/components/admin-activity-filters/admin-activity-filters.html');
@@ -657,20 +669,98 @@ class UserDetailPage {
             if (container) {
                 container.innerHTML = html;
                 
-                // Initialize component
-                window.adminActivityFilters = new AdminActivityFilters();
-                await window.adminActivityFilters.init();
+                // Initialize component (only if not already initialized)
+                if (!window.adminActivityFilters) {
+                    window.adminActivityFilters = new AdminActivityFilters();
+                    await window.adminActivityFilters.init();
+                }
                 
-                // Set up event listener for filter changes
-                window.addEventListener('adminActivityFiltered', (event) => {
-                    this.renderAdminActivityTable(event.detail.filteredActivities);
-                });
+                // Set up event listener for filter changes (only if not already set up)
+                if (!this.adminActivityFilterListenerSet) {
+                    window.addEventListener('adminActivityFiltered', (event) => {
+                        this.renderAdminActivityTable(event.detail.filteredActivities);
+                    });
+                    this.adminActivityFilterListenerSet = true;
+                }
                 
                 console.log('✅ Admin Activity Filters component loaded');
             }
             
         } catch (error) {
             console.error('❌ Failed to load Admin Activity Filters component:', error);
+        }
+    }
+
+    async loadLoginActivityFilters() {
+        try {
+            console.log('🔍 Loading Login Activity Filters component...');
+            
+            // Check if component already exists
+            if (window.loginActivityFilters) {
+                console.log('✅ Login Activity Filters component already loaded');
+                return;
+            }
+            
+            // Load CSS (only if not already loaded)
+            if (!document.querySelector('link[href*="login-activity-filters.css"]')) {
+                const cssLink = document.createElement('link');
+                cssLink.rel = 'stylesheet';
+                cssLink.href = '/admin/components/user-detail/components/login-activity-filters/login-activity-filters.css';
+                document.head.appendChild(cssLink);
+            }
+            
+            // Load translations (only if not already loaded)
+            if (!document.querySelector('script[src*="login-activity-filters-translations.js"]')) {
+                const translationsScript = document.createElement('script');
+                translationsScript.src = '/admin/components/user-detail/components/login-activity-filters/login-activity-filters-translations.js';
+                document.head.appendChild(translationsScript);
+                
+                // Wait for translations to load
+                await new Promise((resolve) => {
+                    translationsScript.onload = resolve;
+                });
+            }
+            
+            // Load component script (only if not already loaded)
+            if (!document.querySelector('script[src*="login-activity-filters.js"]')) {
+                const componentScript = document.createElement('script');
+                componentScript.src = '/admin/components/user-detail/components/login-activity-filters/login-activity-filters.js';
+                document.head.appendChild(componentScript);
+                
+                // Wait for component to load
+                await new Promise((resolve) => {
+                    componentScript.onload = resolve;
+                });
+            }
+            
+            // Load HTML
+            const response = await fetch('/admin/components/user-detail/components/login-activity-filters/login-activity-filters.html');
+            const html = await response.text();
+            
+            // Insert HTML
+            const container = document.getElementById('login-activity-filters-container');
+            if (container) {
+                container.innerHTML = html;
+                
+                // Initialize component (only if not already initialized)
+                if (!window.loginActivityFilters) {
+                    window.loginActivityFilters = new LoginActivityFilters();
+                    await window.loginActivityFilters.init();
+                }
+                
+                // Set up event listener for filter changes (only if not already set up)
+                if (!this.loginActivityFilterListenerSet) {
+                    window.addEventListener('loginActivityFiltered', (event) => {
+                        this.renderLoginActivityTable(event.detail.filteredActivities);
+                    });
+                    this.loginActivityFilterListenerSet = true;
+                }
+                
+                console.log('✅ Login Activity Filters component loaded');
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to load Login Activity Filters component:', error);
         }
     }
 
@@ -752,19 +842,74 @@ class UserDetailPage {
     }
 
     /**
+     * Render login activity table with scroll limit
+     */
+    renderLoginActivityTable(activities) {
+        const loginActivityContainer = document.getElementById('user-detail-login-activity');
+        if (!loginActivityContainer) return;
+
+        if (!activities || activities.length === 0) {
+            loginActivityContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No login activity yet.</p>';
+            return;
+        }
+
+        loginActivityContainer.innerHTML = `
+            <div style="overflow-x: auto;">
+                <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--color-primary); border-radius: var(--border-radius-sm);">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: var(--color-background-primary); z-index: 10;">
+                            <tr style="border-bottom: 1px solid var(--color-primary);">
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Status</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Location</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Device</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Browser</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">IP Address</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">2FA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${activities.map(activity => {
+                                const location = activity.location_city && activity.location_country 
+                                    ? `${activity.location_city}, ${activity.location_country}`
+                                    : activity.location_country || '-';
+                                return `
+                                <tr style="border-bottom: 1px solid var(--color-primary);">
+                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(activity.login_time)}</td>
+                                    <td style="padding: var(--spacing-sm);">
+                                        <span style="color: ${activity.success ? 'var(--color-success)' : 'var(--color-error)'}; font-weight: 600;">
+                                            ${activity.success ? '✓ Success' : '✗ Failed'}
+                                        </span>
+                                    </td>
+                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${location}</td>
+                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.device_type || '-'}</td>
+                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.browser || '-'}</td>
+                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary); font-family: monospace;">${activity.ip_address || '-'}</td>
+                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.used_2fa ? 'Yes' : 'No'}</td>
+                                </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
      * Load activity data
      */
     async loadActivityData() {
         if (!this.currentUser || !window.supabase) return;
 
         try {
-            // Get login activity
+            // Get login activity - load all activities for filtering
             const { data: loginData, error: loginError } = await window.supabase
                 .from('user_login_activity')
                 .select('login_time, success, ip_address, user_agent, device_type, browser, os, used_2fa, location_city, location_country')
                 .eq('user_id', this.currentUser.id)
-                .order('login_time', { ascending: false })
-                .limit(10);
+                .order('login_time', { ascending: false });
+                // Removed limit to load ALL login activities
 
             if (loginError) {
                 console.error('❌ Failed to load login activity:', error);
@@ -779,45 +924,24 @@ class UserDetailPage {
                 if (!loginData || loginData.length === 0) {
                     loginActivityContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No login activity yet.</p>';
                 } else {
-                    loginActivityContainer.innerHTML = `
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid var(--color-primary);">
-                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
-                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Status</th>
-                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Location</th>
-                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Device</th>
-                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Browser</th>
-                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">IP Address</th>
-                                        <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">2FA</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${loginData.map(activity => {
-                                        const location = activity.location_city && activity.location_country 
-                                            ? `${activity.location_city}, ${activity.location_country}`
-                                            : activity.location_country || '-';
-                                        return `
-                                        <tr style="border-bottom: 1px solid var(--color-primary);">
-                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(activity.login_time)}</td>
-                                            <td style="padding: var(--spacing-sm);">
-                                                <span style="color: ${activity.success ? 'var(--color-success)' : 'var(--color-error)'}; font-weight: 600;">
-                                                    ${activity.success ? '✓ Success' : '✗ Failed'}
-                                                </span>
-                                            </td>
-                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${location}</td>
-                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.device_type || '-'}</td>
-                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.browser || '-'}</td>
-                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary); font-family: monospace;">${activity.ip_address || '-'}</td>
-                                            <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${activity.used_2fa ? 'Yes' : 'No'}</td>
-                                        </tr>
-                                        `;
-                                    }).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
+                    // Store login activities for filtering
+                    this.allLoginActivities = loginData;
+                    
+                    // Load login activity filters component
+                    await this.loadLoginActivityFilters();
+                    
+                    // Set activities in filter component (wait for component to be ready)
+                    if (window.loginActivityFilters) {
+                        // Wait a bit for the component to be fully initialized
+                        setTimeout(() => {
+                            window.loginActivityFilters.setActivities(loginData);
+                            // Refresh filter states to restore saved preferences
+                            window.loginActivityFilters.refreshFilterStates();
+                        }, 100);
+                    }
+                    
+                    // Render the login activity table with scroll limit
+                    this.renderLoginActivityTable(loginData);
                 }
             }
 
@@ -846,9 +970,14 @@ class UserDetailPage {
                         // Store activities for filter component
                         this.allAdminActivities = adminActions || [];
                         
-                        // Initialize filter component with activities
+                        // Initialize filter component with activities (wait for component to be ready)
                         if (window.adminActivityFilters) {
-                            window.adminActivityFilters.setActivities(this.allAdminActivities);
+                            // Wait a bit for the component to be fully initialized
+                            setTimeout(() => {
+                                window.adminActivityFilters.setActivities(this.allAdminActivities);
+                                // Refresh filter states to restore saved preferences
+                                window.adminActivityFilters.refreshFilterStates();
+                            }, 100);
                         }
                         
                         // Render initial table

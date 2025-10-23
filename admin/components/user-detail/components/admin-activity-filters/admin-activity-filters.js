@@ -57,7 +57,7 @@ class AdminActivityFilters {
         // Main elements
         this.elements.container = document.getElementById('admin-activity-filters');
         this.elements.dateRangeSelect = document.getElementById('date-range-filter');
-        this.elements.clearBtn = document.getElementById('clear-filters-btn');
+        this.elements.clearBtn = document.getElementById('admin-clear-filters-btn');
         this.elements.filterSummary = document.getElementById('filter-summary');
         
         // Action type multiselect
@@ -85,7 +85,10 @@ class AdminActivityFilters {
         
         // Clear filters button
         if (this.elements.clearBtn) {
+            console.log('🔗 Setting up admin clear button event listener');
             this.elements.clearBtn.addEventListener('click', this.handleClearFilters);
+        } else {
+            console.error('❌ Admin clear button not found');
         }
         
         // Action type multiselect
@@ -139,14 +142,14 @@ class AdminActivityFilters {
             }
             
             if (preferences && preferences.preferences) {
-                const savedFilters = preferences.preferences.activityFilters || {};
+                const savedFilters = preferences.preferences.adminActivityFilters || {};
                 this.currentFilters = {
                     dateRange: savedFilters.dateRange || 'all',
                     actionTypes: savedFilters.actionTypes || [],
                     targetUsers: savedFilters.targetUsers || []
                 };
                 
-                console.log('📋 Loaded saved filter preferences:', this.currentFilters);
+                console.log('📋 Loaded saved admin activity filter preferences:', this.currentFilters);
             }
             
         } catch (error) {
@@ -161,15 +164,25 @@ class AdminActivityFilters {
             const { data: { user } } = await window.supabase.auth.getUser();
             if (!user) return;
             
-            const preferences = {
-                activityFilters: this.currentFilters
+            // Get existing preferences first
+            const { data: existingPrefs } = await window.supabase
+                .from('admin_preferences')
+                .select('preferences')
+                .eq('admin_id', user.id)
+                .single();
+
+            // Merge with existing preferences
+            const existingPreferences = existingPrefs?.preferences || {};
+            const updatedPreferences = {
+                ...existingPreferences,
+                adminActivityFilters: this.currentFilters
             };
             
             const { error } = await window.supabase
                 .from('admin_preferences')
                 .upsert({
                     admin_id: user.id,
-                    preferences: preferences,
+                    preferences: updatedPreferences,
                     updated_at: new Date().toISOString()
                 }, {
                     onConflict: 'admin_id'
@@ -178,7 +191,7 @@ class AdminActivityFilters {
             if (error) {
                 console.warn('⚠️ Failed to save admin preferences:', error);
             } else {
-                console.log('💾 Saved filter preferences');
+                console.log('💾 Saved admin activity filter preferences');
             }
             
         } catch (error) {
@@ -380,6 +393,7 @@ class AdminActivityFilters {
     }
 
     handleClearFilters() {
+        console.log('🧹 Admin clear filters clicked');
         this.currentFilters = {
             dateRange: 'all',
             actionTypes: [],
@@ -394,6 +408,7 @@ class AdminActivityFilters {
         this.renderOptions();
         this.applyFilters();
         this.savePreferences();
+        console.log('✅ Admin filters cleared');
     }
 
     handleMultiselectToggle(event) {
@@ -533,7 +548,16 @@ class AdminActivityFilters {
     }
 
     updateFilterSummary() {
-        if (!this.elements.filterSummary) return;
+        console.log('📊 Updating filter summary...', { 
+            filterSummaryElement: !!this.elements.filterSummary,
+            totalCount: this.allActivities.length,
+            filteredCount: this.filteredActivities.length
+        });
+        
+        if (!this.elements.filterSummary) {
+            console.error('❌ Filter summary element not found');
+            return;
+        }
         
         const totalCount = this.allActivities.length;
         const filteredCount = this.filteredActivities.length;
@@ -551,6 +575,34 @@ class AdminActivityFilters {
         }
         
         this.elements.filterSummary.querySelector('.admin-activity-filters__count').textContent = summaryText;
+        console.log('✅ Filter summary updated:', summaryText);
+    }
+
+    /**
+     * Refresh filter states after HTML re-render
+     */
+    refreshFilterStates() {
+        console.log('🔄 Refreshing admin filter states...');
+        
+        // Re-initialize elements after HTML re-render
+        this.initializeElements();
+        
+        // Restore date range
+        const dateRangeSelect = document.getElementById('date-range-filter');
+        if (dateRangeSelect) {
+            dateRangeSelect.value = this.currentFilters.dateRange;
+        }
+        
+        // Re-render options to restore checkbox states
+        this.renderOptions();
+        
+        // Re-setup event listeners
+        this.setupEventListeners();
+        
+        // Apply current filters
+        this.applyFilters();
+        
+        console.log('✅ Admin filter states refreshed');
     }
 
     // Public methods for parent component
