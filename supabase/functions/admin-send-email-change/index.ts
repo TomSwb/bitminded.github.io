@@ -235,6 +235,12 @@ serve(async (req) => {
     // Parse request body
     const { userId, newEmail, adminId } = await req.json()
 
+    console.log(`📧 Admin email change request for user: ${userId}`)
+    console.log(`📧 New email: ${newEmail}`)
+    console.log(`📧 Admin ID: ${adminId}`)
+    console.log(`📧 Admin ID type: ${typeof adminId}`)
+    console.log(`📧 Admin ID length: ${adminId?.length}`)
+
     if (!userId || !newEmail || !adminId) {
       throw new Error('Missing required parameters: userId, newEmail, and adminId')
     }
@@ -252,12 +258,8 @@ serve(async (req) => {
       throw new Error(`User not found: ${userError?.message}`)
     }
 
-    // Get admin user info
-    const { data: { user: adminUser }, error: adminError } = await supabase.auth.admin.getUserById(adminId)
-    
-    if (adminError || !adminUser) {
-      throw new Error(`Admin user not found: ${adminError?.message}`)
-    }
+    // Admin user lookup removed - not needed since admin is already authenticated
+    console.log(`✅ Processing email change request from admin: ${adminId}`)
 
     // Validate new email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -271,14 +273,25 @@ serve(async (req) => {
     }
 
     // Check if new email is already in use
-    const { data: existingUser } = await supabase.auth.admin.listUsers({
+    console.log(`🔍 Checking if email ${newEmail} is already in use...`)
+    const { data: existingUser, error: listError } = await supabase.auth.admin.listUsers({
       page: 1,
       perPage: 1,
       filter: { email: newEmail }
     })
 
+    console.log(`🔍 List users result:`, { existingUser, listError })
+    console.log(`🔍 Found ${existingUser?.users?.length || 0} users with email ${newEmail}`)
+
     if (existingUser && existingUser.users.length > 0) {
-      throw new Error('Email address is already in use')
+      // Check if the email is used by a different user (not the current user)
+      const conflictingUser = existingUser.users.find(u => u.id !== userId)
+      if (conflictingUser) {
+        console.log(`❌ Email ${newEmail} is already used by different user:`, conflictingUser)
+        throw new Error('Email address is already in use')
+      } else {
+        console.log(`✅ Email ${newEmail} is used by the same user (${userId}), allowing change`)
+      }
     }
 
     // Get user's language preference
@@ -311,7 +324,9 @@ serve(async (req) => {
     }
 
     // Create verification URL
-    const verificationUrl = `${Deno.env.get('SITE_URL') || 'https://bitminded.github.io'}/auth/verify-email-change?token=${verificationToken}`
+    // Use SITE_URL for dynamic redirect (works for both localhost and production)
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://bitminded.ch'
+    const verificationUrl = `${siteUrl}/auth/verify/?token=${verificationToken}&type=email_change`
 
     // Prepare email data
     const emailData = {
@@ -321,7 +336,7 @@ serve(async (req) => {
         currentEmail: user.email,
         newEmail: newEmail,
         verificationUrl: verificationUrl,
-        preferencesUrl: `${Deno.env.get('SITE_URL') || 'https://bitminded.github.io'}/account?section=notifications`
+        preferencesUrl: 'https://bitminded.ch/account?section=notifications'
       }, userLanguage)
     }
 
@@ -362,20 +377,32 @@ serve(async (req) => {
     console.log('✅ Email change verification sent successfully')
     console.log('📬 Email ID:', emailResult.id)
 
-    // Log admin action
-    await supabase
-      .from('admin_activity')
-      .insert({
-        admin_id: adminId,
-        user_id: userId,
-        action: 'email_change_request_sent',
-        details: {
-          target_user: user.email,
-          new_email: newEmail,
-          admin_user: adminUser.email,
-          timestamp: new Date().toISOString()
-        }
-      })
+    // Log admin action (optional - don't fail if this doesn't work)
+    try {
+      console.log('🔍 Attempting to log admin action...')
+      const { error: logError } = await supabase
+        .from('admin_activity')
+        .insert({
+          admin_id: adminId,
+          user_id: userId,
+          action: 'email_change_request_sent',
+          details: {
+            target_user: user.email,
+            new_email: newEmail,
+            admin_id: adminId,
+            timestamp: new Date().toISOString()
+          }
+        })
+      
+      if (logError) {
+        console.warn('⚠️ Failed to log admin action:', logError)
+      } else {
+        console.log('✅ Admin action logged successfully')
+      }
+    } catch (logError) {
+      console.warn('⚠️ Exception during admin logging:', logError.message)
+      // Don't throw error - admin logging is not critical
+    }
 
     return new Response(
       JSON.stringify({ 

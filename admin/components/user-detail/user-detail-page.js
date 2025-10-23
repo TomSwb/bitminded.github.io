@@ -228,10 +228,19 @@ class UserDetailPage {
      */
     async loadUserData(userId) {
         try {
-            // Loading user data
+            console.log('🔄 Loading user data for ID:', userId);
             
             if (!window.supabase) {
                 throw new Error('Supabase not available');
+            }
+
+            // Log admin action - viewing user detail page
+            if (window.adminLayout) {
+                await window.adminLayout.logAdminAction(
+                    'user_detail_viewed',
+                    `Admin viewed user detail page`,
+                    userId
+                );
             }
 
             // Query user profile with all related data
@@ -245,6 +254,8 @@ class UserDetailPage {
                 console.error('❌ Failed to load user profile:', profileError);
                 throw profileError;
             }
+
+            console.log('✅ User profile loaded:', profileData);
 
             // Get role
             const { data: roleData } = await window.supabase
@@ -681,8 +692,8 @@ class UserDetailPage {
             if (this.currentUser.role === 'admin') {
                 const { data: adminActions, error: adminError } = await window.supabase
                     .from('admin_activity')
-                    .select('action_type, created_at, admin_user_id, details')
-                    .eq('admin_user_id', this.currentUser.id)  // Fixed: query by admin_user_id, not user_id
+                    .select('action, created_at, admin_id, user_id, details')
+                    .eq('admin_id', this.currentUser.id)  // Fixed: query by admin_id, not admin_user_id
                     .order('created_at', { ascending: false })
                     .limit(10);
 
@@ -700,6 +711,26 @@ class UserDetailPage {
                         if (!adminActions || adminActions.length === 0) {
                             adminActionsContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No admin actions yet.</p>';
                         } else {
+                            // Get usernames for target users
+                            const userIds = adminActions
+                                .filter(action => action.user_id)
+                                .map(action => action.user_id);
+                            
+                            let userMap = {};
+                            if (userIds.length > 0) {
+                                const { data: users } = await window.supabase
+                                    .from('user_profiles')
+                                    .select('id, username')
+                                    .in('id', userIds);
+                                
+                                if (users) {
+                                    userMap = users.reduce((acc, user) => {
+                                        acc[user.id] = user.username;
+                                        return acc;
+                                    }, {});
+                                }
+                            }
+                            
                             adminActionsContainer.innerHTML = `
                                 <div style="overflow-x: auto;">
                                     <table style="width: 100%; border-collapse: collapse;">
@@ -707,15 +738,30 @@ class UserDetailPage {
                                             <tr style="border-bottom: 1px solid var(--color-primary);">
                                                 <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
                                                 <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Action</th>
+                                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Target User</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            ${adminActions.map(action => `
+                                            ${adminActions.map(action => {
+                                                // For user_field_updated actions, show the detailed change info
+                                                let actionDisplay = action.action;
+                                                if (action.action === 'user_field_updated' && action.details) {
+                                                    // Extract the detailed change information from details
+                                                    if (typeof action.details === 'string') {
+                                                        actionDisplay = action.details;
+                                                    } else if (action.details.details) {
+                                                        actionDisplay = action.details.details;
+                                                    }
+                                                }
+                                                
+                                                return `
                                                 <tr style="border-bottom: 1px solid var(--color-primary);">
                                                     <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(action.created_at)}</td>
-                                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.escapeHtml(action.action_type)}</td>
+                                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.escapeHtml(actionDisplay)}</td>
+                                                    <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${action.user_id ? (userMap[action.user_id] || 'Unknown User') : 'N/A'}</td>
                                                 </tr>
-                                            `).join('')}
+                                                `;
+                                            }).join('')}
                                         </tbody>
                                     </table>
                                 </div>
@@ -1024,7 +1070,8 @@ class UserDetailPage {
             if (window.adminLayout) {
                 await window.adminLayout.logAdminAction(
                     'all_sessions_revoked',
-                    `Revoked all sessions for user: ${this.currentUser.username} (${this.currentUser.email})`
+                    `Revoked all sessions for user: ${this.currentUser.username} (${this.currentUser.email})`,
+                    this.currentUser.id
                 );
             }
             
@@ -1140,7 +1187,7 @@ class UserDetailPage {
                 // Listen for user update events
                 window.addEventListener('userUpdated', (event) => {
                     console.log('🔄 User updated from edit component:', event.detail);
-                    // Reload user data and refresh UI
+                    // Reload user data and refresh UI - always reload the current user being viewed
                     this.loadUserData(this.currentUser.id);
                 });
 
@@ -1194,7 +1241,8 @@ class UserDetailPage {
             if (window.adminLayout) {
                 await window.adminLayout.logAdminAction(
                     'password_reset_sent',
-                    `Sent password reset email to user: ${this.currentUser.username} (${this.currentUser.email})`
+                    `Sent password reset email to user: ${this.currentUser.username} (${this.currentUser.email})`,
+                    this.currentUser.id
                 );
             }
             
