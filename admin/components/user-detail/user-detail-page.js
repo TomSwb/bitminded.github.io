@@ -140,7 +140,7 @@ class UserDetailPage {
             grantAccessButton: document.getElementById('user-detail-grant-access'),
             revokeSessionsButton: document.getElementById('user-detail-revoke-all-sessions'),
             editUserButton: document.getElementById('user-detail-edit-user'),
-            sendEmailButton: document.getElementById('user-detail-send-email'),
+            contactUserButton: document.getElementById('user-detail-contact-user'),
             suspendUserButton: document.getElementById('user-detail-suspend-user'),
             deleteUserButton: document.getElementById('user-detail-delete-user'),
             permanentDeleteButton: document.getElementById('user-detail-permanent-delete')
@@ -206,8 +206,8 @@ class UserDetailPage {
             this.elements.editUserButton.addEventListener('click', () => this.editUser());
         }
 
-        if (this.elements.sendEmailButton) {
-            this.elements.sendEmailButton.addEventListener('click', () => this.sendEmail());
+        if (this.elements.contactUserButton) {
+            this.elements.contactUserButton.addEventListener('click', () => this.openContactUser());
         }
 
         if (this.elements.suspendUserButton) {
@@ -1469,9 +1469,17 @@ class UserDetailPage {
         }
     }
 
-    async sendEmail() {
-        console.log('📧 Send email clicked');
-        // TODO: Implement send email functionality
+    async openContactUser() {
+        console.log('📧 Contact user clicked');
+        
+        if (!this.currentUser) {
+            console.error('❌ No user data available');
+            return;
+        }
+
+        // Open contact user page in new tab
+        const contactUrl = `/admin/components/user-detail/components/user-communication/contact-user.html?userId=${this.currentUser.id}&username=${encodeURIComponent(this.currentUser.username)}`;
+        window.open(contactUrl, '_blank');
     }
 
     async suspendUser() {
