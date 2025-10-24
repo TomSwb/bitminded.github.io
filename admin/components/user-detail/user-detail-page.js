@@ -130,6 +130,7 @@ class UserDetailPage {
             age: document.getElementById('user-detail-age'),
             country: document.getElementById('user-detail-country'),
             gender: document.getElementById('user-detail-gender'),
+            language: document.getElementById('user-detail-language'),
             subscriptionCount: document.getElementById('user-detail-subscription-count'),
             loginCount: document.getElementById('user-detail-login-count'),
             sessionCount: document.getElementById('user-detail-session-count'),
@@ -246,7 +247,7 @@ class UserDetailPage {
             // Query user profile with all related data
             const { data: profileData, error: profileError } = await window.supabase
                 .from('user_profiles')
-                .select('id, username, avatar_url, created_at, email, status, date_of_birth, country, gender')
+                .select('id, username, avatar_url, created_at, email, status, date_of_birth, country, gender, language')
                 .eq('id', userId)
                 .single();
 
@@ -409,6 +410,20 @@ class UserDetailPage {
                 this.elements.gender.textContent = 'Prefer not to say';
             } else {
                 this.elements.gender.textContent = '-';
+            }
+        }
+        
+        if (this.elements.language) {
+            if (userData.language) {
+                const languageMap = {
+                    'en': '🇬🇧 English',
+                    'es': '🇪🇸 Spanish', 
+                    'fr': '🇫🇷 French',
+                    'de': '🇩🇪 German'
+                };
+                this.elements.language.textContent = languageMap[userData.language] || userData.language;
+            } else {
+                this.elements.language.textContent = '-';
             }
         }
         

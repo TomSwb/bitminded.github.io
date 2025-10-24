@@ -6,6 +6,55 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Translation functions
+function getGreeting(language: string): string {
+  const greetings = {
+    'en': 'Hello',
+    'es': 'Hola',
+    'fr': 'Bonjour',
+    'de': 'Hallo'
+  }
+  return greetings[language as keyof typeof greetings] || 'Hello'
+}
+
+function translateSignature(signature: string, language: string): string {
+  if (!signature) return ''
+  
+  const signatureTranslations = {
+    'en': {
+      'Your BitMinded Legal Team': 'Your BitMinded Legal Team',
+      'Your BitMinded Contact Team': 'Your BitMinded Contact Team',
+      'Your BitMinded Support Team': 'Your BitMinded Support Team',
+      'Your BitMinded System Team': 'Your BitMinded System Team',
+      'Your BitMinded Development Team': 'Your BitMinded Development Team'
+    },
+    'es': {
+      'Your BitMinded Legal Team': 'Su Equipo Legal de BitMinded',
+      'Your BitMinded Contact Team': 'Su Equipo de Contacto de BitMinded',
+      'Your BitMinded Support Team': 'Su Equipo de Soporte de BitMinded',
+      'Your BitMinded System Team': 'Su Equipo del Sistema de BitMinded',
+      'Your BitMinded Development Team': 'Su Equipo de Desarrollo de BitMinded'
+    },
+    'fr': {
+      'Your BitMinded Legal Team': 'Votre Équipe Juridique BitMinded',
+      'Your BitMinded Contact Team': 'Votre Équipe de Contact BitMinded',
+      'Your BitMinded Support Team': 'Votre Équipe de Support BitMinded',
+      'Your BitMinded System Team': 'Votre Équipe Système BitMinded',
+      'Your BitMinded Development Team': 'Votre Équipe de Développement BitMinded'
+    },
+    'de': {
+      'Your BitMinded Legal Team': 'Ihr BitMinded Rechtsteam',
+      'Your BitMinded Contact Team': 'Ihr BitMinded Kontaktteam',
+      'Your BitMinded Support Team': 'Ihr BitMinded Support-Team',
+      'Your BitMinded System Team': 'Ihr BitMinded System-Team',
+      'Your BitMinded Development Team': 'Ihr BitMinded Entwicklungsteam'
+    }
+  }
+  
+  const translations = signatureTranslations[language as keyof typeof signatureTranslations]
+  return translations?.[signature as keyof typeof translations] || signature
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -73,6 +122,16 @@ serve(async (req) => {
       )
     }
 
+    // Get user's language for translation
+    const userLanguage = language_used || targetUser.language || 'en'
+    
+    // Create greeting and translate signature
+    const greeting = getGreeting(userLanguage)
+    const translatedSignature = translateSignature(signature_used || '', userLanguage)
+    
+    // Construct the full message with greeting
+    const fullMessage = `${greeting} ${targetUser.username},\n\n${body}`
+
     // Create notification record in database
     const { data: communication, error: communicationError } = await supabaseClient
       .from('user_communications')
@@ -81,9 +140,9 @@ serve(async (req) => {
         admin_id: user.id,
         type: 'notification',
         subject: subject || null,
-        body: body,
-        signature_used: signature_used || null,
-        language_used: language_used || targetUser.language || 'en',
+        body: fullMessage,
+        signature_used: translatedSignature || null,
+        language_used: userLanguage,
         status: 'delivered' // Notifications are delivered instantly
       })
       .select()
@@ -104,7 +163,7 @@ serve(async (req) => {
         user_id: target_user_id,
         type: 'announcement',
         title: subject || 'Message from BitMinded',
-        message: body,
+        message: fullMessage,
         icon: '📧',
         read: false
       })

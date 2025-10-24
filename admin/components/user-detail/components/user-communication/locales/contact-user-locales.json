@@ -24,7 +24,17 @@
       "Select signature": "Select signature",
       "Enter message subject": "Enter message subject",
       "Enter your message": "Enter your message",
-      "No signature": "No signature"
+      "No signature": "No signature",
+      "Legal Team": "Legal Team",
+      "Contact Team": "Contact Team", 
+      "Support Team": "Support Team",
+      "System Team": "System Team",
+      "Development Team": "Development Team",
+      "Your BitMinded Legal Team": "Your BitMinded Legal Team",
+      "Your BitMinded Contact Team": "Your BitMinded Contact Team",
+      "Your BitMinded Support Team": "Your BitMinded Support Team",
+      "Your BitMinded System Team": "Your BitMinded System Team",
+      "Your BitMinded Development Team": "Your BitMinded Development Team"
     }
   },
   "es": {
@@ -52,7 +62,17 @@
       "Select signature": "Seleccionar firma",
       "Enter message subject": "Ingrese el asunto del mensaje",
       "Enter your message": "Ingrese su mensaje",
-      "No signature": "Sin firma"
+      "No signature": "Sin firma",
+      "Legal Team": "Equipo Legal",
+      "Contact Team": "Equipo de Contacto",
+      "Support Team": "Equipo de Soporte", 
+      "System Team": "Equipo del Sistema",
+      "Development Team": "Equipo de Desarrollo",
+      "Your BitMinded Legal Team": "Su Equipo Legal de BitMinded",
+      "Your BitMinded Contact Team": "Su Equipo de Contacto de BitMinded",
+      "Your BitMinded Support Team": "Su Equipo de Soporte de BitMinded",
+      "Your BitMinded System Team": "Su Equipo del Sistema de BitMinded",
+      "Your BitMinded Development Team": "Su Equipo de Desarrollo de BitMinded"
     }
   },
   "fr": {
@@ -80,7 +100,17 @@
       "Select signature": "Sélectionner la signature",
       "Enter message subject": "Entrez le sujet du message",
       "Enter your message": "Entrez votre message",
-      "No signature": "Aucune signature"
+      "No signature": "Aucune signature",
+      "Legal Team": "Équipe Juridique",
+      "Contact Team": "Équipe de Contact",
+      "Support Team": "Équipe de Support",
+      "System Team": "Équipe Système",
+      "Development Team": "Équipe de Développement",
+      "Your BitMinded Legal Team": "Votre Équipe Juridique BitMinded",
+      "Your BitMinded Contact Team": "Votre Équipe de Contact BitMinded",
+      "Your BitMinded Support Team": "Votre Équipe de Support BitMinded",
+      "Your BitMinded System Team": "Votre Équipe Système BitMinded",
+      "Your BitMinded Development Team": "Votre Équipe de Développement BitMinded"
     }
   },
   "de": {
@@ -108,7 +138,17 @@
       "Select signature": "Signatur auswählen",
       "Enter message subject": "Nachrichtenbetreff eingeben",
       "Enter your message": "Ihre Nachricht eingeben",
-      "No signature": "Keine Signatur"
+      "No signature": "Keine Signatur",
+      "Legal Team": "Rechtsteam",
+      "Contact Team": "Kontaktteam",
+      "Support Team": "Support-Team",
+      "System Team": "System-Team",
+      "Development Team": "Entwicklungsteam",
+      "Your BitMinded Legal Team": "Ihr BitMinded Rechtsteam",
+      "Your BitMinded Contact Team": "Ihr BitMinded Kontaktteam",
+      "Your BitMinded Support Team": "Ihr BitMinded Support-Team",
+      "Your BitMinded System Team": "Ihr BitMinded System-Team",
+      "Your BitMinded Development Team": "Ihr BitMinded Entwicklungsteam"
     }
   }
 }
