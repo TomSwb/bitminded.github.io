@@ -1,0 +1,326 @@
+/* Contact User Page - Independent Styles */
+
+/* ===== MAIN LAYOUT ===== */
+.contact-user-page {
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+.contact-user-page__header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    width: 100%;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.contact-user-page__back-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-secondary);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-secondary);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.contact-user-page__back-button:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-background-primary);
+}
+
+/* ===== MAIN CONTENT ===== */
+.contact-user-page__main {
+    padding: 2rem;
+}
+
+/* ===== USER SECTION ===== */
+.contact-user-page__user-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.contact-user-page__user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.contact-user-page__title {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.contact-user-page__user-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-user-page__user-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+}
+
+.contact-user-page__user-detail strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+/* ===== FORM LAYOUT ===== */
+.contact-user-page__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.contact-user-page__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.contact-user-page__section--hidden {
+    display: none !important;
+}
+
+.contact-user-page__section--visible {
+    display: flex !important;
+}
+
+.contact-user-page__section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    text-align: center;
+}
+
+/* ===== COMMUNICATION TYPE SELECTION ===== */
+.contact-user-page__type-selection {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.contact-user-page__type-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+    background: var(--color-background-primary);
+    border: 2px solid var(--color-border);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    min-width: 180px;
+}
+
+.contact-user-page__type-btn:hover {
+    border-color: var(--color-primary);
+    background: var(--color-background-secondary);
+}
+
+.contact-user-page__type-btn--active {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-background-primary);
+}
+
+/* ===== FORM ELEMENTS ===== */
+.contact-user-page__label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.contact-user-page__required {
+    color: var(--color-error);
+    font-weight: bold;
+}
+
+.contact-user-page__input,
+.contact-user-page__select,
+.contact-user-page__textarea {
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    background: var(--color-background-primary);
+    transition: border-color 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.contact-user-page__input:focus,
+.contact-user-page__select:focus,
+.contact-user-page__textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.contact-user-page__textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.contact-user-page__greeting {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+/* ===== ACTIONS ===== */
+.contact-user-page__actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+
+.contact-user-page__send-btn {
+    padding: 1rem 2rem;
+    background: var(--color-primary);
+    color: var(--color-background-primary);
+    border: 2px solid var(--color-primary);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 160px;
+}
+
+.contact-user-page__send-btn:hover {
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
+    transform: translateY(-1px);
+}
+
+.contact-user-page__send-btn:disabled {
+    background: var(--color-border);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.contact-user-page__cancel-btn {
+    padding: 1rem 2rem;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.contact-user-page__cancel-btn:hover {
+    background: var(--color-background-secondary);
+    border-color: var(--color-text-primary);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .contact-user-page {
+        padding: 1rem;
+        max-width: 95vw;
+    }
+    
+    .contact-user-page__title {
+        font-size: 1.5rem;
+    }
+    
+    .contact-user-page__type-selection {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .contact-user-page__type-btn {
+        min-width: auto;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .contact-user-page__actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .contact-user-page__send-btn,
+    .contact-user-page__cancel-btn {
+        min-width: auto;
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-user-page {
+        padding: 0.75rem;
+    }
+    
+    .contact-user-page__title {
+        font-size: 1.25rem;
+    }
+    
+    .contact-user-page__type-btn {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .contact-user-page__input,
+    .contact-user-page__select,
+    .contact-user-page__textarea {
+        padding: 0.875rem;
+    }
+}
+
+/* ===== SIGNATURE PREVIEW ===== */
+.contact-user-page__signature-preview {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    min-height: 1.5rem;
+    white-space: pre-wrap;
+    line-height: 1.4;
+}
