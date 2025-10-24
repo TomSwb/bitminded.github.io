@@ -706,6 +706,72 @@ class UserDetailPage {
         }
     }
 
+    async loadCommunicationActivityFilters() {
+        try {
+            console.log('🔍 Loading Communication Activity Filters component...');
+            
+            // Load CSS
+            if (!document.querySelector('link[href*="communication-activity-filters.css"]')) {
+                const cssLink = document.createElement('link');
+                cssLink.rel = 'stylesheet';
+                cssLink.href = '/admin/components/user-detail/components/communication-activity-filters/communication-activity-filters.css';
+                document.head.appendChild(cssLink);
+            }
+
+            // Load translations
+            if (!document.querySelector('script[src*="communication-activity-filters-translations.js"]')) {
+                const translationsScript = document.createElement('script');
+                translationsScript.src = '/admin/components/user-detail/components/communication-activity-filters/communication-activity-filters-translations.js';
+                document.head.appendChild(translationsScript);
+                
+                // Wait for translations to load
+                await new Promise((resolve) => {
+                    translationsScript.onload = resolve;
+                });
+            }
+
+            // Load component script
+            if (!document.querySelector('script[src*="communication-activity-filters.js"]')) {
+                const componentScript = document.createElement('script');
+                componentScript.src = '/admin/components/user-detail/components/communication-activity-filters/communication-activity-filters.js';
+                document.head.appendChild(componentScript);
+                
+                // Wait for component to load
+                await new Promise((resolve) => {
+                    componentScript.onload = resolve;
+                });
+            }
+
+            // Load HTML content
+            const response = await fetch('/admin/components/user-detail/components/communication-activity-filters/communication-activity-filters.html');
+            const htmlContent = await response.text();
+            
+            const container = document.getElementById('communication-activity-filters-container');
+            if (container) {
+                container.innerHTML = htmlContent;
+                
+                // Initialize the component
+                if (window.CommunicationActivityFilters) {
+                    window.communicationActivityFilters = new window.CommunicationActivityFilters();
+                    await window.communicationActivityFilters.init();
+                }
+                
+                    // Set up communication activity filter listener
+                    if (window.communicationActivityFilters && !this.communicationActivityFilterListenerSet) {
+                        window.addEventListener('communicationFiltersChanged', (event) => {
+                            console.log('📧 Communication filters changed:', event.detail.filters);
+                            this.renderCommunicationActivityTable(event.detail.filteredActivities);
+                        });
+                        this.communicationActivityFilterListenerSet = true;
+                    }
+                    
+                    console.log('✅ Communication Activity Filters component loaded');
+            }
+        } catch (error) {
+            console.error('❌ Failed to load communication activity filters:', error);
+        }
+    }
+
     async loadLoginActivityFilters() {
         try {
             console.log('🔍 Loading Login Activity Filters component...');
@@ -859,6 +925,75 @@ class UserDetailPage {
     /**
      * Render login activity table with scroll limit
      */
+    renderCommunicationActivityTable(communications) {
+        const communicationActivityContainer = document.getElementById('user-detail-communication-activity');
+        if (!communicationActivityContainer) return;
+
+        if (!communications || communications.length === 0) {
+            communicationActivityContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No communications yet.</p>';
+            return;
+        }
+
+        communicationActivityContainer.innerHTML = `
+            <div style="overflow-x: auto;">
+                <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--color-primary); border-radius: var(--border-radius-sm);">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: var(--color-background-primary); z-index: 10;">
+                            <tr style="border-bottom: 1px solid var(--color-primary);">
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Type</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Subject</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Date/Time</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Sender</th>
+                                <th style="padding: var(--spacing-sm); text-align: center; color: var(--color-secondary);">Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${communications.map(communication => {
+                                const typeIcon = communication.type === 'email' ? '📧' : '🔔';
+                                const typeText = communication.type === 'email' ? 'Email' : 'Notification';
+                                const subject = communication.subject || (communication.type === 'notification' ? 'In-app Notification' : 'No Subject');
+                                const messagePreview = communication.body ? 
+                                    (communication.body.length > 100 ? communication.body.substring(0, 100) + '...' : communication.body) : 
+                                    'No message content';
+                                
+                                return `
+                                    <tr style="border-bottom: 1px solid var(--color-primary);">
+                                        <td style="padding: var(--spacing-sm); color: var(--color-text-primary); text-align: center;">
+                                            <span style="display: inline-flex; align-items: center; gap: var(--spacing-xs);">
+                                                <span style="font-size: 1.2em;">${typeIcon}</span>
+                                                <span>${typeText}</span>
+                                            </span>
+                                        </td>
+                                        <td style="padding: var(--spacing-sm); color: var(--color-text-primary); max-width: 200px;">
+                                            <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${subject}">
+                                                ${subject}
+                                            </span>
+                                        </td>
+                                        <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">${this.formatDate(communication.created_at)}</td>
+                                        <td style="padding: var(--spacing-sm); color: var(--color-text-primary);">
+                                            <span style="font-family: monospace; font-size: var(--font-size-sm);">${communication.sender_email || 'System'}</span>
+                                        </td>
+                                        <td style="padding: var(--spacing-sm); color: var(--color-text-primary); max-width: 300px;">
+                                            <div style="display: flex; align-items: center; gap: var(--spacing-xs);">
+                                                <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${messagePreview}">
+                                                    ${messagePreview}
+                                                </span>
+                                                <button onclick="window.userDetailPage.showMessageModal('${communication.id}', '${communication.type}', '${subject.replace(/'/g, "\\'")}', '${communication.body.replace(/'/g, "\\'").replace(/\n/g, '\\n')}', '${communication.sender_email || 'System'}', '${this.formatDate(communication.created_at)}')" 
+                                                        style="padding: var(--spacing-xs); border: 1px solid var(--color-primary); border-radius: var(--border-radius-xs); background: var(--color-background-primary); color: var(--color-primary); cursor: pointer; font-size: var(--font-size-xs);">
+                                                    View
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
     renderLoginActivityTable(activities) {
             const loginActivityContainer = document.getElementById('user-detail-login-activity');
         if (!loginActivityContainer) return;
@@ -918,6 +1053,45 @@ class UserDetailPage {
         if (!this.currentUser || !window.supabase) return;
 
         try {
+            // Get communication activity - load all communications for filtering
+            const { data: communicationData, error: communicationError } = await window.supabase
+                .from('user_communications')
+                .select('id, type, subject, body, created_at, sender_email, signature_used, language_used')
+                .eq('user_id', this.currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if (communicationError) {
+                console.error('❌ Failed to load communication activity:', communicationError);
+            } else {
+                // User communication activity loaded
+                console.log('📧 Communication activity loaded:', communicationData?.length || 0, 'communications');
+
+                // Display communication activity
+                const communicationActivityContainer = document.getElementById('user-detail-communication-activity');
+                if (communicationActivityContainer) {
+                    if (!communicationData || communicationData.length === 0) {
+                        communicationActivityContainer.innerHTML = '<p style="color: var(--color-text-secondary); font-style: italic; text-align: center; padding: var(--spacing-xl);">No communications yet.</p>';
+                    } else {
+                        // Store communication activities for filtering
+                        this.allCommunicationActivities = communicationData;
+                        
+                        // Load communication activity filters component
+                        await this.loadCommunicationActivityFilters();
+                        
+                        // Set activities in filter component (wait for component to be ready)
+                        if (window.communicationActivityFilters) {
+                            // Wait a bit for the component to be fully initialized
+                            setTimeout(() => {
+                                window.communicationActivityFilters.populateFilterOptions(communicationData);
+                            }, 100);
+                        }
+                        
+                        // Render the communication activity table
+                        this.renderCommunicationActivityTable(communicationData);
+                    }
+                }
+            }
+
             // Get login activity - load all activities for filtering
             const { data: loginData, error: loginError } = await window.supabase
                 .from('user_login_activity')
@@ -1582,6 +1756,100 @@ class UserDetailPage {
     /**
      * Format date for display
      */
+    showMessageModal(id, type, subject, body, sender, date) {
+        // Create modal overlay
+        const modalOverlay = document.createElement('div');
+        modalOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        `;
+
+        // Create modal content
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: var(--color-background-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: var(--spacing-md);
+            box-shadow: var(--shadow-lg);
+        `;
+
+        const typeIcon = type === 'email' ? '📧' : '🔔';
+        const typeText = type === 'email' ? 'Email' : 'Notification';
+
+        modalContent.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-sm);">
+                <h3 style="margin: 0; color: var(--color-text-primary); display: flex; align-items: center; gap: var(--spacing-sm);">
+                    <span style="font-size: 1.5em;">${typeIcon}</span>
+                    <span>${typeText} Details</span>
+                </h3>
+                <button onclick="this.closest('.modal-overlay').remove()" style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--color-text-secondary); padding: var(--spacing-xs);">
+                    ×
+                </button>
+            </div>
+            
+            <div style="margin-bottom: var(--spacing-md);">
+                <strong style="color: var(--color-text-primary);">Subject:</strong>
+                <p style="margin: var(--spacing-xs) 0; color: var(--color-text-primary); word-wrap: break-word;">${subject}</p>
+            </div>
+            
+            <div style="margin-bottom: var(--spacing-md);">
+                <strong style="color: var(--color-text-primary);">From:</strong>
+                <p style="margin: var(--spacing-xs) 0; color: var(--color-text-primary); font-family: monospace;">${sender}</p>
+            </div>
+            
+            <div style="margin-bottom: var(--spacing-md);">
+                <strong style="color: var(--color-text-primary);">Date:</strong>
+                <p style="margin: var(--spacing-xs) 0; color: var(--color-text-primary);">${date}</p>
+            </div>
+            
+            <div style="margin-bottom: var(--spacing-md);">
+                <strong style="color: var(--color-text-primary);">Message:</strong>
+                <div style="margin: var(--spacing-sm) 0; padding: var(--spacing-md); background: var(--color-background-primary); border-radius: var(--border-radius-sm); border: 1px solid var(--color-border);">
+                    <pre style="margin: 0; color: var(--color-text-primary); white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">${body}</pre>
+                </div>
+            </div>
+            
+            <div style="text-align: right;">
+                <button onclick="this.closest('.modal-overlay').remove()" style="padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer;">
+                    Close
+                </button>
+            </div>
+        `;
+
+        modalOverlay.className = 'modal-overlay';
+        modalOverlay.appendChild(modalContent);
+        document.body.appendChild(modalOverlay);
+
+        // Close modal when clicking overlay
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.remove();
+            }
+        });
+
+        // Close modal with Escape key
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                modalOverlay.remove();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    }
+
     formatDate(dateString) {
         if (!dateString) return 'Never';
         

@@ -490,6 +490,11 @@ class LoginActivityFilters {
         
         // Select all / Deselect all buttons
         this.setupSelectAllButtons();
+        
+        // Language change listener
+        window.addEventListener('languageChanged', () => {
+            this.updateTranslations();
+        });
     }
 
     /**
@@ -659,6 +664,37 @@ class LoginActivityFilters {
         this.applyFilters();
         this.savePreferences();
         console.log('✅ Login filters cleared');
+    }
+
+    /**
+     * Update translations when language changes
+     */
+    updateTranslations() {
+        if (!window.i18next || !window.i18next.isInitialized) return;
+
+        // Update filter labels
+        const filterLabels = document.querySelectorAll('#login-activity-filters .translatable-content');
+        filterLabels.forEach(label => {
+            const translationKey = label.getAttribute('data-translation-key');
+            if (translationKey) {
+                label.textContent = window.i18next.t(translationKey);
+            }
+        });
+
+        // Update dropdown button text
+        const dropdownButtons = document.querySelectorAll('#login-activity-filters .login-activity-filters__dropdown-btn span');
+        dropdownButtons.forEach(button => {
+            const translationKey = button.getAttribute('data-translation-key');
+            if (translationKey) {
+                button.textContent = window.i18next.t(translationKey);
+            }
+        });
+
+        // Update clear button
+        const clearButton = document.querySelector('#login-activity-filters .login-activity-filters__clear-btn');
+        if (clearButton) {
+            clearButton.textContent = window.i18next.t('Clear Filters');
+        }
     }
 }
 
