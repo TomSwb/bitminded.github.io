@@ -261,7 +261,7 @@ serve(async (req) => {
                 <div class="signature">${translatedSignature || 'Your BitMinded Team'}</div>
               </div>
               <div class="footer">
-                <p>© 2024 BitMinded AG. All rights reserved.</p>
+                <p>© 2025 BitMinded AG. All rights reserved.</p>
               </div>
             </div>
           </body>

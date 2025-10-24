@@ -282,6 +282,26 @@ class TwoFactorVerify {
                 // Log successful 2FA verification with session ID
                 await this.logLoginAttempt(this.userId, true, null, true, sessionId);
                 
+                // Check if user is suspended before allowing access
+                const { data: userProfile, error: profileError } = await window.supabase
+                    .from('user_profiles')
+                    .select('status, suspension_reason')
+                    .eq('id', this.userId)
+                    .single();
+
+                if (!profileError && userProfile && userProfile.status === 'suspended') {
+                    // User is suspended - sign them out and redirect to login with error
+                    await window.supabase.auth.signOut();
+                    sessionStorage.removeItem('pending_2fa_user');
+                    sessionStorage.removeItem('pending_2fa_time');
+                    
+                    // Store error message for login page to display
+                    sessionStorage.setItem('suspension_error', `Your account has been suspended. Reason: ${userProfile.suspension_reason || 'No reason provided'}. You should have received an email explaining this suspension. Please contact support@bitminded.ch for assistance.`);
+                    
+                    window.location.href = '/auth/';
+                    return;
+                }
+                
                 // Clear pending session
                 sessionStorage.removeItem('pending_2fa_user');
                 sessionStorage.removeItem('pending_2fa_time');
