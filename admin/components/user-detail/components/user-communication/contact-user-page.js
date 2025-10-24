@@ -289,10 +289,14 @@ class ContactUserPage {
         this.signatures.forEach(signature => {
             const option = document.createElement('option');
             option.value = signature.content;
-            option.textContent = signature.name;
+            
+            // Translate signature name based on user's language
+            const translatedName = this.translateSignatureName(signature.name);
+            option.textContent = translatedName;
+            
             if (signature.is_default) {
                 option.selected = true;
-                console.log('📝 Set default signature:', signature.name);
+                console.log('📝 Set default signature:', translatedName);
             }
             this.elements.messageSignature.appendChild(option);
         });
@@ -323,8 +327,65 @@ class ContactUserPage {
         if (!selectedSignature) {
             this.elements.signaturePreview.textContent = '';
         } else {
-            this.elements.signaturePreview.textContent = selectedSignature;
+            // Show translated signature content (what the user will receive)
+            const translatedSignature = this.translateSignatureContent(selectedSignature);
+            this.elements.signaturePreview.textContent = translatedSignature;
         }
+    }
+
+    /**
+     * Translate signature name based on user's language
+     * @param {string} signatureName - Original signature name
+     * @returns {string} Translated signature name
+     */
+    translateSignatureName(signatureName) {
+        // Map signature names to translation keys
+        const signatureMap = {
+            'Legal Team': 'Legal Team',
+            'Contact Team': 'Contact Team',
+            'Support Team': 'Support Team',
+            'System Team': 'System Team',
+            'Development Team': 'Development Team'
+        };
+
+        const translationKey = signatureMap[signatureName];
+        if (translationKey && typeof i18next !== 'undefined' && i18next.isInitialized) {
+            return i18next.t(translationKey);
+        }
+        
+        // Fallback to original name if translation not available
+        return signatureName;
+    }
+
+    /**
+     * Translate signature content based on user's language
+     * @param {string} signatureContent - Original signature content
+     * @returns {string} Translated signature content
+     */
+    translateSignatureContent(signatureContent) {
+        if (!signatureContent) return null;
+
+        // Map signature content to translation keys
+        const contentMap = {
+            'Your BitMinded Legal Team': 'Your BitMinded Legal Team',
+            'Your BitMinded Contact Team': 'Your BitMinded Contact Team',
+            'Your BitMinded Support Team': 'Your BitMinded Support Team',
+            'Your BitMinded System Team': 'Your BitMinded System Team',
+            'Your BitMinded Development Team': 'Your BitMinded Development Team'
+        };
+
+        // Find matching content
+        for (const [original, translationKey] of Object.entries(contentMap)) {
+            if (signatureContent === original) {
+                if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+                    return i18next.t(translationKey);
+                }
+                break;
+            }
+        }
+        
+        // Fallback to original content if translation not available
+        return signatureContent;
     }
 
     setCommunicationType(type) {

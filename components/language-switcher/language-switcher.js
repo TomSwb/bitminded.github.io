@@ -252,9 +252,9 @@ class LanguageSwitcher {
 
             // Update language in database
             const { error } = await window.supabase
-                .from('user_preferences')
+                .from('user_profiles')
                 .update({ language: language })
-                .eq('user_id', user.id);
+                .eq('id', user.id);
 
             if (error) {
                 console.error('Failed to save language to database:', error);

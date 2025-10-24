@@ -9,22 +9,22 @@ class LanguageDetector {
             'en': { 
                 flag: '🇬🇧', 
                 name: 'English',
-                greeting: 'Dear'
+                greeting: 'Hello'
             },
             'es': { 
                 flag: '🇪🇸', 
                 name: 'Spanish',
-                greeting: 'Estimado/a'
+                greeting: 'Hola'
             },
             'fr': { 
                 flag: '🇫🇷', 
                 name: 'French',
-                greeting: 'Cher/Chère'
+                greeting: 'Bonjour'
             },
             'de': { 
                 flag: '🇩🇪', 
                 name: 'German',
-                greeting: 'Liebe/r'
+                greeting: 'Hallo'
             }
         };
     }

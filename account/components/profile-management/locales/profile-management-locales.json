@@ -35,6 +35,11 @@
     "male": "Male",
     "female": "Female",
     "prefer_not_say": "Prefer not to say",
+    "preferred_language": "Preferred Language",
+    "english": "English",
+    "spanish": "Spanish",
+    "french": "French",
+    "german": "German",
     "save": "Save",
     "avatar": {
       "cropper": {
@@ -82,6 +87,11 @@
     "male": "Masculino",
     "female": "Femenino",
     "prefer_not_say": "Prefiero no decir",
+    "preferred_language": "Idioma Preferido",
+    "english": "Inglés",
+    "spanish": "Español",
+    "french": "Francés",
+    "german": "Alemán",
     "save": "Guardar",
     "avatar": {
       "cropper": {
@@ -129,6 +139,11 @@
     "male": "Homme",
     "female": "Femme",
     "prefer_not_say": "Préfère ne pas dire",
+    "preferred_language": "Langue Préférée",
+    "english": "Anglais",
+    "spanish": "Espagnol",
+    "french": "Français",
+    "german": "Allemand",
     "save": "Sauvegarder",
     "avatar": {
       "cropper": {
@@ -176,6 +191,11 @@
     "male": "Männlich",
     "female": "Weiblich",
     "prefer_not_say": "Möchte nicht sagen",
+    "preferred_language": "Bevorzugte Sprache",
+    "english": "Englisch",
+    "spanish": "Spanisch",
+    "french": "Französisch",
+    "german": "Deutsch",
     "save": "Speichern",
     "avatar": {
       "cropper": {

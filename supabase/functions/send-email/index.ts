@@ -6,6 +6,55 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Translation functions
+function getGreeting(language: string): string {
+  const greetings = {
+    'en': 'Hello',
+    'es': 'Hola',
+    'fr': 'Bonjour',
+    'de': 'Hallo'
+  }
+  return greetings[language as keyof typeof greetings] || 'Hello'
+}
+
+function translateSignature(signature: string, language: string): string {
+  if (!signature) return ''
+  
+  const signatureTranslations = {
+    'en': {
+      'Your BitMinded Legal Team': 'Your BitMinded Legal Team',
+      'Your BitMinded Contact Team': 'Your BitMinded Contact Team',
+      'Your BitMinded Support Team': 'Your BitMinded Support Team',
+      'Your BitMinded System Team': 'Your BitMinded System Team',
+      'Your BitMinded Development Team': 'Your BitMinded Development Team'
+    },
+    'es': {
+      'Your BitMinded Legal Team': 'Su Equipo Legal de BitMinded',
+      'Your BitMinded Contact Team': 'Su Equipo de Contacto de BitMinded',
+      'Your BitMinded Support Team': 'Su Equipo de Soporte de BitMinded',
+      'Your BitMinded System Team': 'Su Equipo del Sistema de BitMinded',
+      'Your BitMinded Development Team': 'Su Equipo de Desarrollo de BitMinded'
+    },
+    'fr': {
+      'Your BitMinded Legal Team': 'Votre Équipe Juridique BitMinded',
+      'Your BitMinded Contact Team': 'Votre Équipe de Contact BitMinded',
+      'Your BitMinded Support Team': 'Votre Équipe de Support BitMinded',
+      'Your BitMinded System Team': 'Votre Équipe Système BitMinded',
+      'Your BitMinded Development Team': 'Votre Équipe de Développement BitMinded'
+    },
+    'de': {
+      'Your BitMinded Legal Team': 'Ihr BitMinded Rechtsteam',
+      'Your BitMinded Contact Team': 'Ihr BitMinded Kontaktteam',
+      'Your BitMinded Support Team': 'Ihr BitMinded Support-Team',
+      'Your BitMinded System Team': 'Ihr BitMinded System-Team',
+      'Your BitMinded Development Team': 'Ihr BitMinded Entwicklungsteam'
+    }
+  }
+  
+  const translations = signatureTranslations[language as keyof typeof signatureTranslations]
+  return translations?.[signature as keyof typeof translations] || signature
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -89,6 +138,16 @@ serve(async (req) => {
       )
     }
 
+    // Get user's language for translation
+    const userLanguage = language_used || targetUser.language || 'en'
+    
+    // Create greeting and translate signature
+    const greeting = getGreeting(userLanguage)
+    const translatedSignature = translateSignature(signature_used || '', userLanguage)
+    
+    // Construct the full message with greeting
+    const fullMessage = `${greeting} ${targetUser.username},\n\n${body}`
+
     // Create email record in database (initially with 'sent' status)
     const { data: communication, error: communicationError } = await supabaseClient
       .from('user_communications')
@@ -97,9 +156,9 @@ serve(async (req) => {
         admin_id: user.id,
         type: 'email',
         subject: subject,
-        body: body,
-        signature_used: signature_used || null,
-        language_used: language_used || targetUser.language || 'en',
+        body: fullMessage,
+        signature_used: translatedSignature || null,
+        language_used: userLanguage,
         sender_email: sender_email,
         status: 'sent'
       })
@@ -184,7 +243,7 @@ serve(async (req) => {
       // Create styled HTML email matching BitMinded template
       const htmlEmail = `
         <!DOCTYPE html>
-        <html lang="${language_used || 'en'}">
+        <html lang="${userLanguage}">
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -198,8 +257,8 @@ serve(async (req) => {
                 <div class="tagline">Professional Digital Solutions</div>
               </div>
               <div class="content">
-                <div class="message-body">${body.replace(/\n/g, '<br>')}</div>
-                <div class="signature">${signature_used || 'Your BitMinded Team'}</div>
+                <div class="message-body">${fullMessage.replace(/\n/g, '<br>')}</div>
+                <div class="signature">${translatedSignature || 'Your BitMinded Team'}</div>
               </div>
               <div class="footer">
                 <p>© 2024 BitMinded AG. All rights reserved.</p>

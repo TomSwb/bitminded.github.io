@@ -42,7 +42,7 @@ class PersonalInfo {
     async loadProfileData() {
         const { data, error } = await window.supabase
             .from('user_profiles')
-            .select('date_of_birth, country, gender')
+            .select('date_of_birth, country, gender, language')
             .eq('id', this.currentUser.id)
             .single();
         
@@ -63,11 +63,13 @@ class PersonalInfo {
         this.headerAgeDisplay = document.getElementById('profile-age');
         this.headerCountryDisplay = document.getElementById('profile-country');
         this.headerGenderDisplay = document.getElementById('profile-gender');
+        this.headerLanguageDisplay = document.getElementById('profile-language');
         
         // Form inputs
         this.dobInput = document.getElementById('new-dob');
         this.countrySelect = document.getElementById('new-country');
         this.genderSelect = document.getElementById('new-gender');
+        this.languageSelect = document.getElementById('new-language');
         
         // Form buttons
         this.cancelBtn = document.getElementById('cancel-personal-info-btn');
@@ -100,6 +102,16 @@ class PersonalInfo {
         if (this.genderSelect) {
             this.genderSelect.addEventListener('change', () => this.validateForm());
         }
+        if (this.languageSelect) {
+            this.languageSelect.addEventListener('change', () => this.validateForm());
+        }
+        
+        // Listen for language changes from language switcher
+        window.addEventListener('languageChanged', (e) => {
+            if (e.detail && e.detail.language) {
+                this.handleLanguageChange(e.detail.language);
+            }
+        });
     }
 
     validateForm() {
@@ -107,8 +119,9 @@ class PersonalInfo {
         const dobChanged = this.dobInput.value !== (this.profileData.date_of_birth || '');
         const countryChanged = this.countrySelect.value.trim() !== (this.profileData.country || '');
         const genderChanged = this.genderSelect.value !== (this.profileData.gender || '');
+        const languageChanged = this.languageSelect.value !== (this.profileData.language || '');
         
-        const hasChanges = dobChanged || countryChanged || genderChanged;
+        const hasChanges = dobChanged || countryChanged || genderChanged || languageChanged;
         
         // Enable save button only if there are changes
         if (this.saveBtn) {
@@ -147,6 +160,47 @@ class PersonalInfo {
                 this.headerGenderDisplay.textContent = '';
             }
         }
+        
+        // Update language in header (with flag emoji)
+        if (this.headerLanguageDisplay) {
+            if (this.profileData.language) {
+                const languageMap = {
+                    'en': '🇬🇧',
+                    'es': '🇪🇸',
+                    'fr': '🇫🇷',
+                    'de': '🇩🇪'
+                };
+                const flag = languageMap[this.profileData.language] || '🇬🇧';
+                this.headerLanguageDisplay.textContent = ` • ${flag}`;
+            } else {
+                this.headerLanguageDisplay.textContent = '';
+            }
+        }
+    }
+
+    /**
+     * Handle language change from language switcher
+     * @param {string} newLanguage - New language code
+     */
+    async handleLanguageChange(newLanguage) {
+        try {
+            // Update local profile data
+            this.profileData.language = newLanguage;
+            
+            // Update header display immediately
+            this.updateHeaderDisplay();
+            
+            // Update form if it's open
+            if (this.languageSelect && !this.form.classList.contains('hidden')) {
+                this.languageSelect.value = newLanguage;
+                this.validateForm();
+            }
+            
+            console.log(`✅ Personal info language updated to: ${newLanguage}`);
+            
+        } catch (error) {
+            console.error('❌ Failed to handle language change:', error);
+        }
     }
 
     showEditForm() {
@@ -163,6 +217,9 @@ class PersonalInfo {
         }
         if (this.genderSelect && this.profileData.gender) {
             this.genderSelect.value = this.profileData.gender;
+        }
+        if (this.languageSelect && this.profileData.language) {
+            this.languageSelect.value = this.profileData.language;
         }
     }
 
@@ -193,6 +250,7 @@ class PersonalInfo {
         const dobValue = this.dobInput.value || null;
         const countryValue = this.countrySelect.value.trim() || null;
         const genderValue = this.genderSelect.value || null;
+        const languageValue = this.languageSelect.value || null;
 
         try {
             // Disable save button
@@ -203,7 +261,8 @@ class PersonalInfo {
                 .update({ 
                     date_of_birth: dobValue,
                     country: countryValue,
-                    gender: genderValue
+                    gender: genderValue,
+                    language: languageValue
                 })
                 .eq('id', this.currentUser.id);
 
@@ -213,6 +272,7 @@ class PersonalInfo {
             this.profileData.date_of_birth = dobValue;
             this.profileData.country = countryValue;
             this.profileData.gender = genderValue;
+            this.profileData.language = languageValue;
             
             // Update header display and hide form
             this.updateHeaderDisplay();
