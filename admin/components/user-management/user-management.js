@@ -571,8 +571,12 @@ class UserManagement {
         statusCell.setAttribute('data-label', 'Status');
         statusCell.style.padding = 'var(--spacing-sm)';
         const status = user.status || 'active';
+        
+        // Determine badge class based on status
+        const badgeClass = status === 'suspended' ? 'user-management__badge--suspended' : 'user-management__badge--active';
+        
         statusCell.innerHTML = `
-            <span style="display: inline-block; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-size-xs); font-weight: 600; text-transform: uppercase; background-color: var(--color-success); color: var(--color-background-primary);">
+            <span class="user-management__badge ${badgeClass}">
                 ${status}
             </span>
         `;

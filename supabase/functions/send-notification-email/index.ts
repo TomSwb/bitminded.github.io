@@ -14,7 +14,7 @@ const EMAIL_TRANSLATIONS = {
     tagline: 'Professional Digital Solutions',
     footer_notification: 'This is a notification from BitMinded',
     manage_preferences: 'Manage notification preferences',
-    copyright: '© 2024 BitMinded. All rights reserved.',
+    copyright: '© 2025 BitMinded. All rights reserved.',
     
     // Device types
     devices: {

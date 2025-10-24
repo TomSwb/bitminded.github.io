@@ -15,7 +15,7 @@ const DELETION_EMAIL_TRANSLATIONS = {
     tagline: 'Professional Digital Solutions',
     footer_notification: 'This is a notification from BitMinded',
     manage_preferences: 'Manage notification preferences',
-    copyright: '© 2024 BitMinded. All rights reserved.',
+    copyright: '© 2025 BitMinded. All rights reserved.',
     
     deletion_scheduled: {
       subject: 'Account Deletion Scheduled - BitMinded',
@@ -93,7 +93,7 @@ const DELETION_EMAIL_TRANSLATIONS = {
     tagline: 'Soluciones Digitales Profesionales',
     footer_notification: 'Esta es una notificación de BitMinded',
     manage_preferences: 'Administrar preferencias de notificación',
-    copyright: '© 2024 BitMinded. Todos los derechos reservados.',
+    copyright: '© 2025 BitMinded. Todos los derechos reservados.',
     
     deletion_scheduled: {
       subject: 'Eliminación de Cuenta Programada - BitMinded',
@@ -171,7 +171,7 @@ const DELETION_EMAIL_TRANSLATIONS = {
     tagline: 'Solutions Numériques Professionnelles',
     footer_notification: 'Ceci est une notification de BitMinded',
     manage_preferences: 'Gérer les préférences de notification',
-    copyright: '© 2024 BitMinded. Tous droits réservés.',
+    copyright: '© 2025 BitMinded. Tous droits réservés.',
     
     deletion_scheduled: {
       subject: 'Suppression de Compte Programmée - BitMinded',
@@ -249,7 +249,7 @@ const DELETION_EMAIL_TRANSLATIONS = {
     tagline: 'Professionelle Digitale Lösungen',
     footer_notification: 'Dies ist eine Benachrichtigung von BitMinded',
     manage_preferences: 'Benachrichtigungseinstellungen verwalten',
-    copyright: '© 2024 BitMinded. Alle Rechte vorbehalten.',
+    copyright: '© 2025 BitMinded. Alle Rechte vorbehalten.',
     
     deletion_scheduled: {
       subject: 'Kontolöschung Geplant - BitMinded',

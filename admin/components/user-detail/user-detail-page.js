@@ -222,6 +222,11 @@ class UserDetailPage {
         if (this.elements.permanentDeleteButton) {
             this.elements.permanentDeleteButton.addEventListener('click', () => this.permanentDeleteUser());
         }
+
+        // Language change listener
+        window.addEventListener('languageChanged', () => {
+            this.updateButtonTranslations();
+        });
     }
 
     /**
@@ -307,6 +312,7 @@ class UserDetailPage {
 
             // Populate UI
             this.populateUserInfo(this.currentUser);
+            this.updateSuspendButton();
             this.switchTab('overview');
             await this.loadOverviewData();
 
@@ -1672,8 +1678,485 @@ class UserDetailPage {
     }
 
     async suspendUser() {
-        console.log('⏸️ Suspend user clicked');
-        // TODO: Implement suspend user functionality
+        if (!this.currentUser) {
+            console.error('❌ No current user to suspend');
+            return;
+        }
+
+        // Check if user is already suspended - if so, reactivate
+        if (this.currentUser.status === 'suspended') {
+            await this.reactivateUser();
+            return;
+        }
+
+        // Show confirmation modal
+        const confirmed = await this.showSuspendConfirmation();
+        if (!confirmed) return;
+
+        try {
+            // Update user status to suspended
+            const { error } = await window.supabase
+                .from('user_profiles')
+                .update({ 
+                    status: 'suspended',
+                    suspended_at: new Date().toISOString(),
+                    suspended_by: (await window.supabase.auth.getUser()).data.user.id,
+                    suspension_reason: confirmed.reason,
+                    suspension_followup_sent: false
+                })
+                .eq('id', this.currentUser.id);
+
+            if (error) {
+                console.error('❌ Failed to suspend user:', error);
+                this.showAlert('Failed to suspend user', 'error');
+                return;
+            }
+
+            // Send suspension email notification
+            try {
+                const { data: emailResult, error: emailError } = await window.supabase.functions.invoke('send-suspension-email', {
+                    body: {
+                        user_id: this.currentUser.id,
+                        suspension_reason: confirmed.reason
+                    }
+                });
+
+                if (emailError) {
+                    console.error('❌ Failed to send suspension email:', emailError);
+                } else {
+                    console.log('✅ Suspension email sent:', emailResult);
+                }
+            } catch (emailError) {
+                console.error('❌ Error sending suspension email:', emailError);
+            }
+
+            // Log admin action
+            if (window.adminLayout) {
+                await window.adminLayout.logAdminAction(
+                    'suspend_user',
+                    `Suspended user: ${this.currentUser.username}`,
+                    this.currentUser.id,
+                    { reason: confirmed.reason || 'No reason provided' }
+                );
+            }
+
+            // Update local user data
+            this.currentUser.status = 'suspended';
+            this.currentUser.suspended_at = new Date().toISOString();
+            this.currentUser.suspension_reason = confirmed.reason;
+
+            // Update UI
+            this.updateUserStatusDisplay();
+            this.updateSuspendButton();
+
+            // Show success notification
+            this.showAlert(`User ${this.currentUser.username} has been suspended`, 'success');
+
+            console.log('✅ User suspended successfully');
+
+        } catch (error) {
+            console.error('❌ Error suspending user:', error);
+            this.showAlert('An error occurred while suspending the user', 'error');
+        }
+    }
+
+    async reactivateUser() {
+        // Show confirmation for reactivation
+        const confirmed = await this.showReactivateConfirmation();
+        if (!confirmed) return;
+
+        try {
+            // Update user status to active
+            const { error } = await window.supabase
+                .from('user_profiles')
+                .update({ 
+                    status: 'active',
+                    suspended_at: null,
+                    suspended_by: null,
+                    suspension_reason: null,
+                    suspension_followup_sent: false,
+                    reactivated_at: new Date().toISOString(),
+                    reactivated_by: (await window.supabase.auth.getUser()).data.user.id,
+                    reactivation_reason: confirmed.reason || null
+                })
+                .eq('id', this.currentUser.id);
+
+            if (error) {
+                console.error('❌ Failed to reactivate user:', error);
+                this.showAlert('Failed to reactivate user', 'error');
+                return;
+            }
+
+            // Send reactivation email notification
+            try {
+                const { data: emailResult, error: emailError } = await window.supabase.functions.invoke('send-reactivation-email', {
+                    body: {
+                        user_id: this.currentUser.id,
+                        reactivation_reason: confirmed.reason
+                    }
+                });
+
+                if (emailError) {
+                    console.error('❌ Failed to send reactivation email:', emailError);
+                } else {
+                    console.log('✅ Reactivation email sent:', emailResult);
+                }
+            } catch (emailError) {
+                console.error('❌ Error sending reactivation email:', emailError);
+            }
+
+            // Log admin action
+            if (window.adminLayout) {
+                await window.adminLayout.logAdminAction(
+                    'reactivate_user',
+                    `Reactivated user: ${this.currentUser.username}`,
+                    this.currentUser.id,
+                    { reason: confirmed.reason || 'No reason provided' }
+                );
+            }
+
+            // Update local user data
+            this.currentUser.status = 'active';
+            this.currentUser.suspended_at = null;
+            this.currentUser.suspended_by = null;
+            this.currentUser.suspension_reason = null;
+            this.currentUser.reactivated_at = new Date().toISOString();
+            this.currentUser.reactivation_reason = confirmed.reason;
+
+            // Update UI
+            this.updateUserStatusDisplay();
+            this.updateSuspendButton();
+
+            // Show success notification
+            this.showAlert(`User ${this.currentUser.username} has been reactivated`, 'success');
+
+            console.log('✅ User reactivated successfully');
+
+        } catch (error) {
+            console.error('❌ Error reactivating user:', error);
+            this.showAlert('An error occurred while reactivating the user', 'error');
+        }
+    }
+
+    showAlert(message, type = 'info') {
+        // Create a simple alert notification
+        const alertDiv = document.createElement('div');
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        `;
+
+        // Set background color based on type
+        switch (type) {
+            case 'success':
+                alertDiv.style.backgroundColor = '#28a745';
+                break;
+            case 'error':
+                alertDiv.style.backgroundColor = '#dc3545';
+                break;
+            case 'warning':
+                alertDiv.style.backgroundColor = '#ffc107';
+                alertDiv.style.color = '#000';
+                break;
+            default:
+                alertDiv.style.backgroundColor = '#17a2b8';
+        }
+
+        alertDiv.textContent = message;
+        document.body.appendChild(alertDiv);
+
+        // Remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 5000);
+    }
+
+    async showSuspendConfirmation() {
+        return new Promise((resolve) => {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: var(--color-background-primary);
+                border: 1px solid var(--color-border);
+                border-radius: var(--border-radius-md);
+                padding: var(--spacing-lg);
+                max-width: 500px;
+                margin: var(--spacing-md);
+                box-shadow: var(--shadow-lg);
+            `;
+
+            modalContent.innerHTML = `
+                <div style="margin-bottom: var(--spacing-md);">
+                    <h3 style="margin: 0 0 var(--spacing-sm) 0; color: var(--color-text-primary); display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <span style="font-size: 1.5em;">⚠️</span>
+                        <span>Suspend User</span>
+                    </h3>
+                    <p style="margin: 0; color: var(--color-text-primary);">
+                        Are you sure you want to suspend <strong>${this.currentUser.username}</strong>? 
+                        This will prevent them from accessing their account.
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: var(--spacing-md);">
+                    <label style="display: block; margin-bottom: var(--spacing-xs); color: var(--color-text-primary); font-weight: 600;">
+                        Reason for suspension (required):
+                    </label>
+                    <textarea 
+                        id="suspend-reason" 
+                        placeholder="Enter the reason for suspending this user..."
+                        style="width: 100%; padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); font-family: inherit; resize: vertical; min-height: 80px;"
+                        required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: var(--spacing-sm); justify-content: flex-end;">
+                    <button id="suspend-cancel" style="padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button id="suspend-confirm" style="padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-error); border-radius: var(--border-radius-sm); background: var(--color-error); color: var(--color-background-primary); cursor: pointer;">
+                        Suspend User
+                    </button>
+                </div>
+            `;
+
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+
+            // Focus on reason textarea
+            const reasonTextarea = modalContent.querySelector('#suspend-reason');
+            reasonTextarea.focus();
+
+            // Event handlers
+            const cancelBtn = modalContent.querySelector('#suspend-cancel');
+            const confirmBtn = modalContent.querySelector('#suspend-confirm');
+
+            const cleanup = () => {
+                document.body.removeChild(modalOverlay);
+            };
+
+            cancelBtn.addEventListener('click', () => {
+                cleanup();
+                resolve(false);
+            });
+
+            confirmBtn.addEventListener('click', () => {
+                const reason = reasonTextarea.value.trim();
+                if (!reason) {
+                    reasonTextarea.style.borderColor = 'var(--color-error)';
+                    reasonTextarea.focus();
+                    return;
+                }
+                cleanup();
+                resolve({ reason });
+            });
+
+            // Close on overlay click
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    cleanup();
+                    resolve(false);
+                }
+            });
+
+            // Close on Escape key
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    cleanup();
+                    document.removeEventListener('keydown', handleEscape);
+                    resolve(false);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+        });
+    }
+
+    async showReactivateConfirmation() {
+        return new Promise((resolve) => {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: var(--color-background-primary);
+                border: 1px solid var(--color-border);
+                border-radius: var(--border-radius-md);
+                padding: var(--spacing-lg);
+                max-width: 500px;
+                margin: var(--spacing-md);
+                box-shadow: var(--shadow-lg);
+            `;
+
+            modalContent.innerHTML = `
+                <div style="margin-bottom: var(--spacing-md);">
+                    <h3 style="margin: 0 0 var(--spacing-sm) 0; color: var(--color-text-primary); display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <span style="font-size: 1.5em;">✅</span>
+                        <span>Reactivate User</span>
+                    </h3>
+                    <p style="margin: 0; color: var(--color-text-primary);">
+                        Are you sure you want to reactivate <strong>${this.currentUser.username}</strong>? 
+                        This will restore their access to the account.
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: var(--spacing-md);">
+                    <label style="display: block; margin-bottom: var(--spacing-xs); color: var(--color-text-primary); font-weight: 600;">
+                        Reason for reactivation (optional):
+                    </label>
+                    <textarea 
+                        id="reactivate-reason" 
+                        placeholder="Enter the reason for reactivating this user..."
+                        style="width: 100%; padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); font-family: inherit; resize: vertical; min-height: 80px;"
+                    ></textarea>
+                </div>
+                
+                <div style="display: flex; gap: var(--spacing-sm); justify-content: flex-end;">
+                    <button id="reactivate-cancel" style="padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button id="reactivate-confirm" style="padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-success); border-radius: var(--border-radius-sm); background: var(--color-success); color: var(--color-background-primary); cursor: pointer;">
+                        Reactivate User
+                    </button>
+                </div>
+            `;
+
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+
+            // Focus on reason textarea
+            const reasonTextarea = modalContent.querySelector('#reactivate-reason');
+            reasonTextarea.focus();
+
+            // Event handlers
+            const cancelBtn = modalContent.querySelector('#reactivate-cancel');
+            const confirmBtn = modalContent.querySelector('#reactivate-confirm');
+
+            const cleanup = () => {
+                document.body.removeChild(modalOverlay);
+            };
+
+            cancelBtn.addEventListener('click', () => {
+                cleanup();
+                resolve(false);
+            });
+
+            confirmBtn.addEventListener('click', () => {
+                const reason = reasonTextarea.value.trim();
+                cleanup();
+                resolve({ reason });
+            });
+
+            // Close on overlay click
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    cleanup();
+                    resolve(false);
+                }
+            });
+
+            // Close on Escape key
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    cleanup();
+                    document.removeEventListener('keydown', handleEscape);
+                    resolve(false);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+        });
+    }
+
+    updateUserStatusDisplay() {
+        // Update status badge
+        if (this.elements.statusBadge) {
+            this.elements.statusBadge.textContent = this.currentUser.status;
+            this.elements.statusBadge.className = `user-detail__badge user-detail__badge--status ${this.currentUser.status}`;
+        }
+
+        // Update status value in overview
+        if (this.elements.statusValue) {
+            this.elements.statusValue.textContent = this.currentUser.status;
+        }
+    }
+
+    updateSuspendButton() {
+        if (!this.elements.suspendUserButton) return;
+
+        const buttonSpan = this.elements.suspendUserButton.querySelector('.translatable-content');
+        if (!buttonSpan) return;
+
+        if (this.currentUser.status === 'suspended') {
+            buttonSpan.setAttribute('data-translation-key', 'reactivate_user');
+            buttonSpan.textContent = 'Reactivate User'; // Fallback text
+            this.elements.suspendUserButton.className = 'user-detail__action-button user-detail__action-button--success';
+        } else {
+            buttonSpan.setAttribute('data-translation-key', 'suspend_user');
+            buttonSpan.textContent = 'Suspend User'; // Fallback text
+            this.elements.suspendUserButton.className = 'user-detail__action-button user-detail__action-button--warning';
+        }
+
+        // Update translations for the new button content
+        this.updateButtonTranslations();
+    }
+
+    updateButtonTranslations() {
+        // Apply translations to the suspend button's translatable content
+        const buttonSpan = this.elements.suspendUserButton?.querySelector('.translatable-content');
+        if (buttonSpan && window.i18next && window.i18next.isInitialized) {
+            const key = buttonSpan.getAttribute('data-translation-key');
+            if (key) {
+                let translation = window.i18next.t(key);
+                
+                // If translation not found, try converting to snake_case
+                if (translation === key) {
+                    const snakeCaseKey = key
+                        .replace(/\s+/g, '_')
+                        .replace(/-/g, '_')
+                        .toLowerCase();
+                    translation = window.i18next.t(snakeCaseKey);
+                }
+                
+                if (translation && translation !== key) {
+                    buttonSpan.textContent = translation;
+                }
+            }
+        }
     }
 
     async deleteUser() {
