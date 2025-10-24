@@ -121,6 +121,11 @@ class AdminActivityFilters {
         
         // Click outside to close dropdowns
         document.addEventListener('click', this.handleClickOutside);
+        
+        // Language change listener
+        window.addEventListener('languageChanged', () => {
+            this.updateTranslations();
+        });
     }
 
     async loadPreferences() {
@@ -614,6 +619,37 @@ class AdminActivityFilters {
 
     getFilteredActivities() {
         return this.filteredActivities;
+    }
+
+    /**
+     * Update translations when language changes
+     */
+    updateTranslations() {
+        if (!window.i18next || !window.i18next.isInitialized) return;
+
+        // Update filter labels
+        const filterLabels = document.querySelectorAll('#admin-activity-filters .translatable-content');
+        filterLabels.forEach(label => {
+            const translationKey = label.getAttribute('data-translation-key');
+            if (translationKey) {
+                label.textContent = window.i18next.t(translationKey);
+            }
+        });
+
+        // Update dropdown button text
+        const dropdownButtons = document.querySelectorAll('#admin-activity-filters .admin-activity-filters__dropdown-btn span');
+        dropdownButtons.forEach(button => {
+            const translationKey = button.getAttribute('data-translation-key');
+            if (translationKey) {
+                button.textContent = window.i18next.t(translationKey);
+            }
+        });
+
+        // Update clear button
+        const clearButton = document.querySelector('#admin-activity-filters .admin-activity-filters__clear-btn');
+        if (clearButton) {
+            clearButton.textContent = window.i18next.t('Clear Filters');
+        }
     }
 
     destroy() {

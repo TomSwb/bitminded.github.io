@@ -19,7 +19,8 @@ class UserManagement {
             lastLoginLocation: [], // New filter for last login location
             gender: [], // New filter for gender
             country: [], // New filter for country
-            age: [] // New filter for age ranges
+            age: [], // New filter for age ranges
+            language: [] // New filter for preferred language
         };
         this.sort = {
             field: null,
@@ -105,7 +106,7 @@ class UserManagement {
         }
 
         // Select All / Deselect All buttons
-        const filterTypes = ['status', 'role', 'subscription', 'gender', 'country', 'age', 'lastLoginLocation'];
+        const filterTypes = ['status', 'role', 'subscription', 'gender', 'country', 'age', 'language', 'lastLoginLocation'];
         filterTypes.forEach(filterType => {
             const selectAllBtn = this.elements[`${filterType}SelectAll`];
             const deselectAllBtn = this.elements[`${filterType}DeselectAll`];
@@ -181,7 +182,7 @@ class UserManagement {
             // Query users with all related data
             const { data, error } = await window.supabase
                 .from('user_profiles')
-                .select('id, username, avatar_url, created_at, email, status, date_of_birth, gender, country')
+                .select('id, username, avatar_url, created_at, email, status, date_of_birth, gender, country, language')
                 .order('created_at', { ascending: false });
 
             if (error) {
@@ -365,6 +366,11 @@ class UserManagement {
                 }
                 
                 if (!this.filters.age.includes(ageRange)) return false;
+            }
+
+            // Language filter (multi-select)
+            if (this.filters.language.length > 0) {
+                if (!user.language || !this.filters.language.includes(user.language)) return false;
             }
 
             // Last Login Location filter (multi-select)
@@ -679,6 +685,28 @@ class UserManagement {
         tr.appendChild(roleCell);
         tr.appendChild(statusCell);
         tr.appendChild(userInfoCell);
+        
+        // Language cell
+        const languageCell = document.createElement('td');
+        languageCell.setAttribute('data-label', 'Preferred Language');
+        languageCell.style.padding = 'var(--spacing-sm)';
+        languageCell.style.color = 'var(--color-text-primary)';
+        languageCell.style.textAlign = 'center';
+        
+        if (user.language) {
+            const languageMap = {
+                'en': '🇬🇧',
+                'es': '🇪🇸', 
+                'fr': '🇫🇷',
+                'de': '🇩🇪'
+            };
+            const flag = languageMap[user.language] || '🇬🇧';
+            languageCell.innerHTML = `<span style="font-size: 1.2em;">${flag}</span>`;
+        } else {
+            languageCell.innerHTML = '<span style="color: var(--color-text-primary);">Not Set</span>';
+        }
+        
+        tr.appendChild(languageCell);
         tr.appendChild(subsCell);
         tr.appendChild(registeredCell);
         tr.appendChild(lastLoginCell);
@@ -943,6 +971,37 @@ class UserManagement {
             window.userManagementTranslations.updateTranslations();
         }
         this.showTranslatableContent();
+        console.log('🔄 User Management: Calling updateTableHeaders and updateFilterLabels');
+        
+        // Debug: Check what elements actually exist
+        this.debugDOMElements();
+        
+        // Add a small delay to ensure translations are fully loaded
+        setTimeout(() => {
+            this.updateTableHeaders();
+            this.updateFilterLabels();
+        }, 50);
+    }
+
+    /**
+     * Debug DOM elements to see what's actually available
+     */
+    debugDOMElements() {
+        console.log('🔍 DEBUG: Checking DOM elements...');
+        
+        // Check all th elements
+        const allThs = document.querySelectorAll('#users-table th');
+        console.log(`🔍 Found ${allThs.length} total th elements:`);
+        allThs.forEach((th, index) => {
+            console.log(`🔍 TH ${index}: class="${th.className}", hasTranslatableContent=${th.classList.contains('translatable-content')}, hasDataKey=${th.hasAttribute('data-translation-key')}, key="${th.getAttribute('data-translation-key')}", text="${th.textContent.trim()}"`);
+        });
+        
+        // Check all filter labels
+        const allLabels = document.querySelectorAll('#user-management label');
+        console.log(`🔍 Found ${allLabels.length} total label elements:`);
+        allLabels.forEach((label, index) => {
+            console.log(`🔍 Label ${index}: class="${label.className}", hasDataKey=${label.hasAttribute('data-translation-key')}, key="${label.getAttribute('data-translation-key')}", text="${label.textContent.trim()}"`);
+        });
     }
 
     /**
@@ -951,6 +1010,134 @@ class UserManagement {
     showTranslatableContent() {
         const elements = document.querySelectorAll('#user-management .translatable-content');
         elements.forEach(el => el.classList.add('loaded'));
+    }
+
+    /**
+     * Update table headers when language changes
+     */
+    updateTableHeaders() {
+        if (!window.userManagementTranslations || !window.userManagementTranslations.isInitialized) {
+            console.log('❌ User Management: Translations not initialized, skipping table headers update');
+            return;
+        }
+
+        console.log('🔄 User Management: Updating table headers');
+        const headerMap = {
+            'Username': 'Username',
+            'Email': 'Email', 
+            'Role': 'Role',
+            'Status': 'Status',
+            'User Info': 'User Info',
+            'Preferred Language': 'Preferred Language',
+            'Subscriptions': 'Subscriptions',
+            'Registered': 'Registered',
+            'Last Login': 'Last Login',
+            'Actions': 'Actions'
+        };
+
+        // Update table headers
+        const tableHeaders = document.querySelectorAll('#users-table th.translatable-content, #users-table th .translatable-content');
+        console.log(`🔄 User Management: Found ${tableHeaders.length} table headers to update`);
+        
+        // Debug: Log all found headers
+        tableHeaders.forEach((header, index) => {
+            const translationKey = header.getAttribute('data-translation-key');
+            console.log(`🔄 Header ${index}: tag="${header.tagName}", class="${header.className}", key="${translationKey}", text="${header.textContent.trim()}"`);
+        });
+        
+        // Actually update the headers
+        const currentLanguage = window.userManagementTranslations.getCurrentLanguage();
+        console.log(`🔍 Debug: Current language is: ${currentLanguage}`);
+        
+        tableHeaders.forEach(header => {
+            const translationKey = header.getAttribute('data-translation-key');
+            if (translationKey && headerMap[translationKey]) {
+                const newText = window.userManagementTranslations.getTranslation(translationKey, currentLanguage);
+                console.log(`🔄 User Management: Updating "${translationKey}" from "${header.textContent}" to "${newText}"`);
+                console.log(`🔍 Debug: window.userManagementTranslations exists: ${!!window.userManagementTranslations}`);
+                console.log(`🔍 Debug: getTranslation function exists: ${!!window.userManagementTranslations?.getTranslation}`);
+                header.textContent = newText;
+            } else {
+                console.log(`❌ User Management: Skipping header "${translationKey}" - not in headerMap or no translation`);
+            }
+        });
+    }
+
+    /**
+     * Update filter labels when language changes
+     */
+    updateFilterLabels() {
+        if (!window.userManagementTranslations || !window.userManagementTranslations.isInitialized) {
+            console.log('❌ User Management: Translations not initialized, skipping filter labels update');
+            return;
+        }
+
+        console.log('🔄 User Management: Updating filter labels');
+        const filterMap = {
+            'Status': 'Status',
+            'Role': 'Role',
+            'Subscriptions': 'Subscriptions',
+            'Gender': 'Gender',
+            'Country': 'Country',
+            'Age': 'Age',
+            'Preferred Language': 'Preferred Language',
+            'Last Login Time': 'Last Login Time',
+            'Last Login Location': 'Last Login Location',
+            'Registration Date': 'Registration Date',
+            'select_status': 'select_status',
+            'select_role': 'select_role',
+            'select_subscription': 'select_subscription',
+            'select_gender': 'select_gender',
+            'select_country': 'select_country',
+            'select_age': 'select_age',
+            'select_language': 'select_language',
+            'select_location': 'select_location',
+            'Clear Filters': 'Clear Filters'
+        };
+
+        // Update filter labels
+        const filterLabels = document.querySelectorAll('#user-management .user-management__filter-label[data-translation-key]');
+        console.log(`🔄 User Management: Found ${filterLabels.length} filter labels to update`);
+        
+        // Debug: Log all found filter labels
+        filterLabels.forEach((label, index) => {
+            const translationKey = label.getAttribute('data-translation-key');
+            console.log(`🔄 Filter ${index}: tag="${label.tagName}", class="${label.className}", key="${translationKey}", text="${label.textContent.trim()}"`);
+        });
+        
+        // Actually update the filter labels
+        const currentLanguage = window.userManagementTranslations.getCurrentLanguage();
+        console.log(`🔍 Debug: Current language for filters is: ${currentLanguage}`);
+        
+        filterLabels.forEach(label => {
+            const translationKey = label.getAttribute('data-translation-key');
+            if (translationKey && filterMap[translationKey]) {
+                const newText = window.userManagementTranslations.getTranslation(translationKey, currentLanguage);
+                console.log(`🔄 User Management: Updating filter "${translationKey}" from "${label.textContent}" to "${newText}"`);
+                label.textContent = newText;
+            }
+        });
+
+        // Update dropdown button text
+        const dropdownButtons = document.querySelectorAll('#user-management .user-management__dropdown-btn span');
+        console.log(`🔄 User Management: Found ${dropdownButtons.length} dropdown buttons to update`);
+        
+        dropdownButtons.forEach(button => {
+            const translationKey = button.getAttribute('data-translation-key');
+            if (translationKey && filterMap[translationKey]) {
+                const newText = window.userManagementTranslations.getTranslation(translationKey);
+                console.log(`🔄 User Management: Updating dropdown "${translationKey}" from "${button.textContent}" to "${newText}"`);
+                button.textContent = newText;
+            }
+        });
+
+        // Update clear button
+        const clearButton = document.querySelector('#user-management .user-management__clear-btn');
+        if (clearButton) {
+            const newText = window.userManagementTranslations.getTranslation('Clear Filters');
+            console.log(`🔄 User Management: Updating clear button from "${clearButton.textContent}" to "${newText}"`);
+            clearButton.textContent = newText;
+        }
     }
 
     /**
@@ -1003,6 +1190,7 @@ class UserManagement {
             genderDropdownBtn: document.getElementById('gender-dropdown-btn'),
             countryDropdownBtn: document.getElementById('country-dropdown-btn'),
             ageDropdownBtn: document.getElementById('age-dropdown-btn'),
+            languageDropdownBtn: document.getElementById('language-dropdown-btn'),
             lastLoginLocationDropdownBtn: document.getElementById('last-login-location-dropdown-btn'),
             
             // Dropdown content
@@ -1012,6 +1200,7 @@ class UserManagement {
             genderDropdown: document.getElementById('gender-dropdown'),
             countryDropdown: document.getElementById('country-dropdown'),
             ageDropdown: document.getElementById('age-dropdown'),
+            languageDropdown: document.getElementById('language-dropdown'),
             lastLoginLocationDropdown: document.getElementById('last-login-location-dropdown'),
             
             // Options containers
@@ -1021,6 +1210,7 @@ class UserManagement {
             genderOptions: document.getElementById('gender-options'),
             countryOptions: document.getElementById('country-options'),
             ageOptions: document.getElementById('age-options'),
+            languageOptions: document.getElementById('language-options'),
             lastLoginLocationOptions: document.getElementById('last-login-location-options'),
             
             // Search inputs within dropdowns
@@ -1030,6 +1220,7 @@ class UserManagement {
             genderSearch: document.getElementById('gender-search'),
             countrySearch: document.getElementById('country-search'),
             ageSearch: document.getElementById('age-search'),
+            languageSearch: document.getElementById('language-search'),
             lastLoginLocationSearch: document.getElementById('last-login-location-search'),
             
             // Action buttons
@@ -1045,6 +1236,8 @@ class UserManagement {
             countryDeselectAll: document.getElementById('country-deselect-all'),
             ageSelectAll: document.getElementById('age-select-all'),
             ageDeselectAll: document.getElementById('age-deselect-all'),
+            languageSelectAll: document.getElementById('language-select-all'),
+            languageDeselectAll: document.getElementById('language-deselect-all'),
             lastLoginLocationSelectAll: document.getElementById('last-login-location-select-all'),
             lastLoginLocationDeselectAll: document.getElementById('last-login-location-deselect-all'),
             
@@ -1125,6 +1318,7 @@ class UserManagement {
         const subscriptions = [...new Set(this.users.map(user => user.subscription_count > 0 ? 'active' : 'none'))];
         const genders = [...new Set(this.users.map(user => user.gender).filter(Boolean))];
         const countries = [...new Set(this.users.map(user => user.country).filter(Boolean))];
+        const languages = [...new Set(this.users.map(user => user.language).filter(Boolean))];
         
         // Calculate age ranges from users with date_of_birth
         const ageRanges = this.calculateAgeRanges();
@@ -1141,6 +1335,7 @@ class UserManagement {
         this.renderFilterOptions('gender', genders);
         this.renderFilterOptions('country', countries);
         this.renderFilterOptions('age', ageRanges);
+        this.renderFilterOptions('language', languages);
         this.renderFilterOptions('lastLoginLocation', lastLoginLocations);
     }
 
@@ -1352,6 +1547,7 @@ class UserManagement {
             'genderDropdownBtn',
             'countryDropdownBtn',
             'ageDropdownBtn',
+            'languageDropdownBtn',
             'lastLoginLocationDropdownBtn'
         ];
 
