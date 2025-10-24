@@ -143,7 +143,6 @@ class UserDetailPage {
             editUserButton: document.getElementById('user-detail-edit-user'),
             contactUserButton: document.getElementById('user-detail-contact-user'),
             suspendUserButton: document.getElementById('user-detail-suspend-user'),
-            deleteUserButton: document.getElementById('user-detail-delete-user'),
             permanentDeleteButton: document.getElementById('user-detail-permanent-delete')
         };
 
@@ -215,9 +214,6 @@ class UserDetailPage {
             this.elements.suspendUserButton.addEventListener('click', () => this.suspendUser());
         }
 
-        if (this.elements.deleteUserButton) {
-            this.elements.deleteUserButton.addEventListener('click', () => this.deleteUser());
-        }
 
         if (this.elements.permanentDeleteButton) {
             this.elements.permanentDeleteButton.addEventListener('click', () => this.permanentDeleteUser());
@@ -2159,10 +2155,6 @@ class UserDetailPage {
         }
     }
 
-    async deleteUser() {
-        console.log('🗑️ Delete user clicked');
-        // TODO: Implement delete user functionality
-    }
 
     async permanentDeleteUser() {
         console.log('💥 Permanent delete clicked');
