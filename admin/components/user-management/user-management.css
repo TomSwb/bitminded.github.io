@@ -10,15 +10,24 @@
 /* ===== HEADER ===== */
 .user-management__header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: var(--spacing-xl);
     gap: var(--spacing-lg);
     flex-wrap: wrap;
+    position: relative;
 }
 
 .user-management__title-section {
     flex: 1;
+    text-align: center;
+    order: 2;
+}
+
+.user-management__actions {
+    position: absolute;
+    right: 0;
+    order: 3;
 }
 
 .user-management__title {

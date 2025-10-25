@@ -1,0 +1,962 @@
+/**
+ * Product Creation Wizard - Main Controller
+ * Handles step navigation and component coordination
+ */
+
+if (typeof window.ProductWizard === 'undefined') {
+class ProductWizard {
+    constructor() {
+        this.isInitialized = false;
+        this.currentStep = 1;
+        this.totalSteps = 8;
+        this.formData = {};
+        this.elements = {};
+        this.steps = {};
+        this.categoryModal = null;
+        this.isEditMode = false;
+        this.editProductId = null;
+    }
+
+    /**
+     * Initialize the product wizard
+     */
+    async init() {
+        if (this.isInitialized) {
+            return;
+        }
+
+        try {
+            console.log('🧙‍♂️ Initializing Product Creation Wizard...');
+
+            // Check authentication first
+            const isAuthenticated = await this.checkAuthentication();
+            if (!isAuthenticated) {
+                console.error('❌ User not authenticated');
+                this.showError('Please log in to access the admin panel');
+                return;
+            }
+
+            // Check for edit mode
+            this.checkEditMode();
+
+            // Initialize DOM elements
+            this.initializeElements();
+
+            // Setup event listeners
+            this.setupEventListeners();
+            
+            // Initialize translations
+            await this.initializeTranslations();
+            
+            // Show translatable content
+            this.showTranslatableContent();
+            
+            // Initialize components
+            await this.initializeComponents();
+
+            // Load existing product data if in edit mode
+            if (this.isEditMode) {
+                await this.loadExistingProduct();
+            }
+
+            // Load Step 1
+            await this.loadStep(1);
+
+            // Update progress
+            this.updateProgress();
+
+            this.isInitialized = true;
+            console.log('✅ Product Creation Wizard initialized successfully');
+
+        } catch (error) {
+            console.error('❌ Product Creation Wizard: Failed to initialize:', error);
+            this.showError('Failed to initialize product wizard');
+        }
+    }
+
+    /**
+     * Check for edit mode from URL parameters
+     */
+    checkEditMode() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('edit');
+        
+        if (editId) {
+            this.isEditMode = true;
+            this.editProductId = editId;
+            console.log('📝 Edit mode detected for product:', editId);
+            
+            // Update page title and header
+            document.title = `Edit Product - BitMinded Admin`;
+            const titleElement = document.querySelector('.product-wizard__title');
+            if (titleElement) {
+                titleElement.textContent = 'Edit Product';
+            }
+            
+            // Update loading text for edit mode
+            const loadingText = document.querySelector('#wizard-loading p');
+            if (loadingText) {
+                loadingText.textContent = 'Updating Product...';
+            }
+        }
+    }
+
+    /**
+     * Load existing product data for edit mode
+     */
+    async loadExistingProduct() {
+        try {
+            console.log('📥 Loading existing product data...');
+            
+            const { data, error } = await window.supabase
+                .from('products')
+                .select(`
+                    id,
+                    name,
+                    slug,
+                    description,
+                    short_description,
+                    category_id,
+                    tags,
+                    pricing_type,
+                    price_amount,
+                    price_currency,
+                    individual_price,
+                    enterprise_price,
+                    subscription_interval,
+                    status,
+                    github_repo_url,
+                    github_repo_name,
+                    github_branch,
+                    cloudflare_domain,
+                    cloudflare_worker_url,
+                    stripe_product_id,
+                    stripe_price_id,
+                    stripe_price_monthly_id,
+                    stripe_price_yearly_id,
+                    stripe_price_lifetime_id,
+                    is_commissioned,
+                    commissioned_by,
+                    commissioned_client_name,
+                    commissioned_client_email,
+                    trial_days,
+                    trial_requires_payment,
+                    icon_url,
+                    screenshots,
+                    demo_video_url,
+                    features,
+                    target_audience,
+                    tech_stack,
+                    documentation_url,
+                    support_email,
+                    is_featured,
+                    is_available_for_purchase,
+                    requires_admin_approval,
+                    product_categories (
+                        id,
+                        name,
+                        slug
+                    )
+                `)
+                .eq('id', this.editProductId)
+                .single();
+
+            if (error) {
+                console.error('❌ Error loading product:', error);
+                this.showError('Failed to load product data');
+                return;
+            }
+
+            if (!data) {
+                this.showError('Product not found');
+                return;
+            }
+
+            // Convert product data to form data format
+            this.formData = {
+                product_id: data.id,
+                name: data.name || '',
+                slug: data.slug || '',
+                category_id: data.category_id || null,
+                short_description: data.short_description || '',
+                description: data.description || '',
+                tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || ''),
+                pricing_type: data.pricing_type || 'one_time',
+                price_amount: data.price_amount || '',
+                price_currency: data.price_currency || 'USD',
+                individual_price: data.individual_price || '',
+                enterprise_price: data.enterprise_price || '',
+                subscription_interval: data.subscription_interval || '',
+                github_repo_url: data.github_repo_url || '',
+                github_repo_name: data.github_repo_name || '',
+                github_branch: data.github_branch || 'main',
+                cloudflare_domain: data.cloudflare_domain || '',
+                cloudflare_worker_url: data.cloudflare_worker_url || '',
+                stripe_product_id: data.stripe_product_id || '',
+                stripe_price_id: data.stripe_price_id || '',
+                stripe_price_monthly_id: data.stripe_price_monthly_id || '',
+                stripe_price_yearly_id: data.stripe_price_yearly_id || '',
+                stripe_price_lifetime_id: data.stripe_price_lifetime_id || '',
+                is_commissioned: data.is_commissioned || false,
+                commissioned_by: data.commissioned_by || null,
+                commissioned_client_name: data.commissioned_client_name || '',
+                commissioned_client_email: data.commissioned_client_email || '',
+                trial_days: data.trial_days || 0,
+                trial_requires_payment: data.trial_requires_payment || false,
+                icon_url: data.icon_url || '',
+                screenshots: Array.isArray(data.screenshots) ? data.screenshots.join(', ') : (data.screenshots || ''),
+                demo_video_url: data.demo_video_url || '',
+                features: Array.isArray(data.features) ? data.features.join(', ') : (data.features || ''),
+                target_audience: data.target_audience || '',
+                tech_stack: Array.isArray(data.tech_stack) ? data.tech_stack.join(', ') : (data.tech_stack || ''),
+                documentation_url: data.documentation_url || '',
+                support_email: data.support_email || '',
+                is_featured: data.is_featured || false,
+                is_available_for_purchase: data.is_available_for_purchase || true,
+                requires_admin_approval: data.requires_admin_approval || false
+            };
+
+            console.log('✅ Product data loaded:', this.formData);
+
+        } catch (error) {
+            console.error('❌ Error loading existing product:', error);
+            this.showError('Failed to load product data');
+        }
+    }
+
+    /**
+     * Check if user is authenticated
+     */
+    async checkAuthentication() {
+        try {
+            if (typeof window.supabase === 'undefined') {
+                console.error('❌ Supabase client not available');
+                return false;
+            }
+
+            // Check authentication
+            const { data: { user }, error: userError } = await window.supabase.auth.getUser();
+            
+            if (userError || !user) {
+                console.error('❌ User not authenticated:', userError);
+                return false;
+            }
+
+            console.log('✅ User authenticated:', user.email);
+            return true;
+
+        } catch (error) {
+            console.error('❌ Authentication check failed:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Initialize DOM elements
+     */
+    initializeElements() {
+        this.elements = {
+            // Navigation
+            prevBtn: document.getElementById('wizard-prev-btn'),
+            nextBtn: document.getElementById('wizard-next-btn'),
+            saveDraftBtn: document.getElementById('wizard-save-draft-btn'),
+            backBtn: document.getElementById('back-to-products'),
+            
+            // Progress
+            progressFill: document.getElementById('wizard-progress-fill'),
+            progressText: document.getElementById('wizard-progress-text'),
+            
+            // Steps
+            steps: document.querySelectorAll('.product-wizard__step'),
+            stepContents: document.querySelectorAll('.product-wizard__step-content'),
+            
+            // Form
+            form: document.getElementById('product-wizard-form'),
+            
+            // Loading
+            loadingOverlay: document.getElementById('wizard-loading'),
+            
+            // Messages
+            messagesContainer: document.getElementById('wizard-messages')
+        };
+    }
+
+    /**
+     * Setup event listeners
+     */
+    setupEventListeners() {
+        // Navigation buttons
+        if (this.elements.prevBtn) {
+            this.elements.prevBtn.addEventListener('click', () => {
+                this.previousStep();
+            });
+        }
+
+        if (this.elements.nextBtn) {
+            this.elements.nextBtn.addEventListener('click', () => {
+                this.nextStep();
+            });
+        }
+
+        if (this.elements.saveDraftBtn) {
+            this.elements.saveDraftBtn.addEventListener('click', () => {
+                this.saveDraft();
+            });
+        }
+
+        // Back button
+        if (this.elements.backBtn) {
+            this.elements.backBtn.addEventListener('click', () => {
+                // Check if this tab was opened as a new tab (no navigation history)
+                // or has an opener (opened via window.open or target="_blank")
+                if (window.opener || window.history.length <= 1) {
+                    // Close this tab and focus back to the opener
+                    window.close();
+                    
+                    // If window.close() didn't work (browser security), navigate instead
+                    setTimeout(() => {
+                        if (!window.closed) {
+                            window.location.href = '/admin/?section=products';
+                        }
+                    }, 100);
+                } else {
+                    // Normal navigation - go back in history
+                    window.history.back();
+                }
+            });
+        }
+
+        // Step navigation - Allow free navigation for draft creation
+        this.elements.steps.forEach((step, index) => {
+            step.addEventListener('click', () => {
+                const stepNumber = parseInt(step.dataset.step);
+                // Allow navigation to any step for draft creation
+                this.goToStep(stepNumber);
+            });
+        });
+    }
+
+    /**
+     * Initialize components
+     */
+    async initializeComponents() {
+        // Initialize category modal
+        if (window.CategoryModal) {
+            this.categoryModal = new window.CategoryModal();
+            await this.categoryModal.init();
+            
+            // Set callback for when category is created
+            this.categoryModal.setOnCategoryCreated((category) => {
+                // Notify current step about new category
+                if (this.steps[this.currentStep] && this.steps[this.currentStep].addCategoryToDropdown) {
+                    this.steps[this.currentStep].addCategoryToDropdown(category);
+                }
+            });
+            
+            // Make category modal globally available
+            window.categoryModal = this.categoryModal;
+        }
+    }
+
+    /**
+     * Load step component
+     */
+    async loadStep(stepNumber) {
+        try {
+            const stepContent = document.getElementById(`step-${stepNumber}`);
+            if (!stepContent) {
+                console.error(`Step ${stepNumber} content not found`);
+                return;
+            }
+
+            // Load step-specific component
+            switch (stepNumber) {
+                case 1:
+                    await this.loadStep1(stepContent);
+                    break;
+                case 2:
+                    await this.loadStep2(stepContent);
+                    break;
+                case 3:
+                    await this.loadStep3(stepContent);
+                    break;
+                case 4:
+                    await this.loadStep4(stepContent);
+                    break;
+                case 5:
+                    await this.loadStep5(stepContent);
+                    break;
+                case 6:
+                    await this.loadStep6(stepContent);
+                    break;
+                case 7:
+                    await this.loadStep7(stepContent);
+                    break;
+                case 8:
+                    await this.loadStep8(stepContent);
+                    break;
+                default:
+                    console.error(`Unknown step: ${stepNumber}`);
+            }
+
+        } catch (error) {
+            console.error(`Error loading step ${stepNumber}:`, error);
+            this.showError(`Failed to load step ${stepNumber}`);
+        }
+    }
+
+    /**
+     * Load Step 1: Basic Information
+     */
+    async loadStep1(stepContent) {
+        if (window.StepBasicInfo) {
+            // Load HTML content
+            const response = await fetch('/admin/components/product-wizard/components/step-basic-info/step-basic-info.html');
+            const html = await response.text();
+            stepContent.innerHTML = html;
+
+            // Initialize component
+            this.steps[1] = new window.StepBasicInfo();
+            await this.steps[1].init();
+
+            // Load saved data if available (for drafts) or edit data
+            if (this.isEditMode && this.formData) {
+                // Edit mode: load all form data
+                this.steps[1].setFormData(this.formData);
+            } else if (this.formData.step1) {
+                // Draft mode: load step-specific data
+                this.steps[1].setFormData(this.formData.step1);
+            }
+        }
+    }
+
+    /**
+     * Load Step 2: Pricing Configuration
+     */
+    async loadStep2(stepContent) {
+        // Placeholder for Step 2
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 2: Pricing Configuration</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 3: Database Configuration
+     */
+    async loadStep3(stepContent) {
+        // Placeholder for Step 3
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: Database Configuration</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 4: GitHub Integration
+     */
+    async loadStep4(stepContent) {
+        // Placeholder for Step 4
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: GitHub Integration</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 5: Stripe Integration
+     */
+    async loadStep5(stepContent) {
+        // Placeholder for Step 5
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Stripe Integration</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 6: Cloudflare Configuration
+     */
+    async loadStep6(stepContent) {
+        // Placeholder for Step 6
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 7: Content & Media
+     */
+    async loadStep7(stepContent) {
+        // Placeholder for Step 7
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Content & Media</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 8: Review & Publish
+     */
+    async loadStep8(stepContent) {
+        // Placeholder for Step 8
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 8: Review & Publish</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Go to specific step
+     */
+    async goToStep(stepNumber) {
+        if (stepNumber < 1 || stepNumber > this.totalSteps) {
+            return;
+        }
+
+        // Save current step data before moving
+        this.saveCurrentStepData();
+
+        // Update current step
+        this.currentStep = stepNumber;
+
+        // Update step indicators
+        this.updateStepIndicators();
+
+        // Show/hide step content
+        this.elements.stepContents.forEach((content, index) => {
+            if (index + 1 === stepNumber) {
+                content.classList.add('active');
+            } else {
+                content.classList.remove('active');
+            }
+        });
+
+        // Load step content if not already loaded
+        await this.loadStep(stepNumber);
+
+        // Update navigation buttons
+        this.updateNavigationButtons();
+
+        // Update progress
+        this.updateProgress();
+
+        console.log(`📝 Moved to step ${stepNumber}`);
+    }
+
+    /**
+     * Go to next step
+     */
+    async nextStep() {
+        if (this.currentStep < this.totalSteps) {
+            // Regular step navigation - no validation needed
+            await this.goToStep(this.currentStep + 1);
+        } else {
+            // Final step - validate all mandatory fields before creating/updating product
+            if (this.validateAllMandatoryFields()) {
+                if (this.isEditMode) {
+                    this.updateProduct();
+                } else {
+                    this.createProduct();
+                }
+            } else {
+                const action = this.isEditMode ? 'updating' : 'creating';
+                this.showError(`Please fill in all mandatory fields before ${action} the product`);
+            }
+        }
+    }
+
+    /**
+     * Go to previous step
+     */
+    async previousStep() {
+        if (this.currentStep > 1) {
+            await this.goToStep(this.currentStep - 1);
+        }
+    }
+
+    /**
+     * Save current step data to formData
+     * @param {number} stepNumber - Optional step number, defaults to currentStep
+     */
+    saveCurrentStepData(stepNumber = this.currentStep) {
+        if (this.steps[stepNumber] && this.steps[stepNumber].saveFormData) {
+            this.steps[stepNumber].saveFormData(this.formData);
+        }
+    }
+
+    /**
+     * Validate all mandatory fields across all steps
+     */
+    validateAllMandatoryFields() {
+        const mandatoryFields = [
+            'productName',
+            'productSlug', 
+            'productDescription',
+            'productCategory',
+            'pricingType'
+        ];
+
+        let isValid = true;
+        const missingFields = [];
+
+        mandatoryFields.forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (!field || !field.value.trim()) {
+                isValid = false;
+                missingFields.push(fieldName);
+                if (field) {
+                    field.style.borderColor = 'var(--color-error)';
+                }
+            } else if (field) {
+                field.style.borderColor = '';
+            }
+        });
+
+        if (!isValid) {
+            console.log('❌ Missing mandatory fields:', missingFields);
+        }
+
+        return isValid;
+    }
+
+    /**
+     * Update step indicators
+     */
+    updateStepIndicators() {
+        this.elements.steps.forEach((step, index) => {
+            const stepNumber = index + 1;
+            step.classList.remove('product-wizard__step--active', 'product-wizard__step--completed');
+            
+            if (stepNumber === this.currentStep) {
+                step.classList.add('product-wizard__step--active');
+            } else if (stepNumber < this.currentStep) {
+                step.classList.add('product-wizard__step--completed');
+            }
+        });
+    }
+
+    /**
+     * Update navigation buttons
+     */
+    updateNavigationButtons() {
+        if (this.elements.prevBtn) {
+            this.elements.prevBtn.disabled = this.currentStep === 1;
+        }
+
+        if (this.elements.nextBtn) {
+            if (this.currentStep === this.totalSteps) {
+                this.elements.nextBtn.textContent = 'Create Product';
+            } else {
+                this.elements.nextBtn.textContent = 'Next';
+            }
+        }
+    }
+
+    /**
+     * Update progress
+     */
+    updateProgress() {
+        const progress = (this.currentStep / this.totalSteps) * 100;
+        
+        if (this.elements.progressFill) {
+            this.elements.progressFill.style.width = `${progress}%`;
+        }
+        
+        if (this.elements.progressText) {
+            this.elements.progressText.textContent = `Step ${this.currentStep} of ${this.totalSteps}`;
+        }
+    }
+
+    /**
+     * Save draft
+     */
+    async saveDraft() {
+        try {
+            this.showLoading('Saving draft...');
+
+            // Save current step data only (since other steps aren't loaded yet)
+            this.saveCurrentStepData();
+
+            // Save to database
+            const result = await this.saveDraftToDatabase();
+            
+            if (result.success) {
+                this.showSuccess('Draft saved successfully!');
+                console.log('💾 Draft saved:', this.formData);
+            } else {
+                throw new Error(result.error || 'Failed to save draft');
+            }
+
+        } catch (error) {
+            console.error('❌ Error saving draft:', error);
+            this.showError('Failed to save draft: ' + error.message);
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    /**
+     * Parse tags string into array format for database
+     * @param {string} tagsString - Comma-separated tags string
+     * @returns {Array} Array of trimmed tags
+     */
+    parseTags(tagsString) {
+        if (!tagsString || typeof tagsString !== 'string') {
+            return [];
+        }
+        
+        return tagsString
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0);
+    }
+
+    /**
+     * Save draft to database
+     */
+    async saveDraftToDatabase() {
+        try {
+            // Prepare product data
+            const productData = {
+                name: this.formData.name || '',
+                slug: this.formData.slug || '',
+                category_id: this.formData.category_id || null,
+                short_description: this.formData.short_description || '',
+                description: this.formData.description || '',
+                tags: this.parseTags(this.formData.tags || ''),
+                pricing_type: this.formData.pricing_type || 'one_time',
+                status: 'draft'
+            };
+
+            // Check if this is an update to existing draft
+            if (this.formData.product_id) {
+                const { data, error } = await window.supabase
+                    .from('products')
+                    .update(productData)
+                    .eq('id', this.formData.product_id)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                return { success: true, data };
+            } else {
+                // Create new draft
+                const { data, error } = await window.supabase
+                    .from('products')
+                    .insert(productData)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                
+                // Store the product ID for future updates
+                this.formData.product_id = data.id;
+                
+                return { success: true, data };
+            }
+
+        } catch (error) {
+            console.error('❌ Database error:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Update existing product
+     */
+    async updateProduct() {
+        try {
+            this.showLoading('Updating product...');
+
+            // Collect all form data
+            for (let i = 1; i <= this.totalSteps; i++) {
+                this.saveCurrentStepData(i);
+            }
+
+            // Update the product in database
+            const result = await this.updateProductInDatabase();
+            
+            if (result.success) {
+                this.showSuccess('Product updated successfully!');
+                console.log('✅ Product updated:', this.formData);
+                
+                // Close the tab after a short delay
+                setTimeout(() => {
+                    window.close();
+                }, 2000);
+            } else {
+                throw new Error(result.error || 'Failed to update product');
+            }
+
+        } catch (error) {
+            console.error('❌ Error updating product:', error);
+            this.showError('Failed to update product: ' + error.message);
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    /**
+     * Update product in database
+     */
+    async updateProductInDatabase() {
+        try {
+            // Prepare product data (same as create but with product_id)
+            const productData = {
+                name: this.formData.name || '',
+                slug: this.formData.slug || '',
+                category_id: this.formData.category_id || null,
+                short_description: this.formData.short_description || '',
+                description: this.formData.description || '',
+                tags: this.parseTags(this.formData.tags || ''),
+                pricing_type: this.formData.pricing_type || 'one_time',
+                price_amount: this.formData.price_amount || null,
+                price_currency: this.formData.price_currency || 'USD',
+                individual_price: this.formData.individual_price || null,
+                enterprise_price: this.formData.enterprise_price || null,
+                subscription_interval: this.formData.subscription_interval || null,
+                github_repo_url: this.formData.github_repo_url || '',
+                github_repo_name: this.formData.github_repo_name || '',
+                github_branch: this.formData.github_branch || 'main',
+                cloudflare_domain: this.formData.cloudflare_domain || '',
+                cloudflare_worker_url: this.formData.cloudflare_worker_url || '',
+                stripe_product_id: this.formData.stripe_product_id || '',
+                stripe_price_id: this.formData.stripe_price_id || '',
+                stripe_price_monthly_id: this.formData.stripe_price_monthly_id || '',
+                stripe_price_yearly_id: this.formData.stripe_price_yearly_id || '',
+                stripe_price_lifetime_id: this.formData.stripe_price_lifetime_id || '',
+                is_commissioned: this.formData.is_commissioned || false,
+                commissioned_by: this.formData.commissioned_by || null,
+                commissioned_client_name: this.formData.commissioned_client_name || '',
+                commissioned_client_email: this.formData.commissioned_client_email || '',
+                trial_days: this.formData.trial_days || 0,
+                trial_requires_payment: this.formData.trial_requires_payment || false,
+                icon_url: this.formData.icon_url || '',
+                screenshots: this.parseTags(this.formData.screenshots || ''),
+                demo_video_url: this.formData.demo_video_url || '',
+                features: this.parseTags(this.formData.features || ''),
+                target_audience: this.formData.target_audience || '',
+                tech_stack: this.parseTags(this.formData.tech_stack || ''),
+                documentation_url: this.formData.documentation_url || '',
+                support_email: this.formData.support_email || '',
+                is_featured: this.formData.is_featured || false,
+                is_available_for_purchase: this.formData.is_available_for_purchase || true,
+                requires_admin_approval: this.formData.requires_admin_approval || false
+            };
+
+            // Update the product
+            const { data, error } = await window.supabase
+                .from('products')
+                .update(productData)
+                .eq('id', this.editProductId)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('❌ Database error:', error);
+                return { success: false, error: error.message };
+            }
+
+            return { success: true, data: data };
+
+        } catch (error) {
+            console.error('❌ Error updating product in database:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Create product
+     */
+    async createProduct() {
+        try {
+            this.showLoading('Creating product...');
+
+            // Collect all form data
+            for (let i = 1; i <= this.totalSteps; i++) {
+                this.saveCurrentStepData(i);
+            }
+
+            // Here you would create the product
+            console.log('🚀 Creating product with data:', this.formData);
+            this.showSuccess('Product created successfully!');
+
+        } catch (error) {
+            console.error('❌ Error creating product:', error);
+            this.showError('Failed to create product');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    /**
+     * Show loading overlay
+     */
+    showLoading(message = 'Loading...') {
+        if (this.elements.loadingOverlay) {
+            this.elements.loadingOverlay.classList.remove('hidden');
+            const loadingText = this.elements.loadingOverlay.querySelector('p');
+            if (loadingText) {
+                loadingText.textContent = message;
+            }
+        }
+    }
+
+    /**
+     * Hide loading overlay
+     */
+    hideLoading() {
+        if (this.elements.loadingOverlay) {
+            this.elements.loadingOverlay.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Initialize translations
+     */
+    async initializeTranslations() {
+        try {
+            if (window.productWizardTranslations) {
+                await window.productWizardTranslations.init();
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize translations:', error);
+        }
+    }
+
+    /**
+     * Show translatable content
+     */
+    showTranslatableContent() {
+        const elements = document.querySelectorAll('.translatable-content');
+        elements.forEach(el => el.classList.add('loaded'));
+    }
+
+    /**
+     * Show success message
+     */
+    showSuccess(message) {
+        this.showMessage(message, 'success');
+    }
+
+    /**
+     * Show error message
+     */
+    showError(message) {
+        this.showMessage(message, 'error');
+    }
+
+    /**
+     * Show message
+     */
+    showMessage(message, type) {
+        if (!this.elements.messagesContainer) return;
+
+        const messageEl = document.createElement('div');
+        messageEl.className = `product-wizard__message product-wizard__message--${type}`;
+        messageEl.textContent = message;
+
+        this.elements.messagesContainer.appendChild(messageEl);
+
+        // Remove message after 5 seconds
+        setTimeout(() => {
+            if (messageEl.parentNode) {
+                messageEl.parentNode.removeChild(messageEl);
+            }
+        }, 5000);
+    }
+}
+
+// Initialize wizard when page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    const wizard = new ProductWizard();
+    await wizard.init();
+    
+    // Make wizard globally available
+    window.productWizard = wizard;
+});
+
+// Export for use in other scripts
+window.ProductWizard = ProductWizard;
+}
