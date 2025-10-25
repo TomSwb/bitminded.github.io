@@ -24,6 +24,7 @@
     
     <!-- Component CSS -->
     <link rel="stylesheet" href="/admin/components/product-wizard/components/step-basic-info/step-basic-info.css">
+    <link rel="stylesheet" href="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation.css">
     <link rel="stylesheet" href="/admin/components/product-wizard/shared/category-modal/category-modal.css">
     
     <!-- Supabase -->
@@ -53,7 +54,7 @@
                     <div class="product-wizard__progress-fill" id="wizard-progress-fill"></div>
                 </div>
                 <div class="product-wizard__progress-text">
-                    <span id="wizard-progress-text">Step 1 of 8</span>
+                    <span id="wizard-progress-text">Step 1 of 9</span>
                 </div>
             </div>
         </div>
@@ -69,30 +70,34 @@
                 </div>
                 <div class="product-wizard__step" data-step="2">
                     <div class="product-wizard__step-number">2</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Pricing">Pricing</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Technical Specification">Technical Specification</div>
                 </div>
                 <div class="product-wizard__step" data-step="3">
                     <div class="product-wizard__step-number">3</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Database">Database</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Pricing">Pricing</div>
                 </div>
                 <div class="product-wizard__step" data-step="4">
                     <div class="product-wizard__step-number">4</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="GitHub">GitHub</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Database">Database</div>
                 </div>
                 <div class="product-wizard__step" data-step="5">
                     <div class="product-wizard__step-number">5</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Stripe">Stripe</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="GitHub">GitHub</div>
                 </div>
                 <div class="product-wizard__step" data-step="6">
                     <div class="product-wizard__step-number">6</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Cloudflare">Cloudflare</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Stripe">Stripe</div>
                 </div>
                 <div class="product-wizard__step" data-step="7">
                     <div class="product-wizard__step-number">7</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Content & Media">Content & Media</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Cloudflare">Cloudflare</div>
                 </div>
                 <div class="product-wizard__step" data-step="8">
                     <div class="product-wizard__step-number">8</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Content & Media">Content & Media</div>
+                </div>
+                <div class="product-wizard__step" data-step="9">
+                    <div class="product-wizard__step-number">9</div>
                     <div class="product-wizard__step-title translatable-content" data-translation-key="Review & Publish">Review & Publish</div>
                 </div>
             </div>
@@ -108,11 +113,16 @@
                     <!-- Step content will be loaded by component -->
                 </div>
 
-                <!-- Step 2: Pricing Configuration -->
+                <!-- Step 2: AI-Powered Technical Specification -->
                 <div class="product-wizard__step-content" id="step-2">
+                    <!-- Step content will be loaded by component -->
+                </div>
+
+                <!-- Step 3: Pricing Configuration -->
+                <div class="product-wizard__step-content" id="step-3">
                     <div class="product-wizard__step-header">
                         <h2 class="product-wizard__step-title translatable-content" data-translation-key="Pricing Configuration">Pricing Configuration</h2>
-                        <p class="product-wizard__step-description translatable-content" data-translation-key="step2_description">Set up pricing for individual and enterprise users</p>
+                        <p class="product-wizard__step-description translatable-content" data-translation-key="step3_description">Set up pricing for individual and enterprise users</p>
                     </div>
                     
                     <div class="product-wizard__fields">
@@ -123,8 +133,8 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Database Configuration -->
-                <div class="product-wizard__step-content" id="step-3">
+                <!-- Step 4: Database Configuration -->
+                <div class="product-wizard__step-content" id="step-4">
                     <div class="product-wizard__step-header">
                         <h2 class="product-wizard__step-title translatable-content" data-translation-key="Database Configuration">Database Configuration</h2>
                         <p class="product-wizard__step-description translatable-content" data-translation-key="step3_description">Configure database requirements for your product</p>
@@ -145,8 +155,8 @@
                     </div>
                 </div>
 
-                <!-- Step 4: GitHub Integration -->
-                <div class="product-wizard__step-content" id="step-4">
+                <!-- Step 5: GitHub Integration -->
+                <div class="product-wizard__step-content" id="step-5">
                     <div class="product-wizard__step-header">
                         <h2 class="product-wizard__step-title translatable-content" data-translation-key="GitHub Integration">GitHub Integration</h2>
                         <p class="product-wizard__step-description translatable-content" data-translation-key="step4_description">Set up GitHub repository for your product</p>
@@ -187,8 +197,8 @@
                     </div>
                 </div>
 
-                <!-- Step 5: Stripe Integration -->
-                <div class="product-wizard__step-content" id="step-5">
+                <!-- Step 6: Stripe Integration -->
+                <div class="product-wizard__step-content" id="step-6">
                     <div class="product-wizard__step-header">
                         <h2 class="product-wizard__step-title translatable-content" data-translation-key="Stripe Integration">Stripe Integration</h2>
                         <p class="product-wizard__step-description translatable-content" data-translation-key="step5_description">Set up Stripe product and pricing</p>
@@ -215,8 +225,8 @@
                     </div>
                 </div>
 
-                <!-- Step 6: Cloudflare Configuration -->
-                <div class="product-wizard__step-content" id="step-6">
+                <!-- Step 7: Cloudflare Configuration -->
+                <div class="product-wizard__step-content" id="step-7">
                     <div class="product-wizard__step-header">
                         <h2 class="product-wizard__step-title translatable-content" data-translation-key="Cloudflare Configuration">Cloudflare Configuration</h2>
                         <p class="product-wizard__step-description translatable-content" data-translation-key="step6_description">Set up domain and DNS configuration</p>
@@ -241,8 +251,8 @@
                     </div>
                 </div>
 
-                <!-- Step 7: Content & Media -->
-                <div class="product-wizard__step-content" id="step-7">
+                <!-- Step 8: Content & Media -->
+                <div class="product-wizard__step-content" id="step-8">
                     <div class="product-wizard__step-header">
                         <h2 class="product-wizard__step-title translatable-content" data-translation-key="Content & Media">Content & Media</h2>
                         <p class="product-wizard__step-description translatable-content" data-translation-key="step7_description">Add media and content for your product</p>
@@ -293,8 +303,8 @@
                     </div>
                 </div>
 
-                <!-- Step 8: Review & Publish -->
-                <div class="product-wizard__step-content" id="step-8">
+                <!-- Step 9: Review & Publish -->
+                <div class="product-wizard__step-content" id="step-9">
                     <div class="product-wizard__step-header">
                         <h2 class="product-wizard__step-title translatable-content" data-translation-key="Review & Publish">Review & Publish</h2>
                         <p class="product-wizard__step-description translatable-content" data-translation-key="step8_description">Review your product configuration and publish</p>
@@ -403,6 +413,8 @@
     <script src="/admin/components/product-wizard/shared/category-modal/category-modal.js"></script>
     <script src="/admin/components/product-wizard/components/step-basic-info/step-basic-info-translations.js"></script>
     <script src="/admin/components/product-wizard/components/step-basic-info/step-basic-info.js"></script>
+    <script src="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation-translations.js"></script>
+    <script src="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation.js"></script>
     
     <!-- Main Wizard Script -->
     <script src="/admin/components/product-wizard/product-wizard.js"></script>

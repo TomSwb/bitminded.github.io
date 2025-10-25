@@ -175,10 +175,14 @@ class StepBasicInfo {
      * Get form data
      */
     getFormData() {
+        const categoryId = this.elements.productCategory?.value || null;
+        const selectedCategory = this.categories.find(cat => cat.id === categoryId);
+        
         return {
             name: this.elements.productName?.value || '',
             slug: this.elements.productSlug?.value || '',
-            category_id: this.elements.productCategory?.value || null,
+            category_id: categoryId,
+            category: selectedCategory ? selectedCategory.name : '',
             short_description: this.elements.productShortDescription?.value || '',
             description: this.elements.productDescription?.value || '',
             tags: this.elements.productTags?.value || '',

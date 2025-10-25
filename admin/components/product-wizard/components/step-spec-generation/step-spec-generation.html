@@ -1,0 +1,326 @@
+<!-- Step 2: AI-Powered Technical Specification Generation -->
+<div class="step-spec-generation">
+    <div class="step-spec-generation__header">
+        <h3>Generate Technical Specification</h3>
+        <p>Provide additional context to create a comprehensive, Cursor-ready technical specification</p>
+    </div>
+
+    <!-- Context Summary from Step 1 -->
+    <div class="step-spec-generation__context">
+        <h4>Product Context</h4>
+        <table class="context-table">
+            <tbody>
+                <tr>
+                    <td class="context-label">Name:</td>
+                    <td class="context-value" id="context-product-name">-</td>
+                </tr>
+                <tr>
+                    <td class="context-label">Slug:</td>
+                    <td class="context-value" id="context-product-slug">-</td>
+                </tr>
+                <tr>
+                    <td class="context-label">Category:</td>
+                    <td class="context-value" id="context-product-category">-</td>
+                </tr>
+                <tr>
+                    <td class="context-label">Short Description:</td>
+                    <td class="context-value" id="context-product-short-description">-</td>
+                </tr>
+                <tr>
+                    <td class="context-label">Description:</td>
+                    <td class="context-value" id="context-product-description">-</td>
+                </tr>
+                <tr>
+                    <td class="context-label">Tags:</td>
+                    <td class="context-value" id="context-product-tags">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Conversational Technical Planning Session -->
+    <div class="step-spec-generation__planning">
+        <h4>Technical Planning Session</h4>
+        
+        <!-- AI Control Section -->
+        <div class="step-spec-generation__ai-control">
+            <div class="ai-control-header">
+                <h4>AI-Powered Technical Planning</h4>
+                <p class="ai-control-description">Get intelligent recommendations for your technical decisions</p>
+            </div>
+            <div class="ai-control-actions">
+                <button type="button" id="load-ai-recommendations-btn" class="btn-primary">
+                    <span class="btn-icon">🤖</span>
+                    Load AI Recommendations
+                </button>
+                <button type="button" id="clear-ai-data-btn" class="btn-secondary" style="display: none;">
+                    <span class="btn-icon">🗑️</span>
+                    Clear All AI Data
+                </button>
+            </div>
+        </div>
+        
+        <div class="planning-section">
+            <h5>1. Platform & Deployment</h5>
+            <div class="ai-recommendation" id="recommendation-platform-type" style="display: none;">
+                <div class="recommendation-content">
+                    <div class="recommendation-text">
+                        <span class="ai-icon">🤖</span>
+                        <span class="recommendation-value" id="platform-recommendation" style="display: none;">Loading recommendation...</span>
+                    </div>
+                    <div class="recommendation-reasoning" id="platform-reasoning" style="display: none;">Getting AI analysis...</div>
+                </div>
+                <div class="recommendation-actions">
+                    <button type="button" class="btn-secondary ask-ai-btn" data-field="platform-type">Ask AI</button>
+                    <button type="button" class="btn-primary accept-btn" data-field="platform-type">Accept</button>
+                    <button type="button" class="btn-reload reload-btn" data-field="platform-type" title="Get fresh AI recommendation">🔄</button>
+                </div>
+            </div>
+            <div class="ai-chat" id="chat-platform-type" style="display: none;">
+                <div class="chat-messages" id="messages-platform-type"></div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Ask about alternatives or get more details..." id="input-platform-type">
+                    <button type="button" class="btn-primary send-btn" data-field="platform-type">Send</button>
+                </div>
+            </div>
+            <div class="final-decision" id="decision-platform-type" style="display: none;">
+                <span class="decision-label">✅ Final Decision:</span>
+                <span class="decision-value" id="final-platform-type"></span>
+            </div>
+        </div>
+
+        <div class="planning-section">
+            <h5>2. Frontend Technology</h5>
+            <div class="ai-recommendation" id="recommendation-frontend-tech" style="display: none;">
+                <div class="recommendation-content">
+                    <div class="recommendation-text">
+                        <span class="ai-icon">🤖</span>
+                        <span class="recommendation-value" id="frontend-recommendation" style="display: none;">Loading recommendation...</span>
+                    </div>
+                    <div class="recommendation-reasoning" id="frontend-reasoning">Getting AI analysis...</div>
+                </div>
+                <div class="recommendation-actions">
+                    <button type="button" class="btn-secondary ask-ai-btn" data-field="frontend-tech">Ask AI</button>
+                    <button type="button" class="btn-primary accept-btn" data-field="frontend-tech">Accept</button>
+                    <button type="button" class="btn-reload reload-btn" data-field="frontend-tech" title="Get fresh AI recommendation">🔄</button>
+                </div>
+            </div>
+            <div class="ai-chat" id="chat-frontend-tech" style="display: none;">
+                <div class="chat-messages" id="messages-frontend-tech"></div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Ask about alternatives or get more details..." id="input-frontend-tech">
+                    <button type="button" class="btn-primary send-btn" data-field="frontend-tech">Send</button>
+                </div>
+            </div>
+            <div class="final-decision" id="decision-frontend-tech" style="display: none;">
+                <span class="decision-label">✅ Final Decision:</span>
+                <span class="decision-value" id="final-frontend-tech"></span>
+            </div>
+        </div>
+
+        <div class="planning-section">
+            <h5>3. Backend & Database</h5>
+            <div class="ai-recommendation" id="recommendation-backend-tech" style="display: none;">
+                <div class="recommendation-content">
+                    <div class="recommendation-text">
+                        <span class="ai-icon">🤖</span>
+                        <span class="recommendation-value" id="backend-recommendation" style="display: none;">Loading recommendation...</span>
+                    </div>
+                    <div class="recommendation-reasoning" id="backend-reasoning">Getting AI analysis...</div>
+                </div>
+                <div class="recommendation-actions">
+                    <button type="button" class="btn-secondary ask-ai-btn" data-field="backend-tech">Ask AI</button>
+                    <button type="button" class="btn-primary accept-btn" data-field="backend-tech">Accept</button>
+                    <button type="button" class="btn-reload reload-btn" data-field="backend-tech" title="Get fresh AI recommendation">🔄</button>
+                </div>
+            </div>
+            <div class="ai-chat" id="chat-backend-tech" style="display: none;">
+                <div class="chat-messages" id="messages-backend-tech"></div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Ask about alternatives or get more details..." id="input-backend-tech">
+                    <button type="button" class="btn-primary send-btn" data-field="backend-tech">Send</button>
+                </div>
+            </div>
+            <div class="final-decision" id="decision-backend-tech" style="display: none;">
+                <span class="decision-label">✅ Final Decision:</span>
+                <span class="decision-value" id="final-backend-tech"></span>
+            </div>
+
+            <div class="ai-recommendation" id="recommendation-database-type" style="display: none;">
+                <div class="recommendation-content">
+                    <div class="recommendation-text">
+                        <span class="ai-icon">🤖</span>
+                        <span class="recommendation-value" id="database-recommendation" style="display: none;">Loading recommendation...</span>
+                    </div>
+                    <div class="recommendation-reasoning" id="database-reasoning">Getting AI analysis...</div>
+                </div>
+                <div class="recommendation-actions">
+                    <button type="button" class="btn-secondary ask-ai-btn" data-field="database-type">Ask AI</button>
+                    <button type="button" class="btn-primary accept-btn" data-field="database-type">Accept</button>
+                    <button type="button" class="btn-reload reload-btn" data-field="database-type" title="Get fresh AI recommendation">🔄</button>
+                </div>
+            </div>
+            <div class="ai-chat" id="chat-database-type" style="display: none;">
+                <div class="chat-messages" id="messages-database-type"></div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Ask about alternatives or get more details..." id="input-database-type">
+                    <button type="button" class="btn-primary send-btn" data-field="database-type">Send</button>
+                </div>
+            </div>
+            <div class="final-decision" id="decision-database-type" style="display: none;">
+                <span class="decision-label">✅ Final Decision:</span>
+                <span class="decision-value" id="final-database-type"></span>
+            </div>
+        </div>
+
+        <div class="planning-section">
+            <h5>4. User Management & Authentication</h5>
+            <div class="ai-recommendation" id="recommendation-auth-type" style="display: none;">
+                <div class="recommendation-content">
+                    <div class="recommendation-text">
+                        <span class="ai-icon">🤖</span>
+                        <span class="recommendation-value" id="auth-recommendation" style="display: none;">Loading recommendation...</span>
+                    </div>
+                    <div class="recommendation-reasoning" id="auth-reasoning">Getting AI analysis...</div>
+                </div>
+                <div class="recommendation-actions">
+                    <button type="button" class="btn-secondary ask-ai-btn" data-field="auth-type">Ask AI</button>
+                    <button type="button" class="btn-primary accept-btn" data-field="auth-type">Accept</button>
+                    <button type="button" class="btn-reload reload-btn" data-field="auth-type" title="Get fresh AI recommendation">🔄</button>
+                </div>
+            </div>
+            <div class="ai-chat" id="chat-auth-type" style="display: none;">
+                <div class="chat-messages" id="messages-auth-type"></div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Ask about alternatives or get more details..." id="input-auth-type">
+                    <button type="button" class="btn-primary send-btn" data-field="auth-type">Send</button>
+                </div>
+            </div>
+            <div class="final-decision" id="decision-auth-type" style="display: none;">
+                <span class="decision-label">✅ Final Decision:</span>
+                <span class="decision-value" id="final-auth-type"></span>
+            </div>
+        </div>
+
+        <div class="planning-section">
+            <h5>5. Payment & Monetization</h5>
+            <div class="ai-recommendation" id="recommendation-payment-type" style="display: none;">
+                <div class="recommendation-content">
+                    <div class="recommendation-text">
+                        <span class="ai-icon">🤖</span>
+                        <span class="recommendation-value" id="payment-recommendation" style="display: none;">Loading recommendation...</span>
+                    </div>
+                    <div class="recommendation-reasoning" id="payment-reasoning">Getting AI analysis...</div>
+                </div>
+                <div class="recommendation-actions">
+                    <button type="button" class="btn-secondary ask-ai-btn" data-field="payment-type">Ask AI</button>
+                    <button type="button" class="btn-primary accept-btn" data-field="payment-type">Accept</button>
+                    <button type="button" class="btn-reload reload-btn" data-field="payment-type" title="Get fresh AI recommendation">🔄</button>
+                </div>
+            </div>
+            <div class="ai-chat" id="chat-payment-type" style="display: none;">
+                <div class="chat-messages" id="messages-payment-type"></div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Ask about alternatives or get more details..." id="input-payment-type">
+                    <button type="button" class="btn-primary send-btn" data-field="payment-type">Send</button>
+                </div>
+            </div>
+            <div class="final-decision" id="decision-payment-type" style="display: none;">
+                <span class="decision-label">✅ Final Decision:</span>
+                <span class="decision-value" id="final-payment-type"></span>
+            </div>
+        </div>
+
+        <div class="planning-section">
+            <h5>6. Additional Context</h5>
+            <div class="form-group">
+                <label for="target-users">Who are your target users?</label>
+                <div class="input-with-suggestions">
+                    <textarea id="target-users" name="target-users" rows="2" placeholder="Describe your users (e.g., fitness enthusiasts, small business owners, students)"></textarea>
+                    <button type="button" class="suggestion-btn" data-field="target-users" title="Get AI suggestion">
+                        💡
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="business-problem">What problem does this solve?</label>
+                <div class="input-with-suggestions">
+                    <textarea id="business-problem" name="business-problem" rows="2" placeholder="Describe the core problem (e.g., users struggle to track workout timing)"></textarea>
+                    <button type="button" class="suggestion-btn" data-field="business-problem" title="Get AI suggestion">
+                        💡
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="timeline-context">Any timeline or budget constraints?</label>
+                <textarea id="timeline-context" name="timeline-context" rows="2" placeholder="Timeline, budget, or other constraints (optional)"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Generation Section -->
+    <div class="step-spec-generation__ai-section">
+        <div class="generation-requirements">
+            <p class="requirements-text">
+                <span class="requirements-icon">⚠️</span>
+                All AI recommendations above must be accepted before generating the specification
+            </p>
+        </div>
+        <button id="generate-spec-btn" class="btn-primary btn-generate-spec" disabled>
+            <span class="btn-icon">🤖</span>
+            <span class="btn-text">Generate Technical Specification</span>
+            <span class="btn-loading" style="display: none;">⏳ Generating...</span>
+        </button>
+        
+        <div id="generation-status" class="generation-status" style="display: none;">
+            <div class="status-message">
+                <span class="status-icon">⏳</span>
+                <span class="status-text">Generating specification...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generated Specification Display -->
+    <div id="generated-spec-section" class="generated-spec-section" style="display: none;">
+        <div class="spec-header">
+            <h4>Generated Technical Specification</h4>
+            <div class="spec-actions">
+                <button type="button" id="regenerate-spec-btn" class="btn-secondary">
+                    <span class="btn-icon">🔄</span>
+                    Regenerate
+                </button>
+                <button type="button" id="download-spec-btn" class="btn-primary">
+                    <span class="btn-icon">📥</span>
+                    Download Markdown
+                </button>
+            </div>
+        </div>
+        
+        <div class="spec-content-wrapper">
+            <div id="spec-content" class="spec-content"></div>
+            
+            <!-- Discrepancy Analysis Section -->
+            <div id="discrepancy-analysis" class="discrepancy-analysis" style="display: none;">
+                <div class="discrepancy-header">
+                    <h5>🔍 Discrepancy Analysis</h5>
+                    <p class="discrepancy-subtitle">Comparing AI recommendations with generated specification</p>
+                </div>
+                <div id="discrepancy-content" class="discrepancy-content"></div>
+            </div>
+        </div>
+        
+        <!-- Edit Mode -->
+        <div id="spec-edit-mode" class="spec-edit-mode" style="display: none;">
+            <div class="edit-header">
+                <h5>Edit Specification</h5>
+                <div class="edit-actions">
+                    <button id="save-spec-btn" class="btn-primary">Save Changes</button>
+                    <button id="cancel-edit-btn" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
+            <textarea id="spec-edit-textarea" class="spec-edit-textarea"></textarea>
+        </div>
+    </div>
+</div>

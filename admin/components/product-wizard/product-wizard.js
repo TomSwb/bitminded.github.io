@@ -8,7 +8,7 @@ class ProductWizard {
     constructor() {
         this.isInitialized = false;
         this.currentStep = 1;
-        this.totalSteps = 8;
+        this.totalSteps = 9;
         this.formData = {};
         this.elements = {};
         this.steps = {};
@@ -152,6 +152,10 @@ class ProductWizard {
                     is_featured,
                     is_available_for_purchase,
                     requires_admin_approval,
+                    technical_specification,
+                    ai_recommendations,
+                    ai_conversations,
+                    ai_final_decisions,
                     product_categories (
                         id,
                         name,
@@ -215,6 +219,18 @@ class ProductWizard {
                 is_available_for_purchase: data.is_available_for_purchase || true,
                 requires_admin_approval: data.requires_admin_approval || false
             };
+
+            // Load AI data into stepData for Step 2
+            if (data.ai_recommendations || data.ai_conversations || data.ai_final_decisions || data.technical_specification) {
+                this.stepData = this.stepData || {};
+                this.stepData[2] = {
+                    recommendations: data.ai_recommendations || {},
+                    conversationHistory: data.ai_conversations || {},
+                    finalDecisions: data.ai_final_decisions || {},
+                    technicalSpecification: data.technical_specification || ''
+                };
+                console.log('✅ AI data loaded for Step 2:', this.stepData[2]);
+            }
 
             console.log('✅ Product data loaded:', this.formData);
 
@@ -395,6 +411,9 @@ class ProductWizard {
                 case 8:
                     await this.loadStep8(stepContent);
                     break;
+                case 9:
+                    await this.loadStep9(stepContent);
+                    break;
                 default:
                     console.error(`Unknown step: ${stepNumber}`);
             }
@@ -431,59 +450,95 @@ class ProductWizard {
     }
 
     /**
-     * Load Step 2: Pricing Configuration
+     * Load Step 2: AI-Powered Technical Specification
      */
     async loadStep2(stepContent) {
-        // Placeholder for Step 2
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 2: Pricing Configuration</h2><p>Coming soon...</p></div>';
+        if (window.StepSpecGeneration) {
+            // Load HTML content
+            const response = await fetch('/admin/components/product-wizard/components/step-spec-generation/step-spec-generation.html');
+            const html = await response.text();
+            stepContent.innerHTML = html;
+
+            // Initialize component
+            this.steps[2] = new window.StepSpecGeneration();
+            await this.steps[2].init();
+
+            // Set context from Step 1
+            if (this.steps[1]) {
+                const step1Data = this.steps[1].getFormData();
+                this.steps[2].setContextFromStep1(step1Data);
+            }
+
+            // Load existing specification if in edit mode
+            if (this.isEditMode && this.formData.technical_specification) {
+                this.steps[2].loadExistingSpecification(this.formData.technical_specification);
+            }
+
+            console.log('✅ Step 2: AI-Powered Technical Specification loaded');
+        } else {
+            console.error('❌ StepSpecGeneration component not available');
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 2: Technical Specification</h2><p>Component not available</p></div>';
+        }
     }
 
     /**
-     * Load Step 3: Database Configuration
+     * Load Step 3: Pricing Configuration
      */
     async loadStep3(stepContent) {
-        // Placeholder for Step 3
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: Database Configuration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 3 - Pricing Configuration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: Pricing Configuration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 4: GitHub Integration
+     * Load Step 4: Database Configuration
+     */
+
+    /**
+     * Load Step 4: Database Configuration
      */
     async loadStep4(stepContent) {
-        // Placeholder for Step 4
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: GitHub Integration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 4 - Database Configuration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: Database Configuration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 5: Stripe Integration
+     * Load Step 5: GitHub Integration
      */
     async loadStep5(stepContent) {
-        // Placeholder for Step 5
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Stripe Integration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 5 - GitHub Integration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: GitHub Integration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 6: Cloudflare Configuration
+     * Load Step 6: Stripe Integration
      */
     async loadStep6(stepContent) {
-        // Placeholder for Step 6
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 6 - Stripe Integration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Stripe Integration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 7: Content & Media
+     * Load Step 7: Cloudflare Configuration
      */
     async loadStep7(stepContent) {
-        // Placeholder for Step 7
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Content & Media</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 7 - Cloudflare Configuration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 8: Review & Publish
+     * Load Step 8: Content & Media
      */
     async loadStep8(stepContent) {
-        // Placeholder for Step 8
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 8: Review & Publish</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 8 - Content & Media
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 8: Content & Media</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 9: Review & Publish
+     */
+    async loadStep9(stepContent) {
+        // Placeholder for Step 9 - Review & Publish
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 9: Review & Publish</h2><p>Coming soon...</p></div>';
     }
 
     /**
@@ -553,6 +608,16 @@ class ProductWizard {
         if (this.currentStep > 1) {
             await this.goToStep(this.currentStep - 1);
         }
+    }
+
+    /**
+     * Get Step 1 data for other steps to use
+     */
+    getStep1Data() {
+        if (this.steps[1]) {
+            return this.steps[1].getFormData();
+        }
+        return {};
     }
 
     /**
@@ -709,8 +774,67 @@ class ProductWizard {
                 status: 'draft'
             };
 
+            // Add AI data from Step 2 if available
+            console.log('🔍 Checking for Step 2 data:', {
+                hasStepData: !!this.stepData,
+                stepDataKeys: this.stepData ? Object.keys(this.stepData) : [],
+                step2Data: this.stepData && this.stepData[2] ? this.stepData[2] : null
+            });
+            
+            if (this.stepData && this.stepData[2]) {
+                const step2Data = this.stepData[2];
+                
+                console.log('📊 Step 2 data details:', {
+                    hasRecommendations: !!step2Data.recommendations,
+                    recommendationsKeys: step2Data.recommendations ? Object.keys(step2Data.recommendations) : [],
+                    hasConversationHistory: !!step2Data.conversationHistory,
+                    conversationHistoryKeys: step2Data.conversationHistory ? Object.keys(step2Data.conversationHistory) : [],
+                    hasFinalDecisions: !!step2Data.finalDecisions,
+                    finalDecisionsKeys: step2Data.finalDecisions ? Object.keys(step2Data.finalDecisions) : [],
+                    hasTechnicalSpec: !!step2Data.technicalSpecification
+                });
+                
+                // Add AI recommendations and conversations
+                if (step2Data.recommendations) {
+                    productData.ai_recommendations = step2Data.recommendations;
+                    console.log('✅ Added ai_recommendations to productData');
+                }
+                if (step2Data.conversationHistory) {
+                    productData.ai_conversations = step2Data.conversationHistory;
+                    console.log('✅ Added ai_conversations to productData');
+                }
+                if (step2Data.finalDecisions) {
+                    productData.ai_final_decisions = step2Data.finalDecisions;
+                    console.log('✅ Added ai_final_decisions to productData');
+                }
+                
+                // Add technical specification if generated
+                if (step2Data.technicalSpecification) {
+                    productData.technical_specification = step2Data.technicalSpecification;
+                    console.log('✅ Added technical_specification to productData');
+                }
+            } else {
+                console.log('❌ No Step 2 data found to save');
+            }
+
+            console.log('📤 Final productData being sent to database:', productData);
+
+            // Test if AI columns exist by checking the current product
+            if (this.formData.product_id) {
+                console.log('🔍 Testing AI columns existence...');
+                const { data: testData, error: testError } = await window.supabase
+                    .from('products')
+                    .select('ai_recommendations, ai_conversations, ai_final_decisions')
+                    .eq('id', this.formData.product_id)
+                    .single();
+                
+                console.log('🧪 AI columns test result:', { testData, testError });
+            }
+
             // Check if this is an update to existing draft
             if (this.formData.product_id) {
+                console.log('🔄 Updating existing product with ID:', this.formData.product_id);
+                
                 const { data, error } = await window.supabase
                     .from('products')
                     .update(productData)
@@ -718,7 +842,14 @@ class ProductWizard {
                     .select()
                     .single();
 
-                if (error) throw error;
+                console.log('📥 Database update response:', { data, error });
+
+                if (error) {
+                    console.error('❌ Database update error:', error);
+                    throw error;
+                }
+                
+                console.log('✅ Product updated successfully:', data);
                 return { success: true, data };
             } else {
                 // Create new draft
