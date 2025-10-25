@@ -1,0 +1,185 @@
+<!-- Product Management Component -->
+<div class="product-management" id="product-management">
+    <!-- Header -->
+    <div class="product-management__header">
+        <div class="product-management__title-section">
+            <h1 class="product-management__title translatable-content" data-translation-key="Product Management">Product Management</h1>
+        </div>
+        
+        <div class="product-management__actions">
+            <button class="product-management__button product-management__button--primary" id="add-product-button">
+                <span class="translatable-content" data-translation-key="Add New Product">Add New Product</span>
+            </button>
+            <button class="product-management__button product-management__button--secondary" id="create-bundle-button">
+                <span class="translatable-content" data-translation-key="Create Bundle">Create Bundle</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="product-management__controls">
+        <!-- Search Bar -->
+        <div class="product-management__search">
+            <input 
+                type="text" 
+                class="product-management__search-input translatable-content" 
+                id="product-search-input"
+                data-translation-key="Search products..."
+                placeholder="Search products...">
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="product-management__filters">
+            <div class="product-management__filters-header">
+                <div class="product-management__filters-controls">
+                    <!-- Status Filter -->
+                    <div class="product-management__filter-group">
+                        <label for="status-filter" class="product-management__filter-label" data-translation-key="Status">Status</label>
+                        <div class="product-management__dropdown">
+                            <button type="button" class="product-management__dropdown-btn" id="status-dropdown-btn">
+                                <span data-translation-key="select_status">Select Status</span>
+                                <span class="product-management__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="product-management__dropdown-content" id="status-dropdown">
+                                <div class="product-management__search">
+                                    <input type="text" placeholder="Search..." class="product-management__search-input" id="status-search">
+                                </div>
+                                <div class="product-management__options" id="status-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="product-management__dropdown-actions">
+                                    <button type="button" class="product-management__action-btn" id="status-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="product-management__action-btn" id="status-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="product-management__filter-group">
+                        <label for="category-filter" class="product-management__filter-label" data-translation-key="Category">Category</label>
+                        <div class="product-management__dropdown">
+                            <button type="button" class="product-management__dropdown-btn" id="category-dropdown-btn">
+                                <span data-translation-key="select_category">Select Category</span>
+                                <span class="product-management__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="product-management__dropdown-content" id="category-dropdown">
+                                <div class="product-management__search">
+                                    <input type="text" placeholder="Search..." class="product-management__search-input" id="category-search">
+                                </div>
+                                <div class="product-management__options" id="category-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="product-management__dropdown-actions">
+                                    <button type="button" class="product-management__action-btn" id="category-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="product-management__action-btn" id="category-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Type Filter -->
+                    <div class="product-management__filter-group">
+                        <label for="pricing-type-filter" class="product-management__filter-label" data-translation-key="Pricing Type">Pricing Type</label>
+                        <div class="product-management__dropdown">
+                            <button type="button" class="product-management__dropdown-btn" id="pricing-type-dropdown-btn">
+                                <span data-translation-key="select_pricing_type">Select Pricing Type</span>
+                                <span class="product-management__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="product-management__dropdown-content" id="pricing-type-dropdown">
+                                <div class="product-management__search">
+                                    <input type="text" placeholder="Search..." class="product-management__search-input" id="pricing-type-search">
+                                </div>
+                                <div class="product-management__options" id="pricing-type-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="product-management__dropdown-actions">
+                                    <button type="button" class="product-management__action-btn" id="pricing-type-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="product-management__action-btn" id="pricing-type-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Commissioned Filter -->
+                    <div class="product-management__filter-group">
+                        <label for="commissioned-filter" class="product-management__filter-label" data-translation-key="Commissioned">Commissioned</label>
+                        <select id="commissioned-filter" class="product-management__select">
+                            <option value="all" data-translation-key="all_products">All Products</option>
+                            <option value="commissioned" data-translation-key="commissioned_only">Commissioned Only</option>
+                            <option value="not_commissioned" data-translation-key="not_commissioned">Not Commissioned</option>
+                        </select>
+                    </div>
+
+                    <!-- Featured Filter -->
+                    <div class="product-management__filter-group">
+                        <label for="featured-filter" class="product-management__filter-label" data-translation-key="Featured">Featured</label>
+                        <select id="featured-filter" class="product-management__select">
+                            <option value="all" data-translation-key="all_products">All Products</option>
+                            <option value="featured" data-translation-key="featured_only">Featured Only</option>
+                            <option value="not_featured" data-translation-key="not_featured">Not Featured</option>
+                        </select>
+                    </div>
+
+                    <!-- Created Date Filter -->
+                    <div class="product-management__filter-group">
+                        <label for="created-date-filter" class="product-management__filter-label" data-translation-key="Created Date">Created Date</label>
+                        <select id="created-date-filter" class="product-management__select">
+                            <option value="all" data-translation-key="all_time">All Time</option>
+                            <option value="7d" data-translation-key="last_7_days">Last 7 Days</option>
+                            <option value="30d" data-translation-key="last_30_days">Last 30 Days</option>
+                            <option value="90d" data-translation-key="last_90_days">Last 90 Days</option>
+                            <option value="1y" data-translation-key="last_year">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Summary and Clear Button on same row -->
+                <div class="product-management__summary-row">
+                    <div class="product-management__summary">
+                        <span class="product-management__count" data-translation-key="showing_all_products">Showing all products</span>
+                    </div>
+                    <button type="button" class="product-management__clear-btn" id="product-clear-filters-btn" data-translation-key="clear_all_filters">
+                        Clear All Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="product-management__table-container">
+        <table class="product-management__table" id="products-table">
+            <thead>
+                <tr>
+                    <th class="product-management__sortable-header" data-sort="name">
+                        <span class="translatable-content" data-translation-key="Product Name">Product Name</span>
+                        <span class="product-management__sort-indicator"></span>
+                    </th>
+                    <th class="translatable-content" data-translation-key="Category">Category</th>
+                    <th class="translatable-content" data-translation-key="Status">Status</th>
+                    <th class="translatable-content" data-translation-key="Pricing">Pricing</th>
+                    <th class="translatable-content" data-translation-key="Commissioned">Commissioned</th>
+                    <th class="translatable-content" data-translation-key="Featured">Featured</th>
+                    <th class="translatable-content" data-translation-key="Created">Created</th>
+                    <th class="translatable-content" data-translation-key="Actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="products-table-body">
+                <!-- Product rows will be inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Loading State -->
+        <div class="product-management__loading hidden" id="products-loading">
+            <div class="product-management__spinner"></div>
+            <p class="translatable-content" data-translation-key="Loading products...">Loading products...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="product-management__empty hidden" id="products-empty">
+            <p class="translatable-content" data-translation-key="No products found">No products found</p>
+        </div>
+    </div>
+
+</div>

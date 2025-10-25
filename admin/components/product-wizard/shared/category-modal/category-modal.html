@@ -1,0 +1,32 @@
+<!-- Category Modal -->
+<div class="category-modal hidden" id="category-modal">
+    <div class="category-modal__content">
+        <div class="category-modal__header">
+            <h3 class="translatable-content" data-translation-key="Add New Category">Add New Category</h3>
+            <button type="button" id="close-category-modal" class="category-modal__close">&times;</button>
+        </div>
+        <div class="category-modal__body">
+            <div class="category-modal__field-group">
+                <label for="new-category-name" class="category-modal__label">
+                    <span class="translatable-content" data-translation-key="Category Name">Category Name</span>
+                    <span class="required">*</span>
+                </label>
+                <input type="text" id="new-category-name" class="category-modal__input" placeholder="e.g., Productivity Tools">
+            </div>
+            <div class="category-modal__field-group">
+                <label for="new-category-description" class="category-modal__label">
+                    <span class="translatable-content" data-translation-key="Category Description">Category Description</span>
+                </label>
+                <textarea id="new-category-description" class="category-modal__textarea" rows="3" placeholder="Brief description of this category"></textarea>
+            </div>
+        </div>
+        <div class="category-modal__footer">
+            <button type="button" id="cancel-category" class="category-modal__btn category-modal__btn--secondary">
+                <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+            </button>
+            <button type="button" id="save-category" class="category-modal__btn category-modal__btn--primary">
+                <span class="translatable-content" data-translation-key="Save Category">Save Category</span>
+            </button>
+        </div>
+    </div>
+</div>
