@@ -13,12 +13,60 @@ serve(async (req) => {
 
   try {
     // Get the request body
-    const { fieldName, productContext, prompt } = await req.json()
+    const requestBody = await req.json()
+    const { 
+      fieldName, 
+      productName,
+      category,
+      shortDescription,
+      description,
+      tags,
+      currentValue 
+    } = requestBody
 
     // Validate required fields
-    if (!fieldName || !prompt) {
+    if (!fieldName) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
+        JSON.stringify({ error: 'Missing required field: fieldName' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Generate prompt based on field name
+    let prompt = ''
+    if (fieldName === 'target-users') {
+      prompt = `Based on this product information:
+Product Name: ${productName || 'Not specified'}
+Category: ${category || 'Not specified'}
+Description: ${description || shortDescription || 'Not specified'}
+Tags: ${tags?.join(', ') || 'None'}
+${currentValue ? `Current value: ${currentValue}` : ''}
+
+Generate a detailed description of the target users for this product. Consider demographics, technical proficiency, use cases, and pain points. Be specific and actionable.`
+    } else if (fieldName === 'business-problem') {
+      prompt = `Based on this product information:
+Product Name: ${productName || 'Not specified'}
+Category: ${category || 'Not specified'}
+Description: ${description || shortDescription || 'Not specified'}
+Tags: ${tags?.join(', ') || 'None'}
+${currentValue ? `Current value: ${currentValue}` : ''}
+
+Generate a detailed description of the business problem this product solves. Consider the market needs, pain points addressed, and value proposition. Be specific and actionable.`
+    } else if (fieldName === 'timeline-context') {
+      prompt = `Based on this product information:
+Product Name: ${productName || 'Not specified'}
+Category: ${category || 'Not specified'}
+Description: ${description || shortDescription || 'Not specified'}
+Tags: ${tags?.join(', ') || 'None'}
+${currentValue ? `Current value: ${currentValue}` : ''}
+
+Generate timeline context information including urgency, deadlines, market timing considerations, and any relevant scheduling constraints. Be specific and actionable.`
+    } else {
+      return new Response(
+        JSON.stringify({ error: `Unknown field name: ${fieldName}` }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

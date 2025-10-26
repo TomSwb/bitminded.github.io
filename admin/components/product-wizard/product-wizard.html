@@ -25,6 +25,7 @@
     <!-- Component CSS -->
     <link rel="stylesheet" href="/admin/components/product-wizard/components/step-basic-info/step-basic-info.css">
     <link rel="stylesheet" href="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation.css">
+    <link rel="stylesheet" href="/admin/components/product-wizard/components/step-github-setup/step-github-setup.css">
     <link rel="stylesheet" href="/admin/components/product-wizard/shared/category-modal/category-modal.css">
     
     <!-- Supabase -->
@@ -54,7 +55,7 @@
                     <div class="product-wizard__progress-fill" id="wizard-progress-fill"></div>
                 </div>
                 <div class="product-wizard__progress-text">
-                    <span id="wizard-progress-text">Step 1 of 9</span>
+                    <span id="wizard-progress-text">Step 1 of 8</span>
                 </div>
             </div>
         </div>
@@ -74,30 +75,26 @@
                 </div>
                 <div class="product-wizard__step" data-step="3">
                     <div class="product-wizard__step-number">3</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Pricing">Pricing</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="GitHub">GitHub</div>
                 </div>
                 <div class="product-wizard__step" data-step="4">
                     <div class="product-wizard__step-number">4</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Database">Database</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Stripe">Stripe</div>
                 </div>
                 <div class="product-wizard__step" data-step="5">
                     <div class="product-wizard__step-number">5</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="GitHub">GitHub</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Cloudflare">Cloudflare</div>
                 </div>
                 <div class="product-wizard__step" data-step="6">
                     <div class="product-wizard__step-number">6</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Stripe">Stripe</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Content & Media">Content & Media</div>
                 </div>
                 <div class="product-wizard__step" data-step="7">
                     <div class="product-wizard__step-number">7</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Cloudflare">Cloudflare</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Database">Database</div>
                 </div>
                 <div class="product-wizard__step" data-step="8">
                     <div class="product-wizard__step-number">8</div>
-                    <div class="product-wizard__step-title translatable-content" data-translation-key="Content & Media">Content & Media</div>
-                </div>
-                <div class="product-wizard__step" data-step="9">
-                    <div class="product-wizard__step-number">9</div>
                     <div class="product-wizard__step-title translatable-content" data-translation-key="Review & Publish">Review & Publish</div>
                 </div>
             </div>
@@ -118,222 +115,34 @@
                     <!-- Step content will be loaded by component -->
                 </div>
 
-                <!-- Step 3: Pricing Configuration -->
+                <!-- Step 3: GitHub Repository Setup -->
                 <div class="product-wizard__step-content" id="step-3">
-                    <div class="product-wizard__step-header">
-                        <h2 class="product-wizard__step-title translatable-content" data-translation-key="Pricing Configuration">Pricing Configuration</h2>
-                        <p class="product-wizard__step-description translatable-content" data-translation-key="step3_description">Set up pricing for individual and enterprise users</p>
-                    </div>
-                    
-                    <div class="product-wizard__fields">
-                        <!-- Pricing options will be populated based on Step 1 selection -->
-                        <div id="pricing-options-container">
-                            <!-- Dynamic content based on pricing type -->
-                        </div>
-                    </div>
+                    <!-- Step content will be loaded by component -->
                 </div>
 
-                <!-- Step 4: Database Configuration -->
+                <!-- Step 4: Stripe Product Creation (includes Pricing Configuration) -->
                 <div class="product-wizard__step-content" id="step-4">
-                    <div class="product-wizard__step-header">
-                        <h2 class="product-wizard__step-title translatable-content" data-translation-key="Database Configuration">Database Configuration</h2>
-                        <p class="product-wizard__step-description translatable-content" data-translation-key="step3_description">Configure database requirements for your product</p>
-                    </div>
-                    
-                    <div class="product-wizard__fields">
-                        <div class="product-wizard__field-group">
-                            <label class="product-wizard__checkbox-label">
-                                <input type="checkbox" id="needs-database" name="needs_database">
-                                <span class="translatable-content" data-translation-key="needs_database">This product needs a database</span>
-                            </label>
-                            <small class="product-wizard__help translatable-content" data-translation-key="needs_database_help">Check if your product will store user data</small>
-                        </div>
-
-                        <div id="database-config" class="product-wizard__database-config hidden">
-                            <!-- Database configuration fields will be populated here -->
-                        </div>
-                    </div>
+                    <!-- Step content will be loaded by component -->
                 </div>
 
-                <!-- Step 5: GitHub Integration -->
+                <!-- Step 5: Cloudflare Configuration -->
                 <div class="product-wizard__step-content" id="step-5">
-                    <div class="product-wizard__step-header">
-                        <h2 class="product-wizard__step-title translatable-content" data-translation-key="GitHub Integration">GitHub Integration</h2>
-                        <p class="product-wizard__step-description translatable-content" data-translation-key="step4_description">Set up GitHub repository for your product</p>
-                    </div>
-                    
-                    <div class="product-wizard__fields">
-                        <div class="product-wizard__field-group">
-                            <label class="product-wizard__checkbox-label">
-                                <input type="checkbox" id="create-github-repo" name="create_github_repo" checked>
-                                <span class="translatable-content" data-translation-key="create_github_repo">Create GitHub repository</span>
-                            </label>
-                            <small class="product-wizard__help translatable-content" data-translation-key="create_github_repo_help">Automatically create a new repository for this product</small>
-                        </div>
-
-                        <div id="github-config" class="product-wizard__github-config">
-                            <div class="product-wizard__field-group">
-                                <label for="github-repo-name" class="product-wizard__label">
-                                    <span class="translatable-content" data-translation-key="Repository Name">Repository Name</span>
-                                </label>
-                                <input type="text" id="github-repo-name" name="github_repo_name" class="product-wizard__input">
-                                <small class="product-wizard__help translatable-content" data-translation-key="github_repo_name_help">Repository name (will be auto-generated from product slug)</small>
-                            </div>
-
-                            <div class="product-wizard__field-group">
-                                <label for="github-description" class="product-wizard__label">
-                                    <span class="translatable-content" data-translation-key="Repository Description">Repository Description</span>
-                                </label>
-                                <textarea id="github-description" name="github_description" class="product-wizard__textarea" rows="2"></textarea>
-                            </div>
-
-                            <div class="product-wizard__field-group">
-                                <label class="product-wizard__checkbox-label">
-                                    <input type="checkbox" id="github-private" name="github_private">
-                                    <span class="translatable-content" data-translation-key="Private Repository">Private Repository</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Step content will be loaded by component -->
                 </div>
 
-                <!-- Step 6: Stripe Integration -->
+                <!-- Step 6: Content & Media -->
                 <div class="product-wizard__step-content" id="step-6">
-                    <div class="product-wizard__step-header">
-                        <h2 class="product-wizard__step-title translatable-content" data-translation-key="Stripe Integration">Stripe Integration</h2>
-                        <p class="product-wizard__step-description translatable-content" data-translation-key="step5_description">Set up Stripe product and pricing</p>
-                    </div>
-                    
-                    <div class="product-wizard__fields">
-                        <div class="product-wizard__field-group">
-                            <label class="product-wizard__checkbox-label">
-                                <input type="checkbox" id="create-stripe-product" name="create_stripe_product" checked>
-                                <span class="translatable-content" data-translation-key="create_stripe_product">Create Stripe product</span>
-                            </label>
-                            <small class="product-wizard__help translatable-content" data-translation-key="create_stripe_product_help">Automatically create product and pricing in Stripe</small>
-                        </div>
-
-                        <div id="stripe-config" class="product-wizard__stripe-config">
-                            <div class="product-wizard__field-group">
-                                <label for="stripe-product-name" class="product-wizard__label">
-                                    <span class="translatable-content" data-translation-key="Stripe Product Name">Stripe Product Name</span>
-                                </label>
-                                <input type="text" id="stripe-product-name" name="stripe_product_name" class="product-wizard__input">
-                                <small class="product-wizard__help translatable-content" data-translation-key="stripe_product_name_help">Name for the Stripe product (defaults to product name)</small>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Step content will be loaded by component -->
                 </div>
 
-                <!-- Step 7: Cloudflare Configuration -->
+                <!-- Step 7: Database Configuration -->
                 <div class="product-wizard__step-content" id="step-7">
-                    <div class="product-wizard__step-header">
-                        <h2 class="product-wizard__step-title translatable-content" data-translation-key="Cloudflare Configuration">Cloudflare Configuration</h2>
-                        <p class="product-wizard__step-description translatable-content" data-translation-key="step6_description">Set up domain and DNS configuration</p>
-                    </div>
-                    
-                    <div class="product-wizard__fields">
-                        <div class="product-wizard__field-group">
-                            <label for="cloudflare-domain" class="product-wizard__label">
-                                <span class="translatable-content" data-translation-key="Domain">Domain</span>
-                            </label>
-                            <input type="text" id="cloudflare-domain" name="cloudflare_domain" class="product-wizard__input" placeholder="product-name.bitminded.ch">
-                            <small class="product-wizard__help translatable-content" data-translation-key="cloudflare_domain_help">Subdomain for your product</small>
-                        </div>
-
-                        <div class="product-wizard__field-group">
-                            <label class="product-wizard__checkbox-label">
-                                <input type="checkbox" id="setup-dns" name="setup_dns">
-                                <span class="translatable-content" data-translation-key="Setup DNS">Setup DNS automatically</span>
-                            </label>
-                            <small class="product-wizard__help translatable-content" data-translation-key="setup_dns_help">Automatically configure DNS records</small>
-                        </div>
-                    </div>
+                    <!-- Step content will be loaded by component -->
                 </div>
 
-                <!-- Step 8: Content & Media -->
+                <!-- Step 8: Review & Publish -->
                 <div class="product-wizard__step-content" id="step-8">
-                    <div class="product-wizard__step-header">
-                        <h2 class="product-wizard__step-title translatable-content" data-translation-key="Content & Media">Content & Media</h2>
-                        <p class="product-wizard__step-description translatable-content" data-translation-key="step7_description">Add media and content for your product</p>
-                    </div>
-                    
-                    <div class="product-wizard__fields">
-                        <div class="product-wizard__field-group">
-                            <label for="product-icon" class="product-wizard__label">
-                                <span class="translatable-content" data-translation-key="Product Icon">Product Icon</span>
-                            </label>
-                            <div class="product-wizard__file-upload">
-                                <input type="file" id="product-icon" name="icon" accept="image/*" class="product-wizard__file-input">
-                                <div class="product-wizard__file-upload-area" id="icon-upload-area">
-                                    <i class="icon-upload"></i>
-                                    <p class="translatable-content" data-translation-key="click_to_upload_icon">Click to upload icon</p>
-                                    <small class="translatable-content" data-translation-key="recommended_size">Recommended: 512x512px</small>
-                                </div>
-                                <div class="product-wizard__file-preview hidden" id="icon-preview">
-                                    <img id="icon-preview-img" src="" alt="Icon preview">
-                                    <button type="button" class="product-wizard__remove-file" id="remove-icon">
-                                        <i class="icon-close"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="product-wizard__field-group">
-                            <label for="demo-video-url" class="product-wizard__label">
-                                <span class="translatable-content" data-translation-key="Demo Video URL">Demo Video URL</span>
-                            </label>
-                            <input type="url" id="demo-video-url" name="demo_video_url" class="product-wizard__input" placeholder="https://youtube.com/watch?v=...">
-                            <small class="product-wizard__help translatable-content" data-translation-key="demo_video_help">Optional demo video (YouTube, Vimeo, etc.)</small>
-                        </div>
-
-                        <div class="product-wizard__field-group">
-                            <label for="documentation-url" class="product-wizard__label">
-                                <span class="translatable-content" data-translation-key="Documentation URL">Documentation URL</span>
-                            </label>
-                            <input type="url" id="documentation-url" name="documentation_url" class="product-wizard__input" placeholder="https://docs.bitminded.ch/product-name">
-                        </div>
-
-                        <div class="product-wizard__field-group">
-                            <label for="support-email" class="product-wizard__label">
-                                <span class="translatable-content" data-translation-key="Support Email">Support Email</span>
-                            </label>
-                            <input type="email" id="support-email" name="support_email" class="product-wizard__input" placeholder="support@bitminded.ch">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 9: Review & Publish -->
-                <div class="product-wizard__step-content" id="step-9">
-                    <div class="product-wizard__step-header">
-                        <h2 class="product-wizard__step-title translatable-content" data-translation-key="Review & Publish">Review & Publish</h2>
-                        <p class="product-wizard__step-description translatable-content" data-translation-key="step8_description">Review your product configuration and publish</p>
-                    </div>
-                    
-                    <div class="product-wizard__fields">
-                        <div class="product-wizard__review-section">
-                            <h3 class="translatable-content" data-translation-key="Product Summary">Product Summary</h3>
-                            <div id="product-summary" class="product-wizard__summary">
-                                <!-- Summary will be populated here -->
-                            </div>
-                        </div>
-
-                        <div class="product-wizard__field-group">
-                            <label class="product-wizard__checkbox-label">
-                                <input type="checkbox" id="publish-immediately" name="publish_immediately">
-                                <span class="translatable-content" data-translation-key="publish_immediately">Publish immediately</span>
-                            </label>
-                            <small class="product-wizard__help translatable-content" data-translation-key="publish_immediately_help">Make the product available for purchase right away</small>
-                        </div>
-
-                        <div class="product-wizard__field-group">
-                            <label class="product-wizard__checkbox-label">
-                                <input type="checkbox" id="is-featured" name="is_featured">
-                                <span class="translatable-content" data-translation-key="featured_product">Featured Product</span>
-                            </label>
-                            <small class="product-wizard__help translatable-content" data-translation-key="featured_product_help">Show on homepage and featured sections</small>
-                        </div>
-                    </div>
+                    <!-- Step content will be loaded by component -->
                 </div>
             </form>
         </div>
@@ -415,6 +224,7 @@
     <script src="/admin/components/product-wizard/components/step-basic-info/step-basic-info.js"></script>
     <script src="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation-translations.js"></script>
     <script src="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation.js"></script>
+    <script src="/admin/components/product-wizard/components/step-github-setup/step-github-setup.js"></script>
     
     <!-- Main Wizard Script -->
     <script src="/admin/components/product-wizard/product-wizard.js"></script>
