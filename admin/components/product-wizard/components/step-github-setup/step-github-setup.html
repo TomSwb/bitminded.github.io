@@ -1,0 +1,86 @@
+<div class="step-github-setup">
+    <div class="step-github-setup__header">
+        <h2 class="step-github-setup__title">GitHub Repository Setup</h2>
+        <p class="step-github-setup__description">
+            Create and configure the GitHub repository for your product based on the technical specification.
+        </p>
+    </div>
+
+    <div class="step-github-setup__content">
+        <!-- Repository Configuration -->
+        <div class="step-github-setup__section">
+            <h3 class="step-github-setup__section-title">Repository Configuration</h3>
+            
+            <div class="step-github-setup__field-group">
+                <label class="step-github-setup__checkbox-label">
+                    <input type="checkbox" id="create-github-repo" name="create_github_repo" checked>
+                    <span>Create GitHub repository</span>
+                </label>
+                <small class="step-github-setup__help">Automatically create a new repository for this product</small>
+            </div>
+
+            <div id="github-config" class="step-github-setup__github-config">
+                <div class="step-github-setup__field-group">
+                    <label for="github-repo-name" class="step-github-setup__label">
+                        Repository Name
+                    </label>
+                    <input type="text" id="github-repo-name" name="github_repo_name" class="step-github-setup__input" placeholder="product-slug">
+                    <small class="step-github-setup__help">Repository name (will be auto-generated from product slug)</small>
+                </div>
+
+                <div class="step-github-setup__field-group">
+                    <label class="step-github-setup__checkbox-label">
+                        <input type="checkbox" id="github-private" name="github_private" checked>
+                        <span>Private Repository</span>
+                    </label>
+                    <small class="step-github-setup__help">Make the repository private</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repository Structure Preview -->
+        <div class="step-github-setup__section">
+            <h3 class="step-github-setup__section-title">Repository Structure</h3>
+            <div class="step-github-setup__preview" id="repo-structure-preview">
+                <div class="step-github-setup__loading">
+                    <p>Loading repository structure...</p>
+                </div>
+            </div>
+            
+            <div class="step-github-setup__create-section" id="create-repo-section">
+                <button type="button" class="step-github-setup__create-btn" id="create-repo-btn">
+                    <span class="btn-icon">🚀</span>
+                    <span>Create GitHub Repository</span>
+                </button>
+                <small class="step-github-setup__help">This will create the repository with all initial files</small>
+            </div>
+        </div>
+
+        <!-- GitHub Integration Status -->
+        <div class="step-github-setup__section" id="github-status-section" style="display: none;">
+            <h3 class="step-github-setup__section-title">GitHub Integration Status</h3>
+            <div class="step-github-setup__status" id="github-status">
+                <!-- Status will be populated here -->
+            </div>
+        </div>
+
+        <!-- Clone Instructions -->
+        <div class="step-github-setup__section" id="clone-instructions-section" style="display: none;">
+            <h3 class="step-github-setup__section-title">Next Steps: Clone on Your Machine</h3>
+            <div class="step-github-setup__clone-instructions">
+                <p class="step-github-setup__clone-intro">To start working on this product locally, run these commands in your terminal:</p>
+                <div class="step-github-setup__code-block" id="clone-commands">
+                    <pre><code id="clone-code-content">cd /path/to/your/projects
+git clone [REPO_URL]
+cd [REPO_NAME]</code></pre>
+                    <button type="button" class="step-github-setup__copy-btn" id="copy-clone-commands">Copy Commands</button>
+                </div>
+                <div class="step-github-setup__clone-note">
+                    <p><strong>Important:</strong> These instructions use SSH. Make sure your SSH key is added to your GitHub account.</p>
+                    <p style="margin-top: 0.5rem;"><strong>Pro Tip:</strong> After cloning, open the folder in Cursor or VS Code to start developing!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

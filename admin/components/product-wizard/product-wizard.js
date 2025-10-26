@@ -8,7 +8,7 @@ class ProductWizard {
     constructor() {
         this.isInitialized = false;
         this.currentStep = 1;
-        this.totalSteps = 9;
+        this.totalSteps = 8;
         this.formData = {};
         this.elements = {};
         this.steps = {};
@@ -128,6 +128,7 @@ class ProductWizard {
                     github_repo_url,
                     github_repo_name,
                     github_branch,
+                    github_repo_created,
                     cloudflare_domain,
                     cloudflare_worker_url,
                     stripe_product_id,
@@ -194,6 +195,7 @@ class ProductWizard {
                 github_repo_url: data.github_repo_url || '',
                 github_repo_name: data.github_repo_name || '',
                 github_branch: data.github_branch || 'main',
+                github_repo_created: data.github_repo_created || false,
                 cloudflare_domain: data.cloudflare_domain || '',
                 cloudflare_worker_url: data.cloudflare_worker_url || '',
                 stripe_product_id: data.stripe_product_id || '',
@@ -411,9 +413,6 @@ class ProductWizard {
                 case 8:
                     await this.loadStep8(stepContent);
                     break;
-                case 9:
-                    await this.loadStep9(stepContent);
-                    break;
                 default:
                     console.error(`Unknown step: ${stepNumber}`);
             }
@@ -482,63 +481,69 @@ class ProductWizard {
     }
 
     /**
-     * Load Step 3: Pricing Configuration
+     * Load Step 3: GitHub Repository Setup
      */
     async loadStep3(stepContent) {
-        // Placeholder for Step 3 - Pricing Configuration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: Pricing Configuration</h2><p>Coming soon...</p></div>';
+        if (window.StepGithubSetup) {
+            // Load HTML content
+            const response = await fetch('/admin/components/product-wizard/components/step-github-setup/step-github-setup.html');
+            const html = await response.text();
+            stepContent.innerHTML = html;
+
+            // Initialize component
+            this.steps[3] = new window.StepGithubSetup();
+            await this.steps[3].init();
+
+            // Load existing data if in edit mode
+            if (this.isEditMode && this.formData) {
+                this.steps[3].setFormData(this.formData);
+            }
+
+            console.log('✅ Step 3: GitHub Repository Setup loaded');
+        } else {
+            console.error('❌ StepGithubSetup component not available');
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: GitHub Repository Setup</h2><p>Component not available</p></div>';
+        }
     }
 
     /**
-     * Load Step 4: Database Configuration
-     */
-
-    /**
-     * Load Step 4: Database Configuration
+     * Load Step 4: Stripe Product Creation (includes Pricing Configuration)
      */
     async loadStep4(stepContent) {
-        // Placeholder for Step 4 - Database Configuration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: Database Configuration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 4 - Stripe Product Creation
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: Stripe Product Creation</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 5: GitHub Integration
+     * Load Step 5: Cloudflare Configuration
      */
     async loadStep5(stepContent) {
-        // Placeholder for Step 5 - GitHub Integration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: GitHub Integration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 5 - Cloudflare Configuration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 6: Stripe Integration
+     * Load Step 6: Content & Media
      */
     async loadStep6(stepContent) {
-        // Placeholder for Step 6 - Stripe Integration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Stripe Integration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 6 - Content & Media
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Content & Media</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 7: Cloudflare Configuration
+     * Load Step 7: Database Configuration
      */
     async loadStep7(stepContent) {
-        // Placeholder for Step 7 - Cloudflare Configuration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 7 - Database Configuration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Database Configuration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 8: Content & Media
+     * Load Step 8: Review & Publish
      */
     async loadStep8(stepContent) {
-        // Placeholder for Step 8 - Content & Media
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 8: Content & Media</h2><p>Coming soon...</p></div>';
-    }
-
-    /**
-     * Load Step 9: Review & Publish
-     */
-    async loadStep9(stepContent) {
-        // Placeholder for Step 9 - Review & Publish
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 9: Review & Publish</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 8 - Review & Publish
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 8: Review & Publish</h2><p>Coming soon...</p></div>';
     }
 
     /**
@@ -815,6 +820,15 @@ class ProductWizard {
                 }
             } else {
                 console.log('❌ No Step 2 data found to save');
+            }
+            
+            // Add GitHub repository status if created
+            if (this.formData.github_repo_created) {
+                productData.github_repo_created = this.formData.github_repo_created;
+                productData.github_repo_url = this.formData.github_repo_url;
+                productData.github_repo_name = this.formData.github_repo_name;
+                productData.github_branch = this.formData.github_branch;
+                console.log('✅ Added GitHub repository status to productData');
             }
 
             console.log('📤 Final productData being sent to database:', productData);
