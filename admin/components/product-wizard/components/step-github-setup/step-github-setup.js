@@ -112,7 +112,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
 
                     // Mark step as completed
                     if (window.productWizard) {
-                        window.productWizard.markStepCompleted(3);
+                        window.productWizard.markStepCompleted(4);
                     }
                 }
             }
@@ -279,7 +279,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
 
                     // Mark step as completed
                     if (window.productWizard) {
-                        window.productWizard.markStepCompleted(3);
+                        window.productWizard.markStepCompleted(4);
                     }
                 } else {
                     throw new Error(result.error || 'Failed to create repository');
