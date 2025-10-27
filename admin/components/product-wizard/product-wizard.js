@@ -277,6 +277,12 @@ class ProductWizard {
             console.log('✅ Step 4 marked as completed (GitHub repo exists)');
         }
 
+        // Step 5: Check if Cloudflare domain is configured
+        if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
+            this.markStepCompleted(5);
+            console.log('✅ Step 5 marked as completed (Cloudflare configured)');
+        }
+
         // Step 6: Check if Stripe product exists
         if (this.formData.stripe_product_id) {
             this.markStepCompleted(6);
@@ -568,8 +574,23 @@ class ProductWizard {
      * Load Step 5: Cloudflare Configuration (was Step 6)
      */
     async loadStep5(stepContent) {
-        // Placeholder for Step 5 - Cloudflare Configuration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
+        if (window.StepCloudflareSetup) {
+            // Load HTML content
+            const response = await fetch('/admin/components/product-wizard/components/step-cloudflare-setup/step-cloudflare-setup.html');
+            const html = await response.text();
+            stepContent.innerHTML = html;
+
+            // Initialize component
+            this.steps[5] = new window.StepCloudflareSetup();
+            await this.steps[5].init();
+
+            // Load any existing data for this step
+            if (this.stepData && this.stepData[5]) {
+                this.steps[5].setFormData(this.stepData[5]);
+            }
+        } else {
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Cloudflare Configuration</h2><p>Component not loaded...</p></div>';
+        }
     }
 
     /**
