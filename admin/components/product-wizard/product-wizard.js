@@ -277,16 +277,16 @@ class ProductWizard {
             console.log('✅ Step 4 marked as completed (GitHub repo exists)');
         }
 
-        // Step 5: Check if Cloudflare domain is configured
-        if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
+        // Step 5: Check if Stripe product exists
+        if (this.formData.stripe_product_id) {
             this.markStepCompleted(5);
-            console.log('✅ Step 5 marked as completed (Cloudflare configured)');
+            console.log('✅ Step 5 marked as completed (Stripe product exists)');
         }
 
-        // Step 6: Check if Stripe product exists
-        if (this.formData.stripe_product_id) {
+        // Step 6: Check if Cloudflare domain is configured
+        if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
             this.markStepCompleted(6);
-            console.log('✅ Step 6 marked as completed (Stripe product exists)');
+            console.log('✅ Step 6 marked as completed (Cloudflare configured)');
         }
     }
 
@@ -571,9 +571,28 @@ class ProductWizard {
     }
 
     /**
-     * Load Step 5: Cloudflare Configuration (was Step 6)
+     * Load Step 5: Stripe Product Creation (moved before Cloudflare)
      */
     async loadStep5(stepContent) {
+        if (window.StepStripeCreation) {
+            const response = await fetch('/admin/components/product-wizard/components/step-stripe-creation/step-stripe-creation.html');
+            const html = await response.text();
+            stepContent.innerHTML = html;
+            this.steps[5] = new window.StepStripeCreation();
+            await this.steps[5].init();
+            if (this.isEditMode && this.formData) {
+                this.steps[5].setFormData(this.formData);
+            }
+        } else {
+            console.error('❌ StepStripeCreation component not available');
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Stripe Product Creation</h2><p>Component not available</p></div>';
+        }
+    }
+
+    /**
+     * Load Step 6: Cloudflare Configuration (moved after Stripe)
+     */
+    async loadStep6(stepContent) {
         if (window.StepCloudflareSetup) {
             // Load HTML content
             const response = await fetch('/admin/components/product-wizard/components/step-cloudflare-setup/step-cloudflare-setup.html');
@@ -581,34 +600,15 @@ class ProductWizard {
             stepContent.innerHTML = html;
 
             // Initialize component
-            this.steps[5] = new window.StepCloudflareSetup();
-            await this.steps[5].init();
+            this.steps[6] = new window.StepCloudflareSetup();
+            await this.steps[6].init();
 
             // Load any existing data for this step
-            if (this.stepData && this.stepData[5]) {
-                this.steps[5].setFormData(this.stepData[5]);
+            if (this.stepData && this.stepData[6]) {
+                this.steps[6].setFormData(this.stepData[6]);
             }
         } else {
-            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Cloudflare Configuration</h2><p>Component not loaded...</p></div>';
-        }
-    }
-
-    /**
-     * Load Step 6: Stripe Product Creation (was Step 7)
-     */
-    async loadStep6(stepContent) {
-        if (window.StepStripeCreation) {
-            const response = await fetch('/admin/components/product-wizard/components/step-stripe-creation/step-stripe-creation.html');
-            const html = await response.text();
-            stepContent.innerHTML = html;
-            this.steps[6] = new window.StepStripeCreation();
-            await this.steps[6].init();
-            if (this.isEditMode && this.formData) {
-                this.steps[6].setFormData(this.formData);
-            }
-        } else {
-            console.error('❌ StepStripeCreation component not available');
-            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Stripe Product Creation</h2><p>Component not available</p></div>';
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Cloudflare Configuration</h2><p>Component not loaded...</p></div>';
         }
     }
 
