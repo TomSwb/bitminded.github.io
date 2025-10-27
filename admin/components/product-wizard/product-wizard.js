@@ -767,10 +767,6 @@ class ProductWizard {
         if (this.elements.progressText) {
             this.elements.progressText.textContent = `Step ${this.currentStep} of ${this.totalSteps}`;
         }
-        
-        if (this.elements.progressText) {
-            this.elements.progressText.textContent = `Step ${this.currentStep} of ${this.totalSteps}`;
-        }
     }
 
     /**
