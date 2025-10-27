@@ -211,9 +211,9 @@ class ProductWizard {
                 trial_days: data.trial_days || 0,
                 trial_requires_payment: data.trial_requires_payment || false,
                 icon_url: data.icon_url || '',
-                screenshots: Array.isArray(data.screenshots) ? data.screenshots.join(', ') : (data.screenshots || ''),
+                screenshots: data.screenshots || null,
                 demo_video_url: data.demo_video_url || '',
-                features: Array.isArray(data.features) ? data.features.join(', ') : (data.features || ''),
+                features: data.features || null,
                 target_audience: data.target_audience || '',
                 tech_stack: Array.isArray(data.tech_stack) ? data.tech_stack.join(', ') : (data.tech_stack || ''),
                 documentation_url: data.documentation_url || '',
@@ -263,6 +263,12 @@ class ProductWizard {
                 this.markStepCompleted(2);
                 console.log('✅ Step 2 marked as completed (technical spec exists)');
             }
+        }
+
+        // Step 3: Check if content & media exists (icon is required)
+        if (this.formData.icon_url && this.formData.features && this.formData.features.length > 0) {
+            this.markStepCompleted(3);
+            console.log('✅ Step 3 marked as completed (icon and features exist)');
         }
 
         // Step 4: Check if GitHub repository exists
@@ -517,8 +523,23 @@ class ProductWizard {
      * Load Step 3: Content & Media
      */
     async loadStep3(stepContent) {
-        // Placeholder for Step 3 - Content & Media
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: Content & Media</h2><p>Coming soon...</p></div>';
+        if (window.StepContentMedia) {
+            // Load HTML content
+            const response = await fetch('/admin/components/product-wizard/components/step-content-media/step-content-media.html');
+            const html = await response.text();
+            stepContent.innerHTML = html;
+
+            // Initialize component
+            this.steps[3] = new window.StepContentMedia();
+            await this.steps[3].init();
+
+            // Load any existing data for this step
+            if (this.stepData && this.stepData[3]) {
+                this.steps[3].setFormData(this.stepData[3]);
+            }
+        } else {
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: Content & Media</h2><p>Component not loaded...</p></div>';
+        }
     }
 
     /**
@@ -898,6 +919,16 @@ class ProductWizard {
                 productData.github_branch = this.formData.github_branch;
                 console.log('✅ Added GitHub repository status to productData');
             }
+
+            // Add Stripe fields (always, so we can save null when deleting)
+            // Add media fields from Step 3
+            productData.icon_url = this.formData.icon_url || null;
+            productData.screenshots = this.formData.screenshots || null;
+            productData.demo_video_url = this.formData.demo_video_url || null;
+            productData.documentation_url = this.formData.documentation_url || null;
+            productData.support_email = this.formData.support_email || null;
+            productData.features = this.formData.features || null;
+            console.log('✅ Added media fields to productData');
 
             // Add Stripe fields (always, so we can save null when deleting)
             productData.stripe_product_id = this.formData.stripe_product_id || null;
