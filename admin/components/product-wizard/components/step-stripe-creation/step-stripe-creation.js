@@ -226,9 +226,24 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     this.saveToFormData(result.data);
                     console.log('💾 After saveToFormData. window.productWizard.formData.stripe_product_id:', window.productWizard?.formData?.stripe_product_id);
 
-                    // Mark step as completed
+                    // Persist immediately to database (no manual Save Draft required)
+                    try {
+                        if (window.productWizard && typeof window.productWizard.saveDraftToDatabase === 'function') {
+                            console.log('💾 Saving Stripe IDs to database...');
+                            const saveResult = await window.productWizard.saveDraftToDatabase();
+                            if (!saveResult?.success) {
+                                console.warn('⚠️ Failed to persist Stripe IDs automatically:', saveResult?.error);
+                            } else {
+                                console.log('✅ Stripe IDs persisted to database');
+                            }
+                        }
+                    } catch (persistError) {
+                        console.warn('⚠️ Could not auto-persist Stripe IDs:', persistError);
+                    }
+
+                    // Mark step as completed (Stripe is Step 5)
                     if (window.productWizard) {
-                        window.productWizard.markStepCompleted(6);
+                        window.productWizard.markStepCompleted(5);
                     }
                 } else {
                     throw new Error(result.error || 'Failed to create Stripe product');
@@ -349,9 +364,9 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     console.log('✅ Database updated after Stripe deletion');
                 }
 
-                // Mark step as incomplete
+                // Mark step as incomplete (Stripe is Step 5)
                 if (window.productWizard) {
-                    window.productWizard.markStepIncomplete(6);
+                    window.productWizard.markStepIncomplete(5);
                 }
                 
                 // Update UI

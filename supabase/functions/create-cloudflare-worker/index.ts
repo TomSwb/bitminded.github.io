@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { subdomain, productName, productSlug } = await req.json()
+    const { subdomain, productName, productSlug, supabaseFunctionsUrl: suppliedFunctionsUrl, supabaseAnonKey } = await req.json()
 
     if (!subdomain || !productName) {
       throw new Error('Subdomain and product name are required')
@@ -26,12 +26,19 @@ serve(async (req) => {
     // Get Cloudflare credentials from Supabase secrets
     const cloudflareApiToken = Deno.env.get('CLOUDFLARE_API_TOKEN')
     const cloudflareAccountId = Deno.env.get('CLOUDFLARE_ACCOUNT_ID')
+    const cloudflareZoneId = Deno.env.get('CLOUDFLARE_ZONE_ID')
     
     if (!cloudflareApiToken || !cloudflareAccountId) {
       throw new Error('Cloudflare credentials not configured')
     }
 
     const workerName = `${productSlug}-worker`
+
+    // Derive Supabase functions base URL to call validate-license from the Worker
+    // Prefer frontend-supplied functions URL to match the exact project used by the wizard session
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const envFunctionsUrl = supabaseUrl ? supabaseUrl.replace('.supabase.co', '.functions.supabase.co') : ''
+    const supabaseFunctionsUrl = suppliedFunctionsUrl || envFunctionsUrl
 
     // Step 1: Create the Worker
     console.log(`📦 Creating Cloudflare Worker: ${workerName}`)
@@ -44,7 +51,7 @@ serve(async (req) => {
           'Authorization': `Bearer ${cloudflareApiToken}`,
           'Content-Type': 'application/javascript'
         },
-        body: generateWorkerCode(productName, productSlug)
+        body: generateWorkerCode(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey || '')
       }
     )
 
@@ -55,25 +62,78 @@ serve(async (req) => {
 
     console.log('✅ Worker created successfully')
 
-    // Step 2: Configure custom domain
+    // Step 1.1: Resolve account workers.dev subdomain for dev URL
+    let workersSubdomain = ''
+    try {
+      const subdomainRes = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${cloudflareAccountId}/workers/subdomain`,
+        {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${cloudflareApiToken}` }
+        }
+      )
+      if (subdomainRes.ok) {
+        const subdomainJson = await subdomainRes.json()
+        workersSubdomain = subdomainJson?.result?.subdomain || ''
+      }
+    } catch (_) {
+      // ignore; fallback handled below
+    }
+
+    // Step 2: Configure DNS + route for custom domain
     const customDomain = `${subdomain}.bitminded.ch`
     
     console.log(`🌐 Configuring custom domain: ${customDomain}`)
 
-    const domainResponse = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${cloudflareAccountId}/workers/services/${workerName}/routes`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${cloudflareApiToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          pattern: `${subdomain}.bitminded.ch/*`,
-          script: workerName
-        })
+    // Step 2.1: Ensure DNS record exists and proxied
+    if (cloudflareZoneId) {
+      try {
+        const dnsRes = await fetch(
+          `https://api.cloudflare.com/client/v4/zones/${cloudflareZoneId}/dns_records`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${cloudflareApiToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              type: 'A',
+              name: customDomain,
+              content: '192.0.2.1', // placeholder IP, requests terminate at edge
+              ttl: 1,
+              proxied: true
+            })
+          }
+        )
+        if (!dnsRes.ok) {
+          const dnsTxt = await dnsRes.text()
+          console.warn(`⚠️ Could not create DNS record (may already exist): ${dnsTxt}`)
+        } else {
+          console.log('✅ DNS record ensured (proxied)')
+        }
+      } catch (e) {
+        console.warn('⚠️ DNS creation failed (will rely on existing record)', e)
       }
-    )
+    }
+
+    let domainResponse: Response | null = null
+    if (cloudflareZoneId) {
+      // Preferred: zone-level routes API
+      domainResponse = await fetch(
+        `https://api.cloudflare.com/client/v4/zones/${cloudflareZoneId}/workers/routes`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${cloudflareApiToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            pattern: `${subdomain}.bitminded.ch/*`,
+            script: workerName
+          })
+        }
+      )
+    }
 
     if (!domainResponse.ok) {
       const error = await domainResponse.text()
@@ -87,7 +147,9 @@ serve(async (req) => {
     // (For example, to pass Supabase credentials to the Worker)
 
     const workerUrl = `https://${subdomain}.bitminded.ch`
-    const workerDevUrl = `${workerName}.${cloudflareAccountId}.workers.dev`
+    const workerDevUrl = workersSubdomain
+      ? `https://${workerName}.${workersSubdomain}.workers.dev`
+      : ''
 
     return new Response(
       JSON.stringify({
@@ -95,7 +157,7 @@ serve(async (req) => {
         workerName,
         workerUrl,
         workerDevUrl,
-        customDomain: domainResponse.ok ? customDomain : null,
+        customDomain: domainResponse && domainResponse.ok ? customDomain : null,
         message: 'Cloudflare Worker created successfully'
       }),
       {
@@ -119,49 +181,104 @@ serve(async (req) => {
 /**
  * Generate the Worker code for the product
  */
-function generateWorkerCode(productName: string, productSlug: string): string {
+function generateWorkerCode(productName: string, productSlug: string, supabaseFunctionsUrl: string, supabaseAnonKey: string): string {
   return `/**
- * ${productName} - Cloudflare Worker
- * 
- * This Worker serves the ${productName} application.
- * It includes basic authentication and subscription checking.
- */
+* ${productName} - Cloudflare Worker (classic)
+* Enforces access via Supabase validate-license.
+*/
 
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url)
-    
-    // Allow requests to the main domain
-    if (url.hostname === 'bitminded.ch') {
-      return fetch(request)
+const LOGIN_URL = 'https://bitminded.ch/auth'
+const SUBSCRIBE_URL = 'https://bitminded.ch/subscribe?tool=${productSlug}'
+const VALIDATE_URL = '${supabaseFunctionsUrl}/validate-license'
+const SUPABASE_ANON_KEY = '${supabaseAnonKey}'
+
+function getCookie(name, cookieHeader) {
+  if (!cookieHeader) return null
+  const parts = cookieHeader.split(';').map(p => p.trim())
+  for (const part of parts) {
+    if (part.startsWith(name + '=')) {
+      return part.substring(name.length + 1)
     }
-    
-    // Check authentication cookie
-    const authCookie = request.headers.get('Cookie')
-    const hasAuth = authCookie && authCookie.includes('supabase-auth-token')
-    
-    if (!hasAuth) {
-      // Redirect to login page
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Location': \`https://bitminded.ch/auth?redirect=\${encodeURIComponent(url.href)}\`
-        }
-      })
-    }
-    
-    // TODO: Add subscription validation
-    // const isValid = await validateSubscription(authCookie, '${productSlug}')
-    // if (!isValid) {
-    //   return new Response('Subscription required', { status: 403 })
-    // }
-    
-    // For now, just proxy the request or serve static content
-    // In production, you would serve your actual PWA here
-    return new Response('Worker created for ${productName}. Configure your routing here.', {
-      headers: { 'Content-Type': 'text/html' }
+  }
+  return null
+}
+
+function getToken(req) {
+  const cookieHeader = req.headers.get('Cookie') || ''
+  // Try common cookie names set by Supabase or app
+  const candidates = ['sb-access-token', 'supabase-auth-token']
+  for (const name of candidates) {
+    const v = getCookie(name, cookieHeader)
+    if (v) return v
+  }
+  const authHeader = req.headers.get('Authorization') || ''
+  if (authHeader.startsWith('Bearer ')) return authHeader.slice(7)
+  return null
+}
+
+async function handleRequest(request) {
+  const url = new URL(request.url)
+
+  // Bypass trivial assets to avoid noisy errors before app routing is wired
+  if (url.pathname === '/favicon.ico' || url.pathname === '/robots.txt') {
+    return new Response(null, { status: 204 })
+  }
+
+  const token = getToken(request)
+
+  // Lightweight debug mode: append ?debug=1 to see diagnostics (no secrets leaked)
+  const debug = url.searchParams.get('debug') === '1'
+  if (!token) {
+    return new Response(null, {
+      status: 302,
+      headers: { 'Location': LOGIN_URL + '?redirect=' + encodeURIComponent(url.href) }
     })
   }
-}`
+
+  try {
+    const validateRes = await fetch(VALIDATE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ product_slug: '${productSlug}' })
+    })
+
+    if (!validateRes.ok) {
+      if (debug) {
+        const bodyTxt = await validateRes.text().catch(() => '')
+        const diag = { validate_url: VALIDATE_URL, status: validateRes.status, token_present: !!token, token_len: token ? token.length : 0, body_preview: bodyTxt.slice(0, 160) }
+        return new Response(JSON.stringify(diag), { status: 502, headers: { 'Content-Type': 'application/json' } })
+      }
+      return new Response('Access check failed: ' + validateRes.status, { status: 502 })
+    }
+
+    const result = await validateRes.json()
+    if (!result || !result.allowed) {
+      if (debug) {
+        const diag = { validate_url: VALIDATE_URL, status: 200, token_present: !!token, token_len: token ? token.length : 0, result }
+        return new Response(JSON.stringify(diag), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      }
+      return new Response(null, { status: 302, headers: { 'Location': SUBSCRIBE_URL } })
+    }
+  } catch (e) {
+    if (debug) {
+      const diag = { error: 'validation_exception', message: String(e), validate_url: VALIDATE_URL, token_present: !!token }
+      return new Response(JSON.stringify(diag), { status: 502, headers: { 'Content-Type': 'application/json' } })
+    }
+    return new Response('Access validation error', { status: 502 })
+  }
+
+  return new Response('Access granted for ${productName}. Configure proxy to app origin or Pages.', {
+    headers: { 'Content-Type': 'text/plain' }
+  })
+}
+
+addEventListener('fetch', event => {
+  event.respondWith(handleRequest(event.request))
+})
+`
 }
 

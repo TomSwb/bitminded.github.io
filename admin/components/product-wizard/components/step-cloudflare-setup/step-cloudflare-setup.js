@@ -115,10 +115,19 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             this.elements.createWorkerBtn.disabled = true;
             this.elements.createWorkerBtn.innerHTML = '<span class="btn-icon">⏳</span><span>Creating Worker...</span>';
 
+            // Derive Supabase functions base from frontend config to avoid project mismatch
+            const supabaseBaseUrl = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || '';
+            const supabaseFunctionsUrl = supabaseBaseUrl
+                ? supabaseBaseUrl.replace('.supabase.co', '.functions.supabase.co')
+                : '';
+            const supabaseAnonKey = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || '';
+
             const workerData = {
                 subdomain,
                 productName: basicInfo.name || 'Product',
-                productSlug: basicInfo.slug || subdomain
+                productSlug: basicInfo.slug || subdomain,
+                supabaseFunctionsUrl,
+                supabaseAnonKey
             };
 
             console.log('☁️ Creating Cloudflare Worker:', workerData);
