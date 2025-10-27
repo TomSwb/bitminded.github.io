@@ -43,8 +43,6 @@ if (typeof window.stepBasicInfoTranslations === 'undefined') {
                     } catch (i18nextError) {
                         console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
-                } else {
-                    console.log('ℹ️ i18next not ready, using standalone translations');
                 }
 
                 return true;

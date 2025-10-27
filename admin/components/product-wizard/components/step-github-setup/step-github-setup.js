@@ -23,13 +23,10 @@ if (typeof window.StepGithubSetup === 'undefined') {
          * Initialize the component
          */
         async init() {
-            console.log('📝 Initializing Step 3: GitHub Repository Setup...');
             
             this.initializeElements();
             this.attachEventListeners();
             this.setupDefaults();
-            
-            console.log('✅ Step 3: GitHub Repository Setup initialized successfully');
         }
 
         /**
@@ -112,6 +109,11 @@ if (typeof window.StepGithubSetup === 'undefined') {
                     
                     // Show the final state
                     this.showFinalState();
+
+                    // Mark step as completed
+                    if (window.productWizard) {
+                        window.productWizard.markStepCompleted(3);
+                    }
                 }
             }
 
@@ -274,6 +276,11 @@ if (typeof window.StepGithubSetup === 'undefined') {
 
                     // Show success
                     this.updateGitHubStatus(result.data);
+
+                    // Mark step as completed
+                    if (window.productWizard) {
+                        window.productWizard.markStepCompleted(3);
+                    }
                 } else {
                     throw new Error(result.error || 'Failed to create repository');
                 }

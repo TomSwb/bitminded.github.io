@@ -20,7 +20,6 @@ class StepBasicInfo {
         }
 
         try {
-            console.log('📝 Initializing Step 1: Basic Information...');
 
             // Initialize DOM elements
             this.initializeElements();
@@ -38,7 +37,6 @@ class StepBasicInfo {
             this.showTranslatableContent();
 
             this.isInitialized = true;
-            console.log('✅ Step 1: Basic Information initialized successfully');
 
         } catch (error) {
             console.error('❌ Step 1: Basic Information: Failed to initialize:', error);
