@@ -142,7 +142,7 @@
     color: var(--color-text-primary);
 }
 
-.step-cloud jewel-setup__conditions-snippet code {
+.step-cloudflare-setup__code-snippet code {
     font-family: 'Courier New', monospace;
     background: transparent;
 }
@@ -170,5 +170,87 @@
 
 .step-cloudflare-setup__info strong {
     color: var(--color-text-primary);
+}
+
+/* Create Button */
+.step-cloudflare-setup__create-section {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+}
+
+.step-cloudflare-setup__create-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 2rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.step-cloudflare-setup__create-btn:hover:not(:disabled) {
+    background: var(--color-secondary);
+    transform: translateY(-1px);
+}
+
+.step-cloudflare-setup__create-btn:disabled {
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.step-cloudflare-setup__create-btn .btn-icon {
+    font-size: 1.25rem;
+}
+
+/* Status */
+.step-cloudflare-setup__status {
+    margin: 1.5rem 0;
+}
+
+.step-cloudflare-setup__status-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-primary);
+    border-radius: 6px;
+}
+
+.step-cloudflare-setup__status-item--success {
+    border-color: var(--color-success, green);
+}
+
+.step-cloudflare-setup__status-icon {
+    font-size: 1.5rem;
+}
+
+.step-cloudflare-setup__status-content strong {
+    display: block;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.step-cloudflare-setup__status-content p {
+    margin: 0.25rem 0;
+    color: var(--color-text-secondary);
+}
+
+.step-cloudflare-setup__status-content a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.step-cloudflare-setup__status-content a:hover {
+    text-decoration: underline;
 }
 
