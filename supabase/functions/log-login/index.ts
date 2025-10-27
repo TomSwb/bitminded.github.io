@@ -50,9 +50,37 @@ serve(async (req) => {
                       req.headers.get('cf-connecting-ip') ||
                       req.headers.get('x-real-ip') ||
                       null
+    
+    // Get location from IP address using ipapi.co (free geolocation API)
+    let location = null
+    let locationCity = null
+    let locationCountry = null
+    
+    if (ipAddress && ipAddress !== '127.0.0.1' && !ipAddress.startsWith('192.168.')) {
+      try {
+        const geoResponse = await fetch(`https://ipapi.co/${ipAddress}/json/`)
+        if (geoResponse.ok) {
+          const geoData = await geoResponse.json()
+          locationCity = geoData.city || null
+          locationCountry = geoData.country_name || null
+          
+          // Format combined location: "City, Country" or just "Country" if no city
+          if (locationCity && locationCountry) {
+            location = `${locationCity}, ${locationCountry}`
+          } else if (locationCountry) {
+            location = locationCountry
+          }
+          console.log(`📍 Location resolved: ${location}`)
+        }
+      } catch (geoError) {
+        console.warn('⚠️ Failed to resolve location from IP:', geoError)
+        // Don't fail the whole request if geolocation fails
+      }
+    }
 
     console.log(`📊 Logging login attempt for user ${body.user_id}`)
     console.log(`   IP: ${ipAddress}`)
+    console.log(`   Location: ${location || 'Unknown'}`)
     console.log(`   Device: ${body.device_type} • ${body.browser} • ${body.os}`)
     console.log(`   Success: ${body.success}`)
     console.log(`   2FA: ${body.used_2fa}`)
@@ -70,6 +98,8 @@ serve(async (req) => {
         device_type: body.device_type,
         browser: body.browser,
         os: body.os,
+        location_city: locationCity,
+        location_country: locationCountry,
         used_2fa: body.used_2fa,
         session_id: body.session_id
       })
@@ -88,6 +118,45 @@ serve(async (req) => {
     }
 
     console.log('✅ Login attempt logged successfully')
+    
+    // If login was successful and has session_id, also create/update user_sessions record
+    if (body.success && body.session_id) {
+      try {
+        console.log('📝 Creating user_sessions record...')
+        
+        // Decode JWT to get expiration
+        const jwtPayload = body.session_id.split('.')[1]
+        const decoded = JSON.parse(atob(jwtPayload))
+        const expiresAt = new Date(decoded.exp * 1000).toISOString()
+        
+        const { error: sessionError } = await supabaseAdmin
+          .from('user_sessions')
+          .upsert({
+            user_id: body.user_id,
+            session_token: body.session_id,
+            expires_at: expiresAt,
+            last_accessed: new Date().toISOString(),
+            user_agent: body.user_agent,
+            ip_address: ipAddress,
+            location: location, // Geolocation from IP address
+            device_type: body.device_type,
+            browser: body.browser,
+            os: body.os
+          }, {
+            onConflict: 'session_token'
+          })
+        
+        if (sessionError) {
+          console.warn('⚠️ Failed to create user_sessions record:', sessionError)
+          // Don't fail the whole request if this fails
+        } else {
+          console.log('✅ User session record created')
+        }
+      } catch (e) {
+        console.warn('⚠️ Error creating user_sessions record:', e)
+        // Don't fail the whole request
+      }
+    }
 
     return new Response(
       JSON.stringify({ 

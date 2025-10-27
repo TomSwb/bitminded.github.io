@@ -30,7 +30,7 @@ class TwoFactorAuth {
                 return;
             }
 
-            console.log('🔐 2FA: Initializing...');
+            // Initializing
 
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -43,7 +43,7 @@ class TwoFactorAuth {
             await this.initializeTranslations();
 
             this.isInitialized = true;
-            console.log('✅ 2FA: Initialized successfully');
+            // Initialized
             
             // Final translation update to ensure everything is translated
             setTimeout(() => {
@@ -170,7 +170,7 @@ class TwoFactorAuth {
      */
     async load2FAStatus() {
         try {
-            console.log('🔧 2FA: Loading status...');
+            // Loading status
             this.showLoading(true);
             this.hideError();
 
@@ -184,7 +184,7 @@ class TwoFactorAuth {
                 return;
             }
 
-            console.log('🔧 2FA: User found:', user.id);
+            // User found
 
             // Query user_2fa table
             const { data: twoFAData, error } = await supabase
@@ -205,7 +205,7 @@ class TwoFactorAuth {
             const isEnabled = twoFAData?.is_enabled || false;
             const lastVerified = twoFAData?.last_verified_at || null;
             
-            console.log('✅ 2FA: Status loaded - Enabled:', isEnabled, 'Last verified:', lastVerified);
+            // Status loaded
             this.update2FAStatus(isEnabled, lastVerified);
             this.showLoading(false);
 
@@ -272,7 +272,7 @@ class TwoFactorAuth {
         // Trigger translation update
         this.updateTranslations();
 
-        console.log('✅ 2FA: UI updated - Enabled:', isEnabled);
+        // UI updated
     }
 
     /**

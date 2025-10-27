@@ -38,7 +38,7 @@ class NotificationsPreferences {
                 return;
             }
 
-            console.log('🔔 Notifications Preferences: Initializing...');
+            // Initializing
 
             // Wait for Supabase to be ready
             await this.waitForSupabase();
@@ -57,7 +57,7 @@ class NotificationsPreferences {
             await this.initializeTranslations();
 
             this.isInitialized = true;
-            console.log('✅ Notifications Preferences: Initialized successfully');
+            // Initialized
             
             // Final translation update
             setTimeout(() => {
@@ -100,7 +100,7 @@ class NotificationsPreferences {
             }
             
             this.user = user;
-            console.log('✅ Notifications Preferences: User loaded');
+            // User loaded
             
             // Load user preferences
             await this.loadPreferences();
@@ -124,13 +124,33 @@ class NotificationsPreferences {
             
             if (error) {
                 console.error('Error loading preferences:', error);
-                // Use defaults if no preferences exist
+                
+                // If no record exists (PGRST116), create one
+                if (error.code === 'PGRST116') {
+                    console.log('📝 Creating new user preferences record...');
+                    await this.createUserPreferences();
+                    return;
+                }
+                
+                // Use defaults if other error
                 this.preferences = {
                     email_notifications: true,
                     notification_preferences: {
                         email: {
-                            security_alerts: true,
-                            account_updates: true
+                            password_changed: true,
+                            two_fa: true,
+                            new_login: true,
+                            username_changed: true,
+                            product_updates: false,
+                            marketing: false
+                        },
+                        inapp: {
+                            password_changed: true,
+                            two_fa: true,
+                            new_login: true,
+                            username_changed: true,
+                            product_updates: false,
+                            marketing: false
                         }
                     }
                 };
@@ -140,14 +160,26 @@ class NotificationsPreferences {
                 if (!this.preferences.notification_preferences) {
                     this.preferences.notification_preferences = {
                         email: {
-                            security_alerts: true,
-                            account_updates: true
+                            password_changed: true,
+                            two_fa: true,
+                            new_login: true,
+                            username_changed: true,
+                            product_updates: false,
+                            marketing: false
+                        },
+                        inapp: {
+                            password_changed: true,
+                            two_fa: true,
+                            new_login: true,
+                            username_changed: true,
+                            product_updates: false,
+                            marketing: false
                         }
                     };
                 }
             }
             
-            console.log('✅ Notifications Preferences: Preferences loaded', this.preferences);
+            console.log('✅ Preferences loaded:', this.preferences);
             
         } catch (error) {
             console.error('❌ Notifications Preferences: Failed to load preferences:', error);
@@ -156,8 +188,90 @@ class NotificationsPreferences {
                 email_notifications: true,
                 notification_preferences: {
                     email: {
-                        security_alerts: true,
-                        account_updates: true
+                        password_changed: true,
+                        two_fa: true,
+                        new_login: true,
+                        username_changed: true,
+                        product_updates: false,
+                        marketing: false
+                    },
+                    inapp: {
+                        password_changed: true,
+                        two_fa: true,
+                        new_login: true,
+                        username_changed: true,
+                        product_updates: false,
+                        marketing: false
+                    }
+                }
+            };
+        }
+    }
+
+    /**
+     * Create user preferences record if it doesn't exist
+     */
+    async createUserPreferences() {
+        try {
+            const defaultPreferences = {
+                email_notifications: true,
+                language: 'en',
+                theme: 'dark',
+                notification_preferences: {
+                    email: {
+                        password_changed: true,
+                        two_fa: true,
+                        new_login: true,
+                        username_changed: true,
+                        product_updates: false,
+                        marketing: false
+                    },
+                    inapp: {
+                        password_changed: true,
+                        two_fa: true,
+                        new_login: true,
+                        username_changed: true,
+                        product_updates: false,
+                        marketing: false
+                    }
+                }
+            };
+
+            const { data, error } = await supabase
+                .from('user_preferences')
+                .insert({
+                    user_id: this.user.id,
+                    ...defaultPreferences
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            this.preferences = data;
+            console.log('✅ User preferences record created successfully');
+            
+        } catch (error) {
+            console.error('❌ Failed to create user preferences:', error);
+            // Fall back to defaults
+            this.preferences = {
+                email_notifications: true,
+                notification_preferences: {
+                    email: {
+                        password_changed: true,
+                        two_fa: true,
+                        new_login: true,
+                        username_changed: true,
+                        product_updates: false,
+                        marketing: false
+                    },
+                    inapp: {
+                        password_changed: true,
+                        two_fa: true,
+                        new_login: true,
+                        username_changed: true,
+                        product_updates: false,
+                        marketing: false
                     }
                 }
             };
@@ -303,7 +417,21 @@ class NotificationsPreferences {
                 .update(preferences)
                 .eq('user_id', this.user.id);
 
-            if (error) throw error;
+            if (error) {
+                // If update fails because record doesn't exist, try to create it
+                if (error.code === 'PGRST116') {
+                    console.log('📝 Record not found, creating new preferences...');
+                    await this.createUserPreferences();
+                    // Try update again with the new record
+                    const { error: updateError } = await supabase
+                        .from('user_preferences')
+                        .update(preferences)
+                        .eq('user_id', this.user.id);
+                    if (updateError) throw updateError;
+                } else {
+                    throw error;
+                }
+            }
 
             // Update local preferences
             this.preferences = { ...this.preferences, ...preferences };

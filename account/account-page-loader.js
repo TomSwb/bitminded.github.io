@@ -152,7 +152,7 @@ class AccountPageLoader {
                 
                 // Mark as loaded
                 this.loadedComponents.set(sectionName, true);
-                console.log(`✅ Section loaded: ${sectionName}`);
+                // Section loaded
             } else {
                 throw new Error('ComponentLoader not available');
             }
@@ -182,7 +182,7 @@ class AccountPageLoader {
             });
             
             if (response.ok) {
-                console.log(`✅ Component exists: ${componentName}`);
+                // Component exists
                 return true;
             } else {
                 // Component not found
@@ -261,7 +261,7 @@ class AccountPageLoader {
                 return; // Already on this section
             }
 
-            console.log(`🔄 Switching to section: ${sectionName}`);
+            // Switching section
 
             // Load section if not already loaded
             await this.loadSection(sectionName);
@@ -274,7 +274,7 @@ class AccountPageLoader {
                 window.accountLayout.currentSection = sectionName;
             }
 
-            console.log(`✅ Switched to section: ${sectionName}`);
+            // Switched section
 
         } catch (error) {
             console.error(`❌ Failed to switch to section ${sectionName}:`, error);

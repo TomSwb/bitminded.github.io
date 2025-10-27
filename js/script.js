@@ -82,26 +82,20 @@ async function loadThemeSwitcher() {
 }
 
 async function loadNotificationCenter() {
+    // Don't load notification center on auth page
+    if (window.location.pathname.includes('/auth')) {
+        return;
+    }
+    
     try {
-        // Check if user is authenticated
-        if (typeof supabase === 'undefined') {
-            console.log('🔔 Supabase not ready, waiting...');
-            setTimeout(loadNotificationCenter, 500);
-            return;
-        }
-
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-            console.log('🔔 User not authenticated, skipping notification center');
-            return;
-        }
-
+        // Always load the notification center component
+        // It will check auth internally and hide itself if not authenticated
+        // This prevents duplicate getUser() calls that trigger token refreshes
         await componentLoader.load('notification-center', {
             container: 'header',
             priority: 'high'
         });
-        console.log('✅ Notification center component loaded');
+        // Notification center loaded silently
     } catch (error) {
         console.error('❌ Failed to load notification center component:', error);
     }
@@ -110,7 +104,7 @@ async function loadNotificationCenter() {
 async function loadAuthButtons() {
     // Don't load auth buttons on auth page
     if (window.location.pathname.includes('/auth')) {
-        console.log('🔒 Skipping auth buttons load on auth page');
+        // Skipping auth buttons on auth page
         return;
     }
     

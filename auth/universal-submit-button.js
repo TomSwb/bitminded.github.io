@@ -23,7 +23,7 @@ class UniversalSubmitButton {
             this.updateButtonText();
             this.isInitialized = true;
             
-            console.log('✅ Universal Submit Button initialized successfully');
+            // Universal Submit Button initialized silently
         } catch (error) {
             console.error('❌ Failed to initialize Universal Submit Button:', error);
         }

@@ -18,7 +18,7 @@ class DeleteAccountTranslations {
         }
 
         try {
-            console.log('🔧 Initializing delete account translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class DeleteAccountTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Delete account translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize delete account translations:', error);
@@ -45,7 +45,7 @@ class DeleteAccountTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Delete account translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load delete account translations:', error);
@@ -88,7 +88,7 @@ class DeleteAccountTranslations {
             element.style.opacity = '1';
         });
 
-        console.log(`✅ Delete account translations updated for language: ${currentLanguage}`);
+        // Translations updated
     }
 
     /**

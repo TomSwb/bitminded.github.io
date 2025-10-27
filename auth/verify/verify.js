@@ -134,64 +134,38 @@ class EmailVerification {
             console.log('🔍 Hash:', window.location.hash);
             console.log('🔍 Search:', window.location.search);
             
-            // Handle email change verification
+            // Handle custom email change verification
             if (urlParams.type === 'email_change' && urlParams.token) {
-                console.log('🔄 Processing email change verification...');
+                console.log('🔄 Processing custom email change verification...');
                 console.log('🔄 Token:', urlParams.token);
                 console.log('🔄 Type:', urlParams.type);
                 
-                const { data, error } = await window.supabase.auth.verifyOtp({
-                    token_hash: urlParams.token,
-                    type: 'email_change'
+                // Verify the custom token with our Edge Function
+                const { data, error } = await window.supabase.functions.invoke('verify-email-change', {
+                    body: {
+                        token: urlParams.token
+                    }
                 });
                 
                 console.log('📧 Email change verification response:', { data, error });
                 
                 if (error) {
-                    throw error;
+                    throw new Error(error.message || 'Failed to verify email change token');
                 }
                 
-                if (data.user) {
-                    console.log('✅ Email change verification successful');
-                    console.log('✅ User after email change:', data.user);
-                    console.log('✅ User email after change:', data.user.email);
-                    
-                    // Update email in user_profiles table to keep in sync
-                    const { error: updateError } = await window.supabase
-                        .from('user_profiles')
-                        .update({ email: data.user.email })
-                        .eq('id', data.user.id);
-                    
-                    if (updateError) {
-                        console.error('❌ Failed to update email in user_profiles:', updateError);
-                    } else {
-                        console.log('✅ Email updated in user_profiles');
-                    }
-                    
-                    // Log the login activity for email change verification (creates new session)
-                    try {
-                        const { error: logError } = await window.supabase.functions.invoke('log-login', {
-                            body: { user_id: data.user.id }
-                        });
-                        
-                        if (logError) {
-                            console.warn('⚠️ Failed to log login activity:', logError);
-                        } else {
-                            console.log('✅ Login activity logged');
-                        }
-                    } catch (logErr) {
-                        console.warn('⚠️ Error logging login activity:', logErr);
-                    }
-                    
-                    this.showSuccess();
-                    // Redirect to account profile after 3 seconds
-                    setTimeout(() => {
-                        window.location.href = '/account/?section=profile';
-                    }, 3000);
-                    return;
-                } else {
-                    throw new Error('No user data received from email change verification');
+                if (!data.success) {
+                    throw new Error(data.error || 'Email change verification failed');
                 }
+                
+                console.log('✅ Email change verification successful');
+                console.log('✅ New email:', data.newEmail);
+                
+                this.showSuccess();
+                // Redirect to account profile after 3 seconds
+                setTimeout(() => {
+                    window.location.href = '/account/?section=profile';
+                }, 3000);
+                return;
             }
             
             // Handle regular signup verification

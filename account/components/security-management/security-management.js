@@ -22,7 +22,7 @@ class SecurityManagement {
                 return;
             }
 
-            console.log('🛡️ Security Management: Initializing...');
+            // Initializing
 
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -32,7 +32,7 @@ class SecurityManagement {
             }
 
             this.isInitialized = true;
-            console.log('✅ Security Management: Initialized successfully');
+            // Initialized
 
         } catch (error) {
             console.error('❌ Security Management: Failed to initialize:', error);
@@ -108,7 +108,7 @@ class SecurityManagement {
                 return; // Already on this section
             }
 
-            console.log(`🔄 Security Management: Switching to section: ${sectionName}`);
+            // Switching section
 
             // Hide current section
             this.hideCurrentSection();
@@ -124,7 +124,7 @@ class SecurityManagement {
             // Update current section
             this.currentSection = sectionName;
 
-            console.log(`✅ Security Management: Switched to section: ${sectionName}`);
+            // Switched section
 
         } catch (error) {
             console.error('❌ Security Management: Failed to switch section:', error);
@@ -176,7 +176,7 @@ class SecurityManagement {
      */
     async loadSectionContent(sectionName) {
         try {
-            console.log(`📦 Security Management: Loading content for section: ${sectionName}`);
+            // Loading content
 
             const componentMap = {
                 'password': 'password-change',
@@ -209,7 +209,7 @@ class SecurityManagement {
                 
                 // Mark as loaded
                 this.loadedComponents.add(sectionName);
-                console.log(`✅ Security Management: Loaded component: ${componentName}`);
+                // Component loaded
                 
                 // Update translations after component is loaded
                 this.updateTranslations();
@@ -267,7 +267,7 @@ class SecurityManagement {
      */
     async load2FAStatus() {
         try {
-            console.log('🔧 Security Management: Loading 2FA status...');
+            // Loading 2FA status
             
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
@@ -292,7 +292,7 @@ class SecurityManagement {
 
             // Update UI based on status
             const isEnabled = twoFAData?.is_enabled || false;
-            console.log('✅ Security Management: 2FA status loaded - Enabled:', isEnabled);
+            // 2FA status loaded
             this.update2FAStatus(isEnabled);
 
         } catch (error) {
@@ -306,7 +306,7 @@ class SecurityManagement {
      */
     async loadPasswordStatus() {
         try {
-            console.log('🔧 Security Management: Loading password status...');
+            // Loading password status
             
             // Get password last changed date from database
             const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -323,7 +323,7 @@ class SecurityManagement {
                 return;
             }
             
-            console.log('🔧 Security Management: User found:', user.id, user.email);
+            // User found
             
             const { data: profile, error } = await supabase
                 .from('user_profiles')
@@ -340,13 +340,13 @@ class SecurityManagement {
                 this.lastPasswordChangedDate = new Date(profile.password_last_changed);
                 this.updatePasswordStatus(this.lastPasswordChangedDate);
             } else {
-                console.log('🔧 Security Management: No password_last_changed date found, showing "Recently"');
+                // No password date
                 // If no date stored, show "Recently" as fallback
                 this.lastPasswordChangedDate = null;
                 this.updatePasswordStatus(null);
             }
 
-            console.log('📝 Security Management: Password status loaded');
+            // Password status loaded
 
         } catch (error) {
             console.error('❌ Security Management: Failed to load password status:', error);
@@ -376,7 +376,7 @@ class SecurityManagement {
                 statusElement.classList.remove('translatable-content');
                 statusElement.removeAttribute('data-translation-key');
                 statusElement.textContent = `${lastChangedText}${formattedDate}`;
-                console.log('🔧 Security Management: Updated password status display:', `${lastChangedText}${formattedDate}`);
+                // Password display updated
             } else {
                 // Restore translatable content for "Recently"
                 statusElement.classList.add('translatable-content');
@@ -387,7 +387,7 @@ class SecurityManagement {
                     recentlyText = window.securityManagementTranslations.getTranslation('Last changed: Recently');
                 }
                 statusElement.textContent = recentlyText;
-                console.log('🔧 Security Management: Updated password status display: Recently');
+                // Password display updated
             }
         } else {
             console.error('❌ Security Management: Status element not found');
@@ -415,7 +415,7 @@ class SecurityManagement {
     async loadLoginActivityStatus() {
         try {
             // TODO: Implement login activity status check when login activity component is ready
-            console.log('📝 Security Management: Login activity status loaded (placeholder)');
+            // Login activity loaded
 
         } catch (error) {
             console.error('❌ Security Management: Failed to load login activity status:', error);

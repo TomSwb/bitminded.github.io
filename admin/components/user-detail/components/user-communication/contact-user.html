@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact User - BitMinded Admin</title>
+    
+    <!-- Browser Tab icon -->
+    <link rel="icon" type="image/x-icon" href="../../../../../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../../../../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../../../../icons/favicon-32x32.png">
+    
+    <!-- Apple home-saved app icon -->
+    <link rel="apple-touch-icon" href="../../../../../icons/apple-touch-icon.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../../../css/critical.css">
+    <link rel="stylesheet" href="../../../../../css/main.css">
+    <link rel="stylesheet" href="shared/message-composition.css">
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/i18next@23.7.6/i18next.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../../../../js/env-config.js"></script>
+    <script src="../../../../../js/supabase-config.js"></script>
+    <script src="../../../../../js/notification-helper.js"></script>
+    <script src="contact-user-translations.js"></script>
+    <script src="contact-user-page.js"></script>
+</head>
+<body>
+    <div class="contact-user-page">
+        <!-- Header -->
+        <header class="contact-user-page__header">
+            <button id="back-to-users" class="contact-user-page__back-button">
+                <span class="translatable-content" data-translation-key="Back to Users">Back to Users</span>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="contact-user-page__main">
+                <!-- User Info Section -->
+                <div class="contact-user-page__user-section">
+                    <div class="contact-user-page__user-info">
+                        <h2 id="contact-user-title" class="contact-user-page__title">
+                            <!-- Will be populated by JavaScript -->
+                        </h2>
+                        <div class="contact-user-page__user-details">
+                            <div class="contact-user-page__user-detail">
+                                <span class="translatable-content" data-translation-key="Email">Email</span>: <strong id="user-email"></strong>
+                            </div>
+                            <div class="contact-user-page__user-detail">
+                                <span class="translatable-content" data-translation-key="Language">Language</span>: 
+                                <span id="language-flag"></span>
+                                <span id="language-text"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Communication Form -->
+                <form id="contact-form" class="contact-user-page__form">
+                    <!-- Communication Type Selection -->
+                    <div class="contact-user-page__section">
+                        <h3 class="contact-user-page__section-title">
+                            <span class="translatable-content" data-translation-key="Communication Type">Communication Type</span>
+                        </h3>
+                        <div class="contact-user-page__type-selection">
+                            <button type="button" id="send-notification-btn" class="contact-user-page__type-btn contact-user-page__type-btn--active">
+                                <span class="translatable-content" data-translation-key="Send Notification">Send Notification</span>
+                            </button>
+                            <button type="button" id="send-email-btn" class="contact-user-page__type-btn">
+                                <span class="translatable-content" data-translation-key="Send Email">Send Email</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Subject -->
+                    <div id="subject-section" class="contact-user-page__section contact-user-page__section--hidden">
+                        <label for="message-subject" class="contact-user-page__label">
+                            <span class="translatable-content" data-translation-key="Subject">Subject</span>
+                            <span class="contact-user-page__required">*</span>
+                        </label>
+                        <input type="text" id="message-subject" class="contact-user-page__input" required>
+                    </div>
+
+                    <!-- Message Body -->
+                    <div class="contact-user-page__section">
+                        <label for="message-body" class="contact-user-page__label">
+                            <span class="translatable-content" data-translation-key="Message">Message</span>
+                            <span class="contact-user-page__required">*</span>
+                        </label>
+                        <div id="message-greeting" class="contact-user-page__greeting">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <textarea id="message-body" class="contact-user-page__textarea" rows="8" required></textarea>
+                    </div>
+
+                    <!-- Signature Selection -->
+                    <div class="contact-user-page__section">
+                        <div id="signature-preview" class="contact-user-page__signature-preview">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <label for="message-signature" class="contact-user-page__label">
+                            <span class="translatable-content" data-translation-key="Signature">Signature</span>
+                        </label>
+                        <select id="message-signature" class="contact-user-page__select">
+                            <option value="" class="translatable-content" data-translation-key="No signature">No signature</option>
+                        </select>
+                    </div>
+
+                    <!-- Sender Email (for emails only) -->
+                    <div id="sender-section" class="contact-user-page__section contact-user-page__section--hidden">
+                        <label for="sender-email" class="contact-user-page__label">
+                            <span class="translatable-content" data-translation-key="Sender Email">Sender Email</span>
+                            <span class="contact-user-page__required">*</span>
+                        </label>
+                        <select id="sender-email" class="contact-user-page__select" required>
+                            <option value="">Select sender email</option>
+                            <option value="legal@bitminded.ch">legal@bitminded.ch</option>
+                            <option value="contact@bitminded.ch">contact@bitminded.ch</option>
+                            <option value="support@bitminded.ch">support@bitminded.ch</option>
+                            <option value="noreply@bitminded.ch">noreply@bitminded.ch</option>
+                            <option value="dev@bitminded.ch">dev@bitminded.ch</option>
+                        </select>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="contact-user-page__actions">
+                        <button type="submit" id="send-message-btn" class="contact-user-page__send-btn">
+                            <span id="send-btn-text" class="translatable-content" data-translation-key="Send Notification">Send Notification</span>
+                        </button>
+                        <button type="button" id="cancel-btn" class="contact-user-page__cancel-btn">
+                            <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                        </button>
+                    </div>
+                </form>
+        </main>
+    </div>
+</body>
+</html>

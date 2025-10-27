@@ -1,0 +1,65 @@
+<!-- Step 1: Basic Information -->
+<div class="step-basic-info" id="step-basic-info">
+    <div class="step-basic-info__header">
+        <h2 class="step-basic-info__title translatable-content" data-translation-key="Basic Information">Basic Information</h2>
+        <p class="step-basic-info__description translatable-content" data-translation-key="step1_description">Let's start with the basic details about your product</p>
+    </div>
+    
+    <div class="step-basic-info__fields">
+        <div class="step-basic-info__field-group">
+            <label for="product-name" class="step-basic-info__label">
+                <span class="translatable-content" data-translation-key="Product Name">Product Name</span>
+                <span class="required">*</span>
+            </label>
+            <input type="text" id="product-name" name="name" class="step-basic-info__input" required>
+            <small class="step-basic-info__help translatable-content" data-translation-key="product_name_help">The display name for your product</small>
+        </div>
+
+        <div class="step-basic-info__field-group">
+            <label for="product-slug" class="step-basic-info__label">
+                <span class="translatable-content" data-translation-key="Product Slug">Product Slug</span>
+                <span class="required">*</span>
+            </label>
+            <input type="text" id="product-slug" name="slug" class="step-basic-info__input" required>
+            <small class="step-basic-info__help translatable-content" data-translation-key="product_slug_help">URL-friendly identifier (e.g., measure-mate)</small>
+        </div>
+
+        <div class="step-basic-info__field-group">
+            <label for="product-category" class="step-basic-info__label">
+                <span class="translatable-content" data-translation-key="Category">Category</span>
+            </label>
+            <div class="step-basic-info__category-container">
+                <select id="product-category" name="category_id" class="step-basic-info__select">
+                    <option value="">Select a category...</option>
+                </select>
+                <button type="button" id="add-category-btn" class="step-basic-info__btn step-basic-info__btn--outline step-basic-info__btn--small">
+                    <span class="translatable-content" data-translation-key="Add New Category">Add New Category</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="step-basic-info__field-group">
+            <label for="product-short-description" class="step-basic-info__label">
+                <span class="translatable-content" data-translation-key="Short Description">Short Description</span>
+            </label>
+            <textarea id="product-short-description" name="short_description" class="step-basic-info__textarea" rows="2"></textarea>
+            <small class="step-basic-info__help translatable-content" data-translation-key="short_description_help">Brief description shown in product cards</small>
+        </div>
+
+        <div class="step-basic-info__field-group">
+            <label for="product-description" class="step-basic-info__label">
+                <span class="translatable-content" data-translation-key="Description">Description</span>
+            </label>
+            <textarea id="product-description" name="description" class="step-basic-info__textarea" rows="4"></textarea>
+            <small class="step-basic-info__help translatable-content" data-translation-key="description_help">Detailed description of your product</small>
+        </div>
+
+        <div class="step-basic-info__field-group">
+            <label for="product-tags" class="step-basic-info__label">
+                <span class="translatable-content" data-translation-key="Tags">Tags</span>
+            </label>
+            <input type="text" id="product-tags" name="tags" class="step-basic-info__input" placeholder="productivity, tools, automation">
+            <small class="step-basic-info__help translatable-content" data-translation-key="tags_help">Comma-separated tags for filtering</small>
+        </div>
+    </div>
+</div>

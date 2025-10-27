@@ -23,7 +23,7 @@ class ProfileManagement {
         }
 
         try {
-            console.log('🔧 Initializing profile management component...');
+            // Initializing silently
             
             // Load user profile data
             await this.loadUserProfile();
@@ -41,7 +41,7 @@ class ProfileManagement {
             this.updateUI();
             
             this.isInitialized = true;
-            console.log('✅ Profile management component initialized successfully');
+            // Initialized silently
             
             // Dispatch initialization event for translations
             window.dispatchEvent(new CustomEvent('profileManagementInitialized'));
@@ -133,6 +133,16 @@ class ProfileManagement {
                 const emailComponent = new window.EmailChange();
                 await emailComponent.init();
                 this.components.set('email', emailComponent);
+            }
+
+            // Load personal info component
+            await this.loadComponent('personal-info', '#personal-info-component-container');
+            
+            // Initialize personal info component after HTML is loaded
+            if (window.PersonalInfo) {
+                const personalInfoComponent = new window.PersonalInfo();
+                await personalInfoComponent.init();
+                this.components.set('personalInfo', personalInfoComponent);
             }
 
         } catch (error) {

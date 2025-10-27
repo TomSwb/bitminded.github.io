@@ -18,7 +18,7 @@ class ExportDataTranslations {
         }
 
         try {
-            console.log('🔧 Initializing export data translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class ExportDataTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Export data translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize export data translations:', error);
@@ -45,7 +45,7 @@ class ExportDataTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Export data translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load export data translations:', error);
@@ -88,7 +88,7 @@ class ExportDataTranslations {
             element.style.opacity = '1';
         });
 
-        console.log(`✅ Export data translations updated for language: ${currentLanguage}`);
+        // Translations updated
     }
 
     /**

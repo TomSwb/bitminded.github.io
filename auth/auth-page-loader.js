@@ -20,14 +20,10 @@ class AuthPageLoader {
 
 
         try {
-            console.log('🚀 AuthPageLoader initializing...');
-            console.log('📍 Document ready state:', document.readyState);
-            console.log('🌐 Initial URL:', window.location.href);
+            // AuthPageLoader initializing silently
             
             // Determine which form to show based on URL parameters or referrer
             const authAction = this.detectAuthAction();
-            
-            console.log('🔄 Loading form for action:', authAction);
             
             // Load auth toggle only for login, signup, and forgot-password pages
             if (authAction !== 'reset-password') {
@@ -42,7 +38,7 @@ class AuthPageLoader {
                 await this.loadResetPasswordForm();
             } else {
                 // Default to signup form
-                console.log('🔄 Defaulting to signup form');
+                // Defaulting to signup form silently
                 await this.loadSignupForm();
             }
             
@@ -53,7 +49,7 @@ class AuthPageLoader {
             this.bindFormSwitchEvents();
             
             this.isInitialized = true;
-            console.log('✅ Auth page loader initialized successfully');
+            // Auth page loader initialized successfully
         } catch (error) {
             console.error('❌ Failed to initialize auth page loader:', error);
         }
@@ -65,9 +61,7 @@ class AuthPageLoader {
      */
     detectAuthAction() {
         // Check URL parameters first
-        console.log('🌐 Full URL:', window.location.href);
-        console.log('🔗 Search string:', window.location.search);
-        console.log('🔗 Hash:', window.location.hash);
+        // Detecting auth action from URL silently
         
         const urlParams = new URLSearchParams(window.location.search);
         let action = urlParams.get('action');
@@ -76,14 +70,18 @@ class AuthPageLoader {
         if (!action && window.location.hash) {
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             action = hashParams.get('action');
-            console.log('🔍 Checking hash for action:', action);
+            // Checking hash for action silently
         }
         
-        console.log('🔍 Detecting auth action. URL params:', window.location.search, 'action:', action);
-        
         if (action === 'login' || action === 'signup' || action === 'forgot-password' || action === 'reset-password') {
-            console.log('✅ Auth action detected from URL:', action);
             return action;
+        }
+
+        // Check if user is coming from Supabase password reset
+        // This happens when Supabase redirects after processing a recovery link
+        if (document.referrer && document.referrer.includes('supabase.co/auth/v1/verify')) {
+            console.log('🔍 Detected Supabase password reset redirect');
+            return 'reset-password';
         }
 
         // Check if we can detect from referrer (less reliable)
@@ -160,12 +158,12 @@ class AuthPageLoader {
      */
     async loadSignupForm() {
         try {
-            console.log('🔄 Loading signup form component...');
+            // Loading signup form silently
 
             // Load HTML
-            console.log('🔍 Fetching signup form HTML from: components/signup-form/signup-form.html');
+            // Fetching HTML silently
             const htmlResponse = await fetch(`components/signup-form/signup-form.html?t=${Date.now()}`);
-            console.log('🔍 HTML response status:', htmlResponse.status, htmlResponse.ok);
+            // HTML loaded silently
             if (!htmlResponse.ok) {
                 throw new Error(`Failed to load signup form HTML: ${htmlResponse.status}`);
             }
@@ -189,7 +187,7 @@ class AuthPageLoader {
             if (container) {
                 container.innerHTML = htmlContent;
                 container.classList.remove('hidden');
-                console.log('✅ Signup form HTML loaded');
+                // HTML loaded silently
             } else {
                 throw new Error('Signup form container not found');
             }
@@ -224,7 +222,7 @@ class AuthPageLoader {
             }
 
             this.loadedComponents.set('signup-form', true);
-            console.log('✅ Signup form component loaded successfully');
+            // Component loaded silently
             
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();
@@ -240,7 +238,7 @@ class AuthPageLoader {
      */
     async loadTermsCheckbox() {
         try {
-            console.log('🔄 Loading terms checkbox component...');
+            // Loading terms checkbox silently
 
             // Load HTML
             const htmlResponse = await fetch('components/signup-form/component/terms-checkbox.html');
@@ -267,7 +265,7 @@ class AuthPageLoader {
             if (container) {
                 container.innerHTML = htmlContent;
                 container.classList.remove('hidden');
-                console.log('✅ Terms checkbox HTML loaded');
+                // HTML loaded silently
             } else {
                 throw new Error('Terms checkbox container not found');
             }
@@ -290,7 +288,7 @@ class AuthPageLoader {
             }
 
             this.loadedComponents.set('terms-checkbox', true);
-            console.log('✅ Terms checkbox component loaded successfully');
+            // Component loaded silently
 
         } catch (error) {
             console.error('❌ Failed to load terms checkbox component:', error);
@@ -303,7 +301,7 @@ class AuthPageLoader {
      */
     async loadForgotPasswordForm() {
         try {
-            console.log('🔄 Loading forgot password form component...');
+            // Loading forgot password form silently
 
             // Load HTML
             const htmlResponse = await fetch('components/forgot-password/forgot-password.html');
@@ -357,7 +355,7 @@ class AuthPageLoader {
             // Mark as loaded
             this.loadedComponents.set('forgot-password-form', true);
 
-            console.log('✅ Forgot password form component loaded successfully');
+            // Component loaded silently
             
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();
@@ -372,7 +370,7 @@ class AuthPageLoader {
      */
     async loadLoginForm() {
         try {
-            console.log('🔄 Loading login form component...');
+            // Loading login form silently
 
             // Load HTML
             const htmlResponse = await fetch('components/login-form/login-form.html');
@@ -399,7 +397,7 @@ class AuthPageLoader {
             if (container) {
                 container.innerHTML = htmlContent;
                 container.classList.remove('hidden');
-                console.log('✅ Login form HTML loaded');
+                // HTML loaded silently
             } else {
                 throw new Error('Login form container not found');
             }
@@ -425,7 +423,7 @@ class AuthPageLoader {
             }
 
             this.loadedComponents.set('login-form', true);
-            console.log('✅ Login form component loaded successfully');
+            // Component loaded silently
             
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();
@@ -447,7 +445,7 @@ class AuthPageLoader {
                 return;
             }
 
-            console.log('🔄 Loading CAPTCHA component...');
+            // Loading CAPTCHA silently
 
             // Initialize CAPTCHA component
             if (window.CaptchaComponent && !window.captcha) {
@@ -470,7 +468,7 @@ class AuthPageLoader {
             }
 
             this.loadedComponents.set('captcha', true);
-            console.log('✅ CAPTCHA component loaded successfully');
+            // Component loaded silently
 
         } catch (error) {
             console.error('❌ Failed to load CAPTCHA component:', error);
@@ -790,7 +788,7 @@ class AuthPageLoader {
      */
     async loadResetPasswordForm() {
         try {
-            console.log('🔄 Loading reset password form component...');
+            // Loading reset password form silently
 
             // Hide auth toggle container on reset password page
             const authToggleContainer = document.getElementById('auth-toggle-container');
@@ -857,7 +855,7 @@ class AuthPageLoader {
                 detail: { mode: 'reset-password' }
             }));
 
-            console.log('✅ Reset password form component loaded successfully');
+            // Component loaded silently
             
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();

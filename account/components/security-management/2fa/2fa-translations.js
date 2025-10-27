@@ -18,7 +18,7 @@ class TwoFactorAuthTranslations {
         }
 
         try {
-            console.log('🔧 Initializing 2FA translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class TwoFactorAuthTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ 2FA translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize 2FA translations:', error);
@@ -45,7 +45,7 @@ class TwoFactorAuthTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ 2FA translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load 2FA translations:', error);
@@ -88,7 +88,7 @@ class TwoFactorAuthTranslations {
             element.style.opacity = '1';
         });
 
-        console.log(`✅ 2FA translations updated for language: ${currentLanguage}`);
+        // Translations updated
     }
 
     /**

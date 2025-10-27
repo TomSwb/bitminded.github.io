@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Creation Wizard - BitMinded Admin</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="/css/critical.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/utilities.css">
+    
+    <!-- Product Wizard CSS -->
+    <link rel="stylesheet" href="/admin/components/product-wizard/product-wizard.css">
+    
+    <!-- Component CSS -->
+    <link rel="stylesheet" href="/admin/components/product-wizard/components/step-basic-info/step-basic-info.css">
+    <link rel="stylesheet" href="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation.css">
+    <link rel="stylesheet" href="/admin/components/product-wizard/components/step-content-media/step-content-media.css">
+    <link rel="stylesheet" href="/admin/components/product-wizard/components/step-github-setup/step-github-setup.css">
+    <link rel="stylesheet" href="/admin/components/product-wizard/components/step-cloudflare-setup/step-cloudflare-setup.css">
+    <link rel="stylesheet" href="/admin/components/product-wizard/components/step-stripe-creation/step-stripe-creation.css">
+    <link rel="stylesheet" href="/admin/components/product-wizard/shared/category-modal/category-modal.css">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Translation System -->
+    <script src="https://unpkg.com/i18next@23/dist/umd/i18next.min.js"></script>
+    <script src="https://unpkg.com/i18next-browser-languagedetector@7/dist/umd/i18nextBrowserLanguageDetector.min.js"></script>
+    <script src="https://unpkg.com/i18next-http-backend@2/dist/umd/i18nextHttpBackend.min.js"></script>
+</head>
+<body>
+    <!-- Product Creation Wizard -->
+    <div class="product-wizard" id="product-wizard">
+        <!-- Wizard Header -->
+        <div class="product-wizard__header">
+            <button id="back-to-products" class="product-wizard__back-button">
+                <span class="translatable-content" data-translation-key="Back to Product Management">Back to Product Management</span>
+            </button>
+            
+            <div class="product-wizard__title-section">
+                <h1 class="product-wizard__title translatable-content" data-translation-key="Product Creation Wizard">Product Creation Wizard</h1>
+                <p class="product-wizard__subtitle translatable-content" data-translation-key="wizard_subtitle">Create a new product with automated GitHub, Stripe, and Cloudflare integration</p>
+            </div>
+            
+            <div class="product-wizard__progress">
+                <div class="product-wizard__progress-bar">
+                    <div class="product-wizard__progress-fill" id="wizard-progress-fill"></div>
+                </div>
+                <div class="product-wizard__progress-text">
+                    <span id="wizard-progress-text">Step 1 of 7</span>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Steps and Content Wrapper -->
+        <div class="product-wizard__steps-content-wrapper">
+            <!-- Steps Navigation -->
+            <div class="product-wizard__steps">
+                <div class="product-wizard__step product-wizard__step--active" data-step="1">
+                    <div class="product-wizard__step-number">1</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Basic Information">Basic Information</div>
+                </div>
+                <div class="product-wizard__step" data-step="2">
+                    <div class="product-wizard__step-number">2</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Technical Specification">Technical Specification</div>
+                </div>
+                <div class="product-wizard__step" data-step="3">
+                    <div class="product-wizard__step-number">3</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Content & Media">Content & Media</div>
+                </div>
+                <div class="product-wizard__step" data-step="4">
+                    <div class="product-wizard__step-number">4</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="GitHub">GitHub</div>
+                </div>
+                <div class="product-wizard__step" data-step="5">
+                    <div class="product-wizard__step-number">5</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Stripe">Stripe</div>
+                </div>
+                <div class="product-wizard__step" data-step="6">
+                    <div class="product-wizard__step-number">6</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Cloudflare">Cloudflare</div>
+                </div>
+                <div class="product-wizard__step" data-step="7">
+                    <div class="product-wizard__step-number">7</div>
+                    <div class="product-wizard__step-title translatable-content" data-translation-key="Review & Publish">Review & Publish</div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="product-wizard__main-content">
+            <!-- Wizard Content -->
+        <div class="product-wizard__content">
+            <form id="product-wizard-form" class="product-wizard__form">
+                
+                <!-- Step 1: Basic Information -->
+                <div class="product-wizard__step-content active" id="step-1">
+                    <!-- Step content will be loaded by component -->
+                </div>
+
+                <!-- Step 2: AI-Powered Technical Specification -->
+                <div class="product-wizard__step-content" id="step-2">
+                    <!-- Step content will be loaded by component -->
+                </div>
+
+                <!-- Step 3: Content & Media -->
+                <div class="product-wizard__step-content" id="step-3">
+                    <!-- Step content will be loaded by component -->
+                </div>
+
+                <!-- Step 4: GitHub Repository Setup -->
+                <div class="product-wizard__step-content" id="step-4">
+                    <!-- Step content will be loaded by component -->
+                </div>
+
+                <!-- Step 5: Stripe Product Creation (includes Pricing Configuration) -->
+                <div class="product-wizard__step-content" id="step-5">
+                    <!-- Step content will be loaded by component -->
+                </div>
+
+                <!-- Step 6: Cloudflare Configuration -->
+                <div class="product-wizard__step-content" id="step-6">
+                    <!-- Step content will be loaded by component -->
+                </div>
+
+                <!-- Step 7: Review & Publish -->
+                <div class="product-wizard__step-content" id="step-7">
+                    <!-- Step content will be loaded by component -->
+                </div>
+            </form>
+        </div>
+
+        <!-- Wizard Navigation -->
+        <div class="product-wizard__navigation">
+            <button type="button" class="product-wizard__btn product-wizard__btn--secondary" id="wizard-prev-btn" disabled>
+                <span class="translatable-content" data-translation-key="Previous">Previous</span>
+            </button>
+            
+            <div class="product-wizard__nav-center">
+                <button type="button" class="product-wizard__btn product-wizard__btn--outline" id="wizard-save-draft-btn">
+                    <span class="translatable-content" data-translation-key="Save Draft">Save Draft</span>
+                </button>
+            </div>
+            
+            <button type="button" class="product-wizard__btn product-wizard__btn--primary" id="wizard-next-btn">
+                <span class="translatable-content" data-translation-key="Next">Next</span>
+            </button>
+        </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="product-wizard__loading-overlay hidden" id="wizard-loading">
+            <div class="product-wizard__loading-content">
+                <div class="product-wizard__spinner"></div>
+                <p class="translatable-content" data-translation-key="Creating Product...">Creating Product...</p>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div class="product-wizard__messages" id="wizard-messages">
+            <!-- Messages will be shown here -->
+        </div>
+
+        <!-- Add Category Modal -->
+        <div class="category-modal hidden" id="category-modal">
+            <div class="category-modal__content">
+                <div class="category-modal__header">
+                    <h3 class="translatable-content" data-translation-key="Add New Category">Add New Category</h3>
+                    <button type="button" id="close-category-modal" class="category-modal__close">&times;</button>
+                </div>
+                <div class="category-modal__body">
+                    <div class="category-modal__field-group">
+                        <label for="new-category-name" class="category-modal__label">
+                            <span class="translatable-content" data-translation-key="Category Name">Category Name</span>
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" id="new-category-name" class="category-modal__input" placeholder="e.g., Productivity Tools">
+                    </div>
+                    <div class="category-modal__field-group">
+                        <label for="new-category-description" class="category-modal__label">
+                            <span class="translatable-content" data-translation-key="Category Description">Category Description</span>
+                        </label>
+                        <textarea id="new-category-description" class="category-modal__textarea" rows="3" placeholder="Brief description of this category"></textarea>
+                    </div>
+                </div>
+                <div class="category-modal__footer">
+                    <button type="button" id="cancel-category" class="category-modal__btn category-modal__btn--secondary">
+                        <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                    </button>
+                    <button type="button" id="save-category" class="category-modal__btn category-modal__btn--primary">
+                        <span class="translatable-content" data-translation-key="Save Category">Save Category</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/env-config.js"></script>
+    <script src="/js/supabase-config.js"></script>
+    <script src="/admin/components/product-wizard/product-wizard-translations.js"></script>
+    
+    <!-- Component Scripts -->
+    <script src="/admin/components/product-wizard/shared/category-modal/category-modal-translations.js"></script>
+    <script src="/admin/components/product-wizard/shared/category-modal/category-modal.js"></script>
+    <script src="/admin/components/product-wizard/components/step-basic-info/step-basic-info-translations.js"></script>
+    <script src="/admin/components/product-wizard/components/step-basic-info/step-basic-info.js"></script>
+    <script src="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation-translations.js"></script>
+    <script src="/admin/components/product-wizard/components/step-spec-generation/step-spec-generation.js"></script>
+    <script src="/admin/components/product-wizard/components/step-content-media/step-content-media.js"></script>
+    <script src="/admin/components/product-wizard/components/step-github-setup/step-github-setup.js"></script>
+    <script src="/admin/components/product-wizard/components/step-cloudflare-setup/step-cloudflare-setup.js"></script>
+    <script src="/admin/components/product-wizard/components/step-stripe-creation/step-stripe-creation.js"></script>
+    
+    <!-- Main Wizard Script -->
+    <script src="/admin/components/product-wizard/product-wizard.js"></script>
+</body>
+</html>

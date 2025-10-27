@@ -18,7 +18,7 @@ class AccountActionsTranslations {
         }
 
         try {
-            console.log('🔧 Initializing account actions translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -27,7 +27,7 @@ class AccountActionsTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Account actions translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize account actions translations:', error);
@@ -45,7 +45,7 @@ class AccountActionsTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Account actions translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load account actions translations:', error);
@@ -120,7 +120,7 @@ class AccountActionsTranslations {
                 }
             });
 
-            console.log(`✅ Account actions translations updated to ${currentLanguage}`);
+            // Translations updated
             
         } catch (error) {
             console.error('❌ Failed to update account actions translations:', error);

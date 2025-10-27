@@ -1,0 +1,73 @@
+<!-- Personal Info Component -->
+<div class="personal-info" id="personal-info">
+    <!-- Edit Personal Info Button -->
+    <button type="button" id="edit-personal-info-btn" class="personal-info__edit-btn">
+        <span class="personal-info__edit-icon">👤</span>
+        <span class="personal-info__edit-text translatable-content" data-translation-key="Edit Personal Info">Edit Personal Info</span>
+    </button>
+
+    <!-- Edit Form -->
+    <form id="personal-info-form" class="personal-info__form hidden">
+        <!-- Date of Birth -->
+        <div class="personal-info__form-group">
+            <label for="new-dob" class="personal-info__label">
+                <span class="translatable-content" data-translation-key="date_of_birth">Date of Birth</span>
+            </label>
+            <input 
+                type="date" 
+                id="new-dob" 
+                name="dob" 
+                class="personal-info__input"
+                max="9999-12-31"
+            />
+        </div>
+
+        <!-- Country -->
+        <div class="personal-info__form-group">
+            <label for="new-country" class="personal-info__label">
+                <span class="translatable-content" data-translation-key="country">Country</span>
+            </label>
+            <select id="new-country" name="country" class="personal-info__select">
+                <option value="">Select your country...</option>
+            </select>
+        </div>
+
+        <!-- Gender -->
+        <div class="personal-info__form-group">
+            <label for="new-gender" class="personal-info__label">
+                <span class="translatable-content" data-translation-key="gender">Gender</span>
+            </label>
+            <select id="new-gender" name="gender" class="personal-info__select">
+                <option value="">Select...</option>
+                <option value="male" class="translatable-content" data-translation-key="male">Male</option>
+                <option value="female" class="translatable-content" data-translation-key="female">Female</option>
+                <option value="prefer_not_say" class="translatable-content" data-translation-key="prefer_not_say">Prefer not to say</option>
+            </select>
+        </div>
+
+        <!-- Preferred Language -->
+        <div class="personal-info__form-group">
+            <label for="new-language" class="personal-info__label">
+                <span class="translatable-content" data-translation-key="preferred_language">Preferred Language</span>
+            </label>
+            <select id="new-language" name="language" class="personal-info__select">
+                <option value="">Select...</option>
+                <option value="en" class="translatable-content" data-translation-key="english">🇬🇧 English</option>
+                <option value="es" class="translatable-content" data-translation-key="spanish">🇪🇸 Spanish</option>
+                <option value="fr" class="translatable-content" data-translation-key="french">🇫🇷 French</option>
+                <option value="de" class="translatable-content" data-translation-key="german">🇩🇪 German</option>
+            </select>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="personal-info__form-actions">
+            <button type="button" id="cancel-personal-info-btn" class="personal-info__cancel-btn">
+                <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+            </button>
+            <button type="submit" id="save-personal-info-btn" class="personal-info__save-btn" disabled>
+                <span class="personal-info__save-icon">💾</span>
+                <span class="translatable-content" data-translation-key="save">Save</span>
+            </button>
+        </div>
+    </form>
+</div>

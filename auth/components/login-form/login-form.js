@@ -35,9 +35,10 @@ class LoginForm {
             this.bindEvents();
             await this.loadTranslations();
             this.loadFailedAttempts();
+            this.checkSuspensionError();
             this.isInitialized = true;
             
-            console.log('✅ Login Form initialized successfully');
+            // Login Form initialized silently
         } catch (error) {
             console.error('❌ Failed to initialize Login Form:', error);
             this.showError('Failed to initialize login form');
@@ -206,6 +207,20 @@ class LoginForm {
             if (data.user) {
                 // Reset failed attempts on successful login
                 this.resetFailedAttempts();
+                
+                // Check if user is suspended
+                const { data: userProfile, error: profileError } = await window.supabase
+                    .from('user_profiles')
+                    .select('status, suspension_reason')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (!profileError && userProfile && userProfile.status === 'suspended') {
+                    // User is suspended - sign them out and show error
+                    await window.supabase.auth.signOut();
+                    this.showError(`Your account has been suspended. Reason: ${userProfile.suspension_reason || 'No reason provided'}. You should have received an email explaining this suspension. Please contact support@bitminded.ch for assistance.`);
+                    return;
+                }
                 
                 // Check if user has 2FA enabled
                 const { data: twoFAData, error: twoFAError } = await window.supabase
@@ -392,6 +407,17 @@ class LoginForm {
         window.dispatchEvent(new CustomEvent('authFormSwitch', {
             detail: { form: 'forgot-password' }
         }));
+    }
+
+    /**
+     * Check for suspension error from 2FA redirect
+     */
+    checkSuspensionError() {
+        const suspensionError = sessionStorage.getItem('suspension_error');
+        if (suspensionError) {
+            this.showError(suspensionError);
+            sessionStorage.removeItem('suspension_error');
+        }
     }
 
     /**

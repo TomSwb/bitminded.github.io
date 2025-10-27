@@ -23,7 +23,7 @@ class AuthToggle {
             await this.loadTranslations();
             this.isInitialized = true;
             
-            console.log('✅ Auth Toggle initialized successfully with mode:', this.currentMode);
+            // Auth Toggle initialized silently
         } catch (error) {
             console.error('❌ Failed to initialize Auth Toggle:', error);
         }

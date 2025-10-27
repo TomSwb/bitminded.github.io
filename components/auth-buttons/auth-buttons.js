@@ -30,12 +30,10 @@ class AuthButtons {
             this.cacheElements();
             this.bindEvents();
             await this.loadTranslations();
-            await this.checkAuthState();
             
-            // Add a delayed check to ensure auth state is properly detected after page load
-            setTimeout(async () => {
-                await this.checkAuthState();
-            }, 1000);
+            // Don't call checkAuthState() manually - the auth state listener will handle it
+            // This prevents duplicate getSession() calls that trigger token refreshes
+            // The onAuthStateChange listener will fire INITIAL_SESSION or SIGNED_IN events
             
             this.isInitialized = true;
             
@@ -156,12 +154,20 @@ class AuthButtons {
      * Setup Supabase listener (with retry if not available)
      */
     setupSupabaseListener() {
+        // Prevent duplicate listeners
+        if (this.authStateSubscription) {
+            console.log('⚠️ Auth listener already set up, skipping');
+            return;
+        }
+
         if (window.supabase && window.supabase.auth) {
             // Setting up Supabase auth state listener
-            window.supabase.auth.onAuthStateChange((event, session) => {
+            const { data: { subscription } } = window.supabase.auth.onAuthStateChange((event, session) => {
                 // Auth state changed
                 this.handleAuthStateChange(event, session);
             });
+            // Store subscription for cleanup
+            this.authStateSubscription = subscription;
         } else {
             console.log('⏳ Supabase not ready, retrying in 100ms...');
             setTimeout(() => {
@@ -281,10 +287,25 @@ class AuthButtons {
      * Handle authentication state changes
      */
     async handleAuthStateChange(event, session) {
-        console.log('🔐 Auth state changed:', event, session?.user?.email);
+        // Check for expired tokens and force logout if needed
+        if (session?.expires_at) {
+            const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
+            
+            // If token is expired and this is INITIAL_SESSION, force logout
+            if (event === 'INITIAL_SESSION' && expiresIn < 0) {
+                console.warn('⚠️ Token is expired, forcing logout...');
+                // Clear the stale session
+                if (window.supabase) {
+                    await window.supabase.auth.signOut();
+                }
+                this.currentUser = null;
+                this.showLoggedOutState();
+                return;
+            }
+        }
         
         if (event === 'SIGNED_IN' && session) {
-            console.log('✅ User signed in, updating UI');
+            // User signed in, updating UI
             this.currentUser = session.user;
             await this.showLoggedInState();
         } else if (event === 'SIGNED_OUT') {
@@ -292,9 +313,21 @@ class AuthButtons {
             this.currentUser = null;
             this.showLoggedOutState();
         } else if (event === 'TOKEN_REFRESHED' && session) {
-            console.log('🔄 Token refreshed, updating UI');
+            // Token refreshed silently (no UI update needed)
+            // Just update the currentUser reference, don't trigger expensive UI updates
+            this.currentUser = session.user;
+            // NOTE: We don't call showLoggedInState() here because:
+            // 1. Token refresh is a background operation
+            // 2. showLoggedInState() -> updateUserInfo() -> DB query -> getSession() -> triggers another refresh
+            // 3. This creates an infinite loop causing rate limit (429 errors)
+        } else if (event === 'INITIAL_SESSION' && session) {
+            // Initial session loaded, updating UI
             this.currentUser = session.user;
             await this.showLoggedInState();
+        } else if (event === 'INITIAL_SESSION' && !session) {
+            // No initial session - showing logged out state silently
+            this.currentUser = null;
+            this.showLoggedOutState();
         }
     }
 
@@ -303,7 +336,7 @@ class AuthButtons {
      */
     showLoggedOutState() {
         try {
-            console.log('🔓 Showing logged out state');
+            // Showing logged out state silently
             this.hideAllStates();
             if (this.elements.loggedOut) {
                 this.elements.loggedOut.style.display = 'flex';
@@ -388,40 +421,49 @@ class AuthButtons {
             // Try to get username from user_metadata first
             let displayName = this.currentUser.user_metadata?.username;
             
-            // If no username in metadata, try to fetch from user_profiles table
-            if (!displayName && window.supabase) {
-                try {
-                    const { data: profile, error } = await window.supabase
-                        .from('user_profiles')
-                        .select('username')
-                        .eq('id', this.currentUser.id)
-                        .single();
-                    
-                    if (!error && profile?.username) {
-                        displayName = profile.username;
-                        // Update user_metadata for future use
-                        if (!this.currentUser.user_metadata) {
-                            this.currentUser.user_metadata = {};
-                        }
-                        this.currentUser.user_metadata.username = profile.username;
-                    }
-                } catch (error) {
-                    console.warn('Failed to fetch username from profile:', error);
-                }
-            }
-            
             // Fallback to email prefix or default
             if (!displayName) {
                 displayName = this.currentUser.email?.split('@')[0] || defaultUserName;
             }
 
-            // Update the UI
+            // Update the UI immediately with available data
             if (this.elements.userName) {
                 this.elements.userName.textContent = displayName;
             }
 
-            // Check and show admin button if user is admin
-            await this.updateAdminButton();
+            // Defer expensive DB queries to avoid blocking and triggering token refreshes
+            // Use setTimeout to batch these queries and prevent them from blocking INITIAL_SESSION
+            setTimeout(async () => {
+                // Fetch username from DB if not in metadata (non-blocking)
+                if (!this.currentUser?.user_metadata?.username && window.supabase) {
+                    try {
+                        const { data: profile, error } = await window.supabase
+                            .from('user_profiles')
+                            .select('username')
+                            .eq('id', this.currentUser.id)
+                            .single();
+                        
+                        if (!error && profile?.username) {
+                            // Update user_metadata for future use
+                            if (!this.currentUser.user_metadata) {
+                                this.currentUser.user_metadata = {};
+                            }
+                            this.currentUser.user_metadata.username = profile.username;
+                            
+                            // Update UI with fetched username
+                            if (this.elements.userName) {
+                                this.elements.userName.textContent = profile.username;
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('Failed to fetch username from profile:', error);
+                    }
+                }
+                
+                // Check admin role (non-blocking)
+                await this.updateAdminButton();
+            }, 100);
+            
         } catch (error) {
             console.error('Error updating user info:', error);
             // Fallback to basic display
@@ -515,6 +557,24 @@ class AuthButtons {
                 return;
             }
 
+            // Get current session before signing out (to clean up user_sessions)
+            const { data: { session } } = await window.supabase.auth.getSession();
+            const sessionToken = session?.access_token;
+
+            // Clean up user_sessions table BEFORE signing out (need auth context)
+            if (sessionToken) {
+                try {
+                    await window.supabase.functions.invoke('revoke-session', {
+                        body: { session_id: sessionToken }
+                    });
+                    console.log('✅ Session cleaned up from user_sessions');
+                } catch (cleanupError) {
+                    console.warn('⚠️ Could not clean up session:', cleanupError);
+                    // Don't fail logout if cleanup fails
+                }
+            }
+
+            // Sign out from Supabase (do this AFTER cleanup)
             const { error } = await window.supabase.auth.signOut();
             
             if (error) {
@@ -619,6 +679,12 @@ class AuthButtons {
         // Remove profile update event listener
         window.removeEventListener('profileUpdated', this.handleProfileUpdate);
 
+        // Unsubscribe from auth state changes
+        if (this.authStateSubscription) {
+            this.authStateSubscription.unsubscribe();
+            this.authStateSubscription = null;
+        }
+
         // Reset state
         this.isInitialized = false;
         this.currentUser = null;
@@ -628,6 +694,13 @@ class AuthButtons {
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔄 Auth Buttons: DOM Content Loaded, checking for auth-buttons element...');
+    
+    // Prevent duplicate initialization
+    if (window.authButtons) {
+        console.log('⚠️ Auth Buttons already initialized, skipping DOMContentLoaded init');
+        return;
+    }
+    
     // Only initialize if the auth-buttons element exists
     if (document.getElementById('auth-buttons')) {
         console.log('✅ Auth Buttons: Element found, initializing...');
@@ -641,9 +714,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // Expose the component for the component loader
 window['auth-buttons'] = {
     init: function(config = {}) {
+        // Prevent duplicate initialization
+        if (window.authButtons) {
+            console.log('⚠️ Auth Buttons already initialized, skipping component loader init');
+            return;
+        }
+        
         // Find the auth-buttons element that was just loaded
         const element = document.getElementById('auth-buttons');
         if (element) {
+            // Auth buttons initializing silently
             window.authButtons = new AuthButtons();
         }
     }

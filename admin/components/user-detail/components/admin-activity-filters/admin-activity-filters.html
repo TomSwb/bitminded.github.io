@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<div class="admin-activity-filters">
+    <div class="admin-activity-filters__controls">
+        <!-- Date Range Filter -->
+        <div class="admin-activity-filters__group">
+            <label for="date-range-filter" class="admin-activity-filters__label">Date Range</label>
+            <select id="date-range-filter" class="admin-activity-filters__select">
+                <option value="all">All Time</option>
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="3m">Last 3 months</option>
+                <option value="6m">Last 6 months</option>
+                <option value="1y">Last year</option>
+            </select>
+        </div>
+
+        <!-- Action Type Filter -->
+        <div class="admin-activity-filters__group">
+            <label for="action-type-filter" class="admin-activity-filters__label">Action Types</label>
+            <div class="admin-activity-filters__multiselect" id="action-type-multiselect">
+                <div class="admin-activity-filters__multiselect-trigger" id="action-type-trigger">
+                    <span class="admin-activity-filters__multiselect-text">All Actions</span>
+                    <span class="admin-activity-filters__multiselect-arrow">▼</span>
+                </div>
+                <div class="admin-activity-filters__multiselect-dropdown" id="action-type-dropdown">
+                    <div class="admin-activity-filters__multiselect-search">
+                        <input type="text" placeholder="Search actions..." id="action-type-search">
+                    </div>
+                    <div class="admin-activity-filters__multiselect-options" id="action-type-options">
+                        <!-- Options will be populated dynamically -->
+                    </div>
+                    <div class="admin-activity-filters__multiselect-actions">
+                        <button type="button" class="admin-activity-filters__multiselect-btn" id="action-type-select-all">Select All</button>
+                        <button type="button" class="admin-activity-filters__multiselect-btn" id="action-type-deselect-all">Deselect All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Target User Filter -->
+        <div class="admin-activity-filters__group">
+            <label for="target-user-filter" class="admin-activity-filters__label">Target Users</label>
+            <div class="admin-activity-filters__multiselect" id="target-user-multiselect">
+                <div class="admin-activity-filters__multiselect-trigger" id="target-user-trigger">
+                    <span class="admin-activity-filters__multiselect-text">All Users</span>
+                    <span class="admin-activity-filters__multiselect-arrow">▼</span>
+                </div>
+                <div class="admin-activity-filters__multiselect-dropdown" id="target-user-dropdown">
+                    <div class="admin-activity-filters__multiselect-search">
+                        <input type="text" placeholder="Search users..." id="target-user-search">
+                    </div>
+                    <div class="admin-activity-filters__multiselect-options" id="target-user-options">
+                        <!-- Options will be populated dynamically -->
+                    </div>
+                    <div class="admin-activity-filters__multiselect-actions">
+                        <button type="button" class="admin-activity-filters__multiselect-btn" id="target-user-select-all">Select All</button>
+                        <button type="button" class="admin-activity-filters__multiselect-btn" id="target-user-deselect-all">Deselect All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Summary and Clear Button - Separate elements -->
+    <div class="admin-activity-filters__footer">
+        <div class="admin-activity-filters__summary" id="filter-summary">
+            <span class="admin-activity-filters__count">Showing all activities</span>
+        </div>
+        <button type="button" class="admin-activity-filters__clear-btn" id="admin-clear-filters-btn">
+            Clear All Filters
+        </button>
+    </div>
+</div>

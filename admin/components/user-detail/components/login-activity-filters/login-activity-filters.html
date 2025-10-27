@@ -1,0 +1,142 @@
+<div class="login-activity-filters">
+    <div class="login-activity-filters__header">
+        <div class="login-activity-filters__controls">
+            <!-- Date Range Filter -->
+            <div class="login-activity-filters__group">
+                <label for="date-range-select" class="login-activity-filters__label" data-translation-key="date_range">Date Range</label>
+                <select id="date-range-select" class="login-activity-filters__select">
+                    <option value="24h" data-translation-key="last_24_hours">Last 24 Hours</option>
+                    <option value="7d" data-translation-key="last_7_days">Last 7 Days</option>
+                    <option value="30d" data-translation-key="last_30_days">Last 30 Days</option>
+                    <option value="90d" data-translation-key="last_90_days">Last 90 Days</option>
+                    <option value="all" data-translation-key="all_time">All Time</option>
+                </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="login-activity-filters__group">
+                <label for="status-filter" class="login-activity-filters__label" data-translation-key="status">Status</label>
+                <div class="login-activity-filters__dropdown">
+                    <button type="button" class="login-activity-filters__dropdown-btn" id="status-dropdown-btn">
+                        <span data-translation-key="select_status">Select Status</span>
+                        <span class="login-activity-filters__dropdown-arrow">▼</span>
+                    </button>
+                    <div class="login-activity-filters__dropdown-content" id="status-dropdown">
+                        <div class="login-activity-filters__search">
+                            <input type="text" placeholder="Search..." class="login-activity-filters__search-input" id="status-search">
+                        </div>
+                        <div class="login-activity-filters__options" id="status-options">
+                            <!-- Options populated dynamically -->
+                        </div>
+                        <div class="login-activity-filters__actions">
+                            <button type="button" class="login-activity-filters__action-btn" id="status-select-all" data-translation-key="select_all">Select All</button>
+                            <button type="button" class="login-activity-filters__action-btn" id="status-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Type Filter -->
+            <div class="login-activity-filters__group">
+                <label for="device-filter" class="login-activity-filters__label" data-translation-key="device_type">Device Type</label>
+                <div class="login-activity-filters__dropdown">
+                    <button type="button" class="login-activity-filters__dropdown-btn" id="device-dropdown-btn">
+                        <span data-translation-key="select_device_type">Select Device Type</span>
+                        <span class="login-activity-filters__dropdown-arrow">▼</span>
+                    </button>
+                    <div class="login-activity-filters__dropdown-content" id="device-dropdown">
+                        <div class="login-activity-filters__search">
+                            <input type="text" placeholder="Search..." class="login-activity-filters__search-input" id="device-search">
+                        </div>
+                        <div class="login-activity-filters__options" id="device-options">
+                            <!-- Options populated dynamically -->
+                        </div>
+                        <div class="login-activity-filters__actions">
+                            <button type="button" class="login-activity-filters__action-btn" id="device-select-all" data-translation-key="select_all">Select All</button>
+                            <button type="button" class="login-activity-filters__action-btn" id="device-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browser Filter -->
+            <div class="login-activity-filters__group">
+                <label for="browser-filter" class="login-activity-filters__label" data-translation-key="browser">Browser</label>
+                <div class="login-activity-filters__dropdown">
+                    <button type="button" class="login-activity-filters__dropdown-btn" id="browser-dropdown-btn">
+                        <span data-translation-key="select_browser">Select Browser</span>
+                        <span class="login-activity-filters__dropdown-arrow">▼</span>
+                    </button>
+                    <div class="login-activity-filters__dropdown-content" id="browser-dropdown">
+                        <div class="login-activity-filters__search">
+                            <input type="text" placeholder="Search..." class="login-activity-filters__search-input" id="browser-search">
+                        </div>
+                        <div class="login-activity-filters__options" id="browser-options">
+                            <!-- Options populated dynamically -->
+                        </div>
+                        <div class="login-activity-filters__actions">
+                            <button type="button" class="login-activity-filters__action-btn" id="browser-select-all" data-translation-key="select_all">Select All</button>
+                            <button type="button" class="login-activity-filters__action-btn" id="browser-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Filter -->
+            <div class="login-activity-filters__group">
+                <label for="location-filter" class="login-activity-filters__label" data-translation-key="location">Location</label>
+                <div class="login-activity-filters__dropdown">
+                    <button type="button" class="login-activity-filters__dropdown-btn" id="location-dropdown-btn">
+                        <span data-translation-key="select_location">Select Location</span>
+                        <span class="login-activity-filters__dropdown-arrow">▼</span>
+                    </button>
+                    <div class="login-activity-filters__dropdown-content" id="location-dropdown">
+                        <div class="login-activity-filters__search">
+                            <input type="text" placeholder="Search..." class="login-activity-filters__search-input" id="location-search">
+                        </div>
+                        <div class="login-activity-filters__options" id="location-options">
+                            <!-- Options populated dynamically -->
+                        </div>
+                        <div class="login-activity-filters__actions">
+                            <button type="button" class="login-activity-filters__action-btn" id="location-select-all" data-translation-key="select_all">Select All</button>
+                            <button type="button" class="login-activity-filters__action-btn" id="location-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2FA Filter -->
+            <div class="login-activity-filters__group">
+                <label for="twofa-filter" class="login-activity-filters__label" data-translation-key="two_factor_auth">2FA</label>
+                <div class="login-activity-filters__dropdown">
+                    <button type="button" class="login-activity-filters__dropdown-btn" id="twofa-dropdown-btn">
+                        <span data-translation-key="select_2fa">Select 2FA</span>
+                        <span class="login-activity-filters__dropdown-arrow">▼</span>
+                    </button>
+                    <div class="login-activity-filters__dropdown-content" id="twofa-dropdown">
+                        <div class="login-activity-filters__options" id="twofa-options">
+                            <label class="login-activity-filters__option">
+                                <input type="checkbox" value="true" class="login-activity-filters__checkbox">
+                                <span data-translation-key="used_2fa">Used 2FA</span>
+                            </label>
+                            <label class="login-activity-filters__option">
+                                <input type="checkbox" value="false" class="login-activity-filters__checkbox">
+                                <span data-translation-key="no_2fa">No 2FA</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary and Clear Button on same row -->
+        <div class="login-activity-filters__summary-row">
+            <div class="login-activity-filters__summary">
+                <span class="login-activity-filters__count" data-translation-key="showing_all_activities">Showing all activities</span>
+            </div>
+            <button type="button" class="login-activity-filters__clear-btn" id="login-clear-filters-btn" data-translation-key="clear_all_filters">
+                Clear All Filters
+            </button>
+        </div>
+    </div>
+</div>

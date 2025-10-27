@@ -13,6 +13,7 @@ const corsHeaders = {
 interface RevokeSessionRequest {
   session_id?: string
   revoke_all?: boolean
+  target_user_id?: string  // For admin to revoke other user's sessions
 }
 
 serve(async (req) => {
@@ -52,20 +53,46 @@ serve(async (req) => {
 
     // Parse request body
     const body: RevokeSessionRequest = await req.json()
-    const { session_id, revoke_all } = body
+    const { session_id, revoke_all, target_user_id } = body
+    
+    // Determine which user's sessions to revoke
+    let targetUserId = user.id
+    let isAdminAction = false
+    
+    // If target_user_id is provided, verify the requester is an admin
+    if (target_user_id && target_user_id !== user.id) {
+      const { data: roleData, error: roleError } = await supabaseAdmin
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle()
+      
+      if (roleError || !roleData) {
+        return new Response(
+          JSON.stringify({ error: 'Admin access required to revoke other users sessions' }), 
+          { 
+            status: 403, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+      
+      targetUserId = target_user_id
+      isAdminAction = true
+      console.log(`👑 Admin ${user.id} revoking sessions for user: ${targetUserId}`)
+    }
 
     if (revoke_all) {
-      // Revoke all sessions except the current one
-      console.log(`🔐 Revoking all sessions for user: ${user.id} except current`)
+      // Revoke all sessions except the current one (unless admin is doing it)
+      console.log(`🔐 Revoking all sessions for user: ${targetUserId}`)
       
-      // Get all login activities with session IDs for this user
+      // Get all active sessions for this user
       const { data: sessions, error: fetchError } = await supabaseAdmin
-        .from('user_login_activity')
-        .select('session_id')
-        .eq('user_id', user.id)
-        .eq('success', true)
-        .not('session_id', 'is', null)
-        .order('login_time', { ascending: false })
+        .from('user_sessions')
+        .select('session_token')
+        .eq('user_id', targetUserId)
+        .order('created_at', { ascending: false })
       
       if (fetchError) {
         console.error('Error fetching sessions:', fetchError)
@@ -78,27 +105,32 @@ serve(async (req) => {
         )
       }
 
-      // Revoke each session except the current one
+      // Revoke each session except the current one (unless admin is revoking for another user)
       let revokedCount = 0
       if (sessions && sessions.length > 0) {
         for (const session of sessions) {
-          if (session.session_id && session.session_id !== token) {
+          // If admin is revoking for another user, revoke all their sessions
+          // If user is revoking their own, skip current session
+          const shouldRevoke = isAdminAction || session.session_token !== token
+          
+          if (session.session_token && shouldRevoke) {
             try {
-              // Note: We can't directly revoke sessions via Supabase Auth API
-              // but we can mark them as revoked in our database
-              // The JWT token remains valid until it expires (typically 1 hour from creation)
-              // This is a limitation of Supabase Auth currently
+              // Delete from user_sessions
+              await supabaseAdmin
+                .from('user_sessions')
+                .delete()
+                .eq('session_token', session.session_token)
               
-              // Mark session as revoked (don't delete so it persists across refreshes)
+              // Mark as revoked in user_login_activity for history
               await supabaseAdmin
                 .from('user_login_activity')
                 .update({ revoked_at: new Date().toISOString() })
-                .eq('session_id', session.session_id)
-                .is('revoked_at', null) // Only update if not already revoked
+                .eq('session_id', session.session_token)
+                .is('revoked_at', null)
               
               revokedCount++
             } catch (error) {
-              console.error(`Error revoking session ${session.session_id}:`, error)
+              console.error(`Error revoking session ${session.session_token}:`, error)
             }
           }
         }
@@ -122,25 +154,49 @@ serve(async (req) => {
       // Revoke specific session
       console.log(`🔐 Revoking session: ${session_id}`)
       
-      // Verify this session belongs to the user
+      // Verify this session belongs to the user or admin is doing it
       const { data: sessionData, error: sessionError } = await supabaseAdmin
         .from('user_login_activity')
         .select('user_id')
         .eq('session_id', session_id)
         .single()
       
-      if (sessionError || !sessionData || sessionData.user_id !== user.id) {
+      if (sessionError || !sessionData) {
         return new Response(
-          JSON.stringify({ error: 'Session not found or unauthorized' }), 
+          JSON.stringify({ error: 'Session not found' }), 
           { 
-            status: 403, 
+            status: 404, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         )
       }
+      
+      // Check if this is an admin action for another user
+      if (sessionData.user_id !== user.id) {
+        // Verify requester is admin
+        const { data: roleData, error: roleError } = await supabaseAdmin
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .maybeSingle()
+        
+        if (roleError || !roleData) {
+          return new Response(
+            JSON.stringify({ error: 'Admin access required to revoke other users sessions' }), 
+            { 
+              status: 403, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+        
+        isAdminAction = true
+        console.log(`👑 Admin ${user.id} revoking session for user: ${sessionData.user_id}`)
+      }
 
-      // Don't allow revoking current session
-      if (session_id === token) {
+      // Don't allow user revoking their current session (but admin can revoke any)
+      if (!isAdminAction && session_id === token) {
         return new Response(
           JSON.stringify({ error: 'Cannot revoke current session' }), 
           { 
@@ -150,15 +206,25 @@ serve(async (req) => {
         )
       }
 
-      // Mark the session as revoked (don't delete)
+      // Delete the session from user_sessions table
+      const { error: deleteError } = await supabaseAdmin
+        .from('user_sessions')
+        .delete()
+        .eq('session_token', session_id)
+      
+      // Also mark as revoked in user_login_activity for history
       const { error: updateError } = await supabaseAdmin
         .from('user_login_activity')
         .update({ revoked_at: new Date().toISOString() })
         .eq('session_id', session_id)
-        .is('revoked_at', null) // Only update if not already revoked
+        .is('revoked_at', null)
+      
+      if (deleteError) {
+        console.error('Error deleting session from user_sessions:', deleteError)
+      }
       
       if (updateError) {
-        console.error('Error revoking session:', updateError)
+        console.error('Error marking session as revoked in login_activity:', updateError)
         return new Response(
           JSON.stringify({ error: 'Failed to revoke session' }), 
           { 
