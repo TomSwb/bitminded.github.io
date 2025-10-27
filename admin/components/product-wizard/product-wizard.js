@@ -8,7 +8,7 @@ class ProductWizard {
     constructor() {
         this.isInitialized = false;
         this.currentStep = 1;
-        this.totalSteps = 8;
+        this.totalSteps = 7; // Removed Step 5 (Database Configuration)
         this.formData = {};
         this.elements = {};
         this.steps = {};
@@ -277,10 +277,10 @@ class ProductWizard {
             console.log('✅ Step 4 marked as completed (GitHub repo exists)');
         }
 
-        // Step 7: Check if Stripe product exists
+        // Step 6: Check if Stripe product exists
         if (this.formData.stripe_product_id) {
-            this.markStepCompleted(7);
-            console.log('✅ Step 7 marked as completed (Stripe product exists)');
+            this.markStepCompleted(6);
+            console.log('✅ Step 6 marked as completed (Stripe product exists)');
         }
     }
 
@@ -442,16 +442,13 @@ class ProductWizard {
                     await this.loadStep4(stepContent); // GitHub
                     break;
                 case 5:
-                    await this.loadStep5(stepContent); // Database
+                    await this.loadStep5(stepContent); // Cloudflare (was Step 6)
                     break;
                 case 6:
-                    await this.loadStep6(stepContent); // Cloudflare
+                    await this.loadStep6(stepContent); // Stripe (was Step 7)
                     break;
                 case 7:
-                    await this.loadStep7(stepContent); // Stripe
-                    break;
-                case 8:
-                    await this.loadStep8(stepContent);
+                    await this.loadStep7(stepContent); // Review & Publish (was Step 8)
                     break;
                 default:
                     console.error(`Unknown step: ${stepNumber}`);
@@ -568,46 +565,38 @@ class ProductWizard {
     }
 
     /**
-     * Load Step 5: Database Configuration
+     * Load Step 5: Cloudflare Configuration (was Step 6)
      */
     async loadStep5(stepContent) {
-        // Placeholder for Step 5 - Database Configuration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Database Configuration</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 5 - Cloudflare Configuration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 6: Cloudflare Configuration
+     * Load Step 6: Stripe Product Creation (was Step 7)
      */
     async loadStep6(stepContent) {
-        // Placeholder for Step 6 - Cloudflare Configuration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
-    }
-
-    /**
-     * Load Step 7: Stripe Product Creation
-     */
-    async loadStep7(stepContent) {
         if (window.StepStripeCreation) {
             const response = await fetch('/admin/components/product-wizard/components/step-stripe-creation/step-stripe-creation.html');
             const html = await response.text();
             stepContent.innerHTML = html;
-            this.steps[7] = new window.StepStripeCreation();
-            await this.steps[7].init();
+            this.steps[6] = new window.StepStripeCreation();
+            await this.steps[6].init();
             if (this.isEditMode && this.formData) {
-                this.steps[7].setFormData(this.formData);
+                this.steps[6].setFormData(this.formData);
             }
         } else {
             console.error('❌ StepStripeCreation component not available');
-            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Stripe Product Creation</h2><p>Component not available</p></div>';
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Stripe Product Creation</h2><p>Component not available</p></div>';
         }
     }
 
     /**
-     * Load Step 8: Review & Publish
+     * Load Step 7: Review & Publish (was Step 8)
      */
-    async loadStep8(stepContent) {
-        // Placeholder for Step 8 - Review & Publish
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 8: Review & Publish</h2><p>Coming soon...</p></div>';
+    async loadStep7(stepContent) {
+        // Placeholder for Step 7 - Review & Publish
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Review & Publish</h2><p>Coming soon...</p></div>';
     }
 
     /**
@@ -773,6 +762,10 @@ class ProductWizard {
         
         if (this.elements.progressFill) {
             this.elements.progressFill.style.width = `${progress}%`;
+        }
+
+        if (this.elements.progressText) {
+            this.elements.progressText.textContent = `Step ${this.currentStep} of ${this.totalSteps}`;
         }
         
         if (this.elements.progressText) {
