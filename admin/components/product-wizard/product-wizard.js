@@ -234,10 +234,10 @@ class ProductWizard {
                 };
             }
 
-            // Load completed steps from database
+            // Load completed steps from database (but we'll rebuild them based on actual data to handle step reordering)
             if (data.completed_steps && Array.isArray(data.completed_steps)) {
-                this.completedSteps = new Set(data.completed_steps);
-                console.log('✅ Loaded completed steps:', Array.from(this.completedSteps));
+                console.log('⚠️ Loaded old completed_steps:', Array.from(data.completed_steps));
+                console.log('ℹ️ Will rebuild based on actual data to handle step reordering');
             }
 
         } catch (error) {
@@ -265,16 +265,16 @@ class ProductWizard {
             }
         }
 
-        // Step 3: Check if GitHub repository exists
+        // Step 4: Check if GitHub repository exists
         if (this.formData.github_repo_created && this.formData.github_repo_url) {
-            this.markStepCompleted(3);
-            console.log('✅ Step 3 marked as completed (GitHub repo exists)');
+            this.markStepCompleted(4);
+            console.log('✅ Step 4 marked as completed (GitHub repo exists)');
         }
 
-        // Step 6: Check if Stripe product exists
+        // Step 7: Check if Stripe product exists
         if (this.formData.stripe_product_id) {
-            this.markStepCompleted(6);
-            console.log('✅ Step 6 marked as completed (Stripe product exists)');
+            this.markStepCompleted(7);
+            console.log('✅ Step 7 marked as completed (Stripe product exists)');
         }
     }
 
@@ -430,19 +430,19 @@ class ProductWizard {
                     await this.loadStep2(stepContent);
                     break;
                 case 3:
-                    await this.loadStep3(stepContent);
+                    await this.loadStep3(stepContent); // Content & Media
                     break;
                 case 4:
-                    await this.loadStep4(stepContent); // Cloudflare
+                    await this.loadStep4(stepContent); // GitHub
                     break;
                 case 5:
-                    await this.loadStep5(stepContent); // Content & Media
+                    await this.loadStep5(stepContent); // Database
                     break;
                 case 6:
-                    await this.loadStep6(stepContent); // Stripe
+                    await this.loadStep6(stepContent); // Cloudflare
                     break;
                 case 7:
-                    await this.loadStep7(stepContent);
+                    await this.loadStep7(stepContent); // Stripe
                     break;
                 case 8:
                     await this.loadStep8(stepContent);
@@ -514,9 +514,17 @@ class ProductWizard {
     }
 
     /**
-     * Load Step 3: GitHub Repository Setup
+     * Load Step 3: Content & Media
      */
     async loadStep3(stepContent) {
+        // Placeholder for Step 3 - Content & Media
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: Content & Media</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 4: GitHub Repository Setup
+     */
+    async loadStep4(stepContent) {
         if (window.StepGithubSetup) {
             // Load HTML content
             const response = await fetch('/admin/components/product-wizard/components/step-github-setup/step-github-setup.html');
@@ -524,62 +532,53 @@ class ProductWizard {
             stepContent.innerHTML = html;
 
             // Initialize component
-            this.steps[3] = new window.StepGithubSetup();
-            await this.steps[3].init();
+            this.steps[4] = new window.StepGithubSetup();
+            await this.steps[4].init();
 
             // Load existing data if in edit mode
             if (this.isEditMode && this.formData) {
-                this.steps[3].setFormData(this.formData);
+                this.steps[4].setFormData(this.formData);
             }
 
         } else {
             console.error('❌ StepGithubSetup component not available');
-            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 3: GitHub Repository Setup</h2><p>Component not available</p></div>';
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: GitHub Repository Setup</h2><p>Component not available</p></div>';
         }
     }
 
     /**
-     * Load Step 4: Stripe Product Creation (includes Pricing Configuration)
-     */
-    async loadStep4(stepContent) {
-        // Placeholder for Step 4 - Cloudflare Configuration (now Step 4)
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
-    }
-
-    /**
-     * Load Step 5: Content & Media
+     * Load Step 5: Database Configuration
      */
     async loadStep5(stepContent) {
-        // Placeholder for Step 5 - Content & Media (now Step 5)
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Content & Media</h2><p>Coming soon...</p></div>';
+        // Placeholder for Step 5 - Database Configuration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Database Configuration</h2><p>Coming soon...</p></div>';
     }
 
     /**
-     * Load Step 6: Stripe Product Creation (moved from Step 4)
+     * Load Step 6: Cloudflare Configuration
      */
     async loadStep6(stepContent) {
+        // Placeholder for Step 6 - Cloudflare Configuration
+        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Cloudflare Configuration</h2><p>Coming soon...</p></div>';
+    }
+
+    /**
+     * Load Step 7: Stripe Product Creation
+     */
+    async loadStep7(stepContent) {
         if (window.StepStripeCreation) {
             const response = await fetch('/admin/components/product-wizard/components/step-stripe-creation/step-stripe-creation.html');
             const html = await response.text();
             stepContent.innerHTML = html;
-            this.steps[6] = new window.StepStripeCreation();
-            await this.steps[6].init();
+            this.steps[7] = new window.StepStripeCreation();
+            await this.steps[7].init();
             if (this.isEditMode && this.formData) {
-                this.steps[6].setFormData(this.formData);
+                this.steps[7].setFormData(this.formData);
             }
         } else {
             console.error('❌ StepStripeCreation component not available');
-            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 6: Stripe Product Creation</h2><p>Component not available</p></div>';
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Stripe Product Creation</h2><p>Component not available</p></div>';
         }
-    }
-
-
-    /**
-     * Load Step 7: Database Configuration
-     */
-    async loadStep7(stepContent) {
-        // Placeholder for Step 7 - Database Configuration
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Database Configuration</h2><p>Coming soon...</p></div>';
     }
 
     /**

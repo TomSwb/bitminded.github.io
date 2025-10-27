@@ -228,7 +228,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
 
                     // Mark step as completed
                     if (window.productWizard) {
-                        window.productWizard.markStepCompleted(6);
+                        window.productWizard.markStepCompleted(7);
                     }
                 } else {
                     throw new Error(result.error || 'Failed to create Stripe product');
@@ -351,7 +351,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
 
                 // Mark step as incomplete
                 if (window.productWizard) {
-                    window.productWizard.markStepIncomplete(6);
+                    window.productWizard.markStepIncomplete(7);
                 }
                 
                 // Update UI
