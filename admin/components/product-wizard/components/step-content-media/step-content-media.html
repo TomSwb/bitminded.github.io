@@ -1,0 +1,82 @@
+<!-- Step 3: Content & Media -->
+<div class="step-content-media" id="step-content-media">
+    <div class="step-content-media__header">
+        <h2>Step 3: Content & Media</h2>
+        <p>Add visual content and features to showcase your product</p>
+    </div>
+
+    <div class="step-content-media__fields">
+        <!-- Product Icon -->
+        <div class="step-content-media__field-group">
+            <label for="product-icon" class="step-content-media__label">
+                Product Icon <span class="required">*</span>
+            </label>
+            <div class="step-content-media__upload">
+                <input type="file" id="product-icon" accept="image/*" class="step-content-media__file-input">
+                <div class="step-content-media__preview">
+                    <img id="icon-preview" src="" alt="Icon preview" style="display: none;">
+                    <div class="step-content-media__preview-placeholder">
+                        <span>📎</span>
+                        <p>Upload product icon</p>
+                        <small>Recommended: 512x512px PNG</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screenshots -->
+        <div class="step-content-media__field-group">
+            <label class="step-content-media__label">
+                Screenshots (Optional)
+                <small>(Up to 5)</small>
+            </label>
+            <div class="step-content-media__screenshots">
+                <!-- Screenshots will be added dynamically -->
+            </div>
+            <button type="button" id="add-screenshot-btn" class="step-content-media__btn step-content-media__btn--add">
+                + Add Screenshot
+            </button>
+        </div>
+
+        <!-- Features List -->
+        <div class="step-content-media__field-group">
+            <label for="product-features" class="step-content-media__label">
+                Key Features <span class="required">*</span>
+            </label>
+            <div class="step-content-media__features-list" id="features-list">
+                <!-- Features will be added dynamically -->
+            </div>
+            <button type="button" id="add-feature-btn" class="step-content-media__btn step-content-media__btn--add">
+                + Add Feature
+            </button>
+        </div>
+
+        <!-- Demo Video URL -->
+        <div class="step-content-media__field-group">
+            <label for="demo-video-url" class="step-content-media__label">
+                Demo Video URL (Optional)
+            </label>
+            <input type="url" id="demo-video-url" class="step-content-media__input" placeholder="https://youtube.com/watch?v=...">
+            <small class="step-content-media__help">Link to a demo video (YouTube, Vimeo, etc.)</small>
+        </div>
+
+        <!-- Documentation URL -->
+        <div class="step-content-media__field-group">
+            <label for="documentation-url" class="step-content-media__label">
+                Documentation URL (Optional)
+            </label>
+            <input type="url" id="documentation-url" class="step-content-media__input" placeholder="https://docs.example.com">
+            <small class="step-content-media__help">Link to product documentation</small>
+        </div>
+
+        <!-- Support Email -->
+        <div class="step-content-media__field-group">
+            <label for="support-email" class="step-content-media__label">
+                Support Email (Optional)
+            </label>
+            <input type="email" id="support-email" class="step-content-media__input" placeholder="support@example.com">
+            <small class="step-content-media__help">Support contact email for this product</small>
+        </div>
+    </div>
+</div>
+
