@@ -159,6 +159,31 @@
     transform: none;
 }
 
+.step-github-setup__action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 2rem;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.step-github-setup__action-btn:hover {
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
+    transform: translateY(-1px);
+}
+
+.step-github-setup__action-btn .btn-icon {
+    font-size: 1.25rem;
+}
+
 .step-github-setup__loading {
     text-align: center;
     padding: 2rem;

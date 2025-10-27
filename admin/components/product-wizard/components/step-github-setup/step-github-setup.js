@@ -398,6 +398,16 @@ if (typeof window.StepGithubSetup === 'undefined') {
             // Hide the create button section
             this.elements.createRepoSection.style.display = 'none';
 
+            // Check if we have media to add
+            const basicInfo = window.productWizard?.formData || {};
+            const hasMedia = basicInfo.icon_url || (basicInfo.screenshots && basicInfo.screenshots.length > 0);
+            const updateMediaBtn = hasMedia ? `
+                <button type="button" class="step-github-setup__action-btn" id="update-repo-media-btn">
+                    <span class="btn-icon">🖼️</span>
+                    <span>Update Repository with Media</span>
+                </button>
+            ` : '';
+
             // Show status with existing repo info
             this.elements.githubStatusSection.style.display = 'block';
             this.elements.githubStatus.innerHTML = `
@@ -408,7 +418,16 @@ if (typeof window.StepGithubSetup === 'undefined') {
                         <p><a href="${this.formData.github_repo_url}" target="_blank">${this.formData.github_repo_url}</a></p>
                     </div>
                 </div>
+                ${updateMediaBtn}
             `;
+
+            // Add event listener for update media button
+            if (hasMedia) {
+                const updateBtn = document.getElementById('update-repo-media-btn');
+                if (updateBtn) {
+                    updateBtn.addEventListener('click', () => this.handleUpdateRepoWithMedia());
+                }
+            }
 
             // Show clone instructions
             this.showCloneInstructions({
@@ -471,6 +490,44 @@ cd ${repoName}`;
                 }
             } catch (err) {
                 console.error('Failed to copy:', err);
+            }
+        }
+
+        /**
+         * Handle updating repository with media files
+         */
+        async handleUpdateRepoWithMedia() {
+            const basicInfo = window.productWizard?.formData || {};
+            
+            if (!basicInfo.github_repo_name) {
+                alert('No repository name found');
+                return;
+            }
+
+            const mediaData = {
+                repoName: basicInfo.github_repo_name,
+                iconUrl: basicInfo.icon_url || null,
+                screenshots: basicInfo.screenshots || null
+            };
+
+            console.log('🖼️ Updating repository with media:', mediaData);
+
+            try {
+                const { data, error } = await window.supabase.functions.invoke('update-github-repo-media', {
+                    body: mediaData
+                });
+
+                if (error) throw error;
+
+                if (data && data.success) {
+                    alert(`✅ Successfully uploaded ${data.uploadedFiles?.length || 0} media file(s) to GitHub repository!`);
+                    console.log('✅ Media files uploaded:', data.uploadedFiles);
+                } else {
+                    throw new Error(data?.error || 'Failed to upload media');
+                }
+            } catch (error) {
+                console.error('❌ Error updating repository with media:', error);
+                alert('Failed to upload media to GitHub: ' + error.message);
             }
         }
 
