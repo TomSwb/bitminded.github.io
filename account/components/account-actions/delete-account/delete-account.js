@@ -37,7 +37,7 @@ class DeleteAccount {
                 return;
             }
 
-            console.log('🗑️ Delete Account: Initializing...');
+            // Initializing
 
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -50,7 +50,7 @@ class DeleteAccount {
             await this.initializeTranslations();
 
             this.isInitialized = true;
-            console.log('✅ Delete Account: Initialized successfully');
+            // Initialized
             
             // Final translation update to ensure everything is translated
             setTimeout(() => {

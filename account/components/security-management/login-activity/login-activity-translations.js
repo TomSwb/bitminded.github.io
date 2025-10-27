@@ -17,7 +17,7 @@ class LoginActivityTranslations {
         }
 
         try {
-            console.log('🔧 Initializing login activity translations...');
+            // Initializing translations
             
             // Load translation files
             await this.loadTranslations();
@@ -26,7 +26,7 @@ class LoginActivityTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Login activity translations initialized successfully');
+            // Translations initialized
             
         } catch (error) {
             console.error('❌ Failed to initialize login activity translations:', error);
@@ -44,7 +44,7 @@ class LoginActivityTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Login activity translations loaded');
+            // Translations loaded
             
         } catch (error) {
             console.error('❌ Failed to load login activity translations:', error);
@@ -87,7 +87,7 @@ class LoginActivityTranslations {
             element.style.opacity = '1';
         });
 
-        console.log(`✅ Login activity translations updated for language: ${currentLanguage}`);
+        // Translations updated
     }
 
     /**

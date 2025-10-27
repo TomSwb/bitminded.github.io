@@ -1,0 +1,79 @@
+{
+  "en": {
+    "translation": {
+      "no_active_sessions": "No active sessions found",
+      "loading_sessions": "Loading sessions...",
+      "revoke": "Revoke",
+      "browser": "Browser",
+      "os": "OS",
+      "ip": "IP",
+      "location": "Location",
+      "started": "Started",
+      "just_now": "Just now",
+      "minutes_ago": "{{count}} minute ago",
+      "minutes_ago_plural": "{{count}} minutes ago",
+      "hours_ago": "{{count}} hour ago",
+      "hours_ago_plural": "{{count}} hours ago",
+      "days_ago": "{{count}} day ago",
+      "days_ago_plural": "{{count}} days ago"
+    }
+  },
+  "es": {
+    "translation": {
+      "no_active_sessions": "No se encontraron sesiones activas",
+      "loading_sessions": "Cargando sesiones...",
+      "revoke": "Revocar",
+      "browser": "Navegador",
+      "os": "SO",
+      "ip": "IP",
+      "location": "Ubicación",
+      "started": "Iniciado",
+      "just_now": "Justo ahora",
+      "minutes_ago": "Hace {{count}} minuto",
+      "minutes_ago_plural": "Hace {{count}} minutos",
+      "hours_ago": "Hace {{count}} hora",
+      "hours_ago_plural": "Hace {{count}} horas",
+      "days_ago": "Hace {{count}} día",
+      "days_ago_plural": "Hace {{count}} días"
+    }
+  },
+  "fr": {
+    "translation": {
+      "no_active_sessions": "Aucune session active trouvée",
+      "loading_sessions": "Chargement des sessions...",
+      "revoke": "Révoquer",
+      "browser": "Navigateur",
+      "os": "OS",
+      "ip": "IP",
+      "location": "Emplacement",
+      "started": "Démarré",
+      "just_now": "À l'instant",
+      "minutes_ago": "Il y a {{count}} minute",
+      "minutes_ago_plural": "Il y a {{count}} minutes",
+      "hours_ago": "Il y a {{count}} heure",
+      "hours_ago_plural": "Il y a {{count}} heures",
+      "days_ago": "Il y a {{count}} jour",
+      "days_ago_plural": "Il y a {{count}} jours"
+    }
+  },
+  "de": {
+    "translation": {
+      "no_active_sessions": "Keine aktiven Sitzungen gefunden",
+      "loading_sessions": "Lade Sitzungen...",
+      "revoke": "Widerrufen",
+      "browser": "Browser",
+      "os": "OS",
+      "ip": "IP",
+      "location": "Standort",
+      "started": "Gestartet",
+      "just_now": "Gerade eben",
+      "minutes_ago": "Vor {{count}} Minute",
+      "minutes_ago_plural": "Vor {{count}} Minuten",
+      "hours_ago": "Vor {{count}} Stunde",
+      "hours_ago_plural": "Vor {{count}} Stunden",
+      "days_ago": "Vor {{count}} Tag",
+      "days_ago_plural": "Vor {{count}} Tagen"
+    }
+  }
+}
+

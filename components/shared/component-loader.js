@@ -56,7 +56,8 @@ class ComponentLoader {
         const subComponents = [
             'avatar-upload',
             'username-edit', 
-            'email-change'
+            'email-change',
+            'personal-info'
         ];
 
         const loadPromises = subComponents.map(componentName => {
@@ -64,7 +65,7 @@ class ComponentLoader {
                 const script = document.createElement('script');
                 script.src = `/account/components/profile-management/${componentName}/${componentName}.js`;
                 script.onload = () => {
-                    console.log(`✅ Loaded sub-component: ${componentName}`);
+                    // Sub-component loaded
                     resolve();
                 };
                 script.onerror = () => {
@@ -76,7 +77,7 @@ class ComponentLoader {
         });
 
         await Promise.all(loadPromises);
-        console.log('✅ All profile management sub-components loaded');
+        // All sub-components loaded
     }
 
     /**

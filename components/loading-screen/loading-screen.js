@@ -109,7 +109,7 @@ class LoadingScreen {
             const checkTranslationReady = () => {
                 pollCount++;
                 if (window.translationReady) {
-                    console.log('✅ Translation ready after polling:', pollCount, 'checks');
+                    // Translation ready
                     this.setReadyFlag('translation', true);
                 } else if (pollCount >= maxPolls) {
                     console.warn('⚠️ Translation polling timeout, forcing hide');
@@ -143,11 +143,11 @@ class LoadingScreen {
      */
     setReadyFlag(flag, value) {
         this.readyFlags[flag] = value;
-        console.log(`🏁 Ready flag set: ${flag} = ${value}`, this.readyFlags);
+        // Ready flag set
         
         // Safety check for options
         if (this.options && this.options.autoHide && this.isReadyToHide()) {
-            console.log('✅ All conditions met, attempting to hide');
+            // All conditions met
             this.hide();
         } else {
             console.log('⏳ Not ready to hide yet:', {
@@ -183,7 +183,7 @@ class LoadingScreen {
      */
     hide() {
         if (this.loadingElement && this.isVisible) {
-            console.log('✅ Hiding loading screen');
+            // Hiding loading screen
             this.loadingElement.classList.add('hidden');
             // Force display none with inline style to override any CSS caching issues
             this.loadingElement.style.display = 'none';
@@ -192,10 +192,7 @@ class LoadingScreen {
             // Dispatch custom event
             document.dispatchEvent(new CustomEvent('loadingScreenHidden'));
         } else {
-            console.warn('⚠️ hide() called but conditions not met:', {
-                hasElement: !!this.loadingElement,
-                isVisible: this.isVisible
-            });
+            // Conditions not met yet (loading screen stays visible)
         }
     }
 

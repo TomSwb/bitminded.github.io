@@ -26,7 +26,7 @@ class LoginActivity {
                 return;
             }
 
-            console.log('📊 Login Activity: Initializing...');
+            // Initializing
 
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -39,7 +39,7 @@ class LoginActivity {
             await this.initializeTranslations();
 
             this.isInitialized = true;
-            console.log('✅ Login Activity: Initialized successfully');
+            // Initialized
             
             // Final translation update
             setTimeout(() => {
@@ -97,7 +97,7 @@ class LoginActivity {
      */
     async loadActivity() {
         try {
-            console.log('🔧 Login Activity: Loading...');
+            // Loading
             this.showLoading(true);
             this.hideError();
 
@@ -127,7 +127,7 @@ class LoginActivity {
             }
 
             this.activities = activityData || [];
-            console.log(`✅ Login Activity: Loaded ${this.activities.length} records`);
+            // Records loaded
             
             this.renderActivity();
             this.showLoading(false);

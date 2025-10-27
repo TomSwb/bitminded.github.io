@@ -36,7 +36,7 @@ class CaptchaComponent {
             this.bindLanguageEvents();
             this.loadTurnstileScript();
             this.isInitialized = true;
-            console.log('✅ CAPTCHA Component initialized successfully');
+            // CAPTCHA Component initialized silently
         } catch (error) {
             console.error('❌ Failed to initialize CAPTCHA Component:', error);
             this.showError('Failed to initialize security verification');
@@ -87,7 +87,7 @@ class CaptchaComponent {
             if (response && response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ CAPTCHA translations loaded');
+                // Translations loaded silently
             } else {
                 console.warn('Failed to load CAPTCHA translations from any path');
                 // Use fallback translations
@@ -202,7 +202,7 @@ class CaptchaComponent {
                 'timeout-callback': () => this.onTimeout()
             });
 
-            console.log('✅ Turnstile widget rendered successfully');
+            // Turnstile widget rendered silently
         } catch (error) {
             console.error('❌ Failed to render Turnstile widget:', error);
             this.showError('Failed to initialize security verification');

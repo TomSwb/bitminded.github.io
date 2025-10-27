@@ -122,6 +122,22 @@
                                     <span id="user-detail-email-value" class="user-detail__info-value"></span>
                                 </div>
                                 <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Age">Age</label>
+                                    <span id="user-detail-age" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Country">Country</label>
+                                    <span id="user-detail-country" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Gender">Gender</label>
+                                    <span id="user-detail-gender" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
+                                    <label class="translatable-content" data-translation-key="Preferred Language">Preferred Language</label>
+                                    <span id="user-detail-language" class="user-detail__info-value"></span>
+                                </div>
+                                <div class="user-detail__info-item">
                                     <label class="translatable-content" data-translation-key="Role">Role</label>
                                     <span id="user-detail-role-value" class="user-detail__info-value"></span>
                                 </div>
@@ -199,7 +215,16 @@
                     <!-- Activity Tab -->
                     <div class="user-detail__tab-content" data-tab="activity">
                         <div class="user-detail__section">
+                            <h3 class="translatable-content" data-translation-key="User Communications">User Communications</h3>
+                            <div id="communication-activity-filters-container"></div>
+                            <div id="user-detail-communication-activity" class="user-detail__activity-list">
+                                <!-- Communication activity will be loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="user-detail__section">
                             <h3 class="translatable-content" data-translation-key="Recent Login Activity">Recent Login Activity</h3>
+                            <div id="login-activity-filters-container"></div>
                             <div id="user-detail-login-activity" class="user-detail__activity-list">
                                 <!-- Login activity will be loaded here -->
                             </div>
@@ -207,6 +232,8 @@
 
                         <div class="user-detail__section">
                             <h3 class="translatable-content" data-translation-key="Admin Actions">Admin Actions</h3>
+                            <!-- Admin Activity Filters Component -->
+                            <div id="admin-activity-filters-container"></div>
                             <div id="user-detail-admin-actions" class="user-detail__activity-list">
                                 <!-- Admin actions will be loaded here -->
                             </div>
@@ -216,24 +243,10 @@
                     <!-- Security Tab -->
                     <div class="user-detail__tab-content" data-tab="security">
                         <div class="user-detail__section">
-                            <h3 class="translatable-content" data-translation-key="Two-Factor Authentication">Two-Factor Authentication</h3>
-                            <div class="user-detail__security-item">
-                                <div class="user-detail__security-info">
-                                    <span class="translatable-content" data-translation-key="2FA Status">2FA Status</span>
-                                    <span id="user-detail-2fa-status" class="user-detail__security-status"></span>
-                                </div>
-                                <button id="user-detail-toggle-2fa" class="user-detail__button user-detail__button--secondary">
-                                    <span class="translatable-content" data-translation-key="Toggle 2FA">Toggle 2FA</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="user-detail__section">
                             <h3 class="translatable-content" data-translation-key="Active Sessions">Active Sessions</h3>
-                            <div id="user-detail-sessions-list" class="user-detail__sessions-list">
-                                <!-- Active sessions will be loaded here -->
-                            </div>
-                            <button id="user-detail-revoke-all-sessions" class="user-detail__button user-detail__button--danger">
+                            <!-- Session Management Component will be loaded here -->
+                            <div id="session-management-container"></div>
+                            <button id="user-detail-revoke-all-sessions" class="user-detail__button user-detail__button--danger" style="margin-top: var(--spacing-md);">
                                 <span class="translatable-content" data-translation-key="Revoke All Sessions">Revoke All Sessions</span>
                             </button>
                         </div>
@@ -247,16 +260,18 @@
                                 <button id="user-detail-edit-user" class="user-detail__action-button user-detail__action-button--primary">
                                     <span class="translatable-content" data-translation-key="Edit User">Edit User</span>
                                 </button>
-                                <button id="user-detail-reset-password" class="user-detail__action-button user-detail__action-button--secondary">
-                                    <span class="translatable-content" data-translation-key="Reset Password">Reset Password</span>
-                                </button>
-                                <button id="user-detail-send-email" class="user-detail__action-button user-detail__action-button--secondary">
-                                    <span class="translatable-content" data-translation-key="Send Email">Send Email</span>
+                                <button id="user-detail-contact-user" class="user-detail__action-button user-detail__action-button--secondary">
+                                    <span class="translatable-content" data-translation-key="Contact User">Contact User</span>
                                 </button>
                                 <button id="user-detail-suspend-user" class="user-detail__action-button user-detail__action-button--warning">
-                                    <span class="translatable-content" data-translation-key="Suspend User">Suspend User</span>
+                                    <span class="translatable-content" data-translation-key="suspend_user">Suspend User</span>
                                 </button>
                             </div>
+                        </div>
+
+                        <!-- Edit User Form Container -->
+                        <div id="edit-user-form-container" class="user-detail__section hidden">
+                            <!-- Edit User Component will be loaded here -->
                         </div>
 
                         <div class="user-detail__section">

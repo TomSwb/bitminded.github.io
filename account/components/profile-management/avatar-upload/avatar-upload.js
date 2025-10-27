@@ -63,7 +63,7 @@ class AvatarUpload {
             });
             
             this.isInitialized = true;
-            console.log('✅ Avatar upload component initialized successfully');
+            // Initialized silently
             
         } catch (error) {
             console.error('❌ Failed to initialize avatar upload component:', error);

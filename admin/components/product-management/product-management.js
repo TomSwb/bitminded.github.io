@@ -1,0 +1,1331 @@
+/**
+ * Product Management Component
+ * Handles product list display, search, filtering, and pagination
+ */
+
+if (typeof window.ProductManagement === 'undefined') {
+class ProductManagement {
+    constructor() {
+        this.isInitialized = false;
+        this.products = [];
+        this.filteredProducts = [];
+        this.filters = {
+            search: '',
+            status: [], // Multi-select for status
+            category: [], // Multi-select for categories
+            pricingType: [], // Multi-select for pricing types
+            commissioned: 'all', // Single select: all, commissioned, not_commissioned
+            featured: 'all', // Single select: all, featured, not_featured
+            createdDate: 'all' // Single select: all, 7d, 30d, 90d, 1y
+        };
+        this.sort = {
+            field: null,
+            direction: 'asc'
+        };
+        this.searchTimeout = null;
+        this.elements = {}; // Store DOM elements
+    }
+
+    /**
+     * Initialize the product management component
+     */
+    async init() {
+        if (this.isInitialized) {
+            return;
+        }
+
+        try {
+            // Initialize DOM elements
+            this.initializeElements();
+
+            // Setup event listeners
+            this.setupEventListeners();
+            
+            // Load saved preferences
+            await this.loadPreferences();
+            
+            // Initialize translations
+            await this.initializeTranslations();
+            
+            // Show translatable content
+            this.showTranslatableContent();
+            
+            // Load products
+            await this.loadProducts();
+
+            // Populate filter options
+            this.populateFilterOptions();
+
+            // Apply initial filters
+            this.applyFilters();
+
+            this.isInitialized = true;
+
+        } catch (error) {
+            console.error('❌ Product Management: Failed to initialize:', error);
+            this.showError('Failed to initialize product management');
+        }
+    }
+
+    /**
+     * Setup event listeners
+     */
+    setupEventListeners() {
+        // Search input (debounced)
+        if (this.elements.searchInput) {
+            this.elements.searchInput.addEventListener('input', (e) => {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.filters.search = e.target.value.toLowerCase();
+                    this.applyFilters();
+                    this.savePreferences();
+                }, 300); // 300ms debounce
+            });
+        }
+
+        // Single select filters
+        if (this.elements.commissionedFilter) {
+            this.elements.commissionedFilter.addEventListener('change', (e) => {
+                this.filters.commissioned = e.target.value;
+                this.applyFilters();
+                this.savePreferences();
+            });
+        }
+
+        if (this.elements.featuredFilter) {
+            this.elements.featuredFilter.addEventListener('change', (e) => {
+                this.filters.featured = e.target.value;
+                this.applyFilters();
+                this.savePreferences();
+            });
+        }
+
+        if (this.elements.createdDateFilter) {
+            this.elements.createdDateFilter.addEventListener('change', (e) => {
+                this.filters.createdDate = e.target.value;
+                this.applyFilters();
+                this.savePreferences();
+            });
+        }
+
+        // Select All / Deselect All buttons for multi-select filters
+        const filterTypes = ['status', 'category', 'pricingType'];
+        filterTypes.forEach(filterType => {
+            const selectAllBtn = this.elements[`${filterType}SelectAll`];
+            const deselectAllBtn = this.elements[`${filterType}DeselectAll`];
+
+            if (selectAllBtn) {
+                selectAllBtn.addEventListener('click', () => {
+                    this.handleSelectAll(filterType);
+                });
+            }
+
+            if (deselectAllBtn) {
+                deselectAllBtn.addEventListener('click', () => {
+                    this.handleDeselectAll(filterType);
+                });
+            }
+        });
+
+        // Clear all filters button
+        if (this.elements.clearBtn) {
+            this.elements.clearBtn.addEventListener('click', () => {
+                this.clearAllFilters();
+            });
+        }
+
+        // Initialize dropdown functionality
+        this.initializeDropdowns();
+
+        // Initialize dropdown search functionality
+        this.initializeDropdownSearch();
+
+        // Add Product button
+        const addProductButton = document.getElementById('add-product-button');
+        if (addProductButton) {
+            addProductButton.addEventListener('click', () => {
+                this.addProduct();
+            });
+        }
+
+        // Create Bundle button
+        const createBundleButton = document.getElementById('create-bundle-button');
+        if (createBundleButton) {
+            createBundleButton.addEventListener('click', () => {
+                this.createBundle();
+            });
+        }
+
+        // Sortable headers
+        const sortableHeaders = document.querySelectorAll('.product-management__sortable-header');
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', (e) => {
+                const sortField = header.getAttribute('data-sort');
+                this.handleSort(sortField);
+            });
+        });
+
+        // Language change
+        window.addEventListener('languageChanged', () => {
+            this.updateTranslations();
+        });
+    }
+
+    /**
+     * Load products from database
+     */
+    async loadProducts() {
+        try {
+            this.showLoading();
+
+            if (!window.supabase) {
+                throw new Error('Supabase not available');
+            }
+
+            // Log admin action - viewing product list
+            if (window.adminLayout) {
+                await window.adminLayout.logAdminAction(
+                    'product_list_viewed',
+                    `Admin viewed product management list`
+                );
+            }
+
+            // Query products with category information
+            const { data, error } = await window.supabase
+                .from('products')
+                .select(`
+                    id,
+                    name,
+                    slug,
+                    description,
+                    short_description,
+                    status,
+                    pricing_type,
+                    price_amount,
+                    price_currency,
+                    individual_price,
+                    enterprise_price,
+                    subscription_interval,
+                    is_commissioned,
+                    commissioned_by,
+                    commissioned_client_name,
+                    is_featured,
+                    is_available_for_purchase,
+                    created_at,
+                    updated_at,
+                    published_at,
+                    product_categories (
+                        id,
+                        name,
+                        slug
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('❌ Database query error:', error);
+                throw error;
+            }
+
+            // Process products data
+            this.products = data.map(product => ({
+                ...product,
+                category_name: product.product_categories?.name || 'Uncategorized',
+                category_slug: product.product_categories?.slug || 'uncategorized'
+            }));
+
+            // Apply initial filters and render
+            this.applyFilters();
+            this.hideLoading();
+
+        } catch (error) {
+            console.error('❌ Failed to load products:', error);
+            this.hideLoading();
+            this.showEmpty();
+            this.showError('Failed to load products');
+        }
+    }
+
+    /**
+     * Apply filters to products list
+     */
+    applyFilters() {
+        this.filteredProducts = this.products.filter(product => {
+            // Search filter
+            if (this.filters.search) {
+                const searchLower = this.filters.search;
+                const matchesSearch = 
+                    product.name.toLowerCase().includes(searchLower) ||
+                    product.slug.toLowerCase().includes(searchLower) ||
+                    (product.description && product.description.toLowerCase().includes(searchLower)) ||
+                    (product.short_description && product.short_description.toLowerCase().includes(searchLower));
+                
+                if (!matchesSearch) return false;
+            }
+
+            // Status filter (multi-select)
+            if (this.filters.status.length > 0) {
+                if (!this.filters.status.includes(product.status)) return false;
+            }
+
+            // Category filter (multi-select)
+            if (this.filters.category.length > 0) {
+                if (!this.filters.category.includes(product.category_slug)) return false;
+            }
+
+            // Pricing type filter (multi-select)
+            if (this.filters.pricingType.length > 0) {
+                if (!this.filters.pricingType.includes(product.pricing_type)) return false;
+            }
+
+            // Commissioned filter
+            if (this.filters.commissioned !== 'all') {
+                const isCommissioned = product.is_commissioned === true;
+                if (this.filters.commissioned === 'commissioned' && !isCommissioned) return false;
+                if (this.filters.commissioned === 'not_commissioned' && isCommissioned) return false;
+            }
+
+            // Featured filter
+            if (this.filters.featured !== 'all') {
+                const isFeatured = product.is_featured === true;
+                if (this.filters.featured === 'featured' && !isFeatured) return false;
+                if (this.filters.featured === 'not_featured' && isFeatured) return false;
+            }
+
+            // Created date filter
+            if (this.filters.createdDate !== 'all') {
+                const createdDate = new Date(product.created_at);
+                const now = new Date();
+                const daysDiff = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+                
+                switch (this.filters.createdDate) {
+                    case '7d':
+                        if (daysDiff > 7) return false;
+                        break;
+                    case '30d':
+                        if (daysDiff > 30) return false;
+                        break;
+                    case '90d':
+                        if (daysDiff > 90) return false;
+                        break;
+                    case '1y':
+                        if (daysDiff > 365) return false;
+                        break;
+                }
+            }
+
+            return true;
+        });
+
+        // Apply sorting if active
+        if (this.sort.field) {
+            this.applySorting();
+        }
+
+        // Update filter summary
+        this.updateFilterSummary();
+        
+        // Render filtered results
+        this.renderProducts();
+    }
+
+    /**
+     * Handle sortable header click
+     */
+    handleSort(field) {
+        // If clicking the same field, toggle direction
+        if (this.sort.field === field) {
+            this.sort.direction = this.sort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            // New field, default to ascending
+            this.sort.field = field;
+            this.sort.direction = 'asc';
+        }
+
+        // Update UI indicators
+        this.updateSortIndicators();
+        
+        // Apply sorting and re-render
+        this.applySorting();
+        this.renderProducts();
+    }
+
+    /**
+     * Apply sorting to filtered products
+     */
+    applySorting() {
+        if (!this.sort.field) return;
+
+        this.filteredProducts.sort((a, b) => {
+            let aValue = a[this.sort.field];
+            let bValue = b[this.sort.field];
+
+            // Handle string comparison (case insensitive)
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+                aValue = aValue.toLowerCase();
+                bValue = bValue.toLowerCase();
+            }
+
+            let comparison = 0;
+            if (aValue < bValue) comparison = -1;
+            else if (aValue > bValue) comparison = 1;
+
+            return this.sort.direction === 'desc' ? -comparison : comparison;
+        });
+    }
+
+    /**
+     * Update sort indicators in headers
+     */
+    updateSortIndicators() {
+        // Clear all indicators
+        const headers = document.querySelectorAll('.product-management__sortable-header');
+        headers.forEach(header => {
+            header.removeAttribute('data-sort-direction');
+        });
+
+        // Set indicator for active sort
+        if (this.sort.field) {
+            const activeHeader = document.querySelector(`[data-sort="${this.sort.field}"]`);
+            if (activeHeader) {
+                activeHeader.setAttribute('data-sort-direction', this.sort.direction);
+            }
+        }
+    }
+
+    /**
+     * Render products table
+     */
+    renderProducts() {
+        const tbody = document.getElementById('products-table-body');
+        if (!tbody) {
+            console.error('❌ Table body not found');
+            return;
+        }
+
+        // Show all filtered products (no pagination for now)
+        const allProducts = this.filteredProducts;
+
+        // Clear table and ensure tbody is visible
+        tbody.innerHTML = '';
+        tbody.style.display = 'table-row-group';
+
+        // Check if empty
+        if (allProducts.length === 0) {
+            this.showEmpty();
+            this.hideTable();
+            return;
+        }
+
+        this.showTable();
+        this.hideEmpty();
+
+        // Render each product
+        allProducts.forEach((product, index) => {
+            const row = this.createProductRow(product);
+            tbody.appendChild(row);
+        });
+    }
+
+    /**
+     * Create product table row
+     * @param {Object} product - Product data
+     * @returns {HTMLElement} Table row element
+     */
+    createProductRow(product) {
+        const tr = document.createElement('tr');
+        tr.dataset.productId = product.id;
+        tr.style.borderBottom = '1px solid var(--color-primary)';
+
+        // Product Name cell
+        const nameCell = document.createElement('td');
+        nameCell.setAttribute('data-label', 'Product Name');
+        nameCell.style.padding = 'var(--spacing-sm)';
+        nameCell.style.color = 'var(--color-text-primary)';
+        nameCell.style.textAlign = 'center';
+        nameCell.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
+                <div style="font-weight: 600;">${product.name}</div>
+                <div style="font-size: 0.8em; opacity: 0.7;">${product.slug}</div>
+            </div>
+        `;
+
+        // Category cell
+        const categoryCell = document.createElement('td');
+        categoryCell.setAttribute('data-label', 'Category');
+        categoryCell.style.padding = 'var(--spacing-sm)';
+        categoryCell.style.color = 'var(--color-text-primary)';
+        categoryCell.textContent = product.category_name;
+
+        // Status cell
+        const statusCell = document.createElement('td');
+        statusCell.setAttribute('data-label', 'Status');
+        statusCell.style.padding = 'var(--spacing-sm)';
+        const status = product.status || 'draft';
+        
+        // Determine badge class based on status
+        const badgeClass = `product-management__badge--${status}`;
+        
+        statusCell.innerHTML = `
+            <span class="product-management__badge ${badgeClass}">
+                ${status}
+            </span>
+        `;
+
+        // Pricing cell
+        const pricingCell = document.createElement('td');
+        pricingCell.setAttribute('data-label', 'Pricing');
+        pricingCell.style.padding = 'var(--spacing-sm)';
+        pricingCell.style.color = 'var(--color-text-primary)';
+        
+        let pricingText = '';
+        if (product.pricing_type === 'one_time') {
+            pricingText = `${product.price_amount || 0} ${product.price_currency || 'USD'}`;
+        } else if (product.pricing_type === 'subscription') {
+            const individualPrice = product.individual_price || 0;
+            const enterprisePrice = product.enterprise_price || 0;
+            pricingText = `Individual: ${individualPrice} | Enterprise: ${enterprisePrice}`;
+        } else if (product.pricing_type === 'freemium') {
+            pricingText = 'Freemium';
+        }
+        
+        pricingCell.textContent = pricingText;
+
+        // Commissioned cell
+        const commissionedCell = document.createElement('td');
+        commissionedCell.setAttribute('data-label', 'Commissioned');
+        commissionedCell.style.padding = 'var(--spacing-sm)';
+        
+        if (product.is_commissioned) {
+            commissionedCell.innerHTML = `
+                <span style="color: var(--color-secondary); font-weight: 600;">Yes</span>
+                ${product.commissioned_client_name ? `<br><small style="opacity: 0.7;">${product.commissioned_client_name}</small>` : ''}
+            `;
+        } else {
+            commissionedCell.innerHTML = '<span style="opacity: 0.7;">No</span>';
+        }
+
+        // Featured cell
+        const featuredCell = document.createElement('td');
+        featuredCell.setAttribute('data-label', 'Featured');
+        featuredCell.style.padding = 'var(--spacing-sm)';
+        
+        if (product.is_featured) {
+            featuredCell.innerHTML = '<span style="color: var(--color-primary); font-weight: 600;">⭐ Featured</span>';
+        } else {
+            featuredCell.innerHTML = '<span style="opacity: 0.7;">No</span>';
+        }
+
+        // Created cell
+        const createdCell = document.createElement('td');
+        createdCell.setAttribute('data-label', 'Created');
+        createdCell.style.padding = 'var(--spacing-sm)';
+        createdCell.style.color = 'var(--color-text-primary)';
+        createdCell.textContent = this.formatDate(product.created_at);
+
+        // Actions cell
+        const actionsCell = document.createElement('td');
+        actionsCell.setAttribute('data-label', 'Actions');
+        actionsCell.style.padding = 'var(--spacing-sm)';
+        actionsCell.innerHTML = `
+            <div style="display: flex; gap: var(--spacing-sm);">
+                <button class="product-management__action-btn product-management__action-btn--view" data-action="view" data-product-id="${product.id}">
+                    View
+                </button>
+                <button class="product-management__action-btn product-management__action-btn--edit" data-action="edit" data-product-id="${product.id}">
+                    Edit
+                </button>
+                <button class="product-management__action-btn product-management__action-btn--delete" data-action="delete" data-product-id="${product.id}">
+                    Delete
+                </button>
+            </div>
+        `;
+
+        // Add click handlers to action buttons
+        const viewButton = actionsCell.querySelector('[data-action="view"]');
+        if (viewButton) {
+            viewButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.viewProduct(product.id);
+            });
+        }
+
+        const editButton = actionsCell.querySelector('[data-action="edit"]');
+        if (editButton) {
+            editButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.editProduct(product.id);
+            });
+        }
+
+        const deleteButton = actionsCell.querySelector('[data-action="delete"]');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteProduct(product.id, product.name);
+            });
+        }
+
+        // Append cells
+        tr.appendChild(nameCell);
+        tr.appendChild(categoryCell);
+        tr.appendChild(statusCell);
+        tr.appendChild(pricingCell);
+        tr.appendChild(commissionedCell);
+        tr.appendChild(featuredCell);
+        tr.appendChild(createdCell);
+        tr.appendChild(actionsCell);
+
+        return tr;
+    }
+
+    /**
+     * View product detail
+     * @param {string} productId - Product ID
+     */
+    viewProduct(productId) {
+        // Find the product data
+        const product = this.products.find(p => p.id === productId);
+        if (!product) {
+            this.showError('Product not found');
+            return;
+        }
+        
+        // For now, show product info in an alert (can be enhanced later)
+        const productInfo = `
+Product: ${product.name}
+Slug: ${product.slug}
+Status: ${product.status}
+Category: ${product.category_name}
+Pricing: ${product.pricing_type}
+Created: ${this.formatDate(product.created_at)}
+Description: ${product.description || 'No description'}
+        `.trim();
+        
+        alert(productInfo);
+        
+        // TODO: Create a proper product detail page or modal
+        // window.open(`/products/${product.slug}`, '_blank');
+    }
+
+    /**
+     * Edit product
+     * @param {string} productId - Product ID
+     */
+    editProduct(productId) {
+        // Open product wizard in edit mode
+        console.log('Edit product:', productId);
+        window.open(`/admin/components/product-wizard/product-wizard.html?edit=${productId}`, '_blank');
+    }
+
+    /**
+     * Delete a product
+     * @param {string} productId - Product ID to delete
+     * @param {string} productName - Product name for confirmation
+     */
+    async deleteProduct(productId, productName) {
+        if (!window.supabase) {
+            this.showError('Supabase not available');
+            return;
+        }
+        
+        // Confirm deletion with product name verification
+        const confirmMessage = `Are you sure you want to permanently delete the product "${productName}"?\n\nThis action cannot be undone and will:\n- Delete the product\n- Remove all product data\n- Cancel all related purchases\n\nType "${productName}" to confirm:`;
+        
+        const confirmation = prompt(confirmMessage);
+        
+        if (confirmation !== productName) {
+            if (confirmation !== null) {
+                this.showError('Product name confirmation did not match. Deletion cancelled.');
+            }
+            return;
+        }
+        
+        try {
+            // Show loading state
+            this.showLoading();
+            
+            // Get current session
+            const { data: { session } } = await window.supabase.auth.getSession();
+            
+            if (!session) {
+                this.showError('You must be logged in to delete products');
+                this.hideLoading();
+                return;
+            }
+            
+            // Delete the product
+            const { error } = await window.supabase
+                .from('products')
+                .delete()
+                .eq('id', productId);
+            
+            if (error) {
+                console.error('❌ Database error:', error);
+                this.showError(`Failed to delete product: ${error.message}`);
+                this.hideLoading();
+                return;
+            }
+            
+            this.showSuccess(`Product "${productName}" has been permanently deleted`);
+            
+            // Reload products list
+            await this.loadProducts();
+            
+        } catch (error) {
+            console.error('❌ Error deleting product:', error);
+            this.showError(`Failed to delete product: ${error.message || 'Unknown error'}`);
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    /**
+     * Add new product
+     */
+    addProduct() {
+        console.log('Opening product creation wizard');
+        // Open product creation wizard in new tab
+        window.open('/admin/components/product-wizard/product-wizard.html', '_blank');
+    }
+
+    /**
+     * Create product bundle
+     */
+    createBundle() {
+        console.log('Create product bundle');
+        // TODO: Implement create bundle functionality
+        this.showSuccess('Create bundle functionality coming soon!');
+    }
+
+    /**
+     * Format date for display
+     * @param {string} dateString - ISO date string
+     * @returns {string} Formatted date
+     */
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
+
+    /**
+     * Show loading state
+     */
+    showLoading() {
+        const loading = document.getElementById('products-loading');
+        if (loading) {
+            loading.classList.remove('hidden');
+        }
+        this.hideTable();
+        this.hideEmpty();
+    }
+
+    /**
+     * Hide loading state
+     */
+    hideLoading() {
+        const loading = document.getElementById('products-loading');
+        if (loading) {
+            loading.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Show empty state
+     */
+    showEmpty() {
+        const empty = document.getElementById('products-empty');
+        if (empty) {
+            empty.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Hide empty state
+     */
+    hideEmpty() {
+        const empty = document.getElementById('products-empty');
+        if (empty) {
+            empty.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Show table
+     */
+    showTable() {
+        const table = document.getElementById('products-table');
+        if (table) {
+            table.style.display = 'table';
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+        }
+    }
+
+    /**
+     * Hide table
+     */
+    hideTable() {
+        const table = document.getElementById('products-table');
+        if (table) {
+            table.style.display = 'none';
+        }
+    }
+
+    /**
+     * Initialize translations
+     */
+    async initializeTranslations() {
+        try {
+            if (window.productManagementTranslations) {
+                await window.productManagementTranslations.init();
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize translations:', error);
+        }
+    }
+
+    /**
+     * Update translations
+     */
+    updateTranslations() {
+        if (window.productManagementTranslations) {
+            window.productManagementTranslations.updateTranslations();
+        }
+        this.showTranslatableContent();
+        
+        // Add a small delay to ensure translations are fully loaded
+        setTimeout(() => {
+            this.updateTableHeaders();
+            this.updateFilterLabels();
+        }, 50);
+    }
+
+    /**
+     * Show translatable content
+     */
+    showTranslatableContent() {
+        const elements = document.querySelectorAll('#product-management .translatable-content');
+        elements.forEach(el => el.classList.add('loaded'));
+    }
+
+    /**
+     * Update table headers when language changes
+     */
+    updateTableHeaders() {
+        if (!window.productManagementTranslations || !window.productManagementTranslations.isInitialized) {
+            console.log('❌ Product Management: Translations not initialized, skipping table headers update');
+            return;
+        }
+
+        console.log('🔄 Product Management: Updating table headers');
+        const headerMap = {
+            'Product Name': 'Product Name',
+            'Category': 'Category',
+            'Status': 'Status',
+            'Pricing': 'Pricing',
+            'Commissioned': 'Commissioned',
+            'Featured': 'Featured',
+            'Created': 'Created',
+            'Actions': 'Actions'
+        };
+
+        // Update table headers
+        const tableHeaders = document.querySelectorAll('#products-table th.translatable-content, #products-table th .translatable-content');
+        console.log(`🔄 Product Management: Found ${tableHeaders.length} table headers to update`);
+        
+        const currentLanguage = window.productManagementTranslations.getCurrentLanguage();
+        
+        tableHeaders.forEach(header => {
+            const translationKey = header.getAttribute('data-translation-key');
+            if (translationKey && headerMap[translationKey]) {
+                const newText = window.productManagementTranslations.getTranslation(translationKey, currentLanguage);
+                console.log(`🔄 Product Management: Updating "${translationKey}" from "${header.textContent}" to "${newText}"`);
+                header.textContent = newText;
+            }
+        });
+    }
+
+    /**
+     * Update filter labels when language changes
+     */
+    updateFilterLabels() {
+        if (!window.productManagementTranslations || !window.productManagementTranslations.isInitialized) {
+            console.log('❌ Product Management: Translations not initialized, skipping filter labels update');
+            return;
+        }
+
+        console.log('🔄 Product Management: Updating filter labels');
+        const filterMap = {
+            'Status': 'Status',
+            'Category': 'Category',
+            'Pricing Type': 'Pricing Type',
+            'Commissioned': 'Commissioned',
+            'Featured': 'Featured',
+            'Created Date': 'Created Date',
+            'select_status': 'select_status',
+            'select_category': 'select_category',
+            'select_pricing_type': 'select_pricing_type',
+            'select_all': 'select_all',
+            'deselect_all': 'deselect_all',
+            'Clear Filters': 'Clear Filters'
+        };
+
+        // Update filter labels
+        const filterLabels = document.querySelectorAll('#product-management .product-management__filter-label[data-translation-key]');
+        console.log(`🔄 Product Management: Found ${filterLabels.length} filter labels to update`);
+        
+        const currentLanguage = window.productManagementTranslations.getCurrentLanguage();
+        
+        filterLabels.forEach(label => {
+            const translationKey = label.getAttribute('data-translation-key');
+            if (translationKey && filterMap[translationKey]) {
+                const newText = window.productManagementTranslations.getTranslation(translationKey, currentLanguage);
+                console.log(`🔄 Product Management: Updating filter "${translationKey}" from "${label.textContent}" to "${newText}"`);
+                label.textContent = newText;
+            }
+        });
+
+        // Update dropdown button text
+        const dropdownButtons = document.querySelectorAll('#product-management .product-management__dropdown-btn span');
+        console.log(`🔄 Product Management: Found ${dropdownButtons.length} dropdown buttons to update`);
+        
+        dropdownButtons.forEach(button => {
+            const translationKey = button.getAttribute('data-translation-key');
+            if (translationKey && filterMap[translationKey]) {
+                const newText = window.productManagementTranslations.getTranslation(translationKey);
+                console.log(`🔄 Product Management: Updating dropdown "${translationKey}" from "${button.textContent}" to "${newText}"`);
+                button.textContent = newText;
+            }
+        });
+
+        // Update clear button
+        const clearButton = document.querySelector('#product-management .product-management__clear-btn');
+        if (clearButton) {
+            const newText = window.productManagementTranslations.getTranslation('Clear Filters');
+            console.log(`🔄 Product Management: Updating clear button from "${clearButton.textContent}" to "${newText}"`);
+            clearButton.textContent = newText;
+        }
+    }
+
+    /**
+     * Show error message
+     */
+    showError(message) {
+        if (window.adminLayout) {
+            window.adminLayout.showError(message);
+        } else {
+            console.error('Product Management Error:', message);
+        }
+    }
+
+    /**
+     * Show success message
+     */
+    showSuccess(message) {
+        if (window.adminLayout) {
+            window.adminLayout.showSuccess(message);
+        } else {
+            console.log('Product Management Success:', message);
+        }
+    }
+
+    /**
+     * Initialize DOM elements
+     */
+    initializeElements() {
+        this.elements = {
+            // Search
+            searchInput: document.getElementById('product-search-input'),
+            
+            // Dropdown buttons
+            statusDropdownBtn: document.getElementById('status-dropdown-btn'),
+            categoryDropdownBtn: document.getElementById('category-dropdown-btn'),
+            pricingTypeDropdownBtn: document.getElementById('pricing-type-dropdown-btn'),
+            
+            // Dropdown content
+            statusDropdown: document.getElementById('status-dropdown'),
+            categoryDropdown: document.getElementById('category-dropdown'),
+            pricingTypeDropdown: document.getElementById('pricing-type-dropdown'),
+            
+            // Options containers
+            statusOptions: document.getElementById('status-options'),
+            categoryOptions: document.getElementById('category-options'),
+            pricingTypeOptions: document.getElementById('pricing-type-options'),
+            
+            // Search inputs within dropdowns
+            statusSearch: document.getElementById('status-search'),
+            categorySearch: document.getElementById('category-search'),
+            pricingTypeSearch: document.getElementById('pricing-type-search'),
+            
+            // Action buttons
+            statusSelectAll: document.getElementById('status-select-all'),
+            statusDeselectAll: document.getElementById('status-deselect-all'),
+            categorySelectAll: document.getElementById('category-select-all'),
+            categoryDeselectAll: document.getElementById('category-deselect-all'),
+            pricingTypeSelectAll: document.getElementById('pricing-type-select-all'),
+            pricingTypeDeselectAll: document.getElementById('pricing-type-deselect-all'),
+            
+            // Single select filters
+            commissionedFilter: document.getElementById('commissioned-filter'),
+            featuredFilter: document.getElementById('featured-filter'),
+            createdDateFilter: document.getElementById('created-date-filter'),
+            
+            // Summary and clear
+            clearBtn: document.getElementById('product-clear-filters-btn'),
+            filterSummary: document.querySelector('.product-management__summary .product-management__count')
+        };
+    }
+
+    /**
+     * Load saved filter preferences from database
+     */
+    async loadPreferences() {
+        try {
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (!user) return;
+
+            const { data: preferences } = await window.supabase
+                .from('admin_preferences')
+                .select('preferences')
+                .eq('admin_id', user.id)
+                .single();
+
+            if (preferences && preferences.preferences.productManagementFilters) {
+                this.filters = {
+                    ...this.filters,
+                    ...preferences.preferences.productManagementFilters
+                };
+            }
+        } catch (error) {
+            console.error('❌ Failed to load preferences:', error);
+        }
+    }
+
+    /**
+     * Save filter preferences to database
+     */
+    async savePreferences() {
+        try {
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (!user) return;
+
+            // Get existing preferences
+            const { data: existingPrefs } = await window.supabase
+                .from('admin_preferences')
+                .select('preferences')
+                .eq('admin_id', user.id)
+                .single();
+
+            const currentPreferences = existingPrefs?.preferences || {};
+            currentPreferences.productManagementFilters = this.filters;
+
+            await window.supabase
+                .from('admin_preferences')
+                .upsert({
+                    admin_id: user.id,
+                    preferences: currentPreferences
+                }, { onConflict: 'admin_id' });
+
+        } catch (error) {
+            console.error('❌ Failed to save preferences:', error);
+        }
+    }
+
+    /**
+     * Populate filter options dynamically from product data
+     */
+    populateFilterOptions() {
+        if (!this.products.length) return;
+
+        // Get unique values for each filter type
+        const statuses = [...new Set(this.products.map(product => product.status))];
+        const categories = [...new Set(this.products.map(product => product.category_slug))];
+        const pricingTypes = [...new Set(this.products.map(product => product.pricing_type))];
+
+        console.log('🔍 Filter options found:', { statuses, categories, pricingTypes });
+
+        // Render options for each filter
+        this.renderFilterOptions('status', statuses);
+        this.renderFilterOptions('category', categories);
+        this.renderFilterOptions('pricingType', pricingTypes);
+    }
+
+    /**
+     * Render filter options for a specific filter type
+     */
+    renderFilterOptions(filterType, options) {
+        const optionsContainer = this.elements[`${filterType}Options`];
+        if (!optionsContainer) return;
+
+        optionsContainer.innerHTML = '';
+
+        options.forEach(option => {
+            if (!option) return; // Skip null/undefined values
+
+            const optionElement = document.createElement('label');
+            optionElement.className = 'product-management__option';
+            optionElement.innerHTML = `
+                <input type="checkbox" value="${option}" class="product-management__checkbox">
+                <span>${option}</span>
+            `;
+
+            // Set initial state based on saved preferences
+            const checkbox = optionElement.querySelector('input');
+            if (this.filters[filterType].includes(option)) {
+                checkbox.checked = true;
+            }
+
+            // Add event listener
+            checkbox.addEventListener('change', () => {
+                this.handleFilterToggle(filterType, option, checkbox.checked);
+            });
+
+            optionsContainer.appendChild(optionElement);
+        });
+    }
+
+    /**
+     * Handle filter toggle for multi-select filters
+     */
+    handleFilterToggle(filterType, option, isChecked) {
+        if (isChecked) {
+            // Add to filter if not already present
+            if (!this.filters[filterType].includes(option)) {
+                this.filters[filterType].push(option);
+            }
+        } else {
+            // Remove from filter
+            this.filters[filterType] = this.filters[filterType].filter(item => item !== option);
+        }
+
+        this.applyFilters();
+        this.savePreferences();
+    }
+
+    /**
+     * Handle select all for a filter type
+     */
+    handleSelectAll(filterType) {
+        const optionsContainer = this.elements[`${filterType}Options`];
+        if (!optionsContainer) return;
+
+        const checkboxes = optionsContainer.querySelectorAll('input[type="checkbox"]');
+        const allValues = Array.from(checkboxes).map(cb => cb.value);
+
+        // Set all checkboxes as checked
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+
+        // Update filter
+        this.filters[filterType] = [...allValues];
+        this.applyFilters();
+        this.savePreferences();
+    }
+
+    /**
+     * Handle deselect all for a filter type
+     */
+    handleDeselectAll(filterType) {
+        const optionsContainer = this.elements[`${filterType}Options`];
+        if (!optionsContainer) return;
+
+        const checkboxes = optionsContainer.querySelectorAll('input[type="checkbox"]');
+
+        // Set all checkboxes as unchecked
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Update filter
+        this.filters[filterType] = [];
+        this.applyFilters();
+        this.savePreferences();
+    }
+
+    /**
+     * Update filter summary text
+     */
+    updateFilterSummary() {
+        if (!this.elements.filterSummary) return;
+
+        const totalCount = this.products.length;
+        const filteredCount = this.filteredProducts.length;
+
+        let summaryText;
+        if (filteredCount === totalCount) {
+            summaryText = `Showing all products`;
+        } else {
+            summaryText = `Showing ${filteredCount} of ${totalCount} products`;
+        }
+
+        this.elements.filterSummary.textContent = summaryText;
+    }
+
+    /**
+     * Clear all filters
+     */
+    clearAllFilters() {
+        // Reset filter state
+        this.filters = {
+            search: '',
+            status: [],
+            category: [],
+            pricingType: [],
+            commissioned: 'all',
+            featured: 'all',
+            createdDate: 'all'
+        };
+
+        // Clear search input
+        if (this.elements.searchInput) {
+            this.elements.searchInput.value = '';
+        }
+
+        // Clear single select filters
+        if (this.elements.commissionedFilter) {
+            this.elements.commissionedFilter.value = 'all';
+        }
+        if (this.elements.featuredFilter) {
+            this.elements.featuredFilter.value = 'all';
+        }
+        if (this.elements.createdDateFilter) {
+            this.elements.createdDateFilter.value = 'all';
+        }
+
+        // Clear all checkboxes
+        ['status', 'category', 'pricingType'].forEach(filterType => {
+            const optionsContainer = this.elements[`${filterType}Options`];
+            if (optionsContainer) {
+                const checkboxes = optionsContainer.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            }
+        });
+
+        // Apply filters and save preferences
+        this.applyFilters();
+        this.savePreferences();
+    }
+
+    /**
+     * Initialize dropdown functionality
+     */
+    initializeDropdowns() {
+        const dropdownButtons = [
+            'statusDropdownBtn',
+            'categoryDropdownBtn', 
+            'pricingTypeDropdownBtn'
+        ];
+
+        dropdownButtons.forEach(btnKey => {
+            const btn = this.elements[btnKey];
+            const dropdown = this.elements[btnKey.replace('Btn', '')];
+
+            if (btn && dropdown) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleDropdown(btn, dropdown);
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                        this.closeDropdown(btn, dropdown);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Initialize dropdown search functionality
+     */
+    initializeDropdownSearch() {
+        const searchInputs = [
+            'statusSearch',
+            'categorySearch', 
+            'pricingTypeSearch'
+        ];
+
+        searchInputs.forEach(searchKey => {
+            const searchInput = this.elements[searchKey];
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const filterType = searchKey.replace('Search', '');
+                    this.filterDropdownOptions(filterType, e.target.value);
+                });
+            }
+        });
+    }
+
+    /**
+     * Filter dropdown options based on search input
+     */
+    filterDropdownOptions(filterType, searchTerm) {
+        const optionsContainer = this.elements[`${filterType}Options`];
+        if (!optionsContainer) return;
+
+        const options = optionsContainer.querySelectorAll('.product-management__option');
+        const searchLower = searchTerm.toLowerCase();
+
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            const isVisible = text.includes(searchLower);
+            option.style.display = isVisible ? 'block' : 'none';
+        });
+    }
+
+    /**
+     * Toggle dropdown visibility
+     */
+    toggleDropdown(btn, dropdown) {
+        const isOpen = dropdown.classList.contains('show');
+        
+        // Close all other dropdowns
+        this.closeAllDropdowns();
+        
+        if (!isOpen) {
+            dropdown.classList.add('show');
+            btn.classList.add('active');
+        }
+    }
+
+    /**
+     * Close specific dropdown
+     */
+    closeDropdown(btn, dropdown) {
+        dropdown.classList.remove('show');
+        btn.classList.remove('active');
+    }
+
+    /**
+     * Close all dropdowns
+     */
+    closeAllDropdowns() {
+        const dropdowns = [
+            'statusDropdown',
+            'categoryDropdown',
+            'pricingTypeDropdown'
+        ];
+
+        dropdowns.forEach(dropdownKey => {
+            const btn = this.elements[dropdownKey.replace('Dropdown', 'DropdownBtn')];
+            const dropdown = this.elements[dropdownKey];
+            
+            if (btn && dropdown) {
+                this.closeDropdown(btn, dropdown);
+            }
+        });
+    }
+} // End of ProductManagement class
+
+// Export for use in other scripts
+window.ProductManagement = ProductManagement;
+} // End of if statement to prevent duplicate class declaration

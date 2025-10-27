@@ -179,7 +179,7 @@ serve(async (req) => {
             
             <div class="footer">
               <p>This message was sent via the BitMinded contact form</p>
-              <p>© 2024 BitMinded. All rights reserved.</p>
+              <p>© 2025 BitMinded. All rights reserved.</p>
             </div>
           </div>
         </body>

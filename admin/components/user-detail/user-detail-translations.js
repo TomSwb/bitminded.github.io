@@ -6,13 +6,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('language') || 'en';
     
-    console.log('🌐 Loading user detail translations...');
+    // Loading translations
     
     // Load user detail translations
     fetch('/admin/components/user-detail/locales/user-detail-locales.json')
         .then(response => response.json())
         .then(resources => {
-            console.log('📦 User detail translations loaded');
+            // Translations loaded
             
             i18next.init({
                 lng: savedLang,
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('❌ i18next init error:', err);
                     showContent();
                 } else {
-                    console.log('✅ i18next initialized');
+                    // i18next initialized
                     updateContent();
                 }
             });
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        console.log('🔄 Updating content with translations...');
+        // Updating translations
         
         // Apply translations to all translatable elements
         const translatableElements = document.querySelectorAll('.translatable-content');
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             element.classList.add('loaded');
         });
         
-        console.log('✅ Content updated with translations');
+        // Content updated
         
         // Signal that translation is ready
         window.translationReady = true;

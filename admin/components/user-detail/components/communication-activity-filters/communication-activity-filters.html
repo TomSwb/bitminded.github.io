@@ -1,0 +1,96 @@
+<div class="communication-activity-filters">
+    <div class="communication-activity-filters__header">
+        <div class="communication-activity-filters__controls">
+            <!-- Date Range Filter -->
+            <div class="communication-activity-filters__group">
+                <label for="date-range-select" class="communication-activity-filters__label" data-translation-key="date_range">Date Range</label>
+                <select id="communication-date-range-select" class="communication-activity-filters__select">
+                    <option value="24h" data-translation-key="last_24_hours">Last 24 Hours</option>
+                    <option value="7d" data-translation-key="last_7_days">Last 7 Days</option>
+                    <option value="30d" data-translation-key="last_30_days">Last 30 Days</option>
+                    <option value="90d" data-translation-key="last_90_days">Last 90 Days</option>
+                    <option value="all" data-translation-key="all_time" selected>All Time</option>
+                </select>
+            </div>
+
+            <!-- Type Filter -->
+            <div class="communication-activity-filters__group">
+                <label for="type-filter" class="communication-activity-filters__label" data-translation-key="type">Type</label>
+                <div class="communication-activity-filters__dropdown">
+                    <button type="button" class="communication-activity-filters__dropdown-btn" id="type-dropdown-btn">
+                        <span data-translation-key="select_type">Select Type</span>
+                        <span class="communication-activity-filters__dropdown-arrow">▼</span>
+                    </button>
+                    <div class="communication-activity-filters__dropdown-content" id="type-dropdown">
+                        <div class="communication-activity-filters__search">
+                            <input type="text" placeholder="Search..." class="communication-activity-filters__search-input" id="type-search">
+                        </div>
+                        <div class="communication-activity-filters__options" id="type-options">
+                            <!-- Options populated dynamically -->
+                        </div>
+                        <div class="communication-activity-filters__actions">
+                            <button type="button" class="communication-activity-filters__action-btn" id="type-select-all" data-translation-key="select_all">Select All</button>
+                            <button type="button" class="communication-activity-filters__action-btn" id="type-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sender Filter -->
+            <div class="communication-activity-filters__group">
+                <label for="sender-filter" class="communication-activity-filters__label" data-translation-key="sender">Sender</label>
+                <div class="communication-activity-filters__dropdown">
+                    <button type="button" class="communication-activity-filters__dropdown-btn" id="sender-dropdown-btn">
+                        <span data-translation-key="select_sender">Select Sender</span>
+                        <span class="communication-activity-filters__dropdown-arrow">▼</span>
+                    </button>
+                    <div class="communication-activity-filters__dropdown-content" id="sender-dropdown">
+                        <div class="communication-activity-filters__search">
+                            <input type="text" placeholder="Search..." class="communication-activity-filters__search-input" id="sender-search">
+                        </div>
+                        <div class="communication-activity-filters__options" id="sender-options">
+                            <!-- Options populated dynamically -->
+                        </div>
+                        <div class="communication-activity-filters__actions">
+                            <button type="button" class="communication-activity-filters__action-btn" id="sender-select-all" data-translation-key="select_all">Select All</button>
+                            <button type="button" class="communication-activity-filters__action-btn" id="sender-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject Filter (for emails) -->
+            <div class="communication-activity-filters__group">
+                <label for="subject-filter" class="communication-activity-filters__label" data-translation-key="subject">Subject</label>
+                <div class="communication-activity-filters__dropdown">
+                    <button type="button" class="communication-activity-filters__dropdown-btn" id="subject-dropdown-btn">
+                        <span data-translation-key="select_subject">Select Subject</span>
+                        <span class="communication-activity-filters__dropdown-arrow">▼</span>
+                    </button>
+                    <div class="communication-activity-filters__dropdown-content" id="subject-dropdown">
+                        <div class="communication-activity-filters__search">
+                            <input type="text" placeholder="Search..." class="communication-activity-filters__search-input" id="subject-search">
+                        </div>
+                        <div class="communication-activity-filters__options" id="subject-options">
+                            <!-- Options populated dynamically -->
+                        </div>
+                        <div class="communication-activity-filters__actions">
+                            <button type="button" class="communication-activity-filters__action-btn" id="subject-select-all" data-translation-key="select_all">Select All</button>
+                            <button type="button" class="communication-activity-filters__action-btn" id="subject-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary and Clear Button on same row -->
+        <div class="communication-activity-filters__summary-row">
+            <div class="communication-activity-filters__summary">
+                <span class="communication-activity-filters__count" data-translation-key="showing_all_communications">Showing all communications</span>
+            </div>
+            <button type="button" class="communication-activity-filters__clear-btn" id="communication-clear-filters-btn" data-translation-key="clear_all_filters">
+                Clear All Filters
+            </button>
+        </div>
+    </div>
+</div>

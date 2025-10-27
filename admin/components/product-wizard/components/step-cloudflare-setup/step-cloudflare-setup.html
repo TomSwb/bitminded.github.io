@@ -1,0 +1,68 @@
+<!-- Step 6: Cloudflare Configuration -->
+<div class="step-cloudflare-setup" id="step-cloudflare-setup">
+    <div class="step-cloudflare-setup__header">
+        <h2>Step 6: Cloudflare Configuration</h2>
+        <p>Configure the Cloudflare subdomain and worker for your product</p>
+    </div>
+
+    <div class="step-cloudflare-setup__fields">
+        <!-- Subdomain Configuration -->
+        <div class="step-cloudflare-setup__field-group">
+            <label for="cloudflare-subdomain" class="step-cloudflare-setup__label">
+                Subdomain <span class="required">*</span>
+            </label>
+            <div class="step-cloudflare-setup__subdomain-input">
+                <input type="text" id="cloudflare-subdomain" class="step-cloudflare-setup__input" placeholder="product-slug">
+                <span class="step-cloudflare-setup__subdomain-suffix">.bitminded.ch</span>
+            </div>
+            <small class="step-cloudflare-setup__help">The subdomain where your product will be hosted (e.g., converter.bitminded.ch)</small>
+        </div>
+
+        <!-- Cloudflare Worker URL -->
+        <div class="step-cloudflare-setup__field-group">
+            <label for="cloudflare-worker-url" class="step-cloudflare-setup__label">
+                Cloudflare Worker URL (Optional)
+            </label>
+            <input type="url" id="cloudflare-worker-url" class="step-cloudflare-setup__input" placeholder="https://your-worker.your-subdomain.workers.dev">
+            <small class="step-cloudflare-setup__help">Your Cloudflare Worker URL if you have one set up</small>
+        </div>
+
+        <!-- Create Worker Button -->
+        <div class="step-cloudflare-setup__create-section">
+            <button type="button" id="create-worker-btn" class="step-cloudflare-setup__create-btn">
+                <span class="btn-icon">☁️</span>
+                <span>Create Cloudflare Worker</span>
+            </button>
+            <small class="step-cloudflare-setup__help">Automatically create and configure a Cloudflare Worker for this product</small>
+        </div>
+
+        <!-- Worker Status -->
+        <div class="step-cloudflare-setup__status" id="worker-status" style="display: none;">
+            <!-- Status will be shown here -->
+        </div>
+
+        <!-- How it works -->
+        <div class="step-cloudflare-setup__instructions">
+            <h3 class="step-cloudflare-setup__instructions-title">How it works</h3>
+            <div class="step-cloudflare-setup__instruction-step">
+                <ul>
+                    <li>Creates a Cloudflare Worker and sets the route for <strong id="subdomain-preview">[subdomain].bitminded.ch</strong>.</li>
+                    <li>Enforces access automatically via Supabase (validate-license) with admin bypass.</li>
+                    <li>Unauthenticated users are redirected to login; non-subscribers to subscribe.</li>
+                </ul>
+            </div>
+            <div class="step-cloudflare-setup__instruction-step">
+                <h4>Manual route (fallback)</h4>
+                <p>If route creation fails, add the domain in Cloudflare → Workers & Pages → Triggers.</p>
+                <p><a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Open Cloudflare Dashboard</a></p>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="step-cloudflare-setup__info">
+            <p><strong>💡 Pro Tip:</strong> You can come back and update the Worker URL after it's created.</p>
+            <p><strong>🔒 Security:</strong> Access enforcement is handled automatically by the generated Worker.</p>
+        </div>
+    </div>
+</div>
+

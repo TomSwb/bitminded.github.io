@@ -13,7 +13,7 @@ if (typeof window.adminLayoutTranslations === 'undefined') {
          */
         async init() {
             try {
-                console.log('🔧 Initializing admin layout translations...');
+                // Initializing translations
                 
                 const response = await fetch('/admin/components/admin-layout/locales/admin-layout-locales.json');
                 
@@ -22,10 +22,10 @@ if (typeof window.adminLayoutTranslations === 'undefined') {
                 }
 
                 this.translations = await response.json();
-                console.log('✅ Admin layout translations loaded');
+                // Translations loaded
 
                 this.isInitialized = true;
-                console.log('✅ Admin layout translations initialized successfully');
+                // Translations initialized
 
                 // Add translations to i18next if available
                 if (window.i18next && typeof window.i18next.addResourceBundle === 'function') {
@@ -39,7 +39,7 @@ if (typeof window.adminLayoutTranslations === 'undefined') {
                                 true
                             );
                         });
-                        console.log('✅ Admin layout translations added to i18next');
+                        // Translations added
                     } catch (i18nextError) {
                         console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }

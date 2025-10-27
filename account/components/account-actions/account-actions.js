@@ -19,7 +19,7 @@ class AccountActions {
         }
 
         try {
-            console.log('⚙️ Account Actions: Initializing...');
+            // Initializing
 
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
@@ -29,7 +29,7 @@ class AccountActions {
             }
 
             this.isInitialized = true;
-            console.log('✅ Account Actions: Initialized successfully');
+            // Initialized
 
         } catch (error) {
             console.error('❌ Account Actions: Failed to initialize:', error);

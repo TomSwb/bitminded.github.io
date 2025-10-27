@@ -1,0 +1,98 @@
+
+## 📝 **Answer Template**
+
+**Copy this template and fill in your answers:**
+
+```
+## My Answers:
+
+### Product Creation Workflow:
+Q1: step by step in its own page, not sure what is the difference here, if we can do automatic i want that, otherwise a guide
+
+Q2: block all, yes and i want to be able to set a timer on it for its start and end, yes as above
+
+Q3: scheduled but i can choose my schedule, i dont think so - what you think?, yes
+
+### Product Status Management:
+Q4: i think all of these is good, they are great options
+Q5: should be available in the catalogue but not buyable
+Q6: in future phases, right now i got no user and im not sure how it would work
+
+### Pricing Strategy:
+Q7: all of these
+Q8: manually set, i want control on what bundles i will make later on
+Q9: grandfather current users for any future price increases; do not implement this now, but please make note of it as a potential future need and consider how it could be supported later
+
+### Stripe Integration:
+Q10: first time i hear of this so would love to be able to that but im not sure how it works
+Q11: yes
+Q12: need help to understand that one
+
+### Product Analytics:
+Q13: yes all og it
+Q14: yes i will want to add that anyway, but also i dont want to separate stars and actual comment i want them together
+Q15: will keep it to medium for phase 1, i do want to have a set up as complete as possible before making too many products
+
+### Content Management:
+Q16: rich i think
+Q17: icons and screenshots, demo videos as optional
+Q18: hybrid approach - basic docs on bitminded (pricing, features, support), detailed docs on each product (how to use specific features)
+
+### Access Control:
+Q19: yes
+Q20: my products will all be quite simple for now so i dont think we need that
+Q21: yes
+
+### Maintenance & Updates:
+Q22: yes
+Q23: yes
+Q24: yes
+
+### Implementation Strategy:
+Q25: all from the start
+Q26: later
+Q27: grid of cards
+Q28: mandatory
+Q29: yes
+Q30: what can be interactive should be everything that i have to do in github, strip and cloudflare should be instructions
+Q31: i would like to yes if possible
+Q32: yes
+Q33: not sure what would be automatised so i assume manual
+Q34: yes
+Q35: both
+Q36: there is a product management in the admin pannel use that
+Q37: yes that is the point of the app entitlement component
+Q38: i have two products repo: measure-mate.bitminded.github.io (this one already is a page and has a dns set up but i did that a while ago and dont remember so we could go through it again)
+and rythmo.bitminded.github.io (this one i dont think the product is done and its just a repo for now) i want ot use these two to test the whole system.
+
+### Business Model:
+Q39: yes
+Q40: maybe we need to brainstorm that - GRACEFUL DEGRADATION: 7-day grace period (product still works, email reminders) → After 7 days: limited mode (read-only) → After 30 days: inaccessible → Data preserved 90 days → Easy reactivation
+Q41: yes - and they should get the product for free is they are an individual or reduce price if an entreprise - DOCUMENT IN WIZARD: Individual vs Enterprise detection, pricing logic, verification system
+Q42: seems that should be reference by answer of q32
+Q43: i want to have options availables and choose on the go
+Q44: need to understand what would be considered commissions - DOCUMENT IN WIZARD: Stripe fees (2.9% + 30¢), payment processing costs, analytics costs, total cost breakdown
+
+### Technical Implementation:
+Q45: for now we going with either a one time payment or subscription base but i sdont think my product right now will have tiers
+Q46: yes
+Q47: yes
+Q48: yes
+Q49: no
+Q50: yes
+Q51: yes
+Q52: we need a catalogue page yes, that only has the pdocuct if the user is not logged in and if the user is logged in they should be able to purchase
+Q53: we will use emails and notification yes but we need to see how and for what - PURCHASE CONFIRMATIONS (email receipts), SUBSCRIPTION REMINDERS (payment due), PRODUCT UPDATES (new features, maintenance), SUPPORT (help users with issues)
+
+### Success Metrics:
+Q54: number of products no, but user adoption, revenue, user usage etc...
+Q55: we just doing it as wecan 
+Q56: yes
+
+### Priority Matrix:
+Q57: yes
+Q58: yes - i want it understood that all my prducts for now will be pwa, but also im wanting to have a mayimum of them to not need to be constantly connected to use, therefore we need to understand of we ensuring only people that have buyed the products can access it in these conditions, this also means measure mate for example i will need to add a page or something to it thath will do the check, im picturing something that should be applicable like a file or system that i can just copy paste or implement in each of my products very easily right?yes
+Q59: not sure...
+```
+
+---
