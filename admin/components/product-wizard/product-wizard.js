@@ -628,8 +628,18 @@ class ProductWizard {
             return;
         }
 
-        // Save current step data before moving
-        this.saveCurrentStepData();
+        // Save current step data before moving and auto-persist
+        const previousStep = this.currentStep;
+        this.saveCurrentStepData(previousStep);
+        // Silent autosave; do not block navigation on failure
+        try {
+            await this.saveDraftToDatabase();
+        } catch (e) {
+            console.warn('⚠️ Autosave failed while navigating:', e);
+        } finally {
+            // Always reflect completion state based on in-memory data
+            this.updateCompletionForStep(previousStep);
+        }
 
         // Update current step
         this.currentStep = stepNumber;
@@ -654,6 +664,70 @@ class ProductWizard {
 
         // Update progress
         this.updateProgress();
+    }
+
+    /**
+     * Update completion state for a specific step based on current formData
+     */
+    updateCompletionForStep(stepNumber) {
+        switch (stepNumber) {
+            case 1: {
+                const name = this.formData.name && this.formData.name.trim().length > 0;
+                const slug = this.formData.slug && this.formData.slug.trim().length > 0;
+                if (name && slug) {
+                    this.markStepCompleted(1);
+                } else {
+                    this.markStepIncomplete(1);
+                }
+                break;
+            }
+            case 2: {
+                const spec = this.stepData && this.stepData[2] && this.stepData[2].technicalSpecification;
+                if (spec && String(spec).trim() !== '') {
+                    this.markStepCompleted(2);
+                } else {
+                    this.markStepIncomplete(2);
+                }
+                break;
+            }
+            case 3: {
+                const hasIcon = !!this.formData.icon_url;
+                const features = this.formData.features || [];
+                const hasFeatures = Array.isArray(features) && features.length > 0;
+                if (hasIcon && hasFeatures) {
+                    this.markStepCompleted(3);
+                } else {
+                    this.markStepIncomplete(3);
+                }
+                break;
+            }
+            case 4: {
+                if (this.formData.github_repo_created && this.formData.github_repo_url) {
+                    this.markStepCompleted(4);
+                } else {
+                    this.markStepIncomplete(4);
+                }
+                break;
+            }
+            case 5: {
+                if (this.formData.stripe_product_id) {
+                    this.markStepCompleted(5);
+                } else {
+                    this.markStepIncomplete(5);
+                }
+                break;
+            }
+            case 6: {
+                if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
+                    this.markStepCompleted(6);
+                } else {
+                    this.markStepIncomplete(6);
+                }
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     /**
