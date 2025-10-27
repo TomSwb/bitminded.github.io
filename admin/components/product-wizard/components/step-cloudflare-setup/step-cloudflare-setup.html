@@ -1,0 +1,96 @@
+<!-- Step 5: Cloudflare Configuration -->
+<div class="step-cloudflare-setup" id="step-cloudflare-setup">
+    <div class="step-cloudflare-setup__header">
+        <h2>Step 5: Cloudflare Configuration</h2>
+        <p>Configure the Cloudflare subdomain and worker for your product</p>
+    </div>
+
+    <div class="step-cloudflare-setup__fields">
+        <!-- Subdomain Configuration -->
+        <div class="step-cloudflare-setup__field-group">
+            <label for="cloudflare-subdomain" class="step-cloudflare-setup__label">
+                Subdomain <span class="required">*</span>
+            </label>
+            <div class="step-cloudflare-setup__subdomain-input">
+                <input type="text" id="cloudflare-subdomain" class="step-cloudflare-setup__input" placeholder="product-slug">
+                <span class="step-cloudflare-setup__subdomain-suffix">.bitminded.ch</span>
+            </div>
+            <small class="step-cloudflare-setup__help">The subdomain where your product will be hosted (e.g., converter.bitminded.ch)</small>
+        </div>
+
+        <!-- Cloudflare Worker URL -->
+        <div class="step-cloudflare-setup__field-group">
+            <label for="cloudflare-worker-url" class="step-cloudflare-setup__label">
+                Cloudflare Worker URL (Optional)
+            </label>
+            <input type="url" id="cloudflare-worker-url" class="step-cloudflare-setup__input" placeholder="https://your-worker.your-subdomain.workers.dev">
+            <small class="step-cloudflare-setup__help">Your Cloudflare Worker URL if you have one set up</small>
+        </div>
+
+        <!-- Setup Instructions -->
+        <div class="step-cloudflare-setup__instructions">
+            <h3 class="step-cloudflare-setup__instructions-title">Setup Instructions</h3>
+            
+            <div class="step-cloudflare-setup__instruction-step">
+                <h4>1. Create a Cloudflare Worker</h4>
+                <p>Deploy your product code as a Cloudflare Worker:</p>
+                <ul>
+                    <li>Go to <a href="https://dash.cloudflare.com" target="_blank">Cloudflare Dashboard</a></li>
+                    <li>Navigate to Workers & Pages</li>
+                    <li>Create a new Worker</li>
+                    <li>Deploy your product code</li>
+                </ul>
+            </div>
+
+            <div class="step-cloudflare-setup__instruction-step">
+                <h4>2. Configure Custom Domain</h4>
+                <p>Point your custom subdomain to the Worker:</p>
+                <ul>
+                    <li>In the Worker settings, go to Triggers</li>
+                    <li>Add a custom domain: <strong id="subdomain-preview">[subdomain].bitminded.ch</strong></li>
+                    <li>Cloudflare will automatically handle DNS setup</li>
+                </ul>
+            </div>
+
+            <div class="step-cloudflare-setup__instruction-step">
+                <h4>3. Access Control (Optional)</h4>
+                <p>Protect your subdomain with subscription-based access:</p>
+                <ul>
+                    <li>Add authentication check in your Worker</li>
+                    <li>Verify user subscription status with Supabase</li>
+                    <li>Return 403 for unauthorized users</li>
+                </ul>
+                <div class="step-cloudflare-setup__code-snippet">
+                    <pre><code>// Example Worker code
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    
+    // Check authentication
+    const token = request.headers.get('Cookie');
+    if (!token) {
+      return new Response('Unauthorized', { status: 403 });
+    }
+    
+    // Verify subscription with Supabase
+    const subscriptionValid = await checkSubscription(token, url.hostname);
+    if (!subscriptionValid) {
+      return new Response('Subscription required', { status: 403 });
+    }
+    
+    // Serve your app
+    return fetch(request);
+  }
+};</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="step-cloudflare-setup__info">
+            <p><strong>💡 Pro Tip:</strong> You can come back and update the Worker URL after you've deployed it to Cloudflare.</p>
+            <p><strong>🔒 Security:</strong> Make sure to protect your Worker with authentication to prevent unauthorized access.</p>
+        </div>
+    </div>
+</div>
+
