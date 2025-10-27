@@ -269,6 +269,7 @@
 
 .step-stripe-creation__action-btn--delete:hover {
     background: var(--color-error-dark);
+    color: var(--color-error);
     transform: translateY(-2px);
 }
 
