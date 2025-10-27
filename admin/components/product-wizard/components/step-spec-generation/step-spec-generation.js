@@ -12,7 +12,6 @@ class StepSpecGeneration {
         }
 
         try {
-            console.log('📝 Initializing Step 2: AI-Powered Technical Specification...');
             
             this.initializeElements();
             this.attachEventListeners();
@@ -24,12 +23,10 @@ class StepSpecGeneration {
             // Check if we have saved state
             if (this.hasSavedState()) {
                 this.restoreState();
-                console.log('✅ Restored saved state for Step 2');
                 // Show clear button since we have data
                 if (this.clearAiBtn) this.clearAiBtn.style.display = 'inline-flex';
                 if (this.loadAiBtn) this.loadAiBtn.style.display = 'none';
             } else {
-                console.log('ℹ️ No saved AI state found. User can click "Load AI Recommendations" to start.');
                 // Show the load button and hide clear button
                 if (this.loadAiBtn) this.loadAiBtn.style.display = 'inline-flex';
                 if (this.clearAiBtn) this.clearAiBtn.style.display = 'none';
@@ -39,8 +36,9 @@ class StepSpecGeneration {
             
             // Check generation requirements
             this.checkGenerationRequirements();
-            
-            console.log('✅ Step 2: AI-Powered Technical Specification initialized successfully');
+
+            // Check if technical specification exists in the database and mark step as completed
+            this.checkExistingSpec();
             
         } catch (error) {
             console.error('❌ Step 2: Failed to initialize:', error);
@@ -171,18 +169,15 @@ class StepSpecGeneration {
     async initializeTranslations() {
         try {
             if (window.i18next && window.i18next.isInitialized) {
-                console.log('✅ i18next ready, loading translations');
-            } else {
-                console.log('ℹ️ i18next not ready, using standalone translations');
+                // i18next ready
             }
         } catch (error) {
-            console.log('ℹ️ i18next not ready, using standalone translations');
+            // i18next not ready, using standalone translations
         }
     }
 
     setContextFromStep1() {
         if (!window.productWizard || !window.productWizard.formData) {
-            console.log('ℹ️ No Step 1 data available');
             return;
         }
 
@@ -270,49 +265,34 @@ class StepSpecGeneration {
     }
 
     displayRecommendation(fieldName, recommendation) {
-        console.log(`🎨 Displaying recommendation for ${fieldName}:`, recommendation);
-        
         const recommendationElement = document.getElementById(`recommendation-${fieldName}`);
         const valueElement = document.getElementById(`${fieldName.split('-')[0]}-recommendation`);
         const reasoningElement = document.getElementById(`${fieldName.split('-')[0]}-reasoning`);
         
-        console.log(`🔍 Elements found for ${fieldName}:`, {
-            recommendationElement: !!recommendationElement,
-            valueElement: !!valueElement,
-            reasoningElement: !!reasoningElement,
-            valueElementId: `${fieldName.split('-')[0]}-recommendation`,
-            reasoningElementId: `${fieldName.split('-')[0]}-reasoning`
-        });
-        
         // Show the recommendation section first
         if (recommendationElement) {
             recommendationElement.style.display = 'block';
-            console.log(`✅ Showed recommendation element`);
         }
         
         // Show loading text first
         if (valueElement) {
             valueElement.style.display = 'inline';
             valueElement.textContent = 'Loading recommendation...';
-            console.log(`✅ Set loading text`);
         }
         
         if (reasoningElement) {
             reasoningElement.style.display = 'block';
             reasoningElement.textContent = 'Getting AI analysis...';
-            console.log(`✅ Set loading reasoning`);
         }
         
         // Then update with actual recommendation
         setTimeout(() => {
             if (valueElement) {
                 valueElement.textContent = this.formatOptionName(recommendation.recommendation);
-                console.log(`✅ Set value: ${this.formatOptionName(recommendation.recommendation)}`);
             }
             
             if (reasoningElement) {
                 reasoningElement.textContent = recommendation.reasoning;
-                console.log(`✅ Set reasoning: ${recommendation.reasoning}`);
             }
         }, 100);
     }
@@ -498,7 +478,6 @@ class StepSpecGeneration {
             decisionElement.style.display = 'flex';
         }
         
-        console.log(`✅ Accepted recommendation for ${fieldName}: ${recommendation.recommendation}`);
     }
 
     async getSuggestion(fieldName) {
@@ -580,6 +559,11 @@ class StepSpecGeneration {
             
             // Analyze discrepancies between AI recommendations and generated spec
             this.analyzeDiscrepancies(specification);
+
+            // Mark step as completed
+            if (window.productWizard) {
+                window.productWizard.markStepCompleted(2);
+            }
             
         } catch (error) {
             console.error('❌ Error generating specification:', error);
@@ -798,7 +782,6 @@ class StepSpecGeneration {
         // Restore technical specification if it exists
         if (window.productWizard && window.productWizard.stepData && window.productWizard.stepData[2] && window.productWizard.stepData[2].technicalSpecification) {
             const spec = window.productWizard.stepData[2].technicalSpecification;
-            console.log('📄 Restoring saved technical specification:', spec.substring(0, 100) + '...');
             
             if (this.specContent) {
                 this.specContent.innerHTML = this.formatMarkdown(spec);
@@ -810,10 +793,6 @@ class StepSpecGeneration {
                 this.generationStatus.innerHTML = '<span class="status-icon">✅</span><span class="status-text">Technical specification loaded from saved data</span>';
                 this.generationStatus.style.display = 'block';
             }
-            
-            console.log('✅ Technical specification restored successfully');
-        } else {
-            console.log('ℹ️ No saved technical specification found');
         }
         
         // Check generation requirements after restoring state
@@ -1167,8 +1146,18 @@ class StepSpecGeneration {
             }
         }
         
-        console.log(`🔍 Generation requirements check: ${allAccepted ? 'All accepted' : 'Missing acceptances'}`);
         return allAccepted;
+    }
+    
+    checkExistingSpec() {
+        // Check if technical specification exists in the database via stepData
+        if (window.productWizard && window.productWizard.stepData && window.productWizard.stepData[2]) {
+            const technicalSpec = window.productWizard.stepData[2].technicalSpecification;
+            if (technicalSpec && technicalSpec.trim() !== '') {
+                console.log('✅ Technical specification exists in database, marking Step 2 as completed');
+                window.productWizard.markStepCompleted(2);
+            }
+        }
     }
     
     downloadSpecification() {

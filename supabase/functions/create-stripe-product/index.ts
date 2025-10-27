@@ -58,6 +58,12 @@ serve(async (req) => {
     const {
       name,
       description,
+      fullDescription,
+      iconUrl,
+      documentationUrl,
+      supportEmail,
+      category,
+      tags,
       pricingType,
       currency = 'chf',
       enterprisePrice,
@@ -70,6 +76,37 @@ serve(async (req) => {
 
     console.log('💳 Creating Stripe product:', { name, pricingType })
 
+    // Build product metadata
+    const metadata: Record<string, string> = {
+      pricing_type: pricingType
+    }
+    if (category) metadata.category = category
+    if (tags) metadata.tags = tags
+    if (documentationUrl) metadata.documentation_url = documentationUrl
+    if (supportEmail) metadata.support_email = supportEmail
+    
+    // Add full description to metadata if available
+    if (fullDescription) {
+      metadata.full_description = fullDescription
+    }
+
+    // Build Stripe product params
+    const productParams: Record<string, string> = {
+      name: name,
+      description: description || '',
+      statement_descriptor: name.substring(0, 22) // Stripe limit: 22 characters, what shows on statement
+    }
+    
+    // Add images if available
+    if (iconUrl) {
+      productParams['images[0]'] = iconUrl
+    }
+
+    // Add metadata
+    Object.keys(metadata).forEach((key, index) => {
+      productParams[`metadata[${key}]`] = metadata[key]
+    })
+
     // Create Stripe product
     const stripeProduct = await fetch('https://api.stripe.com/v1/products', {
       method: 'POST',
@@ -77,11 +114,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${stripeSecretKey}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: new URLSearchParams({
-        name: name,
-        description: description || '',
-        'metadata[pricing_type]': pricingType
-      })
+      body: new URLSearchParams(productParams)
     })
 
     if (!stripeProduct.ok) {

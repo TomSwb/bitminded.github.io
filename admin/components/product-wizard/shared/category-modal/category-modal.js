@@ -20,7 +20,6 @@ class CategoryModal {
         }
 
         try {
-            console.log('📝 Initializing Category Modal...');
 
             // Initialize DOM elements
             this.initializeElements();
@@ -35,7 +34,6 @@ class CategoryModal {
             this.showTranslatableContent();
 
             this.isInitialized = true;
-            console.log('✅ Category Modal initialized successfully');
 
         } catch (error) {
             console.error('❌ Category Modal: Failed to initialize:', error);

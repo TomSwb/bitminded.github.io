@@ -238,6 +238,49 @@
     border-color: var(--color-primary);
 }
 
+/* Action Buttons */
+.step-stripe-creation__actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.step-stripe-creation__action-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    border: 1px solid var(--color-primary);
+    color: var(--color-text-dark);
+}
+
+.step-stripe-creation__action-btn--delete {
+    background: var(--color-error);
+    border-color: var(--color-error);
+}
+
+.step-stripe-creation__action-btn--delete:hover {
+    background: var(--color-error-dark);
+    transform: translateY(-2px);
+}
+
+.step-stripe-creation__action-btn--view {
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+}
+
+.step-stripe-creation__action-btn--view:hover {
+    background: var(--color-secondary);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .step-stripe-creation {
@@ -246,6 +289,10 @@
 
     .step-stripe-creation__section {
         padding: 1rem;
+    }
+
+    .step-stripe-creation__actions {
+        flex-direction: column;
     }
 }
 
