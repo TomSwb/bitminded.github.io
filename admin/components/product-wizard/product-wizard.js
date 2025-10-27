@@ -510,8 +510,20 @@ class ProductWizard {
      * Load Step 4: Stripe Product Creation (includes Pricing Configuration)
      */
     async loadStep4(stepContent) {
-        // Placeholder for Step 4 - Stripe Product Creation
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: Stripe Product Creation</h2><p>Coming soon...</p></div>';
+        if (window.StepStripeCreation) {
+            const response = await fetch('/admin/components/product-wizard/components/step-stripe-creation/step-stripe-creation.html');
+            const html = await response.text();
+            stepContent.innerHTML = html;
+            this.steps[4] = new window.StepStripeCreation();
+            await this.steps[4].init();
+            if (this.isEditMode && this.formData) {
+                this.steps[4].setFormData(this.formData);
+            }
+            console.log('✅ Step 4: Stripe Product Creation loaded');
+        } else {
+            console.error('❌ StepStripeCreation component not available');
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: Stripe Product Creation</h2><p>Component not available</p></div>';
+        }
     }
 
     /**
