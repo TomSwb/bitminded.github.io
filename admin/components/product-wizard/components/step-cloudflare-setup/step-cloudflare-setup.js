@@ -21,8 +21,10 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             this.elements.workerUrlInput = document.getElementById('cloudflare-worker-url');
             this.elements.subdomainPreview = document.getElementById('subdomain-preview');
             this.elements.createWorkerBtn = document.getElementById('create-worker-btn');
+            this.elements.recreateWorkerBtn = document.getElementById('recreate-worker-btn');
             this.elements.workerStatus = document.getElementById('worker-status');
             this.elements.createSection = document.querySelector('.step-cloudflare-setup__create-section');
+            this.elements.recreateSection = document.getElementById('recreate-worker-section');
         }
 
         setupEventListeners() {
@@ -41,6 +43,11 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             // Create worker button
             if (this.elements.createWorkerBtn) {
                 this.elements.createWorkerBtn.addEventListener('click', () => this.handleCreateWorker());
+            }
+
+            // Recreate worker button
+            if (this.elements.recreateWorkerBtn) {
+                this.elements.recreateWorkerBtn.addEventListener('click', () => this.handleCreateWorker(true));
             }
         }
 
@@ -85,6 +92,10 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                         workerUrl: workerUrl
                     });
                     this.elements.createSection.style.display = 'none';
+                    // Show recreate button since worker exists
+                    if (this.elements.recreateSection) {
+                        this.elements.recreateSection.style.display = 'block';
+                    }
                 }
             }
         }
@@ -111,7 +122,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             }
         }
 
-        async handleCreateWorker() {
+        async handleCreateWorker(isRecreate = false) {
             const basicInfo = window.productWizard?.formData || {};
 
             const subdomain = this.elements.subdomainInput?.value;
@@ -121,9 +132,12 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 return;
             }
 
-            // Disable button
-            this.elements.createWorkerBtn.disabled = true;
-            this.elements.createWorkerBtn.innerHTML = '<span class="btn-icon">⏳</span><span>Creating Worker...</span>';
+            // Disable appropriate button(s)
+            const buttonToDisable = isRecreate ? this.elements.recreateWorkerBtn : this.elements.createWorkerBtn;
+            if (buttonToDisable) {
+                buttonToDisable.disabled = true;
+                buttonToDisable.innerHTML = '<span class="btn-icon">⏳</span><span>' + (isRecreate ? 'Recreating Worker...' : 'Creating Worker...') + '</span>';
+            }
 
             // Derive Supabase functions base from frontend config to avoid project mismatch
             const supabaseBaseUrl = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || '';
@@ -170,10 +184,13 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                     // Show status
                     this.showWorkerStatus(data);
 
-                    // Hide create button
+                    // Hide create button, show recreate button
                     this.elements.createSection.style.display = 'none';
+                    if (this.elements.recreateSection) {
+                        this.elements.recreateSection.style.display = 'block';
+                    }
 
-                    alert('✅ Cloudflare Worker created successfully!');
+                    alert('✅ Cloudflare Worker ' + (isRecreate ? 'recreated' : 'created') + ' successfully!');
                 } else {
                     throw new Error(data?.error || 'Failed to create Worker');
                 }
@@ -181,9 +198,15 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 console.error('❌ Error creating Cloudflare Worker:', error);
                 alert('Failed to create Cloudflare Worker: ' + error.message);
                 
-                // Re-enable button
-                this.elements.createWorkerBtn.disabled = false;
-                this.elements.createWorkerBtn.innerHTML = '<span class="btn-icon">☁️</span><span>Create Cloudflare Worker</span>';
+                // Re-enable appropriate button
+                if (buttonToDisable) {
+                    buttonToDisable.disabled = false;
+                    if (isRecreate) {
+                        buttonToDisable.innerHTML = '<span class="btn-icon">🔄</span><span>Recreate Worker (Use Latest Edge Function)</span>';
+                    } else {
+                        buttonToDisable.innerHTML = '<span class="btn-icon">☁️</span><span>Create Cloudflare Worker</span>';
+                    }
+                }
             }
         }
 
