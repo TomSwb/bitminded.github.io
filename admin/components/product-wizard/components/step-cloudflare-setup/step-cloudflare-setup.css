@@ -78,7 +78,7 @@
 
 /* Instructions */
 .step-cloudflare-setup__instructions {
-    background: var(--color-background-secondary);
+    background: var(--color-background-primary);
     border: 1px solid var(--color-primary);
     border-radius: 8px;
     padding: 1.5rem;
@@ -149,7 +149,7 @@
 
 /* Info Box */
 .step-cloudflare-setup__info {
-    background: var(--color-background-secondary);
+    background: var(--color-background-primary);
     border-left: 4px solid var(--color-primary);
     padding: 1rem 1.5rem;
     border-radius: 4px;
@@ -176,7 +176,7 @@
 .step-cloudflare-setup__create-section {
     margin: 1.5rem 0;
     padding: 1.5rem;
-    background: var(--color-background-secondary);
+    background: var(--color-background-primary);
     border: 1px solid var(--color-primary);
     border-radius: 8px;
 }
@@ -221,7 +221,7 @@
     display: flex;
     gap: 1rem;
     padding: 1rem;
-    background: var(--color-background-secondary);
+    background: var(--color-background-primary);
     border: 1px solid var(--color-primary);
     border-radius: 6px;
 }
