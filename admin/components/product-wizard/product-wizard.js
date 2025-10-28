@@ -930,7 +930,13 @@ class ProductWizard {
                 console.log('✅ Added GitHub repository status to productData');
             }
 
-            // Add Stripe fields (always, so we can save null when deleting)
+            // Add Cloudflare configuration if set
+            productData.cloudflare_domain = this.formData.cloudflare_domain || null;
+            productData.cloudflare_worker_url = this.formData.cloudflare_worker_url || null;
+            if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
+                console.log('✅ Added Cloudflare configuration to productData');
+            }
+
             // Add media fields from Step 3
             productData.icon_url = this.formData.icon_url || null;
             productData.screenshots = this.formData.screenshots || null;

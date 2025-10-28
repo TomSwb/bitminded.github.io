@@ -1,5 +1,5 @@
 /**
- * Step 5: Cloudflare Configuration
+ * Step 6: Cloudflare Configuration
  * Handles subdomain and worker configuration
  */
 
@@ -10,7 +10,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
         }
 
         async init() {
-            console.log('☁️ Initializing Step 5: Cloudflare Configuration');
+            console.log('☁️ Initializing Step 6: Cloudflare Configuration');
             this.initializeElements();
             this.setupEventListeners();
             this.setupDefaults();
@@ -74,7 +74,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             // Mark step as completed if data exists
             if (basicInfo.cloudflare_domain || basicInfo.cloudflare_worker_url) {
                 if (window.productWizard) {
-                    window.productWizard.markStepCompleted(5);
+                    window.productWizard.markStepCompleted(6);
                 }
             }
         }
@@ -153,7 +153,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
 
                     // Mark step as completed
                     if (window.productWizard) {
-                        window.productWizard.markStepCompleted(5);
+                        window.productWizard.markStepCompleted(6);
                     }
 
                     // Show status
