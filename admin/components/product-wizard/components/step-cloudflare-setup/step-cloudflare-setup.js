@@ -1,5 +1,5 @@
 /**
- * Step 5: Cloudflare Configuration
+ * Step 6: Cloudflare Configuration
  * Handles subdomain and worker configuration
  */
 
@@ -10,7 +10,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
         }
 
         async init() {
-            console.log('☁️ Initializing Step 5: Cloudflare Configuration');
+            console.log('☁️ Initializing Step 6: Cloudflare Configuration');
             this.initializeElements();
             this.setupEventListeners();
             this.setupDefaults();
@@ -74,7 +74,17 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             // Mark step as completed if data exists
             if (basicInfo.cloudflare_domain || basicInfo.cloudflare_worker_url) {
                 if (window.productWizard) {
-                    window.productWizard.markStepCompleted(5);
+                    window.productWizard.markStepCompleted(6);
+                }
+                
+                // Restore UI state - show worker status and hide create section
+                if (basicInfo.cloudflare_worker_url) {
+                    const workerUrl = basicInfo.cloudflare_domain ? `https://${basicInfo.cloudflare_domain}` : '';
+                    this.showWorkerStatus({
+                        workerDevUrl: basicInfo.cloudflare_worker_url,
+                        workerUrl: workerUrl
+                    });
+                    this.elements.createSection.style.display = 'none';
                 }
             }
         }
@@ -140,20 +150,21 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 if (error) throw error;
 
                 if (data && data.success) {
-                    // Update form data
-                    window.productWizard.formData.cloudflare_domain = data.workerUrl.replace('https://', '');
-                    window.productWizard.formData.cloudflare_worker_url = data.workerDevUrl;
-                    
-                    // Update input fields
+                    // Update input fields first
                     this.elements.workerUrlInput.value = data.workerDevUrl;
                     
-                    // Save to database
+                    // Then save form data (this will properly reconstruct cloudflare_domain from subdomain input)
                     this.saveFormData();
+                    
+                    // Override with the actual worker URL from response
+                    window.productWizard.formData.cloudflare_worker_url = data.workerDevUrl;
+                    
+                    // Save to database
                     await window.productWizard.saveDraftToDatabase();
 
                     // Mark step as completed
                     if (window.productWizard) {
-                        window.productWizard.markStepCompleted(5);
+                        window.productWizard.markStepCompleted(6);
                     }
 
                     // Show status

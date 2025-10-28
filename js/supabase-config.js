@@ -13,7 +13,39 @@ const SUPABASE_CONFIG = window.SUPABASE_CONFIG || {
 
 // Initialize Supabase client with optimized auth settings
 const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+const supabaseClient = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
+  auth: {
+    storage: typeof localStorage !== 'undefined' ? localStorage : undefined,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce'
+  }
+});
+
+// Sync localStorage token to cookies for subdomain sharing
+async function syncAuthToCookies() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.access_token) {
+    // Set cookie with domain=.bitminded.ch for subdomain access
+    const cookieDomain = window.location.hostname.includes('bitminded.ch') ? '.bitminded.ch' : '';
+    document.cookie = `sb-access-token=${session.access_token}; domain=${cookieDomain}; path=/; secure; samesite=lax; max-age=${60 * 60 * 24 * 7}`; // 7 days
+  }
+}
+
+// Listen for auth changes and sync to cookies
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (session?.access_token) {
+    syncAuthToCookies();
+  } else if (event === 'SIGNED_OUT') {
+    // Clear cookie on sign out
+    const cookieDomain = window.location.hostname.includes('bitminded.ch') ? '.bitminded.ch' : '';
+    document.cookie = `sb-access-token=; domain=${cookieDomain}; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  }
+});
+
+// Initial sync
+syncAuthToCookies();
 
 // Export for use in other scripts
 window.supabase = supabaseClient;

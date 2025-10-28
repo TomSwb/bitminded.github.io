@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { subdomain, productName, productSlug, supabaseFunctionsUrl: suppliedFunctionsUrl, supabaseAnonKey } = await req.json()
+    const { subdomain, productName, productSlug, supabaseFunctionsUrl: suppliedFunctionsUrl, supabaseAnonKey, githubPagesUrl } = await req.json()
 
     if (!subdomain || !productName) {
       throw new Error('Subdomain and product name are required')
@@ -51,7 +51,7 @@ serve(async (req) => {
           'Authorization': `Bearer ${cloudflareApiToken}`,
           'Content-Type': 'application/javascript'
         },
-        body: generateWorkerCode(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey || '')
+        body: generateWorkerCode(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey || '', githubPagesUrl)
       }
     )
 
@@ -88,28 +88,70 @@ serve(async (req) => {
     // Step 2.1: Ensure DNS record exists and proxied
     if (cloudflareZoneId) {
       try {
-        const dnsRes = await fetch(
-          `https://api.cloudflare.com/client/v4/zones/${cloudflareZoneId}/dns_records`,
+        // First, check if DNS record exists
+        const listDnsRes = await fetch(
+          `https://api.cloudflare.com/client/v4/zones/${cloudflareZoneId}/dns_records?name=${customDomain}`,
           {
-            method: 'POST',
+            method: 'GET',
             headers: {
               'Authorization': `Bearer ${cloudflareApiToken}`,
               'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              type: 'A',
-              name: customDomain,
-              content: '192.0.2.1', // placeholder IP, requests terminate at edge
-              ttl: 1,
-              proxied: true
-            })
+            }
           }
         )
-        if (!dnsRes.ok) {
-          const dnsTxt = await dnsRes.text()
-          console.warn(`⚠️ Could not create DNS record (may already exist): ${dnsTxt}`)
+        
+        const listDnsJson = await listDnsRes.json()
+        const existingRecords = listDnsJson?.result || []
+        
+        if (existingRecords.length > 0) {
+          // Update existing record to ensure it's proxied
+          const recordId = existingRecords[0].id
+          const updateRes = await fetch(
+            `https://api.cloudflare.com/client/v4/zones/${cloudflareZoneId}/dns_records/${recordId}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${cloudflareApiToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                proxied: true
+              })
+            }
+          )
+          
+          if (updateRes.ok) {
+            console.log('✅ DNS record updated to proxied')
+          } else {
+            const dnsTxt = await updateRes.text()
+            console.warn(`⚠️ Could not update DNS record to proxied: ${dnsTxt}`)
+          }
         } else {
-          console.log('✅ DNS record ensured (proxied)')
+          // Create new DNS record
+          const dnsRes = await fetch(
+            `https://api.cloudflare.com/client/v4/zones/${cloudflareZoneId}/dns_records`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${cloudflareApiToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                type: 'A',
+                name: subdomain,
+                content: '192.0.2.1', // placeholder IP, requests terminate at edge
+                ttl: 1,
+                proxied: true
+              })
+            }
+          )
+          
+          if (!dnsRes.ok) {
+            const dnsTxt = await dnsRes.text()
+            console.warn(`⚠️ Could not create DNS record: ${dnsTxt}`)
+          } else {
+            console.log('✅ DNS record created (proxied)')
+          }
         }
       } catch (e) {
         console.warn('⚠️ DNS creation failed (will rely on existing record)', e)
@@ -181,7 +223,7 @@ serve(async (req) => {
 /**
  * Generate the Worker code for the product
  */
-function generateWorkerCode(productName: string, productSlug: string, supabaseFunctionsUrl: string, supabaseAnonKey: string): string {
+function generateWorkerCode(productName: string, productSlug: string, supabaseFunctionsUrl: string, supabaseAnonKey: string, githubPagesUrl?: string): string {
   return `/**
 * ${productName} - Cloudflare Worker (classic)
 * Enforces access via Supabase validate-license.
@@ -271,8 +313,23 @@ async function handleRequest(request) {
     return new Response('Access validation error', { status: 502 })
   }
 
-  return new Response('Access granted for ${productName}. Configure proxy to app origin or Pages.', {
-    headers: { 'Content-Type': 'text/plain' }
+  // Proxy to GitHub Pages for the actual app
+  const GITHUB_PAGES_URL = ${githubPagesUrl ? `'${githubPagesUrl}'` : 'null'}
+  
+  if (!GITHUB_PAGES_URL) {
+    return new Response('App not configured: GitHub Pages URL missing', { 
+      status: 502,
+      headers: { 'Content-Type': 'text/plain' }
+    })
+  }
+  
+  const targetUrl = GITHUB_PAGES_URL + url.pathname + url.search
+  
+  // Forward the request to GitHub Pages
+  return fetch(targetUrl, {
+    headers: request.headers,
+    method: request.method,
+    body: request.body
   })
 }
 
