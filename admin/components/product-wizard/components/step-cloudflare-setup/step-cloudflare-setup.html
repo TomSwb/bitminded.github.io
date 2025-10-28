@@ -41,6 +41,15 @@
             <!-- Status will be shown here -->
         </div>
 
+        <!-- Recreate Worker Button (shown when worker exists) -->
+        <div class="step-cloudflare-setup__recreate-section" id="recreate-worker-section" style="display: none;">
+            <button type="button" id="recreate-worker-btn" class="step-cloudflare-setup__create-btn step-cloudflare-setup__create-btn--secondary">
+                <span class="btn-icon">🔄</span>
+                <span>Recreate Worker (Use Latest Edge Function)</span>
+            </button>
+            <small class="step-cloudflare-setup__help">Regenerate the Cloudflare Worker with the latest Edge Function code</small>
+        </div>
+
         <!-- How it works -->
         <div class="step-cloudflare-setup__instructions">
             <h3 class="step-cloudflare-setup__instructions-title">How it works</h3>
