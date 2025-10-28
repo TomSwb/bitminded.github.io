@@ -72,7 +72,7 @@
 }
 
 .step-cloudflare-setup__help {
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     font-size: 0.875rem;
 }
 
@@ -104,13 +104,13 @@
 }
 
 .step-cloudflare-setup__instruction-step p {
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     margin-bottom: 0.75rem;
 }
 
 .step-cloudflare-setup__instruction-step ul {
     margin-left: 1.5rem;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
 }
 
 .step-cloudflare-setup__instruction-step ul li {
@@ -156,7 +156,7 @@
 }
 
 .step-cloudflare-setup__info p {
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     margin: 0.5rem 0;
 }
 
@@ -242,7 +242,7 @@
 
 .step-cloudflare-setup__status-content p {
     margin: 0.25rem 0;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
 }
 
 .step-cloudflare-setup__status-content a {
