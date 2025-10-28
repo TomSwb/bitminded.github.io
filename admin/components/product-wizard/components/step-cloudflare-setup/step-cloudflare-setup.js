@@ -146,12 +146,30 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 : '';
             const supabaseAnonKey = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || '';
 
+            // Construct GitHub Pages URL from repo URL if available
+            let githubPagesUrl = null;
+            if (basicInfo.github_repo_url) {
+                try {
+                    // Extract owner and repo from GitHub URL
+                    // URL format: https://github.com/owner/repo
+                    const match = basicInfo.github_repo_url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+                    if (match) {
+                        const owner = match[1];
+                        const repo = match[2];
+                        githubPagesUrl = `https://${owner}.github.io/${repo}`;
+                    }
+                } catch (e) {
+                    console.warn('Failed to construct GitHub Pages URL:', e);
+                }
+            }
+
             const workerData = {
                 subdomain,
                 productName: basicInfo.name || 'Product',
                 productSlug: basicInfo.slug || subdomain,
                 supabaseFunctionsUrl,
-                supabaseAnonKey
+                supabaseAnonKey,
+                githubPagesUrl
             };
 
             console.log('☁️ Creating Cloudflare Worker:', workerData);

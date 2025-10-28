@@ -20,6 +20,8 @@ Last updated: 2025-01-15
 - ✅ cancel-account-deletion
 - ✅ send-deletion-email
 - ✅ delete-user
+- ❌ **validate-license** - NOT YET DEPLOYED (required for subdomain protection)
+- ❌ **create-cloudflare-worker** - NOT YET DEPLOYED (required for Worker creation)
 
 ## Environment Variables Set
 
