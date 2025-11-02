@@ -56,6 +56,43 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 const subdomain = this.elements.subdomainInput.value || '[subdomain]';
                 this.elements.subdomainPreview.textContent = `${subdomain}.bitminded.ch`;
             }
+            // Also update GitHub Pages instructions when subdomain changes
+            this.updateGitHubPagesInstructions();
+        }
+        
+        updateGitHubPagesInstructions() {
+            if (!window.productWizard) return;
+            
+            const basicInfo = window.productWizard.formData || {};
+            const githubRepoUrl = basicInfo.github_repo_url;
+            
+            // Update GitHub repo link
+            const repoLinkEl = document.getElementById('github-repo-link');
+            if (repoLinkEl && githubRepoUrl) {
+                repoLinkEl.innerHTML = `<a href="${githubRepoUrl}" target="_blank" rel="noopener">${githubRepoUrl}</a>`;
+            } else if (repoLinkEl) {
+                repoLinkEl.textContent = '[Repository URL from Step 4]';
+            }
+            
+            // Update GitHub Pages URL
+            const pagesUrlEl = document.getElementById('github-pages-url');
+            if (pagesUrlEl && githubRepoUrl) {
+                try {
+                    const match = githubRepoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+                    if (match) {
+                        const owner = match[1];
+                        const repo = match[2];
+                        const pagesUrl = `https://${owner}.github.io/${repo}`;
+                        pagesUrlEl.textContent = pagesUrl;
+                    } else {
+                        pagesUrlEl.textContent = 'https://[username].github.io/[repo-name]';
+                    }
+                } catch (e) {
+                    pagesUrlEl.textContent = 'https://[username].github.io/[repo-name]';
+                }
+            } else if (pagesUrlEl) {
+                pagesUrlEl.textContent = 'https://[username].github.io/[repo-name]';
+            }
         }
 
         setupDefaults() {
@@ -77,6 +114,9 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
 
             // Update preview
             this.updateSubdomainPreview();
+            
+            // Update GitHub Pages instructions with dynamic URLs
+            this.updateGitHubPagesInstructions();
 
             // Mark step as completed if data exists
             if (basicInfo.cloudflare_domain || basicInfo.cloudflare_worker_url) {
@@ -212,6 +252,16 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                     this.elements.createSection.style.display = 'none';
                     if (this.elements.recreateSection) {
                         this.elements.recreateSection.style.display = 'block';
+                    }
+
+                    // Re-enable and reset button state (for recreate button)
+                    if (buttonToDisable) {
+                        buttonToDisable.disabled = false;
+                        if (isRecreate) {
+                            buttonToDisable.innerHTML = '<span class="btn-icon">🔄</span><span>Recreate Worker (Use Latest Edge Function)</span>';
+                        } else {
+                            buttonToDisable.innerHTML = '<span class="btn-icon">☁️</span><span>Create Cloudflare Worker</span>';
+                        }
                     }
 
                     alert('✅ Cloudflare Worker ' + (isRecreate ? 'recreated' : 'created') + ' successfully!');

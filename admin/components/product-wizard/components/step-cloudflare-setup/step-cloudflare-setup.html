@@ -58,7 +58,22 @@
                     <li>Creates a Cloudflare Worker and sets the route for <strong id="subdomain-preview">[subdomain].bitminded.ch</strong>.</li>
                     <li>Enforces access automatically via Supabase (validate-license) with admin bypass.</li>
                     <li>Unauthenticated users are redirected to login; non-subscribers to subscribe.</li>
+                    <li>Worker proxies requests to your GitHub Pages deployment.</li>
                 </ul>
+            </div>
+            <div class="step-cloudflare-setup__instruction-step">
+                <h4>Enable GitHub Pages</h4>
+                <p><strong>Important:</strong> Before creating the Worker, you need to enable GitHub Pages for your repository:</p>
+                <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Go to your GitHub repository: <strong id="github-repo-link">[Repository URL]</strong></li>
+                    <li>Click <strong>Settings</strong> → Scroll to <strong>Pages</strong> section</li>
+                    <li>Under <strong>Source</strong>, select <strong>Deploy from a branch</strong></li>
+                    <li>Choose <strong>main</strong> (or <strong>master</strong>) branch and <strong>/ (root)</strong> folder</li>
+                    <li>Click <strong>Save</strong></li>
+                    <li>Wait 1-2 minutes for GitHub to deploy your site</li>
+                    <li>Your site will be available at: <code id="github-pages-url">https://[username].github.io/[repo-name]</code></li>
+                </ol>
+                <p style="margin-top: 0.75rem;"><strong>Note:</strong> The access protection script is automatically included in your repo's index.html to block direct GitHub Pages access.</p>
             </div>
             <div class="step-cloudflare-setup__instruction-step">
                 <h4>Manual route (fallback)</h4>
