@@ -146,13 +146,16 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 : '';
             const supabaseAnonKey = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || '';
 
-            // Construct GitHub Pages URL from repo URL if available
+            // Extract GitHub repo URL for Cloudflare Pages automation
+            const githubRepoUrl = basicInfo.github_repo_url || null;
+            
+            // Construct GitHub Pages URL from repo URL if available (fallback only)
             let githubPagesUrl = null;
-            if (basicInfo.github_repo_url) {
+            if (githubRepoUrl) {
                 try {
                     // Extract owner and repo from GitHub URL
                     // URL format: https://github.com/owner/repo
-                    const match = basicInfo.github_repo_url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+                    const match = githubRepoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
                     if (match) {
                         const owner = match[1];
                         const repo = match[2];
@@ -163,13 +166,18 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 }
             }
 
+            // Prefer Cloudflare Pages URL if set (private hosting)
+            const cloudflarePagesUrl = basicInfo.cloudflare_pages_url || null;
+
             const workerData = {
                 subdomain,
                 productName: basicInfo.name || 'Product',
                 productSlug: basicInfo.slug || subdomain,
                 supabaseFunctionsUrl,
                 supabaseAnonKey,
-                githubPagesUrl
+                githubRepoUrl, // For auto-creating Cloudflare Pages
+                githubPagesUrl, // Fallback (public)
+                cloudflarePagesUrl // Preferred (private)
             };
 
             console.log('☁️ Creating Cloudflare Worker:', workerData);

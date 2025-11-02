@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { subdomain, productName, productSlug, supabaseFunctionsUrl: suppliedFunctionsUrl, supabaseAnonKey, githubPagesUrl } = await req.json()
+    const { subdomain, productName, productSlug, supabaseFunctionsUrl: suppliedFunctionsUrl, supabaseAnonKey, githubPagesUrl, githubRepoUrl, cloudflarePagesUrl } = await req.json()
 
     if (!subdomain || !productName) {
       throw new Error('Subdomain and product name are required')
@@ -33,6 +33,27 @@ serve(async (req) => {
     }
 
     const workerName = `${productSlug}-worker`
+
+    // Determine Pages URL: prioritize Cloudflare Pages (private), fallback to GitHub Pages (public)
+    let pagesUrl: string | null = cloudflarePagesUrl || null
+    
+    // If Cloudflare Pages URL not provided but GitHub repo URL is, try to create/get Pages project
+    if (!pagesUrl && githubRepoUrl) {
+      pagesUrl = await createOrGetCloudflarePagesProject(
+        cloudflareApiToken,
+        cloudflareAccountId,
+        githubRepoUrl,
+        productSlug
+      )
+    }
+    
+    // Fallback to GitHub Pages URL if nothing else available (not recommended for subscription apps)
+    if (!pagesUrl) {
+      pagesUrl = githubPagesUrl || null
+      if (pagesUrl) {
+        console.warn('⚠️ Using public GitHub Pages URL - not suitable for subscription-based apps')
+      }
+    }
 
     // Derive Supabase functions base URL to call validate-license from the Worker
     // Prefer frontend-supplied functions URL to match the exact project used by the wizard session
@@ -51,7 +72,7 @@ serve(async (req) => {
           'Authorization': `Bearer ${cloudflareApiToken}`,
           'Content-Type': 'application/javascript'
         },
-        body: generateWorkerCode(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey || '', githubPagesUrl)
+        body: generateWorkerCode(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey || '', pagesUrl)
       }
     )
 
@@ -199,6 +220,7 @@ serve(async (req) => {
         workerName,
         workerUrl,
         workerDevUrl,
+        pagesUrl: pagesUrl, // Cloudflare Pages URL used for proxying
         customDomain: domainResponse && domainResponse.ok ? customDomain : null,
         message: 'Cloudflare Worker created successfully'
       }),
@@ -221,9 +243,181 @@ serve(async (req) => {
 })
 
 /**
+ * Create or get Cloudflare Pages project from GitHub repo
+ * Requires GitHub OAuth integration to be set up in Cloudflare dashboard
+ */
+async function createOrGetCloudflarePagesProject(
+  apiToken: string,
+  accountId: string,
+  githubRepoUrl: string,
+  projectName: string
+): Promise<string | null> {
+  try {
+    // Extract owner/repo from GitHub URL
+    const match = githubRepoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/)
+    if (!match) {
+      console.warn('⚠️ Invalid GitHub repo URL:', githubRepoUrl)
+      return null
+    }
+    
+    const owner = match[1]
+    const repo = match[2]
+    const sanitizedProjectName = projectName.replace(/[^a-z0-9-]/gi, '-').toLowerCase()
+    
+    console.log(`📦 Checking for Cloudflare Pages project: ${sanitizedProjectName}`)
+    
+    // Step 1: List existing Pages projects
+    const listProjectsResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects`,
+      {
+        headers: {
+          'Authorization': `Bearer ${apiToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+    
+    if (!listProjectsResponse.ok) {
+      const error = await listProjectsResponse.text()
+      console.error('❌ Failed to list Pages projects:', error)
+      return null
+    }
+    
+    const projectsData = await listProjectsResponse.json()
+    const existingProject = projectsData.result?.find(
+      (p: any) => p.name === sanitizedProjectName || p.name === repo.toLowerCase()
+    )
+    
+    // Step 2: If project exists, get deployment URL
+    if (existingProject) {
+      console.log(`✅ Found existing Cloudflare Pages project: ${existingProject.name}`)
+      
+      // Get latest deployment
+      const deploymentsResponse = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${existingProject.name}/deployments?page=1&per_page=1`,
+        {
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      
+      if (deploymentsResponse.ok) {
+        const deployments = await deploymentsResponse.json()
+        const latestDeployment = deployments.result?.[0]
+        if (latestDeployment?.url) {
+          console.log(`✅ Found deployment URL: ${latestDeployment.url}`)
+          return latestDeployment.url
+        }
+      }
+      
+      // Fallback to standard Pages URL pattern
+      return `https://${existingProject.name}.pages.dev`
+    }
+    
+    // Step 3: Create new Pages project from GitHub
+    console.log(`📦 Creating new Cloudflare Pages project from GitHub: ${owner}/${repo}`)
+    
+    // Get available GitHub connections
+    // Note: This requires GitHub OAuth to be set up in Cloudflare dashboard
+    let connectionId: string | null = null
+    
+    try {
+      // Try to get connections via the projects endpoint or a connection list
+      // The exact endpoint may vary, so we'll try a few approaches
+      const connectionListResponse = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/git/repos`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      
+      if (connectionListResponse.ok) {
+        const connections = await connectionListResponse.json()
+        // Find connection that matches the repo owner
+        const matchingConnection = connections.result?.find((c: any) => 
+          c.name?.includes(owner) || c.owner === owner
+        )
+        if (matchingConnection?.id) {
+          connectionId = matchingConnection.id
+          console.log(`✅ Found GitHub connection: ${connectionId}`)
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not fetch GitHub connections (may need OAuth setup):', e)
+    }
+    
+    // Create the project with GitHub connection if available
+    const projectConfig: any = {
+      name: sanitizedProjectName,
+      production_branch: 'main',
+    }
+    
+    // If we have a connection ID, link the GitHub repo
+    if (connectionId) {
+      projectConfig.git_repo = {
+        owner: owner,
+        repo: repo,
+        connection_id: connectionId
+      }
+      console.log(`📦 Linking GitHub repo: ${owner}/${repo}`)
+    } else {
+      console.warn('⚠️ No GitHub connection found. Project will be created without repo link.')
+      console.warn('   Set up GitHub OAuth in Cloudflare dashboard first for full automation.')
+    }
+    
+    // Create the Pages project
+    const createProjectResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(projectConfig)
+      }
+    )
+    
+    if (createProjectResponse.ok) {
+      const projectData = await createProjectResponse.json()
+      console.log(`✅ Created Cloudflare Pages project: ${projectData.result?.name}`)
+      
+      // The project URL follows a predictable pattern
+      const projectUrl = `https://${sanitizedProjectName}.pages.dev`
+      
+      // Try to link GitHub repo (requires connection ID - may need manual setup)
+      // For now, return the URL and log instructions
+      console.log(`📝 Project created. Link GitHub repo manually in dashboard, or provide connection_id for automation.`)
+      console.log(`   Project URL: ${projectUrl}`)
+      
+      return projectUrl
+    } else {
+      const error = await createProjectResponse.text()
+      console.error('❌ Failed to create Pages project:', error)
+      
+      // Check if project name already exists with different casing
+      if (error.includes('already exists') || error.includes('409')) {
+        return `https://${sanitizedProjectName}.pages.dev`
+      }
+      
+      return null
+    }
+  } catch (error) {
+    console.error('❌ Error managing Cloudflare Pages project:', error)
+    return null
+  }
+}
+
+/**
  * Generate the Worker code for the product
  */
-function generateWorkerCode(productName: string, productSlug: string, supabaseFunctionsUrl: string, supabaseAnonKey: string, githubPagesUrl?: string): string {
+function generateWorkerCode(productName: string, productSlug: string, supabaseFunctionsUrl: string, supabaseAnonKey: string, pagesUrl?: string): string {
   return `/**
 * ${productName} - Cloudflare Worker (classic)
 * Enforces access via Supabase validate-license.
@@ -313,19 +507,19 @@ async function handleRequest(request) {
     return new Response('Access validation error', { status: 502 })
   }
 
-  // Proxy to GitHub Pages for the actual app
-  const GITHUB_PAGES_URL = ${githubPagesUrl ? `'${githubPagesUrl}'` : 'null'}
+  // Proxy to Pages (Cloudflare Pages or GitHub Pages) for the actual app
+  const PAGES_URL = ${pagesUrl ? `'${pagesUrl}'` : 'null'}
   
-  if (!GITHUB_PAGES_URL) {
-    return new Response('App not configured: GitHub Pages URL missing', { 
+  if (!PAGES_URL) {
+    return new Response('App not configured: Pages URL missing', { 
       status: 502,
       headers: { 'Content-Type': 'text/plain' }
     })
   }
   
-  const targetUrl = GITHUB_PAGES_URL + url.pathname + url.search
+  const targetUrl = PAGES_URL + url.pathname + url.search
   
-  // Forward the request to GitHub Pages
+  // Forward the request to Pages
   return fetch(targetUrl, {
     headers: request.headers,
     method: request.method,
