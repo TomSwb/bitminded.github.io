@@ -346,7 +346,34 @@ async function createOrGetCloudflarePagesProject(
             )
             
             if (updateResponse.ok) {
-              console.log(`✅ Successfully linked GitHub repo to existing project`)
+              const updateData = await updateResponse.json()
+              // Verify the git_repo was actually set
+              if (updateData.result?.git_repo) {
+                console.log(`✅ Successfully linked GitHub repo to existing project: ${updateData.result.git_repo.owner}/${updateData.result.git_repo.repo}`)
+              } else {
+                console.warn(`⚠️ Update succeeded but git_repo not in response. Verifying...`)
+                
+                // Re-fetch to verify
+                const verifyResponse = await fetch(
+                  `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${existingProject.name}`,
+                  {
+                    headers: {
+                      'Authorization': `Bearer ${apiToken}`,
+                      'Content-Type': 'application/json'
+                    }
+                  }
+                )
+                
+                if (verifyResponse.ok) {
+                  const verifyData = await verifyResponse.json()
+                  if (verifyData.result?.git_repo) {
+                    console.log(`✅ Verified: GitHub repo is linked: ${verifyData.result.git_repo.owner}/${verifyData.result.git_repo.repo}`)
+                  } else {
+                    console.warn(`❌ Verification failed: git_repo still not set despite connection_id.`)
+                    console.warn(`   Response: ${JSON.stringify(verifyData).substring(0, 400)}`)
+                  }
+                }
+              }
             } else {
               const updateError = await updateResponse.text()
               console.warn(`⚠️ Could not link repo to existing project: ${updateError.substring(0, 200)}`)
@@ -375,7 +402,36 @@ async function createOrGetCloudflarePagesProject(
             )
             
             if (updateResponse.ok) {
-              console.log(`✅ Successfully linked GitHub repo (auto-connect)`)
+              const updateData = await updateResponse.json()
+              // Verify the git_repo was actually set in the response
+              if (updateData.result?.git_repo) {
+                console.log(`✅ Successfully linked GitHub repo (auto-connect): ${updateData.result.git_repo.owner}/${updateData.result.git_repo.repo}`)
+              } else {
+                console.warn(`⚠️ Update succeeded but git_repo not in response. Verifying...`)
+                
+                // Re-fetch the project to verify git_repo was actually set
+                const verifyResponse = await fetch(
+                  `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${existingProject.name}`,
+                  {
+                    headers: {
+                      'Authorization': `Bearer ${apiToken}`,
+                      'Content-Type': 'application/json'
+                    }
+                  }
+                )
+                
+                if (verifyResponse.ok) {
+                  const verifyData = await verifyResponse.json()
+                  if (verifyData.result?.git_repo) {
+                    console.log(`✅ Verified: GitHub repo is linked: ${verifyData.result.git_repo.owner}/${verifyData.result.git_repo.repo}`)
+                  } else {
+                    console.warn(`❌ Verification failed: git_repo still not set. Cloudflare API may require connection_id.`)
+                    console.warn(`   Response: ${JSON.stringify(verifyData).substring(0, 400)}`)
+                    console.warn(`   This typically means GitHub OAuth is not properly set up in Cloudflare dashboard.`)
+                    console.warn(`   Manual setup required: https://dash.cloudflare.com/workers/pages/${existingProject.name}/settings/git`)
+                  }
+                }
+              }
             } else {
               const updateError = await updateResponse.text()
               console.warn(`⚠️ Could not auto-link repo: ${updateError.substring(0, 200)}`)
