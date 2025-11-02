@@ -266,6 +266,41 @@ async function handleRequest(request) {
     return new Response(null, { status: 204 })
   }
 
+  // Proxy static assets directly to GitHub Pages without authentication
+  // This allows React/Expo apps to load their JavaScript bundles, CSS, images, etc.
+  // Static assets don't need auth - only the HTML page does
+  const GITHUB_PAGES_URL = ${githubPagesUrl ? `'${githubPagesUrl}'` : 'null'}
+  
+  // Allow static assets to bypass authentication check
+  if (GITHUB_PAGES_URL && (
+    url.pathname.startsWith('/_expo/') ||
+    url.pathname.startsWith('/assets/') ||
+    url.pathname.startsWith('/static/') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.json') ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.jpeg') ||
+    url.pathname.endsWith('.gif') ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.endsWith('.webp') ||
+    url.pathname.endsWith('.mp3') ||
+    url.pathname.endsWith('.mp4') ||
+    url.pathname.endsWith('.woff') ||
+    url.pathname.endsWith('.woff2') ||
+    url.pathname.endsWith('.ttf') ||
+    url.pathname.endsWith('.eot') ||
+    url.pathname.endsWith('.ico')
+  )) {
+    const targetUrl = GITHUB_PAGES_URL + url.pathname + url.search
+    return fetch(targetUrl, {
+      headers: request.headers,
+      method: request.method,
+      body: request.body
+    })
+  }
+
   const token = getToken(request)
 
   // Lightweight debug mode: append ?debug=1 to see diagnostics (no secrets leaked)
@@ -313,9 +348,7 @@ async function handleRequest(request) {
     return new Response('Access validation error', { status: 502 })
   }
 
-  // Proxy to GitHub Pages for the actual app
-  const GITHUB_PAGES_URL = ${githubPagesUrl ? `'${githubPagesUrl}'` : 'null'}
-  
+  // Proxy to GitHub Pages for the actual app (HTML pages and other authenticated routes)
   if (!GITHUB_PAGES_URL) {
     return new Response('App not configured: GitHub Pages URL missing', { 
       status: 502,
