@@ -279,6 +279,10 @@ async function createOrGetCloudflarePagesProject(
     
     console.log(`📦 Checking for Cloudflare Pages project: ${sanitizedProjectName} (from ${owner}/${repo})`)
     
+    // Step 0: Try to find GitHub connection ID from any existing projects
+    // This helps us link repos even if we can't list connections directly
+    let connectionId: string | null = null
+    
     // Step 1: List existing Pages projects
     const listProjectsResponse = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects`,
@@ -297,13 +301,92 @@ async function createOrGetCloudflarePagesProject(
     }
     
     const projectsData = await listProjectsResponse.json()
-    const existingProject = projectsData.result?.find(
+    const projectsList = projectsData.result || []
+    
+    // Extract connection_id from any existing project with git_repo
+    for (const p of projectsList) {
+      if (p.git_repo?.connection_id) {
+        connectionId = p.git_repo.connection_id
+        console.log(`✅ Found connection_id from existing project (${p.name}): ${connectionId}`)
+        break
+      }
+    }
+    
+    const existingProject = projectsList.find(
       (p: any) => p.name === sanitizedProjectName || p.name === repo.toLowerCase()
     )
     
-    // Step 2: If project exists, get deployment URL
+    // Step 2: If project exists, check if it needs git_repo linking
     if (existingProject) {
       console.log(`✅ Found existing Cloudflare Pages project: ${existingProject.name}`)
+      
+      // Check if project already has git_repo configured
+      if (!existingProject.git_repo) {
+        console.log(`🔗 Existing project found without git_repo - attempting to link...`)
+        
+        // Try to update the project with git_repo (connectionId already found above)
+        if (connectionId) {
+          try {
+            const updateResponse = await fetch(
+              `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${existingProject.name}`,
+              {
+                method: 'PATCH',
+                headers: {
+                  'Authorization': `Bearer ${apiToken}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  git_repo: {
+                    owner: owner,
+                    repo: repo,
+                    connection_id: connectionId
+                  }
+                })
+              }
+            )
+            
+            if (updateResponse.ok) {
+              console.log(`✅ Successfully linked GitHub repo to existing project`)
+            } else {
+              const updateError = await updateResponse.text()
+              console.warn(`⚠️ Could not link repo to existing project: ${updateError.substring(0, 200)}`)
+            }
+          } catch (updateError) {
+            console.warn(`⚠️ Error updating project with git_repo:`, updateError)
+          }
+        } else {
+          // Try without connection_id - might work if OAuth is configured
+          try {
+            const updateResponse = await fetch(
+              `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${existingProject.name}`,
+              {
+                method: 'PATCH',
+                headers: {
+                  'Authorization': `Bearer ${apiToken}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  git_repo: {
+                    owner: owner,
+                    repo: repo
+                  }
+                })
+              }
+            )
+            
+            if (updateResponse.ok) {
+              console.log(`✅ Successfully linked GitHub repo (auto-connect)`)
+            } else {
+              const updateError = await updateResponse.text()
+              console.warn(`⚠️ Could not auto-link repo: ${updateError.substring(0, 200)}`)
+            }
+          } catch (updateError) {
+            console.warn(`⚠️ Error auto-linking repo:`, updateError)
+          }
+        }
+      } else {
+        console.log(`✅ Project already has git_repo configured`)
+      }
       
       // Get latest deployment
       const deploymentsResponse = await fetch(
@@ -337,75 +420,80 @@ async function createOrGetCloudflarePagesProject(
     let connectionId: string | null = null
     
     try {
-      // Try multiple API endpoints to find GitHub connections
-      // Cloudflare API endpoints for git integrations may vary
+      // Try to find GitHub connections using various API endpoints
+      // Note: Cloudflare's API for listing available repos may require checking through existing projects
+      // or may need to be done via the dashboard OAuth flow
       const endpoints = [
-        `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/git/repos`,
-        `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${sanitizedProjectName}/git/repos`,
+        // Try to get repos from any existing project (might reveal connection pattern)
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects`,
       ]
       
-      for (const endpoint of endpoints) {
-        try {
-          const connectionListResponse = await fetch(endpoint, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${apiToken}`,
-              'Content-Type': 'application/json'
-            }
-          })
-          
-          if (connectionListResponse.ok) {
-            const connections = await connectionListResponse.json()
-            console.log(`🔍 GitHub connections API response:`, JSON.stringify(connections).substring(0, 200))
-            
-            // Try different response structures
-            const repos = connections.result || connections.repos || []
-            const matchingConnection = repos.find((c: any) => 
-              c.name?.includes(owner) || 
-              c.owner === owner ||
-              c.full_name?.includes(`${owner}/${repo}`) ||
-              c.repo === repo
-            )
-            
-            if (matchingConnection?.id || matchingConnection?.connection_id) {
-              connectionId = matchingConnection.id || matchingConnection.connection_id
-              console.log(`✅ Found GitHub connection: ${connectionId}`)
-              break
-            }
-          } else {
-            const errorText = await connectionListResponse.text()
-            console.log(`⚠️ Connection endpoint failed (${endpoint}): ${errorText.substring(0, 200)}`)
+      // First, try to see if we can infer connection from existing projects
+      try {
+        const projectsResponse = await fetch(endpoints[0], {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
           }
-        } catch (endpointError) {
-          console.log(`⚠️ Error checking endpoint ${endpoint}:`, endpointError)
+        })
+        
+        if (projectsResponse.ok) {
+          const projects = await projectsResponse.json()
+          const projectsList = projects.result || []
+          
+          // Check if any existing project has a git connection we can reference
+          for (const existingProject of projectsList) {
+            if (existingProject.git_repo) {
+              // Found a project with git connection - extract connection ID pattern
+              // The connection might be reusable, or we need to use a different approach
+              console.log(`🔍 Found project with git connection: ${existingProject.name}`)
+              // Try to use similar connection structure
+              if (existingProject.git_repo.connection_id) {
+                connectionId = existingProject.git_repo.connection_id
+                console.log(`✅ Using connection ID from existing project: ${connectionId}`)
+                break
+              }
+            }
+          }
         }
+      } catch (e) {
+        console.log(`⚠️ Could not check existing projects for connection pattern:`, e)
       }
       
+      // If no connection found, we'll need manual linking
+      // The Cloudflare Pages API doesn't expose a direct endpoint to list available GitHub repos
+      // This typically requires going through the dashboard OAuth flow
       if (!connectionId) {
-        console.warn('⚠️ No GitHub connection found. Will create project without repo link.')
-        console.warn('   You may need to manually link the repo in Cloudflare dashboard.')
+        console.warn('⚠️ Could not automatically find GitHub connection ID.')
+        console.warn('   Cloudflare Pages API requires manual repo linking via dashboard.')
+        console.warn(`   After project creation, link manually at:`)
+        console.warn(`   https://dash.cloudflare.com/workers/pages/${sanitizedProjectName}/settings/git`)
       }
     } catch (e) {
       console.error('❌ Error fetching GitHub connections:', e)
     }
     
-    // Create the project with GitHub connection if available
+    // Create the project with GitHub repo info
+    // Try with connection_id if found, otherwise try without (Cloudflare may auto-resolve)
     const projectConfig: any = {
       name: sanitizedProjectName,
       production_branch: 'main',
     }
     
-    // If we have a connection ID, link the GitHub repo
+    // Always try to include git_repo - Cloudflare may auto-connect if OAuth is set up
+    // Try with connection_id first if we found one, otherwise try without
+    projectConfig.git_repo = {
+      owner: owner,
+      repo: repo,
+    }
+    
     if (connectionId) {
-      projectConfig.git_repo = {
-        owner: owner,
-        repo: repo,
-        connection_id: connectionId
-      }
-      console.log(`📦 Linking GitHub repo: ${owner}/${repo}`)
+      projectConfig.git_repo.connection_id = connectionId
+      console.log(`📦 Creating project with GitHub repo (connection_id: ${connectionId}): ${owner}/${repo}`)
     } else {
-      console.warn('⚠️ No GitHub connection found. Project will be created without repo link.')
-      console.warn('   Set up GitHub OAuth in Cloudflare dashboard first for full automation.')
+      console.log(`📦 Creating project with GitHub repo (auto-connect attempt): ${owner}/${repo}`)
+      console.log(`   If this fails, you may need to set up GitHub OAuth in Cloudflare dashboard`)
     }
     
     // Create the Pages project
@@ -423,23 +511,109 @@ async function createOrGetCloudflarePagesProject(
     
     if (createProjectResponse.ok) {
       const projectData = await createProjectResponse.json()
-      console.log(`✅ Created Cloudflare Pages project: ${projectData.result?.name}`)
+      const projectName = projectData.result?.name || sanitizedProjectName
+      const projectGitRepo = projectData.result?.git_repo
+      
+      console.log(`✅ Created Cloudflare Pages project: ${projectName}`)
+      
+      if (projectGitRepo) {
+        console.log(`✅ GitHub repo automatically linked: ${projectGitRepo.owner}/${projectGitRepo.repo}`)
+      } else {
+        console.warn(`⚠️ Project created but GitHub repo was not linked`)
+      }
       
       // The project URL follows a predictable pattern
-      const projectUrl = `https://${sanitizedProjectName}.pages.dev`
+      const projectUrl = `https://${projectName}.pages.dev`
       
-      // Try to link GitHub repo (requires connection ID - may need manual setup)
-      // For now, return the URL and log instructions
-      console.log(`📝 Project created. Link GitHub repo manually in dashboard, or provide connection_id for automation.`)
-      console.log(`   Project URL: ${projectUrl}`)
+      // If repo wasn't linked automatically, try to link it after creation
+      if (!projectGitRepo && connectionId) {
+        try {
+          console.log(`🔗 Attempting to link GitHub repo after project creation...`)
+          const linkRepoResponse = await fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                git_repo: {
+                  owner: owner,
+                  repo: repo,
+                  connection_id: connectionId
+                }
+              })
+            }
+          )
+          
+          if (linkRepoResponse.ok) {
+            console.log(`✅ Successfully linked GitHub repo: ${owner}/${repo}`)
+          } else {
+            const errorText = await linkRepoResponse.text()
+            console.warn(`⚠️ Could not link repo automatically: ${errorText.substring(0, 200)}`)
+            console.warn(`   Please link manually: https://dash.cloudflare.com/workers/pages/${projectName}/settings/git`)
+          }
+        } catch (linkError) {
+          console.warn(`⚠️ Error linking repo:`, linkError)
+          console.warn(`   Please link manually: https://dash.cloudflare.com/workers/pages/${projectName}/settings/git`)
+        }
+      } else {
+        console.warn('⚠️ No GitHub connection found. Project created without repo link.')
+        console.warn(`   Link manually: https://dash.cloudflare.com/workers/pages/${projectName}/settings/git`)
+        console.warn(`   Select repo: ${owner}/${repo}, branch: main`)
+      }
       
       return projectUrl
     } else {
-      const error = await createProjectResponse.text()
-      console.error('❌ Failed to create Pages project:', error)
+      const errorText = await createProjectResponse.text()
+      let errorJson: any = {}
+      try {
+        errorJson = JSON.parse(errorText)
+      } catch {
+        // Not JSON
+      }
+      
+      console.error('❌ Failed to create Pages project:', errorText.substring(0, 500))
+      
+      // If error mentions connection_id or git, try creating without git_repo
+      if ((errorJson.errors?.[0]?.message?.includes('connection') || 
+           errorText.includes('connection') || 
+           errorText.includes('git')) && 
+          projectConfig.git_repo && 
+          !connectionId) {
+        console.log(`🔄 Retrying project creation without git_repo (will link manually)...`)
+        
+        // Retry without git_repo
+        const retryConfig = {
+          name: sanitizedProjectName,
+          production_branch: 'main'
+        }
+        
+        const retryResponse = await fetch(
+          `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(retryConfig)
+          }
+        )
+        
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json()
+          const retryProjectName = retryData.result?.name || sanitizedProjectName
+          console.log(`✅ Created project without git_repo: ${retryProjectName}`)
+          console.warn(`⚠️ Manual git linking required: https://dash.cloudflare.com/workers/pages/${retryProjectName}/settings/git`)
+          return `https://${retryProjectName}.pages.dev`
+        }
+      }
       
       // Check if project name already exists with different casing
-      if (error.includes('already exists') || error.includes('409')) {
+      if (errorText.includes('already exists') || errorText.includes('409')) {
+        console.log(`⚠️ Project already exists, returning URL`)
         return `https://${sanitizedProjectName}.pages.dev`
       }
       
