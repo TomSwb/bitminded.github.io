@@ -613,11 +613,22 @@ class ProductWizard {
     }
 
     /**
-     * Load Step 7: Review & Publish (was Step 8)
+     * Load Step 7: Review & Summary
      */
     async loadStep7(stepContent) {
-        // Placeholder for Step 7 - Review & Publish
-        stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Review & Publish</h2><p>Coming soon...</p></div>';
+        if (window.StepReviewSummary) {
+            // Load HTML content
+            const response = await fetch('/admin/components/product-wizard/components/step-review-summary/step-review-summary.html');
+            const html = await response.text();
+            stepContent.innerHTML = html;
+
+            // Initialize component
+            this.steps[7] = new window.StepReviewSummary();
+            await this.steps[7].init();
+        } else {
+            console.error('❌ StepReviewSummary component not available');
+            stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Review & Summary</h2><p>Component not available</p></div>';
+        }
     }
 
     /**

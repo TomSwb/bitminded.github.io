@@ -14,7 +14,15 @@ const corsHeaders = {
 /**
  * Create initial repository files based on technical specification
  */
-async function createInitialFiles(token: string, repoFullName: string, spec: string, generatedReadme?: string, productSlug?: string) {
+async function createInitialFiles(
+  token: string, 
+  repoFullName: string, 
+  spec: string, 
+  generatedReadme?: string, 
+  productSlug?: string,
+  iconUrl?: string,
+  screenshots?: string[]
+) {
   // Extract key info from specification
   const productName = extractProductName(spec)
   const techStack = extractTechStack(spec)
@@ -40,7 +48,40 @@ async function createInitialFiles(token: string, repoFullName: string, spec: str
   const indexHtml = generateIndexHtml(productName, subdomain)
   await createFile(token, repoFullName, 'index.html', indexHtml)
   
-  console.log('✅ Initial files created successfully')
+  // Upload media files if provided
+  const uploadedFiles: string[] = []
+  
+  // Upload icon if provided
+  if (iconUrl && iconUrl.startsWith('http')) {
+    try {
+      await uploadFileFromUrl(token, repoFullName, iconUrl, 'icon.png', 'Add product icon')
+      uploadedFiles.push('icon.png')
+      console.log('✅ Icon uploaded successfully')
+    } catch (error) {
+      console.error('❌ Error uploading icon:', error)
+      // Don't fail the entire operation if media upload fails
+    }
+  }
+  
+  // Upload screenshots if provided
+  if (screenshots && Array.isArray(screenshots) && screenshots.length > 0) {
+    for (let i = 0; i < screenshots.length; i++) {
+      const screenshotUrl = screenshots[i]
+      if (screenshotUrl && screenshotUrl.startsWith('http')) {
+        try {
+          const filename = `screenshot-${i + 1}.png`
+          await uploadFileFromUrl(token, repoFullName, screenshotUrl, filename, `Add screenshot ${i + 1}`)
+          uploadedFiles.push(filename)
+          console.log(`✅ Screenshot ${i + 1} uploaded successfully`)
+        } catch (error) {
+          console.error(`❌ Error uploading screenshot ${i + 1}:`, error)
+          // Don't fail the entire operation if media upload fails
+        }
+      }
+    }
+  }
+  
+  console.log(`✅ Initial files created successfully${uploadedFiles.length > 0 ? ` (${uploadedFiles.length} media file(s) uploaded)` : ''}`)
 }
 
 /**
@@ -69,6 +110,54 @@ async function createFile(token: string, repoFullName: string, filename: string,
     const error = await response.text()
     console.error(`Error creating ${filename}:`, error)
   }
+}
+
+/**
+ * Upload a file to GitHub repository by fetching it from a URL
+ * Used for media files (images) that need to be downloaded first
+ */
+async function uploadFileFromUrl(githubToken: string, repoFullName: string, fileUrl: string, filename: string, message: string) {
+  // Fetch the image from the URL
+  const imageResponse = await fetch(fileUrl)
+  if (!imageResponse.ok) {
+    throw new Error(`Failed to fetch image from ${fileUrl}`)
+  }
+
+  // Get image as array buffer
+  const imageBuffer = await imageResponse.arrayBuffer()
+  const uint8Array = new Uint8Array(imageBuffer)
+  
+  // Convert to base64 efficiently (avoid stack overflow with large images)
+  let binary = ''
+  const len = uint8Array.length
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(uint8Array[i])
+  }
+  const base64Content = btoa(binary)
+
+  console.log(`📤 Uploading ${filename} to ${repoFullName}`)
+
+  // Upload to GitHub (PUT method creates or updates)
+  // For initial creation, we don't need to check for existing files
+  const response = await fetch(`https://api.github.com/repos/${repoFullName}/contents/${filename}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${githubToken}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: message,
+      content: base64Content
+    })
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Failed to upload file to GitHub: ${error}`)
+  }
+
+  console.log(`✅ Uploaded ${filename} to GitHub`)
 }
 
 /**
@@ -251,44 +340,45 @@ function generateGitignore(stack: string[]): string {
 }
 
 /**
- * Generate index.html with access protection script
+ * Generate index.html with redirect-based access protection
+ * Works with any framework (React, Vue, Svelte, vanilla JS, etc.)
+ * Uses simple redirect instead of overlay - prevents GitHub Pages access
  */
 function generateIndexHtml(productName: string, subdomain: string): string {
   const protectedUrl = `https://${subdomain}.bitminded.ch`
   
-  // Build the error page HTML as a string (using string concatenation to avoid template literal issues)
-  const errorPageHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Access Restricted - ' + 
-    productName + 
-    '</title><style>* { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: #fff; } .error-container { background: rgba(255, 255, 255, 0.95); color: #333; padding: 40px; border-radius: 12px; max-width: 500px; text-align: center; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); } .error-icon { font-size: 64px; margin-bottom: 20px; } h1 { font-size: 28px; margin-bottom: 16px; color: #d32f2f; } p { font-size: 16px; line-height: 1.6; margin-bottom: 12px; color: #555; } .link { display: inline-block; margin-top: 24px; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background 0.3s; } .link:hover { background: #5568d3; }</style></head><body><div class="error-container"><div class="error-icon">🔒</div><h1>Access Restricted</h1><p><strong>This application is only accessible through the protected subdomain.</strong></p><p>Please use the official URL:</p><p style="margin: 20px 0; font-size: 18px; font-weight: 600; color: #667eea;"><a href="' + 
-    protectedUrl + 
-    '" class="link" style="display: inline-block;">' + 
-    subdomain + 
-    '.bitminded.ch</a></p><p style="font-size: 14px; color: #777; margin-top: 20px;">Direct access via GitHub Pages is not permitted for security reasons.</p></div></body></html>'
+  // Simple redirect protection script - inline for immediate execution
+  // Redirects to protected subdomain if accessed via GitHub Pages
+  const protectionScript = `
+    (function() {
+      'use strict';
+      // Get protected URL from meta tag (with fallback)
+      const metaTag = document.querySelector('meta[name="bitminded-protected-url"]');
+      const protectedUrl = metaTag ? metaTag.getAttribute('content') : '${protectedUrl}';
+      
+      // Check if accessed via GitHub Pages
+      const hostname = window.location.hostname;
+      if (hostname.includes('.github.io') || hostname.includes('github.com')) {
+        // Preserve path, query params, and hash if present
+        const path = window.location.pathname + window.location.search + window.location.hash;
+        const redirectUrl = path === '/' ? protectedUrl : protectedUrl + path;
+        // Use replace() to avoid adding to browser history
+        window.location.replace(redirectUrl);
+      }
+    })();
+  `
   
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="bitminded-protected-url" content="${protectedUrl}">
     <title>${productName}</title>
+    <!-- Access Protection: Redirects to protected subdomain if accessed via GitHub Pages -->
+    <script>${protectionScript}</script>
 </head>
 <body>
-    <!-- Access Protection: Check if accessed via GitHub Pages URL instead of protected subdomain -->
-    <script>
-        (function() {
-            // Get current hostname
-            const hostname = window.location.hostname;
-            
-            // Check if accessed via GitHub Pages (public URL)
-            // Protected subdomain should be: ${subdomain}.bitminded.ch
-            if (hostname.includes('.github.io')) {
-                // Replace entire page content with error message
-                document.documentElement.innerHTML = ${JSON.stringify(errorPageHtml)};
-                // Stop execution
-                throw new Error('Access denied - GitHub Pages URL');
-            }
-        })();
-    </script>
     <!-- Your app content goes here -->
     <div id="app">
         <h1>Welcome to ${productName}</h1>
@@ -344,7 +434,7 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { repoName, description, private: isPrivate, specification, generatedReadme, productSlug } = await req.json()
+    const { repoName, description, private: isPrivate, specification, generatedReadme, productSlug, iconUrl, screenshots } = await req.json()
 
     // TODO: Get GitHub token from user's stored credentials
     // For now, we'll use an environment variable
@@ -416,7 +506,7 @@ serve(async (req) => {
 
     // Only create files if repository is new
     if (!repoExists) {
-      await createInitialFiles(githubToken, repoData.full_name, specification, generatedReadme, productSlug)
+      await createInitialFiles(githubToken, repoData.full_name, specification, generatedReadme, productSlug, iconUrl, screenshots)
     }
 
     return new Response(

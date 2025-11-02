@@ -527,17 +527,43 @@ class ProductManagement {
         const actionsCell = document.createElement('td');
         actionsCell.setAttribute('data-label', 'Actions');
         actionsCell.style.padding = 'var(--spacing-sm)';
+        
+        // Determine which buttons to show based on status (status already declared above)
+        const showPublish = status === 'draft';
+        const showUnpublish = status === 'active';
+        
+        let actionButtons = `
+            <button class="product-management__action-btn product-management__action-btn--view" data-action="view" data-product-id="${product.id}">
+                View
+            </button>
+            <button class="product-management__action-btn product-management__action-btn--edit" data-action="edit" data-product-id="${product.id}">
+                Edit
+            </button>
+        `;
+        
+        if (showPublish) {
+            actionButtons += `
+                <button class="product-management__action-btn product-management__action-btn--publish" data-action="publish" data-product-id="${product.id}">
+                    Publish
+                </button>
+            `;
+        } else if (showUnpublish) {
+            actionButtons += `
+                <button class="product-management__action-btn product-management__action-btn--unpublish" data-action="unpublish" data-product-id="${product.id}">
+                    Unpublish
+                </button>
+            `;
+        }
+        
+        actionButtons += `
+            <button class="product-management__action-btn product-management__action-btn--delete" data-action="delete" data-product-id="${product.id}">
+                Delete
+            </button>
+        `;
+        
         actionsCell.innerHTML = `
-            <div style="display: flex; gap: var(--spacing-sm);">
-                <button class="product-management__action-btn product-management__action-btn--view" data-action="view" data-product-id="${product.id}">
-                    View
-                </button>
-                <button class="product-management__action-btn product-management__action-btn--edit" data-action="edit" data-product-id="${product.id}">
-                    Edit
-                </button>
-                <button class="product-management__action-btn product-management__action-btn--delete" data-action="delete" data-product-id="${product.id}">
-                    Delete
-                </button>
+            <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+                ${actionButtons}
             </div>
         `;
 
@@ -555,6 +581,22 @@ class ProductManagement {
             editButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.editProduct(product.id);
+            });
+        }
+
+        const publishButton = actionsCell.querySelector('[data-action="publish"]');
+        if (publishButton) {
+            publishButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.publishProduct(product.id, product.name);
+            });
+        }
+
+        const unpublishButton = actionsCell.querySelector('[data-action="unpublish"]');
+        if (unpublishButton) {
+            unpublishButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.unpublishProduct(product.id, product.name);
             });
         }
 
@@ -616,6 +658,44 @@ Description: ${product.description || 'No description'}
         // Open product wizard in edit mode
         console.log('Edit product:', productId);
         window.open(`/admin/components/product-wizard/product-wizard.html?edit=${productId}`, '_blank');
+    }
+
+    /**
+     * Publish a product (placeholder - will be connected when publishing destination is ready)
+     * @param {string} productId - Product ID to publish
+     * @param {string} productName - Product name
+     */
+    async publishProduct(productId, productName) {
+        console.log('📢 Publish product:', productId, productName);
+        console.log('⚠️ Publish/Unpublish functionality will be connected when publishing destination is ready');
+        
+        // Placeholder implementation
+        alert(`Publish functionality for "${productName}" will be connected when the publishing destination is created.\n\nFor now, this will update the product status from 'draft' to 'active' in the database and make it visible in the public catalog.`);
+        
+        // TODO: When publishing destination is ready:
+        // 1. Update product status from 'draft' to 'active' in database
+        // 2. Make product visible in public catalog
+        // 3. Enable purchase flow (if applicable)
+        // 4. Refresh product list
+    }
+
+    /**
+     * Unpublish a product (placeholder - will be connected when publishing destination is ready)
+     * @param {string} productId - Product ID to unpublish
+     * @param {string} productName - Product name
+     */
+    async unpublishProduct(productId, productName) {
+        console.log('📢 Unpublish product:', productId, productName);
+        console.log('⚠️ Publish/Unpublish functionality will be connected when publishing destination is ready');
+        
+        // Placeholder implementation
+        alert(`Unpublish functionality for "${productName}" will be connected when the publishing destination is created.\n\nFor now, this will update the product status from 'active' to 'draft' and hide it from the public catalog.`);
+        
+        // TODO: When publishing destination is ready:
+        // 1. Update product status from 'active' to 'draft' (or 'archived')
+        // 2. Hide product from public catalog
+        // 3. Disable purchase flow
+        // 4. Refresh product list
     }
 
     /**
