@@ -179,6 +179,11 @@
     background: var(--color-background-primary);
     border: 1px solid var(--color-primary);
     border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .step-cloudflare-setup__create-btn {
@@ -187,7 +192,7 @@
     gap: 0.75rem;
     padding: 0.875rem 2rem;
     background: var(--color-primary);
-    color: white;
+    color: var(--color-text-dark, #333);
     border: none;
     border-radius: 6px;
     font-size: 1rem;
@@ -206,6 +211,7 @@
     color: var(--color-text-secondary);
     cursor: not-allowed;
     transform: none;
+    opacity: 0.6;
 }
 
 .step-cloudflare-setup__create-btn .btn-icon {
@@ -220,12 +226,15 @@
     border: 1px solid var(--color-secondary, #888);
     border-radius: 8px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 0.5rem;
 }
 
 .step-cloudflare-setup__create-btn--secondary {
     background: var(--color-secondary, #666);
+    color: var(--color-text-dark, #333);
 }
 
 .step-cloudflare-setup__create-btn--secondary:hover:not(:disabled) {
