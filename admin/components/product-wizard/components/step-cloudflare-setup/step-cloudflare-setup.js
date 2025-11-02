@@ -147,7 +147,17 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             const supabaseAnonKey = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || '';
 
             // Extract GitHub repo URL for Cloudflare Pages automation
-            const githubRepoUrl = basicInfo.github_repo_url || null;
+            // Try multiple possible locations
+            const githubRepoUrl = basicInfo.github_repo_url 
+                || window.productWizard?.formData?.github_repo_url 
+                || null;
+            
+            console.log('📋 Cloudflare setup - Data check:', {
+                'basicInfo.github_repo_url': basicInfo.github_repo_url,
+                'formData.github_repo_url': window.productWizard?.formData?.github_repo_url,
+                'final githubRepoUrl': githubRepoUrl,
+                'all basicInfo keys': Object.keys(basicInfo || {})
+            });
             
             // Construct GitHub Pages URL from repo URL if available (fallback only)
             let githubPagesUrl = null;
