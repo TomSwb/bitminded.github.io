@@ -39,12 +39,20 @@ serve(async (req) => {
     
     // If Cloudflare Pages URL not provided but GitHub repo URL is, try to create/get Pages project
     if (!pagesUrl && githubRepoUrl) {
+      console.log(`🔍 Attempting to find/create Cloudflare Pages project for: ${githubRepoUrl}`)
       pagesUrl = await createOrGetCloudflarePagesProject(
         cloudflareApiToken,
         cloudflareAccountId,
         githubRepoUrl,
         productSlug
       )
+      if (pagesUrl) {
+        console.log(`✅ Cloudflare Pages URL resolved: ${pagesUrl}`)
+      } else {
+        console.warn(`⚠️ Could not find/create Cloudflare Pages project for ${githubRepoUrl}`)
+      }
+    } else if (!pagesUrl) {
+      console.warn('⚠️ No Cloudflare Pages URL or GitHub repo URL provided')
     }
     
     // Fallback to GitHub Pages URL if nothing else available (not recommended for subscription apps)
@@ -252,6 +260,11 @@ async function createOrGetCloudflarePagesProject(
   githubRepoUrl: string,
   projectName: string
 ): Promise<string | null> {
+  console.log(`🔍 createOrGetCloudflarePagesProject called with:`)
+  console.log(`   - githubRepoUrl: ${githubRepoUrl}`)
+  console.log(`   - projectName: ${projectName}`)
+  console.log(`   - accountId: ${accountId}`)
+  
   try {
     // Extract owner/repo from GitHub URL
     const match = githubRepoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/)
@@ -264,7 +277,7 @@ async function createOrGetCloudflarePagesProject(
     const repo = match[2]
     const sanitizedProjectName = projectName.replace(/[^a-z0-9-]/gi, '-').toLowerCase()
     
-    console.log(`📦 Checking for Cloudflare Pages project: ${sanitizedProjectName}`)
+    console.log(`📦 Checking for Cloudflare Pages project: ${sanitizedProjectName} (from ${owner}/${repo})`)
     
     // Step 1: List existing Pages projects
     const listProjectsResponse = await fetch(
@@ -324,32 +337,56 @@ async function createOrGetCloudflarePagesProject(
     let connectionId: string | null = null
     
     try {
-      // Try to get connections via the projects endpoint or a connection list
-      // The exact endpoint may vary, so we'll try a few approaches
-      const connectionListResponse = await fetch(
+      // Try multiple API endpoints to find GitHub connections
+      // Cloudflare API endpoints for git integrations may vary
+      const endpoints = [
         `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/git/repos`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${apiToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${sanitizedProjectName}/git/repos`,
+      ]
       
-      if (connectionListResponse.ok) {
-        const connections = await connectionListResponse.json()
-        // Find connection that matches the repo owner
-        const matchingConnection = connections.result?.find((c: any) => 
-          c.name?.includes(owner) || c.owner === owner
-        )
-        if (matchingConnection?.id) {
-          connectionId = matchingConnection.id
-          console.log(`✅ Found GitHub connection: ${connectionId}`)
+      for (const endpoint of endpoints) {
+        try {
+          const connectionListResponse = await fetch(endpoint, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${apiToken}`,
+              'Content-Type': 'application/json'
+            }
+          })
+          
+          if (connectionListResponse.ok) {
+            const connections = await connectionListResponse.json()
+            console.log(`🔍 GitHub connections API response:`, JSON.stringify(connections).substring(0, 200))
+            
+            // Try different response structures
+            const repos = connections.result || connections.repos || []
+            const matchingConnection = repos.find((c: any) => 
+              c.name?.includes(owner) || 
+              c.owner === owner ||
+              c.full_name?.includes(`${owner}/${repo}`) ||
+              c.repo === repo
+            )
+            
+            if (matchingConnection?.id || matchingConnection?.connection_id) {
+              connectionId = matchingConnection.id || matchingConnection.connection_id
+              console.log(`✅ Found GitHub connection: ${connectionId}`)
+              break
+            }
+          } else {
+            const errorText = await connectionListResponse.text()
+            console.log(`⚠️ Connection endpoint failed (${endpoint}): ${errorText.substring(0, 200)}`)
+          }
+        } catch (endpointError) {
+          console.log(`⚠️ Error checking endpoint ${endpoint}:`, endpointError)
         }
       }
+      
+      if (!connectionId) {
+        console.warn('⚠️ No GitHub connection found. Will create project without repo link.')
+        console.warn('   You may need to manually link the repo in Cloudflare dashboard.')
+      }
     } catch (e) {
-      console.warn('⚠️ Could not fetch GitHub connections (may need OAuth setup):', e)
+      console.error('❌ Error fetching GitHub connections:', e)
     }
     
     // Create the project with GitHub connection if available
