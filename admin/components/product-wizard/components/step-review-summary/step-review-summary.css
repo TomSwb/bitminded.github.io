@@ -1,0 +1,269 @@
+/* Step 7: Review & Summary Styles */
+
+.step-review-summary {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.step-review-summary__header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.step-review-summary__header h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: bold;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.step-review-summary__header p {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary);
+    opacity: 0.7;
+    margin: 0;
+}
+
+/* Validation Status */
+.step-review-summary__validation {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-xl);
+    border: 2px solid;
+}
+
+.step-review-summary__validation--success {
+    background: var(--color-background-primary);
+    border-color: var(--color-success);
+    color: var(--color-text-primary);
+}
+
+.step-review-summary__validation--success strong {
+    color: var(--color-success);
+}
+
+.step-review-summary__validation--warning {
+    background: var(--color-background-primary);
+    border-color: var(--color-warning);
+    color: var(--color-text-primary);
+}
+
+.step-review-summary__validation--warning strong {
+    color: var(--color-warning);
+}
+
+.step-review-summary__validation--error {
+    background: var(--color-background-primary);
+    border-color: var(--color-error);
+    color: var(--color-text-primary);
+}
+
+.step-review-summary__validation--error strong {
+    color: var(--color-error);
+}
+
+.step-review-summary__validation ul {
+    margin: var(--spacing-sm) 0 0 0;
+    padding-left: var(--spacing-lg);
+}
+
+.step-review-summary__validation li {
+    margin: var(--spacing-xs) 0;
+}
+
+/* Sections */
+.step-review-summary__sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.step-review-summary__section {
+    background: var(--color-background-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+}
+
+.step-review-summary__section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.step-review-summary__section-header h3 {
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.step-review-summary__status-icon {
+    font-size: var(--font-size-xl);
+    line-height: 1;
+}
+
+.step-review-summary__status-icon--complete {
+    color: var(--color-success);
+}
+
+.step-review-summary__status-icon--incomplete {
+    color: var(--color-warning);
+}
+
+/* Section Content */
+.step-review-summary__section-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.step-review-summary__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+@media (min-width: 768px) {
+    .step-review-summary__field {
+        flex-direction: row;
+    }
+    
+    .step-review-summary__field-label {
+        min-width: 200px;
+        font-weight: 600;
+    }
+}
+
+.step-review-summary__field-label {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    opacity: 0.8;
+}
+
+.step-review-summary__field-value {
+    color: var(--color-text-primary);
+    flex: 1;
+}
+
+.step-review-summary__field-value--success {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.step-review-summary__field-value--success::before {
+    content: "✅ ";
+    color: var(--color-success);
+}
+
+.step-review-summary__field-value--missing {
+    color: var(--color-text-primary);
+    opacity: 0.5;
+    font-style: italic;
+}
+
+/* Icon Preview */
+.step-review-summary__icon-preview {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+/* Lists */
+.step-review-summary__list {
+    margin: 0;
+    padding-left: var(--spacing-lg);
+    list-style-type: disc;
+}
+
+.step-review-summary__list li {
+    margin: var(--spacing-xs) 0;
+    color: var(--color-text-primary);
+}
+
+/* Technical Spec Preview */
+.step-review-summary__spec-preview {
+    background: var(--color-background-primary);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: monospace;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Actions */
+.step-review-summary__actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+}
+
+.step-review-summary__btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 2px solid transparent;
+    min-width: 150px;
+}
+
+.step-review-summary__btn--primary {
+    background: var(--color-primary);
+    color: var(--color-background-primary);
+    border-color: var(--color-primary);
+}
+
+.step-review-summary__btn--primary:hover {
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
+}
+
+.step-review-summary__btn--secondary {
+    background: transparent;
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+}
+
+.step-review-summary__btn--secondary:hover {
+    background: var(--color-background-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* Links */
+.step-review-summary__field-value a {
+    color: var(--color-primary);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.step-review-summary__field-value a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .step-review-summary__actions {
+        flex-direction: column;
+    }
+    
+    .step-review-summary__btn {
+        width: 100%;
+    }
+}
+

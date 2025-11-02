@@ -315,6 +315,11 @@ if (typeof window.StepGithubSetup === 'undefined') {
                 // Get product slug for access protection script
                 const productSlug = window.productWizard?.formData?.slug || this.formData.github_repo_name;
                 
+                // Get media files from form data
+                const basicInfo = window.productWizard?.formData || {};
+                const iconUrl = basicInfo.icon_url || null;
+                const screenshots = basicInfo.screenshots || null;
+                
                 // Call Edge Function to create repository
                 const { data, error } = await window.supabase.functions.invoke('create-github-repository', {
                     body: {
@@ -323,7 +328,9 @@ if (typeof window.StepGithubSetup === 'undefined') {
                         private: this.formData.github_private,
                         specification: spec,
                         generatedReadme: this.generatedReadme || undefined,
-                        productSlug: productSlug // Pass slug for access protection script
+                        productSlug: productSlug, // Pass slug for access protection script
+                        iconUrl: iconUrl, // Pass icon URL if available
+                        screenshots: screenshots // Pass screenshots array if available
                     }
                 });
 
