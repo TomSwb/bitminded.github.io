@@ -312,6 +312,9 @@ if (typeof window.StepGithubSetup === 'undefined') {
                 // Get technical specification from Step 2
                 const spec = this.getTechnicalSpecification();
                 
+                // Get product slug for access protection script
+                const productSlug = window.productWizard?.formData?.slug || this.formData.github_repo_name;
+                
                 // Call Edge Function to create repository
                 const { data, error } = await window.supabase.functions.invoke('create-github-repository', {
                     body: {
@@ -319,7 +322,8 @@ if (typeof window.StepGithubSetup === 'undefined') {
                         description: this.formData.github_description,
                         private: this.formData.github_private,
                         specification: spec,
-                        generatedReadme: this.generatedReadme || undefined
+                        generatedReadme: this.generatedReadme || undefined,
+                        productSlug: productSlug // Pass slug for access protection script
                     }
                 });
 
