@@ -80,7 +80,7 @@ serve(async (req) => {
           'Authorization': `Bearer ${cloudflareApiToken}`,
           'Content-Type': 'application/javascript'
         },
-        body: generateWorkerCode(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey || '', pagesUrl)
+        body: generateWorkerCode(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey || '', pagesUrl || undefined)
       }
     )
 
@@ -206,7 +206,7 @@ serve(async (req) => {
       )
     }
 
-    if (!domainResponse.ok) {
+    if (domainResponse && !domainResponse.ok) {
       const error = await domainResponse.text()
       console.warn(`⚠️ Could not configure custom domain: ${error}`)
       // Don't fail if domain setup fails, it can be done manually
@@ -228,8 +228,8 @@ serve(async (req) => {
         workerName,
         workerUrl,
         workerDevUrl,
-        pagesUrl: pagesUrl, // Cloudflare Pages URL used for proxying
-        customDomain: domainResponse && domainResponse.ok ? customDomain : null,
+        pagesUrl: pagesUrl || null, // Cloudflare Pages URL used for proxying
+        customDomain: (domainResponse && domainResponse.ok) ? customDomain : null,
         message: 'Cloudflare Worker created successfully'
       }),
       {
@@ -417,7 +417,8 @@ async function createOrGetCloudflarePagesProject(
     
     // Get available GitHub connections
     // Note: This requires GitHub OAuth to be set up in Cloudflare dashboard
-    let connectionId: string | null = null
+    // connectionId was already found above from existing projects
+    // If not found, try additional methods below
     
     try {
       // Try to find GitHub connections using various API endpoints
