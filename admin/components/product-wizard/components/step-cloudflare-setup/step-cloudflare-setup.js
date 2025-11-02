@@ -146,20 +146,12 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 : '';
             const supabaseAnonKey = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || '';
 
-            // Extract GitHub repo URL for Cloudflare Pages automation
-            // Try multiple possible locations
+            // Extract GitHub repo URL to construct GitHub Pages URL
             const githubRepoUrl = basicInfo.github_repo_url 
                 || window.productWizard?.formData?.github_repo_url 
                 || null;
             
-            console.log('📋 Cloudflare setup - Data check:', {
-                'basicInfo.github_repo_url': basicInfo.github_repo_url,
-                'formData.github_repo_url': window.productWizard?.formData?.github_repo_url,
-                'final githubRepoUrl': githubRepoUrl,
-                'all basicInfo keys': Object.keys(basicInfo || {})
-            });
-            
-            // Construct GitHub Pages URL from repo URL if available (fallback only)
+            // Construct GitHub Pages URL from repo URL if available
             let githubPagesUrl = null;
             if (githubRepoUrl) {
                 try {
@@ -170,14 +162,12 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                         const owner = match[1];
                         const repo = match[2];
                         githubPagesUrl = `https://${owner}.github.io/${repo}`;
+                        console.log(`📦 Constructed GitHub Pages URL: ${githubPagesUrl}`);
                     }
                 } catch (e) {
                     console.warn('Failed to construct GitHub Pages URL:', e);
                 }
             }
-
-            // Prefer Cloudflare Pages URL if set (private hosting)
-            const cloudflarePagesUrl = basicInfo.cloudflare_pages_url || null;
 
             const workerData = {
                 subdomain,
@@ -185,9 +175,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 productSlug: basicInfo.slug || subdomain,
                 supabaseFunctionsUrl,
                 supabaseAnonKey,
-                githubRepoUrl, // For auto-creating Cloudflare Pages
-                githubPagesUrl, // Fallback (public)
-                cloudflarePagesUrl // Preferred (private)
+                githubPagesUrl // GitHub Pages URL (public until Enterprise plan)
             };
 
             console.log('☁️ Creating Cloudflare Worker:', workerData);
