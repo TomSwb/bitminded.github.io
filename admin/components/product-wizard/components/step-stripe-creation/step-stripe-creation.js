@@ -175,12 +175,19 @@ if (typeof window.StepStripeCreation === 'undefined') {
                         this.elements.requiresAdminApprovalCheckbox.checked = basicInfo.requires_admin_approval;
                     }
                 }
+                
+                // Sync this.formData with basicInfo to ensure consistency
+                this.formData = { ...this.formData, ...basicInfo };
 
                 // Check if Stripe product was already created
                 if (basicInfo.stripe_product_id) {
                     this.stripeProductCreated = true;
                     this.showFinalState(basicInfo);
                 }
+                
+                // Always ensure form fields are populated and correct section is visible
+                this.populateFormFields();
+                this.togglePricingSections();
             }
         }
 
@@ -225,6 +232,11 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     console.log('💾 About to save Stripe data to formData. Result:', result.data);
                     this.saveToFormData(result.data);
                     console.log('💾 After saveToFormData. window.productWizard.formData.stripe_product_id:', window.productWizard?.formData?.stripe_product_id);
+                    
+                    // Ensure form fields remain populated with the values that were used
+                    this.populateFormFields();
+                    // Ensure the correct pricing section is visible
+                    this.togglePricingSections();
 
                     // Persist immediately to database (no manual Save Draft required)
                     try {
@@ -417,6 +429,68 @@ if (typeof window.StepStripeCreation === 'undefined') {
             window.productWizard.formData.individual_price = this.formData.individual_price;
             
             console.log('✅ Saved Stripe data to formData');
+        }
+        
+        populateFormFields() {
+            // Use window.productWizard.formData as source of truth (it has the saved values)
+            // Fall back to this.formData if wizard data not available
+            const sourceData = (window.productWizard?.formData && Object.keys(window.productWizard.formData).length > 0) 
+                ? window.productWizard.formData 
+                : this.formData;
+            
+            console.log('📝 Populating form fields with saved values:', sourceData);
+            
+            // Set pricing type radio buttons
+            if (sourceData.pricing_type && this.elements.pricingTypeRadios) {
+                this.elements.pricingTypeRadios.forEach(radio => {
+                    radio.checked = (radio.value === sourceData.pricing_type);
+                });
+            }
+            
+            // Populate enterprise price
+            if (this.elements.enterprisePriceInput) {
+                this.elements.enterprisePriceInput.value = sourceData.enterprise_price !== undefined ? sourceData.enterprise_price : '';
+            }
+            
+            // Populate subscription price
+            if (this.elements.subscriptionPriceInput) {
+                this.elements.subscriptionPriceInput.value = sourceData.subscription_price !== undefined ? sourceData.subscription_price : '';
+            }
+            
+            // Populate one-time price
+            if (this.elements.oneTimePriceInput) {
+                this.elements.oneTimePriceInput.value = sourceData.one_time_price !== undefined ? sourceData.one_time_price : '';
+            }
+            
+            // Populate subscription interval
+            if (sourceData.subscription_interval && this.elements.subscriptionIntervalSelect) {
+                this.elements.subscriptionIntervalSelect.value = sourceData.subscription_interval;
+            }
+            
+            // Populate trial days
+            if (this.elements.trialDaysInput) {
+                this.elements.trialDaysInput.value = sourceData.trial_days !== undefined ? sourceData.trial_days : 0;
+            }
+            
+            // Populate trial requires payment checkbox
+            if (this.elements.trialRequiresPaymentCheckbox) {
+                this.elements.trialRequiresPaymentCheckbox.checked = sourceData.trial_requires_payment || false;
+            }
+            
+            // Populate requires admin approval checkbox
+            if (this.elements.requiresAdminApprovalCheckbox) {
+                this.elements.requiresAdminApprovalCheckbox.checked = sourceData.requires_admin_approval || false;
+            }
+            
+            // Populate individual price (always 0 for freemium)
+            if (this.elements.individualPriceInput) {
+                this.elements.individualPriceInput.value = sourceData.individual_price !== undefined ? sourceData.individual_price : 0;
+            }
+            
+            // Sync this.formData with sourceData to keep them in sync
+            this.formData = { ...this.formData, ...sourceData };
+            
+            console.log('✅ Form fields populated from:', sourceData.stripe_product_id ? 'wizard.formData' : 'this.formData');
         }
 
         /**
