@@ -45,7 +45,7 @@ async function createInitialFiles(
   }
   
   // Create index.html with access protection script
-  const indexHtml = generateIndexHtml(productName, subdomain)
+  const indexHtml = generateIndexHtml(productName, subdomain, repoName)
   await createFile(token, repoFullName, 'index.html', indexHtml)
   
   // Upload media files if provided
@@ -344,7 +344,7 @@ function generateGitignore(stack: string[]): string {
  * Works with any framework (React, Vue, Svelte, vanilla JS, etc.)
  * Uses simple redirect instead of overlay - prevents GitHub Pages access
  */
-function generateIndexHtml(productName: string, subdomain: string): string {
+function generateIndexHtml(productName: string, subdomain: string, repoName: string): string {
   const protectedUrl = `https://${subdomain}.bitminded.ch`
   
   // Simple redirect protection script - inline for immediate execution
@@ -359,9 +359,15 @@ function generateIndexHtml(productName: string, subdomain: string): string {
       // Check if accessed via GitHub Pages
       const hostname = window.location.hostname;
       if (hostname.includes('.github.io') || hostname.includes('github.com')) {
-        // Preserve path, query params, and hash if present
-        const path = window.location.pathname + window.location.search + window.location.hash;
-        const redirectUrl = path === '/' ? protectedUrl : protectedUrl + path;
+        // Strip repository name from path if present, preserve query params and hash
+        let path = window.location.pathname;
+        // Remove '/${repoName}' prefix if it exists (for GitHub Pages project sites)
+        if (path.startsWith('/${repoName}')) {
+          path = path.replace('/${repoName}', '') || '/';
+        }
+        // Build redirect URL with query params and hash
+        const queryAndHash = window.location.search + window.location.hash;
+        const redirectUrl = (path === '/' ? protectedUrl : protectedUrl + path) + queryAndHash;
         // Use replace() to avoid adding to browser history
         window.location.replace(redirectUrl);
       }
