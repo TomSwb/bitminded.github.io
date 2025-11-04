@@ -222,9 +222,16 @@
             <!-- Product Selection -->
             <div class="access-control__form-group">
                 <label for="grant-product-select" class="access-control__form-label translatable-content" data-translation-key="Product">Product *</label>
-                <select id="grant-product-select" class="access-control__form-select" required>
-                    <option value="" data-translation-key="select_product">Select Product</option>
-                </select>
+                <input 
+                    type="text" 
+                    id="grant-product-select" 
+                    class="access-control__form-input" 
+                    placeholder="Search by product name..."
+                    autocomplete="off"
+                >
+                <div class="access-control__product-suggestions" id="product-suggestions"></div>
+                <input type="hidden" id="grant-product-id" required>
+                <div class="access-control__selected-product" id="selected-product-display"></div>
             </div>
 
             <!-- Grant Type -->

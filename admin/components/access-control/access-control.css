@@ -882,6 +882,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+    position: relative;
 }
 
 .access-control__form-label {
@@ -1022,7 +1023,8 @@
     position: relative;
 }
 
-.access-control__user-suggestions {
+.access-control__user-suggestions,
+.access-control__product-suggestions {
     position: absolute;
     top: 100%;
     left: 0;
@@ -1035,6 +1037,12 @@
     overflow-y: auto;
     z-index: 100;
     margin-top: -1px;
+    display: none;
+}
+
+.access-control__user-suggestions:not(.hidden),
+.access-control__product-suggestions:not(.hidden) {
+    display: block;
 }
 
 .access-control__suggestion {
@@ -1045,7 +1053,7 @@
 }
 
 .access-control__suggestion:hover {
-    background-color: var(--color-background-secondary);
+    background-color: var(--color-background-tertiary);
 }
 
 .access-control__suggestion:last-child {
@@ -1062,7 +1070,8 @@
     color: var(--color-secondary);
 }
 
-.access-control__selected-user {
+.access-control__selected-user,
+.access-control__selected-product {
     margin-top: var(--spacing-sm);
     padding: var(--spacing-md);
     background-color: var(--color-background-primary);
@@ -1070,7 +1079,8 @@
     color: var(--color-text-primary);
 }
 
-.access-control__selected-user-info {
+.access-control__selected-user-info,
+.access-control__selected-product-info {
     color: var(--color-text-primary);
 }
 
