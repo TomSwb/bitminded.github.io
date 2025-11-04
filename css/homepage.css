@@ -4,10 +4,24 @@
 
 /* ===== HERO SECTION ===== */
 .hero {
-  padding: var(--spacing-4xl) var(--spacing-lg) var(--spacing-3xl);
+  padding: 0 var(--spacing-lg) var(--spacing-3xl);
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
+}
+
+.hero__image {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  margin: 0 auto var(--spacing-xl);
+  display: block;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}
+
+.hero__content {
+  width: 100%;
 }
 
 .hero__title {
@@ -201,6 +215,63 @@
   margin: 0;
 }
 
+/* ===== ADDITIONAL SERVICES SECTION ===== */
+.services {
+  padding: var(--spacing-3xl) var(--spacing-lg) var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.services__title {
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-accent-pink);
+  font-size: var(--font-size-h2);
+}
+
+.services__subtitle {
+  text-align: center;
+  margin-bottom: var(--spacing-3xl);
+  color: var(--color-text-primary);
+  opacity: 0.8;
+  font-size: var(--font-size-lg);
+}
+
+.services__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.service-card {
+  padding: var(--spacing-xl);
+  border: 2px solid var(--border-color-primary);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-tertiary);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.service-card__title {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.service-card__description {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  margin: 0;
+}
+
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 768px) {
   .hero {
@@ -209,20 +280,23 @@
 
   .philosophy,
   .products,
-  .how-we-work {
+  .how-we-work,
+  .services {
     padding: var(--spacing-2xl) var(--spacing-md);
   }
 
   .philosophy__content,
   .products__grid,
-  .how-we-work__content {
+  .how-we-work__content,
+  .services__grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
   }
 
   .philosophy__item,
   .product-card,
-  .how-we-work__item {
+  .how-we-work__item,
+  .service-card {
     padding: var(--spacing-lg);
   }
 }
@@ -233,8 +307,13 @@
   }
 
   .hero {
-    padding-top: var(--spacing-md);
+    padding-top: 0;
     padding-bottom: var(--spacing-lg);
+  }
+
+  .hero__image {
+    max-width: 100%;
+    margin-bottom: var(--spacing-lg);
   }
 
   .hero__title {
@@ -243,7 +322,8 @@
 
   .philosophy__title,
   .products__title,
-  .how-we-work__title {
+  .how-we-work__title,
+  .services__title {
     font-size: var(--font-size-2xl);
   }
 

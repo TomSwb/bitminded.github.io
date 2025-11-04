@@ -22,7 +22,15 @@
       "catalog-title": "Growing Catalog",
       "catalog-text": "Each commission becomes part of our artisanal catalog. Purchase individual tools or subscribe to access multiple apps. Simple, honest pricing.",
       "support-title": "Support Indie Software",
-      "support-text": "Choose software made with care, not mass production. Support independent development and get tools that respect your time and attention."
+      "support-text": "Choose software made with care, not mass production. Support independent development and get tools that respect your time and attention.",
+      "services-title": "Additional Services",
+      "services-subtitle": "Helping you make the most of software in your daily life",
+      "software-learning-title": "Software Learning Support",
+      "software-learning-text": "Helping you learn to use everyday software tools—from Excel and Google Workspace to productivity apps. Get comfortable with the software you need.",
+      "digital-literacy-title": "Digital Literacy Training",
+      "digital-literacy-text": "Teaching you how to use common software applications in your daily work and life. Build confidence with technology at your own pace.",
+      "software-tutoring-title": "Software Tutoring",
+      "software-tutoring-text": "One-on-one or group sessions tailored to your needs. Learn at your own pace with personalized guidance and practical examples."
     }
   },
   "es": {
@@ -48,7 +56,15 @@
       "catalog-title": "Catálogo en Crecimiento",
       "catalog-text": "Cada encargo se convierte en parte de nuestro catálogo artesanal. Compra herramientas individuales o suscríbete para acceder a múltiples aplicaciones. Precios simples y honestos.",
       "support-title": "Apoya el Software Independiente",
-      "support-text": "Elige software hecho con cuidado, no producción en masa. Apoya el desarrollo independiente y obtén herramientas que respetan tu tiempo y atención."
+      "support-text": "Elige software hecho con cuidado, no producción en masa. Apoya el desarrollo independiente y obtén herramientas que respetan tu tiempo y atención.",
+      "services-title": "Servicios Adicionales",
+      "services-subtitle": "Ayudándote a aprovechar al máximo el software en tu vida diaria",
+      "software-learning-title": "Apoyo para el Aprendizaje de Software",
+      "software-learning-text": "Ayudándote a aprender a usar herramientas de software cotidianas—desde Excel y Google Workspace hasta aplicaciones de productividad. Siéntete cómodo con el software que necesitas.",
+      "digital-literacy-title": "Formación en Alfabetización Digital",
+      "digital-literacy-text": "Enseñándote cómo usar aplicaciones de software comunes en tu trabajo y vida diaria. Construye confianza con la tecnología a tu propio ritmo.",
+      "software-tutoring-title": "Tutoría de Software",
+      "software-tutoring-text": "Sesiones individuales o grupales adaptadas a tus necesidades. Aprende a tu propio ritmo con orientación personalizada y ejemplos prácticos."
     }
   },
   "fr": {
@@ -74,7 +90,15 @@
       "catalog-title": "Catalogue en Croissance",
       "catalog-text": "Chaque commande devient partie de notre catalogue artisanal. Achetez des outils individuels ou abonnez-vous pour accéder à plusieurs applications. Prix simples et honnêtes.",
       "support-title": "Soutenez le Logiciel Indépendant",
-      "support-text": "Choisissez un logiciel fait avec soin, pas de production de masse. Soutenez le développement indépendant et obtenez des outils qui respectent votre temps et votre attention."
+      "support-text": "Choisissez un logiciel fait avec soin, pas de production de masse. Soutenez le développement indépendant et obtenez des outils qui respectent votre temps et votre attention.",
+      "services-title": "Services Supplémentaires",
+      "services-subtitle": "Vous aider à tirer le meilleur parti du logiciel dans votre vie quotidienne",
+      "software-learning-title": "Soutien à l'Apprentissage du Logiciel",
+      "software-learning-text": "Vous aider à apprendre à utiliser les outils logiciels quotidiens—d'Excel et Google Workspace aux applications de productivité. Familiarisez-vous avec les logiciels dont vous avez besoin.",
+      "digital-literacy-title": "Formation à la Littératie Numérique",
+      "digital-literacy-text": "Vous enseigner comment utiliser les applications logicielles courantes dans votre travail et votre vie quotidienne. Développez votre confiance avec la technologie à votre propre rythme.",
+      "software-tutoring-title": "Tutorat en Logiciel",
+      "software-tutoring-text": "Sessions individuelles ou en groupe adaptées à vos besoins. Apprenez à votre propre rythme avec des conseils personnalisés et des exemples pratiques."
     }
   },
   "de": {
@@ -100,7 +124,15 @@
       "catalog-title": "Wachsender Katalog",
       "catalog-text": "Jeder Auftrag wird Teil unseres handwerklichen Katalogs. Kaufen Sie einzelne Tools oder abonnieren Sie, um auf mehrere Apps zuzugreifen. Einfache, ehrliche Preise.",
       "support-title": "Unterstützen Sie Indie-Software",
-      "support-text": "Wählen Sie Software, die mit Sorgfalt gemacht wurde, nicht Massenproduktion. Unterstützen Sie unabhängige Entwicklung und erhalten Sie Tools, die Ihre Zeit und Aufmerksamkeit respektieren."
+      "support-text": "Wählen Sie Software, die mit Sorgfalt gemacht wurde, nicht Massenproduktion. Unterstützen Sie unabhängige Entwicklung und erhalten Sie Tools, die Ihre Zeit und Aufmerksamkeit respektieren.",
+      "services-title": "Zusätzliche Dienstleistungen",
+      "services-subtitle": "Ihnen helfen, das Beste aus Software in Ihrem täglichen Leben herauszuholen",
+      "software-learning-title": "Software-Lernunterstützung",
+      "software-learning-text": "Ihnen helfen, alltägliche Software-Tools zu erlernen—von Excel und Google Workspace bis hin zu Produktivitäts-Apps. Werden Sie vertraut mit der Software, die Sie benötigen.",
+      "digital-literacy-title": "Digitale Kompetenz-Schulung",
+      "digital-literacy-text": "Ihnen beibringen, wie Sie gängige Software-Anwendungen in Ihrer täglichen Arbeit und Ihrem Leben verwenden. Bauen Sie Vertrauen mit Technologie in Ihrem eigenen Tempo auf.",
+      "software-tutoring-title": "Software-Nachhilfe",
+      "software-tutoring-text": "Einzel- oder Gruppensitzungen, die auf Ihre Bedürfnisse zugeschnitten sind. Lernen Sie in Ihrem eigenen Tempo mit personalisierter Anleitung und praktischen Beispielen."
     }
   }
 }
