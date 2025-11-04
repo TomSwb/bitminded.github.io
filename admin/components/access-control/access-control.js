@@ -25,6 +25,7 @@ class AccessControl {
         };
         this.searchTimeout = null;
         this.userSearchTimeout = null;
+        this.productSearchTimeout = null;
         this.elements = {};
         this.currentGrantId = null; // For revoke modal
     }
@@ -127,6 +128,9 @@ class AccessControl {
             userSuggestions: document.getElementById('user-suggestions'),
             selectedUserDisplay: document.getElementById('selected-user-display'),
             grantProductSelect: document.getElementById('grant-product-select'),
+            grantProductId: document.getElementById('grant-product-id'),
+            productSuggestions: document.getElementById('product-suggestions'),
+            selectedProductDisplay: document.getElementById('selected-product-display'),
             grantExpirationType: document.getElementById('grant-expiration-type'),
             grantExpirationDate: document.getElementById('grant-expiration-date'),
             grantExpirationDuration: document.getElementById('grant-expiration-duration'),
@@ -241,12 +245,25 @@ class AccessControl {
 
             // Hide suggestions when clicking outside
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.access-control__user-selection')) {
+                if (!e.target.closest('.access-control__form-group')) {
                     if (this.elements.userSuggestions) {
                         this.elements.userSuggestions.innerHTML = '';
+                        this.elements.userSuggestions.style.display = 'none';
                         this.elements.userSuggestions.classList.add('hidden');
                     }
+                    if (this.elements.productSuggestions) {
+                        this.elements.productSuggestions.innerHTML = '';
+                        this.elements.productSuggestions.style.display = 'none';
+                        this.elements.productSuggestions.classList.add('hidden');
+                    }
                 }
+            });
+        }
+
+        // Product search autocomplete
+        if (this.elements.grantProductSelect) {
+            this.elements.grantProductSelect.addEventListener('input', (e) => {
+                this.handleProductSearch(e.target.value);
             });
         }
 
@@ -693,21 +710,7 @@ class AccessControl {
             });
         }
 
-        // Populate product select in grant modal
-        if (this.elements.grantProductSelect) {
-            const selectProductText = this.getTranslation('select_product') || 'Select Product';
-            this.elements.grantProductSelect.innerHTML = `<option value="">${selectProductText}</option>`;
-            this.products.forEach(productSlug => {
-                const option = document.createElement('option');
-                option.value = productSlug;
-                // Get product name from map, or use slug if not found (e.g., 'all')
-                const productName = productSlug === 'all'
-                    ? this.getTranslation('All Products') || 'All Products'
-                    : (this.productMap[productSlug]?.name || productSlug);
-                option.textContent = productName;
-                this.elements.grantProductSelect.appendChild(option);
-            });
-        }
+        // Product search is handled by handleProductSearch() - no need to populate dropdown
     }
 
     /**
@@ -1048,6 +1051,15 @@ class AccessControl {
             if (this.elements.grantUserId) {
                 this.elements.grantUserId.value = '';
             }
+            if (this.elements.selectedProductDisplay) {
+                this.elements.selectedProductDisplay.innerHTML = '';
+            }
+            if (this.elements.grantProductId) {
+                this.elements.grantProductId.value = '';
+            }
+            if (this.elements.grantProductSelect) {
+                this.elements.grantProductSelect.value = '';
+            }
         } else {
             console.error('❌ Grant modal element NOT found!');
         }
@@ -1105,6 +1117,7 @@ class AccessControl {
         if (!query || query.length < 2) {
             if (this.elements.userSuggestions) {
                 this.elements.userSuggestions.innerHTML = '';
+                this.elements.userSuggestions.style.display = 'none';
                 this.elements.userSuggestions.classList.add('hidden');
             }
             return;
@@ -1128,6 +1141,7 @@ class AccessControl {
 
                 if (this.elements.userSuggestions && data && data.length > 0) {
                     this.elements.userSuggestions.innerHTML = '';
+                    this.elements.userSuggestions.style.display = 'block';
                     this.elements.userSuggestions.classList.remove('hidden');
 
                     data.forEach(user => {
@@ -1144,6 +1158,7 @@ class AccessControl {
                     });
                 } else if (this.elements.userSuggestions) {
                     this.elements.userSuggestions.innerHTML = '<div class="access-control__suggestion">No users found</div>';
+                    this.elements.userSuggestions.style.display = 'block';
                     this.elements.userSuggestions.classList.remove('hidden');
                 }
             } catch (error) {
@@ -1171,7 +1186,102 @@ class AccessControl {
         }
         if (this.elements.userSuggestions) {
             this.elements.userSuggestions.innerHTML = '';
+            this.elements.userSuggestions.style.display = 'none';
             this.elements.userSuggestions.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Handle product search (autocomplete)
+     */
+    async handleProductSearch(query) {
+        if (!query || query.length < 1) {
+            if (this.elements.productSuggestions) {
+                this.elements.productSuggestions.innerHTML = '';
+                this.elements.productSuggestions.style.display = 'none';
+                this.elements.productSuggestions.classList.add('hidden');
+            }
+            return;
+        }
+
+        clearTimeout(this.productSearchTimeout);
+        this.productSearchTimeout = setTimeout(() => {
+            try {
+                const queryLower = query.toLowerCase();
+                
+                // Filter products by name or slug
+                const matchingProducts = this.products
+                    .filter(slug => {
+                        if (slug === 'all') {
+                            const allProductsText = (this.getTranslation('All Products') || 'All Products').toLowerCase();
+                            return allProductsText.includes(queryLower);
+                        }
+                        const product = this.productMap[slug];
+                        if (!product) return false;
+                        const name = (product.name || '').toLowerCase();
+                        const slugLower = slug.toLowerCase();
+                        return name.includes(queryLower) || slugLower.includes(queryLower);
+                    })
+                    .slice(0, 10); // Limit to 10 results
+
+                if (this.elements.productSuggestions && matchingProducts.length > 0) {
+                    this.elements.productSuggestions.innerHTML = '';
+                    this.elements.productSuggestions.style.display = 'block';
+                    this.elements.productSuggestions.classList.remove('hidden');
+
+                    matchingProducts.forEach(productSlug => {
+                        const suggestion = document.createElement('div');
+                        suggestion.className = 'access-control__suggestion';
+                        const productName = productSlug === 'all'
+                            ? this.getTranslation('All Products') || 'All Products'
+                            : (this.productMap[productSlug]?.name || productSlug);
+                        suggestion.innerHTML = `
+                            <div class="access-control__suggestion-name">${productName}</div>
+                            ${productSlug !== 'all' && this.productMap[productSlug]?.slug ? `<div class="access-control__suggestion-email">${productSlug}</div>` : ''}
+                        `;
+                        suggestion.addEventListener('click', () => {
+                            this.selectProduct(productSlug);
+                        });
+                        this.elements.productSuggestions.appendChild(suggestion);
+                    });
+                } else if (this.elements.productSuggestions) {
+                    this.elements.productSuggestions.innerHTML = '<div class="access-control__suggestion">No products found</div>';
+                    this.elements.productSuggestions.style.display = 'block';
+                    this.elements.productSuggestions.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('❌ Error searching products:', error);
+            }
+        }, 300);
+    }
+
+    /**
+     * Select product from suggestions
+     */
+    selectProduct(productSlug) {
+        if (this.elements.grantProductId) {
+            this.elements.grantProductId.value = productSlug;
+        }
+        if (this.elements.grantProductSelect) {
+            const productName = productSlug === 'all'
+                ? this.getTranslation('All Products') || 'All Products'
+                : (this.productMap[productSlug]?.name || productSlug);
+            this.elements.grantProductSelect.value = productName;
+        }
+        if (this.elements.selectedProductDisplay) {
+            const productName = productSlug === 'all'
+                ? this.getTranslation('All Products') || 'All Products'
+                : (this.productMap[productSlug]?.name || productSlug);
+            this.elements.selectedProductDisplay.innerHTML = `
+                <div class="access-control__selected-product-info">
+                    <strong>${productName}</strong>
+                </div>
+            `;
+        }
+        if (this.elements.productSuggestions) {
+            this.elements.productSuggestions.innerHTML = '';
+            this.elements.productSuggestions.style.display = 'none';
+            this.elements.productSuggestions.classList.add('hidden');
         }
     }
 
@@ -1182,7 +1292,7 @@ class AccessControl {
         try {
             // Validate form
             const userId = this.elements.grantUserId?.value;
-            const productId = this.elements.grantProductSelect?.value;
+            const productId = this.elements.grantProductId?.value || this.elements.grantProductSelect?.value;
             const grantType = document.querySelector('input[name="grant-type"]:checked')?.value;
             const reason = this.elements.grantReason?.value;
             const sendNotification = this.elements.grantSendNotification?.checked;
