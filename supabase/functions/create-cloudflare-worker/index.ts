@@ -229,7 +229,6 @@ function generateWorkerCode(productName: string, productSlug: string, supabaseFu
 * Enforces access via Supabase validate-license.
 */
 
-const LOGIN_URL = 'https://bitminded.ch/auth'
 const SUBSCRIBE_URL = 'https://bitminded.ch/subscribe?tool=${productSlug}'
 const VALIDATE_URL = '${supabaseFunctionsUrl}/validate-license'
 const SUPABASE_ANON_KEY = '${supabaseAnonKey}'
@@ -264,6 +263,20 @@ async function handleRequest(request) {
   // Bypass trivial assets to avoid noisy errors before app routing is wired
   if (url.pathname === '/favicon.ico' || url.pathname === '/robots.txt') {
     return new Response(null, { status: 204 })
+  }
+
+  // Allow auth pages to bypass authentication check
+  // This allows users to login when their token expires
+  if (url.pathname.startsWith('/auth')) {
+    const GITHUB_PAGES_URL = ${githubPagesUrl ? `'${githubPagesUrl}'` : 'null'}
+    if (GITHUB_PAGES_URL) {
+      const targetUrl = GITHUB_PAGES_URL + url.pathname + url.search
+      return fetch(targetUrl, {
+        headers: request.headers,
+        method: request.method,
+        body: request.body
+      })
+    }
   }
 
   // Proxy static assets directly to GitHub Pages without authentication
@@ -306,9 +319,11 @@ async function handleRequest(request) {
   // Lightweight debug mode: append ?debug=1 to see diagnostics (no secrets leaked)
   const debug = url.searchParams.get('debug') === '1'
   if (!token) {
+    // Redirect to app's own auth page instead of main site
+    const authUrl = '/auth?redirect=' + encodeURIComponent(url.pathname + url.search)
     return new Response(null, {
       status: 302,
-      headers: { 'Location': LOGIN_URL + '?redirect=' + encodeURIComponent(url.href) }
+      headers: { 'Location': authUrl }
     })
   }
 

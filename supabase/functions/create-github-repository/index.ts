@@ -44,9 +44,12 @@ async function createInitialFiles(
     await createFile(token, repoFullName, 'package.json', packageJson)
   }
   
-  // Create index.html with access protection script
+  // Create index.html with access protection script and token checker
   const indexHtml = generateIndexHtml(productName, subdomain, repoName)
   await createFile(token, repoFullName, 'index.html', indexHtml)
+  
+  // Create auth page files
+  await createAuthFiles(token, repoFullName, productName, subdomain)
   
   // Upload media files if provided
   const uploadedFiles: string[] = []
@@ -340,7 +343,7 @@ function generateGitignore(stack: string[]): string {
 }
 
 /**
- * Generate index.html with redirect-based access protection
+ * Generate index.html with redirect-based access protection and token checker
  * Works with any framework (React, Vue, Svelte, vanilla JS, etc.)
  * Uses simple redirect instead of overlay - prevents GitHub Pages access
  */
@@ -374,6 +377,53 @@ function generateIndexHtml(productName: string, subdomain: string, repoName: str
     })();
   `
   
+  // Token checker script - checks for expired JWT tokens and redirects to auth
+  const tokenCheckerScript = `
+    (function() {
+      'use strict';
+      // Only run on protected subdomain, not GitHub Pages
+      const hostname = window.location.hostname;
+      if (!hostname.includes('bitminded.ch')) return;
+      
+      // Skip token check for auth pages
+      if (window.location.pathname.startsWith('/auth')) return;
+      
+      try {
+        // Check localStorage for Supabase session (format: sb-<project-ref>-auth-token)
+        // Try to find any Supabase session key
+        let sessionKey = null;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.includes('sb-') && key.includes('-auth-token')) {
+            sessionKey = key;
+            break;
+          }
+        }
+        
+        if (!sessionKey) return;
+        
+        const sessionData = localStorage.getItem(sessionKey);
+        if (!sessionData) return;
+        
+        const session = JSON.parse(sessionData);
+        if (!session || !session.expires_at) return;
+        
+        // Check if token is expired (expires_at is in seconds)
+        const expiresAt = session.expires_at * 1000; // Convert to milliseconds
+        const now = Date.now();
+        
+        // If expired or expires in less than 5 minutes, redirect to auth
+        if (now >= expiresAt || (expiresAt - now) < 5 * 60 * 1000) {
+          console.log('Token expired or expiring soon, redirecting to auth...');
+          window.location.href = '/auth?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        }
+      } catch (e) {
+        // Silently fail - Cloudflare Worker will handle auth check
+        console.debug('Token check error:', e);
+      }
+    })();
+  `
+  
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -383,6 +433,8 @@ function generateIndexHtml(productName: string, subdomain: string, repoName: str
     <title>${productName}</title>
     <!-- Access Protection: Redirects to protected subdomain if accessed via GitHub Pages -->
     <script>${protectionScript}</script>
+    <!-- Token Checker: Checks for expired tokens and redirects to auth -->
+    <script>${tokenCheckerScript}</script>
 </head>
 <body>
     <!-- Your app content goes here -->
@@ -392,6 +444,696 @@ function generateIndexHtml(productName: string, subdomain: string, repoName: str
     </div>
 </body>
 </html>`
+}
+
+/**
+ * Create auth page files for the app
+ */
+async function createAuthFiles(
+  token: string,
+  repoFullName: string,
+  productName: string,
+  subdomain: string
+) {
+  // Create auth directory structure
+  const authIndexHtml = generateAuthIndexHtml(productName, subdomain)
+  await createFile(token, repoFullName, 'auth/index.html', authIndexHtml)
+  
+  const authCss = generateAuthCss()
+  await createFile(token, repoFullName, 'auth/auth.css', authCss)
+  
+  const authJs = generateAuthJs(subdomain)
+  await createFile(token, repoFullName, 'auth/auth.js', authJs)
+  
+  const authConfig = generateAuthConfig(productName, subdomain)
+  await createFile(token, repoFullName, 'auth/config.js', authConfig)
+  
+  console.log('✅ Auth page files created successfully')
+}
+
+/**
+ * Generate auth/index.html - Login-only auth page
+ */
+function generateAuthIndexHtml(productName: string, subdomain: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - ${productName}</title>
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <main class="auth-main">
+        <div class="auth-container">
+            <h1 id="auth-title">Sign In</h1>
+            
+            <div id="auth-error" class="auth-error hidden" role="alert">
+                <span id="auth-error-message"></span>
+            </div>
+            
+            <form class="login-form" id="login-form">
+                <div class="login-form__header">
+                    <h2 class="login-form__title">Welcome Back</h2>
+                    <p class="login-form__subtitle">Sign in to continue</p>
+                </div>
+                
+                <div class="login-form__fields">
+                    <div class="login-form__field">
+                        <label for="login-email" class="login-form__label">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="login-email" 
+                            name="email" 
+                            class="login-form__input" 
+                            required 
+                            autocomplete="email"
+                            placeholder="Enter your email"
+                        >
+                        <div class="login-form__error" id="login-email-error" role="alert"></div>
+                    </div>
+                    
+                    <div class="login-form__field">
+                        <label for="login-password" class="login-form__label">Password</label>
+                        <div class="login-form__password-container">
+                            <input 
+                                type="password" 
+                                id="login-password" 
+                                name="password" 
+                                class="login-form__input" 
+                                required 
+                                autocomplete="current-password"
+                                placeholder="Enter your password"
+                            >
+                        </div>
+                        <div class="login-form__error" id="login-password-error" role="alert"></div>
+                    </div>
+                    
+                    <div class="login-form__forgot-password">
+                        <a href="https://bitminded.ch/auth?action=forgot-password" class="login-form__forgot-link" target="_blank">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="auth-submit-container">
+                    <button type="submit" class="auth-submit-button" id="auth-submit-button">
+                        <span class="auth-submit-text" id="auth-submit-text">Sign In</span>
+                        <div class="auth-submit-loading" id="auth-submit-loading" style="display: none;">
+                            <div class="auth-submit-spinner"></div>
+                            <span id="auth-submit-loading-text">Signing in...</span>
+                        </div>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="https://bitminded.ch/auth?action=signup" target="_blank">Sign up on BitMinded</a></p>
+            </div>
+        </div>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>`
+}
+
+/**
+ * Generate auth/auth.css - Base styles with CSS variables for customization
+ */
+function generateAuthCss(): string {
+  return `/* Auth Page Styles - Base Template */
+/* Override CSS variables in your app's main CSS to customize colors */
+
+:root {
+  /* Color Palette - Default BitMinded colors (override in your app) */
+  --auth-color-primary: rgb(207, 222, 103);
+  --auth-color-secondary: rgb(210, 134, 189);
+  --auth-color-background: rgb(39, 43, 46);
+  --auth-color-background-light: rgb(238, 233, 228);
+  --auth-color-text-primary: rgb(238, 233, 228);
+  --auth-color-text-secondary: rgb(39, 43, 46);
+  --auth-color-error: #dc2626;
+  --auth-color-error-bg: rgba(220, 38, 38, 0.1);
+  --auth-border-color: rgba(255, 255, 255, 0.1);
+  
+  /* Spacing */
+  --auth-spacing-xs: 0.25rem;
+  --auth-spacing-sm: 0.5rem;
+  --auth-spacing-md: 1rem;
+  --auth-spacing-lg: 1.5rem;
+  --auth-spacing-xl: 2rem;
+  
+  /* Typography */
+  --auth-font-size-sm: 0.875rem;
+  --auth-font-size-base: 1rem;
+  --auth-font-size-lg: 1.125rem;
+  --auth-font-size-xl: 1.25rem;
+  --auth-font-size-2xl: 1.5rem;
+  --auth-font-size-3xl: 1.875rem;
+  
+  /* Border Radius */
+  --auth-radius-sm: 4px;
+  --auth-radius-md: 8px;
+  
+  /* Shadows */
+  --auth-shadow-lg: 0 4px 12px rgba(210, 134, 189, 0.3);
+  
+  /* Transitions */
+  --auth-transition-fast: 0.2s ease;
+}
+
+[data-theme="light"] {
+  --auth-color-background: var(--auth-color-background-light);
+  --auth-color-text-primary: var(--auth-color-text-secondary);
+  --auth-color-text-secondary: var(--auth-color-text-primary);
+  --auth-color-primary: var(--auth-color-secondary);
+  --auth-color-secondary: var(--auth-color-primary);
+  --auth-border-color: rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--auth-color-background);
+  color: var(--auth-color-text-primary);
+  min-height: 100vh;
+}
+
+.auth-main {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: var(--auth-spacing-4xl, 6rem);
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+#auth-title {
+  text-align: center;
+  font-size: var(--auth-font-size-3xl);
+  color: var(--auth-color-text-primary);
+  margin-bottom: var(--auth-spacing-lg);
+}
+
+.auth-error {
+  background-color: var(--auth-color-error-bg);
+  border: 2px solid var(--auth-color-error);
+  border-radius: var(--auth-radius-sm);
+  padding: var(--auth-spacing-md);
+  margin-bottom: var(--auth-spacing-lg);
+  color: var(--auth-color-error);
+}
+
+.auth-error.hidden {
+  display: none;
+}
+
+.login-form {
+  max-width: 480px;
+  width: 100%;
+  margin: 0;
+  padding: var(--auth-spacing-xl);
+  background-color: var(--auth-color-background);
+  border: 2px solid var(--auth-border-color);
+  border-radius: var(--auth-radius-md);
+  box-shadow: var(--auth-shadow-lg);
+}
+
+.login-form__header {
+  text-align: center;
+  margin-bottom: var(--auth-spacing-md);
+}
+
+.login-form__title {
+  font-size: var(--auth-font-size-2xl);
+  font-weight: bold;
+  color: var(--auth-color-text-primary);
+  margin: 0 0 var(--auth-spacing-sm) 0;
+}
+
+.login-form__subtitle {
+  font-size: var(--auth-font-size-base);
+  color: var(--auth-color-text-primary);
+  opacity: 0.8;
+  margin: 0;
+}
+
+.login-form__fields {
+  margin-top: calc(-1 * var(--auth-spacing-md));
+  margin-bottom: var(--auth-spacing-lg);
+}
+
+.login-form__field {
+  margin-bottom: var(--auth-spacing-lg);
+}
+
+.login-form__label {
+  display: block;
+  font-size: var(--auth-font-size-sm);
+  font-weight: 600;
+  color: var(--auth-color-text-primary);
+  margin-bottom: var(--auth-spacing-sm);
+}
+
+.login-form__input {
+  width: 100%;
+  padding: var(--auth-spacing-md);
+  border: 2px solid var(--auth-border-color);
+  border-radius: var(--auth-radius-sm);
+  background-color: var(--auth-color-background);
+  color: var(--auth-color-text-primary);
+  font-size: var(--auth-font-size-base);
+  transition: all var(--auth-transition-fast);
+}
+
+.login-form__input:focus {
+  outline: none;
+  border-color: var(--auth-color-primary);
+  box-shadow: 0 0 0 3px rgba(207, 222, 103, 0.1);
+}
+
+.login-form__input::placeholder {
+  color: var(--auth-color-text-primary);
+  opacity: 0.5;
+}
+
+.login-form__error {
+  font-size: var(--auth-font-size-sm);
+  color: var(--auth-color-error);
+  margin-top: var(--auth-spacing-xs);
+  min-height: 1.2em;
+  display: none;
+}
+
+.login-form__error.show {
+  display: block;
+}
+
+.login-form__field.error .login-form__input {
+  border-color: var(--auth-color-error);
+}
+
+.login-form__forgot-password {
+  text-align: right;
+  margin-bottom: var(--auth-spacing-lg);
+}
+
+.login-form__forgot-link {
+  color: var(--auth-color-primary);
+  text-decoration: none;
+  font-size: var(--auth-font-size-sm);
+  font-weight: 500;
+  transition: color var(--auth-transition-fast);
+}
+
+.login-form__forgot-link:hover {
+  color: var(--auth-color-secondary);
+  text-decoration: underline;
+}
+
+.auth-submit-container {
+  margin-top: var(--auth-spacing-lg);
+  width: 100%;
+}
+
+.auth-submit-button {
+  width: 100%;
+  padding: var(--auth-spacing-md) var(--auth-spacing-lg);
+  background-color: var(--auth-color-primary);
+  color: var(--auth-color-text-secondary);
+  border: none;
+  border-radius: var(--auth-radius-sm);
+  font-size: var(--auth-font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--auth-transition-fast);
+  position: relative;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--auth-shadow-lg);
+}
+
+.auth-submit-button:hover:not(:disabled) {
+  background-color: var(--auth-color-secondary);
+  transform: translateY(-1px);
+}
+
+.auth-submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-submit-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--auth-spacing-sm);
+}
+
+.auth-submit-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.auth-footer {
+  margin-top: var(--auth-spacing-lg);
+  text-align: center;
+  font-size: var(--auth-font-size-sm);
+  color: var(--auth-color-text-primary);
+  opacity: 0.8;
+}
+
+.auth-footer a {
+  color: var(--auth-color-primary);
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .auth-main {
+    padding-top: var(--auth-spacing-xl);
+  }
+  
+  .auth-container {
+    max-width: 85vw;
+  }
+  
+  .login-form {
+    padding: var(--auth-spacing-lg);
+  }
+  
+  #auth-title {
+    font-size: var(--auth-font-size-2xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    max-width: 90vw;
+  }
+  
+  .login-form {
+    padding: var(--auth-spacing-md);
+  }
+}`
+}
+
+/**
+ * Generate auth/auth.js - Auth logic with Supabase integration
+ */
+function generateAuthJs(subdomain: string): string {
+  return `/**
+ * Auth Page Logic
+ * Handles login and redirects back to app
+ */
+
+// Wait for Supabase to load
+let supabaseClient = null;
+
+(async function init() {
+  // Wait for Supabase library to load
+  while (typeof supabase === 'undefined' && typeof window.supabase === 'undefined') {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  // Initialize Supabase client
+  const { createClient } = supabase || window.supabase;
+  supabaseClient = createClient(
+    window.AUTH_CONFIG.supabaseUrl,
+    window.AUTH_CONFIG.supabaseAnonKey,
+    {
+      auth: {
+        storage: typeof localStorage !== 'undefined' ? localStorage : undefined,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
+      }
+    }
+  );
+  
+  window.supabase = supabaseClient;
+  
+  // Sync token to cookies for Cloudflare Worker
+  syncAuthToCookies();
+  
+  // Check if already logged in
+  checkExistingSession();
+  
+  // Initialize form
+  initLoginForm();
+})();
+
+// Sync localStorage token to cookies for Cloudflare Worker
+async function syncAuthToCookies() {
+  if (!supabaseClient) return;
+  
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.access_token) {
+    const cookieDomain = window.location.hostname.includes('bitminded.ch') ? '.bitminded.ch' : '';
+    document.cookie = \`sb-access-token=\${session.access_token}; domain=\${cookieDomain}; path=/; secure; samesite=lax; max-age=\${60 * 60 * 24 * 7}\`;
+  }
+}
+
+// Check for existing session
+async function checkExistingSession() {
+  if (!supabaseClient) return;
+  
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.user) {
+    // Already logged in, redirect to app
+    redirectToApp();
+  }
+}
+
+// Initialize login form
+function initLoginForm() {
+  const form = document.getElementById('login-form');
+  const submitButton = document.getElementById('auth-submit-button');
+  const emailInput = document.getElementById('login-email');
+  const passwordInput = document.getElementById('login-password');
+  const emailError = document.getElementById('login-email-error');
+  const passwordError = document.getElementById('login-password-error');
+  const errorDiv = document.getElementById('auth-error');
+  const errorMessage = document.getElementById('auth-error-message');
+  
+  if (!form || !submitButton) return;
+  
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (submitButton.disabled) return;
+    
+    // Clear previous errors
+    clearErrors();
+    
+    // Validate inputs
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    
+    if (!email || !password) {
+      showError('Please fill in all fields');
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      showFieldError('email', 'Please enter a valid email address');
+      return;
+    }
+    
+    // Set submitting state
+    setSubmitting(true);
+    
+    try {
+      // Wait for Supabase client
+      while (!supabaseClient) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // Attempt login
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.user) {
+        // Success! Sync to cookies and redirect
+        // Note: Apps skip 2FA - only main website requires 2FA verification
+        await syncAuthToCookies();
+        
+        // Redirect to app immediately (no 2FA check for apps)
+        redirectToApp();
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      if (error.message === 'Invalid login credentials') {
+        showFieldError('password', 'Invalid email or password');
+      } else if (error.message === 'Email not confirmed') {
+        showFieldError('email', 'Please verify your email address before signing in');
+      } else {
+        showError(error.message || 'An error occurred during login');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  });
+  
+  // Real-time validation
+  emailInput.addEventListener('blur', () => {
+    const email = emailInput.value.trim();
+    if (email && !validateEmail(email)) {
+      showFieldError('email', 'Please enter a valid email address');
+    } else {
+      clearFieldError('email');
+    }
+  });
+}
+
+function validateEmail(email) {
+  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function showError(message) {
+  const errorDiv = document.getElementById('auth-error');
+  const errorMessage = document.getElementById('auth-error-message');
+  
+  if (errorDiv && errorMessage) {
+    errorMessage.textContent = message;
+    errorDiv.classList.remove('hidden');
+  }
+}
+
+function clearErrors() {
+  const errorDiv = document.getElementById('auth-error');
+  if (errorDiv) {
+    errorDiv.classList.add('hidden');
+  }
+  clearFieldError('email');
+  clearFieldError('password');
+}
+
+function showFieldError(fieldName, message) {
+  const errorElement = document.getElementById(\`login-\${fieldName}-error\`);
+  const inputElement = document.getElementById(\`login-\${fieldName}\`);
+  
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.classList.add('show');
+  }
+  
+  if (inputElement) {
+    inputElement.classList.add('error');
+  }
+}
+
+function clearFieldError(fieldName) {
+  const errorElement = document.getElementById(\`login-\${fieldName}-error\`);
+  const inputElement = document.getElementById(\`login-\${fieldName}\`);
+  
+  if (errorElement) {
+    errorElement.textContent = '';
+    errorElement.classList.remove('show');
+  }
+  
+  if (inputElement) {
+    inputElement.classList.remove('error');
+  }
+}
+
+function setSubmitting(isSubmitting) {
+  const submitButton = document.getElementById('auth-submit-button');
+  const submitText = document.getElementById('auth-submit-text');
+  const submitLoading = document.getElementById('auth-submit-loading');
+  const emailInput = document.getElementById('login-email');
+  const passwordInput = document.getElementById('login-password');
+  
+  if (submitButton) {
+    submitButton.disabled = isSubmitting;
+  }
+  
+  if (submitText && submitLoading) {
+    submitText.style.display = isSubmitting ? 'none' : 'block';
+    submitLoading.style.display = isSubmitting ? 'flex' : 'none';
+  }
+  
+  if (emailInput) emailInput.disabled = isSubmitting;
+  if (passwordInput) passwordInput.disabled = isSubmitting;
+}
+
+function redirectToApp() {
+  // Get redirect URL from query params or default to app root
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirect = urlParams.get('redirect') || '/';
+  
+  // Redirect to app
+  window.location.href = redirect;
+}
+
+// Listen for auth changes and sync to cookies
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session?.access_token) {
+      syncAuthToCookies();
+    } else if (event === 'SIGNED_OUT') {
+      const cookieDomain = window.location.hostname.includes('bitminded.ch') ? '.bitminded.ch' : '';
+      document.cookie = \`sb-access-token=; domain=\${cookieDomain}; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT\`;
+    }
+  });
+}`
+}
+
+/**
+ * Generate auth/config.js - App-specific configuration
+ */
+function generateAuthConfig(productName: string, subdomain: string): string {
+  return `/**
+ * Auth Configuration
+ * App-specific configuration for authentication
+ */
+
+window.AUTH_CONFIG = {
+  appName: '${productName}',
+  subdomain: '${subdomain}',
+  supabaseUrl: 'https://dynxqnrkmjcvgzsugxtm.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5bnhxbnJrbWpjdmd6c3VneHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjgzNDMsImV4cCI6MjA3NDE0NDM0M30.-HAyQJV9SjJa0DrT-n3dCkHR44BQrdMTP-8qX3SADDY'
+};`
 }
 
 /**
