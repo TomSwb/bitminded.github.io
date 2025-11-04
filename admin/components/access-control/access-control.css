@@ -1065,8 +1065,9 @@
 .access-control__selected-user {
     margin-top: var(--spacing-sm);
     padding: var(--spacing-md);
-    background-color: var(--color-background-secondary);
+    background-color: var(--color-background-primary);
     border-radius: var(--border-radius-sm);
+    color: var(--color-text-primary);
 }
 
 .access-control__selected-user-info {
