@@ -1,0 +1,355 @@
+<!-- Access Control Component -->
+<div class="access-control" id="access-control">
+    <!-- Header -->
+    <div class="access-control__header">
+        <div class="access-control__title-section">
+            <h1 class="access-control__title translatable-content" data-translation-key="Access Control">Access Control</h1>
+            <div class="access-control__stats" id="access-stats">
+                <span class="access-control__stat">
+                    <span class="access-control__stat-label translatable-content" data-translation-key="Total Active Grants">Total Active Grants:</span>
+                    <span class="access-control__stat-value" id="total-active-grants">0</span>
+                </span>
+            </div>
+        </div>
+        
+        <div class="access-control__actions">
+            <button class="access-control__button access-control__button--primary" id="grant-access-button">
+                <span class="translatable-content" data-translation-key="Grant Access">Grant Access</span>
+            </button>
+            <button class="access-control__button access-control__button--secondary" id="export-access-button">
+                <span class="translatable-content" data-translation-key="Export Report">Export Report</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="access-control__controls">
+        <!-- Search Bar -->
+        <div class="access-control__search">
+            <input 
+                type="text" 
+                class="access-control__search-input translatable-content" 
+                id="access-search-input"
+                data-translation-key="Search by user, product, or reason..."
+                placeholder="Search by user, product, or reason...">
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="access-control__filters">
+            <div class="access-control__filters-header">
+                <div class="access-control__filters-controls">
+                    <!-- Product Filter -->
+                    <div class="access-control__filter-group">
+                        <label for="product-filter" class="access-control__filter-label" data-translation-key="Product">Product</label>
+                        <div class="access-control__dropdown">
+                            <button type="button" class="access-control__dropdown-btn" id="product-dropdown-btn">
+                                <span data-translation-key="select_product">Select Product</span>
+                                <span class="access-control__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="access-control__dropdown-content" id="product-dropdown">
+                                <div class="access-control__search">
+                                    <input type="text" placeholder="Search..." class="access-control__search-input" id="product-search">
+                                </div>
+                                <div class="access-control__options" id="product-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="access-control__dropdown-actions">
+                                    <button type="button" class="access-control__action-btn" id="product-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="access-control__action-btn" id="product-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grant Type Filter -->
+                    <div class="access-control__filter-group">
+                        <label for="grant-type-filter" class="access-control__filter-label" data-translation-key="Grant Type">Grant Type</label>
+                        <div class="access-control__dropdown">
+                            <button type="button" class="access-control__dropdown-btn" id="grant-type-dropdown-btn">
+                                <span data-translation-key="select_grant_type">Select Grant Type</span>
+                                <span class="access-control__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="access-control__dropdown-content" id="grant-type-dropdown">
+                                <div class="access-control__options" id="grant-type-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="access-control__dropdown-actions">
+                                    <button type="button" class="access-control__action-btn" id="grant-type-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="access-control__action-btn" id="grant-type-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="access-control__filter-group">
+                        <label for="status-filter" class="access-control__filter-label" data-translation-key="Status">Status</label>
+                        <div class="access-control__dropdown">
+                            <button type="button" class="access-control__dropdown-btn" id="status-dropdown-btn">
+                                <span data-translation-key="select_status">Select Status</span>
+                                <span class="access-control__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="access-control__dropdown-content" id="status-dropdown">
+                                <div class="access-control__options" id="status-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="access-control__dropdown-actions">
+                                    <button type="button" class="access-control__action-btn" id="status-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="access-control__action-btn" id="status-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Granted By Filter -->
+                    <div class="access-control__filter-group">
+                        <label for="granted-by-filter" class="access-control__filter-label" data-translation-key="Granted By">Granted By</label>
+                        <div class="access-control__dropdown">
+                            <button type="button" class="access-control__dropdown-btn" id="granted-by-dropdown-btn">
+                                <span data-translation-key="select_admin">Select Admin</span>
+                                <span class="access-control__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="access-control__dropdown-content" id="granted-by-dropdown">
+                                <div class="access-control__search">
+                                    <input type="text" placeholder="Search..." class="access-control__search-input" id="granted-by-search">
+                                </div>
+                                <div class="access-control__options" id="granted-by-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="access-control__dropdown-actions">
+                                    <button type="button" class="access-control__action-btn" id="granted-by-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="access-control__action-btn" id="granted-by-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date Range Filter -->
+                    <div class="access-control__filter-group">
+                        <label for="date-range-filter" class="access-control__filter-label" data-translation-key="Granted Date">Granted Date</label>
+                        <select id="date-range-filter" class="access-control__select">
+                            <option value="all" data-translation-key="all_time">All Time</option>
+                            <option value="7d" data-translation-key="last_7_days">Last 7 Days</option>
+                            <option value="30d" data-translation-key="last_30_days">Last 30 Days</option>
+                            <option value="90d" data-translation-key="last_90_days">Last 90 Days</option>
+                            <option value="1y" data-translation-key="last_year">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Summary and Clear Button -->
+                <div class="access-control__summary-row">
+                    <div class="access-control__summary">
+                        <span class="access-control__count" id="access-count-text" data-translation-key="showing_all_grants">Showing all grants</span>
+                    </div>
+                    <button type="button" class="access-control__clear-btn" id="access-clear-filters-btn" data-translation-key="clear_all_filters">
+                        Clear All Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Access Grants Table -->
+    <div class="access-control__table-container">
+        <table class="access-control__table" id="access-table">
+            <thead>
+                <tr>
+                    <th class="access-control__sortable-header" data-sort="username">
+                        <span class="translatable-content" data-translation-key="User">User</span>
+                        <span class="access-control__sort-indicator"></span>
+                    </th>
+                    <th class="access-control__sortable-header" data-sort="product">
+                        <span class="translatable-content" data-translation-key="Product">Product</span>
+                        <span class="access-control__sort-indicator"></span>
+                    </th>
+                    <th class="translatable-content" data-translation-key="Grant Type">Grant Type</th>
+                    <th class="translatable-content" data-translation-key="Status">Status</th>
+                    <th class="translatable-content" data-translation-key="Granted By">Granted By</th>
+                    <th class="access-control__sortable-header" data-sort="created_at">
+                        <span class="translatable-content" data-translation-key="Granted Date">Granted Date</span>
+                        <span class="access-control__sort-indicator"></span>
+                    </th>
+                    <th class="access-control__sortable-header" data-sort="expires_at">
+                        <span class="translatable-content" data-translation-key="Expiration">Expiration</span>
+                        <span class="access-control__sort-indicator"></span>
+                    </th>
+                    <th class="translatable-content" data-translation-key="Reason">Reason</th>
+                    <th class="translatable-content" data-translation-key="Actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="access-table-body">
+                <!-- Access grant rows will be inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Loading State -->
+        <div class="access-control__loading hidden" id="access-loading">
+            <div class="access-control__spinner"></div>
+            <p class="translatable-content" data-translation-key="Loading access grants...">Loading access grants...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="access-control__empty hidden" id="access-empty">
+            <p class="translatable-content" data-translation-key="No access grants found">No access grants found</p>
+        </div>
+    </div>
+</div>
+
+<!-- Grant Access Modal -->
+<div class="access-control__modal" id="grant-access-modal">
+    <div class="access-control__modal-content">
+        <div class="access-control__modal-header">
+            <h2 class="access-control__modal-title translatable-content" data-translation-key="Grant Access">Grant Access</h2>
+            <button class="access-control__modal-close" id="grant-modal-close">&times;</button>
+        </div>
+        
+        <form class="access-control__modal-form" id="grant-access-form">
+            <!-- User Selection -->
+            <div class="access-control__form-group">
+                <label for="grant-user-select" class="access-control__form-label translatable-content" data-translation-key="User">User *</label>
+                <input 
+                    type="text" 
+                    id="grant-user-select" 
+                    class="access-control__form-input" 
+                    placeholder="Search by username or email..."
+                    autocomplete="off"
+                >
+                <div class="access-control__user-suggestions" id="user-suggestions"></div>
+                <input type="hidden" id="grant-user-id" required>
+                <div class="access-control__selected-user" id="selected-user-display"></div>
+            </div>
+
+            <!-- Product Selection -->
+            <div class="access-control__form-group">
+                <label for="grant-product-select" class="access-control__form-label translatable-content" data-translation-key="Product">Product *</label>
+                <select id="grant-product-select" class="access-control__form-select" required>
+                    <option value="" data-translation-key="select_product">Select Product</option>
+                </select>
+            </div>
+
+            <!-- Grant Type -->
+            <div class="access-control__form-group">
+                <label class="access-control__form-label translatable-content" data-translation-key="Grant Type">Grant Type *</label>
+                <div class="access-control__radio-group">
+                    <label class="access-control__radio-label">
+                        <input type="radio" name="grant-type" value="manual" checked required>
+                        <span class="translatable-content" data-translation-key="Manual">Manual</span>
+                    </label>
+                    <label class="access-control__radio-label">
+                        <input type="radio" name="grant-type" value="trial">
+                        <span class="translatable-content" data-translation-key="Trial">Trial</span>
+                    </label>
+                    <label class="access-control__radio-label">
+                        <input type="radio" name="grant-type" value="lifetime">
+                        <span class="translatable-content" data-translation-key="Lifetime">Lifetime</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Expiration -->
+            <div class="access-control__form-group" id="expiration-group">
+                <label for="grant-expiration" class="access-control__form-label translatable-content" data-translation-key="Expiration">Expiration</label>
+                <div class="access-control__expiration-controls">
+                    <select id="grant-expiration-type" class="access-control__form-select">
+                        <option value="date" data-translation-key="Specific Date">Specific Date</option>
+                        <option value="duration" data-translation-key="Duration">Duration</option>
+                    </select>
+                    <input type="date" id="grant-expiration-date" class="access-control__form-input">
+                    <select id="grant-expiration-duration" class="access-control__form-select hidden">
+                        <option value="7" data-translation-key="7 days">7 days</option>
+                        <option value="14" data-translation-key="14 days">14 days</option>
+                        <option value="30" data-translation-key="30 days">30 days</option>
+                        <option value="90" data-translation-key="90 days">90 days</option>
+                    </select>
+                </div>
+                <small class="access-control__form-help translatable-content" data-translation-key="Leave empty for lifetime access">Leave empty for lifetime access</small>
+            </div>
+
+            <!-- Reason -->
+            <div class="access-control__form-group">
+                <label for="grant-reason" class="access-control__form-label translatable-content" data-translation-key="Reason">Reason *</label>
+                <textarea 
+                    id="grant-reason" 
+                    class="access-control__form-textarea" 
+                    rows="3" 
+                    placeholder="Enter reason for granting access..."
+                    required
+                ></textarea>
+                <div class="access-control__reason-templates">
+                    <button type="button" class="access-control__template-btn" data-template="Beta tester">
+                        <span class="translatable-content" data-translation-key="Beta Tester">Beta Tester</span>
+                    </button>
+                    <button type="button" class="access-control__template-btn" data-template="Partner access">
+                        <span class="translatable-content" data-translation-key="Partner Access">Partner Access</span>
+                    </button>
+                    <button type="button" class="access-control__template-btn" data-template="Promotional grant">
+                        <span class="translatable-content" data-translation-key="Promotional Grant">Promotional Grant</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notification Options -->
+            <div class="access-control__form-group">
+                <label class="access-control__checkbox-label">
+                    <input type="checkbox" id="grant-send-notification" checked>
+                    <span class="translatable-content" data-translation-key="Send notification to user">Send notification to user</span>
+                </label>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="access-control__modal-actions">
+                <button type="button" class="access-control__button access-control__button--secondary" id="grant-modal-cancel">
+                    <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                </button>
+                <button type="submit" class="access-control__button access-control__button--primary">
+                    <span class="translatable-content" data-translation-key="Grant Access">Grant Access</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Revoke Access Modal -->
+<div class="access-control__modal" id="revoke-access-modal">
+    <div class="access-control__modal-content access-control__modal-content--small">
+        <div class="access-control__modal-header">
+            <h2 class="access-control__modal-title translatable-content" data-translation-key="Revoke Access">Revoke Access</h2>
+            <button class="access-control__modal-close" id="revoke-modal-close">&times;</button>
+        </div>
+        
+        <form class="access-control__modal-form" id="revoke-access-form">
+            <div class="access-control__form-group">
+                <p class="access-control__revoke-warning translatable-content" data-translation-key="revoke_warning">Are you sure you want to revoke access? This action cannot be undone.</p>
+                <div class="access-control__revoke-info" id="revoke-info"></div>
+            </div>
+
+            <div class="access-control__form-group">
+                <label for="revoke-reason" class="access-control__form-label translatable-content" data-translation-key="Reason">Reason *</label>
+                <textarea 
+                    id="revoke-reason" 
+                    class="access-control__form-textarea" 
+                    rows="3" 
+                    placeholder="Enter reason for revoking access..."
+                    required
+                ></textarea>
+            </div>
+
+            <div class="access-control__form-group">
+                <label class="access-control__checkbox-label">
+                    <input type="checkbox" id="revoke-send-notification" checked>
+                    <span class="translatable-content" data-translation-key="Send notification to user">Send notification to user</span>
+                </label>
+            </div>
+
+            <div class="access-control__modal-actions">
+                <button type="button" class="access-control__button access-control__button--secondary" id="revoke-modal-cancel">
+                    <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                </button>
+                <button type="submit" class="access-control__button access-control__button--danger">
+                    <span class="translatable-content" data-translation-key="Revoke Access">Revoke Access</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
