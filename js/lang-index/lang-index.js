@@ -13,15 +13,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        if (document.getElementById('main-title')) {
-            document.getElementById('main-title').textContent = i18next.t('main-title');
-        }
-        if (document.getElementById('subtitle')) {
-            document.getElementById('subtitle').textContent = i18next.t('subtitle');
-        }
+        // Update all translatable content by data attribute or id
+        const translatableElements = document.querySelectorAll('.translatable-content');
+        translatableElements.forEach(element => {
+            const translationKey = element.id || element.getAttribute('data-translate');
+            if (translationKey && i18next.exists(translationKey)) {
+                element.textContent = i18next.t(translationKey);
+            }
+        });
         
         // Show all translatable content after translation is complete
-        const translatableElements = document.querySelectorAll('.translatable-content');
         translatableElements.forEach(element => {
             element.classList.add('loaded');
         });
