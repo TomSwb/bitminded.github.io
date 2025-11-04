@@ -260,6 +260,9 @@ function getToken(req) {
 async function handleRequest(request) {
   const url = new URL(request.url)
 
+  // Declare GITHUB_PAGES_URL once at the beginning
+  const GITHUB_PAGES_URL = ${githubPagesUrl ? `'${githubPagesUrl}'` : 'null'}
+
   // Bypass trivial assets to avoid noisy errors before app routing is wired
   if (url.pathname === '/favicon.ico' || url.pathname === '/robots.txt') {
     return new Response(null, { status: 204 })
@@ -268,7 +271,6 @@ async function handleRequest(request) {
   // Allow auth pages to bypass authentication check
   // This allows users to login when their token expires
   if (url.pathname.startsWith('/auth')) {
-    const GITHUB_PAGES_URL = ${githubPagesUrl ? `'${githubPagesUrl}'` : 'null'}
     if (GITHUB_PAGES_URL) {
       const targetUrl = GITHUB_PAGES_URL + url.pathname + url.search
       return fetch(targetUrl, {
@@ -282,7 +284,6 @@ async function handleRequest(request) {
   // Proxy static assets directly to GitHub Pages without authentication
   // This allows React/Expo apps to load their JavaScript bundles, CSS, images, etc.
   // Static assets don't need auth - only the HTML page does
-  const GITHUB_PAGES_URL = ${githubPagesUrl ? `'${githubPagesUrl}'` : 'null'}
   
   // Allow static assets to bypass authentication check
   if (GITHUB_PAGES_URL && (
