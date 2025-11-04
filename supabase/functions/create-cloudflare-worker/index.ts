@@ -340,6 +340,15 @@ async function handleRequest(request) {
     })
 
     if (!validateRes.ok) {
+      // If token is expired/invalid (401/403), redirect to auth page
+      if (validateRes.status === 401 || validateRes.status === 403) {
+        const authUrl = '/auth?redirect=' + encodeURIComponent(url.pathname + url.search)
+        return new Response(null, {
+          status: 302,
+          headers: { 'Location': authUrl }
+        })
+      }
+      
       if (debug) {
         const bodyTxt = await validateRes.text().catch(() => '')
         const diag = { validate_url: VALIDATE_URL, status: validateRes.status, token_present: !!token, token_len: token ? token.length : 0, body_preview: bodyTxt.slice(0, 160) }
