@@ -1,0 +1,255 @@
+/* ========================================
+   HOMEPAGE SPECIFIC STYLES
+   ======================================== */
+
+/* ===== HERO SECTION ===== */
+.hero {
+  padding: var(--spacing-4xl) var(--spacing-lg) var(--spacing-3xl);
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero__title {
+  font-size: var(--font-size-h1);
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-primary);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hero__subtitle {
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ===== PHILOSOPHY SECTION ===== */
+.philosophy {
+  padding: var(--spacing-3xl) var(--spacing-lg) var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.philosophy__title {
+  text-align: center;
+  margin-bottom: var(--spacing-3xl);
+  color: var(--color-primary);
+  font-size: var(--font-size-h2);
+}
+
+.philosophy__content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.philosophy__item {
+  padding: var(--spacing-xl);
+  border: 2px solid var(--border-color-primary);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-tertiary);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.philosophy__item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.philosophy__item h3 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.philosophy__item p {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ===== PRODUCTS SECTION ===== */
+.products {
+  padding: var(--spacing-3xl) var(--spacing-lg) var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.products__title {
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+  font-size: var(--font-size-h2);
+}
+
+.products__subtitle {
+  text-align: center;
+  margin-bottom: var(--spacing-3xl);
+  color: var(--color-text-primary);
+  opacity: 0.8;
+  font-size: var(--font-size-lg);
+}
+
+.products__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.product-card {
+  padding: var(--spacing-xl);
+  border: 2px solid var(--border-color-primary);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-tertiary);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  text-align: center;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.product-card__icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-lg);
+  border-radius: var(--radius-md);
+  background: var(--color-background-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.product-card__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-card__title {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.product-card__description {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ===== HOW WE WORK SECTION ===== */
+.how-we-work {
+  padding: var(--spacing-3xl) var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.how-we-work__title {
+  text-align: center;
+  margin-bottom: var(--spacing-3xl);
+  color: var(--color-accent-pink);
+  font-size: var(--font-size-h2);
+}
+
+.how-we-work__content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.how-we-work__item {
+  padding: var(--spacing-xl);
+  border: 2px solid var(--border-color-secondary);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-tertiary);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.how-we-work__item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.how-we-work__item h3 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-accent-pink);
+  font-weight: 600;
+}
+
+.how-we-work__item p {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+  .hero {
+    padding: var(--spacing-2xl) var(--spacing-md) var(--spacing-xl);
+  }
+
+  .philosophy,
+  .products,
+  .how-we-work {
+    padding: var(--spacing-2xl) var(--spacing-md);
+  }
+
+  .philosophy__content,
+  .products__grid,
+  .how-we-work__content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .philosophy__item,
+  .product-card,
+  .how-we-work__item {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding-top: var(--spacing-xl);
+  }
+
+  .hero {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .hero__title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .philosophy__title,
+  .products__title,
+  .how-we-work__title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .product-card__icon {
+    width: 60px;
+    height: 60px;
+  }
+}
+

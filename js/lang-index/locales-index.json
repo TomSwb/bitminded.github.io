@@ -1,26 +1,106 @@
 {
   "en": {
     "translation": {
-      "main-title": "Welcome to BitMinded!",
-      "subtitle": "Site under construction"
+      "main-title": "Handcrafted Software for Humans",
+      "hero-subtitle": "Independent, artisanal apps — custom-built solutions made simple, personal, and sustainable.",
+      "philosophy-title": "Why Artisanal?",
+      "philosophy-human-scale-title": "Human-Scale",
+      "philosophy-human-scale-text": "Small, clean, purposeful tools—never bloated mass-market apps. Built by one independent coder, with care and a clear philosophy.",
+      "philosophy-transparent-title": "Transparent & Ethical",
+      "philosophy-transparent-text": "Like Swiss artisans, we build sustainably, ethically, and transparently. You know who made your software and why.",
+      "philosophy-personal-title": "Personal Touch",
+      "philosophy-personal-text": "Every tool is crafted with intention. Commission an app: you get it free, we keep the rights, and it joins our catalog for others to enjoy.",
+      "products-title": "Our Work",
+      "products-subtitle": "Handcrafted tools for everyday needs",
+      "rythmo-title": "Rythmo",
+      "rythmo-description": "A custom workout timer app with exercise and rest intervals. Built for focused training sessions.",
+      "measure-mate-title": "Measure Mate",
+      "measure-mate-description": "A simple, efficient unit conversion tool. Convert between various units of measurement quickly and accurately.",
+      "how-we-work-title": "How We Work",
+      "commission-title": "Commission a Tool",
+      "commission-text": "Need something special? Let's make it together. Commission an app tailored to your needs—you get it free (or discounted), and it joins our catalog for others to enjoy.",
+      "catalog-title": "Growing Catalog",
+      "catalog-text": "Each commission becomes part of our artisanal catalog. Purchase individual tools or subscribe to access multiple apps. Simple, honest pricing.",
+      "support-title": "Support Indie Software",
+      "support-text": "Choose software made with care, not mass production. Support independent development and get tools that respect your time and attention."
     }
   },
   "es": {
     "translation": {
-      "main-title": "¡Bienvenido a BitMinded!",
-      "subtitle": "Sitio en construcción"
+      "main-title": "Software Artesanal para Humanos",
+      "hero-subtitle": "Aplicaciones artesanales e independientes — soluciones personalizadas hechas simples, personales y sostenibles.",
+      "philosophy-title": "¿Por Qué Artesanal?",
+      "philosophy-human-scale-title": "Escala Humana",
+      "philosophy-human-scale-text": "Herramientas pequeñas, limpias y con propósito—nunca aplicaciones masivas e hinchadas. Construidas por un programador independiente, con cuidado y una filosofía clara.",
+      "philosophy-transparent-title": "Transparente y Ético",
+      "philosophy-transparent-text": "Como artesanos suizos, construimos de manera sostenible, ética y transparente. Sabes quién hizo tu software y por qué.",
+      "philosophy-personal-title": "Toque Personal",
+      "philosophy-personal-text": "Cada herramienta está hecha con intención. Encarga una aplicación: la obtienes gratis, nosotros conservamos los derechos, y se une a nuestro catálogo para que otros disfruten.",
+      "products-title": "Nuestro Trabajo",
+      "products-subtitle": "Herramientas artesanales para necesidades cotidianas",
+      "rythmo-title": "Rythmo",
+      "rythmo-description": "Una aplicación de temporizador de entrenamiento personalizado con intervalos de ejercicio y descanso. Construida para sesiones de entrenamiento enfocadas.",
+      "measure-mate-title": "Measure Mate",
+      "measure-mate-description": "Una herramienta simple y eficiente de conversión de unidades. Convierte entre varias unidades de medida de forma rápida y precisa.",
+      "how-we-work-title": "Cómo Trabajamos",
+      "commission-title": "Encarga una Herramienta",
+      "commission-text": "¿Necesitas algo especial? Hagámoslo juntos. Encarga una aplicación adaptada a tus necesidades—la obtienes gratis (o con descuento), y se une a nuestro catálogo para que otros disfruten.",
+      "catalog-title": "Catálogo en Crecimiento",
+      "catalog-text": "Cada encargo se convierte en parte de nuestro catálogo artesanal. Compra herramientas individuales o suscríbete para acceder a múltiples aplicaciones. Precios simples y honestos.",
+      "support-title": "Apoya el Software Independiente",
+      "support-text": "Elige software hecho con cuidado, no producción en masa. Apoya el desarrollo independiente y obtén herramientas que respetan tu tiempo y atención."
     }
   },
   "fr": {
     "translation": {
-      "main-title": "Bienvenue sur BitMinded!",
-      "subtitle": "Site en construction"
+      "main-title": "Logiciel Artisanal pour Humains",
+      "hero-subtitle": "Applications artisanales et indépendantes — solutions sur mesure faites simples, personnelles et durables.",
+      "philosophy-title": "Pourquoi Artisanal ?",
+      "philosophy-human-scale-title": "Échelle Humaine",
+      "philosophy-human-scale-text": "Petits outils propres et ciblés—jamais d'applications de masse gonflées. Construit par un codeur indépendant, avec soin et une philosophie claire.",
+      "philosophy-transparent-title": "Transparent et Éthique",
+      "philosophy-transparent-text": "Comme les artisans suisses, nous construisons de manière durable, éthique et transparente. Vous savez qui a fait votre logiciel et pourquoi.",
+      "philosophy-personal-title": "Touche Personnelle",
+      "philosophy-personal-text": "Chaque outil est conçu avec intention. Commandez une application : vous l'obtenez gratuitement, nous conservons les droits, et elle rejoint notre catalogue pour que d'autres en profitent.",
+      "products-title": "Notre Travail",
+      "products-subtitle": "Outils artisanaux pour besoins quotidiens",
+      "rythmo-title": "Rythmo",
+      "rythmo-description": "Une application de chronomètre d'entraînement personnalisée avec intervalles d'exercice et de repos. Conçue pour des séances d'entraînement ciblées.",
+      "measure-mate-title": "Measure Mate",
+      "measure-mate-description": "Un outil simple et efficace de conversion d'unités. Convertissez entre diverses unités de mesure rapidement et précisément.",
+      "how-we-work-title": "Comment Nous Travaillons",
+      "commission-title": "Commandez un Outil",
+      "commission-text": "Besoin de quelque chose de spécial ? Faisons-le ensemble. Commandez une application adaptée à vos besoins—vous l'obtenez gratuitement (ou à prix réduit), et elle rejoint notre catalogue pour que d'autres en profitent.",
+      "catalog-title": "Catalogue en Croissance",
+      "catalog-text": "Chaque commande devient partie de notre catalogue artisanal. Achetez des outils individuels ou abonnez-vous pour accéder à plusieurs applications. Prix simples et honnêtes.",
+      "support-title": "Soutenez le Logiciel Indépendant",
+      "support-text": "Choisissez un logiciel fait avec soin, pas de production de masse. Soutenez le développement indépendant et obtenez des outils qui respectent votre temps et votre attention."
     }
   },
   "de": {
     "translation": {
-      "main-title": "Willkommen bei BitMinded!",
-      "subtitle": "Seite im Aufbau"
+      "main-title": "Handgefertigte Software für Menschen",
+      "hero-subtitle": "Unabhängige, handwerkliche Apps — maßgeschneiderte Lösungen, einfach, persönlich und nachhaltig.",
+      "philosophy-title": "Warum Handwerklich?",
+      "philosophy-human-scale-title": "Menschlicher Maßstab",
+      "philosophy-human-scale-text": "Kleine, saubere, zielgerichtete Tools—nie aufgeblähte Massenmarkt-Apps. Gebaut von einem unabhängigen Programmierer, mit Sorgfalt und einer klaren Philosophie.",
+      "philosophy-transparent-title": "Transparent & Ethisch",
+      "philosophy-transparent-text": "Wie Schweizer Handwerker bauen wir nachhaltig, ethisch und transparent. Sie wissen, wer Ihre Software gemacht hat und warum.",
+      "philosophy-personal-title": "Persönliche Note",
+      "philosophy-personal-text": "Jedes Tool wird mit Absicht gefertigt. Beauftragen Sie eine App: Sie erhalten sie kostenlos, wir behalten die Rechte, und sie wird Teil unseres Katalogs für andere zum Genießen.",
+      "products-title": "Unsere Arbeit",
+      "products-subtitle": "Handgefertigte Tools für alltägliche Bedürfnisse",
+      "rythmo-title": "Rythmo",
+      "rythmo-description": "Eine maßgeschneiderte Trainings-Timer-App mit Übungs- und Ruheintervallen. Gebaut für fokussierte Trainingseinheiten.",
+      "measure-mate-title": "Measure Mate",
+      "measure-mate-description": "Ein einfaches, effizientes Einheitenumrechnungstool. Konvertieren Sie schnell und genau zwischen verschiedenen Maßeinheiten.",
+      "how-we-work-title": "Wie Wir Arbeiten",
+      "commission-title": "Beauftragen Sie ein Tool",
+      "commission-text": "Benötigen Sie etwas Besonderes? Lassen Sie uns es zusammen machen. Beauftragen Sie eine App, die auf Ihre Bedürfnisse zugeschnitten ist—Sie erhalten sie kostenlos (oder vergünstigt), und sie wird Teil unseres Katalogs für andere zum Genießen.",
+      "catalog-title": "Wachsender Katalog",
+      "catalog-text": "Jeder Auftrag wird Teil unseres handwerklichen Katalogs. Kaufen Sie einzelne Tools oder abonnieren Sie, um auf mehrere Apps zuzugreifen. Einfache, ehrliche Preise.",
+      "support-title": "Unterstützen Sie Indie-Software",
+      "support-text": "Wählen Sie Software, die mit Sorgfalt gemacht wurde, nicht Massenproduktion. Unterstützen Sie unabhängige Entwicklung und erhalten Sie Tools, die Ihre Zeit und Aufmerksamkeit respektieren."
     }
   }
 }
