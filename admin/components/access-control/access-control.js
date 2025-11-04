@@ -9,7 +9,8 @@ class AccessControl {
         this.isInitialized = false;
         this.grants = [];
         this.filteredGrants = [];
-        this.products = ['converter', 'devflow', 'notes', 'all']; // Product list
+        this.products = []; // Product slugs - loaded from database
+        this.productMap = {}; // Map of slug -> product data (name, id, etc.)
         this.filters = {
             search: '',
             product: [],
@@ -37,8 +38,12 @@ class AccessControl {
         }
 
         try {
+            console.log('🚀 Access Control: Initializing...');
+            console.log('🔍 Checking for access-control element:', document.getElementById('access-control'));
+            
             // Initialize DOM elements
             this.initializeElements();
+            console.log('✅ Elements initialized, grant button:', this.elements.grantAccessButton);
 
             // Setup event listeners
             this.setupEventListeners();
@@ -73,6 +78,7 @@ class AccessControl {
      * Initialize DOM elements
      */
     initializeElements() {
+        console.log('🔍 Initializing elements...');
         this.elements = {
             // Header
             totalActiveGrants: document.getElementById('total-active-grants'),
@@ -151,9 +157,15 @@ class AccessControl {
 
         // Grant Access Button
         if (this.elements.grantAccessButton) {
-            this.elements.grantAccessButton.addEventListener('click', () => {
+            console.log('✅ Grant Access button found, adding event listener');
+            this.elements.grantAccessButton.addEventListener('click', (e) => {
+                console.log('🔘 Grant Access button clicked!');
+                e.preventDefault();
+                e.stopPropagation();
                 this.openGrantModal();
             });
+        } else {
+            console.error('❌ Grant Access button NOT found!', document.getElementById('grant-access-button'));
         }
 
         // Export Button
@@ -453,10 +465,55 @@ class AccessControl {
     /**
      * Load products (could be from database in future)
      */
+    /**
+     * Load products from database
+     */
     async loadProducts() {
-        // For now, using hardcoded list
-        // In future, could query products table
-        this.products = ['converter', 'devflow', 'notes', 'all'];
+        try {
+            if (!window.supabase) {
+                console.error('❌ Supabase not available');
+                // Fallback to hardcoded list
+                this.products = ['all'];
+                return;
+            }
+
+            // Query active products from database
+            const { data, error } = await window.supabase
+                .from('products')
+                .select('id, name, slug, status')
+                .in('status', ['active', 'beta'])
+                .order('name', { ascending: true });
+
+            if (error) {
+                console.error('❌ Error loading products:', error);
+                // Fallback to hardcoded list
+                this.products = ['all'];
+                return;
+            }
+
+            // Create product map for easy lookup (slug -> product data)
+            this.productMap = {};
+            (data || []).forEach(p => {
+                const slug = p.slug || p.id;
+                this.productMap[slug] = {
+                    id: p.id,
+                    name: p.name,
+                    slug: slug,
+                    status: p.status
+                };
+            });
+
+            // Map products to array of slugs (matching entitlements.app_id format)
+            // Include 'all' as a special option for granting access to all products
+            this.products = ['all', ...(data || []).map(p => p.slug || p.id)];
+            
+            console.log('✅ Products loaded from database:', this.products.length, 'products');
+
+        } catch (error) {
+            console.error('❌ Failed to load products:', error);
+            // Fallback to hardcoded list
+            this.products = ['all'];
+        }
     }
 
     /**
@@ -569,12 +626,16 @@ class AccessControl {
         // Populate product options
         if (this.elements.productOptions) {
             this.elements.productOptions.innerHTML = '';
-            this.products.forEach(product => {
+            this.products.forEach(productSlug => {
                 const label = document.createElement('label');
                 label.className = 'access-control__option';
+                // Get product name from map, or use slug if not found (e.g., 'all')
+                const productName = productSlug === 'all' 
+                    ? this.getTranslation('All Products') || 'All Products'
+                    : (this.productMap[productSlug]?.name || productSlug);
                 label.innerHTML = `
-                    <input type="checkbox" value="${product}">
-                    <span>${product}</span>
+                    <input type="checkbox" value="${productSlug}">
+                    <span>${productName}</span>
                 `;
                 this.elements.productOptions.appendChild(label);
             });
@@ -636,10 +697,14 @@ class AccessControl {
         if (this.elements.grantProductSelect) {
             const selectProductText = this.getTranslation('select_product') || 'Select Product';
             this.elements.grantProductSelect.innerHTML = `<option value="">${selectProductText}</option>`;
-            this.products.forEach(product => {
+            this.products.forEach(productSlug => {
                 const option = document.createElement('option');
-                option.value = product;
-                option.textContent = product;
+                option.value = productSlug;
+                // Get product name from map, or use slug if not found (e.g., 'all')
+                const productName = productSlug === 'all'
+                    ? this.getTranslation('All Products') || 'All Products'
+                    : (this.productMap[productSlug]?.name || productSlug);
+                option.textContent = productName;
                 this.elements.grantProductSelect.appendChild(option);
             });
         }
@@ -810,7 +875,11 @@ class AccessControl {
         // Product
         const productCell = document.createElement('td');
         productCell.className = 'access-control__table-cell';
-        productCell.textContent = grant.app_id || '-';
+        // Display product name if available, otherwise show slug
+        const productName = grant.app_id && this.productMap[grant.app_id] 
+            ? this.productMap[grant.app_id].name 
+            : (grant.app_id || '-');
+        productCell.textContent = productName;
 
         // Grant Type
         const grantTypeCell = document.createElement('td');
@@ -965,7 +1034,9 @@ class AccessControl {
      * Open grant access modal
      */
     openGrantModal() {
+        console.log('📋 Opening grant modal...', this.elements.grantModal);
         if (this.elements.grantModal) {
+            console.log('✅ Modal opened');
             this.elements.grantModal.classList.add('open');
             // Reset form
             if (this.elements.grantAccessForm) {
@@ -977,7 +1048,10 @@ class AccessControl {
             if (this.elements.grantUserId) {
                 this.elements.grantUserId.value = '';
             }
+        } else {
+            console.error('❌ Grant modal element NOT found!');
         }
+        console.log('📋 openGrantModal() completed');
     }
 
     /**
@@ -1428,20 +1502,8 @@ class AccessControl {
 } // End of AccessControl class
 
 // Export globally
-window.AccessControl = AccessControl;
+if (typeof window !== 'undefined') {
+    window.AccessControl = AccessControl;
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        if (document.getElementById('access-control')) {
-            window.accessControl = new AccessControl();
-            window.accessControl.init();
-        }
-    });
-} else {
-    if (document.getElementById('access-control')) {
-        window.accessControl = new AccessControl();
-        window.accessControl.init();
-    }
-}
+} // End of if (typeof window.AccessControl === 'undefined')
