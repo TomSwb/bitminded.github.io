@@ -481,7 +481,7 @@ function generateAuthIndexHtml(productName: string, subdomain: string): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - ${productName}</title>
-    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="/auth/auth.css">
 </head>
 <body>
     <main class="auth-main">
@@ -554,8 +554,8 @@ function generateAuthIndexHtml(productName: string, subdomain: string): string {
     </main>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="config.js"></script>
-    <script src="auth.js"></script>
+    <script src="/auth/config.js"></script>
+    <script src="/auth/auth.js"></script>
 </body>
 </html>`
 }
