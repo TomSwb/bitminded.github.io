@@ -1114,45 +1114,24 @@ class AccessControl {
             this.elements.revokeAccessForm.reset();
         }
 
-        // Add open class and verify
+        // Move modal to body if it's nested (fixed positioning works better at body level)
+        if (this.elements.revokeModal.parentElement !== document.body) {
+            document.body.appendChild(this.elements.revokeModal);
+        }
+        
+        // Add open class
         this.elements.revokeModal.classList.add('open');
         
-        // Verify modal is visible
-        const computedStyle = window.getComputedStyle(this.elements.revokeModal);
-        const isVisible = computedStyle.display !== 'none';
-        const modalContent = this.elements.revokeModal.querySelector('.access-control__modal-content');
-        
-        console.log('🔍 Modal visibility check:', {
-            hasOpenClass: this.elements.revokeModal.classList.contains('open'),
-            computedDisplay: computedStyle.display,
-            computedVisibility: computedStyle.visibility,
-            computedOpacity: computedStyle.opacity,
-            computedPosition: computedStyle.position,
-            computedTop: computedStyle.top,
-            computedLeft: computedStyle.left,
-            computedWidth: computedStyle.width,
-            computedHeight: computedStyle.height,
-            zIndex: computedStyle.zIndex,
-            isVisible: isVisible,
-            modalContentExists: !!modalContent,
-            modalContentDisplay: modalContent ? window.getComputedStyle(modalContent).display : 'N/A'
-        });
-        
-        // Check if modal is actually in viewport
-        const rect = this.elements.revokeModal.getBoundingClientRect();
-        console.log('🔍 Modal position:', {
-            top: rect.top,
-            left: rect.left,
-            width: rect.width,
-            height: rect.height,
-            inViewport: rect.top >= 0 && rect.left >= 0 && rect.width > 0 && rect.height > 0
-        });
-        
-        if (!isVisible) {
-            console.error('❌ Modal not visible after adding open class!');
-            // Force display
-            this.elements.revokeModal.style.display = 'flex';
-        }
+        // Force modal styles to ensure visibility
+        this.elements.revokeModal.style.display = 'flex';
+        this.elements.revokeModal.style.position = 'fixed';
+        this.elements.revokeModal.style.top = '0';
+        this.elements.revokeModal.style.left = '0';
+        this.elements.revokeModal.style.width = '100vw';
+        this.elements.revokeModal.style.height = '100vh';
+        this.elements.revokeModal.style.zIndex = '9999';
+        this.elements.revokeModal.style.margin = '0';
+        this.elements.revokeModal.style.padding = '0';
     }
 
     /**
@@ -1161,6 +1140,13 @@ class AccessControl {
     closeRevokeModal() {
         if (this.elements.revokeModal) {
             this.elements.revokeModal.classList.remove('open');
+            this.elements.revokeModal.style.display = 'none';
+            
+            // Move modal back to original location if needed
+            const accessControl = document.getElementById('access-control');
+            if (accessControl && this.elements.revokeModal.parentElement === document.body) {
+                accessControl.appendChild(this.elements.revokeModal);
+            }
         }
         this.currentGrantId = null;
     }
