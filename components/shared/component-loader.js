@@ -249,6 +249,25 @@ class ComponentLoader {
                         }
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'app-entitlements') {
+                    // Load app entitlements translations first
+                    const translationScript = document.createElement('script');
+                    translationScript.src = '/account/components/app-entitlements/app-entitlements-translations.js';
+                    translationScript.onload = () => {
+                        // Wait for DOM to be ready before initializing app entitlements component
+                        const initAppEntitlements = () => {
+                            if (window.AppEntitlements && !window.appEntitlements) {
+                                window.appEntitlements = new window.AppEntitlements();
+                            }
+                            if (window.appEntitlements) {
+                                window.appEntitlements.init(config);
+                            }
+                        };
+                        
+                        // Use setTimeout to ensure HTML is fully parsed
+                        setTimeout(initAppEntitlements, 50);
+                    };
+                    document.head.appendChild(translationScript);
                 } else if (componentName === 'password-change') {
                     // Load password change translations first
                     const translationScript = document.createElement('script');
