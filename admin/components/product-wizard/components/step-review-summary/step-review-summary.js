@@ -504,8 +504,11 @@ if (typeof window.StepReviewSummary === 'undefined') {
                 // Save current step data
                 window.productWizard.saveCurrentStepData(7);
 
-                // Save to database
-                const result = await window.productWizard.saveDraftToDatabase();
+                // Mark step 7 as completed
+                window.productWizard.markStepCompleted(7);
+
+                // Save to database with beta status
+                const result = await window.productWizard.saveDraftToDatabase('beta');
                 
                 if (result.success) {
                     // Navigate back to Product Management
