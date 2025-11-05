@@ -511,6 +511,9 @@ class UserAccessManagement {
         this.elements.grantModal.style.zIndex = '9999';
         this.elements.grantModal.style.margin = '0';
         this.elements.grantModal.style.padding = '0';
+        
+        // Update translations for modal content
+        setTimeout(() => this.showTranslatableContent(), 100);
     }
 
     /**
@@ -637,6 +640,9 @@ class UserAccessManagement {
         this.elements.revokeModal.style.zIndex = '9999';
         this.elements.revokeModal.style.margin = '0';
         this.elements.revokeModal.style.padding = '0';
+        
+        // Update translations for modal content
+        setTimeout(() => this.showTranslatableContent(), 100);
     }
 
     /**
@@ -939,9 +945,33 @@ class UserAccessManagement {
         try {
             this.currentLanguage = localStorage.getItem('language') || 'en';
             const response = await fetch('/admin/components/user-detail/components/user-access-management/locales/user-access-management-locales.json');
+            
+            if (!response.ok) {
+                throw new Error(`Failed to load translations: ${response.status}`);
+            }
+            
             this.translations = await response.json();
+            
+            // Add translations to i18next if available
+            if (window.i18next && typeof window.i18next.addResourceBundle === 'function') {
+                try {
+                    Object.keys(this.translations).forEach(lang => {
+                        window.i18next.addResourceBundle(
+                            lang,
+                            'translation',
+                            this.translations[lang].translation,
+                            true,
+                            true
+                        );
+                    });
+                } catch (i18nextError) {
+                    console.warn('⚠️ Could not add to i18next:', i18nextError);
+                }
+            }
         } catch (error) {
             console.warn('⚠️ Failed to load user access management translations:', error);
+            // Continue with empty translations - will use keys as fallback
+            this.translations = {};
         }
     }
 
@@ -949,23 +979,71 @@ class UserAccessManagement {
      * Get translated text
      */
     getTranslation(key) {
-        if (!this.translations || !this.translations[this.currentLanguage]) {
-            return null;
+        // Try i18next first if available
+        if (window.i18next && typeof window.i18next.t === 'function') {
+            const i18nTranslation = window.i18next.t(key);
+            if (i18nTranslation && i18nTranslation !== key) {
+                return i18nTranslation;
+            }
         }
-        return this.translations[this.currentLanguage].translation[key] || null;
+        
+        // Fallback to loaded translations
+        if (this.translations && this.translations[this.currentLanguage]) {
+            return this.translations[this.currentLanguage].translation[key] || key;
+        }
+        
+        // Return key as fallback
+        return key;
     }
 
     /**
-     * Show translatable content
+     * Show translatable content by adding loaded class and updating text
      */
     showTranslatableContent() {
-        const translatableElements = document.querySelectorAll('.translatable-content');
+        // Scope to component container and modals (which might be in document.body)
+        const container = document.getElementById('user-access-management');
+        const grantModal = document.getElementById('grant-access-modal');
+        const revokeModal = document.getElementById('revoke-access-modal');
+        
+        // Collect all translatable elements from container and modals
+        let translatableElements = [];
+        
+        if (container) {
+            const containerElements = container.querySelectorAll('.translatable-content[data-translation-key]');
+            translatableElements.push(...containerElements);
+        }
+        
+        if (grantModal) {
+            const modalElements = grantModal.querySelectorAll('.translatable-content[data-translation-key]');
+            translatableElements.push(...modalElements);
+        }
+        
+        if (revokeModal) {
+            const modalElements = revokeModal.querySelectorAll('.translatable-content[data-translation-key]');
+            translatableElements.push(...modalElements);
+        }
+
         translatableElements.forEach(el => {
             const key = el.getAttribute('data-translation-key');
             if (key) {
+                // Add loaded class to make content visible
+                el.classList.add('loaded');
+                
+                // Update text content with translation
                 const translation = this.getTranslation(key);
-                if (translation) {
-                    el.textContent = translation;
+                if (translation && translation !== key) {
+                    // Handle input/textarea placeholders
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = translation;
+                    } else {
+                        el.textContent = translation;
+                    }
+                } else if (!translation || translation === key) {
+                    // If no translation found, still show the key text so content is visible
+                    if (el.textContent.trim() === '') {
+                        el.textContent = key;
+                    }
+                    el.classList.add('loaded');
                 }
             }
         });
