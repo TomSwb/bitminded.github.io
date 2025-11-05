@@ -616,22 +616,43 @@ class UserDetailPage {
         if (!this.currentUser || !window.supabase) return;
 
         try {
-            const { data, error } = await window.supabase
-                .from('entitlements')
-                .select('app_id, active, created_at, expires_at')
-                .eq('user_id', this.currentUser.id)
-                .eq('active', true);
-
-            if (error) {
-                console.error('❌ Failed to load subscriptions:', error);
-                return;
+            // Load user access management component HTML
+            const response = await fetch('/admin/components/user-detail/components/user-access-management/user-access-management.html');
+            const html = await response.text();
+            
+            const container = document.getElementById('user-access-management-container');
+            if (container) {
+                container.innerHTML = html;
+                
+                // Load component CSS
+                if (!document.querySelector('link[href*="user-access-management.css"]')) {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = '/admin/components/user-detail/components/user-access-management/user-access-management.css';
+                    document.head.appendChild(link);
+                }
+                
+                // Load component JS and initialize
+                if (!window.UserAccessManagement) {
+                    await this.loadScript('/admin/components/user-detail/components/user-access-management/user-access-management.js');
+                }
+                
+                // Load translations
+                if (!window.userAccessManagementTranslations) {
+                    await this.loadScript('/admin/components/user-detail/components/user-access-management/user-access-management-translations.js');
+                }
+                
+                // Initialize user access management component
+                if (window.UserAccessManagement) {
+                    if (!this.userAccessManagement) {
+                        this.userAccessManagement = new window.UserAccessManagement();
+                    }
+                    await this.userAccessManagement.init(this.currentUser.id, this.currentUser);
+                }
             }
 
-            // TODO: Display subscriptions
-            // User subscriptions loaded
-
         } catch (error) {
-            console.error('❌ Error loading subscriptions:', error);
+            console.error('❌ Error loading subscriptions data:', error);
         }
     }
 
@@ -1431,7 +1452,13 @@ class UserDetailPage {
 
     async grantAccess() {
         console.log('🎁 Grant access clicked');
-        // TODO: Implement grant access functionality
+        // Open grant access modal from user access management component
+        if (this.userAccessManagement && typeof this.userAccessManagement.openGrantAccessModal === 'function') {
+            this.userAccessManagement.openGrantAccessModal();
+        } else {
+            console.error('❌ User access management component not initialized');
+            alert('Please wait for the page to load completely');
+        }
     }
 
     async revokeAllSessions() {

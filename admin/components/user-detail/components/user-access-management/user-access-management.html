@@ -1,0 +1,198 @@
+<!-- User Access Management Component -->
+<div class="user-access-management" id="user-access-management">
+    <!-- Entitlements Table -->
+    <div class="user-access-management__table-container" id="access-table-container">
+        <table class="user-access-management__table user-access-management__table--hidden" id="access-table">
+            <thead>
+                <tr>
+                    <th class="translatable-content" data-translation-key="Product">Product</th>
+                    <th class="translatable-content" data-translation-key="Grant Type">Grant Type</th>
+                    <th class="translatable-content" data-translation-key="Status">Status</th>
+                    <th class="translatable-content" data-translation-key="Granted By">Granted By</th>
+                    <th class="translatable-content" data-translation-key="Granted Date">Granted Date</th>
+                    <th class="translatable-content" data-translation-key="Expiration">Expiration</th>
+                    <th class="translatable-content" data-translation-key="Reason">Reason</th>
+                    <th class="translatable-content" data-translation-key="Actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="access-table-body">
+                <!-- Entitlements will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- No Access Message -->
+    <div class="user-access-management__empty user-access-management__empty--hidden" id="access-empty">
+        <p class="translatable-content" data-translation-key="no_access_grants">No access grants found</p>
+    </div>
+    
+    <!-- Loading State -->
+    <div class="user-access-management__loading user-access-management__loading--hidden" id="access-loading">
+        <div class="user-access-management__loading-spinner"></div>
+        <p class="translatable-content" data-translation-key="loading_access">Loading access grants...</p>
+    </div>
+    
+    <!-- Error Message -->
+    <div class="user-access-management__error user-access-management__error--hidden" id="access-error">
+        <span class="user-access-management__error-icon">⚠️</span>
+        <span class="user-access-management__error-text" id="access-error-text"></span>
+    </div>
+
+    <!-- Grant Access Modal -->
+    <div class="user-access-management__modal" id="grant-access-modal">
+        <div class="user-access-management__modal-content">
+            <div class="user-access-management__modal-header">
+                <h2 class="user-access-management__modal-title translatable-content" data-translation-key="Grant Access">Grant Access</h2>
+                <button class="user-access-management__modal-close" id="grant-modal-close">&times;</button>
+            </div>
+            
+            <form class="user-access-management__modal-form" id="grant-access-form">
+                <!-- User Display (pre-filled, read-only) -->
+                <div class="user-access-management__form-group">
+                    <div class="user-access-management__form-label translatable-content" data-translation-key="User">User</div>
+                    <div class="user-access-management__selected-user" id="grant-user-display"></div>
+                    <input type="hidden" id="grant-user-id" required>
+                </div>
+
+                <!-- Product Selection -->
+                <div class="user-access-management__form-group">
+                    <label for="grant-product-select" class="user-access-management__form-label translatable-content" data-translation-key="Product">Product *</label>
+                    <input 
+                        type="text" 
+                        id="grant-product-select" 
+                        class="user-access-management__form-input" 
+                        placeholder="Search by product name..."
+                        autocomplete="off"
+                    >
+                    <div class="user-access-management__product-suggestions user-access-management__suggestion--hidden" id="product-suggestions"></div>
+                    <input type="hidden" id="grant-product-id" required>
+                    <div class="user-access-management__selected-product" id="selected-product-display"></div>
+                </div>
+
+                <!-- Grant Type -->
+                <div class="user-access-management__form-group">
+                    <label class="user-access-management__form-label translatable-content" data-translation-key="Grant Type">Grant Type *</label>
+                    <div class="user-access-management__radio-group">
+                        <label class="user-access-management__radio-label">
+                            <input type="radio" name="grant-type" value="manual" checked required>
+                            <span class="translatable-content" data-translation-key="Manual">Manual</span>
+                        </label>
+                        <label class="user-access-management__radio-label">
+                            <input type="radio" name="grant-type" value="trial">
+                            <span class="translatable-content" data-translation-key="Trial">Trial</span>
+                        </label>
+                        <label class="user-access-management__radio-label">
+                            <input type="radio" name="grant-type" value="lifetime">
+                            <span class="translatable-content" data-translation-key="Lifetime">Lifetime</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Expiration -->
+                <div class="user-access-management__form-group" id="expiration-group">
+                    <label for="grant-expiration" class="user-access-management__form-label translatable-content" data-translation-key="Expiration">Expiration</label>
+                    <div class="user-access-management__expiration-controls">
+                        <select id="grant-expiration-type" class="user-access-management__form-select" aria-label="Expiration type">
+                            <option value="date" class="translatable-content" data-translation-key="Specific Date">Specific Date</option>
+                            <option value="duration" class="translatable-content" data-translation-key="Duration">Duration</option>
+                        </select>
+                        <input type="date" id="grant-expiration-date" class="user-access-management__form-input" aria-label="Expiration date">
+                        <select id="grant-expiration-duration" class="user-access-management__form-select user-access-management__form-select--hidden" aria-label="Expiration duration">
+                            <option value="7" class="translatable-content" data-translation-key="7 days">7 days</option>
+                            <option value="14" class="translatable-content" data-translation-key="14 days">14 days</option>
+                            <option value="30" class="translatable-content" data-translation-key="30 days">30 days</option>
+                            <option value="90" class="translatable-content" data-translation-key="90 days">90 days</option>
+                        </select>
+                    </div>
+                    <small class="user-access-management__form-help translatable-content" data-translation-key="Leave empty for lifetime access">Leave empty for lifetime access</small>
+                </div>
+
+                <!-- Reason -->
+                <div class="user-access-management__form-group">
+                    <label for="grant-reason" class="user-access-management__form-label translatable-content" data-translation-key="Reason">Reason *</label>
+                    <textarea 
+                        id="grant-reason" 
+                        class="user-access-management__form-textarea" 
+                        rows="3" 
+                        placeholder="Enter reason for granting access..."
+                        required
+                    ></textarea>
+                    <div class="user-access-management__reason-templates">
+                        <button type="button" class="user-access-management__template-btn" data-template="Beta tester">
+                            <span class="translatable-content" data-translation-key="Beta Tester">Beta Tester</span>
+                        </button>
+                        <button type="button" class="user-access-management__template-btn" data-template="Partner access">
+                            <span class="translatable-content" data-translation-key="Partner Access">Partner Access</span>
+                        </button>
+                        <button type="button" class="user-access-management__template-btn" data-template="Promotional grant">
+                            <span class="translatable-content" data-translation-key="Promotional Grant">Promotional Grant</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification Options -->
+                <div class="user-access-management__form-group">
+                    <label class="user-access-management__checkbox-label">
+                        <input type="checkbox" id="grant-send-notification" checked>
+                        <span class="translatable-content" data-translation-key="Send notification to user">Send notification to user</span>
+                    </label>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="user-access-management__modal-actions">
+                    <button type="button" class="user-access-management__button user-access-management__button--secondary" id="grant-modal-cancel">
+                        <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                    </button>
+                    <button type="submit" class="user-access-management__button user-access-management__button--primary">
+                        <span class="translatable-content" data-translation-key="Grant Access">Grant Access</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Revoke Access Modal -->
+    <div class="user-access-management__modal" id="revoke-access-modal">
+        <div class="user-access-management__modal-content user-access-management__modal-content--small">
+            <div class="user-access-management__modal-header">
+                <h2 class="user-access-management__modal-title translatable-content" data-translation-key="Revoke Access">Revoke Access</h2>
+                <button class="user-access-management__modal-close" id="revoke-modal-close">&times;</button>
+            </div>
+            
+            <form class="user-access-management__modal-form" id="revoke-access-form">
+                <div class="user-access-management__form-group">
+                    <p class="user-access-management__revoke-warning translatable-content" data-translation-key="revoke_warning">Are you sure you want to revoke access? This action cannot be undone.</p>
+                    <div class="user-access-management__revoke-info" id="revoke-info"></div>
+                </div>
+
+                <div class="user-access-management__form-group">
+                    <label for="revoke-reason" class="user-access-management__form-label translatable-content" data-translation-key="Reason">Reason *</label>
+                    <textarea 
+                        id="revoke-reason" 
+                        class="user-access-management__form-textarea" 
+                        rows="3" 
+                        placeholder="Enter reason for revoking access..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="user-access-management__form-group">
+                    <label class="user-access-management__checkbox-label">
+                        <input type="checkbox" id="revoke-send-notification" checked>
+                        <span class="translatable-content" data-translation-key="Send notification to user">Send notification to user</span>
+                    </label>
+                </div>
+
+                <div class="user-access-management__modal-actions">
+                    <button type="button" class="user-access-management__button user-access-management__button--secondary" id="revoke-modal-cancel">
+                        <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                    </button>
+                    <button type="submit" class="user-access-management__button user-access-management__button--danger">
+                        <span class="translatable-content" data-translation-key="Revoke Access">Revoke Access</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
