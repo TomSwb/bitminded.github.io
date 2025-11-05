@@ -44,11 +44,10 @@
     opacity: 0.7;
 }
 
-/* Actions in table cells - matches user-management pattern */
+/* Actions in table cells - matches user-management/product-management pattern */
 .access-control__actions {
     display: flex;
     gap: var(--spacing-sm);
-    justify-content: center;
 }
 
 /* ===== BUTTONS ===== */
@@ -297,7 +296,6 @@
     font-size: 0.7rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    white-space: nowrap;
 }
 
 .access-control__action-btn:hover {
@@ -306,6 +304,22 @@
 }
 
 /* Table Action Buttons */
+.access-control__action-btn--revoke {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-background-primary);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all 0.2s ease;
+}
+
+.access-control__action-btn--revoke:hover {
+    background: var(--color-error) !important;
+    color: var(--color-background-primary) !important;
+}
+
 .access-control__action-btn--view {
     padding: var(--spacing-xs) var(--spacing-sm);
     background: var(--color-background-primary);
@@ -813,7 +827,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
+    z-index: 9999;
     align-items: center;
     justify-content: center;
 }

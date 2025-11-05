@@ -844,26 +844,7 @@ class AccessControl {
             return;
         }
 
-        // Remove any existing delegated event listener
-        const newTbody = tbody.cloneNode(false);
-        tbody.parentNode.replaceChild(newTbody, tbody);
-        this.elements.tableBody = newTbody;
-
-        // Add delegated event listener for revoke buttons (captures clicks on dynamically added buttons)
-        newTbody.addEventListener('click', (e) => {
-            const revokeBtn = e.target.closest('.access-control__action-btn--revoke');
-            if (revokeBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const grantId = revokeBtn.getAttribute('data-grant-id');
-                
-                // Find the grant from the filtered grants
-                const grant = this.filteredGrants.find(g => g.id === grantId);
-                if (grant) {
-                    this.openRevokeModal(grant);
-                }
-            }
-        }, true); // Use capture phase
+        tbody.innerHTML = '';
 
         if (this.filteredGrants.length === 0) {
             this.showEmpty();
@@ -876,7 +857,7 @@ class AccessControl {
 
         this.filteredGrants.forEach(grant => {
             const row = this.createGrantRow(grant);
-            newTbody.appendChild(row);
+            tbody.appendChild(row);
         });
     }
 
@@ -961,16 +942,32 @@ class AccessControl {
 
         // Actions
         const actionsCell = document.createElement('td');
-        actionsCell.className = 'access-control__table-cell';
+        actionsCell.setAttribute('data-label', 'Actions');
+        actionsCell.style.padding = 'var(--spacing-sm)';
+        
+        let actionButtons = '';
+        if (grant.status === 'active') {
+            actionButtons = `
+                <button class="access-control__action-btn access-control__action-btn--revoke" data-action="revoke" data-grant-id="${grant.id}" title="Revoke Access" type="button">
+                    Revoke
+                </button>
+            `;
+        }
+        
         actionsCell.innerHTML = `
-            <div class="access-control__actions">
-                ${grant.status === 'active' ? `
-                    <button class="access-control__action-btn access-control__action-btn--revoke" data-grant-id="${grant.id}" title="Revoke Access" type="button">
-                        Revoke
-                    </button>
-                ` : ''}
+            <div style="display: flex; gap: var(--spacing-sm);">
+                ${actionButtons}
             </div>
         `;
+        
+        // Add click handler to revoke button (matching user-management pattern)
+        const revokeButton = actionsCell.querySelector('[data-action="revoke"]');
+        if (revokeButton) {
+            revokeButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent any bubbling
+                this.openRevokeModal(grant);
+            });
+        }
 
         row.appendChild(userCell);
         row.appendChild(productCell);
@@ -1121,12 +1118,34 @@ class AccessControl {
         this.elements.revokeModal.classList.add('open');
         
         // Verify modal is visible
-        const isVisible = window.getComputedStyle(this.elements.revokeModal).display !== 'none';
+        const computedStyle = window.getComputedStyle(this.elements.revokeModal);
+        const isVisible = computedStyle.display !== 'none';
+        const modalContent = this.elements.revokeModal.querySelector('.access-control__modal-content');
+        
         console.log('🔍 Modal visibility check:', {
             hasOpenClass: this.elements.revokeModal.classList.contains('open'),
-            computedDisplay: window.getComputedStyle(this.elements.revokeModal).display,
+            computedDisplay: computedStyle.display,
+            computedVisibility: computedStyle.visibility,
+            computedOpacity: computedStyle.opacity,
+            computedPosition: computedStyle.position,
+            computedTop: computedStyle.top,
+            computedLeft: computedStyle.left,
+            computedWidth: computedStyle.width,
+            computedHeight: computedStyle.height,
+            zIndex: computedStyle.zIndex,
             isVisible: isVisible,
-            zIndex: window.getComputedStyle(this.elements.revokeModal).zIndex
+            modalContentExists: !!modalContent,
+            modalContentDisplay: modalContent ? window.getComputedStyle(modalContent).display : 'N/A'
+        });
+        
+        // Check if modal is actually in viewport
+        const rect = this.elements.revokeModal.getBoundingClientRect();
+        console.log('🔍 Modal position:', {
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+            inViewport: rect.top >= 0 && rect.left >= 0 && rect.width > 0 && rect.height > 0
         });
         
         if (!isVisible) {
