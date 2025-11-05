@@ -183,6 +183,18 @@ serve(async (req) => {
       // Replace product placeholder
       const message = template.message_template.replace('{{product}}', entitlement.app_id)
 
+      // Construct link to tool subdomain or account page
+      // If app_id is 'all' or invalid, link to account page
+      // Otherwise, link directly to the tool: https://{slug}.bitminded.ch
+      let notificationLink = '/account?section=subscriptions'
+      if (entitlement.app_id && entitlement.app_id !== 'all' && typeof entitlement.app_id === 'string') {
+        // Validate slug format (alphanumeric, hyphens, underscores)
+        const slugPattern = /^[a-z0-9_-]+$/i
+        if (slugPattern.test(entitlement.app_id)) {
+          notificationLink = `https://${entitlement.app_id}.bitminded.ch`
+        }
+      }
+
       // Create in-app notification
       const { error: notificationError } = await supabaseAdmin
         .from('user_notifications')
@@ -192,7 +204,7 @@ serve(async (req) => {
           title: template.title,
           message: message,
           icon: template.icon,
-          link: '/account?section=subscriptions',
+          link: notificationLink,
           read: false
         })
 
