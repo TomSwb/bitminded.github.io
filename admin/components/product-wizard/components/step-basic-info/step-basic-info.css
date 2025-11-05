@@ -130,17 +130,87 @@
     .step-basic-info {
         padding: var(--spacing-md);
     }
+
+    .step-basic-info__header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .step-basic-info__title {
+        font-size: var(--font-size-xl);
+    }
+
+    .step-basic-info__description {
+        font-size: var(--font-size-sm);
+    }
     
     .step-basic-info__fields {
         max-width: 100%;
+        gap: var(--spacing-md);
+    }
+
+    .step-basic-info__field-group {
+        gap: var(--spacing-xs);
+    }
+
+    .step-basic-info__label {
+        font-size: var(--font-size-sm);
+    }
+
+    .step-basic-info__input,
+    .step-basic-info__select,
+    .step-basic-info__textarea {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
+        min-height: 44px;
+    }
+
+    .step-basic-info__textarea {
+        min-height: 80px;
+    }
+
+    .step-basic-info__help {
+        font-size: var(--font-size-xs);
     }
     
     .step-basic-info__category-container {
         flex-direction: column;
         align-items: stretch;
+        gap: var(--spacing-sm);
+    }
+
+    .step-basic-info__category-container .step-basic-info__select {
+        width: 100%;
     }
     
     .step-basic-info__btn {
         width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+        min-height: 44px;
+        font-size: var(--font-size-base);
+    }
+}
+
+@media (max-width: 480px) {
+    .step-basic-info {
+        padding: var(--spacing-sm);
+    }
+
+    .step-basic-info__title {
+        font-size: var(--font-size-lg);
+    }
+
+    .step-basic-info__description {
+        font-size: var(--font-size-xs);
+    }
+
+    .step-basic-info__label {
+        font-size: var(--font-size-xs);
+    }
+
+    .step-basic-info__input,
+    .step-basic-info__select,
+    .step-basic-info__textarea {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-sm);
     }
 }

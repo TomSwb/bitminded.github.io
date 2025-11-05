@@ -952,42 +952,382 @@
         padding: var(--spacing-md);
     }
     
-    .context-table {
-        font-size: 0.9rem;
+    .step-spec-generation__context h4 {
+        font-size: var(--font-size-base);
     }
-    
-    .context-label {
-        width: 120px;
-        min-width: 120px;
-        padding-right: var(--spacing-sm);
+
+    .context-table {
+        font-size: var(--font-size-sm);
+        display: block;
+    }
+
+    .context-table tr {
+        display: flex;
+        flex-direction: column;
+        border-bottom: 1px solid var(--color-border);
+        padding: var(--spacing-sm) 0;
+    }
+
+    .context-table tr:last-child {
+        border-bottom: none;
     }
     
     .context-table td {
         padding: var(--spacing-xs) 0;
+        display: block;
+        width: 100%;
+    }
+    
+    .context-label {
+        width: 100%;
+        min-width: 100%;
+        padding-right: 0;
+        margin-bottom: var(--spacing-xs);
+        font-size: var(--font-size-xs);
+    }
+
+    .context-value {
+        font-size: var(--font-size-sm);
+    }
+
+    .step-spec-generation__form {
+        gap: var(--spacing-md);
+    }
+
+    .step-spec-generation__form label {
+        font-size: var(--font-size-sm);
+    }
+
+    .input-with-suggestions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .input-with-suggestions textarea {
+        width: 100%;
+        padding: var(--spacing-md);
+        min-height: 100px;
+    }
+
+    .suggestion-btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .step-spec-generation__form select {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
+        min-height: 44px;
+    }
+
+    .generation-requirements {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .requirements-text {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-sm);
+    }
+
+    .btn-generate-spec {
+        width: 100%;
+        min-width: auto;
+        padding: var(--spacing-md) var(--spacing-lg);
+        min-height: 44px;
+    }
+
+    .generation-status {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-sm);
+    }
+
+    .status-message {
+        font-size: var(--font-size-xs);
+    }
+
+    .step-spec-generation__ai-section {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .step-spec-generation__ai-control {
+        padding: var(--spacing-md);
+    }
+
+    .ai-control-header h4 {
+        font-size: var(--font-size-base);
+    }
+
+    .ai-control-description {
+        font-size: var(--font-size-xs);
+    }
+
+    .ai-control-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .ai-control-actions .btn-primary,
+    .ai-control-actions .btn-secondary {
+        width: 100%;
+        padding: var(--spacing-md);
+        min-height: 44px;
     }
     
     .planning-section {
         padding: var(--spacing-md);
     }
-    
+
+    .planning-section h5 {
+        font-size: var(--font-size-base);
+    }
+
+    .planning-section label {
+        font-size: var(--font-size-sm);
+    }
+
+    .planning-section textarea {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
+        min-height: 80px;
+    }
+
+    .ai-recommendation {
+        padding: var(--spacing-sm);
+    }
+
+    .recommendation-value {
+        font-size: var(--font-size-sm);
+    }
+
+    .recommendation-reasoning {
+        font-size: var(--font-size-xs);
+    }
+
+    .recommendation-actions {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .recommendation-actions button {
+        width: 100%;
+        padding: var(--spacing-sm);
+        min-height: 44px;
+    }
+
+    .ai-chat {
+        padding: var(--spacing-sm);
+    }
+
+    .chat-messages {
+        max-height: 150px;
+        padding: var(--spacing-xs);
+    }
+
+    .chat-message {
+        padding: var(--spacing-xs);
+        font-size: var(--font-size-xs);
+    }
+
+    .chat-message.user {
+        margin-left: var(--spacing-sm);
+    }
+
+    .chat-message.ai {
+        margin-right: var(--spacing-sm);
+    }
+
+    .chat-input {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .chat-input input {
+        width: 100%;
+        padding: var(--spacing-md);
+        min-height: 44px;
+    }
+
+    .chat-input button {
+        width: 100%;
+        padding: var(--spacing-md);
+        min-height: 44px;
+    }
+
+    .final-decision {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .decision-label {
+        font-size: var(--font-size-sm);
+    }
+
+    .decision-value {
+        font-size: var(--font-size-sm);
+    }
+
     .spec-header {
         flex-direction: column;
         gap: var(--spacing-md);
         align-items: stretch;
+        padding: var(--spacing-md);
     }
-    
+
+    .spec-header h4 {
+        font-size: var(--font-size-base);
+    }
+
     .spec-actions {
         justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+    }
+
+    .spec-actions .btn-primary,
+    .spec-actions .btn-secondary {
+        flex: 1;
+        min-width: auto;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        min-height: 44px;
+    }
+
+    .spec-content-wrapper {
+        max-height: 400px;
+    }
+
+    .spec-content {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+
+    .spec-content h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    .spec-content h2 {
+        font-size: var(--font-size-lg);
+    }
+
+    .spec-content h3 {
+        font-size: var(--font-size-base);
+    }
+
+    .spec-content h4 {
+        font-size: var(--font-size-sm);
+    }
+
+    .discrepancy-analysis {
+        padding: var(--spacing-md);
+    }
+
+    .discrepancy-header h5 {
+        font-size: var(--font-size-base);
+    }
+
+    .discrepancy-subtitle {
+        font-size: var(--font-size-xs);
+    }
+
+    .discrepancy-item {
+        padding: var(--spacing-sm);
+    }
+
+    .discrepancy-item h6 {
+        font-size: var(--font-size-sm);
+    }
+
+    .discrepancy-comparison {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .discrepancy-label {
+        font-size: var(--font-size-xs);
+    }
+
+    .discrepancy-value {
+        font-size: var(--font-size-xs);
     }
     
     .edit-header {
         flex-direction: column;
         gap: var(--spacing-md);
         align-items: stretch;
+        padding: var(--spacing-md);
+    }
+
+    .edit-header h5 {
+        font-size: var(--font-size-sm);
     }
     
     .edit-actions {
         justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+    }
+
+    .edit-actions .btn-primary,
+    .edit-actions .btn-secondary {
+        flex: 1;
+        min-width: auto;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        min-height: 44px;
+    }
+
+    .spec-edit-textarea {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-xs);
+        min-height: 300px;
+    }
+
+    .new-recommendation-content {
+        padding: var(--spacing-xs);
+    }
+
+    .new-recommendation-header {
+        font-size: var(--font-size-sm);
+    }
+
+    .new-recommendation-reasoning {
+        font-size: var(--font-size-xs);
+    }
+
+    .new-recommendation-actions {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .new-recommendation-actions button {
+        width: 100%;
+        padding: var(--spacing-sm);
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 480px) {
+    .step-spec-generation__context {
+        padding: var(--spacing-sm);
+    }
+
+    .context-table {
+        font-size: var(--font-size-xs);
+    }
+
+    .planning-section {
+        padding: var(--spacing-sm);
+    }
+
+    .btn-generate-spec {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+
+    .spec-content {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
     }
 }
 
