@@ -47,6 +47,14 @@
 .access-control__actions {
     display: flex;
     gap: var(--spacing-sm);
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* Center actions in table cell - target the actions column specifically */
+.access-control__table td:last-child {
+    text-align: center;
 }
 
 /* ===== BUTTONS ===== */
@@ -295,7 +303,7 @@
     font-size: 0.7rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    flex: 1;
+    white-space: nowrap;
 }
 
 .access-control__action-btn:hover {
