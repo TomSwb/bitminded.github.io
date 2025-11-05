@@ -49,6 +49,8 @@
       "Send notification to user": "Send notification to user",
       "Revoke Access": "Revoke Access",
       "revoke_warning": "Are you sure you want to revoke access? This action cannot be undone.",
+      "Regrant": "Regrant",
+      "Delete": "Delete",
       "active": "Active",
       "expired": "Expired",
       "revoked": "Revoked"
@@ -104,6 +106,8 @@
       "Send notification to user": "Enviar notificación al usuario",
       "Revoke Access": "Revocar Acceso",
       "revoke_warning": "¿Está seguro de que desea revocar el acceso? Esta acción no se puede deshacer.",
+      "Regrant": "Reconceder",
+      "Delete": "Eliminar",
       "active": "Activo",
       "expired": "Expirado",
       "revoked": "Revocado"
@@ -159,6 +163,8 @@
       "Send notification to user": "Envoyer une notification à l'utilisateur",
       "Revoke Access": "Révoquer l'Accès",
       "revoke_warning": "Êtes-vous sûr de vouloir révoquer l'accès ? Cette action ne peut pas être annulée.",
+      "Regrant": "Rétablir",
+      "Delete": "Supprimer",
       "active": "Actif",
       "expired": "Expiré",
       "revoked": "Révoqué"
@@ -214,6 +220,8 @@
       "Send notification to user": "Benachrichtigung an Benutzer senden",
       "Revoke Access": "Zugriff Widerrufen",
       "revoke_warning": "Sind Sie sicher, dass Sie den Zugriff widerrufen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "Regrant": "Erneut Gewähren",
+      "Delete": "Löschen",
       "active": "Aktiv",
       "expired": "Abgelaufen",
       "revoked": "Widerrufen"

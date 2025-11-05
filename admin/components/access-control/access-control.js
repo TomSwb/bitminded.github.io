@@ -947,9 +947,21 @@ class AccessControl {
         
         let actionButtons = '';
         if (grant.status === 'active') {
+            const revokeText = this.getTranslation('Revoke Access') || 'Revoke';
             actionButtons = `
                 <button class="access-control__action-btn access-control__action-btn--revoke" data-action="revoke" data-grant-id="${grant.id}" title="Revoke Access" type="button">
-                    Revoke
+                    ${revokeText}
+                </button>
+            `;
+        } else if (grant.status === 'revoked') {
+            const regrantText = this.getTranslation('Regrant') || 'Regrant';
+            const deleteText = this.getTranslation('Delete') || 'Delete';
+            actionButtons = `
+                <button class="access-control__action-btn access-control__action-btn--regrant" data-action="regrant" data-grant-id="${grant.id}" title="Regrant Access" type="button">
+                    ${regrantText}
+                </button>
+                <button class="access-control__action-btn access-control__action-btn--delete" data-action="delete" data-grant-id="${grant.id}" title="Delete Entitlement" type="button">
+                    ${deleteText}
                 </button>
             `;
         }
@@ -960,12 +972,28 @@ class AccessControl {
             </div>
         `;
         
-        // Add click handler to revoke button (matching user-management pattern)
+        // Add click handlers (matching user-management pattern)
         const revokeButton = actionsCell.querySelector('[data-action="revoke"]');
         if (revokeButton) {
             revokeButton.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent any bubbling
+                e.stopPropagation();
                 this.openRevokeModal(grant);
+            });
+        }
+        
+        const regrantButton = actionsCell.querySelector('[data-action="regrant"]');
+        if (regrantButton) {
+            regrantButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.handleRegrantAccess(grant);
+            });
+        }
+        
+        const deleteButton = actionsCell.querySelector('[data-action="delete"]');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.handleDeleteEntitlement(grant);
             });
         }
 
@@ -1422,6 +1450,112 @@ class AccessControl {
         } catch (error) {
             console.error('❌ Error granting access:', error);
             this.showError(error.message || 'Failed to grant access');
+        }
+    }
+
+    /**
+     * Handle regrant access
+     */
+    async handleRegrantAccess(grant) {
+        if (!grant || !grant.id) {
+            this.showError('No grant selected');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to regrant access to ${grant.user?.username || 'this user'} for ${grant.app_id}?`)) {
+            return;
+        }
+
+        try {
+            // Get session
+            const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
+            if (sessionError || !session) {
+                throw new Error('Not authenticated');
+            }
+
+            // Call Edge Function
+            const { data, error } = await window.supabase.functions.invoke('admin-regrant-access', {
+                body: {
+                    entitlementId: grant.id,
+                    reason: 'Access restored by admin',
+                    sendNotification: true
+                },
+                headers: {
+                    Authorization: `Bearer ${session.access_token}`
+                }
+            });
+
+            if (error) {
+                throw new Error(error.message || 'Failed to regrant access');
+            }
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to regrant access');
+            }
+
+            this.showSuccess('Access regranted successfully');
+            
+            // Reload grants
+            await this.loadGrants();
+            this.applyFilters();
+
+        } catch (error) {
+            console.error('❌ Error regranting access:', error);
+            this.showError(error.message || 'Failed to regrant access');
+        }
+    }
+
+    /**
+     * Handle delete entitlement
+     */
+    async handleDeleteEntitlement(grant) {
+        if (!grant || !grant.id) {
+            this.showError('No grant selected');
+            return;
+        }
+
+        const userName = grant.user?.username || 'this user';
+        const productName = grant.app_id || 'this product';
+        
+        if (!confirm(`Are you sure you want to permanently delete this entitlement for ${userName} (${productName})? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            // Get session
+            const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
+            if (sessionError || !session) {
+                throw new Error('Not authenticated');
+            }
+
+            // Call Edge Function
+            const { data, error } = await window.supabase.functions.invoke('admin-delete-entitlement', {
+                body: {
+                    entitlementId: grant.id,
+                    reason: 'Permanently deleted by admin'
+                },
+                headers: {
+                    Authorization: `Bearer ${session.access_token}`
+                }
+            });
+
+            if (error) {
+                throw new Error(error.message || 'Failed to delete entitlement');
+            }
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to delete entitlement');
+            }
+
+            this.showSuccess('Entitlement deleted successfully');
+            
+            // Reload grants
+            await this.loadGrants();
+            this.applyFilters();
+
+        } catch (error) {
+            console.error('❌ Error deleting entitlement:', error);
+            this.showError(error.message || 'Failed to delete entitlement');
         }
     }
 

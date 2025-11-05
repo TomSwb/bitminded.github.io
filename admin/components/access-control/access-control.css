@@ -352,6 +352,22 @@
     color: var(--color-background-primary) !important;
 }
 
+.access-control__action-btn--regrant {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-background-primary);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all 0.2s ease;
+}
+
+.access-control__action-btn--regrant:hover {
+    background: var(--color-success) !important;
+    color: var(--color-background-primary) !important;
+}
+
 /* Summary Row Layout - Same row as filters */
 .access-control__summary-row {
     display: flex;
@@ -1024,7 +1040,7 @@
 }
 
 .access-control__revoke-info {
-    background-color: var(--color-background-secondary);
+    background-color: var(--color-background-tertiary);
     padding: var(--spacing-md);
     border-radius: var(--border-radius-sm);
     margin-bottom: var(--spacing-md);
