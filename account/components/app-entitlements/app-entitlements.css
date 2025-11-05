@@ -50,7 +50,7 @@
 
 .app-entitlements__table th {
     padding: var(--spacing-md) var(--spacing-lg);
-    text-align: left;
+    text-align: center;
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
     font-size: var(--font-size-sm);
@@ -75,6 +75,7 @@
     padding: var(--spacing-md) var(--spacing-lg);
     color: var(--color-text-primary);
     vertical-align: middle;
+    text-align: center;
 }
 
 /* ===== BADGES ===== */
