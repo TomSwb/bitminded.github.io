@@ -969,9 +969,14 @@ class AccessControl {
         // Add revoke button listener
         const revokeBtn = actionsCell.querySelector('.access-control__action-btn--revoke');
         if (revokeBtn) {
-            revokeBtn.addEventListener('click', () => {
+            revokeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔴 Revoke button clicked for grant:', grant);
                 this.openRevokeModal(grant);
             });
+        } else {
+            console.warn('⚠️ Revoke button not found for grant:', grant.id);
         }
 
         row.appendChild(userCell);
@@ -1100,9 +1105,12 @@ class AccessControl {
      * Open revoke access modal
      */
     openRevokeModal(grant) {
+        console.log('🔴 openRevokeModal called with grant:', grant);
         this.currentGrantId = grant.id;
+        console.log('🔴 Current grant ID set to:', this.currentGrantId);
         
         if (this.elements.revokeModal) {
+            console.log('✅ Revoke modal element found');
             // Populate revoke info
             if (this.elements.revokeInfo) {
                 this.elements.revokeInfo.innerHTML = `
@@ -1110,14 +1118,21 @@ class AccessControl {
                     <p><strong>Product:</strong> ${grant.app_id}</p>
                     <p><strong>${this.getTranslation('Grant Type') || 'Grant Type'}:</strong> ${this.getTranslation(this.capitalizeFirst(grant.grant_type || 'manual')) || this.capitalizeFirst(grant.grant_type || 'manual')}</p>
                 `;
+            } else {
+                console.warn('⚠️ Revoke info element not found');
             }
 
             // Reset form
             if (this.elements.revokeAccessForm) {
                 this.elements.revokeAccessForm.reset();
+            } else {
+                console.warn('⚠️ Revoke access form not found');
             }
 
             this.elements.revokeModal.classList.add('open');
+            console.log('✅ Revoke modal opened');
+        } else {
+            console.error('❌ Revoke modal element NOT found!');
         }
     }
 
@@ -1360,6 +1375,16 @@ class AccessControl {
             if (sessionError || !session) {
                 throw new Error('Not authenticated');
             }
+
+            // Debug: Log what we're sending
+            console.log('📤 Granting access with:', {
+                userId,
+                productId,
+                productSlug: productId, // This should be the slug (e.g., 'converter')
+                accessType: grantType,
+                expiration,
+                reason
+            });
 
             // Call Edge Function
             const { data, error } = await window.supabase.functions.invoke('admin-grant-access', {

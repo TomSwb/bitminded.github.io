@@ -169,8 +169,9 @@ serve(async (req) => {
     const { error: logError } = await supabaseAdmin
       .from('admin_activity')
       .insert({
-        admin_user_id: user.id,
-        action_type: 'revoke_access',
+        admin_id: user.id,
+        user_id: entitlement.user_id,
+        action: 'revoke_access',
         details: {
           entitlementId,
           userId: entitlement.user_id,

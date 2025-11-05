@@ -110,6 +110,7 @@ serve(async (req) => {
     let hasAccess = false
     let reason = 'no_entitlement'
 
+    // First check product_purchases
     if (Array.isArray(purchases)) {
       for (const p of purchases as any[]) {
         // Grace period takes precedence if still valid
@@ -143,6 +144,32 @@ serve(async (req) => {
           if (trialValid) {
             hasAccess = true
             reason = 'trial_active'
+            break
+          }
+        }
+      }
+    }
+
+    // If no access from purchases, check entitlements table (admin-granted access)
+    if (!hasAccess && productSlug) {
+      const { data: entitlements, error: entitlementsError } = await supabaseAdmin
+        .from('entitlements')
+        .select('id, app_id, active, expires_at, grant_type')
+        .eq('user_id', userId)
+        .eq('active', true)
+        .or(`app_id.eq.${productSlug},app_id.eq.all`)
+        .order('created_at', { ascending: false })
+
+      if (!entitlementsError && entitlements && entitlements.length > 0) {
+        for (const entitlement of entitlements) {
+          // Check if entitlement is not expired
+          const notExpired = !entitlement.expires_at || new Date(entitlement.expires_at) > now
+          if (notExpired) {
+            hasAccess = true
+            reason = entitlement.grant_type === 'lifetime' ? 'admin_grant_lifetime' : 
+                     entitlement.grant_type === 'trial' ? 'admin_grant_trial' :
+                     entitlement.grant_type === 'subscription' ? 'admin_grant_subscription' :
+                     'admin_grant_manual'
             break
           }
         }

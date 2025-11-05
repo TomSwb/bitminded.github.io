@@ -141,6 +141,8 @@ serve(async (req) => {
       expiresAt = null // Never expires
     }
 
+    console.log('🔍 Checking for existing entitlement with:', { userId, productId, app_id: productId })
+    
     // Check if entitlement already exists
     const { data: existingEntitlement } = await supabaseAdmin
       .from('entitlements')
@@ -148,6 +150,8 @@ serve(async (req) => {
       .eq('user_id', userId)
       .eq('app_id', productId)
       .maybeSingle()
+
+    console.log('🔍 Existing entitlement check result:', existingEntitlement ? 'Found' : 'Not found')
 
     let entitlement
     if (existingEntitlement) {
@@ -174,9 +178,10 @@ serve(async (req) => {
         )
       }
       entitlement = updated
-      console.log('✅ Updated existing entitlement')
+      console.log('✅ Updated existing entitlement:', { id: entitlement.id, app_id: entitlement.app_id, user_id: entitlement.user_id })
     } else {
       // Create new entitlement
+      console.log('📝 Creating new entitlement with app_id:', productId)
       const { data: created, error: createError } = await supabaseAdmin
         .from('entitlements')
         .insert({
@@ -199,15 +204,16 @@ serve(async (req) => {
         )
       }
       entitlement = created
-      console.log('✅ Created new entitlement')
+      console.log('✅ Created new entitlement:', { id: entitlement.id, app_id: entitlement.app_id, user_id: entitlement.user_id, active: entitlement.active })
     }
 
     // Log admin action
     const { error: logError } = await supabaseAdmin
       .from('admin_activity')
       .insert({
-        admin_user_id: user.id,
-        action_type: 'grant_access',
+        admin_id: user.id,
+        user_id: userId,
+        action: 'grant_access',
         details: {
           userId,
           productId,
