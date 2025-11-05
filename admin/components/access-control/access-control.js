@@ -491,30 +491,43 @@ class AccessControl {
                 console.error('❌ Supabase not available');
                 // Fallback to hardcoded list
                 this.products = ['all'];
+                this.productMap = {};
                 return;
             }
 
-            // Query active products from database
+            console.log('🔍 Loading products from database...');
+
+            // Query ALL products from database (admins should see all products regardless of status)
+            // Note: RLS policies should allow admins to see all products
             const { data, error } = await window.supabase
                 .from('products')
                 .select('id, name, slug, status')
-                .in('status', ['active', 'beta'])
                 .order('name', { ascending: true });
 
             if (error) {
                 console.error('❌ Error loading products:', error);
+                console.error('❌ Error details:', JSON.stringify(error, null, 2));
                 // Fallback to hardcoded list
                 this.products = ['all'];
+                this.productMap = {};
                 return;
             }
+
+            console.log('📦 Raw products data:', data);
+            console.log('📦 Products count:', data?.length || 0);
 
             // Create product map for easy lookup (slug -> product data)
             this.productMap = {};
             (data || []).forEach(p => {
+                // Use slug if available, otherwise fall back to id
                 const slug = p.slug || p.id;
+                if (!slug) {
+                    console.warn('⚠️ Product missing both slug and id:', p);
+                    return;
+                }
                 this.productMap[slug] = {
                     id: p.id,
-                    name: p.name,
+                    name: p.name || 'Unnamed Product',
                     slug: slug,
                     status: p.status
                 };
@@ -522,14 +535,22 @@ class AccessControl {
 
             // Map products to array of slugs (matching entitlements.app_id format)
             // Include 'all' as a special option for granting access to all products
-            this.products = ['all', ...(data || []).map(p => p.slug || p.id)];
+            const productSlugs = (data || [])
+                .map(p => p.slug || p.id)
+                .filter(slug => slug); // Filter out any null/undefined slugs
+            
+            this.products = ['all', ...productSlugs];
             
             console.log('✅ Products loaded from database:', this.products.length, 'products');
+            console.log('✅ Product map:', this.productMap);
+            console.log('✅ Product slugs:', this.products);
 
         } catch (error) {
             console.error('❌ Failed to load products:', error);
+            console.error('❌ Error stack:', error.stack);
             // Fallback to hardcoded list
             this.products = ['all'];
+            this.productMap = {};
         }
     }
 
@@ -1209,6 +1230,10 @@ class AccessControl {
             try {
                 const queryLower = query.toLowerCase();
                 
+                console.log('🔍 Product search query:', query);
+                console.log('🔍 Available products:', this.products);
+                console.log('🔍 Product map:', this.productMap);
+                
                 // Filter products by name or slug
                 const matchingProducts = this.products
                     .filter(slug => {
@@ -1217,12 +1242,21 @@ class AccessControl {
                             return allProductsText.includes(queryLower);
                         }
                         const product = this.productMap[slug];
-                        if (!product) return false;
+                        if (!product) {
+                            console.warn('⚠️ Product not found in map:', slug);
+                            return false;
+                        }
                         const name = (product.name || '').toLowerCase();
                         const slugLower = slug.toLowerCase();
-                        return name.includes(queryLower) || slugLower.includes(queryLower);
+                        const matches = name.includes(queryLower) || slugLower.includes(queryLower);
+                        if (matches) {
+                            console.log('✅ Product matches:', slug, product.name);
+                        }
+                        return matches;
                     })
                     .slice(0, 10); // Limit to 10 results
+                
+                console.log('✅ Matching products:', matchingProducts.length);
 
                 if (this.elements.productSuggestions && matchingProducts.length > 0) {
                     this.elements.productSuggestions.innerHTML = '';

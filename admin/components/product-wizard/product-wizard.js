@@ -945,13 +945,19 @@ class ProductWizard {
     /**
      * Save draft to database
      */
-    async saveDraftToDatabase() {
+    async saveDraftToDatabase(statusOverride = null) {
         try {
             // Prepare product data
             console.log('🔍 formData before saveDraft:', { 
                 stripe_product_id: this.formData.stripe_product_id,
                 stripe_price_id: this.formData.stripe_price_id 
             });
+            
+            // Determine status: use override if provided, otherwise 'draft'
+            // If step 7 is completed and no override, use 'beta'
+            const productStatus = statusOverride || 
+                (this.completedSteps.has(7) ? 'beta' : 'draft');
+            
             const productData = {
                 name: this.formData.name || '',
                 slug: this.formData.slug || '',
@@ -960,7 +966,7 @@ class ProductWizard {
                 description: this.formData.description || '',
                 tags: this.parseTags(this.formData.tags || ''),
                 pricing_type: this.formData.pricing_type || 'one_time',
-                status: 'draft'
+                status: productStatus
             };
 
             // Add AI data from Step 2 if available
