@@ -39,12 +39,8 @@ class AccessControl {
         }
 
         try {
-            console.log('🚀 Access Control: Initializing...');
-            console.log('🔍 Checking for access-control element:', document.getElementById('access-control'));
-            
             // Initialize DOM elements
             this.initializeElements();
-            console.log('✅ Elements initialized, grant button:', this.elements.grantAccessButton);
 
             // Setup event listeners
             this.setupEventListeners();
@@ -161,9 +157,7 @@ class AccessControl {
 
         // Grant Access Button
         if (this.elements.grantAccessButton) {
-            console.log('✅ Grant Access button found, adding event listener');
             this.elements.grantAccessButton.addEventListener('click', (e) => {
-                console.log('🔘 Grant Access button clicked!');
                 e.preventDefault();
                 e.stopPropagation();
                 this.openGrantModal();
@@ -495,8 +489,6 @@ class AccessControl {
                 return;
             }
 
-            console.log('🔍 Loading products from database...');
-
             // Query ALL products from database (admins should see all products regardless of status)
             // Note: RLS policies should allow admins to see all products
             const { data, error } = await window.supabase
@@ -513,8 +505,6 @@ class AccessControl {
                 return;
             }
 
-            console.log('📦 Raw products data:', data);
-            console.log('📦 Products count:', data?.length || 0);
 
             // Create product map for easy lookup (slug -> product data)
             this.productMap = {};
@@ -541,9 +531,6 @@ class AccessControl {
             
             this.products = ['all', ...productSlugs];
             
-            console.log('✅ Products loaded from database:', this.products.length, 'products');
-            console.log('✅ Product map:', this.productMap);
-            console.log('✅ Product slugs:', this.products);
 
         } catch (error) {
             console.error('❌ Failed to load products:', error);
@@ -869,15 +856,11 @@ class AccessControl {
                 e.preventDefault();
                 e.stopPropagation();
                 const grantId = revokeBtn.getAttribute('data-grant-id');
-                console.log('🔴🔴🔴 DELEGATED CLICK on revoke button! Grant ID:', grantId);
                 
                 // Find the grant from the filtered grants
                 const grant = this.filteredGrants.find(g => g.id === grantId);
                 if (grant) {
-                    console.log('🔴🔴🔴 Found grant, opening modal:', grant);
                     this.openRevokeModal(grant);
-                } else {
-                    console.error('❌ Grant not found for ID:', grantId);
                 }
             }
         }, true); // Use capture phase
@@ -978,15 +961,7 @@ class AccessControl {
 
         // Actions
         const actionsCell = document.createElement('td');
-        actionsCell.className = 'access-control__table-cell access-control__actions-cell';
-        
-        // Debug: Check grant status
-        console.log('🔵 Creating actions cell for grant:', {
-            id: grant.id,
-            status: grant.status,
-            isActive: grant.status === 'active'
-        });
-        
+        actionsCell.className = 'access-control__table-cell';
         actionsCell.innerHTML = `
             <div class="access-control__actions">
                 ${grant.status === 'active' ? `
@@ -996,49 +971,6 @@ class AccessControl {
                 ` : ''}
             </div>
         `;
-
-        // Add revoke button listener
-        const revokeBtn = actionsCell.querySelector('.access-control__action-btn--revoke');
-        console.log('🔵 Revoke button query result:', {
-            found: !!revokeBtn,
-            grantId: grant.id,
-            status: grant.status,
-            buttonElement: revokeBtn
-        });
-        
-        if (revokeBtn) {
-            // Add multiple event listeners to catch the click
-            revokeBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🔴🔴🔴 CLICK EVENT FIRED! Revoke button clicked for grant:', grant);
-                console.log('🔴🔴🔴 Event details:', {
-                    type: e.type,
-                    target: e.target,
-                    currentTarget: e.currentTarget,
-                    button: revokeBtn
-                });
-                this.openRevokeModal(grant);
-            }, true); // Use capture phase
-            
-            // Also add mousedown as backup
-            revokeBtn.addEventListener('mousedown', (e) => {
-                console.log('🔴🔴🔴 MOUSEDOWN on revoke button:', grant.id);
-            });
-            
-            // Set onclick as absolute fallback
-            revokeBtn.onclick = (e) => {
-                console.log('🔴🔴🔴 ONCLICK fallback fired!');
-                e.preventDefault();
-                e.stopPropagation();
-                this.openRevokeModal(grant);
-                return false;
-            };
-            
-            console.log('✅ Event listeners attached to revoke button for grant:', grant.id);
-        } else {
-            console.warn('⚠️ Revoke button not found for grant:', grant.id, 'Status:', grant.status);
-        }
 
         row.appendChild(userCell);
         row.appendChild(productCell);
@@ -1124,9 +1056,7 @@ class AccessControl {
      * Open grant access modal
      */
     openGrantModal() {
-        console.log('📋 Opening grant modal...', this.elements.grantModal);
         if (this.elements.grantModal) {
-            console.log('✅ Modal opened');
             this.elements.grantModal.classList.add('open');
             // Reset form
             if (this.elements.grantAccessForm) {
@@ -1166,34 +1096,43 @@ class AccessControl {
      * Open revoke access modal
      */
     openRevokeModal(grant) {
-        console.log('🔴 openRevokeModal called with grant:', grant);
         this.currentGrantId = grant.id;
-        console.log('🔴 Current grant ID set to:', this.currentGrantId);
         
-        if (this.elements.revokeModal) {
-            console.log('✅ Revoke modal element found');
-            // Populate revoke info
-            if (this.elements.revokeInfo) {
-                this.elements.revokeInfo.innerHTML = `
-                    <p><strong>User:</strong> ${grant.user?.username || 'Unknown'}</p>
-                    <p><strong>Product:</strong> ${grant.app_id}</p>
-                    <p><strong>${this.getTranslation('Grant Type') || 'Grant Type'}:</strong> ${this.getTranslation(this.capitalizeFirst(grant.grant_type || 'manual')) || this.capitalizeFirst(grant.grant_type || 'manual')}</p>
-                `;
-            } else {
-                console.warn('⚠️ Revoke info element not found');
-            }
+        if (!this.elements.revokeModal) {
+            console.error('❌ Revoke modal element not found!');
+            return;
+        }
+        
+        // Populate revoke info
+        if (this.elements.revokeInfo) {
+            this.elements.revokeInfo.innerHTML = `
+                <p><strong>User:</strong> ${grant.user?.username || 'Unknown'}</p>
+                <p><strong>Product:</strong> ${grant.app_id}</p>
+                <p><strong>${this.getTranslation('Grant Type') || 'Grant Type'}:</strong> ${this.getTranslation(this.capitalizeFirst(grant.grant_type || 'manual')) || this.capitalizeFirst(grant.grant_type || 'manual')}</p>
+            `;
+        }
 
-            // Reset form
-            if (this.elements.revokeAccessForm) {
-                this.elements.revokeAccessForm.reset();
-            } else {
-                console.warn('⚠️ Revoke access form not found');
-            }
+        // Reset form
+        if (this.elements.revokeAccessForm) {
+            this.elements.revokeAccessForm.reset();
+        }
 
-            this.elements.revokeModal.classList.add('open');
-            console.log('✅ Revoke modal opened');
-        } else {
-            console.error('❌ Revoke modal element NOT found!');
+        // Add open class and verify
+        this.elements.revokeModal.classList.add('open');
+        
+        // Verify modal is visible
+        const isVisible = window.getComputedStyle(this.elements.revokeModal).display !== 'none';
+        console.log('🔍 Modal visibility check:', {
+            hasOpenClass: this.elements.revokeModal.classList.contains('open'),
+            computedDisplay: window.getComputedStyle(this.elements.revokeModal).display,
+            isVisible: isVisible,
+            zIndex: window.getComputedStyle(this.elements.revokeModal).zIndex
+        });
+        
+        if (!isVisible) {
+            console.error('❌ Modal not visible after adding open class!');
+            // Force display
+            this.elements.revokeModal.style.display = 'flex';
         }
     }
 
@@ -1326,13 +1265,11 @@ class AccessControl {
                         const slugLower = slug.toLowerCase();
                         const matches = name.includes(queryLower) || slugLower.includes(queryLower);
                         if (matches) {
-                            console.log('✅ Product matches:', slug, product.name);
                         }
                         return matches;
                     })
                     .slice(0, 10); // Limit to 10 results
                 
-                console.log('✅ Matching products:', matchingProducts.length);
 
                 if (this.elements.productSuggestions && matchingProducts.length > 0) {
                     this.elements.productSuggestions.innerHTML = '';

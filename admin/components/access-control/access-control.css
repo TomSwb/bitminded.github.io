@@ -44,17 +44,11 @@
     opacity: 0.7;
 }
 
+/* Actions in table cells - matches user-management pattern */
 .access-control__actions {
     display: flex;
     gap: var(--spacing-sm);
     justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
-/* Center actions in table cell - target the actions column specifically */
-.access-control__table td:last-child {
-    text-align: center;
 }
 
 /* ===== BUTTONS ===== */
@@ -825,7 +819,7 @@
 }
 
 .access-control__modal.open {
-    display: flex;
+    display: flex !important;
 }
 
 .access-control__modal-content {
