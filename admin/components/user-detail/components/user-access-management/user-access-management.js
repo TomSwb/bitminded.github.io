@@ -138,31 +138,69 @@ class UserAccessManagement {
             this.elements.grantProductSelect.addEventListener('input', (e) => {
                 this.handleProductSearch(e.target.value);
             });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.user-access-management__form-group')) {
+                    if (this.elements.productSuggestions) {
+                        this.elements.productSuggestions.innerHTML = '';
+                        this.elements.productSuggestions.style.display = 'none';
+                        this.elements.productSuggestions.classList.add('hidden');
+                    }
+                }
+            });
         }
 
         // Reason templates
         const templateButtons = document.querySelectorAll('.user-access-management__template-btn');
         templateButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const template = btn.getAttribute('data-template');
+            btn.addEventListener('click', (e) => {
+                const template = e.target.closest('.user-access-management__template-btn').dataset.template;
                 if (this.elements.grantReason) {
                     this.elements.grantReason.value = template;
                 }
             });
         });
 
-        // Expiration type toggle
-        if (this.elements.grantExpirationType) {
-            this.elements.grantExpirationType.addEventListener('change', (e) => {
-                const isDate = e.target.value === 'date';
-                if (this.elements.grantExpirationDate) {
-                    this.elements.grantExpirationDate.style.display = isDate ? 'block' : 'none';
+        // Expiration type toggle - use event delegation to work when modal is moved
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('#grant-access-modal #grant-expiration-type')) {
+                if (e.target.value === 'date') {
+                    const dateInput = document.getElementById('grant-expiration-date');
+                    const durationSelect = document.getElementById('grant-expiration-duration');
+                    if (dateInput) {
+                        dateInput.classList.remove('hidden');
+                    }
+                    if (durationSelect) {
+                        durationSelect.classList.add('hidden');
+                    }
+                } else {
+                    const dateInput = document.getElementById('grant-expiration-date');
+                    const durationSelect = document.getElementById('grant-expiration-duration');
+                    if (dateInput) {
+                        dateInput.classList.add('hidden');
+                    }
+                    if (durationSelect) {
+                        durationSelect.classList.remove('hidden');
+                    }
                 }
-                if (this.elements.grantExpirationDuration) {
-                    this.elements.grantExpirationDuration.style.display = isDate ? 'none' : 'block';
+            }
+        });
+
+        // Grant type radio change (hide expiration for lifetime) - use event delegation
+        // This works even when modal is moved to document.body
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('#grant-access-modal input[name="grant-type"]')) {
+                const expirationGroup = document.getElementById('expiration-group');
+                if (expirationGroup) {
+                    if (e.target.value === 'lifetime') {
+                        expirationGroup.style.display = 'none';
+                    } else {
+                        expirationGroup.style.display = 'block';
+                    }
                 }
-            });
-        }
+            }
+        });
 
         // Click outside to close modals
         if (this.elements.grantModal) {
@@ -496,6 +534,23 @@ class UserAccessManagement {
             this.elements.grantProductSelect.value = '';
         }
 
+        // Reset expiration group visibility (default is manual, so show expiration)
+        const expirationGroup = document.getElementById('expiration-group');
+        if (expirationGroup) {
+            expirationGroup.style.display = 'block';
+        }
+        // Reset expiration type to date (default)
+        if (this.elements.grantExpirationType) {
+            this.elements.grantExpirationType.value = 'date';
+        }
+        // Show date input, hide duration input
+        if (this.elements.grantExpirationDate) {
+            this.elements.grantExpirationDate.classList.remove('hidden');
+        }
+        if (this.elements.grantExpirationDuration) {
+            this.elements.grantExpirationDuration.classList.add('hidden');
+        }
+
         // Move modal to body for proper positioning
         if (this.elements.grantModal.parentElement !== document.body) {
             document.body.appendChild(this.elements.grantModal);
@@ -553,13 +608,18 @@ class UserAccessManagement {
             let expiration = null;
             if (grantType !== 'lifetime') {
                 const expirationType = this.elements.grantExpirationType?.value;
-                if (expirationType === 'date' && this.elements.grantExpirationDate?.value) {
-                    expiration = this.elements.grantExpirationDate.value;
-                } else if (expirationType === 'duration' && this.elements.grantExpirationDuration?.value) {
-                    const days = parseInt(this.elements.grantExpirationDuration.value);
-                    const date = new Date();
-                    date.setDate(date.getDate() + days);
-                    expiration = date.toISOString().split('T')[0];
+                if (expirationType === 'date') {
+                    const dateValue = this.elements.grantExpirationDate?.value;
+                    if (dateValue) {
+                        expiration = new Date(dateValue).toISOString();
+                    }
+                } else if (expirationType === 'duration') {
+                    const duration = parseInt(this.elements.grantExpirationDuration?.value);
+                    if (duration) {
+                        const expDate = new Date();
+                        expDate.setDate(expDate.getDate() + duration);
+                        expiration = expDate.toISOString();
+                    }
                 }
             }
 
@@ -783,7 +843,8 @@ class UserAccessManagement {
             if (!query || !this.elements.productSuggestions) {
                 if (this.elements.productSuggestions) {
                     this.elements.productSuggestions.innerHTML = '';
-                    this.elements.productSuggestions.classList.add('user-access-management__suggestion--hidden');
+                    this.elements.productSuggestions.style.display = 'none';
+                    this.elements.productSuggestions.classList.add('hidden');
                 }
                 return;
             }
@@ -801,7 +862,8 @@ class UserAccessManagement {
 
             if (this.elements.productSuggestions && matchingProducts.length > 0) {
                 this.elements.productSuggestions.innerHTML = '';
-                this.elements.productSuggestions.classList.remove('user-access-management__suggestion--hidden');
+                this.elements.productSuggestions.style.display = 'block';
+                this.elements.productSuggestions.classList.remove('hidden');
 
                 matchingProducts.forEach(productSlug => {
                     const suggestion = document.createElement('div');
@@ -818,10 +880,11 @@ class UserAccessManagement {
                     });
                     this.elements.productSuggestions.appendChild(suggestion);
                 });
-                } else if (this.elements.productSuggestions) {
-                    this.elements.productSuggestions.innerHTML = '<div class="user-access-management__suggestion">No products found</div>';
-                    this.elements.productSuggestions.classList.remove('user-access-management__suggestion--hidden');
-                }
+            } else if (this.elements.productSuggestions) {
+                this.elements.productSuggestions.innerHTML = '<div class="user-access-management__suggestion">No products found</div>';
+                this.elements.productSuggestions.style.display = 'block';
+                this.elements.productSuggestions.classList.remove('hidden');
+            }
         }, 300);
     }
 
@@ -850,7 +913,8 @@ class UserAccessManagement {
         }
         if (this.elements.productSuggestions) {
             this.elements.productSuggestions.innerHTML = '';
-            this.elements.productSuggestions.classList.add('user-access-management__suggestion--hidden');
+            this.elements.productSuggestions.style.display = 'none';
+            this.elements.productSuggestions.classList.add('hidden');
         }
     }
 
