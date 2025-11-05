@@ -1,0 +1,265 @@
+/* App Entitlements Component Styles */
+
+/* ===== MAIN CONTAINER ===== */
+.app-entitlements {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ===== HEADER ===== */
+.app-entitlements__header {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--border-color-primary);
+}
+
+.app-entitlements__title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.app-entitlements__description {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: var(--line-height-relaxed);
+}
+
+/* ===== TABLE ===== */
+.app-entitlements__table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border-color-primary);
+    background-color: var(--color-background-primary);
+}
+
+.app-entitlements__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.app-entitlements__table thead {
+    background-color: var(--color-background-secondary);
+    border-bottom: 2px solid var(--border-color-primary);
+}
+
+.app-entitlements__table th {
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-align: left;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.app-entitlements__table tbody tr {
+    border-bottom: 1px solid var(--border-color-primary);
+    transition: background-color var(--transition-fast);
+}
+
+.app-entitlements__table tbody tr:hover {
+    background-color: var(--color-background-secondary);
+}
+
+.app-entitlements__table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.app-entitlements__table-cell {
+    padding: var(--spacing-md) var(--spacing-lg);
+    color: var(--color-text-primary);
+    vertical-align: middle;
+}
+
+/* ===== BADGES ===== */
+.app-entitlements__badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: capitalize;
+    background-color: var(--color-background-secondary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--border-color-primary);
+}
+
+.app-entitlements__badge--active {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.app-entitlements__badge--inactive {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+    border-color: rgba(107, 114, 128, 0.3);
+}
+
+.app-entitlements__badge--expired {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.app-entitlements__badge--warning {
+    background-color: rgba(234, 179, 8, 0.1);
+    color: #eab308;
+    border-color: rgba(234, 179, 8, 0.3);
+}
+
+/* ===== ACCESS LINK ===== */
+.app-entitlements__access-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-semibold);
+    transition: color var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.app-entitlements__access-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* ===== EMPTY STATE ===== */
+.app-entitlements__empty {
+    text-align: center;
+    padding: var(--spacing-3xl) var(--spacing-xl);
+    background-color: var(--color-background-primary);
+    border: 2px dashed var(--border-color-primary);
+    border-radius: var(--radius-md);
+}
+
+.app-entitlements__empty-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
+}
+
+.app-entitlements__empty-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.app-entitlements__empty-description {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+    margin: 0;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ===== LOADING STATE ===== */
+.app-entitlements__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl) var(--spacing-xl);
+    gap: var(--spacing-md);
+}
+
+.app-entitlements__loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color-primary);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.app-entitlements__loading p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-md);
+    margin: 0;
+}
+
+/* ===== ERROR STATE ===== */
+.app-entitlements__error {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-md);
+    color: #ef4444;
+}
+
+.app-entitlements__error-icon {
+    font-size: var(--font-size-lg);
+}
+
+.app-entitlements__error-text {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* ===== UTILITY CLASSES ===== */
+.hidden {
+    display: none !important;
+}
+
+.app-entitlements__table--hidden {
+    display: none !important;
+}
+
+.app-entitlements__empty--hidden {
+    display: none !important;
+}
+
+.app-entitlements__loading--hidden {
+    display: none !important;
+}
+
+.app-entitlements__error--hidden {
+    display: none !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .app-entitlements__table-container {
+        border-radius: var(--radius-sm);
+    }
+
+    .app-entitlements__table {
+        font-size: var(--font-size-xs);
+    }
+
+    .app-entitlements__table th,
+    .app-entitlements__table-cell {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .app-entitlements__header {
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+    }
+
+    .app-entitlements__title {
+        font-size: var(--font-size-xl);
+    }
+
+    .app-entitlements__description {
+        font-size: var(--font-size-sm);
+    }
+}
+

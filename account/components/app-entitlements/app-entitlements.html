@@ -1,0 +1,47 @@
+<!-- App Entitlements Component -->
+<div class="app-entitlements" id="app-entitlements">
+    <!-- Header -->
+    <div class="app-entitlements__header">
+        <h2 class="app-entitlements__title translatable-content" data-translation-key="Your App Access">Your App Access</h2>
+        <p class="app-entitlements__description translatable-content" data-translation-key="app_access_description">View all the apps and products you have access to</p>
+    </div>
+
+    <!-- Entitlements Table -->
+    <div class="app-entitlements__table-container" id="entitlements-table-container">
+        <table class="app-entitlements__table app-entitlements__table--hidden" id="entitlements-table">
+            <thead>
+                <tr>
+                    <th class="translatable-content" data-translation-key="Product">Product</th>
+                    <th class="translatable-content" data-translation-key="Grant Type">Grant Type</th>
+                    <th class="translatable-content" data-translation-key="Status">Status</th>
+                    <th class="translatable-content" data-translation-key="Granted Date">Granted Date</th>
+                    <th class="translatable-content" data-translation-key="Expiration">Expiration</th>
+                    <th class="translatable-content" data-translation-key="Access">Access</th>
+                </tr>
+            </thead>
+            <tbody id="entitlements-table-body">
+                <!-- Entitlements will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- No Access Message -->
+    <div class="app-entitlements__empty app-entitlements__empty--hidden" id="entitlements-empty">
+        <div class="app-entitlements__empty-icon">📦</div>
+        <p class="app-entitlements__empty-title translatable-content" data-translation-key="no_access_title">No app access yet</p>
+        <p class="app-entitlements__empty-description translatable-content" data-translation-key="no_access_description">You don't have access to any apps or products yet. Contact support if you believe this is an error.</p>
+    </div>
+    
+    <!-- Loading State -->
+    <div class="app-entitlements__loading app-entitlements__loading--hidden" id="entitlements-loading">
+        <div class="app-entitlements__loading-spinner"></div>
+        <p class="translatable-content" data-translation-key="loading_entitlements">Loading your app access...</p>
+    </div>
+    
+    <!-- Error Message -->
+    <div class="app-entitlements__error app-entitlements__error--hidden" id="entitlements-error">
+        <span class="app-entitlements__error-icon">⚠️</span>
+        <span class="app-entitlements__error-text" id="entitlements-error-text"></span>
+    </div>
+</div>
+
