@@ -228,9 +228,37 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .communication-activity-filters {
+        padding: var(--spacing-md);
+    }
+
+    .communication-activity-filters__header {
+        gap: var(--spacing-sm);
+    }
+
     .communication-activity-filters__controls {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
+    }
+
+    .communication-activity-filters__group {
+        width: 100%;
+    }
+
+    .communication-activity-filters__label {
+        font-size: var(--font-size-xs);
+    }
+
+    .communication-activity-filters__select {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
+    }
+
+    .communication-activity-filters__dropdown-btn {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
     }
 
     .communication-activity-filters__summary-row {
@@ -239,7 +267,32 @@
         align-items: stretch;
     }
 
+    .communication-activity-filters__summary {
+        width: 100%;
+        justify-content: center;
+        padding: var(--spacing-md);
+    }
+
     .communication-activity-filters__clear-btn {
-        align-self: flex-end;
+        width: 100%;
+        padding: var(--spacing-md);
+        text-align: center;
+        align-self: stretch;
+    }
+
+    .communication-activity-filters__count {
+        font-size: var(--font-size-sm);
+    }
+
+    .communication-activity-filters__actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .communication-activity-filters__action-btn {
+        width: 100%;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
     }
 }

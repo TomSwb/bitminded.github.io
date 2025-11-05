@@ -283,3 +283,149 @@
     text-decoration: underline;
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+    .step-cloudflare-setup {
+        max-width: 100%;
+    }
+
+    .step-cloudflare-setup__header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .step-cloudflare-setup__header h2 {
+        font-size: var(--font-size-xl);
+    }
+
+    .step-cloudflare-setup__header p {
+        font-size: var(--font-size-sm);
+    }
+
+    .step-cloudflare-setup__fields {
+        gap: var(--spacing-lg);
+    }
+
+    .step-cloudflare-setup__field-group {
+        gap: var(--spacing-sm);
+    }
+
+    .step-cloudflare-setup__label {
+        font-size: var(--font-size-sm);
+    }
+
+    .step-cloudflare-setup__input {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
+        min-height: 44px;
+    }
+
+    .step-cloudflare-setup__subdomain-input {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+    }
+
+    .step-cloudflare-setup__subdomain-input .step-cloudflare-setup__input {
+        width: 100%;
+    }
+
+    .step-cloudflare-setup__subdomain-suffix {
+        text-align: center;
+        padding: var(--spacing-sm) 0;
+    }
+
+    .step-cloudflare-setup__help {
+        font-size: var(--font-size-xs);
+    }
+
+    .step-cloudflare-setup__instructions {
+        padding: var(--spacing-md);
+    }
+
+    .step-cloudflare-setup__instructions-title {
+        font-size: var(--font-size-base);
+    }
+
+    .step-cloudflare-setup__instruction-step {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .step-cloudflare-setup__instruction-step h4 {
+        font-size: var(--font-size-sm);
+    }
+
+    .step-cloudflare-setup__instruction-step p {
+        font-size: var(--font-size-xs);
+    }
+
+    .step-cloudflare-setup__instruction-step ul {
+        margin-left: var(--spacing-md);
+        font-size: var(--font-size-xs);
+    }
+
+    .step-cloudflare-setup__code-snippet pre {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        overflow-x: auto;
+    }
+
+    .step-cloudflare-setup__info {
+        padding: var(--spacing-md);
+    }
+
+    .step-cloudflare-setup__info p {
+        font-size: var(--font-size-xs);
+    }
+
+    .step-cloudflare-setup__create-section {
+        padding: var(--spacing-md);
+        margin: var(--spacing-md) 0;
+    }
+
+    .step-cloudflare-setup__create-btn {
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+        min-height: 44px;
+        font-size: var(--font-size-base);
+    }
+
+    .step-cloudflare-setup__recreate-section {
+        padding: var(--spacing-md);
+        margin: var(--spacing-md) 0;
+    }
+
+    .step-cloudflare-setup__status {
+        margin: var(--spacing-md) 0;
+    }
+
+    .step-cloudflare-setup__status-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
+    }
+
+    .step-cloudflare-setup__status-icon {
+        font-size: var(--font-size-xl);
+    }
+
+    .step-cloudflare-setup__status-content strong {
+        font-size: var(--font-size-sm);
+    }
+
+    .step-cloudflare-setup__status-content p {
+        font-size: var(--font-size-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .step-cloudflare-setup__header h2 {
+        font-size: var(--font-size-lg);
+    }
+
+    .step-cloudflare-setup__create-btn {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+}
+

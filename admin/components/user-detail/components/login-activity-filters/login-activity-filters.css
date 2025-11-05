@@ -228,9 +228,37 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .login-activity-filters {
+        padding: var(--spacing-md);
+    }
+
+    .login-activity-filters__header {
+        gap: var(--spacing-sm);
+    }
+
     .login-activity-filters__controls {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
+    }
+
+    .login-activity-filters__group {
+        width: 100%;
+    }
+
+    .login-activity-filters__label {
+        font-size: var(--font-size-xs);
+    }
+
+    .login-activity-filters__select {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
+    }
+
+    .login-activity-filters__dropdown-btn {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
     }
 
     .login-activity-filters__summary-row {
@@ -239,7 +267,32 @@
         align-items: stretch;
     }
 
+    .login-activity-filters__summary {
+        width: 100%;
+        justify-content: center;
+        padding: var(--spacing-md);
+    }
+
     .login-activity-filters__clear-btn {
-        align-self: flex-end;
+        width: 100%;
+        padding: var(--spacing-md);
+        text-align: center;
+        align-self: stretch;
+    }
+
+    .login-activity-filters__count {
+        font-size: var(--font-size-sm);
+    }
+
+    .login-activity-filters__actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .login-activity-filters__action-btn {
+        width: 100%;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
     }
 }

@@ -258,12 +258,130 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .step-review-summary {
+        max-width: 100%;
+    }
+
+    .step-review-summary__header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .step-review-summary__header h2 {
+        font-size: var(--font-size-xl);
+    }
+
+    .step-review-summary__header p {
+        font-size: var(--font-size-sm);
+    }
+
+    .step-review-summary__validation {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        font-size: var(--font-size-sm);
+    }
+
+    .step-review-summary__validation ul {
+        padding-left: var(--spacing-md);
+    }
+
+    .step-review-summary__validation li {
+        font-size: var(--font-size-xs);
+    }
+
+    .step-review-summary__sections {
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .step-review-summary__section {
+        padding: var(--spacing-md);
+    }
+
+    .step-review-summary__section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        padding-bottom: var(--spacing-sm);
+    }
+
+    .step-review-summary__section-header h3 {
+        font-size: var(--font-size-base);
+        width: 100%;
+    }
+
+    .step-review-summary__status-icon {
+        font-size: var(--font-size-lg);
+    }
+
+    .step-review-summary__section-content {
+        gap: var(--spacing-sm);
+    }
+
+    .step-review-summary__field {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .step-review-summary__field-label {
+        font-size: var(--font-size-sm);
+        width: 100%;
+    }
+
+    .step-review-summary__field-value {
+        font-size: var(--font-size-sm);
+        word-break: break-word;
+    }
+
+    .step-review-summary__icon-preview {
+        width: 48px;
+        height: 48px;
+    }
+
+    .step-review-summary__list {
+        padding-left: var(--spacing-md);
+    }
+
+    .step-review-summary__list li {
+        font-size: var(--font-size-xs);
+    }
+
+    .step-review-summary__spec-preview {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        max-height: 200px;
+    }
+
     .step-review-summary__actions {
         flex-direction: column;
+        gap: var(--spacing-sm);
+        padding-top: var(--spacing-lg);
     }
     
     .step-review-summary__btn {
         width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+        min-height: 44px;
+        font-size: var(--font-size-base);
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .step-review-summary__header h2 {
+        font-size: var(--font-size-lg);
+    }
+
+    .step-review-summary__section {
+        padding: var(--spacing-sm);
+    }
+
+    .step-review-summary__section-header h3 {
+        font-size: var(--font-size-sm);
+    }
+
+    .step-review-summary__btn {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
     }
 }
 

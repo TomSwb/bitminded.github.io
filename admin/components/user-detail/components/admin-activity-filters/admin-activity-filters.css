@@ -270,9 +270,74 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .admin-activity-filters {
+        padding: var(--spacing-md);
+    }
+
+    .admin-activity-filters__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding-bottom: var(--spacing-md);
+    }
+
+    .admin-activity-filters__title {
+        font-size: var(--font-size-base);
+        width: 100%;
+    }
+
+    .admin-activity-filters__clear-btn {
+        width: 100%;
+        padding: var(--spacing-md);
+        text-align: center;
+        min-height: 44px;
+        align-self: stretch;
+    }
+
     .admin-activity-filters__controls {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
+    }
+
+    .admin-activity-filters__group {
+        width: 100%;
+    }
+
+    .admin-activity-filters__label {
+        font-size: var(--font-size-xs);
+    }
+
+    .admin-activity-filters__select {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
+    }
+
+    .admin-activity-filters__multiselect-trigger {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
+    }
+
+    .admin-activity-filters__multiselect-dropdown {
+        max-height: 250px;
+    }
+
+    .admin-activity-filters__multiselect-search input {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
+
+    .admin-activity-filters__multiselect-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .admin-activity-filters__multiselect-btn {
+        width: 100%;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
     }
     
     .admin-activity-filters__footer {
@@ -280,8 +345,21 @@
         gap: var(--spacing-sm);
         align-items: stretch;
     }
-    
+
+    .admin-activity-filters__summary {
+        width: 100%;
+        justify-content: center;
+        padding: var(--spacing-md);
+    }
+
     .admin-activity-filters__clear-btn {
-        align-self: flex-end;
+        width: 100%;
+        padding: var(--spacing-md);
+        text-align: center;
+        align-self: stretch;
+    }
+
+    .admin-activity-filters__count {
+        font-size: var(--font-size-sm);
     }
 }

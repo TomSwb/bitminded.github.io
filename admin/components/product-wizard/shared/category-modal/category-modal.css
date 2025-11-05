@@ -147,13 +147,86 @@
     .category-modal__content {
         width: 95%;
         margin: var(--spacing-md);
+        max-height: 95vh;
+    }
+
+    .category-modal__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
+    }
+
+    .category-modal__header h3 {
+        font-size: var(--font-size-lg);
+        width: 100%;
+    }
+
+    .category-modal__close {
+        position: absolute;
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        font-size: var(--font-size-xl);
     }
     
+    .category-modal__body {
+        padding: var(--spacing-md);
+    }
+
+    .category-modal__field-group {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .category-modal__label {
+        font-size: var(--font-size-sm);
+    }
+
+    .category-modal__input,
+    .category-modal__textarea {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
+        min-height: 44px;
+    }
+
+    .category-modal__textarea {
+        min-height: 100px;
+    }
+
     .category-modal__footer {
         flex-direction: column;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
     }
     
     .category-modal__btn {
         width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+        min-height: 44px;
+        font-size: var(--font-size-base);
+    }
+}
+
+@media (max-width: 480px) {
+    .category-modal__content {
+        width: 98%;
+        margin: var(--spacing-sm);
+    }
+
+    .category-modal__header {
+        padding: var(--spacing-sm);
+    }
+
+    .category-modal__header h3 {
+        font-size: var(--font-size-base);
+    }
+
+    .category-modal__body {
+        padding: var(--spacing-sm);
+    }
+
+    .category-modal__input,
+    .category-modal__textarea {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-sm);
     }
 }

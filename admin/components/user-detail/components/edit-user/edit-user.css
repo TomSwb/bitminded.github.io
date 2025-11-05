@@ -374,29 +374,130 @@
 
 /* ===== MOBILE RESPONSIVENESS ===== */
 @media (max-width: 768px) {
+    .edit-user__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding-bottom: var(--spacing-md);
+    }
+
+    .edit-user__title {
+        font-size: var(--font-size-base);
+        width: 100%;
+    }
+
+    .edit-user__close-btn {
+        align-self: flex-end;
+        padding: var(--spacing-sm) var(--spacing-md);
+        min-height: 44px;
+    }
+
     .edit-user__form {
         padding: var(--spacing-lg);
     }
 
+    .edit-user__section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .edit-user__section-title {
+        font-size: var(--font-size-base);
+        padding-bottom: var(--spacing-sm);
+    }
+
+    .edit-user__field {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .edit-user__label {
+        font-size: var(--font-size-xs);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .edit-user__input,
+    .edit-user__select {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
+        min-height: 44px;
+    }
+
     .edit-user__input-group {
         flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .edit-user__input-group .edit-user__input {
+        width: 100%;
     }
 
     .edit-user__input-group .edit-user__button {
+        width: 100%;
         align-self: stretch;
+        padding: var(--spacing-md);
+        min-height: 44px;
     }
 
     .edit-user__avatar-controls {
         flex-direction: column;
         align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .edit-user__current-avatar {
+        align-self: center;
+    }
+
+    .edit-user__current-value {
+        width: 100%;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        word-break: break-all;
+    }
+
+    .edit-user__password-controls {
+        gap: var(--spacing-md);
+        align-items: stretch;
+    }
+
+    .edit-user__password-controls .edit-user__input {
+        width: 100%;
+    }
+
+    .edit-user__help-text {
+        font-size: var(--font-size-xs);
+    }
+
+    .edit-user__availability {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
     }
 
     .edit-user__actions {
         flex-direction: column;
+        gap: var(--spacing-sm);
+        padding-top: var(--spacing-md);
     }
 
-    .edit-user__password-controls {
-        align-items: stretch;
+    .edit-user__button {
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-size-base);
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    .edit-user__loading {
+        padding: var(--spacing-md);
+    }
+
+    .edit-user__loading-text {
+        font-size: var(--font-size-xs);
+    }
+
+    .edit-user__error,
+    .edit-user__success {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
     }
 }
 
@@ -406,12 +507,20 @@
     }
 
     .edit-user__section-title {
-        font-size: var(--font-size-base);
+        font-size: var(--font-size-sm);
     }
 
     .edit-user__current-avatar {
         width: 48px;
         height: 48px;
+    }
+
+    .edit-user__header {
+        padding-bottom: var(--spacing-sm);
+    }
+
+    .edit-user__title {
+        font-size: var(--font-size-sm);
     }
 }
 

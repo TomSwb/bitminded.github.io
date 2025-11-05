@@ -679,23 +679,109 @@
     .product-management__header {
         flex-direction: column;
         align-items: stretch;
+        position: relative;
+        padding: var(--spacing-md) 0;
+    }
+
+    .product-management__title-section {
+        order: 1;
+        text-align: left;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .product-management__title {
+        font-size: var(--font-size-2xl);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .product-management__count {
+        font-size: var(--font-size-sm);
     }
 
     .product-management__actions {
+        position: static;
+        order: 2;
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
     }
 
     .product-management__button {
-        flex: 1;
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-size-base);
         justify-content: center;
+        min-height: 44px;
+    }
+
+    .product-management__controls {
+        gap: var(--spacing-md);
     }
 
     .product-management__filters {
-        flex-direction: column;
+        padding: var(--spacing-md);
     }
 
-    .product-management__filter {
+    .product-management__filters-controls {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .product-management__filter-group {
         width: 100%;
+    }
+
+    .product-management__summary-row {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: stretch;
+    }
+
+    .product-management__summary {
+        width: 100%;
+        justify-content: center;
+        padding: var(--spacing-md);
+    }
+
+    .product-management__clear-btn {
+        width: 100%;
+        padding: var(--spacing-md);
+        text-align: center;
+    }
+
+    .product-management__table-container {
+        margin: 0 -var(--spacing-md);
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .product-management__table th {
+        padding: var(--spacing-sm) var(--spacing-xs);
+        font-size: var(--font-size-xs);
+    }
+
+    .product-management__table td {
+        padding: var(--spacing-sm) var(--spacing-xs);
+        font-size: var(--font-size-xs);
+    }
+
+    .product-management__badge {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .product-management__actions-cell {
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+    }
+
+    .product-management__action-button {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs);
+        min-width: auto;
     }
 }
 
