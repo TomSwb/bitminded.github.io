@@ -32,11 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load Theme Switcher Component
     loadThemeSwitcher();
     
-    // Load Notification Center Component (for authenticated users)
-    loadNotificationCenter();
-    
     // Load Auth Buttons Component
     loadAuthButtons();
+    
+    // Defer Notification Center loading to ensure main content is indexed first
+    // This helps search engines prioritize the main content over UI components
+    setTimeout(() => {
+        loadNotificationCenter();
+    }, 500);
     
     // Account page specific initialization is now handled by account-page-loader.js
     
