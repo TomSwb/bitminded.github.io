@@ -422,6 +422,19 @@ class AuthPageLoader {
                 await window.loginForm.init();
             }
 
+            // Load CAPTCHA component for login (needed if user has failed attempts)
+            await this.loadCaptcha();
+
+            // Show CAPTCHA if login form requires it (due to failed attempts)
+            if (window.loginForm && window.loginForm.requiresCaptcha()) {
+                const captchaContainer = document.getElementById('captcha-container');
+                if (captchaContainer) {
+                    captchaContainer.classList.remove('hidden');
+                    // Ensure CAPTCHA is initialized and rendered
+                    await window.loginForm.ensureCaptchaInitialized();
+                }
+            }
+
             this.loadedComponents.set('login-form', true);
             // Component loaded silently
             
@@ -553,6 +566,11 @@ class AuthPageLoader {
             termsContainer.classList.add('hidden');
         }
 
+        // Load CAPTCHA component if not already loaded
+        if (!this.loadedComponents.has('captcha')) {
+            await this.loadCaptcha();
+        }
+
         // Check if CAPTCHA is needed for login (due to failed attempts)
         const captchaContainer = document.getElementById('captcha-container');
         if (captchaContainer) {
@@ -561,6 +579,10 @@ class AuthPageLoader {
                 captchaContainer.classList.add('hidden');
             } else if (window.loginForm && window.loginForm.requiresCaptcha()) {
                 captchaContainer.classList.remove('hidden');
+                // Ensure CAPTCHA is initialized and rendered
+                if (window.loginForm.ensureCaptchaInitialized) {
+                    await window.loginForm.ensureCaptchaInitialized();
+                }
             }
         }
 
@@ -661,6 +683,25 @@ class AuthPageLoader {
                         await window.loginForm.reinit();
                     }
                 }
+            }
+        }
+
+        // Load CAPTCHA component if not already loaded
+        if (!this.loadedComponents.has('captcha')) {
+            await this.loadCaptcha();
+        }
+
+        // Check if CAPTCHA is needed for login (due to failed attempts)
+        const captchaContainer = document.getElementById('captcha-container');
+        if (captchaContainer) {
+            if (window.loginForm && window.loginForm.requiresCaptcha()) {
+                captchaContainer.classList.remove('hidden');
+                // Ensure CAPTCHA is initialized and rendered
+                if (window.loginForm.ensureCaptchaInitialized) {
+                    await window.loginForm.ensureCaptchaInitialized();
+                }
+            } else {
+                captchaContainer.classList.add('hidden');
             }
         }
 
