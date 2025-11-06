@@ -20,6 +20,24 @@
   object-fit: cover;
 }
 
+/* Default: show dark image (when no data-theme attribute) */
+.hero__image--light {
+  display: none;
+}
+
+.hero__image--dark {
+  display: block;
+}
+
+/* Show light image when light theme is active */
+[data-theme="light"] .hero__image--light {
+  display: block;
+}
+
+[data-theme="light"] .hero__image--dark {
+  display: none;
+}
+
 .hero__content {
   width: 100%;
 }
