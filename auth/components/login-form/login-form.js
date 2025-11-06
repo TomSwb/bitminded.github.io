@@ -522,6 +522,9 @@ class LoginForm {
 
             console.log('🔍 CAPTCHA container found:', captchaContainer);
 
+            // Ensure container is visible
+            captchaContainer.classList.remove('hidden');
+
             // Initialize if not already done
             if (!window.captcha) {
                 console.log('🔄 Initializing CAPTCHA for login...');
@@ -544,10 +547,20 @@ class LoginForm {
                 console.log('✅ CAPTCHA initialized for login');
             }
 
-            // Force render the widget if it's not visible
+            // Wait a bit for the container to be visible in the DOM
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Render the widget - renderWidget() will handle if already rendered
             if (window.captcha && window.captcha.isInitialized) {
-                console.log('🔄 Forcing CAPTCHA widget render...');
-                await window.captcha.renderWidget();
+                console.log('🔄 Ensuring CAPTCHA widget is rendered...');
+                // Check if widget element exists and is empty (needs rendering)
+                const widgetElement = document.getElementById('captcha-widget');
+                if (widgetElement && (!window.captcha.widgetId || widgetElement.children.length === 0)) {
+                    await window.captcha.renderWidget();
+                } else if (window.captcha.widgetId) {
+                    // Widget already rendered, just ensure it's visible
+                    console.log('✅ CAPTCHA widget already rendered');
+                }
             }
         } catch (error) {
             console.error('❌ Failed to initialize CAPTCHA for login:', error);
