@@ -1,11 +1,13 @@
 <!-- Notification Center Component -->
-<div class="notification-center" id="notification-center">
+<!-- data-nosnippet prevents Google from using this content in search snippets -->
+<div class="notification-center" id="notification-center" data-nosnippet>
     <!-- Bell Icon Button -->
     <button class="notification-center__bell" 
             id="notification-bell" 
             aria-label="Notifications"
             aria-haspopup="true"
-            aria-expanded="false">
+            aria-expanded="false"
+            data-nosnippet>
         <span class="notification-center__icon">🔔</span>
         <span class="notification-center__badge" 
               id="notification-badge" 
@@ -16,26 +18,30 @@
     <div class="notification-center__dropdown" 
          id="notification-dropdown" 
          role="menu"
-         aria-hidden="true">
+         aria-hidden="true"
+         data-nosnippet>
         
         <!-- Dropdown Header -->
-        <div class="notification-center__header">
+        <div class="notification-center__header" data-nosnippet>
             <h3 class="notification-center__title translatable-content" 
-                data-translation-key="Notifications">
+                data-translation-key="Notifications"
+                data-nosnippet>
                 Notifications
             </h3>
-            <div class="notification-center__actions">
+            <div class="notification-center__actions" data-nosnippet>
                 <button class="notification-center__mark-all-read" 
                         id="mark-all-read-btn"
-                        type="button">
-                    <span class="translatable-content" data-translation-key="Mark all as read">
+                        type="button"
+                        data-nosnippet>
+                    <span class="translatable-content" data-translation-key="Mark all as read" data-nosnippet>
                         Mark all as read
                     </span>
                 </button>
                 <button class="notification-center__delete-all" 
                         id="delete-all-btn"
-                        type="button">
-                    <span class="translatable-content" data-translation-key="Delete all">
+                        type="button"
+                        data-nosnippet>
+                    <span class="translatable-content" data-translation-key="Delete all" data-nosnippet>
                         Delete all
                     </span>
                 </button>
@@ -43,11 +49,11 @@
         </div>
 
         <!-- Notifications List -->
-        <div class="notification-center__list" id="notification-list">
+        <div class="notification-center__list" id="notification-list" data-nosnippet>
             <!-- Loading state -->
-            <div class="notification-center__loading" id="notification-loading">
+            <div class="notification-center__loading" id="notification-loading" data-nosnippet>
                 <div class="notification-center__spinner"></div>
-                <p class="translatable-content" data-translation-key="Loading notifications...">
+                <p class="translatable-content" data-translation-key="Loading notifications..." data-nosnippet>
                     Loading notifications...
                 </p>
             </div>
@@ -55,14 +61,17 @@
             <!-- Empty state -->
             <div class="notification-center__empty" 
                  id="notification-empty" 
-                 style="display: none;">
+                 style="display: none;"
+                 data-nosnippet>
                 <span class="notification-center__empty-icon">✅</span>
                 <p class="notification-center__empty-title translatable-content" 
-                   data-translation-key="You're all caught up!">
+                   data-translation-key="You're all caught up!"
+                   data-nosnippet>
                     You're all caught up!
                 </p>
                 <p class="notification-center__empty-subtitle translatable-content" 
-                   data-translation-key="No new notifications">
+                   data-translation-key="No new notifications"
+                   data-nosnippet>
                     No new notifications
                 </p>
             </div>
@@ -71,10 +80,11 @@
         </div>
 
         <!-- Dropdown Footer -->
-        <div class="notification-center__footer">
+        <div class="notification-center__footer" data-nosnippet>
             <a href="/account/index.html?section=notifications" 
                class="notification-center__view-all translatable-content" 
-               data-translation-key="View preferences">
+               data-translation-key="View preferences"
+               data-nosnippet>
                 View preferences →
             </a>
         </div>
