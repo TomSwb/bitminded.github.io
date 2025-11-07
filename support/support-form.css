@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4xl, 4rem);
-  padding: clamp(2rem, 5vw, 4rem) 1.5rem 6rem;
+  padding: clamp(5rem, 8vw, 7rem) 1.5rem 6rem;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -11,11 +11,13 @@
 .support-hero {
   display: grid;
   gap: 1.5rem;
-  padding: clamp(2rem, 4vw, 3rem);
+  padding: clamp(2.5rem, 5vw, 3.5rem);
   border-radius: 1.5rem;
   background: var(--gradient-support-hero, linear-gradient(135deg, rgba(99,102,241,0.08), rgba(14,165,233,0.12)));
   border: 1px solid var(--border-color-primary, rgba(255,255,255,0.08));
   box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(15,23,42,0.25));
+  justify-items: center;
+  text-align: center;
 }
 
 .support-hero h1 {
@@ -26,7 +28,7 @@
 
 .support-hero__subtitle {
   font-size: 1.1rem;
-  color: var(--color-text-secondary, #475569);
+  color: var(--color-text-primary);
   max-width: 52ch;
 }
 
@@ -35,7 +37,8 @@
   flex-wrap: wrap;
   gap: 0.75rem 2rem;
   font-size: 0.95rem;
-  color: var(--color-text-tertiary, #64748b);
+  color: var(--color-text-primary);
+  justify-content: center;
 }
 
 .support-quick-help {
@@ -102,6 +105,11 @@
 
 .support-form {
   display: grid;
+  gap: 1.5rem;
+}
+
+.support-form__grid {
+  display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem;
 }
@@ -111,8 +119,16 @@
   gap: 0.5rem;
 }
 
+.support-form__group--centered {
+  text-align: center;
+  justify-items: center;
+  max-width: 320px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 .support-form__group--wide {
-  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .support-form label {
@@ -157,9 +173,9 @@
 .support-form__actions {
   grid-column: 1 / -1;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
+  flex-direction: column;
   align-items: center;
+  gap: 0.75rem;
 }
 
 .support-form__submit {
@@ -169,7 +185,7 @@
   font-weight: 600;
   font-size: 1rem;
   background: var(--color-primary, #6366f1);
-  color: var(--color-text-contrast, #fff);
+  color: var(--color-text-dark, #0f172a);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -182,7 +198,9 @@
 
 .support-form__note {
   font-size: 0.95rem;
-  color: var(--color-text-tertiary, #64748b);
+  color: var(--color-text-primary);
+  text-align: center;
+  width: 100%;
 }
 
 .support-form__status {
@@ -230,16 +248,19 @@
 
   .support-hero,
   .support-form-section {
-    padding: 1.75rem;
+    padding: 2rem;
   }
 
   .support-form {
     grid-template-columns: 1fr;
   }
 
+  .support-form__grid {
+    grid-template-columns: 1fr;
+  }
+
   .support-form__actions {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 }
 

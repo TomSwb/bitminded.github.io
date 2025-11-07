@@ -201,6 +201,7 @@ if (DEBUG) console.log('...');
    /supabase/migrations/fix_user_detail_data_tracking.sql
    /supabase/migrations/fix_admin_activity_schema.sql
    /supabase/migrations/add_cascade_delete_to_user_profiles.sql
+  /supabase/migrations/20250107_create_support_tickets.sql
    ```
 
 2. **Create Admin User:**
@@ -217,8 +218,8 @@ if (DEBUG) console.log('...');
    # Deploy all functions
    supabase functions deploy log-login
    supabase functions deploy verify-2fa-code
-   supabase functions deploy verify-captcha
-  supabase functions deploy send-support-request
+  supabase functions deploy verify-captcha
+  supabase functions deploy send-support-request   # persists support_tickets + emails
    supabase functions deploy send-notification-email
    supabase functions deploy schedule-account-deletion
    supabase functions deploy cancel-account-deletion
@@ -626,7 +627,7 @@ git status
 
 # Test locally one more time
 # Visit http://localhost:5501 (or your local server)
-# Test: Login, Admin Panel, User Management, User Detail
+# Test: Login, Admin Panel, Support Desk (load + status update), User Management, User Detail
 ```
 
 **2. Deploy (2 minutes):**
@@ -651,6 +652,7 @@ git checkout dev
 # - Homepage loads
 # - Login works
 # - Admin panel accessible (for admin users)
+# - Support Desk loads and status update works
 # - User management loads
 # - User detail works
 ```

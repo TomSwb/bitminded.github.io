@@ -18,6 +18,7 @@ class AdminLayout {
             'products',
             'revenue',
             'analytics',
+            'support',
             'communications',
             'bulk-operations'
         ];
@@ -303,6 +304,7 @@ class AdminLayout {
                 'products': 'product-management',
                 'revenue': 'revenue-reports',
                 'analytics': 'analytics-dashboard',
+                'support': 'support-desk',
                 'communications': 'communication-center',
                 'bulk-operations': 'bulk-operations'
             };
@@ -390,6 +392,7 @@ class AdminLayout {
                 'product-management': 'ProductManagement',
                 'revenue-reports': 'RevenueReports',
                 'analytics-dashboard': 'AnalyticsDashboard',
+                'support-desk': 'SupportDesk',
                 'communication-center': 'CommunicationCenter',
                 'bulk-operations': 'BulkOperations'
             };

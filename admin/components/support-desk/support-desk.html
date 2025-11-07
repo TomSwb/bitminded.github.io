@@ -1,0 +1,147 @@
+<div class="support-desk" id="support-desk">
+    <div class="support-desk__header">
+        <div class="support-desk__title-group">
+            <h2 class="support-desk__title translatable-content" data-translation-key="Support Desk">Support Desk</h2>
+            <p class="support-desk__subtitle translatable-content" data-translation-key="Monitor and resolve incoming support requests.">Monitor and resolve incoming support requests.</p>
+        </div>
+        <button class="support-desk__refresh" id="support-desk-refresh" type="button">
+            <span class="support-desk__refresh-icon">🔄</span>
+            <span class="translatable-content" data-translation-key="Refresh">Refresh</span>
+        </button>
+    </div>
+
+    <div class="support-desk__filters">
+        <div class="support-desk__search">
+            <input type="text" id="support-desk-search" class="support-desk__search-input translatable-content" data-translation-key="Search tickets" placeholder="Search tickets">
+        </div>
+
+        <div class="support-desk__filter-group">
+            <label for="support-desk-status-filter" class="translatable-content" data-translation-key="Status">Status</label>
+            <select id="support-desk-status-filter" class="support-desk__select">
+                <option value="all" class="translatable-content" data-translation-key="All statuses">All statuses</option>
+                <option value="new" class="translatable-content" data-translation-key="Status: New">New</option>
+                <option value="in_progress" class="translatable-content" data-translation-key="Status: In Progress">In Progress</option>
+                <option value="resolved" class="translatable-content" data-translation-key="Status: Resolved">Resolved</option>
+                <option value="closed" class="translatable-content" data-translation-key="Status: Closed">Closed</option>
+            </select>
+        </div>
+
+        <div class="support-desk__filter-group">
+            <label for="support-desk-type-filter" class="translatable-content" data-translation-key="Type">Type</label>
+            <select id="support-desk-type-filter" class="support-desk__select">
+                <option value="all" class="translatable-content" data-translation-key="All types">All types</option>
+                <option value="general" class="translatable-content" data-translation-key="Type: General question">General question</option>
+                <option value="bug" class="translatable-content" data-translation-key="Type: Bug or outage">Bug or outage</option>
+                <option value="billing" class="translatable-content" data-translation-key="Type: Billing">Billing</option>
+                <option value="commission" class="translatable-content" data-translation-key="Type: Commission intake">Commission intake</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="support-desk__layout">
+        <div class="support-desk__table-card">
+            <div class="support-desk__table-wrapper">
+                <table class="support-desk__table">
+                    <thead>
+                        <tr>
+                            <th class="translatable-content" data-translation-key="Ticket">Ticket</th>
+                            <th class="translatable-content" data-translation-key="Requester">Requester</th>
+                            <th class="translatable-content" data-translation-key="Type">Type</th>
+                            <th class="translatable-content" data-translation-key="Status">Status</th>
+                            <th class="translatable-content" data-translation-key="Created">Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="support-desk-table-body">
+                        <!-- Tickets will be rendered here -->
+                    </tbody>
+                </table>
+                <div class="support-desk__empty-state" id="support-desk-empty">
+                    <div class="support-desk__empty-icon">🗂️</div>
+                    <p class="translatable-content" data-translation-key="No tickets match the current filters.">No tickets match the current filters.</p>
+                </div>
+            </div>
+        </div>
+
+        <aside class="support-desk__detail" id="support-desk-detail">
+            <div class="support-desk__detail-empty" id="support-desk-detail-empty">
+                <div class="support-desk__detail-icon">👈</div>
+                <p class="support-desk__detail-text translatable-content" data-translation-key="Select a ticket to view its details.">Select a ticket to view its details.</p>
+            </div>
+
+            <div class="support-desk__detail-content hidden" id="support-desk-detail-content">
+                <header class="support-desk__detail-header">
+                    <div class="support-desk__detail-summary">
+                        <h3 class="support-desk__detail-title">
+                            <span class="translatable-content" data-translation-key="Ticket">Ticket</span>
+                            <span id="support-desk-detail-code"></span>
+                        </h3>
+                        <p class="support-desk__detail-meta" id="support-desk-detail-submitted"></p>
+                    </div>
+                    <div class="support-desk__detail-controls">
+                        <label for="support-desk-detail-status-select" class="translatable-content" data-translation-key="Update status">Update status</label>
+                        <select id="support-desk-detail-status-select" class="support-desk__select">
+                            <option value="new" class="translatable-content" data-translation-key="Status: New">New</option>
+                            <option value="in_progress" class="translatable-content" data-translation-key="Status: In Progress">In Progress</option>
+                            <option value="resolved" class="translatable-content" data-translation-key="Status: Resolved">Resolved</option>
+                            <option value="closed" class="translatable-content" data-translation-key="Status: Closed">Closed</option>
+                        </select>
+                        <button id="support-desk-update-status" class="support-desk__update-button" type="button">
+                            <span class="translatable-content" data-translation-key="Update">Update</span>
+                        </button>
+                    </div>
+                </header>
+
+                <section class="support-desk__detail-body">
+                    <dl class="support-desk__detail-grid">
+                        <div>
+                            <dt class="translatable-content" data-translation-key="Requester">Requester</dt>
+                            <dd id="support-desk-detail-name"></dd>
+                        </div>
+                        <div>
+                            <dt class="translatable-content" data-translation-key="Email">Email</dt>
+                            <dd>
+                                <a href="#" id="support-desk-detail-email" class="support-desk__detail-link" target="_blank" rel="noopener"></a>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="translatable-content" data-translation-key="Type">Type</dt>
+                            <dd id="support-desk-detail-type"></dd>
+                        </div>
+                        <div>
+                            <dt class="translatable-content" data-translation-key="Current status">Current status</dt>
+                            <dd id="support-desk-detail-status-text"></dd>
+                        </div>
+                        <div>
+                            <dt class="translatable-content" data-translation-key="Last updated">Last updated</dt>
+                            <dd id="support-desk-detail-updated"></dd>
+                        </div>
+                        <div>
+                            <dt class="translatable-content" data-translation-key="Resolved at">Resolved at</dt>
+                            <dd id="support-desk-detail-resolved"></dd>
+                        </div>
+                    </dl>
+
+                    <div class="support-desk__message-card">
+                        <h4 class="translatable-content" data-translation-key="Message">Message</h4>
+                        <p id="support-desk-detail-message"></p>
+                    </div>
+
+                    <div class="support-desk__meta-card">
+                        <h4 class="translatable-content" data-translation-key="Additional info">Additional info</h4>
+                        <dl>
+                            <div>
+                                <dt class="translatable-content" data-translation-key="User agent">User agent</dt>
+                                <dd id="support-desk-detail-user-agent"></dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+            </div>
+        </aside>
+    </div>
+
+    <div class="support-desk__loading-overlay hidden" id="support-desk-loading">
+        <div class="support-desk__spinner"></div>
+    </div>
+</div>
+
