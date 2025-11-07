@@ -79,16 +79,31 @@
         <section class="hero">
             <img src="icons/hero-header.jpeg" alt="BitMinded - Handcrafted Software" class="hero__image">
             <div class="hero__content">
-                <h1 id="main-title" class="hero__title translatable-content">Handcrafted Software for Humans</h1>
-                <p id="hero-subtitle" class="hero__subtitle translatable-content">Independent, artisanal apps — custom-built solutions made simple, personal, and sustainable.</p>
+                <h1 id="main-title" class="hero__title translatable-content">We Build. We Guide.</h1>
+                <p id="hero-subtitle" class="hero__subtitle translatable-content">We build artisanal apps for everyday needs — and help you feel confident with any technology you use.</p>
                 <!-- Additional visible text for search engines -->
                 <p style="display: none;" aria-hidden="true">BitMinded offers handcrafted software solutions including Rythmo workout timer and Measure Mate unit converter. Custom software development and digital solutions.</p>
             </div>
         </section>
 
-        <!-- Philosophy Section -->
-        <section class="philosophy">
-            <h2 id="philosophy-title" class="philosophy__title translatable-content">Why Artisanal?</h2>
+        <!-- Mission Toggle -->
+        <div class="mission-toggle">
+            <div class="mission-toggle__container">
+                <button class="mission-toggle__button mission-toggle__button--active" id="mission-toggle-build" data-mission="build">
+                    <span class="mission-toggle__button-text translatable-content" id="mission-toggle-build-text">We Build</span>
+                </button>
+                <button class="mission-toggle__button" id="mission-toggle-guide" data-mission="guide">
+                    <span class="mission-toggle__button-text translatable-content" id="mission-toggle-guide-text">We Guide</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mission: We Build -->
+        <div id="mission-build" class="mission-content">
+                <!-- Philosophy Section -->
+                <section class="philosophy">
+            <h2 id="philosophy-title" class="philosophy__title translatable-content">Why Artisanal App Creation?</h2>
+            <p id="philosophy-intro" class="philosophy__intro translatable-content">We design every app like a bespoke instrument—listening closely, trimming the noise, and shaping software that blends into daily life.</p>
             <div class="philosophy__content">
                 <div class="philosophy__item">
                     <h3 id="philosophy-human-scale-title" class="translatable-content">Human-Scale</h3>
@@ -145,26 +160,72 @@
                 </div>
             </div>
         </section>
+        </div>
+        <!-- END Mission: We Build -->
 
-        <!-- Additional Services Section -->
-        <section class="services">
-            <h2 id="services-title" class="services__title translatable-content">Additional Services</h2>
-            <p id="services-subtitle" class="services__subtitle translatable-content">Helping you make the most of software in your daily life</p>
+        <!-- Mission: We Guide -->
+        <div id="mission-guide" class="mission-content hidden">
+            
+            <!-- Guide Philosophy Section -->
+            <section class="guide-philosophy">
+                <h2 id="guide-philosophy-title" class="guide-philosophy__title translatable-content">Why Personal Tech Guidance?</h2>
+                <p id="guide-philosophy-text" class="guide-philosophy__intro translatable-content">Technology should feel safe, clear, and human. We sit beside you—patient, judgment-free—to translate confusing tools into plain language, helping you make confident choices and enjoy the apps that matter in your life.</p>
+                <div class="guide-philosophy__content">
+                    <div class="guide-philosophy__item">
+                        <h3 id="guide-philosophy-pillar1-title" class="translatable-content">We Sit Beside You</h3>
+                        <p id="guide-philosophy-pillar1-text" class="translatable-content">Bring any device, account, or question. We start with calm listening so you feel seen before we touch a single button.</p>
+                    </div>
+                    <div class="guide-philosophy__item">
+                        <h3 id="guide-philosophy-pillar2-title" class="translatable-content">Plain-Language Guidance</h3>
+                        <p id="guide-philosophy-pillar2-text" class="translatable-content">We translate screens into everyday language and steps that make sense, so you always know what we’re doing—and why.</p>
+                    </div>
+                    <div class="guide-philosophy__item">
+                        <h3 id="guide-philosophy-pillar3-title" class="translatable-content">Confidence That Lasts</h3>
+                        <p id="guide-philosophy-pillar3-text" class="translatable-content">You leave with notes, rituals, and safety tips tailored to you, so the confidence stays long after the session ends.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Personal Tech Guidance Section -->
+            <section class="services">
+            <h2 id="services-title" class="services__title translatable-content">How We Support You</h2>
+            <p id="services-subtitle" class="services__subtitle translatable-content">Support designed for the moments when tech feels overwhelming, uncertain, or urgent</p>
             <div class="services__grid">
                 <div class="service-card">
-                    <h3 id="software-learning-title" class="service-card__title translatable-content">Software Learning Support</h3>
-                    <p id="software-learning-text" class="service-card__description translatable-content">Helping you learn to use everyday software tools—from Excel and Google Workspace to productivity apps. Get comfortable with the software you need.</p>
+                    <h3 id="software-learning-title" class="service-card__title translatable-content">Tech Confidence Coaching</h3>
+                    <p id="software-learning-text" class="service-card__description translatable-content">Build lasting ease with guided practice tailored to the tools you want to master—patient pacing, plain language, and encouragement at every step.</p>
                 </div>
                 <div class="service-card">
-                    <h3 id="digital-literacy-title" class="service-card__title translatable-content">Digital Literacy Training</h3>
-                    <p id="digital-literacy-text" class="service-card__description translatable-content">Teaching you how to use common software applications in your daily work and life. Build confidence with technology at your own pace.</p>
+                    <h3 id="digital-literacy-title" class="service-card__title translatable-content">Quick Tech Help</h3>
+                    <p id="digital-literacy-text" class="service-card__description translatable-content">Bring the tricky glitches, password lockouts, or mystery pop-ups. We troubleshoot beside you so the fix actually makes sense.</p>
                 </div>
                 <div class="service-card">
-                    <h3 id="software-tutoring-title" class="service-card__title translatable-content">Software Tutoring</h3>
-                    <p id="software-tutoring-text" class="service-card__description translatable-content">One-on-one or group sessions tailored to your needs. Learn at your own pace with personalized guidance and practical examples.</p>
+                    <h3 id="software-tutoring-title" class="service-card__title translatable-content">Family Tech Connection</h3>
+                    <p id="software-tutoring-text" class="service-card__description translatable-content">Create a shared tech language at home—learn your kids’ games, set healthy boundaries, and help relatives join in without stress.</p>
                 </div>
             </div>
         </section>
+
+            <!-- How It Works Section -->
+            <section class="guide-how-it-works">
+                <h2 id="guide-how-it-works-title" class="guide-how-it-works__title translatable-content">How It Works</h2>
+                <div class="guide-how-it-works__content">
+                    <div class="guide-how-it-works__item">
+                        <h3 id="guide-step-1-title" class="translatable-content">Reach Out & Connect</h3>
+                        <p id="guide-step-1-text" class="translatable-content">Share what feels confusing or urgent—no tech jargon needed. We'll listen, explore the situation together, and plan support that fits you.</p>
+                    </div>
+                    <div class="guide-how-it-works__item">
+                        <h3 id="guide-step-3-title" class="translatable-content">Get Support</h3>
+                        <p id="guide-step-3-text" class="translatable-content">Flexible sessions via video call, phone, or in-person. We work at your pace, in the way that feels most comfortable.</p>
+                    </div>
+                    <div class="guide-how-it-works__item">
+                        <h3 id="guide-step-4-title" class="translatable-content">Build Confidence</h3>
+                        <p id="guide-step-4-text" class="translatable-content">Ongoing support whenever you need it. We're here as your technology companion, not just a one-time fix.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- END Mission: We Guide -->
     </main>
 
     <footer>
@@ -183,6 +244,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
     <!--- language switcher-->
     <script src="js/lang-index/lang-index.js"></script>
+    <!-- Mission Toggle -->
+    <script src="js/mission-toggle.js"></script>
 
 </body> 
 

@@ -41,25 +41,109 @@
   line-height: 1.6;
 }
 
+/* ===== MISSION TOGGLE ===== */
+.mission-toggle {
+  max-width: 900px;
+  margin: var(--spacing-sm) auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.mission-toggle__container {
+  display: flex;
+  gap: var(--spacing-md);
+  background-color: var(--color-background-primary);
+  border: 3px solid var(--border-color-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+}
+
+.mission-toggle__button {
+  flex: 1;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border: 2px solid var(--color-secondary);
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mission-toggle__button:hover:not(.mission-toggle__button--active),
+.mission-toggle__button:focus-visible:not(.mission-toggle__button--active) {
+  background-color: var(--color-secondary);
+  color: var(--color-text-dark);
+  transform: translateY(-2px);
+}
+
+.mission-toggle__button--active {
+  background-color: var(--color-primary);
+  color: var(--color-text-dark);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+}
+
+.mission-toggle__button-text {
+  font-weight: inherit;
+  transition: inherit;
+}
+
+/* ===== MISSION CONTENT ===== */
+.mission-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.mission-content.hidden {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ===== PHILOSOPHY SECTION ===== */
 .philosophy {
-  padding: var(--spacing-3xl) var(--spacing-lg) var(--spacing-2xl);
+  padding: var(--spacing-4xl) var(--spacing-lg) var(--spacing-3xl);
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .philosophy__title {
   text-align: center;
-  margin-bottom: var(--spacing-3xl);
+  margin-bottom: var(--spacing-lg);
   color: var(--color-primary);
   font-size: var(--font-size-h2);
+}
+
+.philosophy__intro {
+  font-size: var(--font-size-lg);
+  line-height: 1.8;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  max-width: 800px;
+  margin: 0 auto var(--spacing-lg);
+  text-align: center;
 }
 
 .philosophy__content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-xl);
-  margin-top: var(--spacing-2xl);
+  margin-top: var(--spacing-lg);
 }
 
 .philosophy__item {
@@ -272,23 +356,153 @@
   margin: 0;
 }
 
+/* ===== GUIDE PHILOSOPHY SECTION ===== */
+.guide-philosophy {
+  padding: var(--spacing-4xl) var(--spacing-lg) var(--spacing-3xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.guide-philosophy__title {
+  font-size: var(--font-size-h2);
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-accent-pink);
+  font-weight: 700;
+  text-align: center;
+}
+
+.guide-philosophy__intro {
+  font-size: var(--font-size-lg);
+  line-height: 1.8;
+  color: var(--color-text-primary);
+  opacity: 0.95;
+  max-width: 800px;
+  margin: 0 auto var(--spacing-lg);
+  text-align: center;
+}
+
+.guide-philosophy__content {
+  margin-top: var(--spacing-lg);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.guide-philosophy__item {
+  padding: var(--spacing-xl);
+  border: 2px solid var(--border-color-secondary);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-tertiary);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  text-align: center;
+}
+
+.guide-philosophy__item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.guide-philosophy__item h3 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-accent-pink);
+  font-weight: 600;
+}
+
+.guide-philosophy__item p {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ===== GUIDE HOW IT WORKS SECTION ===== */
+.guide-how-it-works {
+  padding: var(--spacing-3xl) var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.guide-how-it-works__title {
+  text-align: center;
+  margin-bottom: var(--spacing-3xl);
+  color: var(--color-accent-pink);
+  font-size: var(--font-size-h2);
+}
+
+.guide-how-it-works__content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.guide-how-it-works__item {
+  padding: var(--spacing-xl);
+  border: 2px solid var(--border-color-secondary);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-tertiary);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.guide-how-it-works__item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.guide-how-it-works__item h3 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-accent-pink);
+  font-weight: 600;
+}
+
+.guide-how-it-works__item p {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  margin: 0;
+}
+
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 768px) {
   .hero {
     padding: var(--spacing-2xl) var(--spacing-md) var(--spacing-xl);
   }
 
+  .mission-toggle {
+    padding: 0 var(--spacing-md);
+    margin: var(--spacing-xl) auto;
+  }
+
+  .mission-toggle__button {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    min-height: 60px;
+  }
+
   .philosophy,
   .products,
   .how-we-work,
-  .services {
-    padding: var(--spacing-2xl) var(--spacing-md);
+  .services,
+  .guide-philosophy,
+  .guide-how-it-works {
+    padding: var(--spacing-3xl) var(--spacing-md);
+  }
+
+  .philosophy__intro,
+  .guide-philosophy__intro {
+    font-size: var(--font-size-base);
   }
 
   .philosophy__content,
   .products__grid,
   .how-we-work__content,
-  .services__grid {
+  .services__grid,
+  .guide-philosophy__content,
+  .guide-how-it-works__content {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
   }
@@ -296,8 +510,14 @@
   .philosophy__item,
   .product-card,
   .how-we-work__item,
-  .service-card {
+  .service-card,
+  .guide-philosophy__item,
+  .guide-how-it-works__item {
     padding: var(--spacing-lg);
+  }
+
+  .guide-philosophy__intro {
+    font-size: var(--font-size-base);
   }
 }
 
@@ -320,10 +540,37 @@
     font-size: var(--font-size-3xl);
   }
 
+  .mission-toggle {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .mission-toggle__container {
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+  }
+
+  .mission-toggle__button {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm) var(--spacing-md);
+    min-height: 50px;
+  }
+
+  .philosophy__intro,
+  .guide-philosophy__intro {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  .guide-philosophy__item {
+    padding: var(--spacing-md);
+  }
+
   .philosophy__title,
   .products__title,
   .how-we-work__title,
-  .services__title {
+  .services__title,
+  .guide-philosophy__title,
+  .guide-how-it-works__title {
     font-size: var(--font-size-2xl);
   }
 
