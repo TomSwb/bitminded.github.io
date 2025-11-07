@@ -37,7 +37,7 @@
             <!-- Page Header -->
             <header class="page-header">
                 <h1 class="page-title translatable-content" data-translate="privacy.title">Privacy Policy</h1>
-                <p class="page-subtitle translatable-content" data-translate="privacy.subtitle">Last updated: October 2025</p>
+                <p class="page-subtitle translatable-content" data-translate="privacy.subtitle">Last updated: November 2025</p>
             </header>
 
             <!-- Privacy Content -->
@@ -61,7 +61,7 @@
                         <p class="translatable-content" data-translate="privacy.section2.item2">Username and profile information</p>
                         <p class="translatable-content" data-translate="privacy.section2.item2b">Optional demographic information (date of birth, country, gender) for profile personalization</p>
                         <p class="translatable-content" data-translate="privacy.section2.item3">Payment information (processed securely through Stripe)</p>
-                        <p class="translatable-content" data-translate="privacy.section2.item4">Communication preferences and settings</p>
+                        <p class="translatable-content" data-translate="privacy.section2.item4">Communication preferences, support requests, and messages you send via our contact form (processed through Supabase + Resend)</p>
                         
                         <h3 class="translatable-content" data-translate="privacy.section2.subtitle2">2.2 Technical Information</h3>
                         <p class="translatable-content" data-translate="privacy.section2.content2">We automatically collect certain technical information:</p>
@@ -97,7 +97,7 @@
                         <p class="translatable-content" data-translate="privacy.section4.content1">Your data is stored securely using:</p>
                         <p class="translatable-content" data-translate="privacy.section4.item1">Supabase for database and authentication services</p>
                         <p class="translatable-content" data-translate="privacy.section4.item2">Cloudflare for content delivery and security</p>
-                        <p class="translatable-content" data-translate="privacy.section4.item3">Stripe for secure payment processing</p>
+                        <p class="translatable-content" data-translate="privacy.section4.item3">Stripe for secure payment processing and Resend for transactional and contact emails</p>
                         
                         <h3 class="translatable-content" data-translate="privacy.section4.subtitle2">4.2 Security Measures</h3>
                         <p class="translatable-content" data-translate="privacy.section4.content2">We implement comprehensive security measures:</p>
@@ -113,7 +113,7 @@
                     <h2 class="content-section__title translatable-content" data-translate="privacy.section5.title">5. Information Sharing</h2>
                     <div class="content-section__content">
                         <p class="translatable-content" data-translate="privacy.section5.content1">We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:</p>
-                        <p class="translatable-content" data-translate="privacy.section5.item1">With service providers who assist in operating our platform (Supabase, Stripe, Cloudflare)</p>
+                        <p class="translatable-content" data-translate="privacy.section5.item1">With service providers who assist in operating our platform (Supabase, Stripe, Cloudflare, Resend)</p>
                         <p class="translatable-content" data-translate="privacy.section5.item2">When required by law or legal process</p>
                         <p class="translatable-content" data-translate="privacy.section5.item3">To protect our rights, property, or safety, or that of our users</p>
                         <p class="translatable-content" data-translate="privacy.section5.item4">With your explicit consent</p>
@@ -126,16 +126,15 @@
                     <h2 class="content-section__title translatable-content" data-translate="privacy.section6.title">6. Cookies and Tracking</h2>
                     <div class="content-section__content">
                         <h3 class="translatable-content" data-translate="privacy.section6.subtitle1">6.1 Essential Cookies</h3>
-                        <p class="translatable-content" data-translate="privacy.section6.content1">We use essential cookies for:</p>
-                        <p class="translatable-content" data-translate="privacy.section6.item1">Authentication and session management</p>
-                        <p class="translatable-content" data-translate="privacy.section6.item2">Language and theme preferences</p>
-                        <p class="translatable-content" data-translate="privacy.section6.item3">Security and fraud prevention</p>
+                        <p class="translatable-content" data-translate="privacy.section6.content1">We use essential cookies issued through Supabase authentication for:</p>
+                        <p class="translatable-content" data-translate="privacy.section6.item1">Authentication and session management (`sb-access-token`, `sb-refresh-token`)</p>
+                        <p class="translatable-content" data-translate="privacy.section6.item2">Security and fraud prevention across bitminded.ch subdomains</p>
                         
                         <h3 class="translatable-content" data-translate="privacy.section6.subtitle2">6.2 Analytics</h3>
-                        <p class="translatable-content" data-translate="privacy.section6.content2">We may use analytics to understand how our services are used, but we do not track individual users across websites or use invasive tracking methods.</p>
+                        <p class="translatable-content" data-translate="privacy.section6.content2">We do not currently use analytics cookies. If we introduce privacy-respecting analytics in the future, this policy and our <a href="/legal-pages/cookies/" class="content-link">Cookie Notice</a> will be updated.</p>
                         
                         <h3 class="translatable-content" data-translate="privacy.section6.subtitle3">6.3 Your Choices</h3>
-                        <p class="translatable-content" data-translate="privacy.section6.content3">You can control cookie settings through your browser, though disabling essential cookies may affect service functionality.</p>
+                        <p class="translatable-content" data-translate="privacy.section6.content3">You can control cookie settings through your browser, though disabling essential cookies will prevent login from functioning.</p>
                     </div>
                 </section>
 
@@ -208,6 +207,7 @@
                         <p class="translatable-content" data-translate="privacy.section12.content1">If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
                         <div class="contact-info">
                             <p class="translatable-content" data-translate="privacy.section12.email">Email: <a href="mailto:privacy@bitminded.ch" class="content-link">privacy@bitminded.ch</a></p>
+                            <p>Postal: See our <a href="/legal-pages/imprint/" class="content-link">Legal Notice (Imprint)</a> for full company details.</p>
                         </div>
                     </div>
                 </section>
