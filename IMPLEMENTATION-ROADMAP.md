@@ -79,7 +79,7 @@ PUBLIC (no authentication required):
 ├── Home (/) - Landing page with value proposition
 ├── About/Team - Artisan philosophy, who you are
 ├── Product Showcase - VIEW available tools (can't buy)
-├── Contact - Existing contact form
+├── Support - Existing support form
 └── Legal (privacy, terms) - Already exists
 
 AUTHENTICATED (login required):

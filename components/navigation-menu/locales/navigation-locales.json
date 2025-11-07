@@ -2,25 +2,25 @@
   "en": {
     "translation": {
       "nav-home": "Home",
-      "nav-contact": "Contact"
+      "nav-support": "Support"
     }
   },
   "es": {
     "translation": {
       "nav-home": "Inicio",
-      "nav-contact": "Contacto"
+      "nav-support": "Soporte"
     }
   },
   "fr": {
     "translation": {
       "nav-home": "Accueil",
-      "nav-contact": "Contact"
+      "nav-support": "Support"
     }
   },
   "de": {
     "translation": {
       "nav-home": "Startseite",
-      "nav-contact": "Kontakt"
+      "nav-support": "Support"
     }
   }
 }

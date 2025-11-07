@@ -20,7 +20,7 @@ TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
 ```
 **Note:** You can use the same Turnstile key as production, or create a separate dev key.
 
-### send-contact-email
+### send-support-request
 ### send-notification-email  
 ### send-deletion-email
 ```

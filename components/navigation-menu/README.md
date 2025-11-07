@@ -95,7 +95,7 @@ Closes the mobile menu.
 ### Default Navigation Items
 
 - **Home** (`nav-home`) - Links to `/`
-- **Contact** (`nav-contact`) - Links to `/contact/`
+- **Support** (`nav-support`) - Links to `/support/`
 
 ### Mobile Menu Behavior
 
@@ -185,13 +185,13 @@ Located in `locales/navigation-locales.json`:
   "en": {
     "translation": {
       "nav-home": "Home",
-      "nav-contact": "Contact"
+      "nav-support": "Support"
     }
   },
   "fr": {
     "translation": {
       "nav-home": "Accueil", 
-      "nav-contact": "Contact"
+      "nav-support": "Support"
     }
   }
 }
@@ -282,7 +282,7 @@ navMenu.init({
 });
 
 // Manually set active page
-navMenu.setActivePage('nav-contact');
+navMenu.setActivePage('nav-support');
 ```
 
 ### Event Handling

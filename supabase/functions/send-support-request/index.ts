@@ -1,10 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 /**
- * Send Contact Form Email
- * 
- * Handles contact form submissions and sends emails via Resend
- * Replaces EmailJS for better consistency and server-side processing
+ * Send Support Request Email
+ *
+ * Handles Support Centre submissions and routes them through Resend.
+ * Enriches payload with request type + metadata for faster triage.
  */
 
 serve(async (req) => {
@@ -21,7 +21,14 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { name, email, message } = await req.json()
+    const { name, email, message, type = 'general', userId, userAgent } = await req.json()
+    const typeLabels: Record<string, string> = {
+      general: 'General question',
+      bug: 'Bug or outage',
+      billing: 'Billing',
+      commission: 'Commission intake',
+    }
+    const typeLabel = typeLabels[type] ?? type
 
     // Validate input
     if (!name || !email || !message) {
@@ -43,7 +50,7 @@ serve(async (req) => {
       throw new Error('Message is too long (maximum 5000 characters)')
     }
 
-    console.log(`📧 Contact form submission from: ${email}`)
+    console.log(`📧 Support request from: ${email} [${typeLabel}]${userId ? ` (user:${userId})` : ''}`)
 
     // Get Resend API key
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
@@ -148,11 +155,11 @@ serve(async (req) => {
           <div class="container">
             <div class="header">
               <div class="logo">BitMinded</div>
-              <div class="tagline">Contact Form Submission</div>
+              <div class="tagline">Support Centre Intake</div>
             </div>
             
             <div class="content">
-              <h2 style="margin-top: 0; color: #333;">New Contact Message</h2>
+              <h2 style="margin-top: 0; color: #333;">New Support Request</h2>
               
               <div class="field">
                 <div class="field-label">From</div>
@@ -162,9 +169,25 @@ serve(async (req) => {
                 </div>
               </div>
               
-              <div class="field">
-                <div class="field-label">Received</div>
-                <div class="field-value">${timestamp}</div>
+              <div class="field-grid" style="display:grid; gap:16px;">
+                <div class="field">
+                  <div class="field-label">Received</div>
+                  <div class="field-value">${timestamp}</div>
+                </div>
+                <div class="field">
+                  <div class="field-label">Request Type</div>
+                  <div class="field-value">${typeLabel}</div>
+                </div>
+                ${userId ? `
+                  <div class="field">
+                    <div class="field-label">User ID</div>
+                    <div class="field-value">${userId}</div>
+                  </div>` : ''}
+                ${userAgent ? `
+                  <div class="field">
+                    <div class="field-label">User Agent</div>
+                    <div class="field-value" style="font-size: 12px; line-height: 1.4;">${userAgent}</div>
+                  </div>` : ''}
               </div>
               
               <div class="field">
@@ -178,7 +201,7 @@ serve(async (req) => {
             </div>
             
             <div class="footer">
-              <p>This message was sent via the BitMinded contact form</p>
+              <p>This message was sent via the BitMinded Support Centre</p>
               <p>© 2025 BitMinded. All rights reserved.</p>
             </div>
           </div>
@@ -194,10 +217,10 @@ serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'BitMinded Contact Form <contact@bitminded.ch>',
-        to: 'support@bitminded.ch', // Your email to receive contact form submissions
-        reply_to: email, // User's email as reply-to
-        subject: `Contact Form: ${name}`,
+        from: 'BitMinded Support <support@bitminded.ch>',
+        to: 'support@bitminded.ch',
+        reply_to: email,
+        subject: `[Support:${type}] ${name}`,
         html: emailHtml
       })
     })
@@ -209,13 +232,13 @@ serve(async (req) => {
       throw new Error(`Failed to send email: ${emailResult.message || 'Unknown error'}`)
     }
 
-    console.log('✅ Contact email sent successfully via Resend')
+    console.log('✅ Support email sent successfully via Resend')
     console.log('📬 Email ID:', emailResult.id)
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: 'Contact email sent successfully',
+        message: 'Support request email sent successfully',
         emailId: emailResult.id
       }),
       { 
@@ -225,7 +248,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('❌ Error sending contact email:', error)
+    console.error('❌ Error sending support email:', error)
     
     return new Response(
       JSON.stringify({ 

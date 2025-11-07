@@ -156,7 +156,7 @@ SUPABASE_ANON_KEY          # Client operations
 ### Existing Edge Functions (Already Working) ✅
 ```
 /functions/send-notification-email    # Uses Resend API
-/functions/send-contact-email         # Uses Resend API  
+/functions/send-support-request        # Uses Resend API  
 /functions/send-deletion-email        # Uses Resend API
 /functions/verify-2fa-code            # 2FA verification
 /functions/verify-captcha             # Turnstile

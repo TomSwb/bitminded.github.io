@@ -21,7 +21,7 @@ The platform generates a rich preview card showing:
 
 ✅ **Main page (`/`)** - Has basic meta tags  
 ❌ **Other pages** - Missing social media meta tags:
-- `/contact/` - Contact page
+- `/support/` - Support page
 - `/auth/` - Authentication pages
 - `/legal-pages/privacy/` - Privacy policy
 - `/legal-pages/terms/` - Terms of service
@@ -75,10 +75,10 @@ Create a reusable meta tags component using your existing component system:
 // In each page's script
 componentLoader.load('meta-tags', {
     config: {
-        title: 'Contact - BitMinded',
-        description: 'Get in touch with BitMinded for digital solutions',
+        title: 'Support - BitMinded',
+        description: 'Get help from the BitMinded team or book a guidance session',
         image: 'https://bitminded.github.io/icons/icon-512x512.png',
-        url: 'https://bitminded.github.io/contact/'
+        url: 'https://bitminded.github.io/support/'
     }
 });
 ```
@@ -88,11 +88,11 @@ Generate meta tags during build time or server-side rendering.
 
 ## Page-Specific Examples
 
-### Contact Page (`/contact/`)
+### Support Page (`/support/`)
 ```html
-<meta property="og:title" content="Contact - BitMinded">
-<meta property="og:description" content="Get in touch with BitMinded for digital solutions and consulting services. We're here to help your business thrive.">
-<meta property="og:url" content="https://bitminded.github.io/contact/">
+<meta property="og:title" content="Support - BitMinded">
+<meta property="og:description" content="Reach out for guidance, report issues, or plan a new commission with the BitMinded team.">
+<meta property="og:url" content="https://bitminded.github.io/support/">
 ```
 
 ### Auth Page (`/auth/`)
@@ -174,7 +174,7 @@ You can create **different preview images** for different pages:
 └─────────────────────────────────┘
 ```
 
-**Contact Page**
+**Support Page**
 ```
 ┌─────────────────────────────────┐
 │ [Logo] BitMinded                │
@@ -204,7 +204,7 @@ Create in your `/images/` folder:
 ```
 /images/
   ├── social-preview-home.png      ← Homepage preview
-  ├── social-preview-contact.png   ← Contact page preview
+  ├── social-preview-support.png   ← Support page preview
   ├── social-preview-auth.png      ← Auth page preview
   └── social-preview-default.png   ← Fallback for other pages
 ```
@@ -216,8 +216,8 @@ Then reference in your meta tags:
 <!-- Homepage -->
 <meta property="og:image" content="https://bitminded.github.io/images/social-preview-home.png">
 
-<!-- Contact page -->
-<meta property="og:image" content="https://bitminded.github.io/images/social-preview-contact.png">
+<!-- Support page -->
+<meta property="og:image" content="https://bitminded.github.io/images/social-preview-support.png">
 ```
 
 ### Recommended Improvements
@@ -259,7 +259,7 @@ Meta tags are **static HTML** and cannot be dynamically translated using your cu
 ## Implementation Priority
 
 ### High Priority
-1. **Contact page** - People frequently share contact links
+1. **Support page** - People frequently share support links
 2. **Main pages** - Homepage, key landing pages
 
 ### Medium Priority

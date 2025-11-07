@@ -10,7 +10,7 @@ Last updated: 2025-01-15
 
 - ✅ verify-captcha
 - ✅ verify-2fa-code
-- ✅ send-contact-email
+- ✅ send-support-request
 - ✅ create-notification
 - ✅ send-notification-email
 - ✅ log-login
