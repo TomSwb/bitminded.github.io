@@ -117,7 +117,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                showSuccess(translate('support-status-success', 'Support request submitted! Check your email for confirmation.'));
+                const ticketId = (result.ticket && (result.ticket.code || result.ticket.ticket_code)) || result.ticketId || '';
+                const successTemplate = translate('support-status-success', 'Support request submitted! Ticket {{ticketId}} created. Check your email for confirmation.');
+                const successMessage = ticketId
+                    ? successTemplate.replace('{{ticketId}}', ticketId)
+                    : successTemplate.replace('{{ticketId}}', '#');
+                showSuccess(successMessage);
                 const lockedEmail = emailInput.disabled ? emailInput.value : '';
                 form.reset();
                 if (emailInput.disabled && lockedEmail) {

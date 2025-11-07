@@ -13,7 +13,7 @@ Supabase Edge Functions deployed to both dev and production.
 ### Notifications & Email
 - `create-notification` - Create in-app notifications
 - `send-notification-email` - Send notification emails
-- `send-support-request` - Handle support form submissions
+- `send-support-request` - Handle support form submissions (persist ticket + send confirmation)
 - `send-deletion-email` - Send account deletion emails
 
 ### Account Management

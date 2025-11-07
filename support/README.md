@@ -8,5 +8,7 @@
   - Resource links pointing to documentation, service catalogue, and compliance commitments.
 - **Operational Notes:**
   - Logged-in users have their email locked + userId passed to Supabase for ticket correlation.
-  - Support types surface in the Resend email payload to speed triage; extend as additional flows emerge.
+  - Support types surface in the Resend email payload and are stored in `support_tickets` for trend analysis.
+  - Every submission persists in the `support_tickets` table (see Supabase migration `20250107_create_support_tickets.sql`) and produces a `SUP-xxxx` code shown to the customer.
+  - The admin Support Desk lists tickets with status workflows (`new`, `in_progress`, `resolved`, `closed`).
   - Update this page when live chat hours or channel availability changes.

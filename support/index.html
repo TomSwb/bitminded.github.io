@@ -51,7 +51,6 @@
             </p>
             <div class="support-hero__meta">
                 <span class="support-hero__response-time translatable-content" data-i18n="support-response-time">Average response time: under 24 hours on business days.</span>
-                <span class="support-hero__channels translatable-content" data-i18n="support-channels">Live chat available for Priority plans from 09:00-17:00 CET.</span>
             </div>
         </section>
 
@@ -80,15 +79,17 @@
             <h2 class="translatable-content" data-i18n="support-form-title">Submit a support request</h2>
             <p class="support-form-section__helper translatable-content" data-i18n="support-form-helper">Provide as much context as possible so we can help you faster.</p>
             <form id="support-request-form" class="support-form" novalidate>
-                <div class="support-form__group">
-                    <label for="support-name" class="translatable-content" data-i18n="support-name-label">Name</label>
-                    <input type="text" id="support-name" name="name" autocomplete="name" required>
+                <div class="support-form__grid">
+                    <div class="support-form__group">
+                        <label for="support-name" class="translatable-content" data-i18n="support-name-label">Name</label>
+                        <input type="text" id="support-name" name="name" autocomplete="name" required>
+                    </div>
+                    <div class="support-form__group">
+                        <label for="support-email" class="translatable-content" data-i18n="support-email-label">Email</label>
+                        <input type="email" id="support-email" name="email" autocomplete="email" required>
+                    </div>
                 </div>
-                <div class="support-form__group">
-                    <label for="support-email" class="translatable-content" data-i18n="support-email-label">Email</label>
-                    <input type="email" id="support-email" name="email" autocomplete="email" required>
-                </div>
-                <div class="support-form__group">
+                <div class="support-form__group support-form__group--centered">
                     <label for="support-type" class="translatable-content" data-i18n="support-type-label">Request type</label>
                     <select id="support-type" name="type" required>
                         <option value="general" class="translatable-content" data-i18n="support-type-general">General question</option>

@@ -121,14 +121,20 @@ Detailed specs for each of the 11 admin components. Each includes UI design, fun
 - Retention cohorts
 - Custom report builder
 
-#### 13. **[components/communication-center/SPEC.md](components/communication-center/SPEC.md)** 📧
+#### 13. **[components/support-desk/README.md](components/support-desk/README.md)** 🛟
+- Support ticket queue with filters & search
+- Detail drawer with requester metadata and original message
+- Status workflow (`new`, `in_progress`, `resolved`, `closed`)
+- Powered by `support_tickets` + `send-support-request`
+
+#### 14. **[components/communication-center/SPEC.md](components/communication-center/SPEC.md)** 📧
 - **Resend integration** (primary email service)
 - Email composer with templates
 - System announcements
 - Email analytics
 - Scheduled messaging
 
-#### 14. **[components/bulk-operations/SPEC.md](components/bulk-operations/SPEC.md)**
+#### 15. **[components/bulk-operations/SPEC.md](components/bulk-operations/SPEC.md)**
 - Import/export (CSV, Excel, JSON)
 - Batch operations (grant, revoke, email)
 - Operation history
@@ -144,6 +150,9 @@ All database schema, functions, and RLS policies are in:
 - **[../supabase/migrations/](../supabase/migrations/)** - Migration files
 - **[../supabase/functions/](../supabase/functions/)** - Edge Functions (to be created)
 
+Key tables added:
+- `support_tickets` — Support queue records with RLS for admins/service role (`20250107_create_support_tickets.sql`).
+
 ### Required Secrets (Already Configured) ✅
 ```
 SUPABASE_SERVICE_ROLE_KEY  # Admin operations (bypasses RLS)
@@ -156,7 +165,7 @@ SUPABASE_ANON_KEY          # Client operations
 ### Existing Edge Functions (Already Working) ✅
 ```
 /functions/send-notification-email    # Uses Resend API
-/functions/send-support-request        # Uses Resend API  
+/functions/send-support-request        # Uses Resend API + writes support_tickets  
 /functions/send-deletion-email        # Uses Resend API
 /functions/verify-2fa-code            # 2FA verification
 /functions/verify-captcha             # Turnstile
@@ -186,7 +195,8 @@ STRIPE_PUBLISHABLE_KEY     # Frontend Stripe.js
 
 ### Phase 3: Analytics & Communication (4-5 weeks)
 - Week 10-11: Real-time analytics dashboard
-- Week 12-13: Communication center (Resend)
+- Week 12: Support Desk + ticket workflow
+- Week 13: Communication center (Resend)
 - Week 14: Bulk operations, final polish
 
 **Total: 14-15 weeks** (flexible, quality-focused)
