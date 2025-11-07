@@ -29,8 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load Language Switcher Component
     loadLanguageSwitcher();
     
-    // Load Theme Switcher Component
-    loadThemeSwitcher();
+    // Load Site Footer and then Theme Switcher
+    loadSiteFooter()
+        .then(() => {
+            return loadThemeSwitcher();
+        })
+        .catch(() => {
+            // Even if footer fails, attempt to load theme switcher into fallback container
+            return loadThemeSwitcher();
+        });
     
     // Load Auth Buttons Component
     loadAuthButtons();
@@ -74,8 +81,9 @@ async function loadLanguageSwitcher() {
 
 async function loadThemeSwitcher() {
     try {
+        const footerThemeContainer = document.querySelector('#footer-theme-switcher') ? '#footer-theme-switcher' : 'footer';
         await componentLoader.load('theme-switcher', {
-            container: 'footer',
+            container: footerThemeContainer,
             priority: 'medium'
         });
         // Theme switcher component loaded
@@ -122,6 +130,19 @@ async function loadAuthButtons() {
         
     } catch (error) {
         console.error('❌ Script: Failed to load auth buttons component:', error);
+    }
+}
+
+async function loadSiteFooter() {
+    try {
+        await componentLoader.load('site-footer', {
+            container: 'footer',
+            priority: 'medium'
+        });
+        // Site footer component loaded
+    } catch (error) {
+        console.error('❌ Failed to load site footer component:', error);
+        throw error;
     }
 }
 

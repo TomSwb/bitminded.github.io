@@ -1,0 +1,168 @@
+/* Imprint Page Styles */
+
+/* Page Layout */
+.imprint-page {
+    min-height: 100vh;
+    background: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem;
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin: 0;
+}
+
+/* Imprint Content */
+.imprint-content {
+    margin-bottom: 2rem;
+}
+
+.content-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.content-section__title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.content-section__content {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+.content-section__content p {
+    margin-bottom: 0.6rem;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.content-section__content p:last-child {
+    margin-bottom: 0;
+}
+
+.content-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.content-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 0.75rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .content-section {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .content-section__title {
+        font-size: 1.2rem;
+    }
+
+    .content-section__content {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .imprint-page header {
+        padding: 2rem 0 0 0 !important;
+    }
+
+    .imprint-page main {
+        padding-top: 0.5rem !important;
+    }
+
+    .container {
+        padding-top: 0;
+        margin-top: 0;
+    }
+
+    .page-header {
+        padding-top: 0;
+    }
+
+    .page-title {
+        padding-top: 0;
+        margin: 0;
+        font-size: 1.3rem;
+    }
+
+    .content-section {
+        padding: 0.5rem;
+    }
+
+    .content-section__title {
+        font-size: 1.1rem;
+    }
+
+    .content-section__content {
+        font-size: 0.75rem;
+    }
+
+    .content-section__content p {
+        font-size: 0.8rem;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .content-section {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+}
+

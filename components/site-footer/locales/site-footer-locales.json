@@ -1,0 +1,43 @@
+{
+  "en": {
+    "translation": {
+      "footer.column.legal": "Legal Pages",
+      "footer.link.privacy": "Privacy Policy",
+      "footer.link.terms": "Terms of Service",
+      "footer.link.imprint": "Legal Notice (Imprint)",
+      "footer.link.cookies": "Cookie Notice",
+      "footer.copy": "© 2025 BitMinded. Built with care in Switzerland."
+    }
+  },
+  "de": {
+    "translation": {
+      "footer.column.legal": "Rechtliche Seiten",
+      "footer.link.privacy": "Datenschutzerklärung",
+      "footer.link.terms": "Nutzungsbedingungen",
+      "footer.link.imprint": "Impressum",
+      "footer.link.cookies": "Cookie-Hinweis",
+      "footer.copy": "© 2025 BitMinded. Mit Sorgfalt in der Schweiz entwickelt."
+    }
+  },
+  "fr": {
+    "translation": {
+      "footer.column.legal": "Pages légales",
+      "footer.link.privacy": "Politique de confidentialité",
+      "footer.link.terms": "Conditions d'utilisation",
+      "footer.link.imprint": "Mentions légales",
+      "footer.link.cookies": "Avis sur les cookies",
+      "footer.copy": "© 2025 BitMinded. Conçu avec soin en Suisse."
+    }
+  },
+  "es": {
+    "translation": {
+      "footer.column.legal": "Páginas legales",
+      "footer.link.privacy": "Política de privacidad",
+      "footer.link.terms": "Términos de servicio",
+      "footer.link.imprint": "Aviso legal",
+      "footer.link.cookies": "Aviso de cookies",
+      "footer.copy": "© 2025 BitMinded. Creado con cariño en Suiza."
+    }
+  }
+}
+
