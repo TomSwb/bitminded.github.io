@@ -321,7 +321,7 @@ ADD COLUMN IF NOT EXISTS grant_reason TEXT;
 
 **Existing Edge Functions**:
 - `/functions/send-notification-email` ✅
-- `/functions/send-contact-email` ✅
+- `/functions/send-support-request` ✅
 - `/functions/send-deletion-email` ✅
 
 **Features Already Working**:

@@ -150,7 +150,7 @@ Create `/sitemap.xml`:
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://bitminded.ch/contact.html</loc>
+    <loc>https://bitminded.ch/support/</loc>
     <lastmod>2024-12-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

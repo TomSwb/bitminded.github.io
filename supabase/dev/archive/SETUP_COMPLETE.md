@@ -60,7 +60,7 @@ You should see:
 - [ ] 2FA setup and verification
 - [ ] Profile updates
 - [ ] Notifications
-- [ ] Contact form
+- [ ] Support form
 - [ ] Admin panel (if you have admin role in dev)
 - [ ] Account deletion flow
 

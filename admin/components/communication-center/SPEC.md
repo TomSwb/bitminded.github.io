@@ -401,7 +401,7 @@ CREATE TABLE email_templates (
 
 **Existing Implementation** (already working in 3+ Edge Functions):
 ```typescript
-// Pattern used in: send-notification-email, send-contact-email, send-deletion-email
+// Pattern used in: send-notification-email, send-support-request, send-deletion-email
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY')
 

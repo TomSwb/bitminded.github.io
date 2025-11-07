@@ -13,7 +13,7 @@
       "privacy.section2.item2": "Username and profile information",
       "privacy.section2.item2b": "Optional demographic information (date of birth, country, gender) for profile personalization",
       "privacy.section2.item3": "Payment information (processed securely through Stripe)",
-      "privacy.section2.item4": "Communication preferences, support requests, and messages you send via our contact form (processed through Supabase + Resend)",
+      "privacy.section2.item4": "Communication preferences, support requests, and messages you send via our support form (processed through Supabase + Resend)",
       "privacy.section2.subtitle2": "2.2 Technical Information",
       "privacy.section2.content2": "We automatically collect certain technical information:",
       "privacy.section2.item5": "IP address and location data",

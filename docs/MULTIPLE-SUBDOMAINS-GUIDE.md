@@ -107,7 +107,7 @@ TTL: 300
     <a href="/services.html">Services</a>
     <a href="https://converter.bitminded.ch">Unit Converter</a>
     <a href="https://devflow.bitminded.ch">DevFlow</a>
-    <a href="/contact.html">Contact</a>
+    <a href="/support/">Support</a>
 </nav>
 ````
 
@@ -134,7 +134,7 @@ TTL: 300
         <a href="/">Home</a>
         <a href="/services.html">Services</a>
         <a href="/tools.html">Tools</a>
-        <a href="/contact.html">Contact</a>
+        <a href="/support/">Support</a>
       </nav>
     </header>
 
@@ -208,7 +208,7 @@ TTL: 300
           <a href="https://bitminded.ch">Home</a>
           <a href="https://bitminded.ch/services.html">Services</a>
           <a href="https://bitminded.ch/tools.html">Tools</a>
-          <a href="https://bitminded.ch/contact.html">Contact</a>
+          <a href="https://bitminded.ch/support/">Support</a>
         </div>
       </div>
     </div>

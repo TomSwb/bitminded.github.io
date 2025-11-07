@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document -->
+    <meta charset="UTF-8">
+    
+    <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--Browser Tab title-->
+    <title>Support - BitMinded</title>
+    <!--Browser Tab icon-->
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+
+    <!--iOS home-saved app icon-->
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+    <!-- iOS status bar style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Critical CSS to prevent white flash -->
+    <link rel="stylesheet" href="../css/critical.css">
+
+    <!-- Critical JavaScript for immediate initialization -->
+    <script src="../js/critical.js"></script>
+    
+    <!-- Component Loader -->
+    <script src="../components/shared/component-loader.js"></script>
+
+    <!-- Support Page CSS -->
+    <link rel="stylesheet" href="support-form.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+        
+        <!-- Language Switcher Component will be loaded here -->
+    </header>
+
+    <main class="support-page">
+        <section class="support-hero">
+            <h1 class="translatable-content" data-i18n="support-hero-title">How can we support you today?</h1>
+            <p class="support-hero__subtitle translatable-content" data-i18n="support-hero-subtitle">
+                Reach out to our team for personalised guidance, technical troubleshooting, or commission inquiries.
+            </p>
+            <div class="support-hero__meta">
+                <span class="support-hero__response-time translatable-content" data-i18n="support-response-time">Average response time: under 24 hours on business days.</span>
+                <span class="support-hero__channels translatable-content" data-i18n="support-channels">Live chat available for Priority plans from 09:00-17:00 CET.</span>
+            </div>
+        </section>
+
+        <section class="support-quick-help">
+            <h2 class="translatable-content" data-i18n="support-quick-help-title">Choose a quick-help path</h2>
+            <div class="support-quick-help__cards">
+                <article class="support-card" data-support-type="guidance">
+                    <h3 class="translatable-content" data-i18n="support-card-guidance-title">Book a guidance session</h3>
+                    <p class="translatable-content" data-i18n="support-card-guidance-copy">Schedule a 30-minute walkthrough with our product specialists.</p>
+                    <a class="support-card__link translatable-content" data-i18n="support-card-guidance-link" href="https://cal.com/bitminded/guidance" target="_blank" rel="noopener">View calendar</a>
+                </article>
+                <article class="support-card" data-support-type="bug">
+                    <h3 class="translatable-content" data-i18n="support-card-bug-title">Report an app issue</h3>
+                    <p class="translatable-content" data-i18n="support-card-bug-copy">Share steps to reproduce, device details, and screenshots so we can triage fast.</p>
+                    <button class="support-card__link support-card__link--prefill translatable-content" data-prefill="bug" data-i18n="support-card-bug-link" type="button">Prefill support form</button>
+                </article>
+                <article class="support-card" data-support-type="commission">
+                    <h3 class="translatable-content" data-i18n="support-card-commission-title">Commission a project</h3>
+                    <p class="translatable-content" data-i18n="support-card-commission-copy">Tell us about your idea and we'll map the delivery scope together.</p>
+                    <button class="support-card__link support-card__link--prefill translatable-content" data-prefill="commission" data-i18n="support-card-commission-link" type="button">Start an intake</button>
+                </article>
+            </div>
+        </section>
+
+        <section class="support-form-section" id="support-form">
+            <h2 class="translatable-content" data-i18n="support-form-title">Submit a support request</h2>
+            <p class="support-form-section__helper translatable-content" data-i18n="support-form-helper">Provide as much context as possible so we can help you faster.</p>
+            <form id="support-request-form" class="support-form" novalidate>
+                <div class="support-form__group">
+                    <label for="support-name" class="translatable-content" data-i18n="support-name-label">Name</label>
+                    <input type="text" id="support-name" name="name" autocomplete="name" required>
+                </div>
+                <div class="support-form__group">
+                    <label for="support-email" class="translatable-content" data-i18n="support-email-label">Email</label>
+                    <input type="email" id="support-email" name="email" autocomplete="email" required>
+                </div>
+                <div class="support-form__group">
+                    <label for="support-type" class="translatable-content" data-i18n="support-type-label">Request type</label>
+                    <select id="support-type" name="type" required>
+                        <option value="general" class="translatable-content" data-i18n="support-type-general">General question</option>
+                        <option value="bug" class="translatable-content" data-i18n="support-type-bug">Bug or outage</option>
+                        <option value="billing" class="translatable-content" data-i18n="support-type-billing">Billing</option>
+                        <option value="commission" class="translatable-content" data-i18n="support-type-commission">Commission intake</option>
+                    </select>
+                </div>
+                <div class="support-form__group support-form__group--wide">
+                    <label for="support-message" class="translatable-content" data-i18n="support-message-label">How can we help?</label>
+                    <textarea id="support-message" name="message" rows="6" required></textarea>
+                </div>
+                <div class="support-form__actions">
+                    <button type="submit" class="support-form__submit translatable-content" data-i18n="support-submit-label">Send support request</button>
+                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">We email a confirmation with your ticket number.</span>
+                </div>
+            </form>
+            <div id="support-form-status" class="support-form__status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="support-resources">
+            <h2 class="translatable-content" data-i18n="support-resources-title">Helpful resources</h2>
+            <ul class="support-resources__list">
+                <li>
+                    <a href="/docs/README.html" class="translatable-content" data-i18n="support-resources-docs">Product documentation</a>
+                </li>
+                <li>
+                    <a href="/services/" class="translatable-content" data-i18n="support-resources-services">Services catalog</a>
+                </li>
+                <li>
+                    <a href="/legal-pages/privacy/" class="translatable-content" data-i18n="support-resources-privacy">Privacy and security commitments</a>
+                </li>
+            </ul>
+        </section>
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../js/env-config.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../js/supabase-config.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../js/script.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- language switcher -->
+    <script src="lang-support/lang-support.js"></script>
+    <!-- Support Form JS (using Supabase + Resend) -->
+    <script src="support-form.js"></script>
+
+</body>
+
+</html>

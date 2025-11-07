@@ -26,7 +26,7 @@ RESEND_API_KEY               # Email sending ⭐ (already working in 3+ function
 ### ✅ Existing Edge Functions (Already Implemented)
 ```
 /functions/send-notification-email    # Uses Resend API
-/functions/send-contact-email         # Uses Resend API
+/functions/send-support-request        # Uses Resend API
 /functions/send-deletion-email        # Uses Resend API
 /functions/verify-2fa-code            # 2FA verification
 /functions/verify-captcha             # Turnstile verification

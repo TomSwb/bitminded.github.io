@@ -17,14 +17,14 @@ This document outlines the strategy for refactoring the BitMinded website to imp
 ### Current Component Locations
 
 #### Loading Screen
-- **HTML**: Embedded in `<head>` of each page (`index.html`, `contact/index.html`)
+- **HTML**: Embedded in `<head>` of each page (`index.html`, `support/index.html`)
 - **CSS**: Mixed in `css/critical.css` (lines 66-123)
 - **JS**: Logic scattered across `js/critical.js` and `js/script.js`
 
 #### Language Switcher
 - **HTML**: Hardcoded in each page header
 - **CSS**: Mixed in `css/components.css` (lines 212-217)
-- **JS**: Duplicated in `js/lang-index/lang-index.js` and `contact/lang-contact/lang-contact.js`
+- **JS**: Duplicated in `js/lang-index/lang-index.js` and `support/lang-support/lang-support.js`
 
 #### Theme Switcher
 - **HTML**: Hardcoded in each page footer
@@ -214,7 +214,7 @@ NavigationMenu.toggleMobileMenu();
 
 ### Step 3: Update Pages
 - Modify `index.html` to use components ✅ **COMPLETED**
-- Modify `contact/index.html` to use components ✅ **COMPLETED**
+- Modify `support/index.html` to use components ✅ **COMPLETED**
 - Test all functionality ✅ **COMPLETED**
 
 ### Step 4: Cleanup
@@ -276,7 +276,7 @@ ComponentLoader.load('navigation-menu', {
 
 ### Additional Components
 - Navigation menu component ✅ **PLANNED**
-- Contact form component
+- Support form component
 - Modal/dialog component
 - Toast notification component
 
