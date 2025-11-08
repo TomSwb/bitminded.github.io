@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 /**
  * Send Support Request Email
- *
+ * 
  * Handles Support Centre submissions and routes them through Resend.
  * Enriches payload with request type + metadata for faster triage.
  */
@@ -22,7 +22,7 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { name, email, message, type = 'general', userId, userAgent } = await req.json()
+    const { name, email, message, type = 'general', userId, userAgent, attachments: attachmentsRaw = [] } = await req.json()
 
     const trimmedName = String(name ?? '').trim()
     const trimmedEmail = String(email ?? '').trim()
@@ -43,6 +43,73 @@ serve(async (req) => {
     const safeEmail = sanitize(trimmedEmail)
     const safeMessage = sanitize(trimmedMessage)
     const safeUserAgent = normalizedUserAgent ? sanitize(normalizedUserAgent) : ''
+
+    const attachmentEntries = Array.isArray(attachmentsRaw) ? attachmentsRaw : []
+    const allowedMimeTypes = new Set([
+      'image/png',
+      'image/jpeg',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'text/plain',
+      'text/log'
+    ])
+    const maxAttachmentCount = 5
+    const maxAttachmentSize = 5 * 1024 * 1024 // 5 MB
+
+    const attachmentsForStore: Array<{ name: string; type: string; size: number }> = []
+    const attachmentsForEmail: Array<{ filename: string; content: string; type: string }> = []
+
+    const formatSize = (size: number) => {
+      if (!Number.isFinite(size)) return ''
+      if (size < 1024) return `${size} B`
+      if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`
+      return `${(size / (1024 * 1024)).toFixed(1)} MB`
+    }
+
+    const parseDataUrl = (dataUrl: string) => {
+      if (!dataUrl.startsWith('data:')) return null
+      const commaIndex = dataUrl.indexOf(',')
+      if (commaIndex === -1) return null
+      const meta = dataUrl.substring(5, commaIndex) // remove 'data:'
+      const base64Content = dataUrl.substring(commaIndex + 1)
+      if (!meta.includes(';base64')) return null
+      return base64Content
+    }
+
+    for (const entry of attachmentEntries.slice(0, maxAttachmentCount)) {
+      const fileName = typeof entry?.name === 'string' ? entry.name.trim().slice(0, 120) : ''
+      const fileType = typeof entry?.type === 'string' ? entry.type.toLowerCase() : ''
+      const fileSize = typeof entry?.size === 'number' ? entry.size : Number(entry?.size)
+      const dataUrl = typeof entry?.dataUrl === 'string' ? entry.dataUrl : ''
+
+      if (!fileName || !fileType || !Number.isFinite(fileSize) || fileSize <= 0 || !dataUrl) {
+        continue
+      }
+
+      if (fileSize > maxAttachmentSize || !allowedMimeTypes.has(fileType)) {
+        continue
+      }
+
+      const base64Content = parseDataUrl(dataUrl)
+      if (!base64Content) {
+        continue
+      }
+
+      attachmentsForStore.push({
+        name: fileName,
+        type: fileType,
+        size: fileSize
+      })
+
+      const safeFileName = fileName.replace(/[\\/:*?"<>|]/g, '_') || 'attachment'
+
+      attachmentsForEmail.push({
+        filename: safeFileName,
+        content: base64Content,
+        type: fileType
+      })
+    }
 
     const typeLabels: Record<string, string> = {
       general: 'General question',
@@ -123,7 +190,10 @@ serve(async (req) => {
           status: 'new',
           message: trimmedMessage,
           user_agent: normalizedUserAgent,
-          metadata: { source: 'support-form' }
+          metadata: {
+            source: 'support-form',
+            attachments: attachmentsForStore
+          }
         })
         .select('id, ticket_code, status, created_at, updated_at')
         .single()
@@ -184,12 +254,12 @@ serve(async (req) => {
               text-align: center;
               margin-bottom: 30px;
               padding-bottom: 20px;
-              border-bottom: 2px solid #cfde67;
+              border-bottom: 2px solid #d286bd;
             }
             .logo {
               font-size: 28px;
               font-weight: bold;
-              color: #cfde67;
+              color: #d286bd;
               margin-bottom: 10px;
             }
             .tagline {
@@ -214,13 +284,13 @@ serve(async (req) => {
               padding: 12px;
               background: #f8f9fa;
               border-radius: 6px;
-              border-left: 3px solid #cfde67;
+              border-left: 3px solid #d286bd;
             }
             .message-box {
               padding: 20px;
               background: #f0f8ff;
               border-radius: 6px;
-              border-left: 4px solid #cfde67;
+              border-left: 4px solid #d286bd;
               white-space: pre-wrap;
               word-wrap: break-word;
             }
@@ -237,7 +307,7 @@ serve(async (req) => {
               padding: 15px;
               background: #fff3cd;
               border-radius: 6px;
-              border-left: 4px solid #ffc107;
+              border-left: 4px solid #d286bd;
             }
           </style>
         </head>
@@ -264,9 +334,9 @@ serve(async (req) => {
                   <div class="field-label">Ticket ID</div>
                   <div class="field-value">${safeTicketCode}</div>
                 </div>
-                <div class="field">
-                  <div class="field-label">Received</div>
-                  <div class="field-value">${timestamp}</div>
+              <div class="field">
+                <div class="field-label">Received</div>
+                <div class="field-value">${timestamp}</div>
                 </div>
                 <div class="field">
                   <div class="field-label">Request Type</div>
@@ -288,6 +358,15 @@ serve(async (req) => {
                 <div class="field-label">Message</div>
                 <div class="message-box">${safeMessage}</div>
               </div>
+              ${attachmentsForStore.length ? `
+              <div class="field">
+                <div class="field-label">Attachments</div>
+                <div class="field-value">
+                  <ul style="margin:0;padding-left:16px;">
+                    ${attachmentsForStore.map(att => `<li>${sanitize(att.name)} (${formatSize(att.size)})</li>`).join('')}
+                  </ul>
+                </div>
+              </div>` : ''}
               
               <div class="reply-to">
                 <strong>💡 To Reply:</strong> Simply reply to this email to respond directly to ${safeEmail}
@@ -304,19 +383,29 @@ serve(async (req) => {
     `
 
     // Send email via Resend
+    const internalEmailPayload: Record<string, unknown> = {
+      from: 'BitMinded Support <support@bitminded.ch>',
+      to: 'support@bitminded.ch',
+      reply_to: email,
+      subject: `[Support:${ticketCode}] ${safeName}`,
+      html: emailHtml
+    }
+
+    if (attachmentsForEmail.length) {
+      internalEmailPayload.attachments = attachmentsForEmail.map(att => ({
+        filename: att.filename,
+        content: att.content,
+        type: att.type
+      }))
+    }
+
     const internalEmailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        from: 'BitMinded Support <support@bitminded.ch>',
-        to: 'support@bitminded.ch',
-        reply_to: email,
-        subject: `[Support:${ticketCode}] ${safeName}`,
-        html: emailHtml
-      })
+      body: JSON.stringify(internalEmailPayload)
     })
 
     const internalEmailResult = await internalEmailResponse.json()
@@ -356,7 +445,7 @@ serve(async (req) => {
             .logo {
               font-size: 24px;
               font-weight: 700;
-              color: #6366f1;
+              color: #d286bd;
               letter-spacing: 0.05em;
               text-transform: uppercase;
             }
@@ -367,8 +456,8 @@ serve(async (req) => {
             }
             .ticket-chip {
               display: inline-block;
-              background: rgba(99,102,241,0.12);
-              color: #4338ca;
+              background: rgba(210,134,189,0.18);
+              color: #c26aa1;
               padding: 6px 14px;
               border-radius: 999px;
               font-weight: 600;
@@ -389,7 +478,7 @@ serve(async (req) => {
               background: #f1f5f9;
               border-radius: 12px;
               padding: 24px;
-              border-left: 4px solid #6366f1;
+              border-left: 4px solid #d286bd;
             }
             .summary h3 {
               margin-top: 0;
@@ -443,6 +532,11 @@ serve(async (req) => {
                   <strong>Message:</strong>
                   <span style="white-space: pre-wrap;">${safeMessage}</span>
                 </div>
+                ${attachmentsForStore.length ? `
+                <div>
+                  <strong>Attachments:</strong>
+                  <span>${attachmentsForStore.map(att => `${sanitize(att.name)} (${formatSize(att.size)})`).join(', ')}</span>
+                </div>` : ''}
               </div>
               <p>If you need to add more context, simply reply to this email and it will attach to your ticket.</p>
             </div>
@@ -479,6 +573,7 @@ serve(async (req) => {
 
     console.log('✅ Support emails sent successfully via Resend')
     console.log('🎫 Ticket created:', ticketCode, ticketRecord.id)
+    console.log('📎 Attachments included:', attachmentsForStore.length)
     console.log('📬 Internal Email ID:', internalEmailResult.id)
     console.log('📬 Confirmation Email ID:', userEmailResult.id)
 
@@ -493,7 +588,8 @@ serve(async (req) => {
           code: ticketCode,
           status: ticketRecord.status,
           created_at: ticketRecord.created_at,
-          updated_at: ticketRecord.updated_at
+          updated_at: ticketRecord.updated_at,
+          attachments: attachmentsForStore
         }
       }),
       { 

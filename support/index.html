@@ -60,22 +60,21 @@
                 <article class="support-card" data-support-type="guidance">
                     <h3 class="translatable-content" data-i18n="support-card-guidance-title">Book a guidance session</h3>
                     <p class="translatable-content" data-i18n="support-card-guidance-copy">Schedule a 30-minute walkthrough with our product specialists.</p>
-                    <a class="support-card__link translatable-content" data-i18n="support-card-guidance-link" href="https://cal.com/bitminded/guidance" target="_blank" rel="noopener">View calendar</a>
+                    <span class="support-card__coming-soon translatable-content" data-i18n="support-card-coming-soon">Coming soon</span>
                 </article>
                 <article class="support-card" data-support-type="bug">
                     <h3 class="translatable-content" data-i18n="support-card-bug-title">Report an app issue</h3>
                     <p class="translatable-content" data-i18n="support-card-bug-copy">Share steps to reproduce, device details, and screenshots so we can triage fast.</p>
-                    <button class="support-card__link support-card__link--prefill translatable-content" data-prefill="bug" data-i18n="support-card-bug-link" type="button">Prefill support form</button>
                 </article>
                 <article class="support-card" data-support-type="commission">
                     <h3 class="translatable-content" data-i18n="support-card-commission-title">Commission a project</h3>
                     <p class="translatable-content" data-i18n="support-card-commission-copy">Tell us about your idea and we'll map the delivery scope together.</p>
-                    <button class="support-card__link support-card__link--prefill translatable-content" data-prefill="commission" data-i18n="support-card-commission-link" type="button">Start an intake</button>
+                    <span class="support-card__coming-soon translatable-content" data-i18n="support-card-coming-soon">Coming soon</span>
                 </article>
             </div>
         </section>
 
-        <section class="support-form-section" id="support-form">
+        <section class="support-form-section support-form-section--hidden" id="support-form">
             <h2 class="translatable-content" data-i18n="support-form-title">Submit a support request</h2>
             <p class="support-form-section__helper translatable-content" data-i18n="support-form-helper">Provide as much context as possible so we can help you faster.</p>
             <form id="support-request-form" class="support-form" novalidate>
@@ -95,12 +94,22 @@
                         <option value="general" class="translatable-content" data-i18n="support-type-general">General question</option>
                         <option value="bug" class="translatable-content" data-i18n="support-type-bug">Bug or outage</option>
                         <option value="billing" class="translatable-content" data-i18n="support-type-billing">Billing</option>
-                        <option value="commission" class="translatable-content" data-i18n="support-type-commission">Commission intake</option>
                     </select>
                 </div>
                 <div class="support-form__group support-form__group--wide">
                     <label for="support-message" class="translatable-content" data-i18n="support-message-label">How can we help?</label>
                     <textarea id="support-message" name="message" rows="6" required></textarea>
+                </div>
+                <div class="support-form__group support-form__group--wide">
+                    <label for="support-attachments-input" class="translatable-content" data-i18n="support-attachments-label">Attach screenshots or logs (paste supported)</label>
+                    <div class="support-form__dropzone" id="support-dropzone">
+                        <div class="support-form__dropzone-instructions">
+                            <span class="translatable-content" data-i18n="support-attachments-instructions">Drag & drop files, paste screenshots, or click to upload (max 5 files, 5 MB each).</span>
+                        </div>
+                        <input type="file" id="support-attachments-input" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.log" multiple>
+                    </div>
+                    <ul class="support-form__attachments" id="support-attachments-list"></ul>
+                    <p class="support-form__helper translatable-content" data-i18n="support-attachments-helper">Accepted: PNG, JPG, GIF, WEBP, PDF, TXT, LOG.</p>
                 </div>
                 <div class="support-form__actions">
                     <button type="submit" class="support-form__submit translatable-content" data-i18n="support-submit-label">Send support request</button>

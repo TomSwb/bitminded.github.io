@@ -19,6 +19,13 @@ class SupportDesk {
         this.searchDebounce = null;
     }
 
+    bytesToReadable(bytes) {
+        if (!Number.isFinite(bytes)) return '';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
     async init() {
         if (this.isInitialized) {
             return;
@@ -69,6 +76,8 @@ class SupportDesk {
         this.elements.updateStatusButton = document.getElementById('support-desk-update-status');
         this.elements.detailMessage = document.getElementById('support-desk-detail-message');
         this.elements.detailUserAgent = document.getElementById('support-desk-detail-user-agent');
+        this.elements.detailAttachmentsCard = document.getElementById('support-desk-detail-attachments-card');
+        this.elements.detailAttachmentsList = document.getElementById('support-desk-detail-attachments');
 
         Object.entries(this.elements).forEach(([key, el]) => {
             if (!el) {
@@ -160,7 +169,7 @@ class SupportDesk {
 
             const { data, error } = await window.supabase
                 .from('support_tickets')
-                .select('id, ticket_code, name, email, type, status, message, user_agent, created_at, updated_at, resolved_at')
+                .select('id, ticket_code, name, email, type, status, message, user_agent, created_at, updated_at, resolved_at, metadata')
                 .order('created_at', { ascending: false });
 
             if (error) {
@@ -317,6 +326,29 @@ class SupportDesk {
 
         this.elements.detailMessage.textContent = ticket.message || this.translate('No message provided.', 'No message provided.');
         this.elements.detailUserAgent.textContent = ticket.user_agent || this.translate('Unknown device', 'Unknown device');
+
+        const attachmentsCard = this.elements.detailAttachmentsCard;
+        const attachmentsList = this.elements.detailAttachmentsList;
+        if (attachmentsCard && attachmentsList) {
+            const attachmentsMeta = Array.isArray(ticket.metadata?.attachments)
+                ? ticket.metadata.attachments
+                : Array.isArray(ticket.attachments)
+                    ? ticket.attachments
+                    : [];
+
+            if (attachmentsMeta.length) {
+                attachmentsCard.classList.remove('hidden');
+                attachmentsList.innerHTML = '';
+                attachmentsMeta.forEach((attachment) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${this.escapeHtml(attachment.name)} <span class="support-desk__attachment-size">(${this.escapeHtml(this.bytesToReadable(attachment.size))})</span>`;
+                    attachmentsList.appendChild(li);
+                });
+            } else {
+                attachmentsCard.classList.add('hidden');
+                attachmentsList.innerHTML = '';
+            }
+        }
     }
 
     clearDetail() {
@@ -343,7 +375,7 @@ class SupportDesk {
                 .from('support_tickets')
                 .update(updatePayload)
                 .eq('id', ticket.id)
-                .select('id, ticket_code, status, resolved_at, updated_at')
+            .select('id, ticket_code, status, resolved_at, updated_at, metadata')
                 .maybeSingle();
 
             if (error) {
@@ -357,7 +389,8 @@ class SupportDesk {
                         ...this.tickets[ticketIndex],
                         status: data.status,
                         resolved_at: data.resolved_at,
-                        updated_at: data.updated_at
+                        updated_at: data.updated_at,
+                        metadata: data.metadata ?? this.tickets[ticketIndex].metadata
                     };
                     this.selectedTicket = this.tickets[ticketIndex];
                 } else {
@@ -365,7 +398,8 @@ class SupportDesk {
                         ...ticket,
                         status: data.status,
                         resolved_at: data.resolved_at,
-                        updated_at: data.updated_at
+                        updated_at: data.updated_at,
+                        metadata: data.metadata ?? ticket.metadata
                     };
                     this.tickets = [updatedTicket, ...this.tickets];
                     this.selectedTicket = updatedTicket;

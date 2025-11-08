@@ -218,7 +218,7 @@ if (DEBUG) console.log('...');
    # Deploy all functions
    supabase functions deploy log-login
    supabase functions deploy verify-2fa-code
-  supabase functions deploy verify-captcha
+   supabase functions deploy verify-captcha
   supabase functions deploy send-support-request   # persists support_tickets + emails
    supabase functions deploy send-notification-email
    supabase functions deploy schedule-account-deletion
