@@ -361,6 +361,37 @@
   background: rgba(15, 23, 42, 0.4);
 }
 
+.support-desk__attachments-card {
+  border: var(--support-desk-border);
+  border-radius: calc(var(--support-desk-radius) - 0.3rem);
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.support-desk__attachments-card.hidden {
+  display: none;
+}
+
+.support-desk__attachments-list {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0 0 0.75rem;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--color-text-primary);
+}
+
+.support-desk__attachments-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.support-desk__attachment-size {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
 .support-desk__message-card h4,
 .support-desk__meta-card h4 {
   margin: 0 0 0.75rem;

@@ -8,17 +8,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    const formSection = document.getElementById('support-form');
     const statusDiv = document.getElementById('support-form-status');
     const submitButton = form.querySelector('button[type="submit"]');
     const nameInput = document.getElementById('support-name');
     const emailInput = document.getElementById('support-email');
     const typeSelect = document.getElementById('support-type');
     const messageInput = document.getElementById('support-message');
+    const dropzone = document.getElementById('support-dropzone');
+    const attachmentsInput = document.getElementById('support-attachments-input');
+    const attachmentsList = document.getElementById('support-attachments-list');
     if (!submitButton || !nameInput || !emailInput || !typeSelect || !messageInput) {
         console.error('Support form inputs missing.');
         return;
     }
     const quickPrefillButtons = document.querySelectorAll('.support-card__link--prefill');
+    const supportCards = document.querySelectorAll('.support-card');
+    const attachments = [];
+    supportCards.forEach(card => {
+        const type = card.dataset.supportType;
+        card.addEventListener('click', (event) => {
+            // ignore clicks on actual anchors/buttons inside the card (they keep existing behaviour)
+            if (event.target.closest('a, button')) {
+                return;
+            }
+            if (typeSelect && type) {
+                typeSelect.value = type;
+            }
+            if (type === 'bug') {
+                if (formSection.classList.contains('support-form-section--hidden')) {
+                    revealFormSection({ scroll: true });
+                    nameInput?.focus({ preventScroll: true });
+                } else {
+                    formSection.classList.add('support-form-section--hidden');
+                }
+            }
+        });
+    });
 
     const translate = (key, fallback) => {
         if (window.i18next?.t) {
@@ -31,6 +57,125 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     submitButton.textContent = translate('support-submit-label', submitButton.textContent ?? 'Send support request');
+
+    const bytesToReadable = (bytes) => {
+        if (!Number.isFinite(bytes)) return '';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let value = bytes;
+        let unit = 0;
+        while (value >= 1024 && unit < units.length - 1) {
+            value /= 1024;
+            unit += 1;
+        }
+        return `${value.toFixed(value >= 10 || unit === 0 ? 0 : 1)} ${units[unit]}`;
+    };
+
+    const renderAttachments = () => {
+        if (!attachmentsList) return;
+        attachmentsList.innerHTML = '';
+        attachments.forEach((attachment, index) => {
+            const item = document.createElement('li');
+            item.className = 'support-form__attachment';
+            item.innerHTML = `
+                <div class="support-form__attachment-meta">
+                    <span class="support-form__attachment-name">${attachment.name}</span>
+                    <span class="support-form__attachment-size">${bytesToReadable(attachment.size)}</span>
+                </div>
+                <button type="button" class="support-form__attachment-remove" aria-label="Remove attachment">&times;</button>
+            `;
+            item.querySelector('button').addEventListener('click', () => {
+                attachments.splice(index, 1);
+                renderAttachments();
+            });
+            attachmentsList.appendChild(item);
+        });
+    };
+
+    const addFiles = (fileList) => {
+        const maxFiles = 5;
+        const maxSize = 5 * 1024 * 1024; // 5 MB
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'text/log'];
+
+        const files = Array.from(fileList || []);
+        for (const file of files) {
+            if (attachments.length >= maxFiles) {
+                showError(translate('support-error-attachments-limit', 'Maximum of 5 attachments allowed.'));
+                break;
+            }
+            if (file.size > maxSize) {
+                showError(translate('support-error-attachment-size', 'Each attachment must be 5 MB or smaller.'));
+                continue;
+            }
+            if (!allowedTypes.includes(file.type)) {
+                showError(translate('support-error-attachment-type', 'Unsupported file type.'));
+                continue;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                attachments.push({
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    dataUrl: event.target.result
+                });
+                renderAttachments();
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    renderAttachments();
+
+    if (dropzone && attachmentsInput) {
+        dropzone.addEventListener('click', () => attachmentsInput.click());
+
+        dropzone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (event.dataTransfer?.files?.length) {
+                addFiles(event.dataTransfer.files);
+            }
+        });
+
+        dropzone.addEventListener('paste', (event) => {
+            const clipboardFiles = event.clipboardData?.files;
+            if (clipboardFiles?.length) {
+                addFiles(clipboardFiles);
+            }
+        });
+
+        attachmentsInput.addEventListener('change', (event) => {
+            if (event.target.files?.length) {
+                addFiles(event.target.files);
+                attachmentsInput.value = '';
+            }
+        });
+    }
+
+    const revealFormSection = ({ scroll = true } = {}) => {
+        if (!formSection) {
+            return;
+        }
+        const wasHidden = formSection.classList.contains('support-form-section--hidden');
+        formSection.classList.remove('support-form-section--hidden');
+        if (scroll && wasHidden) {
+            formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    if (window.location.hash === '#support-form') {
+        revealFormSection({ scroll: false });
+    }
 
     // Check if user is logged in and pre-fill email
     try {
@@ -55,8 +200,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (prefill && typeSelect) {
                     typeSelect.value = prefill;
                 }
-                document.getElementById('support-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                nameInput?.focus({ preventScroll: true });
+
+                if (prefill === 'bug') {
+                    revealFormSection({ scroll: true });
+                    nameInput?.focus({ preventScroll: true });
+                }
             });
         });
     }
@@ -79,7 +227,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             type: typeSelect?.value ?? 'general',
             message: messageInput?.value.trim() ?? '',
             userId: form.dataset.userId || null,
-            userAgent: navigator.userAgent
+            userAgent: navigator.userAgent,
+            attachments: attachments.map(({ name, type, size, dataUrl }) => ({ name, type, size, dataUrl }))
         };
 
         const validationErrors = [];
@@ -93,6 +242,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!formData.message || formData.message.length < 10) {
             validationErrors.push(translate('support-error-message-length', 'Message must be at least 10 characters'));
         }
+        if (attachments.length > 5) {
+            validationErrors.push(translate('support-error-attachments-limit', 'Maximum of 5 attachments allowed.'));
+        }
 
         if (validationErrors.length) {
             showError(validationErrors.join(' · '));
@@ -102,12 +254,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             // Call Supabase edge function
+            const supabaseUrl = window.SUPABASE_CONFIG?.url;
+            if (!supabaseUrl) {
+                throw new Error('Missing Supabase configuration');
+            }
+
             const response = await fetch(
-                'https://dynxqnrkmjcvgzsugxtm.supabase.co/functions/v1/send-support-request',
+                `${supabaseUrl}/functions/v1/send-support-request`,
                 {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                        'apikey': SUPABASE_CONFIG.anonKey,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(formData)
@@ -125,6 +283,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showSuccess(successMessage);
                 const lockedEmail = emailInput.disabled ? emailInput.value : '';
                 form.reset();
+                attachments.length = 0;
+                renderAttachments();
                 if (emailInput.disabled && lockedEmail) {
                     emailInput.value = lockedEmail;
                 }
