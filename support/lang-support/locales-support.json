@@ -32,10 +32,10 @@
       "support-error-missing-name": "Name is required",
       "support-error-missing-email": "Email is required",
       "support-error-message-length": "Message must be at least 10 characters",
-      "support-resources-title": "Helpful resources",
-      "support-resources-docs": "Product documentation",
-      "support-resources-services": "Services catalog",
-      "support-resources-privacy": "Privacy and security commitments"
+      "support-resources-title": "",
+      "support-resources-docs": "",
+      "support-resources-services": "",
+      "support-resources-privacy": ""
     }
   },
   "es": {
@@ -71,10 +71,10 @@
       "support-error-missing-name": "El nombre es obligatorio",
       "support-error-missing-email": "El correo es obligatorio",
       "support-error-message-length": "El mensaje debe tener al menos 10 caracteres",
-      "support-resources-title": "Recursos útiles",
-      "support-resources-docs": "Documentación del producto",
-      "support-resources-services": "Catálogo de servicios",
-      "support-resources-privacy": "Compromisos de privacidad y seguridad"
+      "support-resources-title": "",
+      "support-resources-docs": "",
+      "support-resources-services": "",
+      "support-resources-privacy": ""
     }
   },
   "fr": {
@@ -110,10 +110,10 @@
       "support-error-missing-name": "Le nom est requis",
       "support-error-missing-email": "L'e-mail est requis",
       "support-error-message-length": "Le message doit contenir au moins 10 caractères",
-      "support-resources-title": "Ressources utiles",
-      "support-resources-docs": "Documentation produit",
-      "support-resources-services": "Catalogue de services",
-      "support-resources-privacy": "Engagements confidentialité et sécurité"
+      "support-resources-title": "",
+      "support-resources-docs": "",
+      "support-resources-services": "",
+      "support-resources-privacy": ""
     }
   },
   "de": {
@@ -149,10 +149,10 @@
       "support-error-missing-name": "Name ist erforderlich",
       "support-error-missing-email": "E-Mail ist erforderlich",
       "support-error-message-length": "Die Nachricht muss mindestens 10 Zeichen lang sein",
-      "support-resources-title": "Hilfreiche Ressourcen",
-      "support-resources-docs": "Produktdokumentation",
-      "support-resources-services": "Servicekatalog",
-      "support-resources-privacy": "Unsere Datenschutz- und Sicherheitszusagen"
+      "support-resources-title": "",
+      "support-resources-docs": "",
+      "support-resources-services": "",
+      "support-resources-privacy": ""
     }
   }
 }
