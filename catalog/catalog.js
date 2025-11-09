@@ -257,22 +257,28 @@
 
         const media = buildMediaPreview(product);
 
-        const footer = buildCardFooter(product);
-
         const body = document.createElement('div');
         body.className = 'catalog-card__body';
+        if (media) {
+            body.appendChild(media);
+        }
         body.appendChild(title);
         body.appendChild(tagline);
         if (media) {
-            body.appendChild(media);
+            body.classList.add('catalog-card__body--with-media');
         }
         body.appendChild(buildTagList(product));
 
         card.appendChild(header);
         card.appendChild(body);
-        card.appendChild(buildDetailToggle(product));
-        card.appendChild(buildDetailPanel(product));
-        card.appendChild(footer);
+        const featuredToggle = buildDetailToggle(product);
+        const featuredPanel = buildDetailPanel(product);
+        card.appendChild(featuredToggle);
+        card.appendChild(featuredPanel);
+        const featuredFooter = buildCardFooter(product);
+        if (featuredFooter) {
+            card.appendChild(featuredFooter);
+        }
 
         return card;
     }
@@ -307,8 +313,13 @@
 
         const meta = buildMetaLine(product);
 
+        const media = buildMediaPreview(product);
+
         const body = document.createElement('div');
         body.className = 'catalog-card__body';
+        if (media) {
+            body.appendChild(media);
+        }
         body.appendChild(title);
         if (meta) {
             body.appendChild(meta);
@@ -316,7 +327,6 @@
         body.appendChild(tagline);
         body.appendChild(buildTagList(product));
 
-        const footer = buildCardFooter(product);
         const detailToggle = buildDetailToggle(product);
         const detailPanel = buildDetailPanel(product);
 
@@ -324,7 +334,10 @@
         card.appendChild(body);
         card.appendChild(detailToggle);
         card.appendChild(detailPanel);
-        card.appendChild(footer);
+        const footer = buildCardFooter(product);
+        if (footer) {
+            card.appendChild(footer);
+        }
 
         return card;
     }
@@ -440,6 +453,10 @@
     }
 
     function buildCardFooter(product) {
+        if (product.status.availability !== 'available') {
+            return null;
+        }
+
         const footer = document.createElement('footer');
         footer.className = 'catalog-card__footer';
 
