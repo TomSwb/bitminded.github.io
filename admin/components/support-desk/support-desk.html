@@ -2,7 +2,6 @@
     <div class="support-desk__header">
         <div class="support-desk__title-group">
             <h2 class="support-desk__title translatable-content" data-translation-key="Support Desk">Support Desk</h2>
-            <p class="support-desk__subtitle translatable-content" data-translation-key="Monitor and resolve incoming support requests.">Monitor and resolve incoming support requests.</p>
         </div>
         <button class="support-desk__refresh" id="support-desk-refresh" type="button">
             <span class="support-desk__refresh-icon">🔄</span>
@@ -46,7 +45,7 @@
     </div>
 
     <div class="support-desk__layout">
-        <div class="support-desk__table-card">
+        <div class="support-desk__table-card" id="support-desk-table-card">
             <div class="support-desk__table-wrapper">
                 <table class="support-desk__table">
                     <thead>
@@ -157,6 +156,11 @@
                     <div class="support-desk__context-card hidden" id="support-desk-detail-context-card">
                         <h4 class="translatable-content" data-translation-key="Ticket details">Ticket details</h4>
                         <div class="support-desk__context-body" id="support-desk-detail-context"></div>
+                    </div>
+
+                    <div class="support-desk__updates-card hidden" id="support-desk-detail-updates-card">
+                        <h4 class="translatable-content" data-translation-key="Support updates">Support updates</h4>
+                        <div class="support-desk__updates" id="support-desk-detail-updates"></div>
                     </div>
 
                     <div class="support-desk__attachments-card hidden" id="support-desk-detail-attachments-card">

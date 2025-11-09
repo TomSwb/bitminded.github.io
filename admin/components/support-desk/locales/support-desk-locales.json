@@ -2,7 +2,6 @@
   "en": {
     "translation": {
       "Support Desk": "Support Desk",
-      "Monitor and resolve incoming support requests.": "Monitor and resolve incoming support requests.",
       "Refresh": "Refresh",
       "Search tickets": "Search tickets",
       "Status": "Status",
@@ -51,6 +50,9 @@
       "Archive history archived": "Archived",
       "Archive history restored": "Restored",
       "Context: Support updates": "Support updates",
+      "Support updates": "Support updates",
+      "Support team update": "Support team update",
+      "Requester update": "Requester update",
       "Attachments": "Attachments",
       "Attachments note": "Files are forwarded to the support inbox email.",
       "Submitted": "Submitted",
@@ -73,7 +75,6 @@
   "es": {
     "translation": {
       "Support Desk": "Mesa de soporte",
-      "Monitor and resolve incoming support requests.": "Supervisa y resuelve solicitudes de soporte entrantes.",
       "Refresh": "Actualizar",
       "Search tickets": "Buscar tickets",
       "Status": "Estado",
@@ -122,6 +123,9 @@
       "Archive history archived": "Archivado",
       "Archive history restored": "Restaurado",
       "Context: Support updates": "Actualizaciones del soporte",
+      "Support updates": "Actualizaciones del soporte",
+      "Support team update": "Actualización del equipo de soporte",
+      "Requester update": "Actualización del solicitante",
       "Attachments": "Adjuntos",
       "Attachments note": "Los archivos se reenvían al correo del equipo de soporte.",
       "Submitted": "Enviado",
@@ -144,7 +148,6 @@
   "fr": {
     "translation": {
       "Support Desk": "Support",
-      "Monitor and resolve incoming support requests.": "Surveillez et résolvez les demandes de support entrantes.",
       "Refresh": "Actualiser",
       "Search tickets": "Rechercher des tickets",
       "Status": "Statut",
@@ -193,6 +196,9 @@
       "Archive history archived": "Archivé",
       "Archive history restored": "Restauré",
       "Context: Support updates": "Mises à jour du support",
+      "Support updates": "Mises à jour du support",
+      "Support team update": "Mise à jour de l'équipe support",
+      "Requester update": "Mise à jour du demandeur",
       "Attachments": "Pièces jointes",
       "Attachments note": "Les fichiers sont transmis par e-mail à l'équipe support.",
       "Submitted": "Soumis",
@@ -215,7 +221,6 @@
   "de": {
     "translation": {
       "Support Desk": "Support",
-      "Monitor and resolve incoming support requests.": "Überwachen und bearbeiten Sie eingehende Supportanfragen.",
       "Refresh": "Aktualisieren",
       "Search tickets": "Tickets durchsuchen",
       "Status": "Status",
@@ -264,6 +269,9 @@
       "Archive history archived": "Archiviert",
       "Archive history restored": "Wiederhergestellt",
       "Context: Support updates": "Support-Updates",
+      "Support updates": "Support-Updates",
+      "Support team update": "Update des Supportteams",
+      "Requester update": "Update der anfragenden Person",
       "Attachments": "Anhänge",
       "Attachments note": "Dateien werden per E-Mail an das Support-Postfach weitergeleitet.",
       "Submitted": "Eingereicht",
