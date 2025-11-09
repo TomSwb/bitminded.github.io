@@ -23,14 +23,30 @@ type ProductRecord = {
   name: string | null;
   short_description: string | null;
   description: string | null;
+  tags: string[] | null;
   name_translations: Record<string, string> | null;
   summary_translations: Record<string, string> | null;
   description_translations: Record<string, string> | null;
+  tag_translations: Record<string, string[]> | null;
 };
 
-type TranslationMap = {
+type ProductTranslationMap = {
   name: Record<string, string>;
   summary: Record<string, string>;
+  description: Record<string, string>;
+  tags: Record<string, string[]>;
+};
+
+type CategoryRecord = {
+  id: string;
+  name: string | null;
+  description: string | null;
+  name_translations: Record<string, string> | null;
+  description_translations: Record<string, string> | null;
+};
+
+type CategoryTranslationMap = {
+  name: Record<string, string>;
   description: Record<string, string>;
 };
 
@@ -48,6 +64,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 
 const TARGET_LANGUAGES = ['es', 'fr', 'de'] as const;
 const hasValue = (value?: string | null) => typeof value === 'string' && value.trim().length > 0;
+const hasArrayContent = (values?: string[] | null) => Array.isArray(values) && values.some(hasValue);
 
 async function main() {
   console.info('🔄 Fetching products for translation backfill…');
@@ -55,7 +72,7 @@ async function main() {
   const { data: products, error } = await supabase
     .from('products')
     .select(
-      'id, name, short_description, description, name_translations, summary_translations, description_translations'
+      'id, name, short_description, description, tags, name_translations, summary_translations, description_translations, tag_translations'
     );
 
   if (error) {
@@ -68,32 +85,40 @@ async function main() {
     return;
   }
 
-  let translatedCount = 0;
-  let skippedCount = 0;
+  let productTranslatedCount = 0;
+  let productSkippedCount = 0;
 
   for (const product of products as ProductRecord[]) {
     const source = {
       name: product.name ?? '',
       summary: product.short_description ?? '',
-      description: product.description ?? ''
+      description: product.description ?? '',
+      tags: Array.isArray(product.tags) ? product.tags.filter(hasValue) : []
     };
 
-    if (!hasValue(source.name) && !hasValue(source.summary) && !hasValue(source.description)) {
-      skippedCount += 1;
+    if (
+      !hasValue(source.name) &&
+      !hasValue(source.summary) &&
+      !hasValue(source.description) &&
+      source.tags.length === 0
+    ) {
+      productSkippedCount += 1;
       continue;
     }
 
-    const existing: TranslationMap = {
+    const existing: ProductTranslationMap = {
       name: { ...(product.name_translations ?? {}) },
       summary: { ...(product.summary_translations ?? {}) },
-      description: { ...(product.description_translations ?? {}) }
+      description: { ...(product.description_translations ?? {}) },
+      tags: { ...(product.tag_translations ?? {}) }
     };
 
     const languagesToTranslate = TARGET_LANGUAGES.filter((lang) => {
       const needsName = hasValue(source.name) && !hasValue(existing.name[lang]);
       const needsSummary = hasValue(source.summary) && !hasValue(existing.summary[lang]);
       const needsDescription = hasValue(source.description) && !hasValue(existing.description[lang]);
-      return needsName || needsSummary || needsDescription;
+      const needsTags = source.tags.length > 0 && !Array.isArray(existing.tags[lang]);
+      return needsName || needsSummary || needsDescription || needsTags;
     });
 
     if (languagesToTranslate.length === 0) {
@@ -101,8 +126,9 @@ async function main() {
       existing.name.en = source.name;
       existing.summary.en = source.summary;
       existing.description.en = source.description;
-      await persistTranslations(product.id, existing, product);
-      skippedCount += 1;
+      existing.tags.en = source.tags;
+      await persistProductTranslations(product.id, existing, product);
+      productSkippedCount += 1;
       continue;
     }
 
@@ -140,33 +166,41 @@ async function main() {
         if (hasValue(translated.description)) {
           existing.description[lang] = translated.description.trim();
         }
+        if (Array.isArray(translated.tags) && translated.tags.length > 0) {
+          existing.tags[lang] = translated.tags
+            .map((tag: string) => tag.trim())
+            .filter((tag: string) => tag.length > 0);
+        }
       }
 
       existing.name.en = source.name;
       existing.summary.en = source.summary;
       existing.description.en = source.description;
+      existing.tags.en = source.tags;
 
-      const updated = await persistTranslations(product.id, existing, product);
+      const updated = await persistProductTranslations(product.id, existing, product);
       if (updated) {
-        translatedCount += 1;
+        productTranslatedCount += 1;
       } else {
-        skippedCount += 1;
+        productSkippedCount += 1;
       }
 
       // Gentle delay to avoid hitting rate limits
       await delay(400);
     } catch (err) {
       console.error(`❌ Failed to translate product ${product.id}:`, err);
-      skippedCount += 1;
+      productSkippedCount += 1;
     }
   }
 
-  console.info(`✅ Backfill complete. Updated ${translatedCount} products. Skipped ${skippedCount}.`);
+  console.info(`✅ Product translation backfill complete. Updated ${productTranslatedCount} products. Skipped ${productSkippedCount}.`);
+
+  await backfillCategories();
 }
 
-async function persistTranslations(
+async function persistProductTranslations(
   productId: string,
-  translations: TranslationMap,
+  translations: ProductTranslationMap,
   original: ProductRecord
 ): Promise<boolean> {
   const updates: Partial<ProductRecord> = {};
@@ -180,6 +214,9 @@ async function persistTranslations(
   if (JSON.stringify(translations.description) !== JSON.stringify(original.description_translations ?? {})) {
     updates.description_translations = translations.description;
   }
+  if (JSON.stringify(translations.tags) !== JSON.stringify(original.tag_translations ?? {})) {
+    updates.tag_translations = translations.tags;
+  }
 
   if (Object.keys(updates).length === 0) {
     return false;
@@ -188,6 +225,138 @@ async function persistTranslations(
   const { error } = await supabase.from('products').update(updates).eq('id', productId);
   if (error) {
     console.error(`Failed to update product ${productId}:`, error);
+    return false;
+  }
+
+  return true;
+}
+
+async function backfillCategories() {
+  console.info('🔄 Fetching categories for translation backfill…');
+
+  const { data: categories, error } = await supabase
+    .from('product_categories')
+    .select('id, name, description, name_translations, description_translations');
+
+  if (error) {
+    console.error('Failed to fetch categories:', error);
+    return;
+  }
+
+  if (!categories || categories.length === 0) {
+    console.info('No categories found. Skipping category backfill.');
+    return;
+  }
+
+  let translatedCount = 0;
+  let skippedCount = 0;
+
+  for (const category of categories as CategoryRecord[]) {
+    const source = {
+      name: category.name ?? '',
+      description: category.description ?? ''
+    };
+
+    if (!hasValue(source.name) && !hasValue(source.description)) {
+      skippedCount += 1;
+      continue;
+    }
+
+    const existing: CategoryTranslationMap = {
+      name: { ...(category.name_translations ?? {}) },
+      description: { ...(category.description_translations ?? {}) }
+    };
+
+    const languagesToTranslate = TARGET_LANGUAGES.filter((lang) => {
+      const needsName = hasValue(source.name) && !hasValue(existing.name[lang]);
+      const needsDescription = hasValue(source.description) && !hasValue(existing.description[lang]);
+      return needsName || needsDescription;
+    });
+
+    if (languagesToTranslate.length === 0) {
+      existing.name.en = source.name;
+      existing.description.en = source.description;
+      await persistCategoryTranslations(category.id, existing, category);
+      skippedCount += 1;
+      continue;
+    }
+
+    console.info(
+      `🌐 Translating category ${category.id} (${category.name ?? 'Unnamed'}) for languages: ${languagesToTranslate.join(', ')}`
+    );
+
+    try {
+      const { data, error: translationError } = await supabase.functions.invoke('translate-product-content', {
+        body: {
+          sourceLanguage: 'en',
+          targetLanguages: languagesToTranslate,
+          fields: {
+            category: source
+          }
+        }
+      });
+
+      if (translationError) {
+        throw translationError;
+      }
+
+      const translations = data?.translations ?? {};
+
+      for (const lang of languagesToTranslate) {
+        const translated = translations[lang];
+        if (!translated) {
+          continue;
+        }
+
+        if (hasValue(translated.category?.name)) {
+          existing.name[lang] = translated.category.name.trim();
+        }
+        if (hasValue(translated.category?.description)) {
+          existing.description[lang] = translated.category.description.trim();
+        }
+      }
+
+      existing.name.en = source.name;
+      existing.description.en = source.description;
+
+      const updated = await persistCategoryTranslations(category.id, existing, category);
+      if (updated) {
+        translatedCount += 1;
+      } else {
+        skippedCount += 1;
+      }
+
+      await delay(400);
+    } catch (err) {
+      console.error(`❌ Failed to translate category ${category.id}:`, err);
+      skippedCount += 1;
+    }
+  }
+
+  console.info(`✅ Category translation backfill complete. Updated ${translatedCount} categories. Skipped ${skippedCount}.`);
+}
+
+async function persistCategoryTranslations(
+  categoryId: string,
+  translations: CategoryTranslationMap,
+  original: CategoryRecord
+): Promise<boolean> {
+  const updates: Partial<CategoryRecord> = {};
+
+  if (JSON.stringify(translations.name) !== JSON.stringify(original.name_translations ?? {})) {
+    updates.name_translations = translations.name;
+  }
+  if (JSON.stringify(translations.description) !== JSON.stringify(original.description_translations ?? {})) {
+    updates.description_translations = translations.description;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return false;
+  }
+
+  const { error } = await supabase.from('product_categories').update(updates).eq('id', categoryId);
+  if (error) {
+    console.error(`Failed to update category ${categoryId}:`, error);
     return false;
   }
 

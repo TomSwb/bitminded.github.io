@@ -21,12 +21,19 @@
  * }
  */
 
+// @ts-nocheck
+
 import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
 
 type TranslationFields = {
   name?: string;
   summary?: string;
   description?: string;
+  tags?: string[];
+  category?: {
+    name?: string;
+    description?: string;
+  };
 };
 
 interface TranslationRequest {
@@ -123,14 +130,41 @@ function buildPrompt(
   targetLanguage: string,
   fields: TranslationFields,
 ): string {
-  const entries = Object.entries(fields)
-    .filter(([, value]) => value && value.trim().length > 0)
-    .map(([key, value]) => `${key}:\n${value}`)
-    .join("\n\n");
+  const sections: string[] = [];
+
+  if (fields.name) {
+    sections.push(`name:\n${fields.name}`);
+  }
+  if (fields.summary) {
+    sections.push(`summary:\n${fields.summary}`);
+  }
+  if (fields.description) {
+    sections.push(`description:\n${fields.description}`);
+  }
+  if (Array.isArray(fields.tags) && fields.tags.length > 0) {
+    sections.push(`tags:\n${fields.tags.join(", ")}`);
+  }
+  if (fields.category) {
+    const categoryLines: string[] = [];
+    if (fields.category.name) {
+      categoryLines.push(`name:\n${fields.category.name}`);
+    }
+    if (fields.category.description) {
+      categoryLines.push(`description:\n${fields.category.description}`);
+    }
+    if (categoryLines.length > 0) {
+      sections.push(`category:\n${categoryLines.join("\n")}`);
+    }
+  }
+
+  const entries = sections.join("\n\n");
 
   return `
 You are translating product copy from ${sourceLanguage} to ${targetLanguage}.
-Preserve the meaning, tone, and marketing intent. Return your answer as JSON with keys "name", "summary", "description". If a field is missing in the source, return an empty string for it.
+Preserve the meaning, tone, and marketing intent. Return your answer as JSON with keys "name", "summary", "description", "tags", and "category".
+- Use empty strings (or empty arrays for tags) when the source is missing a value.
+- "tags" must be an array of translated tag strings in the same order as the source.
+- "category" must be an object with optional "name" and "description" string fields.
 
 Source content:
 ${entries}
@@ -182,6 +216,21 @@ async function callOpenAI(prompt: string): Promise<TranslationFields> {
       name: parsed.name ?? "",
       summary: parsed.summary ?? "",
       description: parsed.description ?? "",
+      tags: Array.isArray(parsed.tags)
+        ? parsed.tags.map((tag: unknown) =>
+          typeof tag === "string" ? tag.trim() : "",
+        ).filter((tag: string) => tag.length > 0)
+        : [],
+      category: parsed.category && typeof parsed.category === "object"
+        ? {
+          name: typeof parsed.category.name === "string"
+            ? parsed.category.name
+            : "",
+          description: typeof parsed.category.description === "string"
+            ? parsed.category.description
+            : "",
+        }
+        : undefined,
     };
   } catch (_error) {
     throw new Error("Failed to parse OpenAI JSON response");
