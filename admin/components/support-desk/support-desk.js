@@ -84,6 +84,8 @@ class SupportDesk {
         this.elements.detailComment = document.getElementById('support-desk-detail-comment');
         this.elements.detailContextCard = document.getElementById('support-desk-detail-context-card');
         this.elements.detailContext = document.getElementById('support-desk-detail-context');
+        this.elements.detailUpdatesCard = document.getElementById('support-desk-detail-updates-card');
+        this.elements.detailUpdates = document.getElementById('support-desk-detail-updates');
         this.elements.archiveToggleButton = document.getElementById('support-desk-archive-toggle');
 
         Object.entries(this.elements).forEach(([key, el]) => {
@@ -387,6 +389,7 @@ class SupportDesk {
         }
 
         this.renderTicketContext(ticket);
+        this.renderTicketUpdates(ticket);
     }
 
     clearDetail() {
@@ -718,24 +721,87 @@ class SupportDesk {
             pushList('Context: Archive history', 'Archive history', formattedArchiveHistory);
         }
 
-        const updates = Array.isArray(ticket.metadata?.updates) ? ticket.metadata.updates : [];
-        if (updates.length) {
-            const formattedUpdates = updates.map(entry => {
-                const timestamp = typeof entry.created_at === 'string'
-                    ? this.formatDate(entry.created_at)
-                    : this.translate('Not available', 'Not available');
-                const statusLabel = this.getStatusLabel(entry.status || '');
-                const comment = typeof entry.comment === 'string' ? entry.comment.trim() : '';
-                if (comment) {
-                    return `${timestamp} · ${statusLabel}\n${comment}`;
-                }
-                return `${timestamp} · ${statusLabel}`;
-            }).filter(Boolean);
+        return entries;
+    }
 
-            pushList('Context: Support updates', 'Support updates', formattedUpdates);
+    renderTicketUpdates(ticket) {
+        const updatesCard = this.elements.detailUpdatesCard;
+        const updatesContainer = this.elements.detailUpdates;
+        if (!updatesCard || !updatesContainer) {
+            return;
         }
 
-        return entries;
+        updatesContainer.innerHTML = '';
+
+        const updates = Array.isArray(ticket.metadata?.updates)
+            ? [...ticket.metadata.updates]
+            : [];
+
+        if (!updates.length) {
+            updatesCard.classList.add('hidden');
+            return;
+        }
+
+        updatesCard.classList.remove('hidden');
+
+        updates
+            .slice()
+            .reverse()
+            .forEach((entry) => {
+                const item = document.createElement('div');
+                item.className = 'support-desk__update';
+
+                const header = document.createElement('div');
+                header.className = 'support-desk__update-header';
+
+                const statusEl = document.createElement('span');
+                statusEl.className = 'support-desk__update-status';
+                statusEl.textContent = this.getStatusLabel(entry.status || '');
+                header.appendChild(statusEl);
+
+                const timestampEl = document.createElement('span');
+                timestampEl.className = 'support-desk__update-timestamp';
+                timestampEl.textContent = typeof entry.created_at === 'string'
+                    ? this.formatDate(entry.created_at)
+                    : this.translate('Not available', 'Not available');
+                header.appendChild(timestampEl);
+
+                item.appendChild(header);
+
+                const actorLabel = this.getUpdateActorLabel(entry.updated_by);
+                if (actorLabel) {
+                    const actorEl = document.createElement('div');
+                    actorEl.className = 'support-desk__update-actor';
+                    actorEl.textContent = actorLabel;
+                    item.appendChild(actorEl);
+                }
+
+                const comment = typeof entry.comment === 'string' ? entry.comment.trim() : '';
+                if (comment) {
+                    const commentEl = document.createElement('p');
+                    commentEl.className = 'support-desk__update-comment';
+                    if (entry.updated_by && entry.updated_by.type === 'admin') {
+                        commentEl.classList.add('support-desk__update-comment--team');
+                    }
+                    commentEl.textContent = comment;
+                    item.appendChild(commentEl);
+                }
+
+                updatesContainer.appendChild(item);
+            });
+    }
+
+    getUpdateActorLabel(actor) {
+        if (!actor || typeof actor !== 'object') {
+            return '';
+        }
+        if (actor.type === 'admin') {
+            return this.translate('Support team update', 'Support team update');
+        }
+        if (actor.type === 'user') {
+            return this.translate('Requester update', 'Requester update');
+        }
+        return '';
     }
 
     isTicketArchived(ticket) {
