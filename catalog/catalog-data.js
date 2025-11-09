@@ -9,14 +9,14 @@
     }
 
     function normalizeLanguageCode(code) {
-        if (!code) {
+        if (typeof code !== 'string') {
             return '';
         }
         return code.toLowerCase();
     }
 
     function getPreferredLanguage(languageOverride) {
-        if (languageOverride) {
+        if (typeof languageOverride === 'string' && languageOverride.length > 0) {
             return normalizeLanguageCode(languageOverride);
         }
 
