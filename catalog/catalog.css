@@ -268,6 +268,10 @@
   width: 100%;
 }
 
+.catalog-card__body--with-media {
+  gap: var(--spacing-md);
+}
+
 .catalog-card__title {
   margin: 0;
   font-size: var(--font-size-xl);
@@ -350,13 +354,23 @@
   object-fit: cover;
 }
 
+.catalog-card__media {
+  width: 128px;
+  height: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
 .catalog-card__media img {
-  width: 72px;
-  height: 72px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   border-radius: var(--radius-md);
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: var(--spacing-xs);
 }
 
