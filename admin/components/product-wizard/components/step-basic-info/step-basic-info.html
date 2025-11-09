@@ -62,4 +62,90 @@
             <small class="step-basic-info__help translatable-content" data-translation-key="tags_help">Comma-separated tags for filtering</small>
         </div>
     </div>
+
+    <div class="step-basic-info__translations">
+        <div class="step-basic-info__translations-header">
+            <h3 class="step-basic-info__translations-title translatable-content" data-translation-key="Localized Content">Localized Content</h3>
+            <p class="step-basic-info__translations-description translatable-content" data-translation-key="localized_content_help">
+                We’ll auto-translate your product copy into Spanish, French, and German. Adjust any language manually if you need to fine-tune it.
+            </p>
+        </div>
+
+        <div class="step-basic-info__translations-actions">
+            <button type="button" id="generate-translations-btn" class="step-basic-info__btn step-basic-info__btn--primary">
+                <span class="translatable-content" data-translation-key="Generate Translations">Generate Translations</span>
+            </button>
+            <span id="generate-translations-status" class="step-basic-info__translations-status" aria-live="polite"></span>
+        </div>
+
+        <div class="step-basic-info__translations-tabs" role="tablist" aria-label="Translation languages">
+            <button type="button" class="step-basic-info__translations-tab active" role="tab" aria-selected="true" aria-controls="translation-panel-en" data-language-tab="en">
+                English
+            </button>
+            <button type="button" class="step-basic-info__translations-tab" role="tab" aria-selected="false" aria-controls="translation-panel-es" data-language-tab="es">
+                Español
+            </button>
+            <button type="button" class="step-basic-info__translations-tab" role="tab" aria-selected="false" aria-controls="translation-panel-fr" data-language-tab="fr">
+                Français
+            </button>
+            <button type="button" class="step-basic-info__translations-tab" role="tab" aria-selected="false" aria-controls="translation-panel-de" data-language-tab="de">
+                Deutsch
+            </button>
+        </div>
+
+        <div class="step-basic-info__translations-panels">
+            <section id="translation-panel-en" class="step-basic-info__translations-panel active" role="tabpanel" data-language-panel="en" aria-labelledby="translation-panel-en">
+                <h4 class="step-basic-info__translations-heading">English (source)</h4>
+                <p class="step-basic-info__translations-note">Edit the fields above to change the English copy.</p>
+            </section>
+
+            <section id="translation-panel-es" class="step-basic-info__translations-panel" role="tabpanel" data-language-panel="es" hidden>
+                <h4 class="step-basic-info__translations-heading">Spanish</h4>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-name-es">Name</label>
+                    <input type="text" id="product-name-es" class="step-basic-info__input" data-translation-field="name" data-language="es">
+                </div>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-summary-es">Summary</label>
+                    <textarea id="product-summary-es" class="step-basic-info__textarea" rows="2" data-translation-field="summary" data-language="es"></textarea>
+                </div>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-description-es">Description</label>
+                    <textarea id="product-description-es" class="step-basic-info__textarea" rows="4" data-translation-field="description" data-language="es"></textarea>
+                </div>
+            </section>
+
+            <section id="translation-panel-fr" class="step-basic-info__translations-panel" role="tabpanel" data-language-panel="fr" hidden>
+                <h4 class="step-basic-info__translations-heading">French</h4>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-name-fr">Name</label>
+                    <input type="text" id="product-name-fr" class="step-basic-info__input" data-translation-field="name" data-language="fr">
+                </div>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-summary-fr">Summary</label>
+                    <textarea id="product-summary-fr" class="step-basic-info__textarea" rows="2" data-translation-field="summary" data-language="fr"></textarea>
+                </div>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-description-fr">Description</label>
+                    <textarea id="product-description-fr" class="step-basic-info__textarea" rows="4" data-translation-field="description" data-language="fr"></textarea>
+                </div>
+            </section>
+
+            <section id="translation-panel-de" class="step-basic-info__translations-panel" role="tabpanel" data-language-panel="de" hidden>
+                <h4 class="step-basic-info__translations-heading">German</h4>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-name-de">Name</label>
+                    <input type="text" id="product-name-de" class="step-basic-info__input" data-translation-field="name" data-language="de">
+                </div>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-summary-de">Summary</label>
+                    <textarea id="product-summary-de" class="step-basic-info__textarea" rows="2" data-translation-field="summary" data-language="de"></textarea>
+                </div>
+                <div class="step-basic-info__translations-group">
+                    <label class="step-basic-info__label" for="product-description-de">Description</label>
+                    <textarea id="product-description-de" class="step-basic-info__textarea" rows="4" data-translation-field="description" data-language="de"></textarea>
+                </div>
+            </section>
+        </div>
+    </div>
 </div>

@@ -1,14 +1,24 @@
 /**
  * Step 1: Basic Information Component
- * Handles basic product information form
+ * Handles basic product information form with multilingual support
  */
 
-if (typeof window.StepBasicInfo === 'undefined') {
+(function initStepBasicInfo() {
+const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'de'];
+
+if (typeof window.StepBasicInfo !== 'undefined') {
+    return;
+}
+
 class StepBasicInfo {
     constructor() {
         this.isInitialized = false;
         this.elements = {};
         this.categories = [];
+        this.translationTabs = [];
+        this.translationPanels = [];
+        this.translationInputs = [];
+        this.generateBtnLabel = '';
     }
 
     /**
@@ -20,24 +30,13 @@ class StepBasicInfo {
         }
 
         try {
-
-            // Initialize DOM elements
             this.initializeElements();
-
-            // Initialize translations
             await this.initializeTranslations();
-
-            // Setup event listeners
             this.setupEventListeners();
-
-            // Load categories
             await this.loadCategories();
-
-            // Show translatable content
             this.showTranslatableContent();
 
             this.isInitialized = true;
-
         } catch (error) {
             console.error('❌ Step 1: Basic Information: Failed to initialize:', error);
             throw error;
@@ -56,27 +55,237 @@ class StepBasicInfo {
             productDescription: document.getElementById('product-description'),
             productTags: document.getElementById('product-tags'),
             pricingType: document.getElementById('pricing-type'),
-            addCategoryBtn: document.getElementById('add-category-btn')
+            addCategoryBtn: document.getElementById('add-category-btn'),
+            generateTranslationsBtn: document.getElementById('generate-translations-btn'),
+            generateTranslationsStatus: document.getElementById('generate-translations-status')
         };
+
+        this.elements.generateTranslationsLabel = this.elements.generateTranslationsBtn
+            ? this.elements.generateTranslationsBtn.querySelector('.translatable-content')
+            : null;
+        this.translationTabs = Array.from(document.querySelectorAll('[data-language-tab]'));
+        this.translationPanels = Array.from(document.querySelectorAll('[data-language-panel]'));
+        this.translationInputs = Array.from(document.querySelectorAll('[data-translation-field]'));
     }
 
     /**
      * Setup event listeners
      */
     setupEventListeners() {
-        // Auto-generate slug from product name
         if (this.elements.productName) {
             this.elements.productName.addEventListener('input', () => {
                 this.updateSlugFromName();
             });
         }
 
-        // Add category button
         if (this.elements.addCategoryBtn) {
             this.elements.addCategoryBtn.addEventListener('click', () => {
                 this.showAddCategoryModal();
             });
         }
+
+        this.setupTranslationTabs();
+        this.setupGenerateTranslations();
+    }
+
+    setupTranslationTabs() {
+        if (!this.translationTabs.length) {
+            return;
+        }
+
+        this.translationTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const language = tab.dataset.languageTab;
+                this.activateTranslationTab(language);
+            });
+        });
+
+        this.activateTranslationTab('en');
+    }
+
+    setupGenerateTranslations() {
+        if (!this.elements.generateTranslationsBtn) {
+            return;
+        }
+
+        this.elements.generateTranslationsBtn.addEventListener('click', async () => {
+            await this.generateTranslations();
+        });
+    }
+
+    activateTranslationTab(language) {
+        this.translationTabs.forEach(tab => {
+            const isActive = tab.dataset.languageTab === language;
+            tab.classList.toggle('active', isActive);
+            tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        this.translationPanels.forEach(panel => {
+            const isActive = panel.dataset.languagePanel === language;
+            panel.classList.toggle('active', isActive);
+            if (isActive) {
+                panel.removeAttribute('hidden');
+            } else {
+                panel.setAttribute('hidden', 'true');
+            }
+        });
+    }
+
+    async generateTranslations() {
+        if (!window.supabase?.functions) {
+            this.updateTranslationsStatus('Translation service unavailable. Check Supabase functions config.', 'error');
+            return;
+        }
+
+        const englishContent = {
+            name: this.elements.productName?.value?.trim() || '',
+            summary: this.elements.productShortDescription?.value?.trim() || '',
+            description: this.elements.productDescription?.value?.trim() || ''
+        };
+
+        if (!englishContent.name && !englishContent.summary && !englishContent.description) {
+            this.updateTranslationsStatus('Add English content before generating translations.', 'error');
+            return;
+        }
+
+        this.setGenerateTranslationsLoading(true);
+        this.updateTranslationsStatus('Translating with OpenAI…', 'info');
+
+        try {
+            const { data, error } = await window.supabase.functions.invoke('translate-product-content', {
+                body: {
+                    sourceLanguage: 'en',
+                    targetLanguages: SUPPORTED_LANGUAGES.filter(lang => lang !== 'en'),
+                    fields: englishContent
+                }
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            if (data?.translations) {
+                this.applyTranslations(data.translations);
+                this.updateTranslationsStatus('Translations updated. Review each language and adjust if needed.', 'success');
+            } else {
+                this.updateTranslationsStatus('No translations returned. Try again.', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Translation generation failed:', error);
+            const detail = error?.message || 'Unable to reach translation service.';
+            this.updateTranslationsStatus(`Translation failed: ${detail}`, 'error');
+        } finally {
+            this.setGenerateTranslationsLoading(false);
+        }
+    }
+
+    setGenerateTranslationsLoading(isLoading) {
+        if (!this.elements.generateTranslationsBtn) {
+            return;
+        }
+
+        this.elements.generateTranslationsBtn.disabled = isLoading;
+        this.elements.generateTranslationsBtn.classList.toggle('is-loading', isLoading);
+        if (this.elements.generateTranslationsLabel) {
+            if (isLoading) {
+                const translationHelper = window.stepBasicInfoTranslations;
+                const loadingLabel = translationHelper?.t
+                    ? translationHelper.t('Translating')
+                    : 'Translating';
+                this.elements.generateTranslationsLabel.textContent = `${loadingLabel}…`;
+            } else {
+                const translationHelper = window.stepBasicInfoTranslations;
+                const defaultLabel = translationHelper?.t
+                    ? translationHelper.t('Generate Translations')
+                    : 'Generate Translations';
+                this.elements.generateTranslationsLabel.textContent = defaultLabel;
+            }
+        }
+    }
+
+    updateTranslationsStatus(message, status = 'info') {
+        if (!this.elements.generateTranslationsStatus) {
+            return;
+        }
+
+        this.elements.generateTranslationsStatus.textContent = message;
+        this.elements.generateTranslationsStatus.dataset.status = status;
+    }
+
+    applyTranslations(translations) {
+        Object.entries(translations).forEach(([language, fields]) => {
+            Object.entries(fields || {}).forEach(([fieldKey, value]) => {
+                const input = this.translationInputs.find(
+                    el =>
+                        el.dataset.language === language &&
+                        el.dataset.translationField === fieldKey
+                );
+                if (input) {
+                    input.value = value || '';
+                }
+            });
+        });
+    }
+
+    collectTranslations() {
+        const collected = {
+            name: {},
+            summary: {},
+            description: {}
+        };
+
+        this.translationInputs.forEach(input => {
+            const language = input.dataset.language;
+            const field = input.dataset.translationField;
+
+            if (!language || !field || !collected[field]) {
+                return;
+            }
+
+            const value = input.value.trim();
+            if (value) {
+                collected[field][language] = value;
+            }
+        });
+
+        const englishName = this.elements.productName?.value?.trim() || '';
+        const englishSummary = this.elements.productShortDescription?.value?.trim() || '';
+        const englishDescription = this.elements.productDescription?.value?.trim() || '';
+
+        collected.name.en = englishName;
+        collected.summary.en = englishSummary;
+        collected.description.en = englishDescription;
+
+        return collected;
+    }
+
+    populateTranslationInputs(data) {
+        if (!data) {
+            return;
+        }
+
+        const nameTranslations = data.name_translations || {};
+        const summaryTranslations = data.summary_translations || {};
+        const descriptionTranslations = data.description_translations || {};
+
+        this.translationInputs.forEach(input => {
+            const language = input.dataset.language;
+            const field = input.dataset.translationField;
+            if (!language || !field) {
+                return;
+            }
+
+            let value = '';
+            if (field === 'name') {
+                value = nameTranslations[language] || '';
+            } else if (field === 'summary') {
+                value = summaryTranslations[language] || '';
+            } else if (field === 'description') {
+                value = descriptionTranslations[language] || '';
+            }
+
+            input.value = value;
+        });
     }
 
     /**
@@ -90,10 +299,10 @@ class StepBasicInfo {
         const name = this.elements.productName.value;
         const slug = name
             .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-            .replace(/\s+/g, '-') // Replace spaces with hyphens
-            .replace(/-+/g, '-') // Replace multiple hyphens with single
-            .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
 
         this.elements.productSlug.value = slug;
     }
@@ -115,10 +324,8 @@ class StepBasicInfo {
 
             this.categories = data || [];
             this.populateCategoryDropdown();
-
         } catch (error) {
             console.error('❌ Error loading categories:', error);
-            // Don't throw error, just log it - categories are optional
         }
     }
 
@@ -130,10 +337,8 @@ class StepBasicInfo {
             return;
         }
 
-        // Clear existing options except the first one
         this.elements.productCategory.innerHTML = '<option value="">Select a category...</option>';
 
-        // Add categories
         this.categories.forEach(category => {
             const option = document.createElement('option');
             option.value = category.id;
@@ -146,7 +351,6 @@ class StepBasicInfo {
      * Show add category modal
      */
     showAddCategoryModal() {
-        // This will be handled by the shared category modal component
         if (window.categoryModal) {
             window.categoryModal.show();
         }
@@ -164,8 +368,6 @@ class StepBasicInfo {
         option.value = category.id;
         option.textContent = category.name;
         this.elements.productCategory.appendChild(option);
-        
-        // Select the new category
         this.elements.productCategory.value = category.id;
     }
 
@@ -175,7 +377,8 @@ class StepBasicInfo {
     getFormData() {
         const categoryId = this.elements.productCategory?.value || null;
         const selectedCategory = this.categories.find(cat => cat.id === categoryId);
-        
+        const translations = this.collectTranslations();
+
         return {
             name: this.elements.productName?.value || '',
             slug: this.elements.productSlug?.value || '',
@@ -184,7 +387,10 @@ class StepBasicInfo {
             short_description: this.elements.productShortDescription?.value || '',
             description: this.elements.productDescription?.value || '',
             tags: this.elements.productTags?.value || '',
-            pricing_type: this.elements.pricingType?.value || ''
+            pricing_type: this.elements.pricingType?.value || '',
+            name_translations: translations.name,
+            summary_translations: translations.summary,
+            description_translations: translations.description
         };
     }
 
@@ -213,6 +419,8 @@ class StepBasicInfo {
         if (this.elements.pricingType && data.pricing_type) {
             this.elements.pricingType.value = data.pricing_type;
         }
+
+        this.populateTranslationInputs(data);
     }
 
     /**
@@ -260,7 +468,6 @@ class StepBasicInfo {
 
     /**
      * Save form data to wizard's formData object
-     * @param {Object} formData - The wizard's form data object
      */
     saveFormData(formData) {
         const stepData = this.getFormData();
@@ -269,7 +476,6 @@ class StepBasicInfo {
 
     /**
      * Restore form data from wizard's formData object
-     * @param {Object} formData - The wizard's form data object
      */
     restoreFormData(formData) {
         this.setFormData(formData);
@@ -284,6 +490,5 @@ class StepBasicInfo {
     }
 }
 
-// Export for use in other scripts
 window.StepBasicInfo = StepBasicInfo;
-}
+})();
