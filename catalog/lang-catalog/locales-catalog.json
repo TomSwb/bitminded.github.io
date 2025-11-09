@@ -56,6 +56,7 @@
       "catalog-pricing-subscription-yearly": "Yearly subscription",
       "catalog-pricing-subscription-generic": "{{interval}} subscription",
       "catalog-pricing-one-time": "One-time {{price}}",
+      "catalog-pricing-free": "Free",
       "catalog-pricing-unavailable": "Pricing information coming soon"
     }
   },
@@ -116,6 +117,7 @@
       "catalog-pricing-subscription-yearly": "Suscripción anual",
       "catalog-pricing-subscription-generic": "Suscripción {{interval}}",
       "catalog-pricing-one-time": "Pago único {{price}}",
+      "catalog-pricing-free": "Gratis",
       "catalog-pricing-unavailable": "La información de precios llegará pronto."
     }
   },
@@ -176,6 +178,7 @@
       "catalog-pricing-subscription-yearly": "Abonnement annuel",
       "catalog-pricing-subscription-generic": "Abonnement {{interval}}",
       "catalog-pricing-one-time": "Paiement unique {{price}}",
+      "catalog-pricing-free": "Gratuit",
       "catalog-pricing-unavailable": "Les informations tarifaires arrivent bientôt."
     }
   },
@@ -236,6 +239,7 @@
       "catalog-pricing-subscription-yearly": "Jährliches Abonnement",
       "catalog-pricing-subscription-generic": "Abonnement {{interval}}",
       "catalog-pricing-one-time": "Einmalig {{price}}",
+      "catalog-pricing-free": "Kostenlos",
       "catalog-pricing-unavailable": "Preisinformationen folgen in Kürze."
     }
   }
