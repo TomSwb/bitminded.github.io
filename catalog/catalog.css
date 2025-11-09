@@ -319,40 +319,6 @@
   width: 100%;
 }
 
-.catalog-card__cta {
-  border-radius: var(--radius-md);
-  border: 1px dashed var(--border-color-primary);
-  background: transparent;
-  color: var(--color-text-primary);
-  padding: var(--spacing-xs) var(--spacing-lg);
-  font-weight: 600;
-  cursor: not-allowed;
-  opacity: 0.75;
-}
-
-.catalog-card__hint {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  opacity: 0.7;
-  line-height: 1.5;
-}
-
-.catalog-card__details-toggle {
-  background: transparent;
-  border: none;
-  color: var(--color-secondary);
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  transition: color var(--transition-normal);
-  align-self: center;
-}
-
-.catalog-card__details-toggle:hover,
-.catalog-card__details-toggle:focus-visible {
-  color: var(--color-primary);
-}
-
 .catalog-card__details {
   display: flex;
   flex-direction: column;

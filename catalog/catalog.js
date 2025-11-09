@@ -76,23 +76,6 @@
         `
     };
 
-    const CTA_FALLBACK = {
-        'catalog-cta-purchase': 'Purchase (coming soon)',
-        'catalog-cta-notify': 'Join waitlist',
-        'catalog-cta-hidden': 'Unavailable'
-    };
-
-    const HINT_FALLBACK = {
-        'catalog-hint-available': 'Checkout flow unlocks once purchases are live.',
-        'catalog-hint-coming-soon': 'We’ll notify you when this moves into launch.',
-        'catalog-hint-hidden': 'This entry currently stays internal.'
-    };
-
-    const DETAIL_TOGGLE_FALLBACK = {
-        'catalog-detail-toggle-view': 'View details',
-        'catalog-detail-toggle-hide': 'Hide details'
-    };
-
     document.addEventListener('DOMContentLoaded', async () => {
         await hydrateCatalog();
     });
@@ -271,13 +254,9 @@
 
         card.appendChild(header);
         card.appendChild(body);
-        const featuredToggle = buildDetailToggle(product);
         const featuredPanel = buildDetailPanel(product);
-        card.appendChild(featuredToggle);
-        card.appendChild(featuredPanel);
-        const featuredFooter = buildCardFooter(product);
-        if (featuredFooter) {
-            card.appendChild(featuredFooter);
+        if (featuredPanel) {
+            card.appendChild(featuredPanel);
         }
 
         return card;
@@ -313,10 +292,9 @@
 
         const meta = buildMetaLine(product);
 
-        const media = buildMediaPreview(product);
-
         const body = document.createElement('div');
         body.className = 'catalog-card__body';
+        const media = buildMediaPreview(product);
         if (media) {
             body.appendChild(media);
         }
@@ -326,17 +304,11 @@
         }
         body.appendChild(tagline);
         body.appendChild(buildTagList(product));
-
-        const detailToggle = buildDetailToggle(product);
-        const detailPanel = buildDetailPanel(product);
-
         card.appendChild(header);
         card.appendChild(body);
-        card.appendChild(detailToggle);
-        card.appendChild(detailPanel);
-        const footer = buildCardFooter(product);
-        if (footer) {
-            card.appendChild(footer);
+        const detailPanel = buildDetailPanel(product);
+        if (detailPanel) {
+            card.appendChild(detailPanel);
         }
 
         return card;
@@ -362,8 +334,11 @@
             items.push(product.category.name);
         }
 
-        if (product.pricing?.pricingType) {
-            items.push(formatPricingLabel(product.pricing));
+        if (product.status?.availability === 'available' && product.pricing) {
+            const pricingLabel = formatPricingLabel(product.pricing);
+            if (pricingLabel) {
+                items.push(pricingLabel);
+            }
         }
 
         if (items.length === 0) {
@@ -377,15 +352,26 @@
     }
 
     function formatPricingLabel(pricing) {
+        if (!pricing) return '';
+
         if (pricing.pricingType === 'freemium') {
             return translateText('catalog-pricing-freemium', 'Freemium');
         }
 
+        const hasExplicitPrice = typeof pricing.amount === 'number';
+        const isFree = hasExplicitPrice && pricing.amount === 0;
+
         if (pricing.pricingType === 'subscription') {
             if (pricing.subscriptionInterval === 'monthly') {
+                if (isFree) {
+                    return translateText('catalog-pricing-free', 'Free');
+                }
                 return translateText('catalog-pricing-subscription-monthly', 'Monthly subscription');
             }
             if (pricing.subscriptionInterval === 'yearly') {
+                if (isFree) {
+                    return translateText('catalog-pricing-free', 'Free');
+                }
                 return translateText('catalog-pricing-subscription-yearly', 'Yearly subscription');
             }
             const intervalLabel = pricing.subscriptionInterval ? capitalize(pricing.subscriptionInterval) : 'Recurring';
@@ -394,12 +380,15 @@
             });
         }
 
-        if (typeof pricing.amount === 'number') {
+        if (hasExplicitPrice) {
+            if (isFree) {
+                return translateText('catalog-pricing-free', 'Free');
+            }
             const formattedPrice = formatCurrency(pricing.amount, pricing.currency);
             return translateText('catalog-pricing-one-time', `One-time ${formattedPrice}`, { price: formattedPrice });
         }
 
-        return translateText('catalog-pricing-unavailable', 'Pricing information coming soon');
+        return '';
     }
 
     function formatCurrency(amount, currency = 'USD') {
@@ -450,69 +439,6 @@
 
         wrapper.appendChild(image);
         return wrapper;
-    }
-
-    function buildCardFooter(product) {
-        if (product.status.availability !== 'available') {
-            return null;
-        }
-
-        const footer = document.createElement('footer');
-        footer.className = 'catalog-card__footer';
-
-        const cta = document.createElement('button');
-        cta.className = 'catalog-card__cta';
-        cta.type = 'button';
-        const ctaKey = product.status.ctaKey || 'catalog-cta-notify';
-        const ctaFallback = CTA_FALLBACK[ctaKey] || CTA_FALLBACK['catalog-cta-notify'];
-        cta.dataset.i18n = ctaKey;
-        cta.classList.add('translatable-content');
-        cta.textContent = translateText(ctaKey, ctaFallback);
-        cta.disabled = true;
-        cta.setAttribute('aria-disabled', 'true');
-
-        const hint = document.createElement('span');
-        hint.className = 'catalog-card__hint';
-        const hintKey = product.status.hintKey || 'catalog-hint-coming-soon';
-        const hintFallback = HINT_FALLBACK[hintKey] || HINT_FALLBACK['catalog-hint-coming-soon'];
-        hint.dataset.i18n = hintKey;
-        hint.classList.add('translatable-content');
-        hint.textContent = translateText(hintKey, hintFallback);
-
-        footer.appendChild(cta);
-        footer.appendChild(hint);
-
-        return footer;
-    }
-
-    function buildDetailToggle(product) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'catalog-card__details-toggle';
-        button.setAttribute('aria-expanded', 'false');
-        button.setAttribute('aria-controls', `details-${product.slug}`);
-        const defaultKey = 'catalog-detail-toggle-view';
-        const expandedKey = 'catalog-detail-toggle-hide';
-        button.dataset.i18n = defaultKey;
-        button.dataset.i18nDefault = defaultKey;
-        button.dataset.i18nExpanded = expandedKey;
-        button.classList.add('translatable-content');
-        button.textContent = translateText(defaultKey, DETAIL_TOGGLE_FALLBACK[defaultKey]);
-
-        button.addEventListener('click', () => {
-            const panel = document.getElementById(`details-${product.slug}`);
-            const isExpanded = button.getAttribute('aria-expanded') === 'true';
-            const nextState = !isExpanded;
-            button.setAttribute('aria-expanded', String(nextState));
-            const nextKey = nextState ? button.dataset.i18nExpanded : button.dataset.i18nDefault;
-            button.dataset.i18n = nextKey;
-            button.textContent = translateText(nextKey, DETAIL_TOGGLE_FALLBACK[nextKey]);
-            if (panel) {
-                panel.hidden = !nextState;
-            }
-        });
-
-        return button;
     }
 
     function buildDetailPanel(product) {
