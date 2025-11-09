@@ -57,53 +57,58 @@
         <section class="support-quick-help">
             <h2 class="translatable-content" data-i18n="support-quick-help-title">Choose a quick-help path</h2>
             <div class="support-quick-help__cards">
+                <article class="support-card" data-support-type="tech-help">
+                    <h3 class="translatable-content" data-i18n="support-card-tech-help-title">Request tech help</h3>
+                    <p class="translatable-content" data-i18n="support-card-tech-help-copy">Ask about any device or issue (apps, hardware, workflows) and we'll sort it together in plain language.</p>
+                </article>
                 <article class="support-card" data-support-type="bug">
                     <h3 class="translatable-content" data-i18n="support-card-bug-title">Report an app issue</h3>
-                    <p class="translatable-content" data-i18n="support-card-bug-copy">Share steps to reproduce, device details, and screenshots so we can triage fast.</p>
+                    <p class="translatable-content" data-i18n="support-card-bug-copy">Share steps, devices, and screenshots so we can triage fast.</p>
                 </article>
-                <article class="support-card" data-support-type="guidance">
-                    <h3 class="translatable-content" data-i18n="support-card-guidance-title">Request tech help</h3>
-                    <p class="translatable-content" data-i18n="support-card-guidance-copy">Drop in with any device or issue (apps, hardware, workflows) and we'll sort it together in plain language.</p>
-                    <span class="support-card__coming-soon translatable-content" data-i18n="support-card-coming-soon">Coming soon</span>
+                <article class="support-card" data-support-type="account">
+                    <h3 class="translatable-content" data-i18n="support-card-account-title">Account or billing help</h3>
+                    <p class="translatable-content" data-i18n="support-card-account-copy">Get support with BitMinded accounts, billing questions, or subscription changes.</p>
                 </article>
             </div>
         </section>
 
-        <section class="support-form-section support-form-section--hidden" id="support-form">
-            <h2 class="translatable-content" data-i18n="support-form-title">Submit a support request</h2>
-            <p class="support-form-section__helper translatable-content" data-i18n="support-form-helper">Provide as much context as possible so we can help you faster.</p>
-            <form id="support-request-form" class="support-form" novalidate>
+        <section class="support-form-section support-form-section--hidden" id="tech-help-form-section" data-support-form-section="tech-help">
+            <h2 class="translatable-content" data-i18n="support-tech-help-form-title">Request tech help</h2>
+            <p class="support-form-section__helper translatable-content" data-i18n="support-tech-help-form-helper">Pick the closest topic and tell us what you need.</p>
+            <form id="tech-help-form" class="support-form" novalidate>
                 <div class="support-form__grid">
                     <div class="support-form__group">
-                        <label for="support-name" class="translatable-content" data-i18n="support-name-label">Name</label>
-                        <input type="text" id="support-name" name="name" autocomplete="name" required>
+                        <label for="tech-help-name" class="translatable-content" data-i18n="support-name-label">Name</label>
+                        <input type="text" id="tech-help-name" name="name" autocomplete="name" required>
                     </div>
                     <div class="support-form__group">
-                        <label for="support-email" class="translatable-content" data-i18n="support-email-label">Email</label>
-                        <input type="email" id="support-email" name="email" autocomplete="email" required>
+                        <label for="tech-help-email" class="translatable-content" data-i18n="support-email-label">Email</label>
+                        <input type="email" id="tech-help-email" name="email" autocomplete="email" required>
                     </div>
                 </div>
-                <div class="support-form__group support-form__group--centered">
-                    <label for="support-type" class="translatable-content" data-i18n="support-type-label">Request type</label>
-                    <select id="support-type" name="type" required>
-                        <option value="general" class="translatable-content" data-i18n="support-type-general">General question</option>
-                        <option value="bug" class="translatable-content" data-i18n="support-type-bug">Bug or outage</option>
-                        <option value="billing" class="translatable-content" data-i18n="support-type-billing">Billing</option>
+                <div class="support-form__group">
+                    <label for="tech-help-topic" class="translatable-content" data-i18n="support-tech-help-topic-label">What do you need help with?</label>
+                    <select id="tech-help-topic" name="topic" required>
+                        <option value="device-setup-or-refresh" class="translatable-content" data-i18n="support-tech-help-topic-device">Set up or refresh a device</option>
+                        <option value="app-or-service-question" class="translatable-content" data-i18n="support-tech-help-topic-service">Understand how an app or service works</option>
+                        <option value="digital-habits-support" class="translatable-content" data-i18n="support-tech-help-topic-habits">Build safer or calmer digital habits</option>
+                        <option value="family-or-shared-devices" class="translatable-content" data-i18n="support-tech-help-topic-family">Help for family or shared devices</option>
+                        <option value="something-else" class="translatable-content" data-i18n="support-tech-help-topic-other">Something else (tell us more)</option>
                     </select>
                 </div>
                 <div class="support-form__group support-form__group--wide">
-                    <label for="support-message" class="translatable-content" data-i18n="support-message-label">How can we help?</label>
-                    <textarea id="support-message" name="message" rows="6" required></textarea>
+                    <label for="tech-help-message" class="translatable-content" data-i18n="support-tech-help-details-label">Tell us what you’d like to work on</label>
+                    <textarea id="tech-help-message" name="message" rows="6" required></textarea>
                 </div>
                 <div class="support-form__group support-form__group--wide">
-                    <label for="support-attachments-input" class="translatable-content" data-i18n="support-attachments-label">Attach screenshots or logs (paste supported)</label>
-                    <div class="support-form__dropzone" id="support-dropzone">
+                    <label for="tech-help-attachments-input" class="translatable-content" data-i18n="support-attachments-label">Attach screenshots or photos</label>
+                    <div class="support-form__dropzone" id="tech-help-dropzone">
                         <div class="support-form__dropzone-instructions">
                             <span class="translatable-content" data-i18n="support-attachments-instructions">Drag & drop files, paste screenshots, or click to upload (max 5 files, 5 MB each).</span>
                         </div>
-                        <input type="file" id="support-attachments-input" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.log" multiple>
+                        <input type="file" id="tech-help-attachments-input" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.log" multiple>
                     </div>
-                    <ul class="support-form__attachments" id="support-attachments-list"></ul>
+                    <ul class="support-form__attachments" id="tech-help-attachments-list"></ul>
                     <p class="support-form__helper translatable-content" data-i18n="support-attachments-helper">Accepted: PNG, JPG, GIF, WEBP, PDF, TXT, LOG.</p>
                 </div>
                 <div class="support-form__actions">
@@ -111,7 +116,103 @@
                     <span class="support-form__note translatable-content" data-i18n="support-submit-note">We email a confirmation with your ticket number.</span>
                 </div>
             </form>
-            <div id="support-form-status" class="support-form__status" role="status" aria-live="polite"></div>
+            <output id="tech-help-form-status" class="support-form__status" aria-live="polite"></output>
+        </section>
+
+        <section class="support-form-section support-form-section--hidden" id="bug-report-form-section" data-support-form-section="bug">
+            <h2 class="translatable-content" data-i18n="support-bug-form-title">Report an app issue</h2>
+            <p class="support-form-section__helper translatable-content" data-i18n="support-bug-form-helper">Walk us through what you expected, what happened, and where it occurred.</p>
+            <form id="bug-report-form" class="support-form" novalidate>
+                <div class="support-form__grid">
+                    <div class="support-form__group">
+                        <label for="bug-name" class="translatable-content" data-i18n="support-name-label">Name</label>
+                        <input type="text" id="bug-name" name="name" autocomplete="name" required>
+                    </div>
+                    <div class="support-form__group">
+                        <label for="bug-email" class="translatable-content" data-i18n="support-email-label">Email</label>
+                        <input type="email" id="bug-email" name="email" autocomplete="email" required>
+                    </div>
+                </div>
+                <div class="support-form__group support-form__group--wide">
+                    <label for="bug-summary" class="translatable-content" data-i18n="support-bug-summary-label">Issue summary</label>
+                    <input type="text" id="bug-summary" name="summary" required>
+                </div>
+                <fieldset class="support-form__group support-form__group--wide support-form__group--fieldset">
+                    <legend class="translatable-content" data-i18n="support-bug-steps-label">Steps to reproduce</legend>
+                    <ol class="support-bug-steps" id="bug-steps-list"></ol>
+                    <button type="button" class="support-form__secondary-button translatable-content" id="bug-add-step" data-i18n="support-bug-add-step">Add another step</button>
+                </fieldset>
+                <div class="support-form__group support-form__group--wide">
+                    <label for="bug-device-details" class="translatable-content" data-i18n="support-bug-device-label">Device details</label>
+                    <textarea id="bug-device-details" name="deviceDetails" rows="4" required></textarea>
+                </div>
+                <div class="support-form__group support-form__group--wide">
+                    <label for="bug-notes" class="translatable-content" data-i18n="support-bug-notes-label">Anything else we should know?</label>
+                    <textarea id="bug-notes" name="notes" rows="4"></textarea>
+                </div>
+                <div class="support-form__group support-form__group--wide">
+                    <label for="bug-attachments-input" class="translatable-content" data-i18n="support-attachments-label">Attach screenshots or photos</label>
+                    <div class="support-form__dropzone" id="bug-dropzone">
+                        <div class="support-form__dropzone-instructions">
+                            <span class="translatable-content" data-i18n="support-attachments-instructions">Drag & drop files, paste screenshots, or click to upload (max 5 files, 5 MB each).</span>
+                        </div>
+                        <input type="file" id="bug-attachments-input" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.log" multiple>
+                    </div>
+                    <ul class="support-form__attachments" id="bug-attachments-list"></ul>
+                    <p class="support-form__helper translatable-content" data-i18n="support-attachments-helper">Accepted: PNG, JPG, GIF, WEBP, PDF, TXT, LOG.</p>
+                </div>
+                <div class="support-form__actions">
+                    <button type="submit" class="support-form__submit translatable-content" data-i18n="support-submit-label">Send support request</button>
+                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">We email a confirmation with your ticket number.</span>
+                </div>
+            </form>
+            <output id="bug-form-status" class="support-form__status" aria-live="polite"></output>
+        </section>
+
+        <section class="support-form-section support-form-section--hidden" id="account-support-form-section" data-support-form-section="account">
+            <h2 class="translatable-content" data-i18n="support-account-form-title">Account or billing help</h2>
+            <p class="support-form-section__helper translatable-content" data-i18n="support-account-form-helper">Let us know what needs to be updated or unlocked for your BitMinded account.</p>
+            <form id="account-support-form" class="support-form" novalidate>
+                <div class="support-form__grid">
+                    <div class="support-form__group">
+                        <label for="account-name" class="translatable-content" data-i18n="support-name-label">Name</label>
+                        <input type="text" id="account-name" name="name" autocomplete="name" required>
+                    </div>
+                    <div class="support-form__group">
+                        <label for="account-email" class="translatable-content" data-i18n="support-email-label">Email</label>
+                        <input type="email" id="account-email" name="email" autocomplete="email" required>
+                    </div>
+                </div>
+                <div class="support-form__group">
+                    <label for="account-topic" class="translatable-content" data-i18n="support-account-topic-label">What do you need help with?</label>
+                    <select id="account-topic" name="topic" required>
+                        <option value="billing-question" class="translatable-content" data-i18n="support-account-topic-billing">Billing question</option>
+                        <option value="account-access" class="translatable-content" data-i18n="support-account-topic-access">Account access or password reset</option>
+                        <option value="subscription-change" class="translatable-content" data-i18n="support-account-topic-subscription">Subscription update or cancellation</option>
+                        <option value="other-account" class="translatable-content" data-i18n="support-account-topic-other">Something else with my account</option>
+                    </select>
+                </div>
+                <div class="support-form__group support-form__group--wide">
+                    <label for="account-message" class="translatable-content" data-i18n="support-account-message-label">Share the details</label>
+                    <textarea id="account-message" name="message" rows="6" required></textarea>
+                </div>
+                <div class="support-form__group support-form__group--wide">
+                    <label for="account-attachments-input" class="translatable-content" data-i18n="support-attachments-label">Attach screenshots or photos</label>
+                    <div class="support-form__dropzone" id="account-dropzone">
+                        <div class="support-form__dropzone-instructions">
+                            <span class="translatable-content" data-i18n="support-attachments-instructions">Drag & drop files, paste screenshots, or click to upload (max 5 files, 5 MB each).</span>
+                        </div>
+                        <input type="file" id="account-attachments-input" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.log" multiple>
+                    </div>
+                    <ul class="support-form__attachments" id="account-attachments-list"></ul>
+                    <p class="support-form__helper translatable-content" data-i18n="support-attachments-helper">Accepted: PNG, JPG, GIF, WEBP, PDF, TXT, LOG.</p>
+                </div>
+                <div class="support-form__actions">
+                    <button type="submit" class="support-form__submit translatable-content" data-i18n="support-submit-label">Send support request</button>
+                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">We email a confirmation with your ticket number.</span>
+                </div>
+            </form>
+            <output id="account-form-status" class="support-form__status" aria-live="polite"></output>
         </section>
 
     </main>
