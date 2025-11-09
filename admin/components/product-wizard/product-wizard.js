@@ -118,6 +118,7 @@ class ProductWizard {
                     short_description,
                     category_id,
                     tags,
+                    tag_translations,
                     pricing_type,
                     price_amount,
                     price_currency,
@@ -164,7 +165,10 @@ class ProductWizard {
                     product_categories (
                         id,
                         name,
-                        slug
+                        slug,
+                        description,
+                        name_translations,
+                        description_translations
                     )
                 `)
                 .eq('id', this.editProductId)
@@ -194,6 +198,7 @@ class ProductWizard {
                 name_translations: data.name_translations || {},
                 summary_translations: data.summary_translations || {},
                 description_translations: data.description_translations || {},
+                tag_translations: data.tag_translations || {},
                 price_amount: data.price_amount || '',
                 price_currency: data.price_currency || 'USD',
                 individual_price: data.individual_price || '',
@@ -955,10 +960,11 @@ class ProductWizard {
         const source = {
             name: this.formData.name || '',
             summary: this.formData.short_description || '',
-            description: this.formData.description || ''
+            description: this.formData.description || '',
+            tags: this.parseTags(this.formData.tags || '')
         };
 
-        if (!source.name && !source.summary && !source.description) {
+        if (!source.name && !source.summary && !source.description && source.tags.length === 0) {
             return;
         }
 
@@ -967,7 +973,8 @@ class ProductWizard {
         const existingTranslations = {
             name: { ...(this.formData.name_translations || {}) },
             summary: { ...(this.formData.summary_translations || {}) },
-            description: { ...(this.formData.description_translations || {}) }
+            description: { ...(this.formData.description_translations || {}) },
+            tags: { ...(this.formData.tag_translations || {}) }
         };
 
         const targetLanguages = ['es', 'fr', 'de'];
@@ -975,7 +982,8 @@ class ProductWizard {
             const needsName = hasValue(source.name) && !hasValue(existingTranslations.name[lang]);
             const needsSummary = hasValue(source.summary) && !hasValue(existingTranslations.summary[lang]);
             const needsDescription = hasValue(source.description) && !hasValue(existingTranslations.description[lang]);
-            return needsName || needsSummary || needsDescription;
+            const needsTags = source.tags.length > 0 && !Array.isArray(existingTranslations.tags[lang]);
+            return needsName || needsSummary || needsDescription || needsTags;
         });
 
         if (missingLanguages.length > 0 && window.supabase?.functions) {
@@ -987,7 +995,8 @@ class ProductWizard {
                         fields: {
                             name: source.name,
                             summary: source.summary,
-                            description: source.description
+                            description: source.description,
+                            tags: source.tags
                         }
                     }
                 });
@@ -1012,6 +1021,11 @@ class ProductWizard {
                         if (hasValue(translations.description)) {
                             existingTranslations.description[lang] = translations.description.trim();
                         }
+                        if (Array.isArray(translations.tags) && translations.tags.length > 0) {
+                            existingTranslations.tags[lang] = translations.tags.map(tag =>
+                                typeof tag === 'string' ? tag.trim() : ''
+                            ).filter(Boolean);
+                        }
                     });
                 }
             } catch (error) {
@@ -1023,10 +1037,12 @@ class ProductWizard {
         existingTranslations.name.en = source.name;
         existingTranslations.summary.en = source.summary;
         existingTranslations.description.en = source.description;
+        existingTranslations.tags.en = source.tags;
 
         this.formData.name_translations = existingTranslations.name;
         this.formData.summary_translations = existingTranslations.summary;
         this.formData.description_translations = existingTranslations.description;
+        this.formData.tag_translations = existingTranslations.tags;
     }
 
     /**
@@ -1056,6 +1072,7 @@ class ProductWizard {
                 name_translations: this.formData.name_translations || null,
                 summary_translations: this.formData.summary_translations || null,
                 description_translations: this.formData.description_translations || null,
+                tag_translations: this.formData.tag_translations || null,
                 tags: this.parseTags(this.formData.tags || ''),
                 pricing_type: this.formData.pricing_type || 'one_time',
                 status: productStatus
@@ -1262,6 +1279,7 @@ class ProductWizard {
                 name_translations: this.formData.name_translations || null,
                 summary_translations: this.formData.summary_translations || null,
                 description_translations: this.formData.description_translations || null,
+                tag_translations: this.formData.tag_translations || null,
                 tags: this.parseTags(this.formData.tags || ''),
                 pricing_type: this.formData.pricing_type || 'one_time',
                 price_amount: this.formData.price_amount || null,

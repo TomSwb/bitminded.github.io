@@ -10,6 +10,8 @@ if (typeof window.StepBasicInfo !== 'undefined') {
     return;
 }
 
+const TAG_SEPARATOR_REGEX = /\s*,\s*/;
+
 class StepBasicInfo {
     constructor() {
         this.isInitialized = false;
@@ -137,13 +139,21 @@ class StepBasicInfo {
             return;
         }
 
+        const englishTags = this.parseTagsString(this.elements.productTags?.value || '');
+
         const englishContent = {
             name: this.elements.productName?.value?.trim() || '',
             summary: this.elements.productShortDescription?.value?.trim() || '',
-            description: this.elements.productDescription?.value?.trim() || ''
+            description: this.elements.productDescription?.value?.trim() || '',
+            tags: englishTags
         };
 
-        if (!englishContent.name && !englishContent.summary && !englishContent.description) {
+        if (
+            !englishContent.name &&
+            !englishContent.summary &&
+            !englishContent.description &&
+            englishTags.length === 0
+        ) {
             this.updateTranslationsStatus('Add English content before generating translations.', 'error');
             return;
         }
@@ -221,7 +231,11 @@ class StepBasicInfo {
                         el.dataset.translationField === fieldKey
                 );
                 if (input) {
-                    input.value = value || '';
+                    if (Array.isArray(value)) {
+                        input.value = value.join(', ');
+                    } else {
+                        input.value = value || '';
+                    }
                 }
             });
         });
@@ -231,30 +245,37 @@ class StepBasicInfo {
         const collected = {
             name: {},
             summary: {},
-            description: {}
+            description: {},
+            tags: {}
         };
 
         this.translationInputs.forEach(input => {
             const language = input.dataset.language;
             const field = input.dataset.translationField;
 
-            if (!language || !field || !collected[field]) {
+            if (!language || !field || !Object.prototype.hasOwnProperty.call(collected, field)) {
                 return;
             }
 
             const value = input.value.trim();
             if (value) {
-                collected[field][language] = value;
+                if (field === 'tags') {
+                    collected.tags[language] = this.parseTagsString(value);
+                } else {
+                    collected[field][language] = value;
+                }
             }
         });
 
         const englishName = this.elements.productName?.value?.trim() || '';
         const englishSummary = this.elements.productShortDescription?.value?.trim() || '';
         const englishDescription = this.elements.productDescription?.value?.trim() || '';
+        const englishTags = this.parseTagsString(this.elements.productTags?.value || '');
 
         collected.name.en = englishName;
         collected.summary.en = englishSummary;
         collected.description.en = englishDescription;
+        collected.tags.en = englishTags;
 
         return collected;
     }
@@ -267,6 +288,7 @@ class StepBasicInfo {
         const nameTranslations = data.name_translations || {};
         const summaryTranslations = data.summary_translations || {};
         const descriptionTranslations = data.description_translations || {};
+        const tagTranslations = data.tag_translations || {};
 
         this.translationInputs.forEach(input => {
             const language = input.dataset.language;
@@ -282,6 +304,11 @@ class StepBasicInfo {
                 value = summaryTranslations[language] || '';
             } else if (field === 'description') {
                 value = descriptionTranslations[language] || '';
+            } else if (field === 'tags') {
+                const tags = tagTranslations[language];
+                if (Array.isArray(tags)) {
+                    value = tags.join(', ');
+                }
             }
 
             input.value = value;
@@ -390,7 +417,8 @@ class StepBasicInfo {
             pricing_type: this.elements.pricingType?.value || '',
             name_translations: translations.name,
             summary_translations: translations.summary,
-            description_translations: translations.description
+            description_translations: translations.description,
+            tag_translations: translations.tags
         };
     }
 
@@ -421,6 +449,16 @@ class StepBasicInfo {
         }
 
         this.populateTranslationInputs(data);
+    }
+    parseTagsString(value) {
+        if (!value) {
+            return [];
+        }
+
+        return value
+            .split(TAG_SEPARATOR_REGEX)
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0);
     }
 
     /**

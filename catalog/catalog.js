@@ -80,13 +80,20 @@
         await hydrateCatalog();
     });
 
-    window.addEventListener('languageChanged', () => {
+    window.addEventListener('languageChanged', (event) => {
+        const detailLanguage = event?.detail?.language;
+        const languageOverride = typeof detailLanguage === 'string' && detailLanguage.length > 0
+            ? detailLanguage
+            : (typeof i18next !== 'undefined' && i18next.language ? i18next.language : null);
+
         if (!state.products.length || !window.catalogData?.transformProduct) {
             applyTranslationUpdates();
             return;
         }
 
-        state.products = state.products.map(product => window.catalogData.transformProduct(product.raw));
+        state.products = state.products.map(product =>
+            window.catalogData.transformProduct(product.raw, languageOverride)
+        );
         state.featuredProducts = deriveFeatured(state.products);
         applyFilters();
         renderFeaturedSection(state.featuredProducts);

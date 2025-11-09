@@ -15,18 +15,23 @@
         return code.toLowerCase();
     }
 
-    function getPreferredLanguage() {
+    function getPreferredLanguage(languageOverride) {
+        if (languageOverride) {
+            return normalizeLanguageCode(languageOverride);
+        }
+
         const i18nLang = typeof i18next !== 'undefined' && i18next.language ? i18next.language : null;
         const storedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('language') : null;
-        return normalizeLanguageCode(i18nLang || storedLang || 'en');
+        const resolved = i18nLang || storedLang || 'en';
+        return normalizeLanguageCode(resolved);
     }
 
-    function pickLocalizedValue(translations, fallback = '') {
+    function pickLocalizedValue(translations, fallback = '', languageOverride) {
         if (!translations || typeof translations !== 'object') {
             return fallback;
         }
 
-        const preferred = getPreferredLanguage();
+        const preferred = getPreferredLanguage(languageOverride);
         const candidates = [];
 
         if (preferred) {
@@ -52,6 +57,43 @@
 
         if (firstValue) {
             return firstValue.trim();
+        }
+
+        return fallback;
+    }
+
+    function pickLocalizedArray(translations, fallbackArray = [], languageOverride) {
+        const fallback = Array.isArray(fallbackArray) ? fallbackArray : [];
+
+        if (!translations || typeof translations !== 'object') {
+            return fallback;
+        }
+
+        const preferred = getPreferredLanguage(languageOverride);
+        const candidates = [];
+
+        if (preferred) {
+            candidates.push(preferred);
+            const shortCode = preferred.split('-')[0];
+            if (shortCode && shortCode !== preferred) {
+                candidates.push(shortCode);
+            }
+        }
+
+        candidates.push('en');
+
+        for (const code of candidates) {
+            const value = translations[code];
+            if (Array.isArray(value) && value.length > 0) {
+                return value.map(item => (typeof item === 'string' ? item.trim() : '')).filter(Boolean);
+            }
+        }
+
+        const firstArray = Object.values(translations).find(Array.isArray);
+        if (Array.isArray(firstArray)) {
+            return firstArray
+                .map(item => (typeof item === 'string' ? item.trim() : ''))
+                .filter(Boolean);
         }
 
         return fallback;
@@ -142,11 +184,42 @@
         };
     }
 
-    function transformProduct(product) {
+    function transformProduct(product, languageOverride) {
         const statusMeta = getStatusMeta(product.status);
-        const localizedName = pickLocalizedValue(product.name_translations, product.name);
-        const localizedTagline = pickLocalizedValue(product.summary_translations, product.short_description || '');
-        const localizedDescription = pickLocalizedValue(product.description_translations, product.description || '');
+        const localizedName = pickLocalizedValue(product.name_translations, product.name, languageOverride);
+        const localizedTagline = pickLocalizedValue(
+            product.summary_translations,
+            product.short_description || '',
+            languageOverride
+        );
+        const localizedDescription = pickLocalizedValue(
+            product.description_translations,
+            product.description || '',
+            languageOverride
+        );
+
+        const localizedTags = pickLocalizedArray(product.tag_translations, product.tags, languageOverride);
+
+        const category = product.product_categories
+            ? {
+                  id: product.product_categories.id,
+                  name: pickLocalizedValue(
+                      product.product_categories.name_translations,
+                      product.product_categories.name,
+                      languageOverride
+                  ),
+                  slug: product.product_categories.slug,
+                  description: pickLocalizedValue(
+                      product.product_categories.description_translations,
+                      product.product_categories.description || '',
+                      languageOverride
+                  ),
+                  translations: {
+                      name: product.product_categories.name_translations || {},
+                      description: product.product_categories.description_translations || {}
+                  }
+              }
+            : null;
 
         return {
             id: product.id,
@@ -162,12 +235,8 @@
                 // Provide a hint if we ever enable purchase in the future
                 canTogglePurchase: statusMeta.isPurchasable && product.is_available_for_purchase === true
             },
-            category: product.product_categories ? {
-                id: product.product_categories.id,
-                name: product.product_categories.name,
-                slug: product.product_categories.slug
-            } : null,
-            tags: Array.isArray(product.tags) ? product.tags : [],
+            category,
+            tags: localizedTags,
             isFeatured: Boolean(product.is_featured),
             media: {
                 icon: product.icon_url || null,
@@ -184,7 +253,8 @@
             translations: {
                 name: product.name_translations || {},
                 summary: product.summary_translations || {},
-                description: product.description_translations || {}
+                description: product.description_translations || {},
+                tags: product.tag_translations || {}
             },
             raw: product
         };
@@ -235,6 +305,8 @@
                 name_translations,
                 summary_translations,
                 description_translations,
+                tags,
+                tag_translations,
                 status,
                 pricing_type,
                 price_amount,
@@ -256,7 +328,10 @@
                 product_categories (
                     id,
                     name,
-                    slug
+                    slug,
+                    description,
+                    name_translations,
+                    description_translations
                 )
             `)
             .order('is_featured', { ascending: false })
