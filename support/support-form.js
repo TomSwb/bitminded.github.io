@@ -190,6 +190,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const supportCards = document.querySelectorAll('.support-card');
 
+    supportCards.forEach((card) => {
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-pressed', 'false');
+    });
+
     const formsByType = new Map();
 
     formsConfig.forEach((config) => {
@@ -230,12 +236,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('User not logged in, email fields remain editable');
     }
 
-    const showSection = (type, { scroll = true } = {}) => {
+    const hashAliasMap = new Map([
+        ['tech-help', 'tech-help'],
+        ['support', 'tech-help'],
+        ['bug', 'bug'],
+        ['report-bug', 'bug'],
+        ['account', 'account'],
+        ['account-support', 'account']
+    ]);
+
+    const canonicalHash = {
+        'tech-help': 'tech-help',
+        bug: 'bug',
+        account: 'account'
+    };
+
+    let activeType = null;
+
+    const setActiveSection = (type, { scroll = true, allowToggle = true, updateHash = true } = {}) => {
+        let nextType = type ?? null;
+
+        if (allowToggle && nextType && nextType === activeType) {
+            nextType = null;
+        }
+
+        activeType = nextType;
+
         formsConfig.forEach((config) => {
             if (!config.section) {
                 return;
             }
-            const shouldShow = config.type === type;
+            const shouldShow = config.type === nextType;
             config.section.classList.toggle('support-form-section--hidden', !shouldShow);
             if (shouldShow && scroll) {
                 config.section.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -244,25 +275,68 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
         });
+
+        supportCards.forEach((card) => {
+            const isActive = card.dataset.supportType === nextType;
+            card.classList.toggle('support-card--active', isActive);
+            card.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        if (!updateHash) {
+            return;
+        }
+
+        const baseUrl = `${window.location.pathname}${window.location.search}`;
+        if (nextType && canonicalHash[nextType]) {
+            const newHash = `#${canonicalHash[nextType]}`;
+            if (window.location.hash !== newHash) {
+                window.history.replaceState(null, '', `${baseUrl}${newHash}`);
+            }
+        } else if (window.location.hash) {
+            window.history.replaceState(null, '', baseUrl);
+        }
     };
 
-    const hash = window.location.hash.replace('#', '');
-    if (hash === 'bug' || hash === 'report-bug') {
-        showSection('bug', { scroll: false });
-    } else if (hash === 'account' || hash === 'account-support') {
-        showSection('account', { scroll: false });
-    } else {
-        showSection('tech-help', { scroll: false });
-    }
+    const initializeFromHash = () => {
+        const hashValue = window.location.hash.replace('#', '');
+        const mappedType = hashAliasMap.get(hashValue);
+        setActiveSection(mappedType ?? null, {
+            scroll: false,
+            allowToggle: false,
+            updateHash: false
+        });
+    };
+
+    initializeFromHash();
+
+    window.addEventListener('hashchange', () => {
+        initializeFromHash();
+    });
 
     supportCards.forEach((card) => {
         const type = card.dataset.supportType;
+
+        const activateCard = () => {
+            if (!formsByType.has(type)) {
+                return;
+            }
+            setActiveSection(type, { scroll: true, allowToggle: true, updateHash: true });
+        };
+
         card.addEventListener('click', (event) => {
             if (event.target.closest('a, button')) {
                 return;
             }
-            if (formsByType.has(type)) {
-                showSection(type, { scroll: true });
+            activateCard();
+        });
+
+        card.addEventListener('keydown', (event) => {
+            if (event.target.closest('a, button')) {
+                return;
+            }
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                activateCard();
             }
         });
     });
