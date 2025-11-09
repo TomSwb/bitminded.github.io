@@ -2,24 +2,28 @@
   "en": {
     "translation": {
       "nav-home": "Home",
+      "nav-catalog": "Catalog",
       "nav-support": "Support"
     }
   },
   "es": {
     "translation": {
       "nav-home": "Inicio",
+      "nav-catalog": "Catálogo",
       "nav-support": "Soporte"
     }
   },
   "fr": {
     "translation": {
       "nav-home": "Accueil",
+      "nav-catalog": "Catalogue",
       "nav-support": "Support"
     }
   },
   "de": {
     "translation": {
       "nav-home": "Startseite",
+      "nav-catalog": "Katalog",
       "nav-support": "Support"
     }
   }
