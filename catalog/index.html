@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog - BitMinded</title>
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="/css/critical.css">
+    <script src="/js/critical.js"></script>
+
+    <script src="/components/shared/component-loader.js"></script>
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/catalog/catalog.css">
+</head>
+<body class="catalog-page">
+    <header class="catalog-header">
+        <!-- Navigation Menu Component will be injected here -->
+    </header>
+
+    <main class="catalog-main">
+        <section class="catalog-hero">
+            <div class="catalog-hero__content">
+                <h1 class="catalog-hero__title translatable-content" data-i18n="catalog-hero-title">
+                    Discover BitMinded’s digital craftsmanship
+                </h1>
+                <p class="catalog-hero__subtitle translatable-content" data-i18n="catalog-hero-subtitle">
+                    Explore the tools, experiments, and commissions we’re building. Published apps are ready for you today, and beta builds give you a glimpse of what’s coming next.
+                </p>
+                <div class="catalog-hero__meta">
+                    <span class="catalog-hero__meta-item translatable-content" data-i18n="catalog-hero-meta">
+                        Catalog updates as new products move from concept to launch.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="catalog-filter-bar" aria-label="Catalog filters">
+            <div class="catalog-filter-bar__controls">
+                <button class="catalog-filter-bar__toggle" data-filter="all" data-active="true">
+                    <span class="translatable-content" data-i18n="catalog-filter-all">All products</span>
+                </button>
+                <button class="catalog-filter-bar__toggle" data-filter="available">
+                    <span class="translatable-content" data-i18n="catalog-filter-available">Available now</span>
+                </button>
+                <button class="catalog-filter-bar__toggle" data-filter="coming-soon">
+                    <span class="translatable-content" data-i18n="catalog-filter-coming-soon">Coming soon</span>
+                </button>
+            </div>
+            <div class="catalog-filter-bar__search">
+                <label class="catalog-filter-bar__search-label" for="catalog-search">
+                    <span class="translatable-content" data-i18n="catalog-search-label">Search catalog</span>
+                </label>
+                <input id="catalog-search"
+                       class="catalog-filter-bar__search-input"
+                       type="search"
+                       placeholder="Search by name, tagline, or tags"
+                       data-i18n-placeholder="catalog-search-placeholder">
+            </div>
+        </section>
+
+        <section class="catalog-grid" aria-labelledby="catalog-grid-title">
+            <div class="catalog-section-heading">
+                <h2 id="catalog-grid-title" class="translatable-content" data-i18n="catalog-grid-title">
+                    Explore the catalog
+                </h2>
+                <p class="catalog-section-heading__subtitle translatable-content" data-i18n="catalog-grid-subtitle">
+                    Filter by category or status to find the perfect tool for your workflow.
+                </p>
+            </div>
+            <div class="catalog-grid__content" id="catalog-grid">
+                <!-- Product cards dynamically rendered -->
+            </div>
+            <div class="catalog-grid__empty-state hidden" id="catalog-empty-state">
+                <div class="catalog-empty-state__icon" aria-hidden="true">✨</div>
+                <h3 class="catalog-empty-state__title translatable-content" data-i18n="catalog-empty-title">
+                    Nothing matches just yet
+                </h3>
+                <p class="catalog-empty-state__message translatable-content" data-i18n="catalog-empty-message">
+                    Adjust filters or check back soon—new builds appear as they move from beta to launch.
+                </p>
+            </div>
+        </section>
+
+        <section class="catalog-how-it-works" aria-labelledby="catalog-how-title">
+            <div class="catalog-section-heading">
+                <h2 id="catalog-how-title" class="translatable-content" data-i18n="catalog-how-title">
+                    How commissions become catalog releases
+                </h2>
+            </div>
+            <div class="catalog-how-it-works__grid">
+                <article class="catalog-how-step">
+                    <h3 class="catalog-how-step__title translatable-content" data-i18n="catalog-how-step-discover">
+                        Discover & scope
+                    </h3>
+                    <p class="catalog-how-step__description translatable-content" data-i18n="catalog-how-copy-discover">
+                        We partner with individuals and teams to map the challenge, outcomes, and craft a calm digital experience.
+                    </p>
+                </article>
+                <article class="catalog-how-step">
+                    <h3 class="catalog-how-step__title translatable-content" data-i18n="catalog-how-step-build">
+                        Build & iterate
+                    </h3>
+                    <p class="catalog-how-step__description translatable-content" data-i18n="catalog-how-copy-build">
+                        The idea moves through prototypes and private beta releases where early users shape the experience.
+                    </p>
+                </article>
+                <article class="catalog-how-step">
+                    <h3 class="catalog-how-step__title translatable-content" data-i18n="catalog-how-step-launch">
+                        Launch to catalog
+                    </h3>
+                    <p class="catalog-how-step__description translatable-content" data-i18n="catalog-how-copy-launch">
+                        Once polished, we publish it here with lifetime updates, support, and optional enterprise options.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="catalog-newsletter" aria-labelledby="catalog-newsletter-title">
+            <div class="catalog-newsletter__content">
+                <h2 id="catalog-newsletter-title" class="catalog-newsletter__title translatable-content" data-i18n="catalog-newsletter-title">
+                    Join the release list
+                </h2>
+                <p class="catalog-newsletter__subtitle translatable-content" data-i18n="catalog-newsletter-subtitle">
+                    Short, thoughtful updates when new apps move from beta to launch—no noise, just the essentials.
+                </p>
+            </div>
+            <form class="catalog-newsletter__form" id="catalog-newsletter-form" novalidate>
+                <label class="catalog-newsletter__label" for="catalog-newsletter-email">
+                    <span class="sr-only translatable-content" data-i18n="catalog-newsletter-email-label">Email address</span>
+                </label>
+                <input id="catalog-newsletter-email"
+                       class="catalog-newsletter__input"
+                       type="email"
+                       name="email"
+                       placeholder="you@example.com"
+                       required
+                       data-i18n-placeholder="catalog-newsletter-email-placeholder">
+                <button type="submit" class="catalog-newsletter__submit translatable-content" data-i18n="catalog-newsletter-submit">
+                    Notify me
+                </button>
+                <p class="catalog-newsletter__privacy translatable-content" data-i18n="catalog-newsletter-privacy">
+                    We’ll only use your email for catalog updates. Unsubscribe anytime.
+                </p>
+                <output class="catalog-newsletter__status" id="catalog-newsletter-status"></output>
+            </form>
+        </section>
+    </main>
+
+    <footer class="catalog-footer">
+        <!-- Site footer component mounts here -->
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="/js/env-config.js"></script>
+    <script src="/js/supabase-config.js"></script>
+    <script src="/js/script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <script src="/catalog/lang-catalog/lang-catalog.js" defer></script>
+    <script src="/catalog/catalog-data.js" defer></script>
+    <script src="/catalog/catalog-newsletter.js" defer></script>
+    <script src="/catalog/catalog.js" defer></script>
+</body>
+</html>
+
