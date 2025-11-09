@@ -8,6 +8,55 @@
         return;
     }
 
+    function normalizeLanguageCode(code) {
+        if (!code) {
+            return '';
+        }
+        return code.toLowerCase();
+    }
+
+    function getPreferredLanguage() {
+        const i18nLang = typeof i18next !== 'undefined' && i18next.language ? i18next.language : null;
+        const storedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('language') : null;
+        return normalizeLanguageCode(i18nLang || storedLang || 'en');
+    }
+
+    function pickLocalizedValue(translations, fallback = '') {
+        if (!translations || typeof translations !== 'object') {
+            return fallback;
+        }
+
+        const preferred = getPreferredLanguage();
+        const candidates = [];
+
+        if (preferred) {
+            candidates.push(preferred);
+            const shortCode = preferred.split('-')[0];
+            if (shortCode && shortCode !== preferred) {
+                candidates.push(shortCode);
+            }
+        }
+
+        candidates.push('en');
+
+        for (const code of candidates) {
+            const value = translations[code];
+            if (typeof value === 'string' && value.trim().length > 0) {
+                return value.trim();
+            }
+        }
+
+        const firstValue = Object.values(translations).find(
+            value => typeof value === 'string' && value.trim().length > 0
+        );
+
+        if (firstValue) {
+            return firstValue.trim();
+        }
+
+        return fallback;
+    }
+
     const STATUS_BEHAVIOURS = {
         active: {
             visibility: 'visible',
@@ -95,13 +144,16 @@
 
     function transformProduct(product) {
         const statusMeta = getStatusMeta(product.status);
+        const localizedName = pickLocalizedValue(product.name_translations, product.name);
+        const localizedTagline = pickLocalizedValue(product.summary_translations, product.short_description || '');
+        const localizedDescription = pickLocalizedValue(product.description_translations, product.description || '');
 
         return {
             id: product.id,
-            name: product.name,
+            name: localizedName,
             slug: product.slug,
-            tagline: product.short_description || '',
-            description: product.description || '',
+            tagline: localizedTagline,
+            description: localizedDescription,
             status: {
                 raw: product.status,
                 ...statusMeta,
@@ -129,6 +181,11 @@
             },
             visibilityRank: computeVisibilityRank(statusMeta, product),
             pricing: mapPricing(product),
+            translations: {
+                name: product.name_translations || {},
+                summary: product.summary_translations || {},
+                description: product.description_translations || {}
+            },
             raw: product
         };
     }
@@ -175,6 +232,9 @@
                 slug,
                 description,
                 short_description,
+                name_translations,
+                summary_translations,
+                description_translations,
                 status,
                 pricing_type,
                 price_amount,

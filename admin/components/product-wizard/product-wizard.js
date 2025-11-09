@@ -124,6 +124,9 @@ class ProductWizard {
                     individual_price,
                     enterprise_price,
                     subscription_interval,
+                    name_translations,
+                    summary_translations,
+                    description_translations,
                     status,
                     github_repo_url,
                     github_repo_name,
@@ -188,6 +191,9 @@ class ProductWizard {
                 description: data.description || '',
                 tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || ''),
                 pricing_type: data.pricing_type || 'one_time',
+                name_translations: data.name_translations || {},
+                summary_translations: data.summary_translations || {},
+                description_translations: data.description_translations || {},
                 price_amount: data.price_amount || '',
                 price_currency: data.price_currency || 'USD',
                 individual_price: data.individual_price || '',
@@ -943,6 +949,87 @@ class ProductWizard {
     }
 
     /**
+     * Ensure multilingual fields are populated via OpenAI translation service.
+     */
+    async ensureTranslationsForFormData() {
+        const source = {
+            name: this.formData.name || '',
+            summary: this.formData.short_description || '',
+            description: this.formData.description || ''
+        };
+
+        if (!source.name && !source.summary && !source.description) {
+            return;
+        }
+
+        const hasValue = value => typeof value === 'string' && value.trim().length > 0;
+
+        const existingTranslations = {
+            name: { ...(this.formData.name_translations || {}) },
+            summary: { ...(this.formData.summary_translations || {}) },
+            description: { ...(this.formData.description_translations || {}) }
+        };
+
+        const targetLanguages = ['es', 'fr', 'de'];
+        const missingLanguages = targetLanguages.filter(lang => {
+            const needsName = hasValue(source.name) && !hasValue(existingTranslations.name[lang]);
+            const needsSummary = hasValue(source.summary) && !hasValue(existingTranslations.summary[lang]);
+            const needsDescription = hasValue(source.description) && !hasValue(existingTranslations.description[lang]);
+            return needsName || needsSummary || needsDescription;
+        });
+
+        if (missingLanguages.length > 0 && window.supabase?.functions) {
+            try {
+                const { data, error } = await window.supabase.functions.invoke('translate-product-content', {
+                    body: {
+                        sourceLanguage: 'en',
+                        targetLanguages: missingLanguages,
+                        fields: {
+                            name: source.name,
+                            summary: source.summary,
+                            description: source.description
+                        }
+                    }
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data?.translations) {
+                    missingLanguages.forEach(lang => {
+                        const translations = data.translations[lang];
+                        if (!translations) {
+                            return;
+                        }
+
+                        if (hasValue(translations.name)) {
+                            existingTranslations.name[lang] = translations.name.trim();
+                        }
+                        if (hasValue(translations.summary)) {
+                            existingTranslations.summary[lang] = translations.summary.trim();
+                        }
+                        if (hasValue(translations.description)) {
+                            existingTranslations.description[lang] = translations.description.trim();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('⚠️ Automatic translation failed:', error);
+            }
+        }
+
+        // Ensure English baseline is always present
+        existingTranslations.name.en = source.name;
+        existingTranslations.summary.en = source.summary;
+        existingTranslations.description.en = source.description;
+
+        this.formData.name_translations = existingTranslations.name;
+        this.formData.summary_translations = existingTranslations.summary;
+        this.formData.description_translations = existingTranslations.description;
+    }
+
+    /**
      * Save draft to database
      */
     async saveDraftToDatabase(statusOverride = null) {
@@ -952,6 +1039,8 @@ class ProductWizard {
                 stripe_product_id: this.formData.stripe_product_id,
                 stripe_price_id: this.formData.stripe_price_id 
             });
+
+            await this.ensureTranslationsForFormData();
             
             // Determine status: use override if provided, otherwise 'draft'
             // If step 7 is completed and no override, use 'beta'
@@ -964,6 +1053,9 @@ class ProductWizard {
                 category_id: this.formData.category_id || null,
                 short_description: this.formData.short_description || '',
                 description: this.formData.description || '',
+                name_translations: this.formData.name_translations || null,
+                summary_translations: this.formData.summary_translations || null,
+                description_translations: this.formData.description_translations || null,
                 tags: this.parseTags(this.formData.tags || ''),
                 pricing_type: this.formData.pricing_type || 'one_time',
                 status: productStatus
@@ -1158,6 +1250,8 @@ class ProductWizard {
      */
     async updateProductInDatabase() {
         try {
+            await this.ensureTranslationsForFormData();
+
             // Prepare product data (same as create but with product_id)
             const productData = {
                 name: this.formData.name || '',
@@ -1165,6 +1259,9 @@ class ProductWizard {
                 category_id: this.formData.category_id || null,
                 short_description: this.formData.short_description || '',
                 description: this.formData.description || '',
+                name_translations: this.formData.name_translations || null,
+                summary_translations: this.formData.summary_translations || null,
+                description_translations: this.formData.description_translations || null,
                 tags: this.parseTags(this.formData.tags || ''),
                 pricing_type: this.formData.pricing_type || 'one_time',
                 price_amount: this.formData.price_amount || null,

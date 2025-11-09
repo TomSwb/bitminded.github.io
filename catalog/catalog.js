@@ -80,6 +80,19 @@
         await hydrateCatalog();
     });
 
+    window.addEventListener('languageChanged', () => {
+        if (!state.products.length || !window.catalogData?.transformProduct) {
+            applyTranslationUpdates();
+            return;
+        }
+
+        state.products = state.products.map(product => window.catalogData.transformProduct(product.raw));
+        state.featuredProducts = deriveFeatured(state.products);
+        applyFilters();
+        renderFeaturedSection(state.featuredProducts);
+        applyTranslationUpdates();
+    });
+
     async function hydrateCatalog() {
         renderLoadingStates();
 
