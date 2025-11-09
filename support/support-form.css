@@ -70,6 +70,15 @@
   background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
 }
 
+.support-card--active,
+.support-card--active:hover,
+.support-card--active:focus-within {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg, 0 18px 30px -12px rgba(99,102,241,0.55));
+  border-color: var(--color-primary, #6366f1);
+  background: rgba(99, 102, 241, 0.12);
+}
+
 .support-card__link {
   justify-self: flex-start;
   font-weight: 600;
