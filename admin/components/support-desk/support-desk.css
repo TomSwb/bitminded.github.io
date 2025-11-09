@@ -248,7 +248,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  color: var(--color-text-tertiary, #94a3b8);
+  color: var(--color-accent-pink, #f472b6);
   text-align: center;
   flex: 1;
 }
@@ -279,7 +279,7 @@
 .support-desk__detail-title {
   margin: 0;
   font-size: 1.2rem;
-  color: var(--color-text-primary);
+  color: var(--color-accent-pink, #f472b6);
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
@@ -330,7 +330,7 @@
 .support-desk__comment-card h4 {
   margin: 0;
   font-size: 0.95rem;
-  color: var(--color-text-secondary, #e2e8f0);
+  color: var(--color-accent-pink, #f472b6);
 }
 
 .support-desk__comment {

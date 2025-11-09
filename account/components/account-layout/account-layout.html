@@ -29,6 +29,12 @@
                     </button>
                 </li>
                 <li class="account-layout__nav-item">
+                    <button class="account-layout__nav-button" data-section="support" id="nav-support">
+                        <span class="account-layout__nav-icon">🛟</span>
+                        <span class="account-layout__nav-text translatable-content" data-translation-key="Support">Support</span>
+                    </button>
+                </li>
+                <li class="account-layout__nav-item">
                     <button class="account-layout__nav-button" data-section="notifications" id="nav-notifications">
                         <span class="account-layout__nav-icon">🔔</span>
                         <span class="account-layout__nav-text translatable-content" data-translation-key="Notifications">Notifications</span>
@@ -91,6 +97,15 @@
             <div class="account-layout__section-content" id="apps-content">
                 <!-- App entitlements component will be loaded here -->
             </div>
+        </section>
+
+        <!-- Support Section -->
+        <section class="account-layout__section" id="section-support" data-section="support">
+            <div class="account-layout__section-header">
+                <h2 class="account-layout__section-title translatable-content" data-translation-key="Support Tickets">Support Tickets</h2>
+                <p class="account-layout__section-description translatable-content" data-translation-key="Review your support tickets and in-app updates">Review your support tickets and in-app updates</p>
+            </div>
+            <div class="account-layout__section-content" id="support-content"></div>
         </section>
 
         <!-- Notifications Section -->

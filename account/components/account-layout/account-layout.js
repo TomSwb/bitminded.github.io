@@ -7,7 +7,7 @@ class AccountLayout {
     constructor() {
         this.currentSection = 'profile';
         this.isInitialized = false;
-        this.sections = ['profile', 'security', 'payment', 'apps', 'notifications', 'actions'];
+        this.sections = ['profile', 'security', 'payment', 'apps', 'support', 'notifications', 'actions'];
         this.loadedComponents = new Set();
     }
 
@@ -246,6 +246,7 @@ class AccountLayout {
             'security': 'password-change', // Will load multiple security components
             'payment': 'payment-management',
             'apps': 'app-entitlements',
+            'support': 'support-tickets',
             'notifications': 'notifications-preferences',
             'actions': 'account-actions'
         };
@@ -358,6 +359,7 @@ class AccountLayout {
             'security': 'Security Settings',
             'payment': 'Payments & Billing',
             'apps': 'App Entitlements',
+            'support': 'Support',
             'notifications': 'Notifications & Preferences',
             'actions': 'Account Actions'
         };
