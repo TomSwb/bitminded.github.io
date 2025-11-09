@@ -36,9 +36,9 @@
         beta: {
             visibility: 'visible',
             availability: 'coming-soon',
-            badgeText: 'Beta',
-            badgeVariant: 'beta',
-            badgeKey: 'catalog-badge-beta',
+            badgeText: 'Coming Soon',
+            badgeVariant: 'coming-soon',
+            badgeKey: 'catalog-badge-coming-soon',
             messageKey: 'catalog-status-coming-soon',
             ctaKey: 'catalog-cta-notify',
             hintKey: 'catalog-hint-coming-soon',
