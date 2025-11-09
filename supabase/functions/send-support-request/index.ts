@@ -22,7 +22,16 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { name, email, message, type = 'general', userId, userAgent, attachments: attachmentsRaw = [] } = await req.json()
+    const {
+      name,
+      email,
+      message,
+      type = 'tech-help',
+      userId,
+      userAgent,
+      attachments: attachmentsRaw = [],
+      context: contextRaw = {}
+    } = await req.json()
 
     const trimmedName = String(name ?? '').trim()
     const trimmedEmail = String(email ?? '').trim()
@@ -41,7 +50,7 @@ serve(async (req) => {
 
     const safeName = sanitize(trimmedName)
     const safeEmail = sanitize(trimmedEmail)
-    const safeMessage = sanitize(trimmedMessage)
+    let effectiveMessage = trimmedMessage
     const safeUserAgent = normalizedUserAgent ? sanitize(normalizedUserAgent) : ''
 
     const attachmentEntries = Array.isArray(attachmentsRaw) ? attachmentsRaw : []
@@ -111,17 +120,184 @@ serve(async (req) => {
       })
     }
 
+    const sanitizeContextValue = (value: unknown, depth = 0): string | string[] | undefined => {
+      if (depth > 3 || value === null || typeof value === 'undefined') {
+        return undefined
+      }
+
+      if (Array.isArray(value)) {
+        const sanitizedArray = value
+          .slice(0, 10)
+          .map((item) => sanitizeContextValue(item, depth + 1))
+          .filter((item): item is string => typeof item === 'string' && item.length > 0)
+        return sanitizedArray.length ? sanitizedArray : undefined
+      }
+
+      if (typeof value === 'object') {
+        const entries = Object.entries(value as Record<string, unknown>)
+          .slice(0, 10)
+          .map(([key, val]) => {
+            const sanitizedVal = sanitizeContextValue(val, depth + 1)
+            if (!sanitizedVal) return ''
+            const sanitizedKey = sanitize(key)
+            if (Array.isArray(sanitizedVal)) {
+              return `${sanitizedKey}: ${sanitizedVal.join(', ')}`
+            }
+            return `${sanitizedKey}: ${sanitizedVal}`
+          })
+          .filter(Boolean)
+        if (!entries.length) return undefined
+        return entries.join(', ')
+      }
+
+      const stringValue = sanitize(String(value)).slice(0, 500)
+      return stringValue.length ? stringValue : undefined
+    }
+
+    const safeContext: Record<string, string | string[]> = {}
+    if (contextRaw && typeof contextRaw === 'object' && !Array.isArray(contextRaw)) {
+      for (const [entryKey, entryValue] of Object.entries(contextRaw as Record<string, unknown>).slice(0, 25)) {
+        const trimmedKey = entryKey.trim()
+        if (!trimmedKey) continue
+        const sanitizedValue = sanitizeContextValue(entryValue)
+        if (!sanitizedValue) continue
+        safeContext[trimmedKey] = sanitizedValue
+      }
+    }
+
+    if (typeof safeContext.topicLabel === 'string' && typeof safeContext.topic === 'string') {
+      delete safeContext.topic
+    }
+
+    const formatList = (items: string[], ordered = false) => {
+      if (!items.length) return ''
+      const tag = ordered ? 'ol' : 'ul'
+      return `<${tag} style="margin:0;padding-left:18px;">${items.map((item) => `<li>${item}</li>`).join('')}</${tag}>`
+    }
+
+    const renderContextHtml = (_requestType: string, context: Record<string, string | string[]>): string => {
+      if (!context || Object.keys(context).length === 0) {
+        return ''
+      }
+
+      const workingContext: Record<string, string | string[]> = { ...context }
+      const sections: Array<{ label: string; valueHtml: string }> = []
+
+      const contextLabelMap: Record<string, string> = {
+        topicLabel: 'Topic',
+        summary: 'Summary',
+        steps: 'Steps to reproduce',
+        deviceDetails: 'Device details',
+        notes: 'Additional notes'
+      }
+
+      const addSection = (label: string, valueHtml: string) => {
+        const trimmedValue = valueHtml.trim()
+        if (!trimmedValue) return
+        sections.push({
+          label: sanitize(label),
+          valueHtml: trimmedValue
+        })
+      }
+
+      if (typeof workingContext.topicLabel === 'string') {
+        const topicLabel = workingContext.topicLabel
+        delete workingContext.topicLabel
+        if (topicLabel) {
+          addSection(contextLabelMap.topicLabel || 'Topic', topicLabel)
+        }
+      }
+
+      if (typeof workingContext.summary === 'string') {
+        const summary = workingContext.summary
+        delete workingContext.summary
+        if (summary) {
+          addSection(contextLabelMap.summary || 'Summary', summary)
+        }
+      }
+
+      if (Array.isArray(workingContext.steps)) {
+        const steps = workingContext.steps as string[]
+        delete workingContext.steps
+        if (steps.length) {
+          addSection(contextLabelMap.steps || 'Steps to reproduce', formatList(steps, true))
+        }
+      }
+
+      if (typeof workingContext.deviceDetails === 'string') {
+        const deviceDetails = workingContext.deviceDetails
+        delete workingContext.deviceDetails
+        if (deviceDetails) {
+          addSection(contextLabelMap.deviceDetails || 'Device details', deviceDetails)
+        }
+      }
+
+      if (typeof workingContext.notes === 'string') {
+        const notes = workingContext.notes
+        delete workingContext.notes
+        if (notes) {
+          addSection(contextLabelMap.notes || 'Additional notes', notes)
+        }
+      }
+
+      for (const [key, value] of Object.entries(workingContext)) {
+        if (!value) continue
+        const prettyKey = key
+          .replace(/[_-]+/g, ' ')
+          .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+          .replace(/\s+/g, ' ')
+          .trim()
+        const label = contextLabelMap[key] || (prettyKey
+          ? prettyKey.replace(/\b\w/g, (char) => char.toUpperCase())
+          : 'Detail'
+        )
+        if (Array.isArray(value)) {
+          if (value.length) {
+            addSection(label, formatList(value))
+          }
+          continue
+        }
+        addSection(label, value as string)
+      }
+
+      if (!sections.length) {
+        return ''
+      }
+
+      return sections.map((section) => `
+              <div class="field">
+                <div class="field-label">${section.label}</div>
+                <div class="field-value">${section.valueHtml}</div>
+              </div>
+            `).join('')
+    }
+
+    if (!effectiveMessage && typeof safeContext.summary === 'string' && safeContext.summary.length > 0) {
+      effectiveMessage = safeContext.summary
+    }
+
+    const safeMessage = sanitize(effectiveMessage)
+
+    const allowedTypes = new Set(['tech-help', 'bug', 'account', 'billing', 'general', 'commission'])
+    const normalizedType = allowedTypes.has(type) ? type : 'tech-help'
+
     const typeLabels: Record<string, string> = {
-      general: 'General question',
+      'tech-help': 'Request tech help',
       bug: 'Bug or outage',
+      account: 'Account or billing help',
       billing: 'Billing',
+      general: 'General question',
       commission: 'Commission intake',
     }
-    const typeLabel = typeLabels[type] ?? type
+    const typeLabel = typeLabels[normalizedType] ?? normalizedType
 
     // Validate input
-    if (!trimmedName || !trimmedEmail || !trimmedMessage) {
-      throw new Error('Missing required fields: name, email, and message are required')
+    if (!trimmedName || !trimmedEmail) {
+      throw new Error('Missing required fields: name and email are required')
+    }
+
+    if (!effectiveMessage) {
+      throw new Error('Missing required fields: message is required')
     }
 
     // Validate email format
@@ -131,11 +307,12 @@ serve(async (req) => {
     }
 
     // Validate message length
-    if (trimmedMessage.length < 10) {
-      throw new Error('Message is too short (minimum 10 characters)')
+    const minMessageLength = normalizedType === 'bug' ? 5 : 10
+    if (effectiveMessage.length < minMessageLength) {
+      throw new Error(`Message is too short (minimum ${minMessageLength} characters)`)
     }
 
-    if (trimmedMessage.length > 5000) {
+    if (effectiveMessage.length > 5000) {
       throw new Error('Message is too long (maximum 5000 characters)')
     }
 
@@ -186,13 +363,14 @@ serve(async (req) => {
           user_id: dbUserId,
           email: trimmedEmail,
           name: trimmedName,
-          type,
+          type: normalizedType,
           status: 'new',
-          message: trimmedMessage,
+          message: effectiveMessage,
           user_agent: normalizedUserAgent,
           metadata: {
             source: 'support-form',
-            attachments: attachmentsForStore
+            attachments: attachmentsForStore,
+            context: safeContext
           }
         })
         .select('id, ticket_code, status, created_at, updated_at')
@@ -226,6 +404,8 @@ serve(async (req) => {
       dateStyle: 'full',
       timeStyle: 'long'
     })
+
+    const contextHtml = renderContextHtml(normalizedType, safeContext)
 
     // Create email HTML
     const emailHtml = `
@@ -358,6 +538,7 @@ serve(async (req) => {
                 <div class="field-label">Message</div>
                 <div class="message-box">${safeMessage}</div>
               </div>
+              ${contextHtml}
               ${attachmentsForStore.length ? `
               <div class="field">
                 <div class="field-label">Attachments</div>

@@ -49,6 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         revealContent();
+        document.dispatchEvent(new CustomEvent('supportTranslationsApplied', {
+            detail: {
+                language: i18next.language
+            }
+        }));
     }
 
     function revealContent() {

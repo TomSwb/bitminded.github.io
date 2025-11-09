@@ -13,7 +13,8 @@ class SupportDesk {
         this.filters = {
             search: '',
             status: 'all',
-            type: 'all'
+            type: 'all',
+            showArchived: false
         };
         this.elements = {};
         this.searchDebounce = null;
@@ -61,6 +62,7 @@ class SupportDesk {
         this.elements.detailContent = document.getElementById('support-desk-detail-content');
         this.elements.statusFilter = document.getElementById('support-desk-status-filter');
         this.elements.typeFilter = document.getElementById('support-desk-type-filter');
+        this.elements.archivedFilter = document.getElementById('support-desk-archived-filter');
         this.elements.search = document.getElementById('support-desk-search');
         this.elements.refreshButton = document.getElementById('support-desk-refresh');
         this.elements.loadingOverlay = document.getElementById('support-desk-loading');
@@ -74,10 +76,15 @@ class SupportDesk {
         this.elements.detailStatusText = document.getElementById('support-desk-detail-status-text');
         this.elements.detailStatusSelect = document.getElementById('support-desk-detail-status-select');
         this.elements.updateStatusButton = document.getElementById('support-desk-update-status');
+        this.elements.archiveToggleButton = document.getElementById('support-desk-archive-toggle');
         this.elements.detailMessage = document.getElementById('support-desk-detail-message');
         this.elements.detailUserAgent = document.getElementById('support-desk-detail-user-agent');
         this.elements.detailAttachmentsCard = document.getElementById('support-desk-detail-attachments-card');
         this.elements.detailAttachmentsList = document.getElementById('support-desk-detail-attachments');
+        this.elements.detailComment = document.getElementById('support-desk-detail-comment');
+        this.elements.detailContextCard = document.getElementById('support-desk-detail-context-card');
+        this.elements.detailContext = document.getElementById('support-desk-detail-context');
+        this.elements.archiveToggleButton = document.getElementById('support-desk-archive-toggle');
 
         Object.entries(this.elements).forEach(([key, el]) => {
             if (!el) {
@@ -96,6 +103,13 @@ class SupportDesk {
             this.filters.type = event.target.value;
             this.applyFilters();
         });
+
+        if (this.elements.archivedFilter) {
+            this.elements.archivedFilter.addEventListener('change', (event) => {
+                this.filters.showArchived = Boolean(event.target.checked);
+                this.applyFilters();
+            });
+        }
 
         this.elements.search.addEventListener('input', (event) => {
             clearTimeout(this.searchDebounce);
@@ -121,6 +135,12 @@ class SupportDesk {
             }
             await this.updateTicketStatus(this.selectedTicket, newStatus);
         });
+
+        if (this.elements.archiveToggleButton) {
+            this.elements.archiveToggleButton.addEventListener('click', async () => {
+                await this.toggleArchiveTicket();
+            });
+        }
 
         window.addEventListener('languageChanged', () => {
             this.updateTranslations();
@@ -194,6 +214,7 @@ class SupportDesk {
         const searchTerm = this.filters.search;
         const statusFilter = this.filters.status;
         const typeFilter = this.filters.type;
+        const includeArchived = this.filters.showArchived;
 
         this.filteredTickets = this.tickets.filter(ticket => {
             const matchesSearch = !searchTerm || [
@@ -204,9 +225,14 @@ class SupportDesk {
 
             const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
             const matchesType = typeFilter === 'all' || ticket.type === typeFilter;
+            const matchesArchive = includeArchived || !this.isTicketArchived(ticket);
 
-            return matchesSearch && matchesStatus && matchesType;
+            return matchesSearch && matchesStatus && matchesType && matchesArchive;
         });
+
+        if (this.elements.archivedFilter) {
+            this.elements.archivedFilter.checked = includeArchived;
+        }
 
         this.renderTable();
         this.renderEmptyState();
@@ -306,6 +332,10 @@ class SupportDesk {
         this.elements.detailEmpty.classList.add('hidden');
         this.elements.detailContent.classList.remove('hidden');
 
+        if (this.elements.detailComment) {
+            this.elements.detailComment.value = '';
+        }
+
         this.elements.detailCode.textContent = ticket.ticket_code;
         this.elements.detailSubmitted.textContent = `${this.translate('Submitted', 'Submitted')}: ${this.formatDate(ticket.created_at)}`;
         this.elements.detailUpdated.textContent = ticket.updated_at
@@ -323,6 +353,12 @@ class SupportDesk {
         this.elements.detailType.textContent = this.getTypeLabel(ticket.type);
         this.elements.detailStatusText.textContent = this.getStatusLabel(ticket.status);
         this.elements.detailStatusSelect.value = ticket.status;
+
+        if (this.elements.archiveToggleButton) {
+            const isArchived = this.isTicketArchived(ticket);
+            const key = isArchived ? 'Restore ticket' : 'Archive ticket';
+            this.elements.archiveToggleButton.textContent = this.translate(key, isArchived ? 'Restore ticket' : 'Archive ticket');
+        }
 
         this.elements.detailMessage.textContent = ticket.message || this.translate('No message provided.', 'No message provided.');
         this.elements.detailUserAgent.textContent = ticket.user_agent || this.translate('Unknown device', 'Unknown device');
@@ -349,6 +385,8 @@ class SupportDesk {
                 attachmentsList.innerHTML = '';
             }
         }
+
+        this.renderTicketContext(ticket);
     }
 
     clearDetail() {
@@ -359,63 +397,72 @@ class SupportDesk {
 
     async updateTicketStatus(ticket, newStatus) {
         try {
-            if (!window.supabase) {
-                throw new Error('Supabase client not available');
+            const supabaseConfig = globalThis.SUPABASE_CONFIG || {};
+            const supabaseUrl = supabaseConfig.url;
+            const supabaseAnonKey = supabaseConfig.anonKey;
+
+            if (!supabaseUrl || !supabaseAnonKey) {
+                throw new Error('Missing Supabase configuration');
             }
 
             this.elements.updateStatusButton.disabled = true;
             this.elements.updateStatusButton.classList.add('is-loading');
 
-            const updatePayload = {
-                status: newStatus,
-                resolved_at: (newStatus === 'resolved' || newStatus === 'closed') ? new Date().toISOString() : null
-            };
+            const commentValue = (this.elements.detailComment?.value || '').trim();
 
-            const { data, error } = await window.supabase
-                .from('support_tickets')
-                .update(updatePayload)
-                .eq('id', ticket.id)
-            .select('id, ticket_code, status, resolved_at, updated_at, metadata')
-                .maybeSingle();
+            const response = await fetch(`${supabaseUrl}/functions/v1/send-support-update`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${supabaseAnonKey}`,
+                    'apikey': supabaseAnonKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ticketId: ticket.id,
+                    status: newStatus,
+                    comment: commentValue,
+                    notifyUser: true
+                })
+            });
 
-            if (error) {
-                throw error;
+            const result = await response.json();
+
+            if (!response.ok || !result?.success) {
+                throw new Error(result?.error || 'Failed to update ticket status.');
             }
 
-            if (data) {
-                const ticketIndex = this.tickets.findIndex(item => item.id === ticket.id);
-                if (ticketIndex !== -1) {
-                    this.tickets[ticketIndex] = {
-                        ...this.tickets[ticketIndex],
-                        status: data.status,
-                        resolved_at: data.resolved_at,
-                        updated_at: data.updated_at,
-                        metadata: data.metadata ?? this.tickets[ticketIndex].metadata
-                    };
-                    this.selectedTicket = this.tickets[ticketIndex];
-                } else {
-                    const updatedTicket = {
-                        ...ticket,
-                        status: data.status,
-                        resolved_at: data.resolved_at,
-                        updated_at: data.updated_at,
-                        metadata: data.metadata ?? ticket.metadata
-                    };
-                    this.tickets = [updatedTicket, ...this.tickets];
-                    this.selectedTicket = updatedTicket;
-                }
-                this.applyFilters();
-                this.renderTicketDetail();
-
-                if (window.adminLayout) {
-                    window.adminLayout.showSuccess(this.translate('Status updated successfully.', 'Status updated successfully.'));
-                    window.adminLayout.logAdminAction('support_ticket_status_updated', {
-                        ticket_code: ticket.ticket_code,
-                        status: data.status
-                    }).catch(() => {});
-                }
+            const updatedTicket = result.ticket;
+            if (!updatedTicket) {
+                throw new Error('Missing ticket data in response');
             }
 
+            const ticketIndex = this.tickets.findIndex(item => item.id === ticket.id);
+            if (ticketIndex !== -1) {
+                this.tickets[ticketIndex] = {
+                    ...this.tickets[ticketIndex],
+                    ...updatedTicket
+                };
+                this.selectedTicket = this.tickets[ticketIndex];
+            } else {
+                this.tickets = [updatedTicket, ...this.tickets];
+                this.selectedTicket = updatedTicket;
+            }
+
+            if (window.adminLayout) {
+                window.adminLayout.logAdminAction('support_ticket_status_updated', {
+                    ticket_code: ticket.ticket_code,
+                    status: updatedTicket.status
+                }).catch(() => {});
+            }
+
+            this.applyFilters();
+            this.renderTicketDetail();
+
+            if (this.elements.detailComment) {
+                this.elements.detailComment.value = '';
+            }
+
+            this.showSuccess(this.translate('Status updated successfully.', 'Status updated successfully.'));
         } catch (error) {
             console.error('❌ Support Desk: failed to update ticket status', error);
             this.showError(this.translate('Failed to update ticket status.', 'Failed to update ticket status.'));
@@ -443,8 +490,10 @@ class SupportDesk {
 
     getTypeLabel(type) {
         const keyMap = {
+            'tech-help': 'Type: Tech help',
             general: 'Type: General question',
             bug: 'Type: Bug or outage',
+            account: 'Type: Account or billing help',
             billing: 'Type: Billing',
             commission: 'Type: Commission intake'
         };
@@ -517,6 +566,269 @@ class SupportDesk {
             window.adminLayout.showError(message);
         } else {
             alert(message);
+        }
+    }
+
+    showSuccess(message) {
+        if (window.adminLayout) {
+            window.adminLayout.showSuccess(message);
+        } else {
+            console.log(message);
+        }
+    }
+
+    renderTicketContext(ticket) {
+        const contextCard = this.elements.detailContextCard;
+        const contextContainer = this.elements.detailContext;
+        if (!contextCard || !contextContainer) {
+            return;
+        }
+
+        contextContainer.innerHTML = '';
+        contextCard.classList.add('hidden');
+
+        const entries = this.getContextEntries(ticket);
+
+        if (!entries.length) {
+            return;
+        }
+
+        entries.forEach((entry) => {
+            const wrapper = document.createElement('div');
+            const title = document.createElement('div');
+            title.className = 'support-desk__context-item-title';
+            title.textContent = entry.label;
+            wrapper.appendChild(title);
+
+            if (entry.type === 'list') {
+                const list = document.createElement('ol');
+                list.className = 'support-desk__context-item-list';
+                entry.value.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    list.appendChild(li);
+                });
+                wrapper.appendChild(list);
+            } else {
+                const paragraph = document.createElement('p');
+                paragraph.className = 'support-desk__context-item-value';
+                paragraph.textContent = entry.value;
+                wrapper.appendChild(paragraph);
+            }
+
+            contextContainer.appendChild(wrapper);
+        });
+
+        contextCard.classList.remove('hidden');
+    }
+
+    getContextEntries(ticket) {
+        const entries = [];
+
+        const pushText = (labelKey, fallback, value) => {
+            const trimmed = typeof value === 'string' ? value.trim() : '';
+            if (!trimmed) {
+                return;
+            }
+            entries.push({
+                label: this.translate(labelKey, fallback),
+                type: 'text',
+                value: trimmed
+            });
+        };
+
+        const pushList = (labelKey, fallback, values) => {
+            if (!Array.isArray(values) || !values.length) {
+                return;
+            }
+            const sanitized = values
+                .map(item => (typeof item === 'string' ? item.trim() : ''))
+                .filter(Boolean);
+            if (!sanitized.length) {
+                return;
+            }
+            entries.push({
+                label: this.translate(labelKey, fallback),
+                type: 'list',
+                value: sanitized
+            });
+        };
+
+        const context = ticket.metadata?.context;
+        if (context && typeof context === 'object') {
+            if (typeof context.topicLabel === 'string') {
+                pushText('Context: Topic', 'Topic', context.topicLabel);
+            }
+
+            if (typeof context.summary === 'string') {
+                pushText('Context: Summary', 'Summary', context.summary);
+            }
+
+            if (Array.isArray(context.steps)) {
+                pushList('Context: Steps to reproduce', 'Steps to reproduce', context.steps);
+            }
+
+            if (typeof context.deviceDetails === 'string') {
+                pushText('Context: Device details', 'Device details', context.deviceDetails);
+            }
+
+            if (typeof context.notes === 'string') {
+                pushText('Context: Additional notes', 'Additional notes', context.notes);
+            }
+        }
+
+        const archiveMeta = ticket.metadata?.archived;
+        if (archiveMeta && typeof archiveMeta === 'object') {
+            const isArchived = Boolean(archiveMeta.isArchived);
+            const archivedAt = archiveMeta.archived_at
+                ? this.formatDate(archiveMeta.archived_at)
+                : this.translate('Not available', 'Not available');
+            const state = isArchived
+                ? this.translate('Archive state archived', `Archived on {{date}}`).replace('{{date}}', archivedAt)
+                : this.translate('Archive state active', 'Active ticket');
+
+            pushText('Context: Archive state', 'Archive state', state);
+        }
+
+        const archiveHistoryEntries = Array.isArray(ticket.metadata?.archive_history)
+            ? ticket.metadata.archive_history
+            : [];
+
+        if (archiveHistoryEntries.length) {
+            const formattedArchiveHistory = archiveHistoryEntries.map(entry => {
+                const timestamp = typeof entry.timestamp === 'string'
+                    ? this.formatDate(entry.timestamp)
+                    : this.translate('Not available', 'Not available');
+                const action = entry.action === 'archived'
+                    ? this.translate('Archive history archived', 'Archived')
+                    : this.translate('Archive history restored', 'Restored');
+                return `${timestamp} · ${action}`;
+            }).filter(Boolean);
+
+            pushList('Context: Archive history', 'Archive history', formattedArchiveHistory);
+        }
+
+        const updates = Array.isArray(ticket.metadata?.updates) ? ticket.metadata.updates : [];
+        if (updates.length) {
+            const formattedUpdates = updates.map(entry => {
+                const timestamp = typeof entry.created_at === 'string'
+                    ? this.formatDate(entry.created_at)
+                    : this.translate('Not available', 'Not available');
+                const statusLabel = this.getStatusLabel(entry.status || '');
+                const comment = typeof entry.comment === 'string' ? entry.comment.trim() : '';
+                if (comment) {
+                    return `${timestamp} · ${statusLabel}\n${comment}`;
+                }
+                return `${timestamp} · ${statusLabel}`;
+            }).filter(Boolean);
+
+            pushList('Context: Support updates', 'Support updates', formattedUpdates);
+        }
+
+        return entries;
+    }
+
+    isTicketArchived(ticket) {
+        const archivedMeta = ticket.metadata?.archived;
+        if (!archivedMeta || typeof archivedMeta !== 'object') {
+            return false;
+        }
+        return Boolean(archivedMeta.isArchived);
+    }
+
+    async toggleArchiveTicket() {
+        if (!this.selectedTicket) {
+            return;
+        }
+
+        try {
+            if (!window.supabase) {
+                throw new Error('Supabase client not available');
+            }
+
+            if (this.elements.archiveToggleButton) {
+                this.elements.archiveToggleButton.disabled = true;
+                this.elements.archiveToggleButton.classList.add('is-loading');
+            }
+
+            const nowIso = new Date().toISOString();
+            const isArchived = this.isTicketArchived(this.selectedTicket);
+
+            const existingMetadata = this.selectedTicket.metadata && typeof this.selectedTicket.metadata === 'object'
+                ? { ...this.selectedTicket.metadata }
+                : {};
+
+            const archiveHistory = Array.isArray(existingMetadata.archive_history)
+                ? existingMetadata.archive_history.slice(-24)
+                : [];
+
+            const historyEntry = {
+                action: isArchived ? 'restored' : 'archived',
+                timestamp: nowIso,
+                by: 'admin'
+            };
+
+            archiveHistory.push(historyEntry);
+
+            existingMetadata.archived = {
+                isArchived: !isArchived,
+                archived_at: !isArchived ? nowIso : null
+            };
+            existingMetadata.archive_history = archiveHistory;
+
+            const { data, error } = await window.supabase
+                .from('support_tickets')
+                .update({
+                    metadata: existingMetadata,
+                    updated_at: nowIso
+                })
+                .eq('id', this.selectedTicket.id)
+                .select('id, metadata, updated_at')
+                .maybeSingle();
+
+            if (error) {
+                throw error;
+            }
+
+            if (window.adminLayout) {
+                window.adminLayout.logAdminAction('support_ticket_archived_toggled', {
+                    ticket_code: this.selectedTicket.ticket_code,
+                    archived: !isArchived
+                }).catch(() => {});
+            }
+
+            if (data) {
+                const ticketIndex = this.tickets.findIndex(item => item.id === this.selectedTicket.id);
+                if (ticketIndex !== -1) {
+                    this.tickets[ticketIndex] = {
+                        ...this.tickets[ticketIndex],
+                        metadata: data.metadata,
+                        updated_at: data.updated_at
+                    };
+                    this.selectedTicket = this.tickets[ticketIndex];
+                } else {
+                    this.selectedTicket = {
+                        ...this.selectedTicket,
+                        metadata: data.metadata,
+                        updated_at: data.updated_at
+                    };
+                }
+
+                this.applyFilters();
+                this.renderTicketDetail();
+                this.renderTable();
+
+                const successKey = !isArchived ? 'Ticket archived.' : 'Ticket restored.';
+                this.showSuccess(this.translate(successKey, successKey));
+            }
+        } catch (error) {
+            console.error('❌ Support Desk: failed to toggle archive state', error);
+            this.showError(this.translate('Failed to update archive state.', 'Failed to update archive state.'));
+        } finally {
+            if (this.elements.archiveToggleButton) {
+                this.elements.archiveToggleButton.disabled = false;
+                this.elements.archiveToggleButton.classList.remove('is-loading');
+            }
         }
     }
 }

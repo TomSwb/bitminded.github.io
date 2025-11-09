@@ -1,0 +1,333 @@
+// @ts-nocheck
+/* eslint-disable complexity */
+/* eslint-disable sonarjs/cognitive-complexity */
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+type TicketRecord = {
+  id: string
+  ticket_code: string
+  name: string
+  email: string | null
+  type: string
+  status: string
+  message: string | null
+  user_agent: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+  resolved_at: string | null
+}
+
+const allowedStatuses = new Set(['new', 'in_progress', 'resolved', 'closed'])
+
+const statusLabels: Record<string, string> = {
+  new: 'New',
+  in_progress: 'In progress',
+  resolved: 'Resolved',
+  closed: 'Closed'
+}
+
+const sanitize = (value?: string | null) => (value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+    .trim()
+
+const buildUpdatedMetadata = (
+  metadata: Record<string, unknown> | null,
+  status: string,
+  comment: string,
+  timestamp: string
+) => {
+  const base = metadata && typeof metadata === 'object' ? { ...metadata } : {}
+  const updatesHistory = Array.isArray(base.updates) ? base.updates : []
+
+  const entry: Record<string, unknown> = {
+    status,
+    created_at: timestamp
+  }
+
+  if (comment) {
+    entry.comment = comment
+  }
+
+  const nextUpdates = updatesHistory.slice(-24)
+  nextUpdates.push(entry)
+
+  return {
+    ...base,
+    updates: nextUpdates
+  }
+}
+
+const buildEmailHtml = (
+  ticketCode: string,
+  name: string,
+  statusLabel: string,
+  safeComment: string,
+  timestamp: string
+) => `
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body {
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 620px;
+                margin: 0 auto;
+                padding: 32px 24px;
+                background: #f9fafb;
+              }
+              .container {
+                background: #ffffff;
+                border-radius: 16px;
+                padding: 32px;
+                border: 1px solid #e5e7eb;
+              }
+              .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 12px;
+                border-radius: 999px;
+                font-weight: 600;
+                font-size: 13px;
+                background: #f3e8ff;
+                color: #7c3aed;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+              }
+              .section {
+                margin-top: 24px;
+              }
+              .section h3 {
+                margin: 0 0 12px;
+                font-size: 17px;
+                color: #111827;
+              }
+              .section p {
+                margin: 0;
+                color: #374151;
+              }
+              .meta {
+                margin-top: 24px;
+                padding-top: 16px;
+                border-top: 1px solid #e5e7eb;
+                font-size: 13px;
+                color: #6b7280;
+              }
+              .comment {
+                margin-top: 16px;
+                padding: 16px;
+                border-radius: 12px;
+                background: #f1f5f9;
+                border-left: 4px solid #7c3aed;
+                white-space: pre-wrap;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="badge">Ticket ${ticketCode}</div>
+              <div class="section">
+                <h3>Status update: ${statusLabel}</h3>
+                <p>Hi ${name},</p>
+                <p>Your support ticket has been updated to <strong>${statusLabel}</strong>.</p>
+              </div>
+              ${safeComment ? `
+                <div class="section">
+                  <h3>Notes from the desk</h3>
+                  <div class="comment">${safeComment}</div>
+                </div>
+              ` : ''}
+              <div class="meta">
+                Sent ${new Date(timestamp).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })} · Ticket ${ticketCode}
+              </div>
+            </div>
+          </body>
+        </html>
+      `
+
+const buildEmailText = (
+  name: string,
+  ticketCode: string,
+  statusLabel: string,
+  comment: string
+) => `Hi ${name},
+
+Your support ticket ${ticketCode} has been updated to: ${statusLabel}.
+${comment ? `\nNotes from the support desk:\n${comment}\n` : ''}
+`
+
+const sendStatusEmail = async (
+  resendApiKey: string,
+  ticket: TicketRecord,
+  status: string,
+  comment: string,
+  timestamp: string
+) => {
+  const statusLabel = sanitize(statusLabels[status] || status)
+  const safeTicketCode = sanitize(ticket.ticket_code)
+  const safeName = sanitize(ticket.name)
+  const safeComment = sanitize(comment)
+
+  const emailPayload: Record<string, unknown> = {
+    from: 'BitMinded Support <support@bitminded.ch>',
+    to: ticket.email,
+    subject: `[Support:${ticket.ticket_code}] Status update: ${statusLabel}`,
+    html: buildEmailHtml(safeTicketCode, safeName, statusLabel, safeComment, timestamp),
+    text: buildEmailText(ticket.name, ticket.ticket_code, statusLabel, comment)
+  }
+
+  const emailResponse = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json'
+    }
+  , body: JSON.stringify(emailPayload)
+  })
+
+  if (!emailResponse.ok) {
+    const errorText = await emailResponse.text()
+    console.error('❌ send-support-update: Failed to send email', errorText)
+  }
+}
+
+serve(async (req) => {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
+
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    const { ticketId, ticketCode, status, comment = '', notifyUser = true } = await req.json()
+
+    if (!ticketId && !ticketCode) {
+      throw new Error('Ticket identifier is required')
+    }
+
+    if (typeof status !== 'string' || !status.trim()) {
+      throw new Error('Status is required')
+    }
+
+    if (!allowedStatuses.has(status)) {
+      throw new Error('Invalid status provided')
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ send-support-update: Missing Supabase configuration')
+      throw new Error('Service not configured')
+    }
+
+    if (!resendApiKey) {
+      console.error('❌ send-support-update: RESEND_API_KEY not set')
+      throw new Error('Email service not configured')
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+
+    const ticketQuery = supabase
+      .from('support_tickets')
+      .select('id, ticket_code, name, email, type, status, message, user_agent, metadata, created_at, updated_at, resolved_at')
+      .maybeSingle()
+
+    if (ticketId) {
+      ticketQuery.eq('id', ticketId)
+    } else if (ticketCode) {
+      ticketQuery.eq('ticket_code', ticketCode)
+    }
+
+    const { data: ticket, error: ticketError } = await ticketQuery
+
+    if (ticketError) {
+      console.error('❌ send-support-update: Failed to fetch ticket', ticketError)
+      throw new Error('Failed to load ticket')
+    }
+
+    if (!ticket) {
+      throw new Error('Ticket not found')
+    }
+
+    const trimmedComment = typeof comment === 'string' ? comment.trim() : ''
+    const nowIso = new Date().toISOString()
+
+    const metadata = buildUpdatedMetadata(ticket.metadata, status, trimmedComment, nowIso)
+    const resolvedAt = (status === 'resolved' || status === 'closed') ? nowIso : null
+
+    const { data: updatedTicket, error: updateError } = await supabase
+      .from('support_tickets')
+      .update({
+        status,
+        resolved_at: resolvedAt,
+        metadata,
+        updated_at: nowIso
+      })
+      .eq('id', ticket.id)
+      .select('id, ticket_code, name, email, type, status, message, user_agent, metadata, created_at, updated_at, resolved_at')
+      .maybeSingle()
+
+    if (updateError) {
+      console.error('❌ send-support-update: Failed to update ticket', updateError)
+      throw new Error('Failed to update ticket')
+    }
+
+    if (!updatedTicket) {
+      throw new Error('Ticket update did not return data')
+    }
+
+    if (notifyUser && updatedTicket.email) {
+      await sendStatusEmail(resendApiKey, updatedTicket, status, trimmedComment, nowIso)
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        ticket: updatedTicket
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+  } catch (error) {
+    console.error('❌ send-support-update error:', error)
+    const message = error instanceof Error ? error.message : 'Unexpected error occurred'
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: message
+      }),
+      {
+        status: 400,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+  }
+})
+
