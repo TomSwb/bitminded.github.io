@@ -17,6 +17,7 @@ type TicketRecord = {
   created_at: string
   updated_at: string
   resolved_at: string | null
+  user_id: string | null
 }
 
 const allowedStatuses = new Set(['new', 'in_progress', 'resolved', 'closed'])
@@ -40,27 +41,71 @@ const buildUpdatedMetadata = (
   metadata: Record<string, unknown> | null,
   status: string,
   comment: string,
-  timestamp: string
+  timestamp: string,
+  actor: { type: 'admin' | 'user'; id?: string | null }
 ) => {
   const base = metadata && typeof metadata === 'object' ? { ...metadata } : {}
-  const updatesHistory = Array.isArray(base.updates) ? base.updates : []
+  const updatesHistory = Array.isArray(base.updates) ? base.updates.slice(-24) : []
 
   const entry: Record<string, unknown> = {
     status,
-    created_at: timestamp
+    created_at: timestamp,
+    updated_by: actor
   }
 
   if (comment) {
     entry.comment = comment
   }
 
-  const nextUpdates = updatesHistory.slice(-24)
-  nextUpdates.push(entry)
+  updatesHistory.push(entry)
 
   return {
     ...base,
-    updates: nextUpdates
+    updates: updatesHistory
   }
+}
+
+const applyArchiveState = (
+  metadata: Record<string, unknown>,
+  status: string,
+  actor: { type: 'admin' | 'user'; id?: string | null },
+  timestamp: string
+) => {
+  const next = { ...metadata }
+  const history = Array.isArray(next.archive_history)
+    ? next.archive_history.slice(-24)
+    : []
+  const currentlyArchived = Boolean(next.archived?.isArchived)
+
+  if (status === 'closed' && !currentlyArchived) {
+    history.push({
+      action: 'archived',
+      timestamp,
+      by: actor
+    })
+    next.archived = {
+      isArchived: true,
+      archived_at: timestamp,
+      archived_by: actor
+    }
+  } else if (status !== 'closed' && currentlyArchived) {
+    history.push({
+      action: 'restored',
+      timestamp,
+      by: actor
+    })
+    next.archived = {
+      isArchived: false,
+      archived_at: null,
+      archived_by: actor
+    }
+  }
+
+  if (history.length) {
+    next.archive_history = history
+  }
+
+  return next
 }
 
 const buildEmailHtml = (
@@ -68,7 +113,8 @@ const buildEmailHtml = (
   name: string,
   statusLabel: string,
   safeComment: string,
-  timestamp: string
+  timestamp: string,
+  closerLabel?: string
 ) => `
         <!DOCTYPE html>
         <html lang="en">
@@ -140,6 +186,7 @@ const buildEmailHtml = (
                 <h3>Status update: ${statusLabel}</h3>
                 <p>Hi ${name},</p>
                 <p>Your support ticket has been updated to <strong>${statusLabel}</strong>.</p>
+                ${closerLabel ? `<p>${closerLabel}</p>` : ''}
               </div>
               ${safeComment ? `
                 <div class="section">
@@ -159,10 +206,12 @@ const buildEmailText = (
   name: string,
   ticketCode: string,
   statusLabel: string,
-  comment: string
+  comment: string,
+  closerLabel?: string
 ) => `Hi ${name},
 
 Your support ticket ${ticketCode} has been updated to: ${statusLabel}.
+${closerLabel ? `${closerLabel}\n` : ''}
 ${comment ? `\nNotes from the support desk:\n${comment}\n` : ''}
 `
 
@@ -171,7 +220,8 @@ const sendStatusEmail = async (
   ticket: TicketRecord,
   status: string,
   comment: string,
-  timestamp: string
+  timestamp: string,
+  closerLabel?: string
 ) => {
   const statusLabel = sanitize(statusLabels[status] || status)
   const safeTicketCode = sanitize(ticket.ticket_code)
@@ -182,8 +232,8 @@ const sendStatusEmail = async (
     from: 'BitMinded Support <support@bitminded.ch>',
     to: ticket.email,
     subject: `[Support:${ticket.ticket_code}] Status update: ${statusLabel}`,
-    html: buildEmailHtml(safeTicketCode, safeName, statusLabel, safeComment, timestamp),
-    text: buildEmailText(ticket.name, ticket.ticket_code, statusLabel, comment)
+    html: buildEmailHtml(safeTicketCode, safeName, statusLabel, safeComment, timestamp, closerLabel),
+    text: buildEmailText(ticket.name, ticket.ticket_code, statusLabel, comment, closerLabel)
   }
 
   const emailResponse = await fetch('https://api.resend.com/emails', {
@@ -249,7 +299,7 @@ serve(async (req) => {
 
     const ticketQuery = supabase
       .from('support_tickets')
-      .select('id, ticket_code, name, email, type, status, message, user_agent, metadata, created_at, updated_at, resolved_at')
+      .select('id, ticket_code, name, email, type, status, message, user_agent, metadata, created_at, updated_at, resolved_at, user_id')
       .maybeSingle()
 
     if (ticketId) {
@@ -272,7 +322,34 @@ serve(async (req) => {
     const trimmedComment = typeof comment === 'string' ? comment.trim() : ''
     const nowIso = new Date().toISOString()
 
-    const metadata = buildUpdatedMetadata(ticket.metadata, status, trimmedComment, nowIso)
+    const authHeader = req.headers.get('Authorization') || ''
+    let actingUser: { type: 'admin' | 'user'; id?: string | null } = { type: 'admin' }
+
+    if (authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice(7).trim()
+      if (token) {
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        })
+        const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token)
+        if (!authError && authData?.user) {
+          actingUser = { type: 'user', id: authData.user.id }
+          if (ticket.user_id && ticket.user_id !== authData.user.id) {
+            throw new Error('You can only update your own tickets')
+          }
+          const allowedUserStatuses = new Set(['in_progress', 'resolved', 'closed', ticket.status])
+          if (!allowedUserStatuses.has(status)) {
+            throw new Error('Unsupported status transition for end user')
+          }
+        }
+      }
+    }
+
+    const metadataWithUpdate = buildUpdatedMetadata(ticket.metadata, status, trimmedComment, nowIso, actingUser)
+    const metadata = applyArchiveState(metadataWithUpdate, status, actingUser, nowIso)
     const resolvedAt = (status === 'resolved' || status === 'closed') ? nowIso : null
 
     const { data: updatedTicket, error: updateError } = await supabase
@@ -296,8 +373,17 @@ serve(async (req) => {
       throw new Error('Ticket update did not return data')
     }
 
+    let closerLabel: string | undefined
+    if (status === 'closed') {
+      closerLabel = actingUser.type === 'user'
+        ? 'You marked this ticket as closed.'
+        : 'Our team marked this ticket as closed.'
+    } else if (actingUser.type === 'user' && status === 'resolved') {
+      closerLabel = 'You marked this ticket as resolved.'
+    }
+
     if (notifyUser && updatedTicket.email) {
-      await sendStatusEmail(resendApiKey, updatedTicket, status, trimmedComment, nowIso)
+      await sendStatusEmail(resendApiKey, updatedTicket, status, trimmedComment, nowIso, closerLabel)
     }
 
     return new Response(

@@ -1,0 +1,33 @@
+<div class="support-tickets" id="support-tickets">
+    <div class="support-tickets__header">
+        <h3 class="support-tickets__title translatable-content" data-translation-key="support-tickets-heading">Support tickets</h3>
+        <label class="support-tickets__toggle" for="support-tickets-toggle-archived">
+            <input type="checkbox" id="support-tickets-toggle-archived">
+            <span class="translatable-content" data-translation-key="support-tickets-toggle-archived">Include archived</span>
+        </label>
+    </div>
+
+    <div class="support-tickets__layout">
+        <aside class="support-tickets__list" id="support-tickets-list">
+            <div class="support-tickets__loading" id="support-tickets-loading">
+                <span class="support-tickets__spinner"></span>
+                <span class="translatable-content" data-translation-key="support-tickets-loading">Loading your tickets…</span>
+            </div>
+            <div class="support-tickets__empty translatable-content" id="support-tickets-empty" data-translation-key="support-tickets-empty">
+                You haven’t opened any support tickets yet.
+            </div>
+        </aside>
+
+        <section class="support-tickets__detail" id="support-tickets-detail">
+            <div class="support-tickets__detail-empty translatable-content" data-translation-key="support-tickets-select-placeholder">
+                Select a ticket to view its details.
+            </div>
+        </section>
+    </div>
+
+    <div class="support-tickets__error" id="support-tickets-error" role="alert" hidden>
+        <span class="support-tickets__error-icon">⚠️</span>
+        <span class="support-tickets__error-text" id="support-tickets-error-text"></span>
+    </div>
+</div>
+

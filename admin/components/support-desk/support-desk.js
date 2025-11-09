@@ -696,10 +696,20 @@ class SupportDesk {
 
         if (archiveHistoryEntries.length) {
             const formattedArchiveHistory = archiveHistoryEntries.map(entry => {
-                const timestamp = typeof entry.timestamp === 'string'
-                    ? this.formatDate(entry.timestamp)
+                const rawTimestamp = typeof entry.timestamp === 'string'
+                    ? entry.timestamp
+                    : typeof entry.archived_at === 'string'
+                        ? entry.archived_at
+                        : null;
+                const timestamp = rawTimestamp
+                    ? this.formatDate(rawTimestamp)
                     : this.translate('Not available', 'Not available');
-                const action = entry.action === 'archived'
+                const rawAction = typeof entry.action === 'string'
+                    ? entry.action
+                    : entry.archived_at
+                        ? 'archived'
+                        : 'restored';
+                const action = rawAction === 'archived'
                     ? this.translate('Archive history archived', 'Archived')
                     : this.translate('Archive history restored', 'Restored');
                 return `${timestamp} · ${action}`;
@@ -762,17 +772,16 @@ class SupportDesk {
                 ? existingMetadata.archive_history.slice(-24)
                 : [];
 
-            const historyEntry = {
+            archiveHistory.push({
                 action: isArchived ? 'restored' : 'archived',
                 timestamp: nowIso,
-                by: 'admin'
-            };
-
-            archiveHistory.push(historyEntry);
+                by: { type: 'admin' }
+            });
 
             existingMetadata.archived = {
                 isArchived: !isArchived,
-                archived_at: !isArchived ? nowIso : null
+                archived_at: !isArchived ? nowIso : null,
+                archived_by: { type: 'admin' }
             };
             existingMetadata.archive_history = archiveHistory;
 

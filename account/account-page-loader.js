@@ -8,7 +8,7 @@ class AccountPageLoader {
         this.isInitialized = false;
         this.loadedComponents = new Map();
         this.currentSection = 'profile';
-        this.sections = ['profile', 'security', 'payment', 'apps', 'notifications', 'actions'];
+        this.sections = ['profile', 'security', 'payment', 'apps', 'support', 'notifications', 'actions'];
     }
 
     /**
@@ -123,6 +123,7 @@ class AccountPageLoader {
                 'security': 'security-management', // Security management container
                 'payment': 'payment-management',
                 'apps': 'app-entitlements',
+                'support': 'support-tickets',
                 'notifications': 'notifications-preferences',
                 'actions': 'account-actions'
             };
@@ -245,6 +246,7 @@ class AccountPageLoader {
             'security': 'Security Settings',
             'payment': 'Payments & Billing',
             'apps': 'App Entitlements',
+            'support': 'Support',
             'notifications': 'Notifications & Preferences',
             'actions': 'Account Actions'
         };
