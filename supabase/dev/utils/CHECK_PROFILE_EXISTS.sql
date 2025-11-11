@@ -81,13 +81,3 @@ BEGIN
         RAISE NOTICE '✅ Profile exists for user: %', current_user_id;
     END IF;
 END $$;
-
-
-
-
-
-
-
-
-
-
