@@ -1,0 +1,109 @@
+<div class="maintenance-mode" id="maintenance-mode-component">
+    <div class="maintenance-mode__card">
+        <div class="maintenance-mode__header">
+            <div class="maintenance-mode__intro">
+                <span class="maintenance-mode__status" data-maintenance="status-pill">
+                    <span class="translatable-content" data-translation-key="Status Unknown">Status Unknown</span>
+                </span>
+                <h2 class="maintenance-mode__title translatable-content" data-translation-key="Maintenance Mode">Maintenance Mode</h2>
+                <p class="maintenance-mode__description translatable-content" data-translation-key="Visitors see the maintenance page when enabled. Allowlisted IPs and bypass tokens can still access the site.">
+                    Visitors see the maintenance page when enabled. Allowlisted IPs and bypass tokens can still access the site.
+                </p>
+            </div>
+        </div>
+
+        <div class="maintenance-mode__controls">
+            <button class="maintenance-mode__btn maintenance-mode__btn--primary" data-maintenance="toggle">
+                <span class="translatable-content" data-translation-key="Enable Maintenance Mode">Enable Maintenance Mode</span>
+            </button>
+            <button class="maintenance-mode__btn maintenance-mode__btn--ghost" data-maintenance="refresh">
+                <span class="translatable-content" data-translation-key="Refresh Status">Refresh Status</span>
+            </button>
+        </div>
+
+        <div class="maintenance-mode__meta">
+            <div class="maintenance-mode__meta-item">
+                <span class="maintenance-mode__meta-label translatable-content" data-translation-key="Last updated">Last updated</span>
+                <span class="maintenance-mode__meta-value" data-maintenance="last-updated">—</span>
+            </div>
+            <div class="maintenance-mode__meta-item">
+                <span class="maintenance-mode__meta-label translatable-content" data-translation-key="Updated by">Updated by</span>
+                <span class="maintenance-mode__meta-value" data-maintenance="updated-by">—</span>
+            </div>
+        </div>
+
+        <div class="maintenance-mode__alert" data-maintenance="alert" hidden>
+            <span class="maintenance-mode__alert-icon">⚠️</span>
+            <span class="maintenance-mode__alert-message" data-maintenance="alert-message"></span>
+        </div>
+    </div>
+
+    <section class="maintenance-mode__section">
+        <header class="maintenance-mode__section-header">
+            <h3 class="maintenance-mode__section-title translatable-content" data-translation-key="Allowlisted IPs">Allowlisted IPs</h3>
+            <p class="maintenance-mode__section-subtitle translatable-content" data-translation-key="Visitors from these addresses bypass the maintenance page.">
+                Visitors from these addresses bypass the maintenance page.
+            </p>
+        </header>
+
+        <form class="maintenance-mode__form" data-maintenance="allowlist-form">
+            <label class="maintenance-mode__label translatable-content" data-translation-key="Add IP address or CIDR range">
+                Add IP address or CIDR range
+            </label>
+            <div class="maintenance-mode__form-row">
+                <input
+                    type="text"
+                    class="maintenance-mode__input translatable-content"
+                    data-maintenance="allowlist-input"
+                    data-translation-key="e.g. 203.0.113.5 or 203.0.113.0/24"
+                    placeholder="e.g. 203.0.113.5 or 203.0.113.0/24"
+                    autocomplete="off"
+                >
+                <button type="submit" class="maintenance-mode__btn maintenance-mode__btn--primary">
+                    <span class="translatable-content" data-translation-key="Add">Add</span>
+                </button>
+            </div>
+            <p class="maintenance-mode__help translatable-content" data-translation-key="IPv4, IPv6, and CIDR ranges are supported.">
+                IPv4, IPv6, and CIDR ranges are supported.
+            </p>
+            <p class="maintenance-mode__hint-small translatable-content" data-translation-key="Need your IP? Visit https://ifconfig.co or search 'what is my IP'." data-allow-html="true">
+                Need your IP? Visit <a href="https://ifconfig.co" target="_blank" rel="noopener" class="maintenance-mode__link">https://ifconfig.co</a> or search 'what is my IP'.
+            </p>
+        </form>
+
+        <ul class="maintenance-mode__allowlist" data-maintenance="allowlist-list" aria-live="polite"></ul>
+        <div class="maintenance-mode__empty" data-maintenance="allowlist-empty" hidden>
+            <p class="translatable-content" data-translation-key="No IPs added yet. Add your own IP to stay signed in during maintenance.">
+                No IPs added yet. Add your own IP to stay signed in during maintenance.
+            </p>
+        </div>
+    </section>
+
+    <section class="maintenance-mode__section">
+        <header class="maintenance-mode__section-header">
+            <h3 class="maintenance-mode__section-title translatable-content" data-translation-key="Bypass Tokens">Bypass Tokens</h3>
+            <p class="maintenance-mode__section-subtitle translatable-content" data-translation-key="Generate a temporary bypass link for yourself or a teammate.">
+                Generate a temporary bypass link for yourself or a teammate.
+            </p>
+        </header>
+
+        <div class="maintenance-mode__actions">
+            <button class="maintenance-mode__btn maintenance-mode__btn--ghost" data-maintenance="generate">
+                <span class="translatable-content" data-translation-key="Generate Bypass Link">Generate Bypass Link</span>
+            </button>
+            <button class="maintenance-mode__btn maintenance-mode__btn--ghost" data-maintenance="copy" disabled>
+                <span class="translatable-content" data-translation-key="Copy Link">Copy Link</span>
+            </button>
+            <button class="maintenance-mode__btn maintenance-mode__btn--ghost" data-maintenance="clear" disabled>
+                <span class="translatable-content" data-translation-key="Clear">Clear</span>
+            </button>
+        </div>
+
+        <div class="maintenance-mode__bypass-result" data-maintenance="bypass-result" hidden>
+            <code class="maintenance-mode__bypass-link" data-maintenance="bypass-link"></code>
+            <p class="maintenance-mode__hint translatable-content" data-translation-key="Bypass links expire after 24 hours or when maintenance mode is disabled.">
+                Bypass links expire after 24 hours or when maintenance mode is disabled.
+            </p>
+        </div>
+    </section>
+</div>
