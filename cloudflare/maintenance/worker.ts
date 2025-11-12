@@ -1,267 +1,294 @@
-interface Env {
-  ORIGIN_URL: string
-  SUPABASE_URL: string
-  SUPABASE_SERVICE_ROLE_KEY: string
-  MAINTENANCE_PAGE_URL?: string
-  MAINTENANCE_SETTINGS_CACHE_SECONDS?: string
-  MAINTENANCE_BYPASS_COOKIE_NAME?: string
-  MAINTENANCE_COOKIE_DOMAIN?: string
-}
+const settingsCache = { value: null, expiresAt: 0 };
+const maintenancePageCache = { value: null, expiresAt: 0 };
 
-type MaintenanceSettings = {
-  is_enabled: boolean
-  bypass_ips: string[]
-  bypass_cookie_secret: string | null
-  last_generated_token: string | null
-  last_generated_token_expires_at: string | null
-  updated_at: string | null
-}
-
-type CachedValue<T> = {
-  value: T | null
-  expiresAt: number
-}
-
-const settingsCache: CachedValue<MaintenanceSettings> = {
-  value: null,
-  expiresAt: 0
-}
-
-const maintenancePageCache: CachedValue<string> = {
-  value: null,
-  expiresAt: 0
-}
-
-const DEFAULT_CACHE_SECONDS = 30
-const BYPASS_TTL_SECONDS = 60 * 60 * 24 // 24 hours
-const DEFAULT_COOKIE_NAME = 'maintenance_bypass'
-const MAINTENANCE_UNLOCK_PATH = '/maintenance/unlock'
+const DEFAULT_CACHE_SECONDS = 30;
+const BYPASS_TTL_SECONDS = 60 * 60 * 24; // 24 hours
+const DEFAULT_COOKIE_NAME = 'maintenance_bypass';
+const MAINTENANCE_UNLOCK_PATH = '/maintenance/unlock';
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request, env) {
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type'
-        }
-      })
+          'Access-Control-Allow-Headers': 'Content-Type',
+        },
+      });
     }
 
-    const url = new URL(request.url)
+    const url = new URL(request.url);
 
     if (url.pathname === MAINTENANCE_UNLOCK_PATH) {
-      const settings = await getSettings(env, { bypassCache: true })
-      return await handleBypassUnlock(request, env, settings)
+      const settings = await getSettings(env, { bypassCache: true });
+      return handleBypassUnlock(request, env, settings);
     }
 
-    // Health check endpoint
     if (url.pathname === '/.well-known/maintenance-status') {
-      const settings = await getSettings(env)
-      return new Response(
-        JSON.stringify({
-          maintenance: settings.is_enabled,
-          updated_at: settings.updated_at
-        }),
-        {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store'
-          }
-        }
-      )
+      const settings = await getSettings(env);
+      return jsonResponse({
+        maintenance: settings.is_enabled,
+        updated_at: settings.updated_at,
+      });
     }
 
-    const settings = await getSettings(env)
+    const settings = await getSettings(env);
 
     if (!settings.is_enabled) {
-      return proxyToOrigin(request, env)
+      return proxyToOrigin(request, env);
     }
 
-    const clientIp = getClientIp(request)
-    const allowlist = settings.bypass_ips || []
-    const cookieName = getCookieName(env)
+    const clientIp = getClientIp(request);
+    const allowlist = settings.bypass_ips || [];
+    const cookieName = getCookieName(env);
 
     if (clientIp && ipMatchesAllowlist(clientIp, allowlist)) {
-      return proxyToOrigin(request, env)
+      return proxyToOrigin(request, env);
     }
 
-    const bypassCookie = getCookie(request.headers.get('Cookie') ?? '', cookieName)
-    if (bypassCookie && await verifyBypassToken(bypassCookie, settings)) {
-      return proxyToOrigin(request, env)
+    const bypassCookie = getCookie(request.headers.get('Cookie') || '', cookieName);
+    if (bypassCookie && (await verifyBypassToken(bypassCookie, settings))) {
+      return proxyToOrigin(request, env);
     }
 
-    return await serveMaintenancePage(env, settings)
-  }
+    return serveMaintenancePage(env, settings);
+  },
+};
+
+async function proxyToOrigin(request, env) {
+  const originUrl = env.ORIGIN_URL || 'https://bitminded.ch';
+  const incomingUrl = new URL(request.url);
+  const target = new URL(incomingUrl.pathname + incomingUrl.search, originUrl);
+
+  const proxiedRequest = new Request(target.toString(), request);
+  const headers = new Headers(proxiedRequest.headers);
+  const originHost = new URL(originUrl).host;
+  headers.set('host', originHost);
+
+  return fetch(proxiedRequest, {
+    headers,
+    cf: { resolveOverride: 'bitminded.github.io' }, // GitHub Pages origin
+  });
 }
 
-async function proxyToOrigin(request: Request, env: Env) {
-  const originUrl = env.ORIGIN_URL ?? ''
-  if (!originUrl) {
-    return new Response('Origin URL not configured', {
-      status: 502,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Cache-Control': 'no-store'
-      }
-    })
-  }
-
-  const incomingUrl = new URL(request.url)
-  const target = new URL(incomingUrl.pathname + incomingUrl.search, originUrl)
-  const proxiedRequest = new Request(target.toString(), request)
-
-  return fetch(proxiedRequest)
-}
-
-async function serveMaintenancePage(env: Env, settings: MaintenanceSettings) {
-  const body = await getMaintenancePage(env, settings)
+async function serveMaintenancePage(env, settings) {
+  const body = await getMaintenancePage(env, settings);
   return new Response(body, {
     status: 503,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      'Retry-After': '600'
-    }
-  })
+      'Retry-After': '600',
+    },
+  });
 }
 
-async function getMaintenancePage(env: Env, settings: MaintenanceSettings) {
-  const now = Date.now()
-  if (maintenancePageCache.value && maintenancePageCache.expiresAt > now) {
-    return maintenancePageCache.value
-  }
+async function getMaintenancePage(env, settings) {
+  const now = Date.now();
+  const cacheDuration =
+    (parseInt(env.MAINTENANCE_SETTINGS_CACHE_SECONDS || '', 10) || DEFAULT_CACHE_SECONDS) * 1000;
 
-  const cacheDuration = (parseInt(env.MAINTENANCE_SETTINGS_CACHE_SECONDS ?? '', 10) || DEFAULT_CACHE_SECONDS) * 1000
+  if (maintenancePageCache.value && maintenancePageCache.expiresAt > now) {
+    return maintenancePageCache.value;
+  }
 
   if (env.MAINTENANCE_PAGE_URL) {
     try {
       const response = await fetch(env.MAINTENANCE_PAGE_URL, {
-        headers: { 'Cache-Control': 'no-cache' }
-      })
+        headers: { 'Cache-Control': 'no-cache' },
+      });
       if (response.ok) {
-        const html = await response.text()
-        maintenancePageCache.value = html
-        maintenancePageCache.expiresAt = now + cacheDuration
-        return html
+        const html = await response.text();
+        maintenancePageCache.value = html;
+        maintenancePageCache.expiresAt = now + cacheDuration;
+        return html;
       }
     } catch (error) {
-      console.error('⚠️ maintenance-worker: failed to fetch maintenance page asset', error)
+      console.error('⚠️ maintenance-worker: failed to fetch maintenance page asset', error);
     }
   }
 
-  const fallbackHtml = buildFallbackMaintenancePage(settings)
-  maintenancePageCache.value = fallbackHtml
-  maintenancePageCache.expiresAt = now + cacheDuration
-  return fallbackHtml
+  const fallbackHtml = buildFallbackMaintenancePage(settings);
+  maintenancePageCache.value = fallbackHtml;
+  maintenancePageCache.expiresAt = now + cacheDuration;
+  return fallbackHtml;
 }
 
-function buildFallbackMaintenancePage(settings: MaintenanceSettings) {
+function buildFallbackMaintenancePage(settings) {
   const estimatedReturn = settings.updated_at
     ? new Date(settings.updated_at).toLocaleString()
-    : 'soon'
+    : 'soon';
 
   return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>We&rsquo;ll be right back</title>
+    <title>Maintenance in progress · BitMinded</title>
     <style>
       :root {
-        color-scheme: light dark;
+        color-scheme: dark light;
       }
+
       body {
-        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         margin: 0;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: radial-gradient(circle at top, rgba(17, 24, 39, 0.1), rgba(17, 24, 39, 0.04));
-        color: #111827;
-        padding: 2rem;
+        padding: 2.75rem 1.75rem;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(140% 140% at 12% -10%, rgba(210, 134, 189, 0.18) 0%, rgba(39, 43, 46, 0) 55%),
+          radial-gradient(120% 120% at 85% 0%, rgba(207, 222, 103, 0.16) 0%, rgba(39, 43, 46, 0) 60%),
+          #272b2e;
+        color: #eee9e4;
       }
+
       .card {
-        max-width: 520px;
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(8px);
-        border-radius: 24px;
-        padding: 3rem 2.5rem;
-        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
+        width: min(100%, 540px);
+        padding: clamp(2.5rem, 5vw, 3.75rem);
+        background: rgba(21, 23, 30, 0.82);
+        border-radius: 28px;
+        border: 1px solid rgba(238, 233, 228, 0.15);
+        box-shadow: 0 32px 60px rgba(15, 23, 42, 0.3);
         text-align: center;
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
       }
-      h1 {
-        font-size: clamp(2rem, 4vw, 2.75rem);
-        margin-bottom: 1rem;
-        letter-spacing: -0.02em;
-      }
-      p {
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-      }
+
       .badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
+        gap: 0.4rem;
+        padding: 0.45rem 1.15rem;
         border-radius: 999px;
-        background: rgba(17, 24, 39, 0.08);
-        color: #111827;
+        background: rgba(207, 222, 103, 0.18);
+        color: #cfdE67;
+        font-size: 0.78rem;
         font-weight: 600;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
       }
-      .contact {
-        font-size: 0.95rem;
-        color: rgba(17, 24, 39, 0.7);
+
+      h1 {
+        margin: 1.25rem 0 0.75rem;
+        font-size: clamp(2.35rem, 5vw, 3.1rem);
+        letter-spacing: -0.02em;
       }
-      a {
-        color: inherit;
+
+      .lead {
+        margin: 0 0 2.25rem;
+        font-size: 1.05rem;
+        color: rgba(238, 233, 228, 0.82);
+        line-height: 1.7;
+      }
+
+      .details {
+        display: grid;
+        gap: 1.1rem;
+        padding: 1.1rem 1.4rem;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        text-align: left;
+      }
+
+      .details-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .details-label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(238, 233, 228, 0.6);
         font-weight: 600;
+      }
+
+      .details-value {
+        font-weight: 600;
+        color: #eee9e4;
+      }
+
+      .contact {
+        margin: 2rem 0 0;
+        font-size: 0.95rem;
+        color: rgba(238, 233, 228, 0.7);
+      }
+
+      a {
+        color: #cfdE67;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(207, 222, 103, 0.35);
+        transition: color 0.2s ease, border-color 0.2s ease;
+      }
+
+      a:hover {
+        color: #e7ff9a;
+        border-bottom-color: rgba(207, 222, 103, 0.65);
+      }
+
+      @media (max-width: 520px) {
+        .details-row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
       }
     </style>
   </head>
   <body>
     <div class="card">
-      <div class="badge">Maintenance</div>
-      <h1>We&rsquo;re polishing a few things</h1>
-      <p>Our team is applying updates right now. Service will resume shortly &mdash; thanks for your patience.</p>
-      <p class="contact">Latest update: ${estimatedReturn}. Need a hand? Email <a href="mailto:hello@bitminded.ch">hello@bitminded.ch</a></p>
+      <span class="badge">Maintenance</span>
+      <h1>We’ll be right back</h1>
+      <p class="lead">We’re shipping updates behind the scenes. Thanks for your patience while we finish the rollout.</p>
+      <div class="details">
+        <div class="details-row">
+          <span class="details-label">Last update</span>
+          <span class="details-value">${estimatedReturn}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Need assistance?</span>
+          <span class="details-value"><a href="mailto:support@bitminded.ch">support@bitminded.ch</a></span>
+        </div>
+      </div>
+      <p class="contact">We’ll restore full access as soon as maintenance wraps up.</p>
     </div>
   </body>
-</html>`
+</html>`;
 }
 
-async function handleBypassUnlock(request: Request, env: Env, settings: MaintenanceSettings) {
-  const url = new URL(request.url)
-  const code = url.searchParams.get('code')
-  const redirectTo = url.searchParams.get('redirect') || '/'
-  const cookieName = getCookieName(env)
+async function handleBypassUnlock(request, env, settings) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get('code');
+  const redirectTo = url.searchParams.get('redirect') || '/';
+  const cookieName = getCookieName(env);
 
   if (!code || !(await verifyBypassToken(code, settings))) {
     return new Response('Invalid or expired bypass code.', {
       status: 400,
       headers: {
         'Content-Type': 'text/plain',
-        'Cache-Control': 'no-store'
-      }
-    })
+        'Cache-Control': 'no-store',
+      },
+    });
   }
 
-  const response = Response.redirect(redirectTo, 302)
-  const cookieValue = buildBypassCookie(cookieName, code, request.url, env)
-  response.headers.append('Set-Cookie', cookieValue)
-  response.headers.set('Cache-Control', 'no-store')
-  return response
+  const response = Response.redirect(redirectTo, 302);
+  const cookieValue = buildBypassCookie(cookieName, code, request.url, env);
+  response.headers.append('Set-Cookie', cookieValue);
+  response.headers.set('Cache-Control', 'no-store');
+  return response;
 }
 
-function buildBypassCookie(name: string, value: string, requestUrl: string, env: Env) {
-  const secure = requestUrl.startsWith('https://')
-  const domain = env.MAINTENANCE_COOKIE_DOMAIN
+function buildBypassCookie(name, value, requestUrl, env) {
+  const secure = requestUrl.startsWith('https://');
+  const domain = env.MAINTENANCE_COOKIE_DOMAIN;
   const attributes = [
     `${name}=${value}`,
     `Max-Age=${BYPASS_TTL_SECONDS}`,
@@ -269,95 +296,97 @@ function buildBypassCookie(name: string, value: string, requestUrl: string, env:
     'SameSite=Lax',
     secure ? 'Secure' : '',
     'HttpOnly',
-    domain ? `Domain=${domain}` : ''
-  ].filter(Boolean)
+    domain ? `Domain=${domain}` : '',
+  ].filter(Boolean);
 
-  return attributes.join('; ')
+  return attributes.join('; ');
 }
 
-async function verifyBypassToken(token: string, settings: MaintenanceSettings) {
+async function verifyBypassToken(token, settings) {
   if (!settings.bypass_cookie_secret || !token) {
-    return false
+    return false;
   }
 
-  const parts = token.split('.')
+  const parts = token.split('.');
   if (parts.length !== 3) {
-    return false
+    return false;
   }
 
-  const [rawToken, expires, signature] = parts
+  const [rawToken, expires, signature] = parts;
+  const expirySeconds = parseInt(expires, 10);
 
-  const expirySeconds = parseInt(expires, 10)
   if (Number.isNaN(expirySeconds) || expirySeconds * 1000 < Date.now()) {
-    return false
+    return false;
   }
 
-  const secret = settings.bypass_cookie_secret
+  const payload = `${rawToken}.${expires}`;
+
   try {
-    const expectedSignature = await generateSignature(secret, `${rawToken}.${expires}`)
-    return timingSafeEqual(expectedSignature, signature)
+    const expectedSignature = await generateSignature(settings.bypass_cookie_secret, payload);
+    return timingSafeEqual(expectedSignature, signature);
   } catch {
-    return false
+    return false;
   }
 }
 
-function timingSafeEqual(a: string, b: string) {
+function timingSafeEqual(a, b) {
   if (a.length !== b.length) {
-    return false
+    return false;
   }
-  let mismatch = 0
+  let mismatch = 0;
   for (let i = 0; i < a.length; i++) {
-    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i)
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
-  return mismatch === 0
+  return mismatch === 0;
 }
 
-async function generateSignature(secret: string, payload: string) {
-  const encoder = new TextEncoder()
+async function generateSignature(secret, payload) {
+  const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
     'raw',
     encoder.encode(secret),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
-  )
+  );
 
-  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
-  return base64UrlEncode(new Uint8Array(signature))
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+  return base64UrlEncode(new Uint8Array(signature));
 }
 
-function base64UrlEncode(bytes: Uint8Array) {
-  let binary = ''
+function base64UrlEncode(bytes) {
+  let binary = '';
   for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i])
+    binary += String.fromCharCode(bytes[i]);
   }
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 }
 
-function getCookieName(env: Env) {
-  return env.MAINTENANCE_BYPASS_COOKIE_NAME || DEFAULT_COOKIE_NAME
+function getCookieName(env) {
+  return env.MAINTENANCE_BYPASS_COOKIE_NAME || DEFAULT_COOKIE_NAME;
 }
 
-function getCookie(cookieHeader: string, name: string) {
-  const cookies = cookieHeader.split(';').map((cookie) => cookie.trim())
+function getCookie(cookieHeader, name) {
+  const cookies = cookieHeader.split(';').map((cookie) => cookie.trim());
   for (const cookie of cookies) {
-    if (!cookie) continue
-    const separatorIndex = cookie.indexOf('=')
-    if (separatorIndex === -1) continue
-    const key = cookie.slice(0, separatorIndex)
+    if (!cookie) continue;
+    const separatorIndex = cookie.indexOf('=');
+    if (separatorIndex === -1) continue;
+    const key = cookie.slice(0, separatorIndex);
     if (key === name) {
-      return cookie.slice(separatorIndex + 1)
+      return cookie.slice(separatorIndex + 1);
     }
   }
-  return null
+  return null;
 }
 
-async function getSettings(env: Env, options: { bypassCache?: boolean } = {}) {
-  const now = Date.now()
-  const cacheDuration = (parseInt(env.MAINTENANCE_SETTINGS_CACHE_SECONDS ?? '', 10) || DEFAULT_CACHE_SECONDS) * 1000
+async function getSettings(env, options = {}) {
+  const now = Date.now();
+  const cacheDuration =
+    (parseInt(env.MAINTENANCE_SETTINGS_CACHE_SECONDS || '', 10) || DEFAULT_CACHE_SECONDS) * 1000;
 
   if (!options.bypassCache && settingsCache.value && settingsCache.expiresAt > now) {
-    return settingsCache.value
+    return settingsCache.value;
   }
 
   try {
@@ -365,217 +394,223 @@ async function getSettings(env: Env, options: { bypassCache?: boolean } = {}) {
       headers: {
         apikey: env.SUPABASE_SERVICE_ROLE_KEY,
         Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-        Prefer: 'return=representation'
-      }
-    })
+        Prefer: 'return=representation',
+      },
+    });
 
     if (!response.ok) {
-      throw new Error(`Supabase responded with ${response.status}`)
+      throw new Error(`Supabase responded with ${response.status}`);
     }
 
-    const data = (await response.json()) as any[]
-    const record = data?.[0] ?? {}
+    const data = await response.json();
+    const record = data?.[0] || {};
 
-    const settings: MaintenanceSettings = {
+    const settings = {
       is_enabled: Boolean(record.is_enabled),
       bypass_ips: parseSupabaseTextArray(record.bypass_ips),
-      bypass_cookie_secret: record.bypass_cookie_secret ?? null,
-      last_generated_token: record.last_generated_token ?? null,
-      last_generated_token_expires_at: record.last_generated_token_expires_at ?? null,
-      updated_at: record.updated_at ?? null
-    }
+      bypass_cookie_secret: record.bypass_cookie_secret || null,
+      last_generated_token: record.last_generated_token || null,
+      last_generated_token_expires_at: record.last_generated_token_expires_at || null,
+      updated_at: record.updated_at || null,
+      updated_by: record.updated_by || null,
+    };
 
-    settingsCache.value = settings
-    settingsCache.expiresAt = now + cacheDuration
-    return settings
+    settingsCache.value = settings;
+    settingsCache.expiresAt = now + cacheDuration;
+    return settings;
   } catch (error) {
-    console.error('⚠️ maintenance-worker: failed to fetch settings, defaulting to fail-open', error)
-    const fallback: MaintenanceSettings = {
+    console.error('⚠️ maintenance-worker: failed to fetch settings, defaulting to fail-open', error);
+    const fallback = {
       is_enabled: false,
       bypass_ips: [],
       bypass_cookie_secret: null,
       last_generated_token: null,
       last_generated_token_expires_at: null,
-      updated_at: null
-    }
-    settingsCache.value = fallback
-    settingsCache.expiresAt = now + cacheDuration
-    return fallback
+      updated_at: null,
+      updated_by: null,
+    };
+    settingsCache.value = fallback;
+    settingsCache.expiresAt = now + cacheDuration;
+    return fallback;
   }
 }
 
-function parseSupabaseTextArray(value: unknown): string[] {
-  if (!value) return []
+function parseSupabaseTextArray(value) {
+  if (!value) return [];
   if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean)
+    return value.map((item) => String(item).trim()).filter(Boolean);
   }
   if (typeof value === 'string') {
-    const trimmed = value.trim()
+    const trimmed = value.trim();
     if (!trimmed || trimmed === '{}') {
-      return []
+      return [];
     }
     const inner = trimmed.startsWith('{') && trimmed.endsWith('}')
       ? trimmed.slice(1, -1)
-      : trimmed
+      : trimmed;
     if (!inner) {
-      return []
+      return [];
     }
-    return inner
-      .match(/"([^"\\]*(\\.[^"\\]*)*)"|[^,]+/g)
-      ?.map((segment) => segment.replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"').trim())
-      .filter(Boolean) ?? []
+    return (
+      inner
+        .match(/"([^"\\]*(\\.[^"\\]*)*)"|[^,]+/g)
+        ?.map((segment) => segment.replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"').trim())
+        .filter(Boolean) || []
+    );
   }
-  return []
+  return [];
 }
 
-function getClientIp(request: Request) {
+function getClientIp(request) {
   return (
     request.headers.get('CF-Connecting-IP') ||
     request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
     null
-  )
+  );
 }
 
-function ipMatchesAllowlist(ip: string, allowlist: string[]) {
+function ipMatchesAllowlist(ip, allowlist) {
   if (!allowlist.length) {
-    return false
+    return false;
   }
 
   for (const entry of allowlist) {
-    if (!entry) continue
+    if (!entry) continue;
     if (entry.toLowerCase() === 'localhost') {
-      continue
+      continue;
     }
 
     if (entry.includes('/')) {
       if (matchCidr(ip, entry)) {
-        return true
+        return true;
       }
     } else if (ip === entry) {
-      return true
+      return true;
     }
   }
 
-  return false
+  return false;
 }
 
-function matchCidr(ip: string, cidr: string) {
-  const [base, mask] = cidr.split('/')
-  const maskBits = parseInt(mask ?? '', 10)
+function matchCidr(ip, cidr) {
+  const [base, mask] = cidr.split('/');
+  const maskBits = parseInt(mask || '', 10);
   if (Number.isNaN(maskBits)) {
-    return false
+    return false;
   }
 
   if (isIpv4(ip) && isIpv4(base)) {
-    return matchIpv4Cidr(ip, base, maskBits)
+    return matchIpv4Cidr(ip, base, maskBits);
   }
 
   if (isIpv6(ip) && isIpv6(base)) {
-    return matchIpv6Cidr(ip, base, maskBits)
+    return matchIpv6Cidr(ip, base, maskBits);
   }
 
-  return false
+  return false;
 }
 
-function isIpv4(value: string) {
-  return value.includes('.')
+function isIpv4(value) {
+  return value.includes('.');
 }
 
-function isIpv6(value: string) {
-  return value.includes(':')
+function isIpv6(value) {
+  return value.includes(':');
 }
 
-function matchIpv4Cidr(ip: string, base: string, maskBits: number) {
+function matchIpv4Cidr(ip, base, maskBits) {
   if (maskBits < 0 || maskBits > 32) {
-    return false
+    return false;
   }
-  const ipInt = ipv4ToInt(ip)
-  const baseInt = ipv4ToInt(base)
+  const ipInt = ipv4ToInt(ip);
+  const baseInt = ipv4ToInt(base);
   if (ipInt === null || baseInt === null) {
-    return false
+    return false;
   }
-  const mask = maskBits === 0 ? 0 : (~0 << (32 - maskBits)) >>> 0
-  return (ipInt & mask) === (baseInt & mask)
+  const mask = maskBits === 0 ? 0 : (~0 << (32 - maskBits)) >>> 0;
+  return (ipInt & mask) === (baseInt & mask);
 }
 
-function ipv4ToInt(ip: string) {
-  const parts = ip.split('.')
+function ipv4ToInt(ip) {
+  const parts = ip.split('.');
   if (parts.length !== 4) {
-    return null
+    return null;
   }
-  let result = 0
+  let result = 0;
   for (const part of parts) {
-    const value = parseInt(part, 10)
+    const value = parseInt(part, 10);
     if (Number.isNaN(value) || value < 0 || value > 255) {
-      return null
+      return null;
     }
-    result = (result << 8) + value
+    result = (result << 8) + value;
   }
-  return result >>> 0
+  return result >>> 0;
 }
 
-function matchIpv6Cidr(ip: string, base: string, maskBits: number) {
+function matchIpv6Cidr(ip, base, maskBits) {
   if (maskBits < 0 || maskBits > 128) {
-    return false
+    return false;
   }
-  const ipBigInt = ipv6ToBigInt(ip)
-  const baseBigInt = ipv6ToBigInt(base)
+  const ipBigInt = ipv6ToBigInt(ip);
+  const baseBigInt = ipv6ToBigInt(base);
   if (ipBigInt === null || baseBigInt === null) {
-    return false
+    return false;
   }
   if (maskBits === 0) {
-    return true
+    return true;
   }
-  const bits = BigInt(maskBits)
-  const mask = bits === 128n
-    ? (1n << 128n) - 1n
-    : ((1n << bits) - 1n) << (128n - bits)
-  return (ipBigInt & mask) === (baseBigInt & mask)
+  const bits = BigInt(maskBits);
+  const shift = 128n - bits;
+  const mask = bits === 128n ? (1n << 128n) - 1n : ((1n << bits) - 1n) << shift;
+  return (ipBigInt & mask) === (baseBigInt & mask);
 }
 
-function ipv6ToBigInt(ip: string) {
-  const [head, tail] = ip.split('::')
-  const headSegments = head ? head.split(':') : []
-  const tailSegments = tail ? tail.split(':') : []
+function ipv6ToBigInt(ip) {
+  const [head, tail] = ip.split('::');
+  const headSegments = head ? head.split(':') : [];
+  const tailSegments = tail ? tail.split(':') : [];
 
   if (tail !== undefined && ip.indexOf('::') !== ip.lastIndexOf('::')) {
-    return null
+    return null;
   }
 
-  const missingSegments = 8 - (headSegments.length + tailSegments.length)
+  const missingSegments = 8 - (headSegments.length + tailSegments.length);
   if (missingSegments < 0) {
-    return null
+    return null;
   }
 
-  const segments = [
-    ...headSegments,
-    ...Array(missingSegments).fill('0'),
-    ...tailSegments
-  ]
-
+  const segments = [...headSegments, ...Array(missingSegments).fill('0'), ...tailSegments];
   if (segments.length !== 8) {
-    return null
+    return null;
   }
 
-  let result = 0n
+  let result = 0n;
   for (const segment of segments) {
     if (segment.includes('.')) {
-      // IPv4-mapped IPv6 (e.g. ::ffff:192.0.2.128)
-      const ipv4Int = ipv4ToInt(segment)
+      const ipv4Int = ipv4ToInt(segment);
       if (ipv4Int === null) {
-        return null
+        return null;
       }
-      result = (result << 32n) + BigInt(ipv4Int)
-      continue
+      result = (result << 32n) + BigInt(ipv4Int);
+      continue;
     }
 
-    const value = parseInt(segment || '0', 16)
+    const value = parseInt(segment || '0', 16);
     if (Number.isNaN(value) || value < 0 || value > 0xffff) {
-      return null
+      return null;
     }
-    result = (result << 16n) + BigInt(value)
+    result = (result << 16n) + BigInt(value);
   }
 
-  return result
+  return result;
 }
 
+function jsonResponse(payload, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
