@@ -170,6 +170,18 @@ async function handleUpdate({
 
   if (updateError) {
     console.error('❌ maintenance-settings: update failed', updateError)
+
+    if (generateBypassToken && updateError.code === '42703') {
+      return jsonResponse(
+        {
+          error: 'Bypass tokens are not supported in the current database schema.',
+          hint:
+            'Apply the maintenance_settings migration (20251112_create_maintenance_settings.sql) or disable bypass token generation.'
+        },
+        400
+      )
+    }
+
     return jsonResponse({ error: 'Failed to update maintenance settings' }, 500)
   }
 
