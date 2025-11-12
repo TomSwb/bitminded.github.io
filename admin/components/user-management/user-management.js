@@ -9,25 +9,64 @@ class UserManagement {
         this.isInitialized = false;
         this.users = [];
         this.filteredUsers = [];
-        this.filters = {
-            search: '',
-            status: [], // Changed to array for multi-select
-            role: [], // Changed to array for multi-select
-            subscription: [], // Changed to array for multi-select
-            registrationDate: 'all', // New filter
-            lastLogin: 'all', // Renamed to Last Login Time
-            lastLoginLocation: [], // New filter for last login location
-            gender: [], // New filter for gender
-            country: [], // New filter for country
-            age: [], // New filter for age ranges
-            language: [] // New filter for preferred language
-        };
+        this.filters = this.getDefaultFilters();
         this.sort = {
             field: null,
             direction: 'asc'
         };
         this.searchTimeout = null;
         this.elements = {}; // Store DOM elements
+    }
+
+    /**
+     * Return a copy of the default filter configuration
+     */
+    getDefaultFilters() {
+        return {
+            search: '',
+            status: [],
+            role: [],
+            subscription: [],
+            registrationDate: 'all',
+            lastLogin: 'all',
+            lastLoginLocation: [],
+            gender: [],
+            country: [],
+            age: [],
+            language: []
+        };
+    }
+
+    /**
+     * Ensure filter state contains all expected keys with valid types
+     */
+    normalizeFilters() {
+        const defaults = this.getDefaultFilters();
+        this.filters = {
+            ...defaults,
+            ...this.filters
+        };
+
+        const arrayFilters = ['status', 'role', 'subscription', 'lastLoginLocation', 'gender', 'country', 'age', 'language'];
+        arrayFilters.forEach(filterKey => {
+            if (!Array.isArray(this.filters[filterKey])) {
+                this.filters[filterKey] = [];
+            }
+        });
+
+        if (typeof this.filters.search !== 'string') {
+            this.filters.search = '';
+        }
+
+        const allowedRegistration = ['all', '7d', '30d', '90d', '1y'];
+        if (!allowedRegistration.includes(this.filters.registrationDate)) {
+            this.filters.registrationDate = 'all';
+        }
+
+        const allowedLastLogin = ['all', 'never', '7d', '30d', '90d'];
+        if (!allowedLastLogin.includes(this.filters.lastLogin)) {
+            this.filters.lastLogin = 'all';
+        }
     }
 
     /**
@@ -402,12 +441,7 @@ class UserManagement {
      */
     clearFilters() {
         // Reset filter values
-        this.filters = {
-            search: '',
-            status: '',
-            role: '',
-            subscription: ''
-        };
+        this.filters = this.getDefaultFilters();
 
         // Reset UI
         const searchInput = document.getElementById('user-search-input');
@@ -1275,6 +1309,8 @@ class UserManagement {
                     ...preferences.preferences.userManagementFilters
                 };
             }
+
+            this.normalizeFilters();
         } catch (error) {
             console.error('❌ Failed to load preferences:', error);
         }
@@ -1294,6 +1330,8 @@ class UserManagement {
                 .select('preferences')
                 .eq('admin_id', user.id)
                 .single();
+
+            this.normalizeFilters();
 
             const currentPreferences = existingPrefs?.preferences || {};
             currentPreferences.userManagementFilters = this.filters;
@@ -1498,19 +1536,7 @@ class UserManagement {
     clearAllFilters() {
 
         // Reset filter state
-        this.filters = {
-            search: '',
-            status: [],
-            role: [],
-            subscription: [],
-            registrationDate: 'all',
-            lastLogin: 'all',
-            lastLoginLocation: [],
-            gender: [],
-            country: [],
-            age: [],
-            language: []
-        };
+        this.filters = this.getDefaultFilters();
 
         // Clear search input
         if (this.elements.searchInput) {
