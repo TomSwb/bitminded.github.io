@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BitMinded Maintenance</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="/maintenance/maintenance.css" />
+  </head>
+  <body>
+    <main class="maintenance">
+      <div class="maintenance__inner">
+        <div class="maintenance__badge">Scheduled Maintenance</div>
+        <h1 class="maintenance__title">We’ll be right back.</h1>
+        <p class="maintenance__lead">
+          We’re shipping improvements behind the scenes. Thanks for your patience while we tune
+          things up.
+        </p>
+        <div class="maintenance__details">
+          <div class="maintenance__detail">
+            <span class="maintenance__detail-label">Latest update</span>
+            <span class="maintenance__detail-value" id="maintenance-last-update">Checking…</span>
+          </div>
+          <div class="maintenance__detail">
+            <span class="maintenance__detail-label">Contact</span>
+            <a class="maintenance__detail-link" href="mailto:hello@bitminded.ch">hello@bitminded.ch</a>
+          </div>
+        </div>
+        <p class="maintenance__footnote">
+          Need immediate help? Drop us a line and we’ll get right back to you.
+        </p>
+      </div>
+    </main>
+
+    <script>
+      (async () => {
+        try {
+          const res = await fetch('/.well-known/maintenance-status', { cache: 'no-store' })
+          if (!res.ok) throw new Error('status unavailable')
+          const data = await res.json()
+          const el = document.getElementById('maintenance-last-update')
+          if (!el) return
+          if (data.updated_at) {
+            const formatted = new Date(data.updated_at).toLocaleString()
+            el.textContent = formatted
+          } else {
+            el.textContent = 'We will post an update shortly.'
+          }
+        } catch (error) {
+          const el = document.getElementById('maintenance-last-update')
+          if (el) {
+            el.textContent = 'Currently unavailable.'
+          }
+          console.error('Failed to fetch maintenance status', error)
+        }
+      })()
+    </script>
+  </body>
+</html>
+
