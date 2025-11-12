@@ -1,6 +1,6 @@
 /**
  * Maintenance Mode Component
- * Handles maintenance flag, allowlist, and bypass token management.
+ * Handles maintenance flag and IP allowlist management.
  */
 
 if (typeof window.MaintenanceMode === 'undefined') {
@@ -17,9 +17,7 @@ class MaintenanceMode {
             bypassIps: [],
             updatedAt: null,
             updatedBy: null,
-            updatedByEmail: null,
-            bypassLink: null,
-            bypassTokenExpiresAt: null
+            updatedByEmail: null
         };
     }
 
@@ -85,12 +83,6 @@ class MaintenanceMode {
         this.elements.allowlistInput = query('[data-maintenance="allowlist-input"]');
         this.elements.allowlistList = query('[data-maintenance="allowlist-list"]');
         this.elements.allowlistEmpty = query('[data-maintenance="allowlist-empty"]');
-
-        this.elements.generateBypass = query('[data-maintenance="generate"]');
-        this.elements.copyBypass = query('[data-maintenance="copy"]');
-        this.elements.clearBypass = query('[data-maintenance="clear"]');
-        this.elements.bypassResult = query('[data-maintenance="bypass-result"]');
-        this.elements.bypassLink = query('[data-maintenance="bypass-link"]');
     }
 
     setupEventListeners() {
@@ -108,10 +100,6 @@ class MaintenanceMode {
                 this.handleRemoveIp(target.dataset.ip);
             }
         });
-
-        this.elements.generateBypass?.addEventListener('click', () => this.handleGenerateBypass());
-        this.elements.copyBypass?.addEventListener('click', () => this.handleCopyBypass());
-        this.elements.clearBypass?.addEventListener('click', () => this.handleClearBypass());
     }
 
     async initializeTranslations() {
@@ -174,12 +162,9 @@ class MaintenanceMode {
             this.state.updatedAt = settings.updated_at || null;
             this.state.updatedByEmail = settings.updated_by_email || null;
             this.state.updatedBy = settings.updated_by || null;
-            this.state.bypassLink = settings.last_generated_link || null;
-            this.state.bypassTokenExpiresAt = settings.last_generated_link_expires_at || null;
 
             this.renderStatus();
             this.renderAllowlist();
-            this.renderBypassLink();
             this.renderAlert(settings.alert || null);
         } catch (error) {
             console.error('❌ Failed to load maintenance settings:', error);
@@ -197,10 +182,7 @@ class MaintenanceMode {
         const disabledElements = [
             this.elements.toggleButton,
             this.elements.refreshButton,
-            this.elements.allowlistInput,
-            this.elements.generateBypass,
-            this.elements.copyBypass,
-            this.elements.clearBypass
+            this.elements.allowlistInput
         ];
 
         disabledElements.forEach((el) => {
@@ -276,34 +258,6 @@ class MaintenanceMode {
         });
     }
 
-    renderBypassLink() {
-        const hasLink = Boolean(this.state.bypassLink);
-
-        if (this.elements.bypassResult) {
-            this.elements.bypassResult.hidden = !hasLink;
-        }
-
-        if (this.elements.bypassLink) {
-            this.elements.bypassLink.textContent = hasLink ? this.state.bypassLink : '';
-        }
-
-        if (this.elements.copyBypass) {
-            this.elements.copyBypass.disabled = !hasLink;
-        }
-
-        if (this.elements.clearBypass) {
-            this.elements.clearBypass.disabled = !hasLink;
-        }
-
-        if (hasLink && this.state.bypassTokenExpiresAt && this.elements.bypassResult) {
-            const hint = this.elements.bypassResult.querySelector('.maintenance-mode__hint');
-            if (hint) {
-                hint.textContent = this.translate('Bypass link expires at {{date}}.', 'Bypass link expires at {{date}}.')
-                    .replace('{{date}}', this.formatDate(this.state.bypassTokenExpiresAt));
-            }
-        }
-    }
-
     renderAlert(message) {
         if (!this.elements.alert || !this.elements.alertMessage) {
             return;
@@ -377,37 +331,6 @@ class MaintenanceMode {
         });
     }
 
-    async handleGenerateBypass() {
-        if (this.isSaving) {
-            return;
-        }
-
-        await this.saveSettings({
-            generateBypassToken: true,
-            successMessage: this.translate('Bypass link generated.', 'Bypass link generated.')
-        });
-    }
-
-    async handleCopyBypass() {
-        if (!this.state.bypassLink) {
-            return;
-        }
-
-        try {
-            await navigator.clipboard.writeText(this.state.bypassLink);
-            this.showSuccess(this.translate('Bypass link copied to clipboard.', 'Bypass link copied to clipboard.'));
-        } catch (error) {
-            console.error('❌ Failed to copy bypass link:', error);
-            this.showError(this.translate('Unable to copy link. Try copying manually.', 'Unable to copy link. Try copying manually.'));
-        }
-    }
-
-    async handleClearBypass() {
-        this.state.bypassLink = null;
-        this.state.bypassTokenExpiresAt = null;
-        this.renderBypassLink();
-    }
-
     async saveSettings(options = {}) {
         if (this.isSaving) {
             return;
@@ -417,8 +340,7 @@ class MaintenanceMode {
         const payload = {
             action: 'update',
             is_enabled: options.isEnabled !== undefined ? options.isEnabled : this.state.isEnabled,
-            bypass_ips: options.bypassIps || this.state.bypassIps,
-            generate_bypass_token: Boolean(options.generateBypassToken)
+            bypass_ips: options.bypassIps || this.state.bypassIps
         };
 
         this.isSaving = true;
@@ -436,12 +358,9 @@ class MaintenanceMode {
             this.state.updatedAt = settings.updated_at || this.state.updatedAt;
             this.state.updatedByEmail = settings.updated_by_email || this.state.updatedByEmail;
             this.state.updatedBy = settings.updated_by || this.state.updatedBy;
-            this.state.bypassLink = settings.last_generated_link || this.state.bypassLink;
-            this.state.bypassTokenExpiresAt = settings.last_generated_link_expires_at || this.state.bypassTokenExpiresAt;
 
             this.renderStatus();
             this.renderAllowlist();
-            this.renderBypassLink();
             this.renderAlert(settings.alert || null);
 
             const successMessage = options.successMessage
@@ -459,8 +378,6 @@ class MaintenanceMode {
                 await this.logAdminAction('maintenance_allowlist_updated', {
                     count: this.state.bypassIps.length
                 });
-            } else if (options.generateBypassToken) {
-                await this.logAdminAction('maintenance_bypass_generated', {});
             }
         } catch (error) {
             console.error('❌ Failed to update maintenance settings:', error);

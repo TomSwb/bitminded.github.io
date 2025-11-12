@@ -54,3 +54,7 @@ COMMENT ON COLUMN public.maintenance_settings.last_generated_token_expires_at IS
 COMMENT ON COLUMN public.maintenance_settings.updated_by IS
     'References the admin user who last changed maintenance mode settings.';
 
+ALTER TABLE public.maintenance_settings
+  ADD COLUMN IF NOT EXISTS last_generated_token TEXT,
+  ADD COLUMN IF NOT EXISTS last_generated_token_expires_at TIMESTAMP WITH TIME ZONE;
+

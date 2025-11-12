@@ -6,8 +6,8 @@
                     <span class="translatable-content" data-translation-key="Status Unknown">Status Unknown</span>
                 </span>
                 <h2 class="maintenance-mode__title translatable-content" data-translation-key="Maintenance Mode">Maintenance Mode</h2>
-                <p class="maintenance-mode__description translatable-content" data-translation-key="Visitors see the maintenance page when enabled. Allowlisted IPs and bypass tokens can still access the site.">
-                    Visitors see the maintenance page when enabled. Allowlisted IPs and bypass tokens can still access the site.
+                <p class="maintenance-mode__description translatable-content" data-translation-key="Visitors see the maintenance page when enabled. Allowlisted IPs can still access the site.">
+                    Visitors see the maintenance page when enabled. Allowlisted IPs can still access the site.
                 </p>
             </div>
         </div>
@@ -75,34 +75,6 @@
         <div class="maintenance-mode__empty" data-maintenance="allowlist-empty" hidden>
             <p class="translatable-content" data-translation-key="No IPs added yet. Add your own IP to stay signed in during maintenance.">
                 No IPs added yet. Add your own IP to stay signed in during maintenance.
-            </p>
-        </div>
-    </section>
-
-    <section class="maintenance-mode__section">
-        <header class="maintenance-mode__section-header">
-            <h3 class="maintenance-mode__section-title translatable-content" data-translation-key="Bypass Tokens">Bypass Tokens</h3>
-            <p class="maintenance-mode__section-subtitle translatable-content" data-translation-key="Generate a temporary bypass link for yourself or a teammate.">
-                Generate a temporary bypass link for yourself or a teammate.
-            </p>
-        </header>
-
-        <div class="maintenance-mode__actions">
-            <button class="maintenance-mode__btn maintenance-mode__btn--ghost" data-maintenance="generate">
-                <span class="translatable-content" data-translation-key="Generate Bypass Link">Generate Bypass Link</span>
-            </button>
-            <button class="maintenance-mode__btn maintenance-mode__btn--ghost" data-maintenance="copy" disabled>
-                <span class="translatable-content" data-translation-key="Copy Link">Copy Link</span>
-            </button>
-            <button class="maintenance-mode__btn maintenance-mode__btn--ghost" data-maintenance="clear" disabled>
-                <span class="translatable-content" data-translation-key="Clear">Clear</span>
-            </button>
-        </div>
-
-        <div class="maintenance-mode__bypass-result" data-maintenance="bypass-result" hidden>
-            <code class="maintenance-mode__bypass-link" data-maintenance="bypass-link"></code>
-            <p class="maintenance-mode__hint translatable-content" data-translation-key="Bypass links expire after 24 hours or when maintenance mode is disabled.">
-                Bypass links expire after 24 hours or when maintenance mode is disabled.
             </p>
         </div>
     </section>
