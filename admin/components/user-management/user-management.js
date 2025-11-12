@@ -1508,7 +1508,8 @@ class UserManagement {
             lastLoginLocation: [],
             gender: [],
             country: [],
-            age: []
+            age: [],
+            language: []
         };
 
         // Clear search input
@@ -1525,7 +1526,7 @@ class UserManagement {
         }
 
         // Clear all checkboxes
-        ['status', 'role', 'subscription'].forEach(filterType => {
+        ['status', 'role', 'subscription', 'gender', 'country', 'age', 'language', 'lastLoginLocation'].forEach(filterType => {
             const optionsContainer = this.elements[`${filterType}Options`];
             if (optionsContainer) {
                 const checkboxes = optionsContainer.querySelectorAll('input[type="checkbox"]');
