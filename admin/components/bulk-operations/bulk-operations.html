@@ -7,11 +7,6 @@
                 Handle high-volume admin workflows from a single place.
             </p>
         </div>
-        <div class="bulk-operations__actions">
-            <button class="bulk-operations__action-btn" data-tab-target="history">
-                <span class="translatable-content" data-translation-key="View History">View History</span>
-            </button>
-        </div>
     </div>
 
     <div class="bulk-operations__tabs" role="tablist">
@@ -55,111 +50,9 @@
         </section>
 
         <section class="bulk-operations__panel" role="tabpanel" data-tab-panel="maintenance">
-            <div class="maintenance-card" id="maintenance-card">
-                <div class="maintenance-card__header">
-                    <div>
-                        <h2 class="maintenance-card__title translatable-content" data-translation-key="Maintenance Mode">Maintenance Mode</h2>
-                        <p class="maintenance-card__description translatable-content" data-translation-key="Visitors see the maintenance page when enabled. Allowlisted IPs and bypass tokens can still access the site.">
-                            Visitors see the maintenance page when enabled. Allowlisted IPs and bypass tokens can still access the site.
-                        </p>
-                    </div>
-                    <span class="maintenance-status" id="maintenance-status-pill">
-                        <span class="translatable-content" data-translation-key="Status Unknown">Status Unknown</span>
-                    </span>
-                </div>
-
-                <div class="maintenance-card__body">
-                    <div class="maintenance-card__controls">
-                        <button class="maintenance-card__primary-btn" id="maintenance-toggle-button">
-                            <span class="translatable-content" data-translation-key="Enable Maintenance Mode">Enable Maintenance Mode</span>
-                        </button>
-                        <button class="maintenance-card__ghost-btn" id="maintenance-refresh-button">
-                            <span class="translatable-content" data-translation-key="Refresh Status">Refresh Status</span>
-                        </button>
-                    </div>
-
-                    <div class="maintenance-card__meta">
-                        <div class="maintenance-card__meta-item">
-                            <span class="maintenance-card__meta-label translatable-content" data-translation-key="Last updated">Last updated</span>
-                            <span class="maintenance-card__meta-value" id="maintenance-last-updated">—</span>
-                        </div>
-                        <div class="maintenance-card__meta-item">
-                            <span class="maintenance-card__meta-label translatable-content" data-translation-key="Updated by">Updated by</span>
-                            <span class="maintenance-card__meta-value" id="maintenance-updated-by">—</span>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-card__alert" id="maintenance-alert" hidden>
-                        <span class="maintenance-card__alert-icon">⚠️</span>
-                        <span class="maintenance-card__alert-message" id="maintenance-alert-message"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="maintenance-section">
-                <div class="maintenance-section__header">
-                    <h3 class="maintenance-section__title translatable-content" data-translation-key="Allowlisted IPs">Allowlisted IPs</h3>
-                    <p class="maintenance-section__subtitle translatable-content" data-translation-key="Visitors from these addresses bypass the maintenance page.">
-                        Visitors from these addresses bypass the maintenance page.
-                    </p>
-                </div>
-
-                <form class="maintenance-form" id="maintenance-allowlist-form">
-                    <label for="maintenance-ip-input" class="maintenance-form__label translatable-content" data-translation-key="Add IP address or CIDR range">
-                        Add IP address or CIDR range
-                    </label>
-                    <div class="maintenance-form__input-group">
-                        <input 
-                            type="text" 
-                            id="maintenance-ip-input" 
-                            class="maintenance-form__input translatable-content" 
-                            placeholder="e.g. 203.0.113.5 or 203.0.113.0/24"
-                            data-translation-key="e.g. 203.0.113.5 or 203.0.113.0/24"
-                            autocomplete="off"
-                        >
-                        <button type="submit" class="maintenance-form__submit">
-                            <span class="translatable-content" data-translation-key="Add">Add</span>
-                        </button>
-                    </div>
-                    <p class="maintenance-form__help-text translatable-content" data-translation-key="IPv4, IPv6, and CIDR ranges are supported.">
-                        IPv4, IPv6, and CIDR ranges are supported.
-                    </p>
-                </form>
-
-                <ul class="maintenance-allowlist" id="maintenance-ip-list" aria-live="polite"></ul>
-                <div class="maintenance-empty" id="maintenance-empty-allowlist" hidden>
-                    <p class="translatable-content" data-translation-key="No IPs added yet. Add your own IP to stay signed in during maintenance.">
-                        No IPs added yet. Add your own IP to stay signed in during maintenance.
-                    </p>
-                </div>
-            </div>
-
-            <div class="maintenance-section">
-                <div class="maintenance-section__header">
-                    <h3 class="maintenance-section__title translatable-content" data-translation-key="Bypass Tokens">Bypass Tokens</h3>
-                    <p class="maintenance-section__subtitle translatable-content" data-translation-key="Generate a temporary bypass link for yourself or a teammate.">
-                        Generate a temporary bypass link for yourself or a teammate.
-                    </p>
-                </div>
-
-                <div class="maintenance-bypass">
-                    <div class="maintenance-bypass__actions">
-                        <button class="maintenance-card__ghost-btn" id="maintenance-generate-bypass">
-                            <span class="translatable-content" data-translation-key="Generate Bypass Link">Generate Bypass Link</span>
-                        </button>
-                        <button class="maintenance-card__ghost-btn" id="maintenance-copy-bypass" disabled>
-                            <span class="translatable-content" data-translation-key="Copy Link">Copy Link</span>
-                        </button>
-                        <button class="maintenance-card__ghost-btn" id="maintenance-clear-bypass" disabled>
-                            <span class="translatable-content" data-translation-key="Clear">Clear</span>
-                        </button>
-                    </div>
-                    <div class="maintenance-bypass__result" id="maintenance-bypass-result" hidden>
-                        <code class="maintenance-bypass__link" id="maintenance-bypass-link"></code>
-                        <p class="maintenance-bypass__hint translatable-content" data-translation-key="Bypass links expire after 24 hours or when maintenance mode is disabled.">
-                            Bypass links expire after 24 hours or when maintenance mode is disabled.
-                        </p>
-                    </div>
+            <div class="bulk-operations__lazy-panel" id="maintenance-mode-container">
+                <div class="bulk-operations__loader" role="status" aria-live="polite">
+                    <span class="translatable-content" data-translation-key="Loading maintenance controls...">Loading maintenance controls...</span>
                 </div>
             </div>
         </section>
