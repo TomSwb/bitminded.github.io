@@ -33,6 +33,7 @@ class MaintenanceMode {
         try {
             this.resolveRoot();
             this.cacheElements();
+            this.renderAlert(null);
             this.setupEventListeners();
 
             translationsReady = await this.initializeTranslations();
@@ -310,11 +311,13 @@ class MaintenanceMode {
 
         if (!message) {
             this.elements.alert.hidden = true;
+            this.elements.alert.style.display = 'none';
             this.elements.alertMessage.textContent = '';
             return;
         }
 
         this.elements.alert.hidden = false;
+        this.elements.alert.style.display = 'flex';
         this.elements.alertMessage.textContent = message;
     }
 
