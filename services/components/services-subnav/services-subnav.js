@@ -54,6 +54,8 @@
                 this.currentPage = 'commissioning';
             } else if (path.includes('/services/guidance')) {
                 this.currentPage = 'guidance';
+            } else if (path.includes('/services/catalog-access')) {
+                this.currentPage = 'catalog-access';
             } else if (path.includes('/services/faq')) {
                 this.currentPage = 'faq';
             } else {
