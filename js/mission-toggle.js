@@ -48,7 +48,7 @@ class MissionToggle {
     loadSavedPreference() {
         const savedMission = localStorage.getItem('selectedMission');
         if (savedMission === 'guide') {
-            this.setMission('guide', false); // false = don't save to localStorage again
+            this.setMission('guide', false, false); // false = don't save to localStorage, false = don't scroll
         }
     }
 
@@ -104,8 +104,9 @@ class MissionToggle {
      * Set the current mission (build or guide)
      * @param {string} mission - 'build' or 'guide'
      * @param {boolean} save - Whether to save to localStorage (default: true)
+     * @param {boolean} shouldScroll - Whether to scroll to content (default: true)
      */
-    setMission(mission, save = true) {
+    setMission(mission, save = true, shouldScroll = true) {
         if (mission === this.currentMission) {
             return; // Already on this mission
         }
@@ -124,16 +125,18 @@ class MissionToggle {
             localStorage.setItem('selectedMission', mission);
         }
 
-        // Smooth scroll to top of content
-        const scrollTarget = mission === 'build' 
-            ? this.elements.buildContent 
-            : this.elements.guideContent;
-        
-        if (scrollTarget) {
-            scrollTarget.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
+        // Smooth scroll to top of content (only if requested)
+        if (shouldScroll) {
+            const scrollTarget = mission === 'build' 
+                ? this.elements.buildContent 
+                : this.elements.guideContent;
+            
+            if (scrollTarget) {
+                scrollTarget.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
         }
 
         // Dispatch custom event
