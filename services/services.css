@@ -183,7 +183,7 @@
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   line-height: 1.2;
   color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-xl, 2rem) 0;
+  margin: var(--spacing-2xl, 3rem) 0 var(--spacing-xl, 2rem) 0;
 }
 
 .services-steps {
