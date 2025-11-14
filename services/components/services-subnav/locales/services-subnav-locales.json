@@ -1,0 +1,35 @@
+{
+  "en": {
+    "translation": {
+      "services-subnav-overview": "Overview",
+      "services-subnav-commissioning": "Commissioning",
+      "services-subnav-guidance": "Guidance",
+      "services-subnav-faq": "FAQ"
+    }
+  },
+  "es": {
+    "translation": {
+      "services-subnav-overview": "Resumen",
+      "services-subnav-commissioning": "Encargos",
+      "services-subnav-guidance": "Orientación",
+      "services-subnav-faq": "Preguntas Frecuentes"
+    }
+  },
+  "fr": {
+    "translation": {
+      "services-subnav-overview": "Aperçu",
+      "services-subnav-commissioning": "Commandes",
+      "services-subnav-guidance": "Conseils",
+      "services-subnav-faq": "FAQ"
+    }
+  },
+  "de": {
+    "translation": {
+      "services-subnav-overview": "Übersicht",
+      "services-subnav-commissioning": "Aufträge",
+      "services-subnav-guidance": "Beratung",
+      "services-subnav-faq": "FAQ"
+    }
+  }
+}
+

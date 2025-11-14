@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document -->
+    <meta charset="UTF-8">
+    
+    <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--Browser Tab title-->
+    <title>Services - BitMinded</title>
+    <!--Browser Tab icon-->
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+
+    <!--iOS home-saved app icon-->
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+    <!-- iOS status bar style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Critical CSS to prevent white flash -->
+    <link rel="stylesheet" href="../css/critical.css">
+
+    <!-- Critical JavaScript for immediate initialization -->
+    <script src="../js/critical.js"></script>
+    
+    <!-- Component Loader -->
+    <script src="../components/shared/component-loader.js"></script>
+
+    <!-- Services Page CSS -->
+    <link rel="stylesheet" href="services.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+        
+        <!-- Language Switcher Component will be loaded here -->
+    </header>
+
+    <main class="services-page">
+        <!-- Hero Section -->
+        <section class="services-hero">
+            <h1 class="services-hero__title translatable-content" data-i18n="services-hero-title">We Build. We Guide.</h1>
+            <p class="services-hero__subtitle translatable-content" data-i18n="services-hero-subtitle">
+                Handcrafted software paired with patient, plain-language tech support.
+            </p>
+        </section>
+
+        <!-- Services Sub-Navigation (only on services pages) -->
+        <div id="services-subnav-container"></div>
+
+        <!-- Mission Toggle -->
+        <section class="services-mission-toggle">
+            <div class="mission-toggle">
+                <div class="mission-toggle__container">
+                    <button class="mission-toggle__button mission-toggle__button--active" id="mission-toggle-build" data-mission="build">
+                        <span class="mission-toggle__button-text translatable-content" id="mission-toggle-build-text" data-i18n="mission-toggle-build">We Build</span>
+                    </button>
+                    <button class="mission-toggle__button" id="mission-toggle-guide" data-mission="guide">
+                        <span class="mission-toggle__button-text translatable-content" id="mission-toggle-guide-text" data-i18n="mission-toggle-guide">We Guide</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mission-Based Content -->
+        <section class="services-content">
+            <!-- "We Build" Section -->
+            <div id="mission-build" class="services-mission-content">
+                <div class="services-mission-section">
+                    <h2 class="services-mission-section__title translatable-content" data-i18n="services-build-title">Commission a Tool</h2>
+                    <p class="services-mission-section__description translatable-content" data-i18n="services-build-description">
+                        Fund the build you need, keep a perpetual-use license, and watch your tool evolve in the catalog for others to benefit.
+                    </p>
+                    
+                    <div class="services-mission-section__highlights">
+                        <div class="services-highlight">
+                            <h3 class="services-highlight__title translatable-content" data-i18n="services-build-discovery-title">Discovery</h3>
+                            <p class="services-highlight__text translatable-content" data-i18n="services-build-discovery-text">Map workflows, priorities, and risks in a focused 4-6 hour session.</p>
+                        </div>
+                        <div class="services-highlight">
+                            <h3 class="services-highlight__title translatable-content" data-i18n="services-build-sprints-title">Build Sprints</h3>
+                            <p class="services-highlight__text translatable-content" data-i18n="services-build-sprints-text">Ship usable increments every 2-3 weeks with transparent progress tracking.</p>
+                        </div>
+                        <div class="services-highlight">
+                            <h3 class="services-highlight__title translatable-content" data-i18n="services-build-license-title">Perpetual License</h3>
+                            <p class="services-highlight__text translatable-content" data-i18n="services-build-license-text">Deploy your commissioned tool internally forever—no recurring fees.</p>
+                        </div>
+                    </div>
+
+                    <div class="services-mission-section__cta">
+                        <a href="/services/commissioning/" class="services-button services-button--primary translatable-content" data-i18n="services-build-cta">Learn About Commissioning</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- "We Guide" Section -->
+            <div id="mission-guide" class="services-mission-content hidden">
+                <div class="services-mission-section">
+                    <h2 class="services-mission-section__title translatable-content" data-i18n="services-guide-title">Guidance Services</h2>
+                    <p class="services-mission-section__description translatable-content" data-i18n="services-guide-description">
+                        Judgment-free tech support delivered with patience and plain language. Bring any device or question, leave with notes, rituals, and confidence.
+                    </p>
+                    
+                    <div class="services-mission-section__highlights">
+                        <div class="services-highlight">
+                            <h3 class="services-highlight__title translatable-content" data-i18n="services-guide-coaching-title">Tech Confidence Coaching</h3>
+                            <p class="services-highlight__text translatable-content" data-i18n="services-guide-coaching-text">Structured sessions to build digital rituals and confidence over time.</p>
+                        </div>
+                        <div class="services-highlight">
+                            <h3 class="services-highlight__title translatable-content" data-i18n="services-guide-quick-help-title">Quick Tech Help</h3>
+                            <p class="services-highlight__text translatable-content" data-i18n="services-guide-quick-help-text">45-minute troubleshooting or setup sessions with annotated recaps.</p>
+                        </div>
+                        <div class="services-highlight">
+                            <h3 class="services-highlight__title translatable-content" data-i18n="services-guide-family-title">Family Tech Connection</h3>
+                            <p class="services-highlight__text translatable-content" data-i18n="services-guide-family-text">Group sessions covering shared devices, parental controls, and healthy digital habits.</p>
+                        </div>
+                    </div>
+
+                    <div class="services-mission-section__cta">
+                        <a href="/services/guidance/" class="services-button services-button--primary translatable-content" data-i18n="services-guide-cta">Explore Guidance Services</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shared "How It Works" Section -->
+        <section class="services-how-it-works">
+            <h2 class="services-how-it-works__title translatable-content" data-i18n="services-how-it-works-title">How It Works</h2>
+            <div class="services-steps">
+                <div class="services-step">
+                    <div class="services-step__number">1</div>
+                    <h3 class="services-step__title translatable-content" data-i18n="services-step-discovery-title">Discovery</h3>
+                    <p class="services-step__text translatable-content" data-i18n="services-step-discovery-text">We start with a conversation to understand your needs, goals, and timeline. For commissions, this includes a discovery intensive. For guidance, it's a quick intake call.</p>
+                </div>
+                <div class="services-step">
+                    <div class="services-step__number">2</div>
+                    <h3 class="services-step__title translatable-content" data-i18n="services-step-session-title">Session / Project</h3>
+                    <p class="services-step__text translatable-content" data-i18n="services-step-session-text">We work together—whether building your custom tool in focused sprints or guiding you through tech challenges in structured sessions.</p>
+                </div>
+                <div class="services-step">
+                    <div class="services-step__number">3</div>
+                    <h3 class="services-step__title translatable-content" data-i18n="services-step-followup-title">Follow-up</h3>
+                    <p class="services-step__text translatable-content" data-i18n="services-step-followup-text">You receive notes, checklists, and ritual recommendations. For builds, we handle catalog onboarding. For guidance, we provide ongoing check-ins as needed.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support Content Section -->
+        <section class="services-support-content">
+            <h2 class="services-support-content__title translatable-content" data-i18n="services-support-title">Questions or Ready to Get Started?</h2>
+            <p class="services-support-content__text translatable-content" data-i18n="services-support-text">
+                Check out our FAQ for common questions, or reach out through our support page for personalized guidance.
+            </p>
+            <div class="services-support-content__links">
+                <a href="/services/faq/" class="services-button services-button--secondary translatable-content" data-i18n="services-faq-link">View FAQ</a>
+                <a href="/support/" class="services-button services-button--secondary translatable-content" data-i18n="services-support-link">Contact Support</a>
+            </div>
+        </section>
+
+        <!-- Cross-links Section -->
+        <section class="services-cross-links">
+            <h2 class="services-cross-links__title translatable-content" data-i18n="services-explore-title">Explore More</h2>
+            <div class="services-cross-links__grid">
+                <a href="/catalog/" class="services-cross-link">
+                    <h3 class="services-cross-link__title translatable-content" data-i18n="services-catalog-link-title">Browse Catalog</h3>
+                    <p class="services-cross-link__text translatable-content" data-i18n="services-catalog-link-text">See our collection of artisanal apps, many born from commissions.</p>
+                </a>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase CDN (must load before supabase-config.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../js/env-config.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../js/supabase-config.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../js/script.js"></script>
+    <!-- Mission Toggle Script -->
+    <script src="../js/mission-toggle.js"></script>
+    <!-- Services page translation -->
+    <script src="lang-services/lang-services.js"></script>
+    <!-- Services page loader -->
+    <script src="services-page-loader.js"></script>
+    <!-- Services page scripts -->
+    <script src="services.js"></script>
+
+</body>
+
+</html>
+
