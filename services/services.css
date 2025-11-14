@@ -1,0 +1,347 @@
+/* Services Page Layout */
+.services-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4xl, 4rem);
+  padding: clamp(5rem, 8vw, 7rem) 1.5rem 6rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Hero Section */
+.services-hero {
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(2.5rem, 5vw, 3.5rem);
+  border-radius: 1.5rem;
+  background: var(--gradient-support-hero, linear-gradient(135deg, rgba(99,102,241,0.08), rgba(14,165,233,0.12)));
+  border: 1px solid var(--border-color-primary, rgba(255,255,255,0.08));
+  box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(15,23,42,0.25));
+  justify-items: center;
+  text-align: center;
+}
+
+.services-hero__title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.services-hero__subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  max-width: 52ch;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Mission Toggle Section - Let homepage.css handle the styling */
+.services-mission-toggle {
+  /* Minimal wrapper, let homepage.css styles apply to .mission-toggle */
+}
+
+/* Mission Content */
+.services-content {
+  min-height: 400px;
+}
+
+.services-mission-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.services-mission-content.hidden {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mission Section */
+.services-mission-section {
+  display: grid;
+  gap: var(--spacing-xl, 2rem);
+  padding: var(--spacing-xl, 2rem);
+  border-radius: 1rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+}
+
+.services-mission-section__title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+.services-mission-section__description {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.services-mission-section__highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg, 1.5rem);
+  margin-top: var(--spacing-lg, 1.5rem);
+}
+
+.services-highlight {
+  padding: var(--spacing-lg, 1.5rem);
+  border-radius: 0.75rem;
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.3));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.services-highlight:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
+}
+
+.services-highlight__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+}
+
+.services-highlight__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0;
+}
+
+.services-mission-section__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-lg, 1.5rem);
+}
+
+/* Services Buttons */
+.services-button {
+  display: inline-block;
+  padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
+  border-radius: var(--radius-md, 0.5rem);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.services-button--primary {
+  background-color: var(--color-primary, #6366f1);
+  color: var(--color-text-dark, #fff);
+}
+
+.services-button--primary:hover {
+  background-color: var(--color-primary-hover, #4f46e5);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
+}
+
+.services-button--secondary {
+  background-color: transparent;
+  color: var(--color-primary, #6366f1);
+  border-color: var(--color-primary, #6366f1);
+}
+
+.services-button--secondary:hover {
+  background-color: var(--color-primary, #6366f1);
+  color: var(--color-text-dark, #fff);
+}
+
+/* How It Works Section */
+.services-how-it-works {
+  padding: var(--spacing-xl, 2rem);
+  text-align: center;
+}
+
+.services-how-it-works__title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xl, 2rem) 0;
+}
+
+.services-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-xl, 2rem);
+  margin-top: var(--spacing-xl, 2rem);
+}
+
+.services-step {
+  padding: var(--spacing-xl, 2rem);
+  border-radius: 1rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  position: relative;
+}
+
+.services-step__number {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--color-primary, #6366f1);
+  color: var(--color-text-dark, #fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 auto var(--spacing-md, 1rem) auto;
+}
+
+.services-step__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+}
+
+.services-step__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* Support Content Section */
+.services-support-content {
+  padding: var(--spacing-xl, 2rem);
+  text-align: center;
+  border-radius: 1rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+}
+
+.services-support-content__title {
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md, 1rem) 0;
+}
+
+.services-support-content__text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.services-support-content__links {
+  display: flex;
+  gap: var(--spacing-md, 1rem);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Cross-links Section */
+.services-cross-links {
+  padding: var(--spacing-xl, 2rem);
+  text-align: center;
+}
+
+.services-cross-links__title {
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+}
+
+.services-cross-links__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg, 1.5rem);
+}
+
+.services-cross-link {
+  padding: var(--spacing-xl, 2rem);
+  border-radius: 1rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: block;
+}
+
+.services-cross-link:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
+  border-color: var(--color-primary, #6366f1);
+}
+
+.services-cross-link__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+}
+
+.services-cross-link__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .services-page {
+    padding: clamp(3rem, 6vw, 5rem) 1rem 4rem;
+    gap: var(--spacing-2xl, 3rem);
+  }
+
+  .services-mission-toggle {
+    /* Let homepage.css handle responsive styles */
+  }
+
+  .services-mission-section__highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .services-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .services-support-content__links {
+    flex-direction: column;
+  }
+
+  .services-support-content__links .services-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .services-mission-toggle {
+    /* Let homepage.css handle responsive styles */
+  }
+}
+

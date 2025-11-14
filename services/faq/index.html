@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Services - BitMinded</title>
+    <link rel="icon" type="image/x-icon" href="../../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="../../css/critical.css">
+    <script src="../../js/critical.js"></script>
+    
+    <script src="../../components/shared/component-loader.js"></script>
+
+    <link rel="stylesheet" href="faq.css">
+    <link rel="stylesheet" href="../../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+    </header>
+
+    <main class="faq-page">
+        <!-- Hero Section -->
+        <section class="faq-hero">
+            <h1 class="faq-hero__title translatable-content" data-i18n="faq-hero-title">Frequently Asked Questions</h1>
+            <p class="faq-hero__subtitle translatable-content" data-i18n="faq-hero-subtitle">
+                Find answers to common questions about our commissioning and guidance services.
+            </p>
+        </section>
+
+        <!-- Services Sub-Navigation (only on services pages) -->
+        <div id="services-subnav-container"></div>
+
+        <!-- Commissioning FAQs -->
+        <section class="faq-category">
+            <h2 class="faq-category__title translatable-content" data-i18n="faq-category-commissioning-title">Commissioning</h2>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-commissioning-1-question">How does commissioning work?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-commissioning-1-answer">When you commission a tool, you fund its development at artisan rates. You receive a perpetual-use license for your commissioned version, and we retain IP rights to adapt it for the public catalog. The process typically starts with a Discovery Intensive (CHF 600-900), followed by Build Sprints (CHF 1.2k-1.5k per 30-hour block) until completion.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-commissioning-2-question">What's included in the perpetual license?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-commissioning-2-answer">The perpetual license allows you to deploy your commissioned tool internally forever with no recurring fees. You receive the complete, functional tool with source code and documentation. Updates and maintenance during the build are included; post-delivery updates for your specific version can be discussed separately.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-commissioning-3-question">How long do builds take?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-commissioning-3-answer">Most apps need 2-4 sprints (30-hour blocks each), with each sprint delivering usable increments every 2-3 weeks. A typical project takes 6-12 weeks for complete delivery, plus 2-4 weeks for catalog onboarding post-delivery.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-commissioning-4-question">Can I customize existing tools?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-commissioning-4-answer">Yes! Starter Customization (CHF 350-550) allows you to personalize an existing catalog tool or create a lightweight automation after a 30-minute intake call. This is perfect for adapting our tools to your specific needs.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-commissioning-5-question">What if I need ongoing support after delivery?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-commissioning-5-answer">Post-delivery updates and maintenance for your specific commissioned version can be discussed separately. We also offer Build + Guide Retainers (from CHF 450/month) for dedicated build hours paired with recurring coaching, ideal for ongoing support.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guidance Services FAQs -->
+        <section class="faq-category">
+            <h2 class="faq-category__title translatable-content" data-i18n="faq-category-guidance-title">Guidance Services</h2>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-guidance-1-question">What's the difference between guidance service types?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-guidance-1-answer">Tech Confidence Coaching focuses on building digital rituals and confidence over time through structured sessions. Quick Tech Help is perfect for immediate troubleshooting or setup needs (45-minute sessions). Family Tech Connection offers group sessions covering shared devices, parental controls, and healthy digital habits, available remotely or in-person.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-guidance-2-question">How do sessions work?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-guidance-2-answer">We start by understanding your needs and goals. Then we work together step-by-step, explaining everything in plain language with no judgment. After each session, you'll receive annotated notes summarizing what we covered, checklists for future reference, and personalized recommendations for building healthy tech habits.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-guidance-3-question">Can sessions be done remotely or in-person?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-guidance-3-answer">Most sessions work great remotely via video call. For hands-on device setup or family sessions, we offer in-home visits or meet-ups at your location. Home Visit Essentials (CHF 120 + travel, 90 minutes) and Onsite Visits (CHF 180 + travel) are available for in-person support.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-guidance-4-question">What if I need ongoing support?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-guidance-4-answer">We offer Family Plan Retainers (CHF 160-320/month) that guarantee monthly support hours, device audits, and priority response for households. We can also create custom guidance packages based on your needs. Contact us to discuss ongoing support options.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing FAQs -->
+        <section class="faq-category">
+            <h2 class="faq-category__title translatable-content" data-i18n="faq-category-pricing-title">Pricing</h2>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-pricing-1-question">Are prices in CHF or another currency?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-pricing-1-answer">All prices are in Swiss Francs (CHF). We're based in Switzerland and charge in CHF for all services. International clients are welcome, and we can discuss payment options if needed.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-pricing-2-question">Do you offer payment plans for larger commissions?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-pricing-2-answer">Yes, we can structure payment plans for larger commissions. Typically, payment is split across the discovery phase and each sprint. We're flexible and can work with you to find a payment schedule that works for your budget. Contact us to discuss options.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-pricing-3-question">What's included in the Personal Project Intake (CHF 30)?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-pricing-3-answer">The Personal Project Intake includes a quick call and questionnaire to scope personal or family projects before issuing a quote. The CHF 30 fee is credited toward your project if you proceed with commissioning.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- General FAQs -->
+        <section class="faq-category">
+            <h2 class="faq-category__title translatable-content" data-i18n="faq-category-general-title">General</h2>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-general-1-question">How do I get started?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-general-1-answer">For commissioning, start with a Personal Project Intake (CHF 30, credited) or reach out directly through our support page for larger commissions. For guidance services, contact us through the support page with your preferred service type and availability. We'll respond within 24 hours on business days.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-general-2-question">What about privacy and data handling?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-general-2-answer">We take privacy seriously. All client information is handled with strict confidentiality. For commissioned tools, we only retain IP rights for catalog adaptation—your data and workflows remain private. For guidance sessions, we don't share your information with third parties. See our Privacy Policy for full details.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-general-3-question">Do you work with international clients?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-general-3-answer">Yes! We work with clients worldwide. Remote sessions work great across time zones, and we can accommodate scheduling for different regions. Payment is in CHF, but we can discuss payment options for international clients.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-general-4-question">What if I have more questions?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-general-4-answer">We're here to help! Reach out through our support page with any questions about commissioning, guidance services, or our approach. We typically respond within 24 hours on business days.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact CTA -->
+        <section class="faq-contact">
+            <h2 class="faq-contact__title translatable-content" data-i18n="faq-contact-title">Still Have Questions?</h2>
+            <p class="faq-contact__text translatable-content" data-i18n="faq-contact-text">
+                Can't find the answer you're looking for? Reach out to our support team.
+            </p>
+            <div class="faq-contact__cta">
+                <a href="/support/" class="faq-button faq-button--primary translatable-content" data-i18n="faq-contact-cta">Contact Support</a>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase CDN (must load before supabase-config.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../../js/env-config.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../../js/supabase-config.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../../js/script.js"></script>
+    <!-- FAQ page translation -->
+    <script src="lang-faq/lang-faq.js"></script>
+    <!-- FAQ page loader -->
+    <script src="faq.js"></script>
+
+</body>
+
+</html>
+

@@ -210,6 +210,8 @@ class NavigationMenu {
             return 'home';
         } else if (path.includes('/catalog')) {
             return 'catalog';
+        } else if (path.includes('/services')) {
+            return 'services';
         } else if (path.includes('/support')) {
             return 'support';
         } else if (path.includes('/auth')) {

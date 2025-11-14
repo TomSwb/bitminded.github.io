@@ -36,6 +36,7 @@
   
   /* Additional Backgrounds */
   --color-background-tertiary: rgba(255, 255, 255, 0.05);
+  --color-surface: rgba(15, 23, 42, 0.45);
   --color-border: rgba(255, 255, 255, 0.1);
   
   /* Typography Scale */
@@ -109,6 +110,7 @@
   --color-background-primary: var(--color-bg-light);
   --color-background-secondary: var(--color-bg-dark);
   --color-background-tertiary: rgba(0, 0, 0, 0.05); /* Dark overlay for light mode */
+  --color-surface: rgba(0, 0, 0, 0.08); /* Light surface for cards in light mode */
   --color-primary: var(--color-accent-pink); /* light mode primary */
   --color-secondary: var(--color-accent-green);
   --color-text-primary: var(--color-text-dark);
