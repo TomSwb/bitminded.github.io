@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update all translatable content by data attribute or id
         const translatableElements = document.querySelectorAll('.translatable-content');
         translatableElements.forEach(element => {
-            const translationKey = element.id || element.getAttribute('data-translate');
+            // Prefer data-translate over id for translation keys
+            const translationKey = element.getAttribute('data-translate') || element.id;
             if (translationKey && i18next.exists(translationKey)) {
                 element.textContent = i18next.t(translationKey);
             }
