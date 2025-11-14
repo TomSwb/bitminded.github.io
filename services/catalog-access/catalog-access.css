@@ -1,0 +1,509 @@
+/* Catalog Access Page Layout */
+.catalog-access-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl, 3rem);
+  padding: clamp(5rem, 8vw, 7rem) 1.5rem 6rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Hero Section */
+.catalog-access-hero {
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(2.5rem, 5vw, 3.5rem);
+  border-radius: 1.5rem;
+  background: var(--gradient-support-hero, linear-gradient(135deg, rgba(99,102,241,0.08), rgba(14,165,233,0.12)));
+  border: 1px solid var(--border-color-primary, rgba(255,255,255,0.08));
+  box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(15,23,42,0.25));
+  justify-items: center;
+  text-align: center;
+}
+
+.catalog-access-hero__title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.catalog-access-hero__subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  max-width: 52ch;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Section Styles */
+.catalog-access-section__title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+  text-align: center;
+}
+
+.catalog-access-section__description {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto var(--spacing-xl, 2rem) auto;
+}
+
+/* Pricing Grid */
+.catalog-access-pricing {
+  padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+.catalog-access-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg, 1.5rem);
+  margin-top: var(--spacing-xl, 2rem);
+}
+
+.catalog-access-pricing-card {
+  padding: var(--spacing-xl, 2rem);
+  border-radius: 1rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.catalog-access-pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(15,23,42,0.25));
+  border-color: var(--color-primary, #6366f1);
+}
+
+.catalog-access-pricing-card--featured {
+  border-color: var(--color-primary, #6366f1);
+  border-width: 3px;
+}
+
+.catalog-access-pricing-card__badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-primary, #6366f1);
+  color: var(--color-text-dark, #fff);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.catalog-access-pricing-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md, 1rem) 0;
+}
+
+.catalog-access-pricing-card__price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 var(--spacing-xs, 0.5rem) 0;
+  line-height: 1;
+}
+
+.catalog-access-pricing-card__price-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: var(--spacing-md, 1rem);
+}
+
+.catalog-access-pricing-card__price-period {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  opacity: 0.7;
+}
+
+.catalog-access-pricing-card__price-alt {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  opacity: 0.9;
+}
+
+.catalog-access-pricing-card__savings {
+  font-size: 0.875rem;
+  color: var(--color-primary, #6366f1);
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+.catalog-access-pricing-card__duration {
+  font-size: 0.875rem;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 var(--spacing-md, 1rem) 0;
+  font-weight: 500;
+}
+
+.catalog-access-pricing-card__description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0 0 var(--spacing-md, 1rem) 0;
+}
+
+.catalog-access-pricing-card__features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.catalog-access-pricing-card__features li {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  padding: var(--spacing-xs, 0.5rem) 0 var(--spacing-xs, 0.5rem) var(--spacing-md, 1rem);
+  position: relative;
+}
+
+.catalog-access-pricing-card__features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-primary, #6366f1);
+  font-weight: 700;
+}
+
+.catalog-access-pricing-card__cta {
+  margin-top: auto;
+}
+
+/* Comparison Table */
+.catalog-access-comparison {
+  padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+.catalog-access-comparison-table-wrapper {
+  overflow-x: auto;
+  margin-top: var(--spacing-lg, 1.5rem);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+}
+
+.catalog-access-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+}
+
+.catalog-access-comparison-table thead {
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+}
+
+.catalog-access-comparison-table th {
+  padding: var(--spacing-md, 1rem);
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+}
+
+.catalog-access-comparison-table th:first-child {
+  font-weight: 700;
+}
+
+.catalog-access-comparison-table th:not(:first-child) {
+  text-align: center;
+}
+
+.catalog-access-comparison-table td {
+  padding: var(--spacing-md, 1rem);
+  color: var(--color-text-primary);
+  opacity: 0.9;
+  border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.2));
+}
+
+.catalog-access-comparison-table td:first-child {
+  font-weight: 500;
+}
+
+.catalog-access-comparison-table td:not(:first-child) {
+  text-align: center;
+}
+
+.catalog-access-comparison-table tbody tr:hover {
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+}
+
+.catalog-access-comparison-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Benefits Section */
+.catalog-access-benefits {
+  padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+.catalog-access-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg, 1.5rem);
+  margin-top: var(--spacing-lg, 1.5rem);
+}
+
+.catalog-access-benefit {
+  padding: var(--spacing-lg, 1.5rem);
+  border-radius: 0.75rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  text-align: center;
+}
+
+.catalog-access-benefit__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+}
+
+.catalog-access-benefit__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* FAQ Section */
+.catalog-access-faq {
+  padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+.catalog-access-faq-list {
+  display: grid;
+  gap: var(--spacing-md, 1rem);
+  margin-top: var(--spacing-lg, 1.5rem);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.catalog-access-faq-item {
+  border-radius: 0.75rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.catalog-access-faq-item:hover {
+  border-color: var(--color-primary, #6366f1);
+}
+
+.catalog-access-faq-item__button {
+  width: 100%;
+  padding: var(--spacing-lg, 1.5rem);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md, 1rem);
+  transition: background 0.2s ease;
+}
+
+.catalog-access-faq-item__button:hover {
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+}
+
+.catalog-access-faq-item__button[aria-expanded="true"] {
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+  border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+}
+
+.catalog-access-faq-item__question {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.catalog-access-faq-item__icon {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary, #6366f1);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.catalog-access-faq-item__button[aria-expanded="true"] .catalog-access-faq-item__icon {
+  transform: rotate(45deg);
+}
+
+.catalog-access-faq-item__answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 var(--spacing-lg, 1.5rem);
+}
+
+.catalog-access-faq-item__button[aria-expanded="true"] + .catalog-access-faq-item__answer {
+  /* max-height is set dynamically by JavaScript based on content */
+  padding: var(--spacing-lg, 1.5rem);
+}
+
+.catalog-access-faq-item__answer p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* CTA Section */
+.catalog-access-cta {
+  padding: var(--spacing-lg, 1.5rem) 0;
+  text-align: center;
+}
+
+.catalog-access-cta__links {
+  display: flex;
+  gap: var(--spacing-md, 1rem);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--spacing-xl, 2rem);
+}
+
+/* Buttons */
+.catalog-access-button {
+  display: inline-block;
+  padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
+  border-radius: var(--radius-md, 0.5rem);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.catalog-access-button--primary {
+  background-color: var(--color-primary, #6366f1);
+  color: var(--color-text-dark, #fff);
+}
+
+.catalog-access-button--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover, #4f46e5);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
+}
+
+.catalog-access-button--secondary {
+  background-color: transparent;
+  color: var(--color-text-primary);
+  border-color: var(--border-color-primary, rgba(148,163,184,0.4));
+}
+
+.catalog-access-button--secondary:hover {
+  background-color: var(--color-surface, rgba(15,23,42,0.45));
+  border-color: var(--color-primary, #6366f1);
+  transform: translateY(-2px);
+}
+
+.catalog-access-button--coming-soon {
+  background-color: var(--color-secondary, #d286bd);
+  cursor: not-allowed;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.catalog-access-button--coming-soon:hover {
+  transform: none;
+  box-shadow: none;
+  background-color: var(--color-secondary, #d286bd);
+}
+
+.catalog-access-button--coming-soon:active {
+  transform: none;
+  box-shadow: none;
+  background-color: var(--color-secondary, #d286bd);
+}
+
+.catalog-access-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .catalog-access-page {
+    padding: clamp(3rem, 6vw, 5rem) 1rem 4rem;
+    gap: var(--spacing-2xl, 3rem);
+  }
+
+  .catalog-access-pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-access-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-access-comparison-table-wrapper {
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .catalog-access-comparison-table {
+    min-width: 600px;
+  }
+
+  .catalog-access-cta__links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .catalog-access-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .catalog-access-faq-item__button {
+    padding: var(--spacing-md, 1rem);
+  }
+
+  .catalog-access-faq-item__question {
+    font-size: 1rem;
+  }
+
+  .catalog-access-faq-item__answer {
+    padding: 0 var(--spacing-md, 1rem);
+  }
+
+  .catalog-access-faq-item__button[aria-expanded="true"] + .catalog-access-faq-item__answer {
+    padding: var(--spacing-md, 1rem);
+  }
+}
+
