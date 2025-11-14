@@ -104,14 +104,12 @@
 
 .commissioning-step {
   padding: var(--spacing-xl, 2rem);
+  padding-left: calc(var(--spacing-xl, 2rem) + 48px + var(--spacing-lg, 1.5rem));
   border-radius: 1rem;
   background: var(--color-surface, rgba(15,23,42,0.45));
   border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
   position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--spacing-lg, 1.5rem);
-  align-items: start;
+  display: block;
 }
 
 .commissioning-step__number {
@@ -125,18 +123,17 @@
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 700;
-  flex-shrink: 0;
-  align-self: center;
-  grid-column: 1;
-  grid-row: 1 / -1;
+  position: absolute;
+  left: var(--spacing-xl, 2rem);
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .commissioning-step__title {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  margin: 0;
-  grid-column: 2;
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
 }
 
 .commissioning-step__text {
@@ -145,7 +142,6 @@
   color: var(--color-text-primary);
   opacity: 0.85;
   margin: 0;
-  grid-column: 2;
 }
 
 .commissioning-step__pricing {
@@ -153,7 +149,6 @@
   font-weight: 600;
   color: var(--color-primary, #6366f1);
   margin-top: var(--spacing-sm, 0.75rem);
-  grid-column: 2;
 }
 
 /* Pricing Grid */

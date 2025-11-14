@@ -1,7 +1,7 @@
 /* Services Sub-Navigation Component */
 .services-subnav {
     padding: var(--spacing-xl, 2rem) var(--spacing-lg, 1.5rem) var(--spacing-lg, 1.5rem);
-    margin: 0;
+    margin: 0 0 calc(-1 * var(--spacing-2xl, 3rem)) 0;
     display: flex;
     justify-content: center;
     width: 100%;

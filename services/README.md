@@ -52,11 +52,10 @@ See [PRICING-STRATEGY.md](./PRICING-STRATEGY.md) for comprehensive pricing analy
 
 ✅ **Commissioning:**
 - Personal Project Intake: CHF 30 (credited)
-- Discovery Intensive: CHF 600-900 (4-6 hours)
-- Build Sprints: CHF 1.2k-1.5k (per 30-hour block)
-- Mini Build Sprint: CHF 850 (~18-20 hours)
-- Additional Features: CHF 80-120 (per feature)
-- Starter Customization: CHF 350-550 (after intake)
+- Simple App: CHF 450-750 (1-2 weeks)
+- Standard App: CHF 850-1,250 (2-4 weeks)
+- Complex App: CHF 1,350-1,950 (6+ weeks)
+- Commission a Feature: CHF 20-150 (depending on difficulty - for new features on existing catalog tools)
 
 ✅ **Guidance Services:**
 - Friendly Tech Drop-In: CHF 45 (30 minutes)
@@ -74,6 +73,11 @@ See [PRICING-STRATEGY.md](./PRICING-STRATEGY.md) for comprehensive pricing analy
 - All-Tools Membership: CHF 8/month or CHF 80/year (from CHF 18/month)
 - Supporter Tier: CHF 15/month (from CHF 35/month)
 - Rationale: Volume strategy (lower price = more subscribers)
+
+**Recent Changes:**
+- ✅ Commissioning pricing restructured: Fixed project pricing based on complexity (Simple/Standard/Complex)
+- ✅ Removed "sprint" terminology—using everyday language and project-based pricing
+- ✅ Removed Discovery Intensive and Starter Customization—simplified pricing structure
 
 ---
 
