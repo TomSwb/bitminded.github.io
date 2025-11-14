@@ -382,8 +382,29 @@ serve(async (req) => {
       closerLabel = 'You marked this ticket as resolved.'
     }
 
-    if (notifyUser && updatedTicket.email) {
+    // Check if ticket creator is admin - skip email sending for admin users
+    const adminEmails = ['thomasschwab@bitminded.ch']
+    const ticketEmail = ticket.email?.toLowerCase() || ''
+    const isAdminEmail = adminEmails.includes(ticketEmail)
+    
+    let isAdminUser = false
+    if (ticket.user_id) {
+      const { data: adminRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', ticket.user_id)
+        .eq('role', 'admin')
+        .maybeSingle()
+      
+      isAdminUser = !!adminRole
+    }
+
+    const shouldSkipEmail = isAdminEmail || isAdminUser
+
+    if (notifyUser && updatedTicket.email && !shouldSkipEmail) {
       await sendStatusEmail(resendApiKey, updatedTicket, status, trimmedComment, nowIso, closerLabel)
+    } else if (shouldSkipEmail) {
+      console.log(`⏭️ Skipping email sending for admin user ticket: ${ticket.email || ticket.user_id}`)
     }
 
     return new Response(
