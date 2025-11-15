@@ -63,3 +63,4 @@ SELECT auth.uid() as current_user_id, auth.email() as current_email;
 
 
 
+

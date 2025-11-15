@@ -3,9 +3,30 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xl, 3rem);
-  padding: clamp(5rem, 8vw, 7rem) 1.5rem 6rem;
-  max-width: 1100px;
+  padding: clamp(5rem, 8vw, 7rem) clamp(1.5rem, 4vw, 3rem) 6rem;
+  max-width: min(98%, 2000px);
   margin: 0 auto;
+  width: 100%;
+}
+
+/* Two Column Layout Wrapper */
+.commissioning-two-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-2xl, 3rem);
+}
+
+@media (min-width: 1024px) {
+  .commissioning-two-column {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl, 2rem);
+    align-items: start;
+  }
+  
+  .commissioning-two-column > section {
+    min-width: 0; /* Prevent overflow */
+  }
+  
 }
 
 /* Hero Section */
@@ -19,6 +40,9 @@
   box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(15,23,42,0.25));
   justify-items: center;
   text-align: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .commissioning-hero__title {
@@ -55,40 +79,6 @@
   margin: 0 auto var(--spacing-xl, 2rem) auto;
 }
 
-/* Commission-to-Catalog Model */
-.commissioning-model {
-  padding: var(--spacing-lg, 1.5rem) 0;
-}
-
-.commissioning-benefits {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-lg, 1.5rem);
-  margin-top: var(--spacing-lg, 1.5rem);
-}
-
-.commissioning-benefit {
-  padding: var(--spacing-lg, 1.5rem);
-  border-radius: 0.75rem;
-  background: var(--color-surface, rgba(15,23,42,0.45));
-  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
-}
-
-.commissioning-benefit__title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-primary, #6366f1);
-  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
-}
-
-.commissioning-benefit__text {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--color-text-primary);
-  opacity: 0.85;
-  margin: 0;
-}
-
 /* Process Timeline */
 .commissioning-process {
   padding: var(--spacing-lg, 1.5rem) 0;
@@ -96,10 +86,11 @@
 
 .commissioning-timeline {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-xl, 2rem);
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg, 1.5rem);
   margin-top: var(--spacing-lg, 1.5rem);
   position: relative;
+  align-items: start;
 }
 
 .commissioning-step {
@@ -125,8 +116,7 @@
   font-weight: 700;
   position: absolute;
   left: var(--spacing-xl, 2rem);
-  top: 50%;
-  transform: translateY(-50%);
+  top: var(--spacing-xl, 2rem);
 }
 
 .commissioning-step__title {
@@ -134,6 +124,7 @@
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+  text-align: center;
 }
 
 .commissioning-step__text {
@@ -142,6 +133,7 @@
   color: var(--color-text-primary);
   opacity: 0.85;
   margin: 0;
+  text-align: justify;
 }
 
 .commissioning-step__pricing {
@@ -158,7 +150,7 @@
 
 .commissioning-pricing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--spacing-lg, 1.5rem);
   margin-top: var(--spacing-xl, 2rem);
 }
@@ -204,6 +196,7 @@
   color: var(--color-text-primary);
   opacity: 0.85;
   margin: 0;
+  text-align: justify;
 }
 
 /* Licensing Section */
@@ -237,56 +230,47 @@
   color: var(--color-text-primary);
   opacity: 0.85;
   margin: 0;
+  text-align: justify;
 }
 
-/* What's Included Section */
-.commissioning-included {
-  padding: var(--spacing-xl, 2rem);
-}
-
-.commissioning-included-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-lg, 1.5rem);
+.commissioning-licensing-disclaimer {
   margin-top: var(--spacing-xl, 2rem);
-}
-
-.commissioning-included-item {
   padding: var(--spacing-lg, 1.5rem);
   border-radius: 0.75rem;
-  background: var(--color-surface, rgba(15,23,42,0.45));
-  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.3));
 }
 
-.commissioning-included-item__title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-md, 1rem) 0;
-}
-
-.commissioning-included-item__list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.commissioning-included-item__list li {
-  font-size: 0.95rem;
-  line-height: 1.8;
+.commissioning-licensing-disclaimer__text {
+  font-size: 0.9rem;
+  line-height: 1.6;
   color: var(--color-text-primary);
   opacity: 0.85;
-  padding: var(--spacing-xs, 0.5rem) 0 var(--spacing-xs, 0.5rem) var(--spacing-md, 1rem);
-  position: relative;
+  margin: 0;
+  text-align: center;
 }
 
-.commissioning-included-item__list li::before {
-  content: '✓';
-  position: absolute;
-  left: 0;
+.commissioning-licensing-disclaimer__link {
   color: var(--color-primary, #6366f1);
-  font-weight: 700;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
 }
+
+.commissioning-licensing-disclaimer__link:hover {
+  opacity: 0.8;
+}
+
+.commissioning-link {
+  color: var(--color-primary, #6366f1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+.commissioning-link:hover {
+  color: var(--color-secondary, #d286bd);
+}
+
 
 /* Intake Section */
 .commissioning-intake {
@@ -383,6 +367,111 @@
   line-height: 1;
 }
 
+/* FAQ Section */
+.commissioning-faq {
+  padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+.commissioning-faq-list {
+  display: grid;
+  gap: var(--spacing-md, 1rem);
+  margin-top: var(--spacing-lg, 1.5rem);
+}
+
+.commissioning-faq-item {
+  border-radius: 0.75rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.commissioning-faq-item:hover {
+  border-color: var(--color-primary, #6366f1);
+}
+
+.commissioning-faq-item__button {
+  width: 100%;
+  padding: var(--spacing-lg, 1.5rem);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md, 1rem);
+  font-family: inherit;
+  transition: background 0.2s ease;
+}
+
+.commissioning-faq-item__button:hover {
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+}
+
+.commissioning-faq-item__button[aria-expanded="true"] {
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+  border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+}
+
+.commissioning-faq-item__question {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.commissioning-faq-item__icon {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary, #6366f1);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.commissioning-faq-item__button[aria-expanded="true"] .commissioning-faq-item__icon {
+  transform: rotate(45deg);
+}
+
+.commissioning-faq-item__answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 var(--spacing-lg, 1.5rem);
+}
+
+.commissioning-faq-item__button[aria-expanded="true"] + .commissioning-faq-item__answer {
+  /* max-height is set dynamically by JavaScript based on content */
+  padding: var(--spacing-lg, 1.5rem);
+}
+
+.commissioning-faq-item__answer p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0;
+  text-align: justify;
+}
+
+/* Tablet/Medium Screen Responsive */
+@media (max-width: 1200px) and (min-width: 769px) {
+  .commissioning-timeline {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .commissioning-pricing-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .commissioning-pricing-card:nth-child(5) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    max-width: calc(50% - var(--spacing-lg, 1.5rem));
+  }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .commissioning-page {
@@ -394,16 +483,26 @@
     grid-template-columns: 1fr;
   }
 
-  .commissioning-benefits {
-    grid-template-columns: 1fr;
-  }
 
   .commissioning-pricing-grid {
     grid-template-columns: 1fr;
   }
 
-  .commissioning-included-list {
-    grid-template-columns: 1fr;
+
+  .commissioning-faq-item__button {
+    padding: var(--spacing-md, 1rem);
+  }
+
+  .commissioning-faq-item__question {
+    font-size: 1rem;
+  }
+
+  .commissioning-faq-item__answer {
+    padding: 0 var(--spacing-md, 1rem);
+  }
+
+  .commissioning-faq-item__button[aria-expanded="true"] + .commissioning-faq-item__answer {
+    padding: var(--spacing-md, 1rem);
   }
 }
 
