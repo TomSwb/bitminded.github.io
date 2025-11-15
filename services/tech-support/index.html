@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Support - BitMinded</title>
+    <link rel="icon" type="image/x-icon" href="../../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="../../css/critical.css">
+    <script src="../../js/critical.js"></script>
+    
+    <script src="../../components/shared/component-loader.js"></script>
+
+    <link rel="stylesheet" href="tech-support.css">
+    <link rel="stylesheet" href="../../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+    </header>
+
+    <main class="tech-support-page">
+        <!-- Hero Section -->
+        <section class="tech-support-hero">
+            <h1 class="tech-support-hero__title translatable-content" data-i18n="tech-support-hero-title">Tech Support</h1>
+            <p class="tech-support-hero__subtitle translatable-content" data-i18n="tech-support-hero-subtitle">
+                Judgment-free tech support delivered with patience and plain language. Bring any device or question, leave with notes, rituals, and confidence.
+            </p>
+        </section>
+
+        <!-- Services Sub-Navigation (only on services pages) -->
+        <div id="services-subnav-container"></div>
+
+        <!-- Who These Services Help Section -->
+        <section class="tech-support-audience">
+            <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-audience-title">Who These Services Help</h2>
+            <div class="tech-support-audience-grid">
+                <div class="tech-support-audience-item">
+                    <h3 class="tech-support-audience-item__title translatable-content" data-i18n="tech-support-audience-1-title">Tech-Anxious Learners</h3>
+                    <p class="tech-support-audience-item__text translatable-content" data-i18n="tech-support-audience-1-text">Students, seniors, and career shifters who want patient coaching to feel safe online.</p>
+                </div>
+                <div class="tech-support-audience-item">
+                    <h3 class="tech-support-audience-item__title translatable-content" data-i18n="tech-support-audience-2-title">Families Seeking Digital Literacy</h3>
+                    <p class="tech-support-audience-item__text translatable-content" data-i18n="tech-support-audience-2-text">Households looking for shared digital literacy rituals and healthy tech boundaries.</p>
+                </div>
+                <div class="tech-support-audience-item">
+                    <h3 class="tech-support-audience-item__title translatable-content" data-i18n="tech-support-audience-3-title">Anyone with Tech Questions</h3>
+                    <p class="tech-support-audience-item__text translatable-content" data-i18n="tech-support-audience-3-text">From quick fixes to building confidence over time, we're here to help in plain language.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Process -->
+        <section class="tech-support-process">
+            <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-process-title">The Process</h2>
+            <div class="tech-support-timeline">
+                <div class="tech-support-step">
+                    <div class="tech-support-step__number">1</div>
+                    <h3 class="tech-support-step__title translatable-content" data-i18n="tech-support-step-1-title">Discovery</h3>
+                    <p class="tech-support-step__text translatable-content" data-i18n="tech-support-step-1-text">We start with a quick intake conversation to understand your needs, goals, and what you'd like to learn or accomplish. This helps us tailor the session to your specific situation.</p>
+                </div>
+                <div class="tech-support-step">
+                    <div class="tech-support-step__number">2</div>
+                    <h3 class="tech-support-step__title translatable-content" data-i18n="tech-support-step-2-title">Session</h3>
+                    <p class="tech-support-step__text translatable-content" data-i18n="tech-support-step-2-text">We work together step-by-step, explaining everything in plain language. Whether it's troubleshooting, setting up devices, or building digital confidence, we guide you through each step with patience and no judgment.</p>
+                </div>
+                <div class="tech-support-step">
+                    <div class="tech-support-step__number">3</div>
+                    <h3 class="tech-support-step__title translatable-content" data-i18n="tech-support-step-3-title">Follow-up</h3>
+                    <p class="tech-support-step__text translatable-content" data-i18n="tech-support-step-3-text">You receive annotated notes summarizing what we covered, checklists for future reference, and personalized recommendations for building healthy tech habits. Ongoing check-ins are available as needed.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Service Types Grid -->
+        <section class="tech-support-services">
+            <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-services-title">Our Tech Support Services</h2>
+            <div class="tech-support-services-grid">
+                <!-- Tech Confidence Coaching -->
+                <div class="tech-support-service-card">
+                    <h3 class="tech-support-service-card__title translatable-content" data-i18n="tech-support-service-coaching-title">Tech Confidence Coaching</h3>
+                    <p class="tech-support-service-card__description translatable-content" data-i18n="tech-support-service-coaching-description">Structured sessions to build digital rituals and confidence over time. Ideal for individuals or families building lasting tech habits.</p>
+                    <div class="tech-support-service-card__formats">
+                        <div class="tech-support-format">
+                            <div class="tech-support-format__header">
+                                <div class="tech-support-format__name translatable-content" data-i18n="tech-support-format-confidence-session">Confidence Session</div>
+                                <span class="tech-support-format__separator">•</span>
+                                <div class="tech-support-format__details">CHF 70 • 1 hour</div>
+                            </div>
+                            <p class="tech-support-format__description translatable-content" data-i18n="tech-support-format-confidence-session-description">One hour of patient, judgment-free help with take-home notes—ideal for seniors and beginners building confidence.</p>
+                        </div>
+                        <div class="tech-support-format">
+                            <div class="tech-support-format__header">
+                                <div class="tech-support-format__name translatable-content" data-i18n="tech-support-format-confidence-series">Confidence Series</div>
+                                <span class="tech-support-format__separator">•</span>
+                                <div class="tech-support-format__details">CHF 320 • 4 sessions</div>
+                            </div>
+                            <p class="tech-support-format__description translatable-content" data-i18n="tech-support-format-confidence-series-description">Four structured sessions with a curriculum for individuals or families building lasting digital rituals and habits.</p>
+                        </div>
+                        <div class="tech-support-format">
+                            <div class="tech-support-format__header">
+                                <div class="tech-support-format__name translatable-content" data-i18n="tech-support-format-learning-bundle">Guided Learning Bundle</div>
+                                <span class="tech-support-format__separator">•</span>
+                                <div class="tech-support-format__details">CHF 180 • 3 sessions</div>
+                            </div>
+                            <p class="tech-support-format__description translatable-content" data-i18n="tech-support-format-learning-bundle-description">Three Confidence Sessions spread over a month with homework assignments and check-ins between sessions.</p>
+                        </div>
+                    </div>
+                    <div class="tech-support-service-card__cta">
+                        <a href="/support/" class="tech-support-button tech-support-button--primary translatable-content" data-i18n="tech-support-service-coaching-cta">Book a Session</a>
+                    </div>
+                </div>
+
+                <!-- Quick Tech Help -->
+                <div class="tech-support-service-card">
+                    <h3 class="tech-support-service-card__title translatable-content" data-i18n="tech-support-service-quick-help-title">Quick Tech Help</h3>
+                    <p class="tech-support-service-card__description translatable-content" data-i18n="tech-support-service-quick-help-description">45-minute troubleshooting or setup sessions with annotated recaps. Perfect for immediate fixes or understanding how apps and services work.</p>
+                    <div class="tech-support-service-card__formats">
+                        <div class="tech-support-format">
+                            <div class="tech-support-format__header">
+                                <div class="tech-support-format__name translatable-content" data-i18n="tech-support-format-quick-help">Quick Tech Help</div>
+                                <span class="tech-support-format__separator">•</span>
+                                <div class="tech-support-format__details">CHF 90 • 45 minutes</div>
+                            </div>
+                            <p class="tech-support-format__description translatable-content" data-i18n="tech-support-format-quick-help-description">45-minute troubleshooting or setup session with annotated recap. Perfect for immediate fixes or understanding how apps and services work.</p>
+                        </div>
+                        <div class="tech-support-format">
+                            <div class="tech-support-format__header">
+                                <div class="tech-support-format__name translatable-content" data-i18n="tech-support-format-drop-in">Friendly Tech Drop-In</div>
+                                <span class="tech-support-format__separator">•</span>
+                                <div class="tech-support-format__details">CHF 45 • 30 minutes</div>
+                            </div>
+                            <p class="tech-support-format__description translatable-content" data-i18n="tech-support-format-drop-in-description">30-minute remote or café meet-up for quick fixes or app walkthroughs. Great for simple questions and rapid support.</p>
+                        </div>
+                    </div>
+                    <div class="tech-support-service-card__cta">
+                        <a href="/support/" class="tech-support-button tech-support-button--primary translatable-content" data-i18n="tech-support-service-quick-help-cta">Get Quick Help</a>
+                    </div>
+                </div>
+
+                <!-- Family Tech Connection -->
+                <div class="tech-support-service-card">
+                    <h3 class="tech-support-service-card__title translatable-content" data-i18n="tech-support-service-family-title">Family Tech Connection</h3>
+                    <p class="tech-support-service-card__description translatable-content" data-i18n="tech-support-service-family-description">Group sessions covering shared devices, parental controls, and healthy digital habits. Available remotely or in-home for hands-on setup.</p>
+                    <div class="tech-support-service-card__formats">
+                        <div class="tech-support-format">
+                            <div class="tech-support-format__header">
+                                <div class="tech-support-format__name translatable-content" data-i18n="tech-support-format-family-tuneup">Family Tech Tune-Up</div>
+                                <span class="tech-support-format__separator">•</span>
+                                <div class="tech-support-format__details">CHF 140 • 90 minutes</div>
+                            </div>
+                            <p class="tech-support-format__description translatable-content" data-i18n="tech-support-format-family-tuneup-description">90-minute group session covering shared devices, parental controls, and healthy digital habits. Available remotely.</p>
+                        </div>
+                        <div class="tech-support-format">
+                            <div class="tech-support-format__header">
+                                <div class="tech-support-format__name translatable-content" data-i18n="tech-support-format-home-visit">Home Visit Essentials</div>
+                                <span class="tech-support-format__separator">•</span>
+                                <div class="tech-support-format__details">CHF 120 + travel • 90 minutes</div>
+                            </div>
+                            <p class="tech-support-format__description translatable-content" data-i18n="tech-support-format-home-visit-description">90-minute onsite support with tailored checklist. Perfect for hands-on device setup and family tech configuration.</p>
+                        </div>
+                        <div class="tech-support-format">
+                            <div class="tech-support-format__header">
+                                <div class="tech-support-format__name translatable-content" data-i18n="tech-support-format-onsite">Onsite Visit</div>
+                                <span class="tech-support-format__separator">•</span>
+                                <div class="tech-support-format__details">CHF 180 + travel</div>
+                            </div>
+                            <p class="tech-support-format__description translatable-content" data-i18n="tech-support-format-onsite-description">Flexible in-home or office setup with checklist and follow-up check-in. Duration based on your needs.</p>
+                        </div>
+                    </div>
+                    <div class="tech-support-service-card__cta">
+                        <a href="/support/" class="tech-support-button tech-support-button--primary translatable-content" data-i18n="tech-support-service-family-cta">Book Family Session</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Service Comparison Table -->
+        <section class="tech-support-comparison">
+            <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-comparison-title">Service Comparison</h2>
+            <div class="tech-support-comparison-table-wrapper">
+                <table class="tech-support-comparison-table">
+                    <thead>
+                        <tr>
+                            <th class="translatable-content" data-i18n="tech-support-comparison-service">Service</th>
+                            <th class="translatable-content" data-i18n="tech-support-comparison-duration">Duration</th>
+                            <th class="translatable-content" data-i18n="tech-support-comparison-price">Price</th>
+                            <th class="translatable-content" data-i18n="tech-support-comparison-format">Format</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-confidence-session">Confidence Session</td>
+                            <td>1 hour</td>
+                            <td>CHF 70</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-remote">Remote</td>
+                        </tr>
+                        <tr>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-confidence-series">Confidence Series</td>
+                            <td>4 sessions</td>
+                            <td>CHF 320</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-remote">Remote</td>
+                        </tr>
+                        <tr>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-learning-bundle">Guided Learning Bundle</td>
+                            <td>3 sessions</td>
+                            <td>CHF 180</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-remote">Remote</td>
+                        </tr>
+                        <tr>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-quick-help">Quick Tech Help</td>
+                            <td>45 minutes</td>
+                            <td>CHF 90</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-remote">Remote</td>
+                        </tr>
+                        <tr>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-drop-in">Friendly Tech Drop-In</td>
+                            <td>30 minutes</td>
+                            <td>CHF 45</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-remote-inperson">Remote / In-person</td>
+                        </tr>
+                        <tr>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-family-tuneup">Family Tech Tune-Up</td>
+                            <td>90 minutes</td>
+                            <td>CHF 140</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-remote">Remote</td>
+                        </tr>
+                        <tr>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-home-visit">Home Visit Essentials</td>
+                            <td>90 minutes</td>
+                            <td>CHF 120 + travel</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-inperson">In-person</td>
+                        </tr>
+                        <tr>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-onsite">Onsite Visit</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-onsite-duration">Variable</td>
+                            <td>CHF 180 + travel</td>
+                            <td class="translatable-content" data-i18n="tech-support-comparison-inperson">In-person</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- What to Expect Section -->
+        <section class="tech-support-expect">
+            <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-expect-title">What to Expect</h2>
+            <div class="tech-support-expect-content">
+                <div class="tech-support-expect-item">
+                    <h3 class="tech-support-expect-item__title translatable-content" data-i18n="tech-support-expect-session-title">Session Flow</h3>
+                    <p class="tech-support-expect-item__text translatable-content" data-i18n="tech-support-expect-session-text">We start by understanding your needs and goals. Then we work together step-by-step, explaining everything in plain language. No judgment, just patient guidance.</p>
+                </div>
+                <div class="tech-support-expect-item">
+                    <h3 class="tech-support-expect-item__title translatable-content" data-i18n="tech-support-expect-receive-title">What You'll Receive</h3>
+                    <p class="tech-support-expect-item__text translatable-content" data-i18n="tech-support-expect-receive-text">Annotated notes summarizing what we covered, checklists for future reference, and personalized recommendations for building healthy tech habits.</p>
+                </div>
+                <div class="tech-support-expect-item">
+                    <h3 class="tech-support-expect-item__title translatable-content" data-i18n="tech-support-expect-formats-title">Remote vs. In-Person</h3>
+                    <p class="tech-support-expect-item__text translatable-content" data-i18n="tech-support-expect-formats-text">Most sessions work great remotely via video call. For hands-on device setup or family sessions, we offer in-home visits or meet-ups at your location.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="tech-support-faq" class="tech-support-faq">
+            <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-faq-title">Frequently Asked Questions</h2>
+            <div class="tech-support-faq-list">
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-1-question">What's the difference between the different session types?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-1-answer">Confidence Sessions are structured one-hour sessions focused on building digital confidence over time, ideal for beginners. Quick Tech Help is a 45-minute troubleshooting session perfect for immediate fixes. Family sessions cover shared devices and digital habits for households. Series and bundles provide multiple sessions for deeper learning and habit-building.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-2-question">How do remote sessions work?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-2-answer">Remote sessions are conducted via video call (Zoom, Google Meet, or your preferred platform). We'll send you a link before your session. During the call, we can share screens, walk through processes together, and guide you step-by-step. You'll still receive all the same notes, checklists, and recommendations as in-person sessions.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-3-question">What should I prepare before a session?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-3-answer">Before your session, think about what you'd like to accomplish or learn. Have any relevant devices, accounts, or questions ready. For remote sessions, ensure you have a stable internet connection and your device charged. For troubleshooting sessions, note any error messages or issues you've encountered. No technical knowledge is required—we'll guide you through everything.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-4-question">Can I book multiple sessions?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-4-answer">Absolutely! Many clients benefit from multiple sessions. Series and bundles offer discounted rates for multiple sessions. You can also book individual sessions as needed. We can help you choose the right package based on your goals—whether it's building confidence over time, learning specific skills, or ongoing support.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-5-question">What happens after a session?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-5-answer">After each session, you'll receive annotated notes summarizing what we covered, step-by-step checklists for future reference, and personalized recommendations for building healthy tech habits. For series and bundles, you'll get homework assignments between sessions. You can always reach out with follow-up questions, and we're available for additional sessions as needed.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-6-question">Do you offer payment plans?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-6-answer">Yes, we're flexible and can work with you on payment arrangements for series and bundles. Contact us to discuss payment plan options that work for your budget.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-7-question">Can sessions be recorded for later reference?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-7-answer">We provide detailed annotated notes and checklists after each session, which serve as your reference guide. Recording sessions can be arranged upon request for an additional fee. However, the notes and checklists are designed to capture everything important without needing a recording.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Booking Information Section -->
+        <section class="tech-support-booking">
+            <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-booking-title">Booking Information</h2>
+            <div class="tech-support-booking-content">
+                <p class="tech-support-booking-notice translatable-content" data-i18n="tech-support-booking-notice">
+                    Our booking system is coming soon. We'll notify you when it's ready!
+                </p>
+                <div class="tech-support-booking-cta">
+                    <button class="tech-support-button tech-support-button--primary tech-support-button--coming-soon translatable-content" data-i18n="tech-support-booking-cta" disabled>Coming Soon</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase CDN (must load before supabase-config.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../../js/env-config.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../../js/supabase-config.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../../js/script.js"></script>
+    <!-- Tech Support page translation -->
+    <script src="lang-tech-support/lang-tech-support.js"></script>
+    <!-- Tech Support page loader -->
+    <script src="tech-support.js"></script>
+
+</body>
+
+</html>
+

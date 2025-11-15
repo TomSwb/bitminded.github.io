@@ -1221,7 +1221,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - [Business Model](./docs/BUSINESS_MODEL.md)
 - [Database Schema](./supabase/schema/database-schema.sql)
 - [Catalog Access](./services/catalog-access/index.html)
-- [Guidance Services](./services/guidance/index.html)
+- [Tech Support](./services/tech-support/index.html)
 
 ---
 

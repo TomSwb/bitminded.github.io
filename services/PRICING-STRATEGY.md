@@ -40,7 +40,7 @@
 | **Complex App** | CHF 1,350-1,950 | 6+ weeks | ✅ Implemented |
 | **Commission a Feature** | CHF 20-150 | depending on difficulty | ✅ Implemented |
 
-### Guidance Services
+### Tech Support Services
 
 | Service | Current Price | Duration | Status |
 |---------|--------------|----------|--------|
@@ -90,7 +90,7 @@
 **After Tax (~25%):**
 - CHF 4,850 × 0.75 = CHF 3,638/month = CHF 43,650/year
 
-**Verdict:** Sustainable for one person in Vaud, especially with commissions and guidance services.
+**Verdict:** Sustainable for one person in Vaud, especially with commissions and tech support services.
 
 ---
 
@@ -155,7 +155,7 @@
    - ✅ Sustainable for full-time work (35-45 hours/week)
    - ✅ Simplified pricing structure (removed Discovery Intensive and Starter Customization)
 
-2. **Guidance Services (CHF 45-180):**
+2. **Tech Support Services (CHF 45-180):**
    - ✅ Accessible pricing for families and individuals
    - ✅ Fits Vaud market expectations
    - ✅ Complements commissioning services
@@ -220,9 +220,9 @@
 - Discovery is now included in Personal Project Intake (CHF 20, credited)
 - Customization replaced by "Commission a Feature" for existing catalog tools
 
-### 4. Guidance Services Complement Commissioning
+### 4. Tech Support Services Complement Commissioning
 
-**Decision:** Keep guidance services at current pricing (CHF 45-180)
+**Decision:** Keep tech support services at current pricing (CHF 45-180)
 
 **Rationale:**
 - Builds relationships and trust
@@ -236,7 +236,7 @@
 
 **Rationale:**
 - Focus on core services first
-- Build volume with catalog and guidance
+- Build volume with catalog and tech support
 - Add advanced services later if needed
 - Keep scope manageable for one person
 
@@ -260,7 +260,7 @@
 - Catalog (500 subscribers at CHF 8): CHF 4,000
 - **Total: CHF 5.7k-7.4k/month** = CHF 68.4k-88.8k/year
 
-### Scenario C: Guidance-Heavy
+### Scenario C: Tech Support-Heavy
 
 **Monthly:**
 - 1 simple commission: CHF 450-750
@@ -296,7 +296,7 @@
 - Lower barrier to entry
 - Volume strategy (625 subscribers = CHF 5,000/month)
 - Accessible to "petite gens"
-- Still sustainable with commissions and guidance
+- Still sustainable with commissions and tech support
 
 #### Commissioning (Simplified Structure)
 
@@ -309,7 +309,7 @@
 - Serves "petite gens" market effectively
 - Sustainable for full-time work
 
-#### Guidance Services (No Changes Needed)
+#### Tech Support Services (No Changes Needed)
 
 **Current pricing is appropriate:**
 - CHF 45-180 is accessible
@@ -422,7 +422,7 @@
 4. **Capacity:**
    - Full-time work (35-45 hours/week)
    - Can handle 2-3 commissions/month
-   - Can handle 5-10 guidance sessions/month
+   - Can handle 5-10 tech support sessions/month
    - Catalog requires minimal maintenance time
 
 5. **Market Fit:**
@@ -443,7 +443,7 @@
    - Should we raise prices as demand grows?
    - Should we add premium tier for faster delivery?
 
-3. **Guidance Services:**
+3. **Tech Support Services:**
    - Should we add more session types?
    - Should we create packages/bundles?
    - Should we add group sessions?
@@ -461,7 +461,7 @@
 - [Services Page Plan](./README.md)
 - [Catalog Access Page](./catalog-access/index.html)
 - [Commissioning Page](./commissioning/index.html)
-- [Guidance Page](./guidance/index.html)
+- [Tech Support Page](./tech-support/index.html)
 
 ---
 
