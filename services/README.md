@@ -3,7 +3,7 @@
 - **Purpose:** Combine guidance/coaching offer, commissioning flow, and "How it works" into one cohesive services destination.
 - **Top-Level Sections:**
   1. Overview hero reinforcing "We Build. We Guide." and clarifying who the services help.
-  2. Guidance Services (Tech Confidence Coaching, Quick Tech Help, Family Tech Connection) with formats, pricing ranges, and booking CTA.
+  2. Tech Support (Tech Confidence Coaching, Quick Tech Help, Family Tech Connection) with formats, pricing ranges, and booking CTA.
   3. Commission a Tool (process outline, deliverables, licensing terms, intake form link).
   4. How It Works (shared steps from discovery → session/project → follow-up rituals/notes).
 - **Support Content:** FAQs, safety/privacy assurances, and quick link to the contact/support page.
@@ -28,7 +28,7 @@ See [PRICING-STRATEGY.md](./PRICING-STRATEGY.md) for comprehensive pricing analy
 - **Strategy:** Volume over premium pricing (lower price = more subscribers)
 - **Catalog Pricing:** Proposed CHF 8/month (from CHF 18/month) for volume strategy
 - **Commissioning:** CHF 40-50/hour (accessible, not premium agency pricing)
-- **Guidance Services:** CHF 45-180 (fits Vaud market expectations)
+- **Tech Support:** CHF 45-180 (fits Vaud market expectations)
 - **Capacity:** Full-time (35-45 hours/week)
 
 ### Service Pages
@@ -36,7 +36,7 @@ See [PRICING-STRATEGY.md](./PRICING-STRATEGY.md) for comprehensive pricing analy
 - [Services Overview](./index.html) - Main services landing page
 - [Catalog Access](./catalog-access/index.html) - Catalog pricing and tiers
 - [Commissioning](./commissioning/index.html) - Commissioning process and pricing
-- [Guidance Services](./guidance/index.html) - Guidance services and pricing
+- [Tech Support](./tech-support/index.html) - Tech support services and pricing
 - [FAQ](./faq/index.html) - Frequently asked questions
 
 ---
@@ -57,7 +57,7 @@ See [PRICING-STRATEGY.md](./PRICING-STRATEGY.md) for comprehensive pricing analy
 - Complex App: CHF 1,350-1,950 (6+ weeks)
 - Commission a Feature: CHF 20-150 (depending on difficulty - for new features on existing catalog tools)
 
-✅ **Guidance Services:**
+✅ **Tech Support:**
 - Friendly Tech Drop-In: CHF 45 (30 minutes)
 - Confidence Session: CHF 70 (1 hour)
 - Quick Tech Help: CHF 90 (45 minutes)

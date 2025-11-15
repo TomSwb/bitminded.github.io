@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hide content until translations load
     document.documentElement.classList.add('hide-translatable');
     
-    fetch('lang-guidance/locales-guidance.json')
+    fetch('lang-tech-support/locales-tech-support.json')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }))
         .then(applyTranslations)
         .catch(error => {
-            console.error('Failed to load guidance translations:', error);
+            console.error('Failed to load tech support translations:', error);
             revealContent();
         });
 
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         revealContent();
-        document.dispatchEvent(new CustomEvent('guidanceTranslationsApplied', {
+        document.dispatchEvent(new CustomEvent('techSupportTranslationsApplied', {
             detail: {
                 language: i18next.language
             }

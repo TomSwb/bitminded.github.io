@@ -52,8 +52,8 @@
                 this.currentPage = 'overview';
             } else if (path.includes('/services/commissioning')) {
                 this.currentPage = 'commissioning';
-            } else if (path.includes('/services/guidance')) {
-                this.currentPage = 'guidance';
+            } else if (path.includes('/services/tech-support')) {
+                this.currentPage = 'tech-support';
             } else if (path.includes('/services/catalog-access')) {
                 this.currentPage = 'catalog-access';
             } else if (path.includes('/services/faq')) {

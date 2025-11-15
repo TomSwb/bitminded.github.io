@@ -3,7 +3,7 @@
     "translation": {
       "services-subnav-overview": "Overview",
       "services-subnav-commissioning": "Commissioning",
-      "services-subnav-guidance": "Guidance",
+      "services-subnav-tech-support": "Tech Support",
       "services-subnav-catalog-access": "Catalog Access",
       "services-subnav-faq": "FAQ"
     }
@@ -12,7 +12,7 @@
     "translation": {
       "services-subnav-overview": "Resumen",
       "services-subnav-commissioning": "Encargos",
-      "services-subnav-guidance": "Orientación",
+      "services-subnav-tech-support": "Soporte Técnico",
       "services-subnav-catalog-access": "Acceso al Catálogo",
       "services-subnav-faq": "Preguntas Frecuentes"
     }
@@ -21,7 +21,7 @@
     "translation": {
       "services-subnav-overview": "Aperçu",
       "services-subnav-commissioning": "Commandes",
-      "services-subnav-guidance": "Conseils",
+      "services-subnav-tech-support": "Support Technique",
       "services-subnav-catalog-access": "Accès au Catalogue",
       "services-subnav-faq": "FAQ"
     }
@@ -30,7 +30,7 @@
     "translation": {
       "services-subnav-overview": "Übersicht",
       "services-subnav-commissioning": "Aufträge",
-      "services-subnav-guidance": "Beratung",
+      "services-subnav-tech-support": "Technischer Support",
       "services-subnav-catalog-access": "Katalogzugang",
       "services-subnav-faq": "FAQ"
     }
