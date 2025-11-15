@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (element.tagName === 'SELECT' || element.tagName === 'OPTION') {
                 element.textContent = translation;
+            } else if (element.tagName === 'A') {
+                // For links, update textContent but preserve href
+                element.textContent = translation;
             } else {
                 element.textContent = translation;
             }

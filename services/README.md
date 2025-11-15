@@ -51,7 +51,7 @@ See [PRICING-STRATEGY.md](./PRICING-STRATEGY.md) for comprehensive pricing analy
 - Supporter Tier: CHF 35/month
 
 ✅ **Commissioning:**
-- Personal Project Intake: CHF 30 (credited)
+- Personal Project Intake: CHF 20 (credited)
 - Simple App: CHF 450-750 (1-2 weeks)
 - Standard App: CHF 850-1,250 (2-4 weeks)
 - Complex App: CHF 1,350-1,950 (6+ weeks)

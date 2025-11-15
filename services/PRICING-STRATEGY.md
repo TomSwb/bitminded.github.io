@@ -34,12 +34,11 @@
 
 | Service | Current Price | Duration | Status |
 |---------|--------------|----------|--------|
-| **Personal Project Intake** | CHF 30 (credited) | Quick call | ✅ Implemented |
-| **Discovery Intensive** | CHF 600-900 | 4-6 hours | ✅ Implemented |
-| **Build Sprints** | CHF 1.2k-1.5k | per 30-hour block | ✅ Implemented |
-| **Mini Build Sprint** | CHF 850 | ~18-20 hours | ✅ Implemented |
-| **Additional Features** | CHF 80-120 | per feature | ✅ Implemented |
-| **Starter Customization** | CHF 350-550 | After intake | ✅ Implemented |
+| **Personal Project Intake** | CHF 20 (credited) | Quick call | ✅ Implemented |
+| **Simple App** | CHF 450-750 | 1-2 weeks | ✅ Implemented |
+| **Standard App** | CHF 850-1,250 | 2-4 weeks | ✅ Implemented |
+| **Complex App** | CHF 1,350-1,950 | 6+ weeks | ✅ Implemented |
+| **Commission a Feature** | CHF 20-150 | depending on difficulty | ✅ Implemented |
 
 ### Guidance Services
 
@@ -95,40 +94,43 @@
 
 ---
 
-## 🎯 Modular Pricing Recommendations
+## 🎯 Project-Based Pricing Structure
 
 ### Commissioning: Project Complexity Scale
 
-**Key Insight:** Apps can vary significantly in complexity. Simple apps can be built in 1 week (1 sprint), while complex apps may need 3-4 sprints.
+**Key Insight:** Apps can vary significantly in complexity. Simple apps can be built in 1-2 weeks, while complex apps may take 6+ weeks.
 
-#### Simple App (1 Sprint - 1 Week)
-- **Duration:** 30-40 hours of development
-- **Price:** CHF 1,200-1,500
+#### Simple App
+- **Duration:** 1-2 weeks
+- **Price:** CHF 450-750
 - **Perfect for:** Personal tools, simple automations, focused utilities
 - **Delivery:** 1-2 weeks
 
-#### Standard App (2 Sprints - 2-3 Weeks)
-- **Duration:** 60-80 hours of development
-- **Price:** CHF 2,400-3,000
+#### Standard App
+- **Duration:** 2-4 weeks
+- **Price:** CHF 850-1,250
 - **Perfect for:** Small business tools, multi-feature apps
-- **Delivery:** 3-4 weeks
+- **Delivery:** 2-4 weeks
 
-#### Complex App (3-4 Sprints - 6-12 Weeks)
-- **Duration:** 90-120 hours of development
-- **Price:** CHF 3,600-6,000
+#### Complex App
+- **Duration:** 6+ weeks
+- **Price:** CHF 1,350-1,950
 - **Perfect for:** Multi-user systems, advanced integrations
-- **Delivery:** 6-12 weeks
+- **Delivery:** 6+ weeks
 
 ### Current Pricing Breakdown
 
 **Effective Hourly Rate:**
-- CHF 1.2k-1.5k per 30-hour block = CHF 40-50/hour
+- Simple App (CHF 450-750 for 1-2 weeks): ~CHF 40-50/hour
+- Standard App (CHF 850-1,250 for 2-4 weeks): ~CHF 40-50/hour
+- Complex App (CHF 1,350-1,950 for 6+ weeks): ~CHF 40-50/hour
 - **Assessment:** Appropriate for "petite gens" market (accessible, not premium agency pricing)
 
-**Modular Options:**
-- Mini Sprint (18-20h): CHF 850 = CHF 42-47/hour
-- Standard Sprint (30h): CHF 1.2k-1.5k = CHF 40-50/hour
-- Additional Features: CHF 80-120 per feature
+**Project-Based Pricing:**
+- Simple App: CHF 450-750 (1-2 weeks) - Personal tools, simple automations, focused utilities
+- Standard App: CHF 850-1,250 (2-4 weeks) - Small business tools, multi-feature apps
+- Complex App: CHF 1,350-1,950 (6+ weeks) - Multi-user systems, advanced integrations
+- Commission a Feature: CHF 20-150 (depending on difficulty) - New features for existing catalog tools
 
 ---
 
@@ -146,11 +148,12 @@
 
 ### Why Current Pricing Works
 
-1. **Commissioning (CHF 40-50/hour):**
-   - ✅ Accessible to individuals (CHF 850-1,500 for simple apps)
+1. **Commissioning (CHF 40-50/hour effective rate):**
+   - ✅ Accessible to individuals (CHF 450-750 for simple apps)
    - ✅ Not competing with premium agencies (CHF 80-150/hour)
    - ✅ Serves "petite gens" market effectively
    - ✅ Sustainable for full-time work (35-45 hours/week)
+   - ✅ Simplified pricing structure (removed Discovery Intensive and Starter Customization)
 
 2. **Guidance Services (CHF 45-180):**
    - ✅ Accessible pricing for families and individuals
@@ -167,17 +170,17 @@
 ### Capacity Analysis (35-45 hours/week)
 
 **Per Month (160-180 hours):**
-- 1 simple app (30-40h) + 1 standard app (60-80h) = 90-120h
+- 1 simple app (1-2 weeks) + 1 standard app (2-4 weeks) = ~90-120h
 - 5-8 guidance sessions (prep + delivery) = 10-20h
 - Admin/marketing/catalog work = 30-40h
 - Buffer = 10-20h
 - **Total: 140-180 hours/month** ✅ Fits capacity
 
 **Revenue Potential:**
-- 2 commissions/month: CHF 2.4k-3.0k
+- 2 commissions/month: CHF 1.3k-2.0k (simple + standard)
 - 5-8 guidance sessions: CHF 350-1,440
 - Catalog subscriptions: CHF 1.6k-5.0k (200-625 subscribers)
-- **Total: CHF 4.4k-9.4k/month** = CHF 52.8k-112.8k/year
+- **Total: CHF 3.3k-8.4k/month** = CHF 39.6k-100.8k/year
 
 ---
 
@@ -185,13 +188,14 @@
 
 ### 1. Pricing for "Petite Gens" (Not Premium Agencies)
 
-**Decision:** Keep commissioning at CHF 40-50/hour (CHF 850-1,500 per sprint)
+**Decision:** Keep commissioning at CHF 40-50/hour effective rate (CHF 450-1,950 per project)
 
 **Rationale:**
 - Focus on accessibility, not premium positioning
 - Serve individuals and small projects
 - Build volume through accessibility
 - Differentiate from expensive agencies (CHF 80-150/hour)
+- Simplified pricing structure (project-based, not sprint-based)
 
 ### 2. Volume Strategy for Catalog
 
@@ -203,15 +207,18 @@
 - Lower barrier to entry = more subscribers
 - 625 subscribers at CHF 8/month = CHF 5,000/month (same revenue as 278 at CHF 18/month)
 
-### 3. Modular Pricing for Commissioning
+### 3. Project-Based Pricing for Commissioning
 
-**Decision:** Keep modular pricing structure (Mini, Standard, Additional Features)
+**Decision:** Simplified to project-based pricing (Simple/Standard/Complex apps)
 
 **Rationale:**
 - Apps vary significantly in complexity
-- Simple apps can be built in 1 week (1 sprint)
-- Complex apps may need 3-4 sprints
-- Modular pricing allows clients to pay for what they need
+- Simple apps can be built in 1-2 weeks
+- Standard apps take 2-4 weeks
+- Complex apps take 6+ weeks
+- Project-based pricing is clearer and more accessible than sprint-based terminology
+- Discovery is now included in Personal Project Intake (CHF 20, credited)
+- Customization replaced by "Commission a Feature" for existing catalog tools
 
 ### 4. Guidance Services Complement Commissioning
 
@@ -237,37 +244,37 @@
 
 ## 💵 Revenue Scenarios
 
-### Scenario A: Simple Apps Focus (1 Sprint Each)
+### Scenario A: Simple Apps Focus
 
 **Monthly:**
-- 2-3 commissions: CHF 2.4k-4.5k
+- 2-3 simple app commissions: CHF 900-2,250
 - 5-8 guidance sessions: CHF 350-1,440
 - Catalog (200 subscribers at CHF 8): CHF 1,600
-- **Total: CHF 4.4k-7.5k/month** = CHF 52.8k-90k/year
+- **Total: CHF 2.9k-5.3k/month** = CHF 34.8k-63.6k/year
 
 ### Scenario B: Mixed Portfolio
 
 **Monthly:**
-- 1 standard + 1 simple commission: CHF 3.6k-4.5k
+- 1 standard + 1 simple commission: CHF 1.3k-2.0k
 - 5-8 guidance sessions: CHF 350-1,440
 - Catalog (500 subscribers at CHF 8): CHF 4,000
-- **Total: CHF 8k-9.9k/month** = CHF 96k-118.8k/year
+- **Total: CHF 5.7k-7.4k/month** = CHF 68.4k-88.8k/year
 
 ### Scenario C: Guidance-Heavy
 
 **Monthly:**
-- 1 commission: CHF 1.2k-1.5k
+- 1 simple commission: CHF 450-750
 - 10-15 guidance sessions: CHF 700-2,700
 - Catalog (300 subscribers at CHF 8): CHF 2,400
-- **Total: CHF 4.3k-6.6k/month** = CHF 51.6k-79.2k/year
+- **Total: CHF 3.6k-5.9k/month** = CHF 43.2k-70.8k/year
 
 ### Scenario D: Volume Strategy Success
 
 **Monthly:**
-- 1 commission: CHF 1.2k-1.5k
+- 1 simple commission: CHF 450-750
 - 5 guidance sessions: CHF 350-700
 - Catalog (1,000 subscribers at CHF 8): CHF 8,000
-- **Total: CHF 9.6k-10.2k/month** = CHF 115.2k-122.4k/year
+- **Total: CHF 8.8k-9.5k/month** = CHF 105.6k-114k/year
 
 ---
 
@@ -291,12 +298,15 @@
 - Accessible to "petite gens"
 - Still sustainable with commissions and guidance
 
-#### Commissioning (No Changes Needed)
+#### Commissioning (Simplified Structure)
 
-**Current pricing is appropriate:**
-- CHF 40-50/hour is accessible
+**Current pricing structure:**
+- Project-based pricing (Simple/Standard/Complex apps)
+- CHF 450-1,950 per project (CHF 40-50/hour effective rate)
+- Removed Discovery Intensive and Starter Customization services
+- Discovery now included in Personal Project Intake (CHF 20, credited)
+- Customization replaced by "Commission a Feature" for existing catalog tools
 - Serves "petite gens" market effectively
-- Modular pricing allows flexibility
 - Sustainable for full-time work
 
 #### Guidance Services (No Changes Needed)
@@ -310,10 +320,11 @@
 ### Content Updates Needed
 
 1. **Commissioning Page:**
-   - Add "Project Complexity" section
-   - Clarify that simple apps can be built in 1 week (1 sprint)
-   - Update messaging: "Apps range from simple (1 sprint) to complex (3-4 sprints)"
-   - Emphasize modular pricing
+   - ✅ Updated to project-based pricing (Simple/Standard/Complex apps)
+   - ✅ Removed sprint terminology
+   - ✅ Removed Discovery Intensive and Starter Customization
+   - ✅ Discovery included in Personal Project Intake
+   - ✅ Customization replaced by "Commission a Feature"
 
 2. **Catalog Access Page:**
    - Update pricing to CHF 8/month (from CHF 18/month)
@@ -400,11 +411,13 @@
    - CHF 8/month is accessible and sustainable
    - 625 subscribers = CHF 5,000/month revenue
 
-3. **Modular Pricing:**
+3. **Project-Based Pricing:**
    - Apps vary significantly in complexity
-   - Simple apps can be built in 1 week (1 sprint)
-   - Complex apps may need 3-4 sprints
-   - Modular pricing allows flexibility
+   - Simple apps can be built in 1-2 weeks
+   - Standard apps take 2-4 weeks
+   - Complex apps take 6+ weeks
+   - Project-based pricing is clearer and more accessible
+   - Discovery included in intake, customization replaced by feature commissions
 
 4. **Capacity:**
    - Full-time work (35-45 hours/week)
@@ -457,10 +470,13 @@
 ### January 2025
 - Initial pricing strategy analysis
 - Volume strategy recommendation (CHF 8/month)
-- Modular pricing documentation
+- Project-based pricing documentation
 - Market assessment for Vaud
 - Revenue scenario calculations
 - Implementation notes for proposed changes
+- **Removed Discovery Intensive and Starter Customization services**
+- **Simplified commissioning to project-based pricing (Simple/Standard/Complex apps)**
+- **Updated revenue scenarios to reflect new pricing structure**
 
 ---
 
