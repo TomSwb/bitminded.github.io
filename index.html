@@ -62,6 +62,9 @@
     
     <!-- Main CSS -->
     <link rel="stylesheet" href="css/main.css">
+    <!-- Preload hero images for faster theme swap -->
+    <link rel="preload" as="image" href="icons/here-header-dark.jpeg">
+    <link rel="preload" as="image" href="icons/here-header-light.jpeg">
 </head>
 
 <body>
@@ -81,7 +84,7 @@
     <main>
         <!-- Hero Section -->
         <section class="hero">
-            <img src="icons/hero-header.jpeg" alt="BitMinded - Handcrafted Software" class="hero__image">
+            <img id="hero-image" src="icons/here-header-dark.jpeg" alt="BitMinded - Handcrafted Software" class="hero__image">
             <div class="hero__content">
                 <h1 id="main-title" class="hero__title translatable-content">We Build. We Guide.</h1>
                 <p id="hero-subtitle" class="hero__subtitle translatable-content">We build artisanal apps for everyday needs — and help you feel confident with any technology you use.</p>
@@ -94,10 +97,10 @@
         <div class="mission-toggle">
             <div class="mission-toggle__container">
                 <button class="mission-toggle__button mission-toggle__button--active" id="mission-toggle-build" data-mission="build">
-                    <span class="mission-toggle__button-text translatable-content" id="mission-toggle-build-text">We Build</span>
+                    <span class="mission-toggle__button-text translatable-content" id="mission-toggle-build-text" data-translate="mission-toggle-build">We Build</span>
                 </button>
                 <button class="mission-toggle__button" id="mission-toggle-guide" data-mission="guide">
-                    <span class="mission-toggle__button-text translatable-content" id="mission-toggle-guide-text">We Guide</span>
+                    <span class="mission-toggle__button-text translatable-content" id="mission-toggle-guide-text" data-translate="mission-toggle-guide">We Guide</span>
                 </button>
             </div>
         </div>
@@ -245,6 +248,7 @@
     <!-- i18next CDN language-switcher-->
     <!-- other scripts (includes loading screen) -->
     <script src="js/script.js"></script>
+    <script src="js/hero-image.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
     <!--- language switcher-->
     <script src="js/lang-index/lang-index.js"></script>
