@@ -214,6 +214,22 @@
   width: 66.666%;
 }
 
+.tech-support-reduced-badge {
+  margin: var(--spacing-md, 1rem) auto 0 auto;
+  width: 66.666%;
+  display: flex;
+  justify-content: center;
+}
+.tech-support-reduced-badge > span {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.35));
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+}
+
 .tech-support-tab {
   appearance: none;
   background: transparent;
@@ -397,6 +413,7 @@
 
 .tech-support-service-card__cta {
   text-align: center;
+  margin-top: var(--spacing-lg, 1.5rem);
 }
 
 .tech-support-button {
@@ -443,6 +460,18 @@
 /* Comparison Table */
 .tech-support-comparison {
   padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+/* Two-column pricing grid for policies and reduced fares */
+.tech-support-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xl, 2rem);
+}
+@media (max-width: 1200px) {
+  .tech-support-pricing-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Pricing + FAQ side-by-side */
@@ -497,6 +526,11 @@
   border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.2));
 }
 
+/* Render line breaks in travel details cell */
+td[data-i18n="tech-support-policies-travel-details"] {
+  white-space: pre-line;
+}
+
 .tech-support-comparison-table tbody tr:hover {
   background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
 }
@@ -512,9 +546,16 @@
 
 .tech-support-faq-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, minmax(280px, 1fr));
   gap: var(--spacing-md, 1rem);
   margin-top: var(--spacing-lg, 1.5rem);
+}
+
+/* FAQ columns: stack items within each column */
+.tech-support-faq-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 1rem);
 }
 
 .tech-support-faq-item {
@@ -645,6 +686,12 @@
   grid-column: 3;
 }
 
+/* Make CTA inside each tabpanel span full width of the grid */
+#coaching-panel .tech-support-service-card__cta,
+#quickhelp-panel .tech-support-service-card__cta,
+#homesetup-panel .tech-support-service-card__cta {
+  grid-column: 1 / -1;
+}
 /* Coaching: center 3 cards on desktop, keep others untouched */
 #coaching-panel .tech-support-services-grid {
   grid-template-columns: repeat(3, 1fr);
