@@ -197,100 +197,370 @@
   margin-top: auto;
 }
 
-/* Comparison Table */
-.catalog-access-comparison {
+/* Feature Comparison Section (replaces Comparison Table + Benefits) */
+.catalog-access-feature-comparison {
   padding: var(--spacing-lg, 1.5rem) 0;
 }
 
-.catalog-access-comparison-table-wrapper {
-  overflow-x: auto;
-  margin-top: var(--spacing-lg, 1.5rem);
-  border-radius: 0.75rem;
-  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+.catalog-access-feature-comparison-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl, 2rem);
+  margin-top: var(--spacing-xl, 2rem);
 }
 
-.catalog-access-comparison-table {
-  width: 100%;
-  border-collapse: collapse;
+/* Desktop: Side-by-side layout */
+@media (min-width: 1024px) {
+  .catalog-access-feature-comparison-wrapper {
+    grid-template-columns: 1fr 2fr;
+    gap: var(--spacing-2xl, 3rem);
+    align-items: start;
+  }
+}
+
+/* Left: Feature Information Card */
+.catalog-access-features-info {
+  padding: var(--spacing-xl, 2rem);
+  border-radius: 1rem;
   background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  position: sticky;
+  top: calc(var(--spacing-xl, 2rem) + 80px); /* Account for header */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
 }
 
-.catalog-access-comparison-table thead {
-  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
-}
-
-.catalog-access-comparison-table th {
-  padding: var(--spacing-md, 1rem);
-  text-align: left;
+/* Create header section in left card to match pricing cards */
+.catalog-access-features-info__title {
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  border-bottom: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+  flex-shrink: 0;
+  position: relative;
 }
 
-.catalog-access-comparison-table th:first-child {
-  font-weight: 700;
-}
-
-.catalog-access-comparison-table th:not(:first-child) {
-  text-align: center;
-}
-
-.catalog-access-comparison-table td {
-  padding: var(--spacing-md, 1rem);
+.catalog-access-features-info__description {
+  font-size: 0.9rem;
+  line-height: 1.5;
   color: var(--color-text-primary);
-  opacity: 0.9;
-  border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.2));
+  opacity: 0.85;
+  margin: 0 0 2.6rem 0;
+  flex-shrink: 0;
+  min-height: 2.7rem; /* Ensure two lines of text */
 }
 
-.catalog-access-comparison-table td:first-child {
-  font-weight: 500;
+/* Add spacer after description to match pricing card header height */
+.catalog-access-features-info__description::after {
+  content: '';
+  display: block;
+  height: calc(150px - 1.5rem - 2.7rem - 0.75rem - 2.6rem); /* Match pricing card header minus title (1.5rem) and two-line description (2.7rem) and margins */
+  margin-top: 0;
 }
 
-.catalog-access-comparison-table td:not(:first-child) {
-  text-align: center;
+.catalog-access-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 0;
+  flex-grow: 1;
 }
 
-.catalog-access-comparison-table tbody tr:hover {
-  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+.catalog-access-feature-item {
+  padding: var(--spacing-sm, 0.75rem) 0;
+  border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.1));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: fit-content;
 }
 
-.catalog-access-comparison-table tbody tr:last-child td {
+
+.catalog-access-feature-item:last-child {
   border-bottom: none;
 }
 
-/* Benefits Section */
-.catalog-access-benefits {
-  padding: var(--spacing-lg, 1.5rem) 0;
+/* Specific heights for each feature row to ensure alignment - matching title + description content */
+.catalog-access-feature-item:nth-child(1) {
+  min-height: 6.5rem; /* Tool Access - title + 3 lines description */
 }
 
-.catalog-access-benefits-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-lg, 1.5rem);
-  margin-top: var(--spacing-lg, 1.5rem);
+.catalog-access-feature-item:nth-child(2) {
+  min-height: 6.5rem; /* Updates - title + 3 lines description */
 }
 
-.catalog-access-benefit {
-  padding: var(--spacing-lg, 1.5rem);
-  border-radius: 0.75rem;
-  background: var(--color-surface, rgba(15,23,42,0.45));
-  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
-  text-align: center;
+.catalog-access-feature-item:nth-child(3) {
+  min-height: 6rem; /* Release Notes - title + 3 lines description */
 }
 
-.catalog-access-benefit__title {
-  font-size: 1.25rem;
+.catalog-access-feature-item:nth-child(4) {
+  min-height: 5.5rem; /* Free Trial - title + 2 lines description */
+}
+
+.catalog-access-feature-item:nth-child(5) {
+  min-height: 6.5rem; /* Feature Voting - title + 3 lines description (longer text with proposal mention) */
+}
+
+.catalog-access-feature-item__title {
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--color-primary, #6366f1);
-  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+  margin: 0 0 var(--spacing-xs, 0.5rem) 0;
 }
 
-.catalog-access-benefit__text {
+.catalog-access-feature-item__description {
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--color-text-primary);
   opacity: 0.85;
   margin: 0;
+}
+
+/* Right: Pricing Comparison Cards */
+.catalog-access-pricing-comparison {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg, 1.5rem);
+  align-items: stretch;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .catalog-access-pricing-comparison {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+  }
+}
+
+/* Pricing Toggle Button */
+.catalog-access-pricing-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: var(--spacing-lg, 1.5rem) 0;
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+  .catalog-access-pricing-toggle-wrapper {
+    position: absolute;
+    top: -3rem;
+    left: 66.666%;
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: 10;
+    grid-column: auto;
+  }
+}
+
+.catalog-access-pricing-toggle {
+  padding: var(--spacing-sm, 0.75rem) var(--spacing-lg, 1.5rem);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.catalog-access-pricing-toggle:hover {
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+  border-color: var(--color-primary, #6366f1);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
+}
+
+.catalog-access-pricing-toggle:active {
+  transform: translateY(0);
+}
+
+.catalog-access-pricing-toggle__text {
+  display: block;
+}
+
+.catalog-access-pricing-comparison-card {
+  padding: var(--spacing-xl, 2rem);
+  border-radius: 1rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.catalog-access-pricing-comparison-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(15,23,42,0.25));
+  border-color: var(--color-primary, #6366f1);
+}
+
+.catalog-access-pricing-comparison-card--featured {
+  border-color: var(--color-primary, #6366f1);
+  border-width: 3px;
+}
+
+.catalog-access-pricing-comparison-card__badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--color-primary, #6366f1), var(--color-secondary, #d286bd));
+  color: var(--color-text-dark, #fff);
+  padding: 0.4rem 1rem;
+  border-radius: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  z-index: 10;
+  animation: pulse-badge 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, box-shadow;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.6);
+    transform: translateX(-50%) scale(1.06);
+  }
+}
+
+.catalog-access-pricing-comparison-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md, 1rem) 0;
+}
+
+/* Header section wrapper - ensures consistent height before features */
+.catalog-access-pricing-comparison-card__header {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.catalog-access-pricing-comparison-card__description {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: var(--spacing-sm, 0.75rem) 0 0 0;
+  text-align: center;
+}
+
+.catalog-access-pricing-comparison-card__title,
+.catalog-access-pricing-comparison-card__price,
+.catalog-access-pricing-comparison-card__price-group,
+.catalog-access-pricing-comparison-card__duration {
+  flex-shrink: 0;
+}
+
+.catalog-access-pricing-comparison-card__price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 var(--spacing-xs, 0.5rem) 0;
+  line-height: 1;
+}
+
+
+.catalog-access-pricing-comparison-card__duration {
+  font-size: 0.875rem;
+  color: var(--color-primary, #6366f1);
+  margin: 0;
+  font-weight: 500;
+}
+
+.catalog-access-pricing-comparison-card__features {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 0.5rem;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.catalog-access-feature-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm, 0.75rem) 0;
+  border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.1));
+  min-height: fit-content;
+}
+
+
+.catalog-access-feature-row:last-child {
+  border-bottom: none;
+}
+
+/* Specific heights for each feature row to match left card - separators align */
+.catalog-access-feature-row:nth-child(1) {
+  min-height: 6.5rem; /* Tool Access - matches left card */
+}
+
+.catalog-access-feature-row:nth-child(2) {
+  min-height: 6.5rem; /* Updates - matches left card */
+}
+
+.catalog-access-feature-row:nth-child(3) {
+  min-height: 6rem; /* Release Notes - matches left card */
+}
+
+.catalog-access-feature-row:nth-child(4) {
+  min-height: 5.5rem; /* Free Trial - matches left card */
+}
+
+.catalog-access-feature-row:nth-child(5) {
+  min-height: 6.5rem; /* Feature Voting - matches left card */
+}
+
+.catalog-access-feature-row__label {
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  flex: 1;
+}
+
+.catalog-access-feature-row__indicator {
+  font-size: 1.25rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.catalog-access-feature-row__indicator--check {
+  color: var(--color-primary, #6366f1);
+}
+
+.catalog-access-feature-row__indicator--cross {
+  color: var(--color-text-primary);
+  opacity: 0.3;
+}
+
+.catalog-access-pricing-comparison-card__cta {
+  margin-top: auto;
 }
 
 /* FAQ Section */
@@ -471,19 +741,6 @@
     grid-template-columns: 1fr;
   }
 
-  .catalog-access-benefits-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .catalog-access-comparison-table-wrapper {
-    overflow-x: scroll;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .catalog-access-comparison-table {
-    min-width: 600px;
-  }
-
   .catalog-access-cta__links {
     flex-direction: column;
     align-items: stretch;
@@ -510,4 +767,17 @@
     padding: var(--spacing-md, 1rem);
   }
 }
+
+/* Mobile: Feature Comparison Section */
+@media (max-width: 1023px) {
+  .catalog-access-features-info {
+    position: static;
+    margin-bottom: var(--spacing-lg, 1.5rem);
+  }
+
+  .catalog-access-pricing-comparison {
+    grid-template-columns: 1fr;
+  }
+}
+
 

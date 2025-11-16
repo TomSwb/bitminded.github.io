@@ -38,149 +38,155 @@
         <!-- Services Sub-Navigation (only on services pages) -->
         <div id="services-subnav-container"></div>
 
-        <!-- Pricing Tiers Section -->
-        <section class="catalog-access-pricing">
+        <!-- Pricing Tiers Section with Feature Comparison -->
+        <section class="catalog-access-feature-comparison">
             <h2 class="catalog-access-section__title translatable-content" data-i18n="catalog-access-pricing-title">Pricing Tiers</h2>
             <p class="catalog-access-section__description translatable-content" data-i18n="catalog-access-pricing-description">
                 Select the access level that works best for you. All tiers include lifetime updates and support for the tools you purchase.
             </p>
-            <div class="catalog-access-pricing-grid">
-                <!-- Single Tool License -->
-                <div class="catalog-access-pricing-card">
-                    <h3 class="catalog-access-pricing-card__title translatable-content" data-i18n="catalog-access-single-tool-title">Single Tool License</h3>
-                    <div class="catalog-access-pricing-card__price">CHF 25-60</div>
-                    <p class="catalog-access-pricing-card__duration translatable-content" data-i18n="catalog-access-single-tool-duration">one-time</p>
-                    <p class="catalog-access-pricing-card__description translatable-content" data-i18n="catalog-access-single-tool-description">Lifetime access to one finished artisanal app with minor updates.</p>
-                    <ul class="catalog-access-pricing-card__features">
-                        <li class="translatable-content" data-i18n="catalog-access-single-tool-feature-1">One tool selection</li>
-                        <li class="translatable-content" data-i18n="catalog-access-single-tool-feature-2">Lifetime access</li>
-                        <li class="translatable-content" data-i18n="catalog-access-single-tool-feature-3">Minor updates included</li>
-                        <li class="translatable-content" data-i18n="catalog-access-single-tool-feature-4">Perpetual license</li>
-                    </ul>
-                    <div class="catalog-access-pricing-card__cta">
-                        <button class="catalog-access-button catalog-access-button--primary catalog-access-button--coming-soon translatable-content" data-i18n="catalog-access-cta" disabled>Coming Soon</button>
+            <div class="catalog-access-feature-comparison-wrapper">
+                <!-- Left: Feature Information Card -->
+                <div class="catalog-access-features-info">
+                    <h3 class="catalog-access-features-info__title translatable-content" data-i18n="catalog-access-features-info-title">Features & Benefits</h3>
+                    <p class="catalog-access-features-info__description translatable-content" data-i18n="catalog-access-features-info-description">Learn about what each feature includes and compare which pricing tiers include them. Check the indicators on the right to see what's included in each plan.</p>
+                    <div class="catalog-access-features-list">
+                        <div class="catalog-access-feature-item">
+                            <h4 class="catalog-access-feature-item__title translatable-content" data-i18n="catalog-access-feature-tool-access-title">Tool Access</h4>
+                            <p class="catalog-access-feature-item__description translatable-content" data-i18n="catalog-access-feature-tool-access-description">Access to our collection of artisanal apps. Single tool licenses grant lifetime access to one tool, while memberships unlock everything.</p>
+                        </div>
+                        <div class="catalog-access-feature-item">
+                            <h4 class="catalog-access-feature-item__title translatable-content" data-i18n="catalog-access-feature-updates-title">Updates</h4>
+                            <p class="catalog-access-feature-item__description translatable-content" data-i18n="catalog-access-feature-updates-description">All tools receive regular updates. All licenses include updates for the purchased tool, while memberships get also new tools automatically.</p>
+                        </div>
+                        <div class="catalog-access-feature-item">
+                            <h4 class="catalog-access-feature-item__title translatable-content" data-i18n="catalog-access-feature-release-notes-title">Release Notes</h4>
+                            <p class="catalog-access-feature-item__description translatable-content" data-i18n="catalog-access-feature-release-notes-description">Stay informed about updates. Members receive private release notes with detailed information about new features and improvements.</p>
+                        </div>
+                        <div class="catalog-access-feature-item">
+                            <h4 class="catalog-access-feature-item__title translatable-content" data-i18n="catalog-access-feature-trial-title">Free Trial</h4>
+                            <p class="catalog-access-feature-item__description translatable-content" data-i18n="catalog-access-feature-trial-description">Try all tools risk-free before committing. Subscription tiers include a free trial period to explore the catalog.</p>
+                        </div>
+                        <div class="catalog-access-feature-item">
+                            <h4 class="catalog-access-feature-item__title translatable-content" data-i18n="catalog-access-feature-voting-title">Feature Voting</h4>
+                            <p class="catalog-access-feature-item__description translatable-content" data-i18n="catalog-access-feature-voting-description">Supporter tier members can vote on new features and improvements, and also propose their own features to any tool, helping shape the future of our catalog.</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- All-Tools Membership -->
-                <div class="catalog-access-pricing-card catalog-access-pricing-card--featured">
-                    <div class="catalog-access-pricing-card__badge translatable-content" data-i18n="catalog-access-popular-badge">Popular</div>
-                    <h3 class="catalog-access-pricing-card__title translatable-content" data-i18n="catalog-access-all-tools-title">All-Tools Membership</h3>
-                    <div class="catalog-access-pricing-card__price-group">
-                        <div class="catalog-access-pricing-card__price">CHF 18</div>
-                        <span class="catalog-access-pricing-card__price-period translatable-content" data-i18n="catalog-access-month">/month</span>
-                        <div class="catalog-access-pricing-card__price-alt">CHF 180<span class="translatable-content" data-i18n="catalog-access-year">/year</span></div>
-                        <div class="catalog-access-pricing-card__savings translatable-content" data-i18n="catalog-access-savings">Save 17% with yearly</div>
+                <!-- Right: Pricing Cards with Feature Indicators -->
+                <div class="catalog-access-pricing-comparison">
+                    <!-- Single Tool License Card -->
+                    <div class="catalog-access-pricing-comparison-card">
+                        <div class="catalog-access-pricing-comparison-card__header">
+                            <h3 class="catalog-access-pricing-comparison-card__title translatable-content" data-i18n="catalog-access-single-tool-title">Single Tool License</h3>
+                            <div class="catalog-access-pricing-comparison-card__price">CHF 2-25</div>
+                            <p class="catalog-access-pricing-comparison-card__duration translatable-content" data-i18n="catalog-access-single-tool-duration">varies by tool</p>
+                            <p class="catalog-access-pricing-comparison-card__description translatable-content" data-i18n="catalog-access-single-tool-description">Lifetime access to one finished artisanal app with updates. Pricing and payment model (one-time or subscription) vary by tool based on complexity and features.</p>
+                        </div>
+                        <div class="catalog-access-pricing-comparison-card__features">
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-tool-access-title">Tool Access</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-updates-title">Updates</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-release-notes-title">Release Notes</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--cross" aria-label="Not included">✗</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-trial-title">Free Trial</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--cross" aria-label="Not included">✗</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-voting-title">Feature Voting</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--cross" aria-label="Not included">✗</span>
+                            </div>
+                        </div>
+                        <div class="catalog-access-pricing-comparison-card__cta">
+                            <button class="catalog-access-button catalog-access-button--primary catalog-access-button--coming-soon translatable-content" data-i18n="catalog-access-cta" disabled>Coming Soon</button>
+                        </div>
                     </div>
-                    <p class="catalog-access-pricing-card__description translatable-content" data-i18n="catalog-access-all-tools-description">Unlock every catalog app, priority feature voting, and private release notes.</p>
-                    <ul class="catalog-access-pricing-card__features">
-                        <li class="translatable-content" data-i18n="catalog-access-all-tools-feature-1">Access to all catalog tools</li>
-                        <li class="translatable-content" data-i18n="catalog-access-all-tools-feature-2">Priority feature voting</li>
-                        <li class="translatable-content" data-i18n="catalog-access-all-tools-feature-3">Private release notes</li>
-                        <li class="translatable-content" data-i18n="catalog-access-all-tools-feature-4">Monthly or yearly billing</li>
-                        <li class="translatable-content" data-i18n="catalog-access-all-tools-feature-5">New tools automatically included</li>
-                    </ul>
-                    <div class="catalog-access-pricing-card__cta">
-                        <button class="catalog-access-button catalog-access-button--primary catalog-access-button--coming-soon translatable-content" data-i18n="catalog-access-cta" disabled>Coming Soon</button>
+
+                    <!-- All-Tools Membership Card -->
+                    <div class="catalog-access-pricing-comparison-card catalog-access-pricing-comparison-card--featured" data-pricing-toggle="true">
+                        <div class="catalog-access-pricing-comparison-card__badge translatable-content" data-i18n="catalog-access-popular-badge">Popular</div>
+                        <div class="catalog-access-pricing-comparison-card__header">
+                            <h3 class="catalog-access-pricing-comparison-card__title translatable-content" data-i18n="catalog-access-all-tools-title">All-Tools Membership</h3>
+                            <div class="catalog-access-pricing-comparison-card__price" data-price-monthly="5" data-price-yearly="55">CHF 5</div>
+                            <p class="catalog-access-pricing-comparison-card__duration" data-duration-monthly="/month" data-duration-yearly="/year">/month</p>
+                            <p class="catalog-access-pricing-comparison-card__description translatable-content" data-i18n="catalog-access-all-tools-description">Unlock every catalog app and private release notes. Price may increase over time as the catalog grows. New pricing will always be communicated prior to implementation.</p>
+                        </div>
+                        <div class="catalog-access-pricing-comparison-card__features">
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-tool-access-title">Tool Access</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-updates-title">Updates</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-release-notes-title">Release Notes</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-trial-title">Free Trial</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-voting-title">Feature Voting</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--cross" aria-label="Not included">✗</span>
+                            </div>
+                        </div>
+                        <div class="catalog-access-pricing-comparison-card__cta">
+                            <button class="catalog-access-button catalog-access-button--primary catalog-access-button--coming-soon translatable-content" data-i18n="catalog-access-cta" disabled>Coming Soon</button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Supporter Tier -->
-                <div class="catalog-access-pricing-card">
-                    <h3 class="catalog-access-pricing-card__title translatable-content" data-i18n="catalog-access-supporter-title">Supporter Tier</h3>
-                    <div class="catalog-access-pricing-card__price">CHF 35</div>
-                    <p class="catalog-access-pricing-card__duration translatable-content" data-i18n="catalog-access-month">/month</p>
-                    <p class="catalog-access-pricing-card__description translatable-content" data-i18n="catalog-access-supporter-description">All-Tools perks plus quarterly behind-the-scenes sessions and a 30-minute guidance call.</p>
-                    <ul class="catalog-access-pricing-card__features">
-                        <li class="translatable-content" data-i18n="catalog-access-supporter-feature-1">Everything in All-Tools Membership</li>
-                        <li class="translatable-content" data-i18n="catalog-access-supporter-feature-2">Quarterly behind-the-scenes sessions</li>
-                        <li class="translatable-content" data-i18n="catalog-access-supporter-feature-3">30-minute guidance call per quarter</li>
-                        <li class="translatable-content" data-i18n="catalog-access-supporter-feature-4">Early access to new features</li>
-                        <li class="translatable-content" data-i18n="catalog-access-supporter-feature-5">Direct feedback channel</li>
-                    </ul>
-                    <div class="catalog-access-pricing-card__cta">
-                        <button class="catalog-access-button catalog-access-button--primary catalog-access-button--coming-soon translatable-content" data-i18n="catalog-access-cta" disabled>Coming Soon</button>
+                    <!-- Pricing Toggle Button -->
+                    <div class="catalog-access-pricing-toggle-wrapper">
+                        <button class="catalog-access-pricing-toggle" id="pricing-toggle" aria-label="Toggle between monthly and yearly pricing">
+                            <span class="catalog-access-pricing-toggle__text" data-text-monthly="Show Yearly Prices" data-text-yearly="Show Monthly Prices">Show Yearly Prices</span>
+                        </button>
                     </div>
-                </div>
-            </div>
-        </section>
 
-        <!-- Comparison Table -->
-        <section class="catalog-access-comparison">
-            <h2 class="catalog-access-section__title translatable-content" data-i18n="catalog-access-comparison-title">Service Comparison</h2>
-            <div class="catalog-access-comparison-table-wrapper">
-                <table class="catalog-access-comparison-table">
-                    <thead>
-                        <tr>
-                            <th class="translatable-content" data-i18n="catalog-access-comparison-feature">Feature</th>
-                            <th class="translatable-content" data-i18n="catalog-access-single-tool-title">Single Tool</th>
-                            <th class="translatable-content" data-i18n="catalog-access-all-tools-title">All-Tools</th>
-                            <th class="translatable-content" data-i18n="catalog-access-supporter-title">Supporter</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-price">Price</td>
-                            <td>CHF 25-60</td>
-                            <td>CHF 18/mo or CHF 180/yr</td>
-                            <td>CHF 35/mo</td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-tools">Tool Access</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-one-tool">One tool</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-all-tools">All tools</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-all-tools">All tools</td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-updates">Updates</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-minor">Minor updates</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-full">Full updates</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-full">Full updates</td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-voting">Feature Voting</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-no">No</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-priority">Priority</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-priority">Priority</td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-release-notes">Release Notes</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-public">Public</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-private">Private</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-private">Private</td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-guidance">Guidance Calls</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-no">No</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-no">No</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-yes">Yes (30 min/quarter)</td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-sessions">Behind-the-Scenes</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-no">No</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-no">No</td>
-                            <td class="translatable-content" data-i18n="catalog-access-comparison-yes-quarterly">Yes (quarterly)</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Benefits Section -->
-        <section class="catalog-access-benefits">
-            <h2 class="catalog-access-section__title translatable-content" data-i18n="catalog-access-benefits-title">What You Get</h2>
-            <div class="catalog-access-benefits-grid">
-                <div class="catalog-access-benefit">
-                    <h3 class="catalog-access-benefit__title translatable-content" data-i18n="catalog-access-benefit-1-title">Lifetime Access</h3>
-                    <p class="catalog-access-benefit__text translatable-content" data-i18n="catalog-access-benefit-1-text">Once you purchase a tool, you have lifetime access. No recurring fees for single tool licenses.</p>
-                </div>
-                <div class="catalog-access-benefit">
-                    <h3 class="catalog-access-benefit__title translatable-content" data-i18n="catalog-access-benefit-2-title">Regular Updates</h3>
-                    <p class="catalog-access-benefit__text translatable-content" data-i18n="catalog-access-benefit-2-text">All tools receive regular updates and improvements. Members get priority access to new features.</p>
-                </div>
-                <div class="catalog-access-benefit">
-                    <h3 class="catalog-access-benefit__title translatable-content" data-i18n="catalog-access-benefit-3-title">Community Support</h3>
-                    <p class="catalog-access-benefit__text translatable-content" data-i18n="catalog-access-benefit-3-text">Join a community of users and provide feedback that shapes the future of our tools.</p>
+                    <!-- Supporter Tier Card -->
+                    <div class="catalog-access-pricing-comparison-card" data-pricing-toggle="true">
+                        <div class="catalog-access-pricing-comparison-card__header">
+                            <h3 class="catalog-access-pricing-comparison-card__title translatable-content" data-i18n="catalog-access-supporter-title">Supporter Tier</h3>
+                            <div class="catalog-access-pricing-comparison-card__price" data-price-monthly="8" data-price-yearly="88">CHF 8</div>
+                            <p class="catalog-access-pricing-comparison-card__duration" data-duration-monthly="/month" data-duration-yearly="/year">/month</p>
+                            <p class="catalog-access-pricing-comparison-card__description translatable-content" data-i18n="catalog-access-supporter-description">All-Tools perks plus the ability to propose your own features. Price may increase over time as the catalog grows. New pricing will always be communicated prior to implementation.</p>
+                        </div>
+                        <div class="catalog-access-pricing-comparison-card__features">
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-tool-access-title">Tool Access</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-updates-title">Updates</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-release-notes-title">Release Notes</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-trial-title">Free Trial</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                            <div class="catalog-access-feature-row">
+                                <span class="catalog-access-feature-row__label translatable-content" data-i18n="catalog-access-feature-voting-title">Feature Voting</span>
+                                <span class="catalog-access-feature-row__indicator catalog-access-feature-row__indicator--check" aria-label="Included">✓</span>
+                            </div>
+                        </div>
+                        <div class="catalog-access-pricing-comparison-card__cta">
+                            <button class="catalog-access-button catalog-access-button--primary catalog-access-button--coming-soon translatable-content" data-i18n="catalog-access-cta" disabled>Coming Soon</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -195,7 +201,7 @@
                         <span class="catalog-access-faq-item__icon" aria-hidden="true">+</span>
                     </button>
                     <div class="catalog-access-faq-item__answer">
-                        <p class="translatable-content" data-i18n="catalog-access-faq-1-answer">When our booking system is ready, you'll be able to browse our catalog, select a tool, and purchase a one-time license. The price varies by tool (CHF 25-60) based on complexity and features.</p>
+                        <p class="translatable-content" data-i18n="catalog-access-faq-1-answer">When our booking system is ready, you'll be able to browse our catalog, select a tool, and purchase a one-time license. The price varies by tool (CHF 2-25) based on complexity and features.</p>
                     </div>
                 </div>
                 <div class="catalog-access-faq-item">
@@ -245,11 +251,11 @@
                 </div>
                 <div class="catalog-access-faq-item">
                     <button class="catalog-access-faq-item__button" aria-expanded="false">
-                        <span class="catalog-access-faq-item__question translatable-content" data-i18n="catalog-access-faq-7-question">What's included in the Supporter Tier guidance calls?</span>
+                        <span class="catalog-access-faq-item__question translatable-content" data-i18n="catalog-access-faq-7-question">What's included in the Supporter Tier feature voting?</span>
                         <span class="catalog-access-faq-item__icon" aria-hidden="true">+</span>
                     </button>
                     <div class="catalog-access-faq-item__answer">
-                        <p class="translatable-content" data-i18n="catalog-access-faq-7-answer">Supporter Tier members receive one 30-minute guidance call per quarter. These calls can cover tech questions, tool usage, digital wellbeing, or any topic related to our services. You'll also receive quarterly behind-the-scenes sessions about upcoming features and developments.</p>
+                        <p class="translatable-content" data-i18n="catalog-access-faq-7-answer">Supporter Tier members can vote on new features and improvements for any tool. Additionally, they can propose their own features to any tool, helping shape the future of our catalog.</p>
                     </div>
                 </div>
             </div>
