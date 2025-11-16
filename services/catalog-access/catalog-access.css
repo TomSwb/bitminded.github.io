@@ -233,13 +233,20 @@
 }
 
 /* Create header section in left card to match pricing cards */
+.catalog-access-features-info__header {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
 .catalog-access-features-info__title {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-sm, 0.75rem) 0;
   flex-shrink: 0;
-  position: relative;
 }
 
 .catalog-access-features-info__description {
@@ -247,17 +254,9 @@
   line-height: 1.5;
   color: var(--color-text-primary);
   opacity: 0.85;
-  margin: 0 0 2.6rem 0;
+  margin: var(--spacing-sm, 0.75rem) 0 0 0;
   flex-shrink: 0;
   min-height: 2.7rem; /* Ensure two lines of text */
-}
-
-/* Add spacer after description to match pricing card header height */
-.catalog-access-features-info__description::after {
-  content: '';
-  display: block;
-  height: calc(150px - 1.5rem - 2.7rem - 0.75rem - 2.6rem); /* Match pricing card header minus title (1.5rem) and two-line description (2.7rem) and margins */
-  margin-top: 0;
 }
 
 .catalog-access-features-list {
@@ -269,7 +268,7 @@
 }
 
 .catalog-access-feature-item {
-  padding: var(--spacing-sm, 0.75rem) 0;
+  padding: var(--spacing-md, 1rem) 0;
   border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.1));
   display: flex;
   flex-direction: column;
@@ -341,6 +340,7 @@
   align-items: center;
   margin: var(--spacing-lg, 1.5rem) 0;
   grid-column: 1 / -1;
+  order: 1; /* Appear after first card (Single Tool) on mobile */
 }
 
 @media (min-width: 768px) {
@@ -352,6 +352,7 @@
     margin: 0;
     z-index: 10;
     grid-column: auto;
+    order: 0; /* Reset order on desktop */
   }
 }
 
@@ -396,6 +397,22 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  order: 0; /* Default order */
+}
+
+/* First card (Single Tool) */
+.catalog-access-pricing-comparison-card:nth-child(1) {
+  order: 0;
+}
+
+/* Second card (All-Tools/Popular) */
+.catalog-access-pricing-comparison-card:nth-child(2) {
+  order: 2; /* Appear after toggle on mobile */
+}
+
+/* Supporter card (4th child, after toggle button) */
+.catalog-access-pricing-comparison-card:nth-child(4) {
+  order: 3; /* Appear last on mobile */
 }
 
 .catalog-access-pricing-comparison-card:hover {
@@ -500,7 +517,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-sm, 0.75rem) 0;
+  padding: var(--spacing-md, 1rem) 0;
   border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.1));
   min-height: fit-content;
 }
@@ -561,6 +578,7 @@
 
 .catalog-access-pricing-comparison-card__cta {
   margin-top: auto;
+  padding-top: var(--spacing-lg, 1.5rem);
 }
 
 /* FAQ Section */
@@ -777,6 +795,85 @@
 
   .catalog-access-pricing-comparison {
     grid-template-columns: 1fr;
+  }
+
+  /* Remove spacing between header and first feature row on mobile */
+  .catalog-access-pricing-comparison-card__features {
+    margin-top: 0;
+  }
+
+  /* Make headers clickable on mobile */
+  .catalog-access-pricing-comparison-card__header {
+    cursor: pointer;
+    position: relative;
+  }
+
+  /* Add toggle icon below header content on mobile */
+  .catalog-access-pricing-comparison-card__header::after {
+    content: '+';
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary, #6366f1);
+    transition: transform 0.3s ease;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .catalog-access-pricing-comparison-card__header[aria-expanded="true"]::after {
+    transform: rotate(45deg);
+  }
+
+  /* Make features collapsible on mobile */
+  .catalog-access-pricing-comparison-card__features {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, margin-top 0.3s ease;
+    margin-top: 0;
+  }
+
+  .catalog-access-pricing-comparison-card__header[aria-expanded="true"] + .catalog-access-pricing-comparison-card__features {
+    max-height: 2000px; /* Large enough to accommodate all features */
+    margin-top: 0;
+  }
+
+  /* Also make left feature card collapsible on mobile */
+  .catalog-access-features-info__header {
+    cursor: pointer;
+    position: relative;
+    min-height: auto; /* Dynamic height on mobile */
+  }
+
+  /* Add toggle icon below header content on mobile */
+  .catalog-access-features-info__header::after {
+    content: '+';
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary, #6366f1);
+    transition: transform 0.3s ease;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .catalog-access-features-info__header[aria-expanded="true"]::after {
+    transform: rotate(45deg);
+  }
+
+  .catalog-access-features-list {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .catalog-access-features-info__header[aria-expanded="true"] + .catalog-access-features-list {
+    max-height: 3000px; /* Large enough to accommodate all features */
+  }
+
+  /* Make left card height dynamic on mobile */
+  .catalog-access-features-info {
+    height: auto;
+    min-height: auto;
   }
 }
 

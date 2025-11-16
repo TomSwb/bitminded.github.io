@@ -35,6 +35,9 @@ class CatalogAccessPageLoader {
             // Initialize feature row alignment
             this.initFeatureRowAlignment();
 
+            // Initialize mobile collapsible cards
+            this.initMobileCollapsible();
+
             this.componentsLoaded = true;
             this.accordionInitialized = true;
             console.log('✅ Catalog Access page components loaded');
@@ -361,24 +364,29 @@ class CatalogAccessPageLoader {
     }
 
     alignHeaders() {
+        // Skip alignment on mobile (screens < 1024px) - left card should be dynamic
+        if (window.innerWidth < 1024) {
+            return;
+        }
+
         // Get the left feature card
         const leftFeatureCard = document.querySelector('.catalog-access-features-info');
+        const leftHeader = leftFeatureCard?.querySelector('.catalog-access-features-info__header');
         const leftTitle = leftFeatureCard?.querySelector('.catalog-access-features-info__title');
-        const leftDescription = leftFeatureCard?.querySelector('.catalog-access-features-info__description');
         const leftFirstFeature = leftFeatureCard?.querySelector('.catalog-access-feature-item:first-child');
         
         // Get all pricing card headers and their first feature rows
         const pricingCards = document.querySelectorAll('.catalog-access-pricing-comparison-card');
         
-        if (!leftTitle || !leftFirstFeature || pricingCards.length === 0) {
+        if (!leftHeader || !leftTitle || !leftFirstFeature || pricingCards.length === 0) {
             return;
         }
 
         let maxHeaderHeight = 0;
 
         // Reset all heights to get natural measurements
-        if (leftDescription) {
-            leftDescription.style.marginBottom = '';
+        if (leftHeader) {
+            leftHeader.style.minHeight = '';
         }
         pricingCards.forEach(card => {
             const header = card.querySelector('.catalog-access-pricing-comparison-card__header');
@@ -390,10 +398,10 @@ class CatalogAccessPageLoader {
         // Force reflow to get accurate measurements
         void document.body.offsetHeight;
 
-        // Measure left card: from top of title to top of first feature item
-        const leftTitleRect = leftTitle.getBoundingClientRect();
+        // Measure left card: from top of header to top of first feature item
+        const leftHeaderRect = leftHeader.getBoundingClientRect();
         const leftFirstFeatureRect = leftFirstFeature.getBoundingClientRect();
-        const leftHeaderHeight = leftFirstFeatureRect.top - leftTitleRect.top;
+        const leftHeaderHeight = leftFirstFeatureRect.top - leftHeaderRect.top;
         maxHeaderHeight = Math.max(maxHeaderHeight, leftHeaderHeight);
 
         // Measure all pricing cards: from top of header to top of first feature row
@@ -440,15 +448,19 @@ class CatalogAccessPageLoader {
                 }
             });
 
-            // For left card, adjust the margin-bottom of description to match
-            const currentLeftHeight = leftFirstFeatureRect.top - leftTitleRect.top;
-            const neededSpacer = maxHeaderHeight - currentLeftHeight;
+            // For left card, adjust the min-height of header to match
+            const currentLeftHeight = leftFirstFeatureRect.top - leftHeaderRect.top;
+            const neededHeight = maxHeaderHeight - currentLeftHeight;
             
-            if (neededSpacer !== 0 && leftDescription) {
-                // Get current margin and adjust to achieve target distance
-                const currentMargin = parseFloat(window.getComputedStyle(leftDescription).marginBottom) || 0;
-                // Reset the ::after pseudo-element by removing margin, then add needed spacer
-                leftDescription.style.marginBottom = `${Math.max(0, currentMargin + neededSpacer)}px`;
+            if (neededHeight !== 0 && leftHeader) {
+                // Get the natural height of the header content
+                const headerContentHeight = leftHeader.scrollHeight;
+                // Set min-height to ensure the header is tall enough
+                leftHeader.style.minHeight = `${headerContentHeight + neededHeight}px`;
+            } else if (leftHeader) {
+                // Even if no adjustment needed, ensure min-height is set to natural height
+                const headerContentHeight = leftHeader.scrollHeight;
+                leftHeader.style.minHeight = `${headerContentHeight}px`;
             }
             
             // Force reflow and re-measure to ensure alignment
@@ -460,9 +472,9 @@ class CatalogAccessPageLoader {
                 void document.body.offsetHeight;
                 
                 // Double-check alignment after applying styles
-                const verifyLeftTitleRect = leftTitle.getBoundingClientRect();
+                const verifyLeftHeaderRect = leftHeader.getBoundingClientRect();
                 const verifyLeftFirstFeatureRect = leftFirstFeature.getBoundingClientRect();
-                const verifyLeftHeight = verifyLeftFirstFeatureRect.top - verifyLeftTitleRect.top;
+                const verifyLeftHeight = verifyLeftFirstFeatureRect.top - verifyLeftHeaderRect.top;
                 
                 pricingCards.forEach((card, cardIndex) => {
                     const header = card.querySelector('.catalog-access-pricing-comparison-card__header');
@@ -501,6 +513,11 @@ class CatalogAccessPageLoader {
     }
 
     alignFeatureItems() {
+        // Skip alignment on mobile (screens < 1024px) - left card should be dynamic
+        if (window.innerWidth < 1024) {
+            return;
+        }
+
         // Get all feature items from the left card
         const leftFeatureItems = document.querySelectorAll('.catalog-access-feature-item');
         
@@ -577,6 +594,183 @@ class CatalogAccessPageLoader {
         
         // Force a final reflow to ensure all heights are applied
         void document.body.offsetHeight;
+    }
+
+    initMobileCollapsible() {
+        // Only initialize on mobile (screens < 1024px)
+        const isMobile = () => window.innerWidth < 1024;
+        
+        // Initialize pricing card headers
+        const pricingCardHeaders = document.querySelectorAll('.catalog-access-pricing-comparison-card__header');
+        pricingCardHeaders.forEach(header => {
+            // Set initial state to collapsed on mobile
+            if (isMobile()) {
+                header.setAttribute('aria-expanded', 'false');
+            } else {
+                header.setAttribute('aria-expanded', 'true');
+            }
+
+            header.addEventListener('click', () => {
+                // Only handle clicks on mobile
+                if (!isMobile()) return;
+
+                const isExpanded = header.getAttribute('aria-expanded') === 'true';
+                const features = header.nextElementSibling;
+                
+                if (!features || !features.classList.contains('catalog-access-pricing-comparison-card__features')) {
+                    return;
+                }
+
+                if (!isExpanded) {
+                    // Open - calculate dynamic height
+                    header.setAttribute('aria-expanded', 'true');
+                    
+                    requestAnimationFrame(() => {
+                        // Measure the natural height of the features
+                        const computedStyle = window.getComputedStyle(features);
+                        const parentWidth = features.parentElement.offsetWidth;
+                        
+                        // Clone to measure
+                        const clone = features.cloneNode(true);
+                        clone.style.cssText = `
+                            position: absolute;
+                            visibility: hidden;
+                            height: auto;
+                            max-height: none;
+                            overflow: visible;
+                            width: ${parentWidth}px;
+                            font-size: ${computedStyle.fontSize};
+                            font-family: ${computedStyle.fontFamily};
+                            line-height: ${computedStyle.lineHeight};
+                            box-sizing: ${computedStyle.boxSizing};
+                        `;
+                        document.body.appendChild(clone);
+                        
+                        void clone.offsetHeight;
+                        const featuresHeight = clone.scrollHeight;
+                        document.body.removeChild(clone);
+                        
+                        // Reset for smooth transition
+                        features.style.maxHeight = '0';
+                        void features.offsetHeight;
+                        
+                        // Animate to calculated height
+                        requestAnimationFrame(() => {
+                            features.style.maxHeight = featuresHeight + 'px';
+                        });
+                    });
+                } else {
+                    // Close
+                    header.setAttribute('aria-expanded', 'false');
+                    features.style.maxHeight = '0';
+                }
+            });
+        });
+
+        // Initialize left feature card header
+        const leftFeatureHeader = document.querySelector('.catalog-access-features-info__header');
+        const leftFeaturesList = document.querySelector('.catalog-access-features-list');
+        
+        if (leftFeatureHeader) {
+            // Set initial state
+            if (isMobile()) {
+                leftFeatureHeader.setAttribute('aria-expanded', 'false');
+            } else {
+                leftFeatureHeader.setAttribute('aria-expanded', 'true');
+            }
+
+            leftFeatureHeader.addEventListener('click', () => {
+                // Only handle clicks on mobile
+                if (!isMobile()) return;
+
+                const isExpanded = leftFeatureHeader.getAttribute('aria-expanded') === 'true';
+                
+                if (!leftFeaturesList) return;
+
+                if (!isExpanded) {
+                    // Open - calculate dynamic height
+                    leftFeatureHeader.setAttribute('aria-expanded', 'true');
+                    
+                    requestAnimationFrame(() => {
+                        const computedStyle = window.getComputedStyle(leftFeaturesList);
+                        const parentWidth = leftFeaturesList.parentElement.offsetWidth;
+                        
+                        // Clone to measure
+                        const clone = leftFeaturesList.cloneNode(true);
+                        clone.style.cssText = `
+                            position: absolute;
+                            visibility: hidden;
+                            height: auto;
+                            max-height: none;
+                            overflow: visible;
+                            width: ${parentWidth}px;
+                            font-size: ${computedStyle.fontSize};
+                            font-family: ${computedStyle.fontFamily};
+                            line-height: ${computedStyle.lineHeight};
+                            box-sizing: ${computedStyle.boxSizing};
+                        `;
+                        document.body.appendChild(clone);
+                        
+                        void clone.offsetHeight;
+                        const listHeight = clone.scrollHeight;
+                        document.body.removeChild(clone);
+                        
+                        // Reset for smooth transition
+                        leftFeaturesList.style.maxHeight = '0';
+                        void leftFeaturesList.offsetHeight;
+                        
+                        // Animate to calculated height
+                        requestAnimationFrame(() => {
+                            leftFeaturesList.style.maxHeight = listHeight + 'px';
+                        });
+                    });
+                } else {
+                    // Close
+                    leftFeatureHeader.setAttribute('aria-expanded', 'false');
+                    leftFeaturesList.style.maxHeight = '0';
+                }
+            });
+        }
+
+        // Handle window resize to update state
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const mobile = isMobile();
+                
+                // Update pricing card headers
+                pricingCardHeaders.forEach(header => {
+                    if (mobile) {
+                        // On mobile, keep current state or default to collapsed
+                        if (!header.hasAttribute('aria-expanded')) {
+                            header.setAttribute('aria-expanded', 'false');
+                        }
+                    } else {
+                        // On desktop, always expanded
+                        header.setAttribute('aria-expanded', 'true');
+                        const features = header.nextElementSibling;
+                        if (features && features.classList.contains('catalog-access-pricing-comparison-card__features')) {
+                            features.style.maxHeight = '';
+                        }
+                    }
+                });
+
+                // Update left feature card
+                if (leftFeatureHeader) {
+                    if (mobile) {
+                        if (!leftFeatureHeader.hasAttribute('aria-expanded')) {
+                            leftFeatureHeader.setAttribute('aria-expanded', 'false');
+                        }
+                    } else {
+                        leftFeatureHeader.setAttribute('aria-expanded', 'true');
+                        if (leftFeaturesList) {
+                            leftFeaturesList.style.maxHeight = '';
+                        }
+                    }
+                }
+            }, 100);
+        });
     }
 }
 
