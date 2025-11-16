@@ -162,6 +162,8 @@
   border: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .commissioning-pricing-card:hover {
@@ -197,6 +199,11 @@
   opacity: 0.85;
   margin: 0;
   text-align: justify;
+}
+
+.commissioning-pricing-card__cta {
+  margin-top: auto; /* Push CTA to bottom of the card */
+  padding-top: var(--spacing-lg, 1.5rem);
 }
 
 /* Licensing Section */

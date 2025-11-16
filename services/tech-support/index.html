@@ -91,6 +91,9 @@
                 <button class="tech-support-tab translatable-content" role="tab" aria-selected="false" aria-controls="quickhelp-panel" id="tab-quickhelp" data-i18n="tech-support-tab-quickhelp">Quick Help</button>
                 <button class="tech-support-tab translatable-content" role="tab" aria-selected="false" aria-controls="homesetup-panel" id="tab-homesetup" data-i18n="tech-support-tab-homesetup">Home Set-up</button>
                             </div>
+            <div class="tech-support-reduced-badge">
+                <span class="translatable-content" data-i18n="tech-support-reduced-badge">Reduced fare available for all services (seniors, students, unemployed)</span>
+                        </div>
 
             <!-- Coaching Panel -->
             <div id="coaching-panel" class="tech-support-tabpanel" role="tabpanel" aria-labelledby="tab-coaching">
@@ -123,6 +126,10 @@
                         </ul>
                     </div>
                 </div>
+                <div class="tech-support-service-card__cta">
+                    <button class="tech-support-button tech-support-button--primary tech-support-button--coming-soon translatable-content"
+                        data-i18n="tech-support-booking-cta-coaching" data-form="coaching" disabled>Coaching — Coming Soon</button>
+                        </div>
                             </div>
 
             <!-- Quick Help Panel -->
@@ -143,10 +150,14 @@
                         <ul class="tech-support-service-meta">
                             <li><strong>Format:</strong> <span class="translatable-content" data-i18n="tech-support-comparison-inperson">In-person</span></li>
                             <li><strong>Duration:</strong> 1 hour</li>
-                            <li><strong>Price:</strong> <span class="badge-value">CHF 40 <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></span></li>
+                            <li><strong>Price:</strong> <span class="badge-value">CHF 40 <span class="translatable-content" data-i18n="tech-support-plus-travel-no-brackets">+ travel</span></span></li>
                         </ul>
                     </div>
                 </div>
+                <div class="tech-support-service-card__cta">
+                    <button class="tech-support-button tech-support-button--primary tech-support-button--coming-soon translatable-content"
+                        data-i18n="tech-support-booking-cta-quickhelp" data-form="quickhelp" disabled>Quick Help — Coming Soon</button>
+                        </div>
                             </div>
 
             <!-- Home Set-up Panel -->
@@ -158,7 +169,7 @@
                         <ul class="tech-support-service-meta">
                             <li><strong>Format:</strong> <span class="translatable-content" data-i18n="tech-support-comparison-inperson">In-person</span></li>
                             <li><strong>Duration:</strong> 90 minutes</li>
-                            <li><strong>Price:</strong> <span class="badge-value">CHF 90 <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></span></li>
+                            <li><strong>Price:</strong> <span class="badge-value">CHF 90 <span class="translatable-content" data-i18n="tech-support-plus-travel-no-brackets">+ travel</span></span></li>
                         </ul>
                     </div>
                     <div class="tech-support-service-card">
@@ -167,157 +178,25 @@
                         <ul class="tech-support-service-meta">
                             <li><strong>Format:</strong> <span class="translatable-content" data-i18n="tech-support-comparison-inperson">In-person</span></li>
                             <li><strong>Duration:</strong> <span class="translatable-content" data-i18n="tech-support-comparison-variable">Variable</span></li>
-                            <li><strong>Price:</strong> <span class="badge-value">CHF 30/hour + <span class="translatable-content" data-i18n="tech-support-comparison-device-cost">Device cost</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></span></li>
+                            <li><strong>Price:</strong> <span class="badge-value">CHF 30/hour + <span class="translatable-content" data-i18n="tech-support-comparison-device-cost">Device cost</span> <span class="translatable-content" data-i18n="tech-support-plus-travel-no-brackets">+ travel</span></span></li>
                         </ul>
                     </div>
+                </div>
+                <div class="tech-support-service-card__cta">
+                    <button class="tech-support-button tech-support-button--primary tech-support-button--coming-soon translatable-content"
+                        data-i18n="tech-support-booking-cta-homesetup" data-form="homesetup" disabled>Home Set-up — Coming Soon</button>
                 </div>
             </div>
         </section>
 
-        <!-- Service Comparison Tables (by Category) -->
+        <!-- Service Comparison / Pricing -->
         <section class="tech-support-comparison">
             <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-comparison-title">Service Comparison</h2>
-
-            <!-- Coaching Table -->
-            <h3 class="tech-support-comparison-subtitle translatable-content" data-i18n="tech-support-comparison-sub-coaching">Coaching</h3>
-            <div class="tech-support-comparison-table-wrapper">
-                <table class="tech-support-comparison-table">
-                    <colgroup>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-service">Service</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-duration">Duration</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-price">Price</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-format">Format</th>
-                            <th>
-                                <span class="th-title translatable-content" data-i18n="tech-support-comparison-reduced-title">Reduced Fare</span>
-                                <br>
-                                <span class="th-sub translatable-content" data-i18n="tech-support-comparison-reduced-sub">(seniors, students, unemployed)</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-confidence-session">Confidence Session</td>
-                            <td>1 hour</td>
-                            <td>CHF 50 <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-remote-inperson">Remote / In-person</td>
-                            <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-confidence-session">CHF 35</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-learning-bundle">Guided Learning Bundle</td>
-                            <td>3 sessions</td>
-                            <td>CHF 135 <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-remote-inperson">Remote / In-person</td>
-                            <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-learning-bundle">CHF 95</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-family-tuneup">Parent & Home Tech Session</td>
-                            <td>90 minutes</td>
-                            <td>CHF 75 <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-remote-inperson">Remote / In-person</td>
-                            <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-family-tuneup">CHF 50</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Quick Help Table -->
-            <h3 class="tech-support-comparison-subtitle translatable-content" data-i18n="tech-support-comparison-sub-quickhelp">Quick Help</h3>
-            <div class="tech-support-comparison-table-wrapper">
-                <table class="tech-support-comparison-table">
-                    <colgroup>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-service">Service</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-duration">Duration</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-price">Price</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-format">Format</th>
-                            <th>
-                                <span class="th-title translatable-content" data-i18n="tech-support-comparison-reduced-title">Reduced Fare</span>
-                                <br>
-                                <span class="th-sub translatable-content" data-i18n="tech-support-comparison-reduced-sub">(seniors, students, unemployed)</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-quick-help">Quick Tech Help</td>
-                            <td>45 minutes</td>
-                            <td>CHF 30</td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-remote">Remote</td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-reduced-quick-help">CHF 25</td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-drop-in">Friendly Tech Drop-In</td>
-                            <td>1 hour</td>
-                            <td>CHF 40 <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-inperson">In-person</td>
-                            <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-drop-in">CHF 30</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Home Set-up Table -->
-            <h3 class="tech-support-comparison-subtitle translatable-content" data-i18n="tech-support-comparison-sub-homesetup">Home Set-up</h3>
-            <div class="tech-support-comparison-table-wrapper">
-                <table class="tech-support-comparison-table">
-                    <colgroup>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                        <col>
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-service">Service</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-duration">Duration</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-price">Price</th>
-                            <th class="translatable-content" data-i18n="tech-support-comparison-format">Format</th>
-                            <th>
-                                <span class="th-title translatable-content" data-i18n="tech-support-comparison-reduced-title">Reduced Fare</span>
-                                <br>
-                                <span class="th-sub translatable-content" data-i18n="tech-support-comparison-reduced-sub">(seniors, students, unemployed)</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-home-visit">Home Visit Essentials</td>
-                            <td>90 minutes</td>
-                            <td>CHF 90 <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-inperson">In-person</td>
-                            <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-home-visit">CHF 65</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                        </tr>
-                        <tr>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-procurement">Device Procurement</td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-variable">Variable</td>
-                            <td>CHF 30/hour + <span class="translatable-content" data-i18n="tech-support-comparison-device-cost">Device cost</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                            <td class="translatable-content" data-i18n="tech-support-comparison-inperson">In-person</td>
-                            <td>CHF 20/hour + <span class="translatable-content" data-i18n="tech-support-comparison-device-cost">Device cost</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Policies Table -->
-            <h3 class="tech-support-comparison-subtitle translatable-content" data-i18n="tech-support-policies-title">Travel & Cancellation</h3>
-            <div class="tech-support-comparison-table-wrapper">
-                <table class="tech-support-comparison-table">
+            <div class="tech-support-pricing-grid">
+                <div>
+                    <h3 class="tech-support-comparison-subtitle translatable-content" data-i18n="tech-support-policies-title">Travel & Cancellation</h3>
+                    <div class="tech-support-comparison-table-wrapper">
+                        <table class="tech-support-comparison-table">
                     <thead>
                         <tr>
                             <th class="translatable-content" data-i18n="tech-support-policies-policy">Policy</th>
@@ -335,6 +214,51 @@
                         </tr>
                     </tbody>
                 </table>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="tech-support-comparison-subtitle translatable-content" data-i18n="tech-support-reduced-table-title">Reduced Fares</h3>
+                    <div class="tech-support-comparison-table-wrapper">
+                        <table class="tech-support-comparison-table">
+                            <thead>
+                                <tr>
+                                    <th class="translatable-content" data-i18n="tech-support-comparison-service">Service</th>
+                                    <th class="translatable-content" data-i18n="tech-support-comparison-reduced-title">Reduced Fare</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="translatable-content" data-i18n="tech-support-comparison-confidence-session">Confidence Session</td>
+                                    <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-confidence-session">CHF 35</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
+                        </tr>
+                        <tr>
+                                    <td class="translatable-content" data-i18n="tech-support-comparison-learning-bundle">Guided Learning Bundle</td>
+                                    <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-learning-bundle">CHF 95</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
+                        </tr>
+                        <tr>
+                                    <td class="translatable-content" data-i18n="tech-support-comparison-family-tuneup">Parent & Home Tech Session</td>
+                                    <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-family-tuneup">CHF 50</span> <span class="translatable-content" data-i18n="tech-support-plus-travel">(+ travel)</span></td>
+                        </tr>
+                        <tr>
+                                    <td class="translatable-content" data-i18n="tech-support-comparison-quick-help">Quick Tech Help</td>
+                                    <td class="translatable-content" data-i18n="tech-support-comparison-reduced-quick-help">CHF 25</td>
+                        </tr>
+                        <tr>
+                                    <td class="translatable-content" data-i18n="tech-support-comparison-drop-in">Friendly Tech Drop-In</td>
+                                    <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-drop-in">CHF 30</span> <span class="translatable-content" data-i18n="tech-support-plus-travel-no-brackets">+ travel</span></td>
+                        </tr>
+                        <tr>
+                                    <td class="translatable-content" data-i18n="tech-support-comparison-home-visit">Home Visit Essentials</td>
+                                    <td><span class="translatable-content" data-i18n="tech-support-comparison-reduced-home-visit">CHF 65</span> <span class="translatable-content" data-i18n="tech-support-plus-travel-no-brackets">+ travel</span></td>
+                        </tr>
+                        <tr>
+                                    <td class="translatable-content" data-i18n="tech-support-comparison-procurement">Device Procurement</td>
+                                    <td>CHF 20/hour + <span class="translatable-content" data-i18n="tech-support-comparison-device-cost">Device cost</span> <span class="translatable-content" data-i18n="tech-support-plus-travel-no-brackets">+ travel</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+                </div>
             </div>
         </section>
 
@@ -342,6 +266,7 @@
         <section id="tech-support-faq" class="tech-support-faq">
             <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-faq-title">Frequently Asked Questions</h2>
             <div class="tech-support-faq-list">
+                <div class="tech-support-faq-col">
                 <div class="tech-support-faq-item">
                     <button class="tech-support-faq-item__button" aria-expanded="false">
                         <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-1-question">What's the difference between the different session types?</span>
@@ -378,6 +303,8 @@
                         <p class="translatable-content" data-i18n="tech-support-faq-4-answer">Absolutely! Many clients benefit from multiple sessions. Series and bundles offer discounted rates for multiple sessions. You can also book individual sessions as needed. We can help you choose the right package based on your goals—whether it's building confidence over time, learning specific skills, or ongoing support.</p>
                     </div>
                 </div>
+                </div>
+                <div class="tech-support-faq-col">
                 <div class="tech-support-faq-item">
                     <button class="tech-support-faq-item__button" aria-expanded="false">
                         <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-5-question">What happens after a session?</span>
@@ -414,21 +341,87 @@
                         <p class="translatable-content" data-i18n="tech-support-faq-7-answer">We provide detailed annotated notes and checklists after each session, which serve as your reference guide. Recording sessions can be arranged upon request for an additional fee. However, the notes and checklists are designed to capture everything important without needing a recording.</p>
                     </div>
                 </div>
+                </div>
+                <div class="tech-support-faq-col">
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-8-question">Which languages do you support? Where do you travel for in-person?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-8-answer">We offer sessions in English and French. In-person visits are available across the canton of Vaud and nearby areas; reach out if you’re unsure about your location.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-9-question">Who qualifies for the reduced fare?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-9-answer">Reduced fare is available for seniors, students, and people who are unemployed. If this applies to you, just let us know when booking.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-10-question">What is your cancellation policy?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-10-answer">Cancellations within 24 hours of your appointment are billed at 50% of the session price. There is no fee for cancellations made earlier.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-11-question">Can you help buy devices for me?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-11-answer">Yes. We can procure new or second-hand devices based on your preferences and budget. Procurement is billed hourly plus the device cost; we add the device cost to your invoice with receipts.</p>
+                    </div>
+                </div>
             </div>
-        </section>
-
-        <!-- Booking Information Section -->
-        <section class="tech-support-booking">
-            <h2 class="tech-support-section__title translatable-content" data-i18n="tech-support-booking-title">Booking Information</h2>
-            <div class="tech-support-booking-content">
-                <p class="tech-support-booking-notice translatable-content" data-i18n="tech-support-booking-notice">
-                    Our booking system is coming soon. We'll notify you when it's ready!
-                </p>
-                <div class="tech-support-booking-cta">
-                    <button class="tech-support-button tech-support-button--primary tech-support-button--coming-soon translatable-content" data-i18n="tech-support-booking-cta" disabled>Coming Soon</button>
+                <div class="tech-support-faq-col">
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-12-question">How do you handle privacy and security?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-12-answer">We never keep your passwords. If we need temporary access, we’ll guide you to change passwords afterwards. Notes we share avoid sensitive information, and we emphasize safe digital practices.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-13-question">Do you provide accessibility accommodations?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-13-answer">Yes. We adapt pace and materials for your needs—for example larger-print notes, clearer step-by-step checklists, and slower walkthroughs. Tell us what helps you most.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-14-question">How do I book? Can family members join?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-14-answer">Use the centralized booking at the bottom of this page. Our sessions are parent-focused; other family members can participate if helpful, but it isn’t full-family coaching.</p>
+                    </div>
+                </div>
+                <div class="tech-support-faq-item">
+                    <button class="tech-support-faq-item__button" aria-expanded="false">
+                        <span class="tech-support-faq-item__question translatable-content" data-i18n="tech-support-faq-15-question">Do you repair hardware?</span>
+                        <span class="tech-support-faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="tech-support-faq-item__answer">
+                        <p class="translatable-content" data-i18n="tech-support-faq-15-answer">We focus on setup, configuration, learning, and smart home/console support. We don’t perform hardware repairs, but we can recommend options if needed.</p>
+                    </div>
+                </div>
                 </div>
             </div>
         </section>
+
+        
 
     </main>
     
