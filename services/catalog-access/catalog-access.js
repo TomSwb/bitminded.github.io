@@ -606,6 +606,11 @@ class CatalogAccessPageLoader {
             // Set initial state to collapsed on mobile
             if (isMobile()) {
                 header.setAttribute('aria-expanded', 'false');
+                // Ensure features are collapsed on initial load
+                const features = header.nextElementSibling;
+                if (features && features.classList.contains('catalog-access-pricing-comparison-card__features')) {
+                    features.style.maxHeight = '0';
+                }
             } else {
                 header.setAttribute('aria-expanded', 'true');
             }
@@ -675,6 +680,10 @@ class CatalogAccessPageLoader {
             // Set initial state
             if (isMobile()) {
                 leftFeatureHeader.setAttribute('aria-expanded', 'false');
+                // Ensure features are collapsed on initial load
+                if (leftFeaturesList) {
+                    leftFeaturesList.style.maxHeight = '0';
+                }
             } else {
                 leftFeatureHeader.setAttribute('aria-expanded', 'true');
             }
