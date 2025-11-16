@@ -824,16 +824,16 @@
     transform: rotate(45deg);
   }
 
-  /* Make features collapsible on mobile */
+  /* Make features collapsible on mobile - default to collapsed */
   .catalog-access-pricing-comparison-card__features {
-    max-height: 0;
+    max-height: 0 !important;
     overflow: hidden;
     transition: max-height 0.3s ease, margin-top 0.3s ease;
     margin-top: 0;
   }
 
   .catalog-access-pricing-comparison-card__header[aria-expanded="true"] + .catalog-access-pricing-comparison-card__features {
-    max-height: 2000px; /* Large enough to accommodate all features */
+    max-height: 2000px !important; /* Large enough to accommodate all features */
     margin-top: 0;
   }
 
@@ -861,13 +861,13 @@
   }
 
   .catalog-access-features-list {
-    max-height: 0;
+    max-height: 0 !important;
     overflow: hidden;
     transition: max-height 0.3s ease;
   }
 
   .catalog-access-features-info__header[aria-expanded="true"] + .catalog-access-features-list {
-    max-height: 3000px; /* Large enough to accommodate all features */
+    max-height: 3000px !important; /* Large enough to accommodate all features */
   }
 
   /* Make left card height dynamic on mobile */
