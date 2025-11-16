@@ -27,12 +27,56 @@ class TechSupportPageLoader {
 
             // Initialize FAQ accordion
             this.initFAQAccordion();
+            // Initialize tabs
+            this.initTabs();
 
             this.componentsLoaded = true;
             console.log('✅ Tech Support page components loaded');
         } catch (error) {
             console.error('❌ Failed to load tech support page components:', error);
         }
+    }
+
+    initTabs() {
+        const tabs = Array.from(document.querySelectorAll('.tech-support-tab'));
+        const panels = Array.from(document.querySelectorAll('.tech-support-tabpanel'));
+        if (!tabs.length || !panels.length) return;
+
+        const activate = (tab) => {
+            // update selected
+            tabs.forEach(t => {
+                const selected = t === tab;
+                t.classList.toggle('is-active', selected);
+                t.setAttribute('aria-selected', selected ? 'true' : 'false');
+            });
+            // show matching panel
+            panels.forEach(panel => {
+                const isMatch = panel.id === tab.getAttribute('aria-controls');
+                if (isMatch) {
+                    panel.hidden = false;
+                } else {
+                    panel.hidden = true;
+                }
+            });
+        };
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => activate(tab));
+            tab.addEventListener('keydown', (e) => {
+                const idx = tabs.indexOf(tab);
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const next = tabs[(idx + 1) % tabs.length];
+                    next.focus();
+                    activate(next);
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+                    prev.focus();
+                    activate(prev);
+                }
+            });
+        });
     }
 
     async loadNavigationMenu() {

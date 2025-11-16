@@ -3,18 +3,10 @@
     "translation": {
       "faq-hero-title": "Frequently Asked Questions",
       "faq-hero-subtitle": "Find answers to common questions about our commissioning and tech support services.",
-      "faq-category-commissioning-title": "Commissioning",
-      "faq-commissioning-note": "For detailed questions about commissioning, pricing, timelines, and the commissioning process, please visit our <a href=\"/services/commissioning/\" class=\"faq-link\">Commissioning page</a>, which includes a comprehensive FAQ section.",
-      "faq-category-guidance-title": "Tech Support",
-      "faq-guidance-1-question": "What's the difference between tech support service types?",
-      "faq-guidance-1-answer": "Tech Confidence Coaching focuses on building digital rituals and confidence over time through structured sessions. Quick Tech Help is perfect for immediate troubleshooting or setup needs (45-minute sessions). Family Tech Connection offers group sessions covering shared devices, parental controls, and healthy digital habits, available remotely or in-person.",
-      "faq-guidance-2-question": "How do sessions work?",
-      "faq-guidance-2-answer": "We start by understanding your needs and goals. Then we work together step-by-step, explaining everything in plain language with no judgment. After each session, you'll receive annotated notes summarizing what we covered, checklists for future reference, and personalized recommendations for building healthy tech habits.",
-      "faq-guidance-3-question": "Can sessions be done remotely or in-person?",
-      "faq-guidance-3-answer": "Most sessions work great remotely via video call. For hands-on device setup or family sessions, we offer in-home visits or meet-ups at your location. Home Visit Essentials (CHF 120 + travel, 90 minutes) and Onsite Visits (CHF 180 + travel) are available for in-person support.",
-      "faq-guidance-4-question": "What if I need ongoing support?",
-      "faq-guidance-4-answer": "We can create custom tech support packages based on your needs. Contact us to discuss ongoing support options.",
+      
+      
       "faq-category-pricing-title": "Pricing",
+      
       "faq-pricing-1-question": "Are prices in CHF or another currency?",
       "faq-pricing-1-answer": "All prices are in Swiss Francs (CHF). We're based in Switzerland and charge in CHF for all services. International clients are welcome, and we can discuss payment options if needed.",
       "faq-category-general-title": "General",
@@ -35,17 +27,8 @@
     "translation": {
       "faq-hero-title": "Preguntas Frecuentes",
       "faq-hero-subtitle": "Encuentra respuestas a preguntas comunes sobre nuestros servicios de encargos y orientación.",
-      "faq-category-commissioning-title": "Encargos",
-      "faq-commissioning-note": "Para preguntas detalladas sobre encargos, precios, cronogramas y el proceso de encargo, por favor visita nuestra <a href=\"/services/commissioning/\" class=\"faq-link\">página de Encargos</a>, que incluye una sección completa de preguntas frecuentes.",
-      "faq-category-guidance-title": "Soporte Técnico",
-      "faq-guidance-1-question": "¿Cuál es la diferencia entre los tipos de servicios de soporte técnico?",
-      "faq-guidance-1-answer": "El Coaching de Confianza Tecnológica se enfoca en construir rituales digitales y confianza con el tiempo a través de sesiones estructuradas. La Ayuda Tecnológica Rápida es perfecta para necesidades inmediatas de resolución de problemas o configuración (sesiones de 45 minutos). La Conexión Tecnológica Familiar ofrece sesiones grupales que cubren dispositivos compartidos, controles parentales y hábitos digitales saludables, disponibles remotamente o en persona.",
-      "faq-guidance-2-question": "¿Cómo funcionan las sesiones?",
-      "faq-guidance-2-answer": "Comenzamos entendiendo tus necesidades y objetivos. Luego trabajamos juntos paso a paso, explicando todo en lenguaje sencillo sin juicios. Después de cada sesión, recibirás notas anotadas que resumen lo que cubrimos, listas de verificación para referencia futura y recomendaciones personalizadas para construir hábitos tecnológicos saludables.",
-      "faq-guidance-3-question": "¿Se pueden hacer sesiones remotamente o en persona?",
-      "faq-guidance-3-answer": "La mayoría de las sesiones funcionan muy bien remotamente por videollamada. Para configuración práctica de dispositivos o sesiones familiares, ofrecemos visitas a domicilio o encuentros en tu ubicación. Visitas a Casa Esenciales (CHF 120 + viaje, 90 minutos) y Visitas en Sitio (CHF 180 + viaje) están disponibles para soporte en persona.",
-      "faq-guidance-4-question": "¿Qué pasa si necesito soporte continuo?",
-      "faq-guidance-4-answer": "Podemos crear paquetes de soporte técnico personalizados según tus necesidades. Contáctanos para discutir opciones de soporte continuo.",
+      
+      
       "faq-category-pricing-title": "Precios",
       "faq-pricing-1-question": "¿Los precios están en CHF u otra moneda?",
       "faq-pricing-1-answer": "Todos los precios están en Francos Suizos (CHF). Estamos basados en Suiza y cobramos en CHF para todos los servicios. Los clientes internacionales son bienvenidos, y podemos discutir opciones de pago si es necesario.",
@@ -69,15 +52,7 @@
       "faq-hero-subtitle": "Trouvez des réponses aux questions courantes sur nos services de commande et de conseil.",
       "faq-category-commissioning-title": "Commandes",
       "faq-commissioning-note": "Pour des questions détaillées sur les commandes, les prix, les délais et le processus de commande, veuillez visiter notre <a href=\"/services/commissioning/\" class=\"faq-link\">page de Commandes</a>, qui comprend une section complète de questions fréquemment posées.",
-      "faq-category-guidance-title": "Support Technique",
-      "faq-guidance-1-question": "Quelle est la différence entre les types de services de support technique?",
-      "faq-guidance-1-answer": "Le Coaching de Confiance Technologique se concentre sur la construction de rituels numériques et la confiance au fil du temps grâce à des sessions structurées. L'Aide Technologique Rapide est parfaite pour les besoins immédiats de dépannage ou de configuration (sessions de 45 minutes). La Connexion Technologique Familiale propose des sessions de groupe couvrant les appareils partagés, les contrôles parentaux et les habitudes numériques saines, disponibles à distance ou en personne.",
-      "faq-guidance-2-question": "Comment fonctionnent les sessions?",
-      "faq-guidance-2-answer": "Nous commençons par comprendre vos besoins et objectifs. Ensuite, nous travaillons ensemble étape par étape, expliquant tout en langage simple sans jugement. Après chaque session, vous recevrez des notes annotées résumant ce que nous avons couvert, des listes de contrôle pour référence future et des recommandations personnalisées pour construire des habitudes technologiques saines.",
-      "faq-guidance-3-question": "Les sessions peuvent-elles être effectuées à distance ou en personne?",
-      "faq-guidance-3-answer": "La plupart des sessions fonctionnent très bien à distance via appel vidéo. Pour la configuration pratique d'appareils ou les sessions familiales, nous offrons des visites à domicile ou des rencontres à votre emplacement. Visites à Domicile Essentielles (CHF 120 + déplacement, 90 minutes) et Visites sur Site (CHF 180 + déplacement) sont disponibles pour le support en personne.",
-      "faq-guidance-4-question": "Et si j'ai besoin d'un support continu?",
-      "faq-guidance-4-answer": "Nous pouvons créer des packages de conseil personnalisés basés sur vos besoins. Contactez-nous pour discuter des options de support continu.",
+      
       "faq-category-pricing-title": "Prix",
       "faq-pricing-1-question": "Les prix sont-ils en CHF ou dans une autre devise?",
       "faq-pricing-1-answer": "Tous les prix sont en Francs Suisses (CHF). Nous sommes basés en Suisse et facturons en CHF pour tous les services. Les clients internationaux sont les bienvenus, et nous pouvons discuter des options de paiement si nécessaire.",
@@ -99,17 +74,8 @@
     "translation": {
       "faq-hero-title": "Häufig Gestellte Fragen",
       "faq-hero-subtitle": "Finden Sie Antworten auf häufige Fragen zu unseren Auftrags- und Beratungsdiensten.",
-      "faq-category-commissioning-title": "Aufträge",
-      "faq-commissioning-note": "Für detaillierte Fragen zu Aufträgen, Preisen, Zeitplänen und dem Auftragsprozess besuchen Sie bitte unsere <a href=\"/services/commissioning/\" class=\"faq-link\">Auftragsseite</a>, die einen umfassenden FAQ-Bereich enthält.",
-      "faq-category-guidance-title": "Technischer Support",
-      "faq-guidance-1-question": "Was ist der Unterschied zwischen Technischen Supportdiensttypen?",
-      "faq-guidance-1-answer": "Tech-Vertrauens-Coaching konzentriert sich darauf, digitale Rituale und Vertrauen im Laufe der Zeit durch strukturierte Sitzungen aufzubauen. Schnelle Tech-Hilfe ist perfekt für sofortige Fehlerbehebungs- oder Einrichtungsbedürfnisse (45-minütige Sitzungen). Familiäre Tech-Verbindung bietet Gruppensitzungen zu gemeinsamen Geräten, Kindersicherung und gesunden digitalen Gewohnheiten, verfügbar remote oder vor Ort.",
-      "faq-guidance-2-question": "Wie funktionieren Sitzungen?",
-      "faq-guidance-2-answer": "Wir beginnen damit, Ihre Bedürfnisse und Ziele zu verstehen. Dann arbeiten wir Schritt für Schritt zusammen, erklären alles in einfacher Sprache ohne Urteil. Nach jeder Sitzung erhalten Sie kommentierte Notizen, die zusammenfassen, was wir abgedeckt haben, Checklisten für zukünftige Referenz und personalisierte Empfehlungen zum Aufbau gesunder Technikgewohnheiten.",
-      "faq-guidance-3-question": "Können Sitzungen remote oder vor Ort durchgeführt werden?",
-      "faq-guidance-3-answer": "Die meisten Sitzungen funktionieren sehr gut remote per Videoanruf. Für praktische Geräteeinrichtung oder Familiensitzungen bieten wir Hausbesuche oder Treffen an Ihrem Standort an. Hausbesuch Grundlagen (CHF 120 + Reise, 90 Minuten) und Vor-Ort-Besuche (CHF 180 + Reise) sind für persönliche Unterstützung verfügbar.",
-      "faq-guidance-4-question": "Was ist, wenn ich laufende Unterstützung benötige?",
-      "faq-guidance-4-answer": "Wir können maßgeschneiderte Beratungspakete basierend auf Ihren Bedürfnissen erstellen. Kontaktieren Sie uns, um laufende Unterstützungsoptionen zu besprechen.",
+      
+      
       "faq-category-pricing-title": "Preise",
       "faq-pricing-1-question": "Sind die Preise in CHF oder einer anderen Währung?",
       "faq-pricing-1-answer": "Alle Preise sind in Schweizer Franken (CHF). Wir sind in der Schweiz ansässig und berechnen CHF für alle Dienste. Internationale Kunden sind willkommen, und wir können Zahlungsoptionen besprechen, falls erforderlich.",
