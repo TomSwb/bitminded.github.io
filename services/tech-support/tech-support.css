@@ -60,6 +60,10 @@
   padding: var(--spacing-lg, 1.5rem) 0;
 }
 
+.tech-support-intro .tech-support-audience {
+  padding-bottom: var(--spacing-md, 1rem);
+}
+
 /* Ensure section titles align nicely when side-by-side */
 .tech-support-intro .tech-support-section__title {
   text-align: center;
@@ -69,8 +73,19 @@
 
 /* Force single-column cards within each intro section */
 .tech-support-intro .tech-support-audience-grid {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
   gap: var(--spacing-lg, 1.5rem);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tech-support-intro .tech-support-audience-item--col3 {
+  grid-column: 3;
+}
+
+.tech-support-intro .tech-support-audience-item--centered {
+  grid-column: 2;
+  justify-self: center;
 }
 
 .tech-support-intro .tech-support-timeline {
@@ -81,7 +96,6 @@
 /* Make the audience column sticky on large screens */
 .tech-support-intro .tech-support-audience {
   position: static;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -140,6 +154,7 @@
   color: var(--color-text-primary);
   opacity: 0.85;
   margin: 0;
+  text-align: justify;
 }
 
 /* Process Timeline Section */
@@ -306,6 +321,7 @@
   color: var(--color-text-primary);
   opacity: 0.9;
   margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+  text-align: justify;
 }
 
 /* Service meta badges (format, duration, price) */
@@ -509,7 +525,7 @@
   font-weight: 600;
   color: var(--color-text-primary);
   border-bottom: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
-  white-space: normal;
+  white-space: pre-line;
 }
 
 .tech-support-comparison-table th .th-sub {
@@ -524,6 +540,7 @@
   color: var(--color-text-primary);
   opacity: 0.9;
   border-bottom: 1px solid var(--border-color-primary, rgba(148,163,184,0.2));
+  white-space: pre-line;
 }
 
 /* Render line breaks in travel details cell */
@@ -667,6 +684,7 @@ td[data-i18n="tech-support-policies-travel-details"] {
   color: var(--color-text-primary);
   opacity: 0.85;
   margin: 0;
+  text-align: justify;
 }
 
 /* Booking Section */
@@ -676,14 +694,17 @@ td[data-i18n="tech-support-policies-travel-details"] {
 }
 
 /* Place each card in the center two columns (one per column) on wide screens */
-#quickhelp-panel .tech-support-services-grid .tech-support-service-card:nth-child(1),
-#homesetup-panel .tech-support-services-grid .tech-support-service-card:nth-child(1) {
-  grid-column: 2;
-}
+/* Desktop only: position cards in middle columns for Quick Help and Home Set-up */
+@media (min-width: 1201px) {
+  #quickhelp-panel .tech-support-services-grid .tech-support-service-card:nth-child(1),
+  #homesetup-panel .tech-support-services-grid .tech-support-service-card:nth-child(1) {
+    grid-column: 2;
+  }
 
-#quickhelp-panel .tech-support-services-grid .tech-support-service-card:nth-child(2),
-#homesetup-panel .tech-support-services-grid .tech-support-service-card:nth-child(2) {
-  grid-column: 3;
+  #quickhelp-panel .tech-support-services-grid .tech-support-service-card:nth-child(2),
+  #homesetup-panel .tech-support-services-grid .tech-support-service-card:nth-child(2) {
+    grid-column: 3;
+  }
 }
 
 /* Make CTA inside each tabpanel span full width of the grid */
@@ -702,7 +723,7 @@ td[data-i18n="tech-support-policies-travel-details"] {
 @media (max-width: 1200px) {
   #coaching-panel .tech-support-services-grid {
     width: 100%;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 
@@ -710,18 +731,30 @@ td[data-i18n="tech-support-policies-travel-details"] {
   #coaching-panel .tech-support-services-grid {
     grid-template-columns: 1fr;
   }
+
+  #quickhelp-panel .tech-support-services-grid,
+  #homesetup-panel .tech-support-services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #quickhelp-panel .tech-support-services-grid .tech-support-service-card,
+  #homesetup-panel .tech-support-services-grid .tech-support-service-card {
+    grid-column: auto;
+  }
 }
 
 /* Make middle columns slightly wider for Quick Help and Home Set-up on desktop */
-#quickhelp-panel .tech-support-services-grid,
-#homesetup-panel .tech-support-services-grid {
-  grid-template-columns: 0.8fr 1.2fr 1.2fr 0.8fr;
+@media (min-width: 1201px) {
+  #quickhelp-panel .tech-support-services-grid,
+  #homesetup-panel .tech-support-services-grid {
+    grid-template-columns: 0.8fr 1.2fr 1.2fr 0.8fr;
+  }
 }
 
 @media (max-width: 1200px) {
   #quickhelp-panel .tech-support-services-grid,
   #homesetup-panel .tech-support-services-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 1200px) {
@@ -766,6 +799,14 @@ td[data-i18n="tech-support-policies-travel-details"] {
   .tech-support-services-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  /* Override for all tabs to use 1 column on tablet */
+  #coaching-panel .tech-support-services-grid,
+  #quickhelp-panel .tech-support-services-grid,
+  #homesetup-panel .tech-support-services-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .tech-support-faq-list {
     grid-template-columns: repeat(2, minmax(280px, 1fr));
   }
@@ -796,6 +837,22 @@ td[data-i18n="tech-support-policies-travel-details"] {
     grid-template-columns: 1fr;
   }
 
+  .tech-support-intro .tech-support-audience-grid {
+    max-width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .tech-support-intro .tech-support-audience-item--col3,
+  .tech-support-intro .tech-support-audience-item--centered {
+    grid-column: 1;
+    justify-self: stretch;
+  }
+
+  .tech-support-intro .tech-support-audience {
+    padding: var(--spacing-md, 1rem) 0;
+    padding-bottom: var(--spacing-sm, 0.75rem);
+  }
+
   .tech-support-timeline {
     grid-template-columns: 1fr;
   }
@@ -822,12 +879,40 @@ td[data-i18n="tech-support-policies-travel-details"] {
     grid-template-columns: 1fr;
   }
 
+  .tech-support-comparison {
+    padding: var(--spacing-md, 1rem) 0;
+  }
+
+  .tech-support-pricing-grid {
+    gap: var(--spacing-lg, 1.5rem);
+  }
+
   .tech-support-comparison-table-wrapper {
-    overflow-x: scroll;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: var(--spacing-md, 1rem);
   }
 
   .tech-support-comparison-table {
-    min-width: 600px;
+    min-width: 100%;
+    font-size: 0.8rem;
+    table-layout: auto;
+  }
+
+  .tech-support-comparison-table col:nth-child(1) { width: auto; }
+  .tech-support-comparison-table col:nth-child(2) { width: auto; }
+  .tech-support-comparison-table col:nth-child(3) { width: auto; }
+  .tech-support-comparison-table col:nth-child(4) { width: auto; }
+  .tech-support-comparison-table col:nth-child(5) { width: auto; }
+
+  .tech-support-comparison-table th,
+  .tech-support-comparison-table td {
+    padding: calc(var(--spacing-xs, 0.5rem) * 0.9);
+    font-size: 0.75rem;
+  }
+
+  .tech-support-comparison-table th .th-sub {
+    font-size: 0.7em;
   }
 
   .tech-support-faq-item__button {
