@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account & Billing FAQ - BitMinded</title>
+    <link rel="icon" type="image/x-icon" href="../../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="../../css/critical.css">
+    <script src="../../js/critical.js"></script>
+    
+    <script src="../../components/shared/component-loader.js"></script>
+
+    <link rel="stylesheet" href="../../faq/faq.css">
+    <link rel="stylesheet" href="account-billing.css">
+    <link rel="stylesheet" href="../../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+    </header>
+
+    <main class="faq-page">
+        <!-- Hero Section -->
+        <section class="faq-hero">
+            <h1 class="faq-hero__title translatable-content" data-i18n="faq-account-billing-hero-title">Account & Billing Questions</h1>
+            <p class="faq-hero__subtitle translatable-content" data-i18n="faq-account-billing-hero-subtitle">
+                Questions about account management, payment methods, billing cycles, and purchase history.
+            </p>
+        </section>
+
+        <!-- FAQ Sub-Navigation (only on FAQ pages) -->
+        <div id="faq-subnav-container"></div>
+
+        <!-- Account & Billing FAQs -->
+        <section class="faq-category" id="account-billing">
+            <h2 class="faq-category__title translatable-content" data-i18n="faq-category-account-billing-title">Account & Billing</h2>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-account-billing-1-question">How do I update my payment method?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-account-billing-1-answer">You can update your payment method at any time from your account dashboard. Go to your account settings, find the billing section, and click to update your payment information. Your new payment method will be used for all future charges.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-account-billing-2-question">Where can I view my purchase history?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-account-billing-2-answer">Your complete purchase history, including all subscriptions and single tool licenses, is available in your account dashboard. You can view invoices, download receipts, and see the status of all your purchases in one place.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-account-billing-3-question">Can I change my account email address?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-account-billing-3-answer">Yes, you can update your email address from your account settings. After changing your email, you'll need to verify the new address. All future communications will be sent to your new email address.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-account-billing-4-question">How do I download my invoices?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-account-billing-4-answer">All invoices are available in your account dashboard. Go to your purchase history, find the invoice you need, and click to download it as a PDF. Invoices are also automatically emailed to you after each purchase or subscription renewal.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-item__button" aria-expanded="false">
+                        <span class="faq-item__question translatable-content" data-i18n="faq-account-billing-5-question">What currency are charges in?</span>
+                        <span class="faq-item__icon" aria-hidden="true">+</span>
+                    </button>
+                    <div class="faq-item__answer">
+                        <p class="translatable-content" data-i18n="faq-account-billing-5-answer">All charges are in Swiss Francs (CHF). We're based in Switzerland and charge in CHF for all services. International clients are welcome, and your bank or credit card provider will handle currency conversion if needed.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact CTA -->
+        <section class="faq-contact">
+            <h2 class="faq-contact__title translatable-content" data-i18n="faq-contact-title">Still Have Questions?</h2>
+            <p class="faq-contact__text translatable-content" data-i18n="faq-contact-text">
+                Can't find the answer you're looking for? Reach out to our support team.
+            </p>
+            <div class="faq-contact__cta">
+                <a href="/support/" class="faq-button faq-button--primary translatable-content" data-i18n="faq-contact-cta">Contact Support</a>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase CDN (must load before supabase-config.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../../js/env-config.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../../js/supabase-config.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../../js/script.js"></script>
+    <!-- FAQ page translation -->
+    <script src="../../faq/lang-faq/lang-faq.js"></script>
+    <!-- Account & Billing FAQ translation -->
+    <script src="lang-account-billing/lang-account-billing.js"></script>
+    <!-- FAQ page loader -->
+    <script src="../../faq/faq.js"></script>
+    <!-- Account & Billing FAQ page scripts -->
+    <script src="account-billing.js"></script>
+
+</body>
+
+</html>
+

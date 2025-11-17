@@ -1,0 +1,39 @@
+{
+  "en": {
+    "translation": {
+      "faq-subnav-general": "General",
+      "faq-subnav-catalog-access": "Catalog Access",
+      "faq-subnav-commissioning": "Commissioning",
+      "faq-subnav-tech-support": "Tech Support",
+      "faq-subnav-account-billing": "Account & Billing"
+    }
+  },
+  "es": {
+    "translation": {
+      "faq-subnav-general": "General",
+      "faq-subnav-catalog-access": "Acceso al Catálogo",
+      "faq-subnav-commissioning": "Encargos",
+      "faq-subnav-tech-support": "Soporte Técnico",
+      "faq-subnav-account-billing": "Cuenta y Facturación"
+    }
+  },
+  "fr": {
+    "translation": {
+      "faq-subnav-general": "Général",
+      "faq-subnav-catalog-access": "Accès au Catalogue",
+      "faq-subnav-commissioning": "Commandes",
+      "faq-subnav-tech-support": "Support Technique",
+      "faq-subnav-account-billing": "Compte et Facturation"
+    }
+  },
+  "de": {
+    "translation": {
+      "faq-subnav-general": "Allgemein",
+      "faq-subnav-catalog-access": "Katalogzugang",
+      "faq-subnav-commissioning": "Aufträge",
+      "faq-subnav-tech-support": "Technischer Support",
+      "faq-subnav-account-billing": "Konto und Abrechnung"
+    }
+  }
+}
+

@@ -398,6 +398,48 @@ serve(async (req) => {
     const safeTicketCode = sanitize(ticketCode)
     const safeTypeLabel = sanitize(typeLabel)
 
+    // Check if user is admin - skip email sending for admin users
+    const adminEmails = ['thomasschwab@bitminded.ch']
+    const isAdminEmail = adminEmails.includes(trimmedEmail.toLowerCase())
+    
+    let isAdminUser = false
+    if (dbUserId) {
+      const { data: adminRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', dbUserId)
+        .eq('role', 'admin')
+        .maybeSingle()
+      
+      isAdminUser = !!adminRole
+    }
+
+    const shouldSkipEmails = isAdminEmail || isAdminUser
+
+    if (shouldSkipEmails) {
+      console.log(`⏭️ Skipping email sending for admin user: ${trimmedEmail}`)
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          message: 'Support ticket created successfully (emails skipped for admin user)',
+          ticketId: ticketCode,
+          ticket: {
+            id: ticketRecord.id,
+            code: ticketCode,
+            status: ticketRecord.status,
+            created_at: ticketRecord.created_at,
+            updated_at: ticketRecord.updated_at,
+            attachments: attachmentsForStore
+          },
+          emailsSkipped: true
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      )
+    }
+
     // Format timestamp
     const timestamp = new Date().toLocaleString('en-US', {
       timeZone: 'UTC',

@@ -1,0 +1,207 @@
+/* FAQ Sub-Navigation Component */
+.faq-subnav {
+    padding: var(--spacing-xl, 2rem) var(--spacing-lg, 1.5rem) var(--spacing-lg, 1.5rem);
+    margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem)) calc(-1 * var(--spacing-2xl, 3rem)) calc(-1 * clamp(1.5rem, 4vw, 3rem));
+    display: flex;
+    justify-content: center;
+    width: calc(100% + 2 * clamp(1.5rem, 4vw, 3rem));
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+    .faq-subnav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+.faq-subnav__container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+    padding-bottom: var(--spacing-md, 1rem);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.faq-subnav__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm, 0.75rem);
+    padding: var(--spacing-md, 1rem) var(--spacing-md, 1rem);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    font-weight: 500;
+    font-size: 1rem;
+    border-bottom: 3px solid transparent;
+    background-color: transparent;
+    transition: all var(--transition-fast, 0.2s ease);
+    cursor: pointer;
+    position: relative;
+    margin-bottom: calc(-1 * var(--spacing-md, 1rem) - 2px);
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    outline: none;
+}
+
+.faq-subnav__link:focus {
+    outline: none;
+}
+
+.faq-subnav__link:focus-visible {
+    outline: none;
+}
+
+.faq-subnav__link:hover {
+    color: var(--color-secondary, #d286bd);
+    border-bottom-color: var(--color-secondary, #d286bd);
+}
+
+.faq-subnav__link.active {
+    color: var(--color-secondary, #d286bd);
+    border-bottom-color: var(--color-secondary, #d286bd);
+    font-weight: 600;
+}
+
+.faq-subnav__icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: transform var(--transition-fast, 0.2s ease);
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.faq-subnav__link:hover .faq-subnav__icon {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.faq-subnav__link.active .faq-subnav__icon {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.faq-subnav__text {
+    letter-spacing: 0.025em;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+/* Tablet Responsive - slightly reduce size but keep full width */
+@media (max-width: 1024px) {
+    .faq-subnav__link {
+        padding: var(--spacing-sm, 0.75rem) var(--spacing-sm, 0.75rem);
+        font-size: 0.9375rem;
+    }
+
+    .faq-subnav__icon {
+        font-size: 1.125rem;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .faq-subnav {
+        padding: var(--spacing-lg, 1.5rem) var(--spacing-sm, 0.75rem) var(--spacing-md, 1rem);
+        margin: 0 calc(-1 * 1.5rem) calc(-1 * var(--spacing-2xl, 3rem)) calc(-1 * 1.5rem);
+        width: calc(100% + 3rem);
+    }
+
+    .faq-subnav__container {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm, 0.75rem);
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .faq-subnav__link {
+        padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+        font-size: 1rem;
+        margin-bottom: 0;
+        min-width: 0;
+        flex: 0 1 calc(50% - var(--spacing-sm, 0.75rem));
+        max-width: calc(50% - var(--spacing-sm, 0.75rem));
+        border-radius: var(--radius-md, 0.5rem);
+        border: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+        background-color: var(--color-surface, rgba(15,23,42,0.45));
+        border-bottom: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+        transition: all var(--transition-fast, 0.2s ease);
+    }
+
+    .faq-subnav__link:hover {
+        background-color: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+        border-color: var(--color-secondary, #d286bd);
+        border-bottom-color: var(--color-secondary, #d286bd);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm, 0 4px 6px -2px rgba(15,23,42,0.25));
+    }
+
+    .faq-subnav__link.active {
+        background-color: var(--color-secondary, #d286bd);
+        border-color: var(--color-secondary, #d286bd);
+        border-bottom-color: var(--color-secondary, #d286bd);
+        color: var(--color-text-dark, #fff);
+    }
+
+    .faq-subnav__icon {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .faq-subnav {
+        padding: var(--spacing-lg, 1.5rem) var(--spacing-xs, 0.5rem) var(--spacing-md, 1rem);
+        margin: 0 calc(-1 * 1.5rem) calc(-1 * var(--spacing-2xl, 3rem)) calc(-1 * 1.5rem);
+        width: calc(100% + 3rem);
+    }
+
+    .faq-subnav__container {
+        flex-wrap: wrap;
+        gap: var(--spacing-xs, 0.5rem);
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .faq-subnav__link {
+        padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+        min-width: 0;
+        font-size: 0.9375rem;
+        flex: 0 1 calc(50% - var(--spacing-xs, 0.5rem));
+        max-width: calc(50% - var(--spacing-xs, 0.5rem));
+        border-radius: var(--radius-md, 0.5rem);
+        border: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+        background-color: var(--color-surface, rgba(15,23,42,0.45));
+        border-bottom: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+        margin-bottom: 0;
+        transition: all var(--transition-fast, 0.2s ease);
+    }
+
+    .faq-subnav__link:hover {
+        background-color: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+        border-color: var(--color-secondary, #d286bd);
+        border-bottom-color: var(--color-secondary, #d286bd);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm, 0 4px 6px -2px rgba(15,23,42,0.25));
+    }
+
+    .faq-subnav__link.active {
+        background-color: var(--color-secondary, #d286bd);
+        border-color: var(--color-secondary, #d286bd);
+        border-bottom-color: var(--color-secondary, #d286bd);
+        color: var(--color-text-dark, #fff);
+    }
+
+    .faq-subnav__icon {
+        font-size: 1.125rem;
+    }
+}
+
