@@ -1,0 +1,8 @@
+/**
+ * Commissioning FAQ Page Scripts
+ * Page-specific functionality for Commissioning FAQ section
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Commissioning FAQ page loaded');
+});
+

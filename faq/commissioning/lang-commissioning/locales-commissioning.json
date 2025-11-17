@@ -1,0 +1,87 @@
+{
+  "en": {
+    "translation": {
+      "faq-commissioning-hero-title": "Commissioning Questions",
+      "faq-commissioning-hero-subtitle": "Questions about commissioning custom tools, pricing, timelines, and the commissioning process.",
+      "faq-category-commissioning-title": "Commissioning",
+      "faq-commissioning-1-question": "How does commissioning work?",
+      "faq-commissioning-1-answer": "When you commission a tool, you fund its development at artisan rates. You receive a perpetual-use license for your commissioned version, and we retain IP rights to adapt it for the public catalog. Projects are priced based on complexity: Simple apps (1-2 weeks) start at CHF 450-750, Standard apps (2-4 weeks) are CHF 850-1,250, and Complex apps (6+ weeks) are CHF 1,350-1,950.",
+      "faq-commissioning-2-question": "How do you calculate pricing? Do you bill hourly?",
+      "faq-commissioning-2-answer": "We bill by project, not by the hour. This means you pay a fixed price for your complete tool, regardless of how long it takes. For context, our pricing works out to approximately CHF 40-50 per hour—much more accessible than typical agency rates of CHF 80-150/hour. This project-based approach gives you predictable costs and ensures we focus on delivering value rather than tracking time.",
+      "faq-commissioning-3-question": "How many hours per week do you work on my project?",
+      "faq-commissioning-3-answer": "I typically work 20-25 hours per week on your project. This means a Simple app (1-2 weeks) represents approximately 20-50 hours of focused development time, a Standard app (2-4 weeks) represents 40-100 hours, and a Complex app (6+ weeks) represents 120-150+ hours. You'll receive regular check-ins and progress updates throughout the build process so you can see how things are progressing.",
+      "faq-commissioning-4-question": "Can I customize existing tools?",
+      "faq-commissioning-4-answer": "Yes! We can customize existing catalog tools or adapt them for your specific needs. You can also commission new features for existing catalog tools (CHF 20-150 depending on difficulty). Contact us to discuss your customization requirements and get a quote based on the complexity of the changes needed.",
+      "faq-commissioning-5-question": "Do you offer payment plans for larger commissions?",
+      "faq-commissioning-5-answer": "Yes, we can structure payment plans for commissions. We're flexible and can work with you to find a payment schedule that works for your budget. Contact us to discuss options.",
+      "faq-commissioning-6-question": "What about recurring payment services like databases or APIs?",
+      "faq-commissioning-6-answer": "If your tool requires recurring payment services (such as databases, APIs, or other monthly services), these costs will be discussed and agreed upon during the project scope phase. You'll pay these costs at cost (no profit margin) as part of the project contract. Once the app is actively used by others (threshold to be determined), we can waive these recurring service costs entirely. This only applies to apps requiring recurring payment services.",
+      "faq-commissioning-7-question": "What if I need ongoing support after delivery?",
+      "faq-commissioning-7-answer": "Your commissioned tool receives updates and maintenance during the build process. After delivery, as the commissioner, you have priority access to new features and enhancements. Simple additions may be added at no cost, while more complex features are priced at reduced rates depending on difficulty. This gives you ongoing value from your initial investment. Post-delivery updates and maintenance for your specific commissioned version can be discussed separately. Contact us to discuss ongoing support options."
+    }
+  },
+  "es": {
+    "translation": {
+      "faq-commissioning-hero-title": "Preguntas sobre Encargos",
+      "faq-commissioning-hero-subtitle": "Preguntas sobre encargar herramientas personalizadas, precios, plazos y el proceso de encargo.",
+      "faq-category-commissioning-title": "Encargos",
+      "faq-commissioning-1-question": "¿Cómo funcionan los encargos?",
+      "faq-commissioning-1-answer": "Cuando encargas una herramienta, financias su desarrollo a tarifas artesanales. Recibes una licencia de uso perpetuo para tu versión encargada, y retenemos los derechos de IP para adaptarla para el catálogo público. Los proyectos se cotizan según la complejidad: Aplicaciones simples (1-2 semanas) desde CHF 450-750, aplicaciones estándar (2-4 semanas) CHF 850-1,250, y aplicaciones complejas (6+ semanas) CHF 1,350-1,950.",
+      "faq-commissioning-2-question": "¿Cómo calculan los precios? ¿Facturan por hora?",
+      "faq-commissioning-2-answer": "Facturamos por proyecto, no por hora. Esto significa que pagas un precio fijo por tu herramienta completa, sin importar cuánto tiempo tome. Para contexto, nuestros precios equivalen aproximadamente a CHF 40-50 por hora—mucho más accesible que las tarifas típicas de agencias de CHF 80-150/hora. Este enfoque basado en proyectos te da costos predecibles y asegura que nos enfoquemos en entregar valor en lugar de rastrear tiempo.",
+      "faq-commissioning-3-question": "¿Cuántas horas por semana trabajas en mi proyecto?",
+      "faq-commissioning-3-answer": "Típicamente trabajo 20-25 horas por semana en tu proyecto. Esto significa que una aplicación Simple (1-2 semanas) representa aproximadamente 20-50 horas de tiempo de desarrollo enfocado, una aplicación Estándar (2-4 semanas) representa 40-100 horas, y una aplicación Compleja (6+ semanas) representa 120-150+ horas. Recibirás seguimientos regulares y actualizaciones de progreso durante todo el proceso de construcción para que puedas ver cómo van las cosas.",
+      "faq-commissioning-4-question": "¿Puedo personalizar herramientas existentes?",
+      "faq-commissioning-4-answer": "¡Sí! Podemos personalizar herramientas existentes del catálogo o adaptarlas para tus necesidades específicas. También puedes encargar nuevas características para herramientas existentes del catálogo (CHF 20-150 según la dificultad). Contáctanos para discutir tus requisitos de personalización y obtener una cotización basada en la complejidad de los cambios necesarios.",
+      "faq-commissioning-5-question": "¿Ofrecen planes de pago para encargos más grandes?",
+      "faq-commissioning-5-answer": "Sí, podemos estructurar planes de pago para encargos. Somos flexibles y podemos trabajar contigo para encontrar un cronograma de pago que funcione para tu presupuesto. Contáctanos para discutir opciones.",
+      "faq-commissioning-6-question": "¿Qué pasa con los servicios de pago recurrentes como bases de datos o APIs?",
+      "faq-commissioning-6-answer": "Si tu herramienta requiere servicios de pago recurrentes (como bases de datos, APIs u otros servicios mensuales), estos costos se discutirán y acordarán durante la fase de alcance del proyecto. Pagarás estos costos al costo (sin margen de ganancia) como parte del contrato del proyecto. Una vez que la aplicación sea utilizada activamente por otros (umbral a determinar), podemos renunciar por completo a estos costos de servicio recurrentes. Esto solo se aplica a aplicaciones que requieren servicios de pago recurrentes.",
+      "faq-commissioning-7-question": "¿Qué pasa si necesito soporte continuo después de la entrega?",
+      "faq-commissioning-7-answer": "Tu herramienta encargada recibe actualizaciones y mantenimiento durante el proceso de construcción. Después de la entrega, como comisionista, tienes acceso prioritario a nuevas características y mejoras. Las adiciones simples pueden agregarse sin costo, mientras que las características más complejas tienen precios reducidos según la dificultad. Esto te brinda valor continuo de tu inversión inicial. Las actualizaciones y mantenimiento posteriores a la entrega para tu versión encargada específica pueden discutirse por separado. Contáctanos para discutir opciones de soporte continuo."
+    }
+  },
+  "fr": {
+    "translation": {
+      "faq-commissioning-hero-title": "Questions sur les Commandes",
+      "faq-commissioning-hero-subtitle": "Questions sur la commande d'outils personnalisés, les prix, les délais et le processus de commande.",
+      "faq-category-commissioning-title": "Commandes",
+      "faq-commissioning-1-question": "Comment fonctionnent les commandes?",
+      "faq-commissioning-1-answer": "Lorsque vous commandez un outil, vous financez son développement aux tarifs artisanaux. Vous recevez une licence d'utilisation perpétuelle pour votre version commandée, et nous conservons les droits de propriété intellectuelle pour l'adapter au catalogue public. Les projets sont tarifés selon la complexité : Applications simples (1-2 semaines) à partir de CHF 450-750, applications standard (2-4 semaines) CHF 850-1,250, et applications complexes (6+ semaines) CHF 1,350-1,950.",
+      "faq-commissioning-2-question": "Comment calculez-vous les prix? Facturez-vous à l'heure?",
+      "faq-commissioning-2-answer": "Nous facturons par projet, pas à l'heure. Cela signifie que vous payez un prix fixe pour votre outil complet, peu importe le temps que cela prend. Pour contexte, nos prix équivalent à environ CHF 40-50 par heure—beaucoup plus accessible que les tarifs typiques d'agences de CHF 80-150/heure. Cette approche basée sur les projets vous donne des coûts previsibles et assure que nous nous concentrons sur la livraison de valeur plutôt que sur le suivi du temps.",
+      "faq-commissioning-3-question": "Combien d'heures par semaine travaillez-vous sur mon projet?",
+      "faq-commissioning-3-answer": "Je travaille généralement 20-25 heures par semaine sur votre projet. Cela signifie qu'une application Simple (1-2 semaines) représente environ 20-50 heures de temps de développement ciblé, une application Standard (2-4 semaines) représente 40-100 heures, et une application Complexe (6+ semaines) représente 120-150+ heures. Vous recevrez des points de contrôle réguliers et des mises à jour de progression tout au long du processus de construction pour que vous puissiez voir comment les choses progressent.",
+      "faq-commissioning-4-question": "Puis-je personnaliser des outils existants?",
+      "faq-commissioning-4-answer": "Oui! Nous pouvons personnaliser les outils existants du catalogue ou les adapter à vos besoins spécifiques. Vous pouvez également commander de nouvelles fonctionnalités pour des outils existants du catalogue (CHF 20-150 selon la difficulté). Contactez-nous pour discuter de vos besoins de personnalisation et obtenir un devis basé sur la complexité des modifications nécessaires.",
+      "faq-commissioning-5-question": "Offrez-vous des plans de paiement pour les commandes plus importantes?",
+      "faq-commissioning-5-answer": "Oui, nous pouvons structurer des plans de paiement pour les commandes. Nous sommes flexibles et pouvons travailler avec vous pour trouver un calendrier de paiement qui convient à votre budget. Contactez-nous pour discuter des options.",
+      "faq-commissioning-6-question": "Qu'en est-il des services de paiement récurrents comme les bases de données ou les APIs?",
+      "faq-commissioning-6-answer": "Si votre outil nécessite des services de paiement récurrents (tels que bases de données, APIs ou autres services mensuels), ces coûts seront discutés et convenus pendant la phase de portée du projet. Vous paierez ces coûts au coût (sans marge de profit) dans le cadre du contrat du projet. Une fois que l'application est activement utilisée par d'autres (seuil à déterminer), nous pouvons renoncer entièrement à ces coûts de service récurrents. Cela ne s'applique qu'aux applications nécessitant des services de paiement récurrents.",
+      "faq-commissioning-7-question": "Que faire si j'ai besoin d'un support continu après la livraison?",
+      "faq-commissioning-7-answer": "Votre outil commandé reçoit des mises à jour et une maintenance pendant le processus de construction. Après la livraison, en tant que commanditaire, vous avez un accès prioritaire aux nouvelles fonctionnalités et améliorations. Les ajouts simples peuvent être ajoutés sans frais, tandis que les fonctionnalités plus complexes sont tarifées à des taux réduits selon la difficulté. Cela vous donne une valeur continue de votre investissement initial. Les mises à jour et la maintenance post-livraison pour votre version commandée spécifique peuvent être discutées séparément. Contactez-nous pour discuter des options de support continu."
+    }
+  },
+  "de": {
+    "translation": {
+      "faq-commissioning-hero-title": "Fragen zur Auftragsvergabe",
+      "faq-commissioning-hero-subtitle": "Fragen zur Beauftragung benutzerdefinierter Tools, Preise, Zeitpläne und den Auftragsprozess.",
+      "faq-category-commissioning-title": "Aufträge",
+      "faq-commissioning-1-question": "Wie funktioniert die Auftragsvergabe?",
+      "faq-commissioning-1-answer": "Wenn Sie ein Tool in Auftrag geben, finanzieren Sie dessen Entwicklung zu Handwerkstarifen. Sie erhalten eine permanente Nutzungslizenz für Ihre beauftragte Version, und wir behalten die IP-Rechte, um sie für den öffentlichen Katalog anzupassen. Projekte werden nach Komplexität bewertet: Einfache Apps (1-2 Wochen) beginnen bei CHF 450-750, Standard-Apps (2-4 Wochen) sind CHF 850-1,250, und komplexe Apps (6+ Wochen) sind CHF 1,350-1,950.",
+      "faq-commissioning-2-question": "Wie berechnen Sie die Preise? Rechnen Sie stundenweise ab?",
+      "faq-commissioning-2-answer": "Wir rechnen nach Projekt ab, nicht stundenweise. Das bedeutet, Sie zahlen einen Festpreis für Ihr vollständiges Tool, unabhängig davon, wie lange es dauert. Zum Kontext: Unsere Preise entsprechen ungefähr CHF 40-50 pro Stunde—viel zugänglicher als typische Agenturraten von CHF 80-150/Stunde. Dieser projektbasierte Ansatz gibt Ihnen vorhersehbare Kosten und stellt sicher, dass wir uns auf die Wertschöpfung konzentrieren, anstatt Zeit zu verfolgen.",
+      "faq-commissioning-3-question": "Wie viele Stunden pro Woche arbeiten Sie an meinem Projekt?",
+      "faq-commissioning-3-answer": "Ich arbeite typischerweise 20-25 Stunden pro Woche an Ihrem Projekt. Das bedeutet, eine einfache App (1-2 Wochen) repräsentiert ungefähr 20-50 Stunden fokussierte Entwicklungszeit, eine Standard-App (2-4 Wochen) repräsentiert 40-100 Stunden, und eine komplexe App (6+ Wochen) repräsentiert 120-150+ Stunden. Sie erhalten regelmäßige Check-ins und Fortschrittsaktualisierungen während des gesamten Aufbauprozesses, damit Sie sehen können, wie die Dinge voranschreiten.",
+      "faq-commissioning-4-question": "Kann ich vorhandene Tools anpassen?",
+      "faq-commissioning-4-answer": "Ja! Wir können vorhandene Katalogtools anpassen oder für Ihre spezifischen Bedürfnisse adaptieren. Sie können auch neue Funktionen für vorhandene Katalogtools in Auftrag geben (CHF 20-150 je nach Schwierigkeit). Kontaktieren Sie uns, um Ihre Anpassungsanforderungen zu besprechen und ein Angebot basierend auf der Komplexität der benötigten Änderungen zu erhalten.",
+      "faq-commissioning-5-question": "Bieten Sie Zahlungspläne für größere Aufträge?",
+      "faq-commissioning-5-answer": "Ja, wir können Zahlungspläne für Aufträge strukturieren. Wir sind flexibel und können mit Ihnen zusammenarbeiten, um einen Zahlungsplan zu finden, der zu Ihrem Budget passt. Kontaktieren Sie uns, um Optionen zu besprechen.",
+      "faq-commissioning-6-question": "Was ist mit wiederkehrenden Zahlungsdiensten wie Datenbanken oder APIs?",
+      "faq-commissioning-6-answer": "Wenn Ihr Tool wiederkehrende Zahlungsdienste erfordert (wie Datenbanken, APIs oder andere monatliche Dienste), werden diese Kosten während der Projektumfangsphase besprochen und vereinbart. Sie zahlen diese Kosten zu den Kosten (ohne Gewinnmarge) als Teil des Projektvertrags. Sobald die App aktiv von anderen genutzt wird (Schwelle zu bestimmen), können wir diese wiederkehrenden Servicekosten vollständig erlassen. Dies gilt nur für Apps, die wiederkehrende Zahlungsdienste erfordern.",
+      "faq-commissioning-7-question": "Was ist, wenn ich nach der Lieferung laufenden Support benötige?",
+      "faq-commissioning-7-answer": "Ihr beauftragtes Tool erhält Updates und Wartung während des Aufbauprozesses. Nach der Lieferung haben Sie als Auftraggeber prioritären Zugang zu neuen Funktionen und Verbesserungen. Einfache Ergänzungen können kostenlos hinzugefügt werden, während komplexere Funktionen je nach Schwierigkeit zu reduzierten Preisen angeboten werden. Dies gibt Ihnen kontinuierlichen Wert aus Ihrer ursprünglichen Investition. Updates und Wartung nach der Lieferung für Ihre spezifische beauftragte Version können separat besprochen werden. Kontaktieren Sie uns, um laufende Support-Optionen zu besprechen."
+    }
+  }
+}
+

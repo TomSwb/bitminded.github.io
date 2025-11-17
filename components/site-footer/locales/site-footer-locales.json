@@ -2,6 +2,7 @@
   "en": {
     "translation": {
       "footer.column.legal": "Legal Pages",
+      "footer.link.faq": "FAQ",
       "footer.link.privacy": "Privacy Policy",
       "footer.link.terms": "Terms of Service",
       "footer.link.imprint": "Legal Notice (Imprint)",
@@ -12,6 +13,7 @@
   "de": {
     "translation": {
       "footer.column.legal": "Rechtliche Seiten",
+      "footer.link.faq": "FAQ",
       "footer.link.privacy": "Datenschutzerklärung",
       "footer.link.terms": "Nutzungsbedingungen",
       "footer.link.imprint": "Impressum",
@@ -22,6 +24,7 @@
   "fr": {
     "translation": {
       "footer.column.legal": "Pages légales",
+      "footer.link.faq": "FAQ",
       "footer.link.privacy": "Politique de confidentialité",
       "footer.link.terms": "Conditions d'utilisation",
       "footer.link.imprint": "Mentions légales",
@@ -32,6 +35,7 @@
   "es": {
     "translation": {
       "footer.column.legal": "Páginas legales",
+      "footer.link.faq": "Preguntas Frecuentes",
       "footer.link.privacy": "Política de privacidad",
       "footer.link.terms": "Términos de servicio",
       "footer.link.imprint": "Aviso legal",
