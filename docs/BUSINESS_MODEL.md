@@ -42,11 +42,11 @@
 ## Revenue Streams
 
 - **Resale of artisanal apps:** Catalog grows with each commission
-  - One-time purchase CHF 10–50
-  - Subscription CHF 5–20/month (for cloud-based or regularly updated tools)
-- **Guided tech support:** 1:1 coaching, quick-help troubleshooting, and family sessions (CHF 80–150/hour or CHF 250–600 packages)
+  - One-time purchase CHF 25–60 (current pricing)
+  - Subscription CHF 18/month or CHF 180/year (current pricing)
+- **Guided tech support:** 1:1 coaching, quick-help troubleshooting, and family sessions (see Guidance & Coaching section below for current pricing)
 - **Custom commissions:** Paid discovery + build sprints (e.g., CHF 2.5k–6k for 40–120 hours). Commissioner gets a perpetual-use license; I retain IP and adapt the app for catalog resale.
-- **Workshops / consulting:** Teaching artisanal coding and digital wellbeing to teams or communities (CHF 100–300/session or CHF 2k–20k/project)
+- **Additional Features:** CHF 80–120 per feature (for commissioned tools beyond initial scope)
 
 ---
 
@@ -58,7 +58,8 @@
 - **Build Sprints (CHF 1.2k–1.5k per 30-hour block):** Ship usable increments every 2–3 weeks; most apps need 2–4 sprints.
 - **Perpetual License & Catalog Onboarding (included):** Commissioner deploys internally forever. I handle polish and adaptation before it enters the public catalog.
 - **Starter Customization (CHF 350–550):** Personalize an existing catalog tool or create a lightweight automation after a 30-minute intake.
-- **Mini Build Sprint (from CHF 850):** One focused sprint (~18–20 hours) for individuals or hobby groups; additional features quoted at CHF 80–120 each.
+- **Mini Build Sprint (from CHF 850):** One focused sprint (~18–20 hours) for individuals or hobby groups.
+- **Additional Features (CHF 80–120 per feature):** Add extra features or enhancements to commissioned tools beyond the initial scope.
 - **Personal Project Intake (CHF 30, credited):** Quick call and questionnaire to scope personal or family projects before issuing a quote.
 
 ### Catalog Access
@@ -80,9 +81,13 @@
 
 ### Retainers & Bundles
 
-- **Build + Guide Retainer (from CHF 450/month):** Dedicated build hours paired with recurring coaching; ideal for small teams.
-- **Patron Bundle (CHF 750/quarter):** Includes one discovery workshop, two coaching sessions, and early access to upcoming catalog tools.
-- **Family Plan Retainer (CHF 160–320/month):** Guarantees monthly support hours, device audits, and priority response for households.
+> **Note (2025-01):** The following services are documented in the business model but are not currently implemented on the service pages. We will not worry about these for now and will see for potential implementation later:
+> - **Build + Guide Retainer (from CHF 450/month):** Dedicated build hours paired with recurring coaching; ideal for small teams.
+> - **Patron Bundle (CHF 750/quarter):** Includes one discovery workshop, two coaching sessions, and early access to upcoming catalog tools.
+> - **Family Plan Retainer (CHF 160–320/month):** Guarantees monthly support hours, device audits, and priority response for households.
+> - **Workshops / Consulting (CHF 100–300/session or CHF 2k–20k/project):** Teaching artisanal coding and digital wellbeing to teams or communities.
+> - **Original Catalog Pricing Ranges:** CHF 10–50 one-time, CHF 5–20/month (superseded by current pricing: CHF 25–60 one-time, CHF 18/month).
+> - **Original Guided Tech Support Range:** CHF 80–150/hour (superseded by current pricing structure).
 
 ---
 

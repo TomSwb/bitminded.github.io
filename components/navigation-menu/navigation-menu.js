@@ -208,6 +208,8 @@ class NavigationMenu {
         const path = window.location.pathname;
         if (path === '/' || path === '/index.html') {
             return 'home';
+        } else if (path.includes('/services')) {
+            return 'services';
         } else if (path.includes('/catalog')) {
             return 'catalog';
         } else if (path.includes('/support')) {

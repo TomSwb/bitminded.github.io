@@ -1,0 +1,35 @@
+{
+  "en": {
+    "translation": {
+      "services-subnav-overview": "Overview",
+      "services-subnav-commissioning": "Commissioning",
+      "services-subnav-tech-support": "Tech Support",
+      "services-subnav-catalog-access": "Catalog Access"
+    }
+  },
+  "es": {
+    "translation": {
+      "services-subnav-overview": "Resumen",
+      "services-subnav-commissioning": "Encargos",
+      "services-subnav-tech-support": "Soporte Técnico",
+      "services-subnav-catalog-access": "Acceso al Catálogo"
+    }
+  },
+  "fr": {
+    "translation": {
+      "services-subnav-overview": "Aperçu",
+      "services-subnav-commissioning": "Commandes",
+      "services-subnav-tech-support": "Support Technique",
+      "services-subnav-catalog-access": "Accès au Catalogue"
+    }
+  },
+  "de": {
+    "translation": {
+      "services-subnav-overview": "Übersicht",
+      "services-subnav-commissioning": "Aufträge",
+      "services-subnav-tech-support": "Technischer Support",
+      "services-subnav-catalog-access": "Katalogzugang"
+    }
+  }
+}
+

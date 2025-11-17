@@ -3,6 +3,7 @@
     "translation": {
       "nav-home": "Home",
       "nav-catalog": "Catalog",
+      "nav-services": "Services",
       "nav-support": "Support"
     }
   },
@@ -10,6 +11,7 @@
     "translation": {
       "nav-home": "Inicio",
       "nav-catalog": "Catálogo",
+      "nav-services": "Servicios",
       "nav-support": "Soporte"
     }
   },
@@ -17,6 +19,7 @@
     "translation": {
       "nav-home": "Accueil",
       "nav-catalog": "Catalogue",
+      "nav-services": "Services",
       "nav-support": "Support"
     }
   },
@@ -24,6 +27,7 @@
     "translation": {
       "nav-home": "Startseite",
       "nav-catalog": "Katalog",
+      "nav-services": "Dienstleistungen",
       "nav-support": "Support"
     }
   }

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commission an App - BitMinded</title>
+    <link rel="icon" type="image/x-icon" href="../../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="../../css/critical.css">
+    <script src="../../js/critical.js"></script>
+    
+    <script src="../../components/shared/component-loader.js"></script>
+
+    <link rel="stylesheet" href="commissioning.css">
+    <link rel="stylesheet" href="../../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+    </header>
+
+    <main class="commissioning-page">
+        <!-- Hero Section -->
+        <section class="commissioning-hero">
+            <h1 class="commissioning-hero__title translatable-content" data-i18n="commissioning-hero-title">Commission a Tool</h1>
+            <p class="commissioning-hero__subtitle translatable-content" data-i18n="commissioning-hero-subtitle">
+                Fund the build you need, receive a perpetual-use license, and watch your tool evolve in the catalog for others to benefit.
+            </p>
+        </section>
+
+        <!-- Services Sub-Navigation (only on services pages) -->
+        <div id="services-subnav-container"></div>
+
+        <!-- Process Timeline -->
+        <section class="commissioning-process">
+            <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-process-title">The Commissioning Process</h2>
+            <div class="commissioning-timeline">
+                <div class="commissioning-step">
+                    <div class="commissioning-step__number">1</div>
+                    <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-1-title">Personal Project Intake</h3>
+                    <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-1-text">We start with a Personal Project Intake (CHF 20, credited toward your project). We'll have a conversation to understand your needs, goals, and timeline. You'll receive a clear quote and timeline.</p>
+                </div>
+                <div class="commissioning-step">
+                    <div class="commissioning-step__number">2</div>
+                    <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-2-title">We Build Your Tool</h3>
+                    <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-2-text">We'll build your tool over the agreed timeline, with regular check-ins, progress updates, and demos so you can see progress and provide feedback. You'll have access to feedback loops, iteration cycles, technical support during development, and can request changes within project scope.</p>
+                </div>
+                <div class="commissioning-step">
+                    <div class="commissioning-step__number">3</div>
+                    <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-3-title">Delivery & License Transfer</h3>
+                    <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-3-text">You receive your complete, functional tool ready for deployment, with deployment support and documentation. You get a full perpetual-use license agreement and access to the application (source code access is not included).</p>
+                </div>
+                <div class="commissioning-step">
+                    <div class="commissioning-step__number">4</div>
+                    <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-4-title">Catalog Onboarding</h3>
+                    <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-4-text">We polish and adapt your tool for the public catalog (included in commission), growing our collection organically. Know that your investment helps make custom software more accessible to others.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Tiers Section -->
+        <section class="commissioning-pricing">
+            <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-pricing-title">Project Pricing</h2>
+            <div class="commissioning-pricing-grid">
+                <div class="commissioning-pricing-card">
+                    <h3 class="commissioning-pricing-card__title translatable-content" data-i18n="commissioning-pricing-intake-title">Personal Project Intake</h3>
+                    <div class="commissioning-pricing-card__price">CHF 20</div>
+                    <p class="commissioning-pricing-card__duration translatable-content" data-i18n="commissioning-pricing-intake-duration">Credited toward project</p>
+                    <p class="commissioning-pricing-card__description translatable-content" data-i18n="commissioning-pricing-intake-description">Quick call and questionnaire to scope personal or family projects before issuing a quote.</p>
+                    <div class="commissioning-pricing-card__cta">
+                        <button class="commissioning-button commissioning-button--primary commissioning-button--coming-soon translatable-content" data-i18n="commissioning-intake-cta" data-form="intake" disabled>Coming Soon</button>
+                    </div>
+                </div>
+                <div class="commissioning-pricing-card">
+                    <h3 class="commissioning-pricing-card__title translatable-content" data-i18n="commissioning-pricing-feature-commission-title">Commission a Feature</h3>
+                    <div class="commissioning-pricing-card__price">CHF 20-150</div>
+                    <p class="commissioning-pricing-card__duration translatable-content" data-i18n="commissioning-pricing-feature-commission-duration">depending on difficulty</p>
+                    <p class="commissioning-pricing-card__description translatable-content" data-i18n="commissioning-pricing-feature-commission-description">Have an idea for a new feature for an existing catalog tool? Commission it and we'll add it to the tool. Beyond simple corrections—this is for new functionality specific to the tool.</p>
+                    <div class="commissioning-pricing-card__cta">
+                        <button class="commissioning-button commissioning-button--primary commissioning-button--coming-soon translatable-content" data-i18n="commissioning-intake-cta" data-form="feature" disabled>Coming Soon</button>
+                    </div>
+                </div>
+                <div class="commissioning-pricing-card">
+                    <h3 class="commissioning-pricing-card__title translatable-content" data-i18n="commissioning-pricing-simple-title">Simple App</h3>
+                    <div class="commissioning-pricing-card__price">CHF 450-750</div>
+                    <p class="commissioning-pricing-card__duration translatable-content" data-i18n="commissioning-pricing-simple-duration">1-2 weeks</p>
+                    <p class="commissioning-pricing-card__description translatable-content" data-i18n="commissioning-pricing-simple-description">Perfect for personal tools, simple automations, focused utilities. I'll build your tool over 1-2 weeks, with regular check-ins so you can see progress.</p>
+                    <div class="commissioning-pricing-card__cta">
+                        <button class="commissioning-button commissioning-button--primary commissioning-button--coming-soon translatable-content" data-i18n="commissioning-intake-cta" data-form="simple" disabled>Coming Soon</button>
+                    </div>
+                </div>
+                <div class="commissioning-pricing-card">
+                    <h3 class="commissioning-pricing-card__title translatable-content" data-i18n="commissioning-pricing-standard-title">Standard App</h3>
+                    <div class="commissioning-pricing-card__price">CHF 850-1,250</div>
+                    <p class="commissioning-pricing-card__duration translatable-content" data-i18n="commissioning-pricing-standard-duration">2-4 weeks</p>
+                    <p class="commissioning-pricing-card__description translatable-content" data-i18n="commissioning-pricing-standard-description">Perfect for small business tools, multi-feature apps. I'll build your tool over 2-4 weeks, delivering working features along the way.</p>
+                    <div class="commissioning-pricing-card__cta">
+                        <button class="commissioning-button commissioning-button--primary commissioning-button--coming-soon translatable-content" data-i18n="commissioning-intake-cta" data-form="standard" disabled>Coming Soon</button>
+                    </div>
+                </div>
+                <div class="commissioning-pricing-card">
+                    <h3 class="commissioning-pricing-card__title translatable-content" data-i18n="commissioning-pricing-complex-title">Complex App</h3>
+                    <div class="commissioning-pricing-card__price">CHF 1,350-1,950</div>
+                    <p class="commissioning-pricing-card__duration translatable-content" data-i18n="commissioning-pricing-complex-duration">6+ weeks</p>
+                    <p class="commissioning-pricing-card__description translatable-content" data-i18n="commissioning-pricing-complex-description">Perfect for multi-user systems, advanced integrations. I'll build your tool over 6+ weeks, working closely with you to get it right.</p>
+                    <div class="commissioning-pricing-card__cta">
+                        <button class="commissioning-button commissioning-button--primary commissioning-button--coming-soon translatable-content" data-i18n="commissioning-intake-cta" data-form="complex" disabled>Coming Soon</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Two Column Layout Wrapper -->
+        <div class="commissioning-two-column">
+            <!-- Licensing Terms Section -->
+            <section class="commissioning-licensing">
+                <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-licensing-title">Licensing Terms</h2>
+                <div class="commissioning-licensing-content">
+                    <div class="commissioning-licensing-item">
+                        <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-perpetual-title">Perpetual License</h3>
+                        <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-perpetual-text">You receive a perpetual-use license for your commissioned tool, granting you the right to use it forever with no recurring license fees. If your tool requires recurring payment services (such as databases or APIs), these costs are discussed during project scope and paid at cost.</p>
+                    </div>
+                    <div class="commissioning-licensing-item">
+                        <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-ip-title">Rights to Share & Adapt</h3>
+                        <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-ip-text">We retain the rights to adapt your tool for the public catalog and share it with others.</p>
+                    </div>
+                    <div class="commissioning-licensing-item">
+                        <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-updates-title">Priority Access to Updates</h3>
+                        <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-updates-text">As the commissioner, you have priority access to new features and enhancements. Simple additions may be added at no cost, while more complex features are priced at reduced rates.</p>
+                    </div>
+                </div>
+                <div class="commissioning-licensing-disclaimer">
+                    <p class="commissioning-licensing-disclaimer__text">
+                        <span class="translatable-content" data-i18n="commissioning-licensing-disclaimer-text-1">These licensing terms are a summary. The formal commissioning agreement will contain the complete terms and conditions. Your commissioning project is also subject to our</span> 
+                        <a href="/legal-pages/terms" class="commissioning-licensing-disclaimer__link translatable-content" data-i18n="commissioning-licensing-disclaimer-link">Terms of Service</a>
+                        <span class="translatable-content" data-i18n="commissioning-licensing-disclaimer-text-2">, which cover liability limitations, dispute resolution, and other general terms.</span>
+                    </p>
+                </div>
+            </section>
+
+            <!-- FAQ Link Section -->
+            <section id="commissioning-faq" class="commissioning-faq-link">
+                <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-faq-title">Frequently Asked Questions</h2>
+                <p class="commissioning-section__description translatable-content" data-i18n="commissioning-faq-link-description">
+                    Have questions about commissioning, pricing, timelines, or the commissioning process? Visit our comprehensive FAQ page for detailed answers.
+                </p>
+                <div class="commissioning-faq-link__cta">
+                    <a href="/faq/commissioning/" class="commissioning-button commissioning-button--primary translatable-content" data-i18n="commissioning-view-faq">View Commissioning FAQs →</a>
+                </div>
+            </section>
+        </div>
+
+        
+
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase CDN (must load before supabase-config.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../../js/env-config.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../../js/supabase-config.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../../js/script.js"></script>
+    <!-- Commissioning page translation -->
+    <script src="lang-commissioning/lang-commissioning.js"></script>
+    <!-- Commissioning page loader -->
+    <script src="commissioning.js"></script>
+
+</body>
+
+</html>
+
+

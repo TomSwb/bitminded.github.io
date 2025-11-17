@@ -1,0 +1,71 @@
+{
+  "en": {
+    "translation": {
+      "faq-account-billing-hero-title": "Account & Billing Questions",
+      "faq-account-billing-hero-subtitle": "Questions about account management, payment methods, billing cycles, and purchase history.",
+      "faq-category-account-billing-title": "Account & Billing",
+      "faq-account-billing-1-question": "How do I update my payment method?",
+      "faq-account-billing-1-answer": "You can update your payment method at any time from your account dashboard. Go to your account settings, find the billing section, and click to update your payment information. Your new payment method will be used for all future charges.",
+      "faq-account-billing-2-question": "Where can I view my purchase history?",
+      "faq-account-billing-2-answer": "Your complete purchase history, including all subscriptions and single tool licenses, is available in your account dashboard. You can view invoices, download receipts, and see the status of all your purchases in one place.",
+      "faq-account-billing-3-question": "Can I change my account email address?",
+      "faq-account-billing-3-answer": "Yes, you can update your email address from your account settings. After changing your email, you'll need to verify the new address. All future communications will be sent to your new email address.",
+      "faq-account-billing-4-question": "How do I download my invoices?",
+      "faq-account-billing-4-answer": "All invoices are available in your account dashboard. Go to your purchase history, find the invoice you need, and click to download it as a PDF. Invoices are also automatically emailed to you after each purchase or subscription renewal.",
+      "faq-account-billing-5-question": "What currency are charges in?",
+      "faq-account-billing-5-answer": "All charges are in Swiss Francs (CHF). We're based in Switzerland and charge in CHF for all services. International clients are welcome, and your bank or credit card provider will handle currency conversion if needed."
+    }
+  },
+  "es": {
+    "translation": {
+      "faq-account-billing-hero-title": "Preguntas sobre Cuenta y Facturación",
+      "faq-account-billing-hero-subtitle": "Preguntas sobre gestión de cuenta, métodos de pago, ciclos de facturación e historial de compras.",
+      "faq-category-account-billing-title": "Cuenta y Facturación",
+      "faq-account-billing-1-question": "¿Cómo actualizo mi método de pago?",
+      "faq-account-billing-1-answer": "Puedes actualizar tu método de pago en cualquier momento desde el panel de tu cuenta. Ve a la configuración de tu cuenta, encuentra la sección de facturación y haz clic para actualizar tu información de pago. Tu nuevo método de pago se usará para todos los cargos futuros.",
+      "faq-account-billing-2-question": "¿Dónde puedo ver mi historial de compras?",
+      "faq-account-billing-2-answer": "Tu historial completo de compras, incluyendo todas las suscripciones y licencias de herramientas individuales, está disponible en el panel de tu cuenta. Puedes ver facturas, descargar recibos y ver el estado de todas tus compras en un solo lugar.",
+      "faq-account-billing-3-question": "¿Puedo cambiar la dirección de correo electrónico de mi cuenta?",
+      "faq-account-billing-3-answer": "Sí, puedes actualizar tu dirección de correo electrónico desde la configuración de tu cuenta. Después de cambiar tu correo electrónico, necesitarás verificar la nueva dirección. Todas las comunicaciones futuras se enviarán a tu nueva dirección de correo electrónico.",
+      "faq-account-billing-4-question": "¿Cómo descargo mis facturas?",
+      "faq-account-billing-4-answer": "Todas las facturas están disponibles en el panel de tu cuenta. Ve a tu historial de compras, encuentra la factura que necesitas y haz clic para descargarla como PDF. Las facturas también se envían automáticamente por correo electrónico después de cada compra o renovación de suscripción.",
+      "faq-account-billing-5-question": "¿En qué moneda se realizan los cargos?",
+      "faq-account-billing-5-answer": "Todos los cargos están en Francos Suizos (CHF). Estamos basados en Suiza y cobramos en CHF para todos los servicios. Los clientes internacionales son bienvenidos, y tu banco o proveedor de tarjeta de crédito manejará la conversión de moneda si es necesario."
+    }
+  },
+  "fr": {
+    "translation": {
+      "faq-account-billing-hero-title": "Questions sur le Compte et la Facturation",
+      "faq-account-billing-hero-subtitle": "Questions sur la gestion de compte, les méthodes de paiement, les cycles de facturation et l'historique des achats.",
+      "faq-category-account-billing-title": "Compte et Facturation",
+      "faq-account-billing-1-question": "Comment mettre à jour mon mode de paiement?",
+      "faq-account-billing-1-answer": "Vous pouvez mettre à jour votre mode de paiement à tout moment depuis le tableau de bord de votre compte. Allez dans les paramètres de votre compte, trouvez la section de facturation et cliquez pour mettre à jour vos informations de paiement. Votre nouveau mode de paiement sera utilisé pour tous les frais futurs.",
+      "faq-account-billing-2-question": "Où puis-je consulter mon historique d'achats?",
+      "faq-account-billing-2-answer": "Votre historique d'achats complet, y compris toutes les abonnements et licences d'outils individuels, est disponible dans le tableau de bord de votre compte. Vous pouvez consulter les factures, télécharger les reçus et voir le statut de tous vos achats en un seul endroit.",
+      "faq-account-billing-3-question": "Puis-je changer l'adresse e-mail de mon compte?",
+      "faq-account-billing-3-answer": "Oui, vous pouvez mettre à jour votre adresse e-mail depuis les paramètres de votre compte. Après avoir changé votre e-mail, vous devrez vérifier la nouvelle adresse. Toutes les communications futures seront envoyées à votre nouvelle adresse e-mail.",
+      "faq-account-billing-4-question": "Comment télécharger mes factures?",
+      "faq-account-billing-4-answer": "Toutes les factures sont disponibles dans le tableau de bord de votre compte. Allez dans votre historique d'achats, trouvez la facture dont vous avez besoin et cliquez pour la télécharger en PDF. Les factures sont également automatiquement envoyées par e-mail après chaque achat ou renouvellement d'abonnement.",
+      "faq-account-billing-5-question": "Dans quelle devise sont les frais?",
+      "faq-account-billing-5-answer": "Tous les frais sont en Francs Suisses (CHF). Nous sommes basés en Suisse et facturons en CHF pour tous les services. Les clients internationaux sont les bienvenus, et votre banque ou fournisseur de carte de crédit gérera la conversion de devise si nécessaire."
+    }
+  },
+  "de": {
+    "translation": {
+      "faq-account-billing-hero-title": "Fragen zu Konto und Abrechnung",
+      "faq-account-billing-hero-subtitle": "Fragen zur Kontoverwaltung, Zahlungsmethoden, Abrechnungszyklen und Kaufhistorie.",
+      "faq-category-account-billing-title": "Konto und Abrechnung",
+      "faq-account-billing-1-question": "Wie aktualisiere ich meine Zahlungsmethode?",
+      "faq-account-billing-1-answer": "Sie können Ihre Zahlungsmethode jederzeit über Ihr Kontodashboard aktualisieren. Gehen Sie zu Ihren Kontoeinstellungen, finden Sie den Abrechnungsbereich und klicken Sie, um Ihre Zahlungsinformationen zu aktualisieren. Ihre neue Zahlungsmethode wird für alle zukünftigen Gebühren verwendet.",
+      "faq-account-billing-2-question": "Wo kann ich meine Kaufhistorie einsehen?",
+      "faq-account-billing-2-answer": "Ihre vollständige Kaufhistorie, einschließlich aller Abonnements und Einzeltool-Lizenzen, ist in Ihrem Kontodashboard verfügbar. Sie können Rechnungen anzeigen, Quittungen herunterladen und den Status aller Ihrer Käufe an einem Ort sehen.",
+      "faq-account-billing-3-question": "Kann ich meine Kontoe-Mail-Adresse ändern?",
+      "faq-account-billing-3-answer": "Ja, Sie können Ihre E-Mail-Adresse über Ihre Kontoeinstellungen aktualisieren. Nach dem Ändern Ihrer E-Mail müssen Sie die neue Adresse verifizieren. Alle zukünftigen Kommunikationen werden an Ihre neue E-Mail-Adresse gesendet.",
+      "faq-account-billing-4-question": "Wie lade ich meine Rechnungen herunter?",
+      "faq-account-billing-4-answer": "Alle Rechnungen sind in Ihrem Kontodashboard verfügbar. Gehen Sie zu Ihrer Kaufhistorie, finden Sie die benötigte Rechnung und klicken Sie, um sie als PDF herunterzuladen. Rechnungen werden auch automatisch per E-Mail nach jedem Kauf oder Abonnementverlängerung gesendet.",
+      "faq-account-billing-5-question": "In welcher Währung werden die Gebühren berechnet?",
+      "faq-account-billing-5-answer": "Alle Gebühren sind in Schweizer Franken (CHF). Wir sind in der Schweiz ansässig und berechnen CHF für alle Dienstleistungen. Internationale Kunden sind willkommen, und Ihre Bank oder Kreditkartenanbieter wird die Währungsumrechnung bei Bedarf durchführen."
+    }
+  }
+}
+
