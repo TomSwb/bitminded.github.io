@@ -4,8 +4,7 @@
       "services-subnav-overview": "Overview",
       "services-subnav-commissioning": "Commissioning",
       "services-subnav-tech-support": "Tech Support",
-      "services-subnav-catalog-access": "Catalog Access",
-      "services-subnav-faq": "FAQ"
+      "services-subnav-catalog-access": "Catalog Access"
     }
   },
   "es": {
@@ -13,8 +12,7 @@
       "services-subnav-overview": "Resumen",
       "services-subnav-commissioning": "Encargos",
       "services-subnav-tech-support": "Soporte Técnico",
-      "services-subnav-catalog-access": "Acceso al Catálogo",
-      "services-subnav-faq": "Preguntas Frecuentes"
+      "services-subnav-catalog-access": "Acceso al Catálogo"
     }
   },
   "fr": {
@@ -22,8 +20,7 @@
       "services-subnav-overview": "Aperçu",
       "services-subnav-commissioning": "Commandes",
       "services-subnav-tech-support": "Support Technique",
-      "services-subnav-catalog-access": "Accès au Catalogue",
-      "services-subnav-faq": "FAQ"
+      "services-subnav-catalog-access": "Accès au Catalogue"
     }
   },
   "de": {
@@ -31,8 +28,7 @@
       "services-subnav-overview": "Übersicht",
       "services-subnav-commissioning": "Aufträge",
       "services-subnav-tech-support": "Technischer Support",
-      "services-subnav-catalog-access": "Katalogzugang",
-      "services-subnav-faq": "FAQ"
+      "services-subnav-catalog-access": "Katalogzugang"
     }
   }
 }

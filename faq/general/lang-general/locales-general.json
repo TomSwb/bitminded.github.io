@@ -1,0 +1,71 @@
+{
+  "en": {
+    "translation": {
+      "faq-general-hero-title": "General Questions",
+      "faq-general-hero-subtitle": "Common questions about getting started, privacy, and our services.",
+      "faq-category-general-title": "General",
+      "faq-general-1-question": "How do I get started?",
+      "faq-general-1-answer": "For commissioning, visit our <a href=\"/services/commissioning/\" class=\"faq-link\">Commissioning page</a> to learn more and start with a Personal Project Intake (CHF 20, credited) or reach out directly through our support page for larger commissions. For tech support services, contact us through the support page with your preferred service type and availability. We'll respond within 24 hours on business days.",
+      "faq-general-2-question": "What about privacy and data handling?",
+      "faq-general-2-answer": "We take privacy seriously. All client information is handled with strict confidentiality. For commissioned tools, we only retain IP rights for catalog adaptation—your data and workflows remain private. For guidance sessions, we don't share your information with third parties. See our Privacy Policy for full details.",
+      "faq-general-3-question": "Do you work with international clients?",
+      "faq-general-3-answer": "Yes! We work with clients worldwide. Remote sessions work great across time zones, and we can accommodate scheduling for different regions. Payment is in CHF, but we can discuss payment options for international clients.",
+      "faq-general-4-question": "What if I have more questions?",
+      "faq-general-4-answer": "We're here to help! Reach out through our support page with any questions about commissioning, tech support services, or our approach. We typically respond within 24 hours on business days.",
+      "faq-general-5-question": "Are prices in CHF or another currency?",
+      "faq-general-5-answer": "All prices are in Swiss Francs (CHF). We're based in Switzerland and charge in CHF for all services. International clients are welcome, and we can discuss payment options if needed."
+    }
+  },
+  "es": {
+    "translation": {
+      "faq-general-hero-title": "Preguntas Generales",
+      "faq-general-hero-subtitle": "Preguntas comunes sobre cómo empezar, privacidad y nuestros servicios.",
+      "faq-category-general-title": "General",
+      "faq-general-1-question": "¿Cómo empiezo?",
+      "faq-general-1-answer": "Para encargos, visita nuestra <a href=\"/services/commissioning/\" class=\"faq-link\">página de Encargos</a> para aprender más y comenzar con un Ingreso de Proyecto Personal (CHF 20, acreditado) o contáctanos directamente a través de nuestra página de soporte para encargos más grandes. Para servicios de orientación, contáctanos a través de la página de soporte con tu tipo de servicio preferido y disponibilidad. Responderemos dentro de 24 horas en días hábiles.",
+      "faq-general-2-question": "¿Qué pasa con la privacidad y el manejo de datos?",
+      "faq-general-2-answer": "Nos tomamos la privacidad en serio. Toda la información del cliente se maneja con estricta confidencialidad. Para herramientas encargadas, solo retenemos los derechos de IP para adaptación al catálogo—tus datos y flujos de trabajo permanecen privados. Para sesiones de orientación, no compartimos tu información con terceros. Consulta nuestra Política de Privacidad para más detalles.",
+      "faq-general-3-question": "¿Trabajan con clientes internacionales?",
+      "faq-general-3-answer": "¡Sí! Trabajamos con clientes en todo el mundo. Las sesiones remotas funcionan muy bien a través de zonas horarias, y podemos acomodar la programación para diferentes regiones. El pago es en CHF, pero podemos discutir opciones de pago para clientes internacionales.",
+      "faq-general-4-question": "¿Qué pasa si tengo más preguntas?",
+      "faq-general-4-answer": "¡Estamos aquí para ayudar! Contáctanos a través de nuestra página de soporte con cualquier pregunta sobre encargos, servicios de orientación o nuestro enfoque. Típicamente respondemos dentro de 24 horas en días hábiles.",
+      "faq-general-5-question": "¿Los precios están en CHF u otra moneda?",
+      "faq-general-5-answer": "Todos los precios están en Francos Suizos (CHF). Estamos basados en Suiza y cobramos en CHF para todos los servicios. Los clientes internacionales son bienvenidos, y podemos discutir opciones de pago si es necesario."
+    }
+  },
+  "fr": {
+    "translation": {
+      "faq-general-hero-title": "Questions Générales",
+      "faq-general-hero-subtitle": "Questions courantes sur comment commencer, la confidentialité et nos services.",
+      "faq-category-general-title": "Général",
+      "faq-general-1-question": "Comment commencer?",
+      "faq-general-1-answer": "Pour les commandes, visitez notre <a href=\"/services/commissioning/\" class=\"faq-link\">page de Commandes</a> pour en savoir plus et commencer par une Admission de Projet Personnel (CHF 20, crédité) ou contactez-nous directement via notre page de support pour les commandes plus importantes. Pour les services de conseil, contactez-nous via la page de support avec votre type de service préféré et votre disponibilité. Nous répondrons dans les 24 heures les jours ouvrables.",
+      "faq-general-2-question": "Qu'en est-il de la confidentialité et du traitement des données?",
+      "faq-general-2-answer": "Nous prenons la confidentialité au sérieux. Toutes les informations clients sont traitées avec une stricte confidentialité. Pour les outils commandés, nous ne conservons que les droits de propriété intellectuelle pour l'adaptation au catalogue—vos données et flux de travail restent privés. Pour les sessions de conseil, nous ne partageons pas vos informations avec des tiers. Consultez notre Politique de Confidentialité pour plus de détails.",
+      "faq-general-3-question": "Travaillez-vous avec des clients internationaux?",
+      "faq-general-3-answer": "Oui! Nous travaillons avec des clients du monde entier. Les sessions à distance fonctionnent très bien à travers les fuseaux horaires, et nous pouvons accommoder la planification pour différentes régions. Le paiement est en CHF, mais nous pouvons discuter des options de paiement pour les clients internationaux.",
+      "faq-general-4-question": "Et si j'ai d'autres questions?",
+      "faq-general-4-answer": "Nous sommes là pour vous aider! Contactez-nous via notre page de support avec toute question sur les commandes, les services de conseil ou notre approche. Nous répondons généralement dans les 24 heures les jours ouvrables.",
+      "faq-general-5-question": "Les prix sont-ils en CHF ou dans une autre devise?",
+      "faq-general-5-answer": "Tous les prix sont en Francs Suisses (CHF). Nous sommes basés en Suisse et facturons en CHF pour tous les services. Les clients internationaux sont les bienvenus, et nous pouvons discuter des options de paiement si nécessaire."
+    }
+  },
+  "de": {
+    "translation": {
+      "faq-general-hero-title": "Allgemeine Fragen",
+      "faq-general-hero-subtitle": "Häufige Fragen zum Einstieg, Datenschutz und unseren Dienstleistungen.",
+      "faq-category-general-title": "Allgemein",
+      "faq-general-1-question": "Wie fange ich an?",
+      "faq-general-1-answer": "Für Aufträge besuchen Sie unsere <a href=\"/services/commissioning/\" class=\"faq-link\">Auftragsseite</a>, um mehr zu erfahren und mit einer Persönlichen Projektaufnahme (CHF 20, gutgeschrieben) zu beginnen, oder kontaktieren Sie uns direkt über unsere Supportseite für größere Aufträge. Für Beratungsdienste kontaktieren Sie uns über die Supportseite mit Ihrem bevorzugten Diensttyp und Ihrer Verfügbarkeit. Wir antworten innerhalb von 24 Stunden an Werktagen.",
+      "faq-general-2-question": "Was ist mit Datenschutz und Datenverarbeitung?",
+      "faq-general-2-answer": "Wir nehmen den Datenschutz ernst. Alle Kundeninformationen werden streng vertraulich behandelt. Für beauftragte Tools behalten wir nur IP-Rechte für Kataloganpassung—Ihre Daten und Arbeitsabläufe bleiben privat. Für Beratungssitzungen teilen wir Ihre Informationen nicht mit Dritten. Siehe unsere Datenschutzrichtlinie für vollständige Details.",
+      "faq-general-3-question": "Arbeiten Sie mit internationalen Kunden?",
+      "faq-general-3-answer": "Ja! Wir arbeiten mit Kunden auf der ganzen Welt. Remote-Sitzungen funktionieren sehr gut über Zeitzonen hinweg, und wir können die Planung für verschiedene Regionen anpassen. Die Zahlung erfolgt in CHF, aber wir können Zahlungsoptionen für internationale Kunden besprechen.",
+      "faq-general-4-question": "Was ist, wenn ich weitere Fragen habe?",
+      "faq-general-4-answer": "Wir sind hier, um zu helfen! Kontaktieren Sie uns über unsere Supportseite mit Fragen zu Aufträgen, Beratungsdiensten oder unserem Ansatz. Wir antworten typischerweise innerhalb von 24 Stunden an Werktagen.",
+      "faq-general-5-question": "Sind die Preise in CHF oder einer anderen Währung?",
+      "faq-general-5-answer": "Alle Preise sind in Schweizer Franken (CHF). Wir sind in der Schweiz ansässig und berechnen CHF für alle Dienste. Internationale Kunden sind willkommen, und wir können Zahlungsoptionen besprechen, falls erforderlich."
+    }
+  }
+}
+

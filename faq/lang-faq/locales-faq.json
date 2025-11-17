@@ -1,0 +1,107 @@
+{
+  "en": {
+    "translation": {
+      "faq-hero-title": "Frequently Asked Questions",
+      "faq-hero-subtitle": "Find answers to common questions about our services, catalog access, and more.",
+      "faq-nav-general": "General",
+      "faq-nav-catalog-access": "Catalog Access",
+      "faq-nav-commissioning": "Commissioning",
+      "faq-nav-tech-support": "Tech Support",
+      "faq-nav-account-billing": "Account & Billing",
+      "faq-section-general-title": "General",
+      "faq-section-general-description": "Common questions about getting started, privacy, and our services.",
+      "faq-section-catalog-access-title": "Catalog Access",
+      "faq-section-catalog-access-description": "Questions about purchasing tools, subscriptions, memberships, and accessing your purchased apps.",
+      "faq-section-commissioning-title": "Commissioning",
+      "faq-section-commissioning-description": "Questions about commissioning custom tools, pricing, timelines, and the commissioning process.",
+      "faq-section-tech-support-title": "Tech Support",
+      "faq-section-tech-support-description": "Questions about our tech support services, sessions, booking, and policies.",
+      "faq-section-account-billing-title": "Account & Billing",
+      "faq-section-account-billing-description": "Questions about account management, payment methods, billing cycles, and purchase history.",
+      "faq-view-section": "View FAQs →",
+      "faq-contact-title": "Still Have Questions?",
+      "faq-contact-text": "Can't find the answer you're looking for? Reach out to our support team.",
+      "faq-contact-cta": "Contact Support",
+      "faq-back-to-index": "← Back to FAQ"
+    }
+  },
+  "es": {
+    "translation": {
+      "faq-hero-title": "Preguntas Frecuentes",
+      "faq-hero-subtitle": "Encuentra respuestas a preguntas comunes sobre nuestros servicios, acceso al catálogo y más.",
+      "faq-nav-general": "General",
+      "faq-nav-catalog-access": "Acceso al Catálogo",
+      "faq-nav-commissioning": "Encargos",
+      "faq-nav-tech-support": "Soporte Técnico",
+      "faq-nav-account-billing": "Cuenta y Facturación",
+      "faq-section-general-title": "General",
+      "faq-section-general-description": "Preguntas comunes sobre cómo empezar, privacidad y nuestros servicios.",
+      "faq-section-catalog-access-title": "Acceso al Catálogo",
+      "faq-section-catalog-access-description": "Preguntas sobre comprar herramientas, suscripciones, membresías y acceder a tus aplicaciones compradas.",
+      "faq-section-commissioning-title": "Encargos",
+      "faq-section-commissioning-description": "Preguntas sobre encargar herramientas personalizadas, precios, plazos y el proceso de encargo.",
+      "faq-section-tech-support-title": "Soporte Técnico",
+      "faq-section-tech-support-description": "Preguntas sobre nuestros servicios de soporte técnico, sesiones, reservas y políticas.",
+      "faq-section-account-billing-title": "Cuenta y Facturación",
+      "faq-section-account-billing-description": "Preguntas sobre gestión de cuenta, métodos de pago, ciclos de facturación e historial de compras.",
+      "faq-view-section": "Ver Preguntas →",
+      "faq-contact-title": "¿Todavía Tienes Preguntas?",
+      "faq-contact-text": "¿No encuentras la respuesta que buscas? Contáctanos a través de nuestro equipo de soporte.",
+      "faq-contact-cta": "Contactar Soporte",
+      "faq-back-to-index": "← Volver a FAQ"
+    }
+  },
+  "fr": {
+    "translation": {
+      "faq-hero-title": "Questions Fréquemment Posées",
+      "faq-hero-subtitle": "Trouvez des réponses aux questions courantes sur nos services, l'accès au catalogue et plus encore.",
+      "faq-nav-general": "Général",
+      "faq-nav-catalog-access": "Accès au Catalogue",
+      "faq-nav-commissioning": "Commandes",
+      "faq-nav-tech-support": "Support Technique",
+      "faq-nav-account-billing": "Compte et Facturation",
+      "faq-section-general-title": "Général",
+      "faq-section-general-description": "Questions courantes sur comment commencer, la confidentialité et nos services.",
+      "faq-section-catalog-access-title": "Accès au Catalogue",
+      "faq-section-catalog-access-description": "Questions sur l'achat d'outils, les abonnements, les adhésions et l'accès à vos applications achetées.",
+      "faq-section-commissioning-title": "Commandes",
+      "faq-section-commissioning-description": "Questions sur la commande d'outils personnalisés, les prix, les délais et le processus de commande.",
+      "faq-section-tech-support-title": "Support Technique",
+      "faq-section-tech-support-description": "Questions sur nos services de support technique, les sessions, les réservations et les politiques.",
+      "faq-section-account-billing-title": "Compte et Facturation",
+      "faq-section-account-billing-description": "Questions sur la gestion de compte, les méthodes de paiement, les cycles de facturation et l'historique des achats.",
+      "faq-view-section": "Voir les Questions →",
+      "faq-contact-title": "Vous Avez Encore des Questions?",
+      "faq-contact-text": "Vous ne trouvez pas la réponse que vous cherchez? Contactez notre équipe de support.",
+      "faq-contact-cta": "Contacter le Support",
+      "faq-back-to-index": "← Retour à FAQ"
+    }
+  },
+  "de": {
+    "translation": {
+      "faq-hero-title": "Häufig Gestellte Fragen",
+      "faq-hero-subtitle": "Finden Sie Antworten auf häufige Fragen zu unseren Dienstleistungen, Katalogzugang und mehr.",
+      "faq-nav-general": "Allgemein",
+      "faq-nav-catalog-access": "Katalogzugang",
+      "faq-nav-commissioning": "Aufträge",
+      "faq-nav-tech-support": "Technischer Support",
+      "faq-nav-account-billing": "Konto und Abrechnung",
+      "faq-section-general-title": "Allgemein",
+      "faq-section-general-description": "Häufige Fragen zum Einstieg, Datenschutz und unseren Dienstleistungen.",
+      "faq-section-catalog-access-title": "Katalogzugang",
+      "faq-section-catalog-access-description": "Fragen zum Kauf von Tools, Abonnements, Mitgliedschaften und Zugriff auf Ihre gekauften Apps.",
+      "faq-section-commissioning-title": "Aufträge",
+      "faq-section-commissioning-description": "Fragen zur Beauftragung benutzerdefinierter Tools, Preise, Zeitpläne und den Auftragsprozess.",
+      "faq-section-tech-support-title": "Technischer Support",
+      "faq-section-tech-support-description": "Fragen zu unseren technischen Support-Dienstleistungen, Sitzungen, Buchungen und Richtlinien.",
+      "faq-section-account-billing-title": "Konto und Abrechnung",
+      "faq-section-account-billing-description": "Fragen zur Kontoverwaltung, Zahlungsmethoden, Abrechnungszyklen und Kaufhistorie.",
+      "faq-view-section": "FAQs anzeigen →",
+      "faq-contact-title": "Haben Sie Noch Fragen?",
+      "faq-contact-text": "Können Sie die Antwort nicht finden, die Sie suchen? Kontaktieren Sie unser Support-Team.",
+      "faq-contact-cta": "Support Kontaktieren",
+      "faq-back-to-index": "← Zurück zu FAQ"
+    }
+  }
+}
+

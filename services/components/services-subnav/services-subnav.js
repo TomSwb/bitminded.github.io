@@ -56,8 +56,6 @@
                 this.currentPage = 'tech-support';
             } else if (path.includes('/services/catalog-access')) {
                 this.currentPage = 'catalog-access';
-            } else if (path.includes('/services/faq')) {
-                this.currentPage = 'faq';
             } else {
                 this.currentPage = 'overview'; // Default fallback
             }

@@ -119,101 +119,42 @@
 
         <!-- Two Column Layout Wrapper -->
         <div class="commissioning-two-column">
-            <!-- FAQ Section -->
-            <section id="commissioning-faq" class="commissioning-faq">
-            <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-faq-title">Frequently Asked Questions</h2>
-            <div class="commissioning-faq-list">
-                <div class="commissioning-faq-item">
-                    <button class="commissioning-faq-item__button" aria-expanded="false">
-                        <span class="commissioning-faq-item__question translatable-content" data-i18n="commissioning-faq-1-question">How does commissioning work?</span>
-                        <span class="commissioning-faq-item__icon" aria-hidden="true">+</span>
-                    </button>
-                    <div class="commissioning-faq-item__answer">
-                        <p class="translatable-content" data-i18n="commissioning-faq-1-answer">When you commission a tool, you fund its development at artisan rates. You receive a perpetual-use license for your commissioned version, and we retain IP rights to adapt it for the public catalog. Projects are priced based on complexity: Simple apps (1-2 weeks) start at CHF 450-750, Standard apps (2-4 weeks) are CHF 850-1,250, and Complex apps (6+ weeks) are CHF 1,350-1,950.</p>
+            <!-- Licensing Terms Section -->
+            <section class="commissioning-licensing">
+                <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-licensing-title">Licensing Terms</h2>
+                <div class="commissioning-licensing-content">
+                    <div class="commissioning-licensing-item">
+                        <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-perpetual-title">Perpetual License</h3>
+                        <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-perpetual-text">You receive a perpetual-use license for your commissioned tool, granting you the right to use it forever with no recurring license fees. If your tool requires recurring payment services (such as databases or APIs), these costs are discussed during project scope and paid at cost.</p>
+                    </div>
+                    <div class="commissioning-licensing-item">
+                        <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-ip-title">Rights to Share & Adapt</h3>
+                        <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-ip-text">We retain the rights to adapt your tool for the public catalog and share it with others.</p>
+                    </div>
+                    <div class="commissioning-licensing-item">
+                        <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-updates-title">Priority Access to Updates</h3>
+                        <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-updates-text">As the commissioner, you have priority access to new features and enhancements. Simple additions may be added at no cost, while more complex features are priced at reduced rates.</p>
                     </div>
                 </div>
-                <div class="commissioning-faq-item">
-                    <button class="commissioning-faq-item__button" aria-expanded="false">
-                        <span class="commissioning-faq-item__question translatable-content" data-i18n="commissioning-faq-2-question">How do you calculate pricing? Do you bill hourly?</span>
-                        <span class="commissioning-faq-item__icon" aria-hidden="true">+</span>
-                    </button>
-                    <div class="commissioning-faq-item__answer">
-                        <p class="translatable-content" data-i18n="commissioning-faq-2-answer">We bill by project, not by the hour. This means you pay a fixed price for your complete tool, regardless of how long it takes. For context, our pricing works out to approximately CHF 40-50 per hour—much more accessible than typical agency rates of CHF 80-150/hour. This project-based approach gives you predictable costs and ensures we focus on delivering value rather than tracking time.</p>
-                    </div>
+                <div class="commissioning-licensing-disclaimer">
+                    <p class="commissioning-licensing-disclaimer__text">
+                        <span class="translatable-content" data-i18n="commissioning-licensing-disclaimer-text-1">These licensing terms are a summary. The formal commissioning agreement will contain the complete terms and conditions. Your commissioning project is also subject to our</span> 
+                        <a href="/legal-pages/terms" class="commissioning-licensing-disclaimer__link translatable-content" data-i18n="commissioning-licensing-disclaimer-link">Terms of Service</a>
+                        <span class="translatable-content" data-i18n="commissioning-licensing-disclaimer-text-2">, which cover liability limitations, dispute resolution, and other general terms.</span>
+                    </p>
                 </div>
-                <div class="commissioning-faq-item">
-                    <button class="commissioning-faq-item__button" aria-expanded="false">
-                        <span class="commissioning-faq-item__question translatable-content" data-i18n="commissioning-faq-3-question">How many hours per week do you work on my project?</span>
-                        <span class="commissioning-faq-item__icon" aria-hidden="true">+</span>
-                    </button>
-                    <div class="commissioning-faq-item__answer">
-                        <p class="translatable-content" data-i18n="commissioning-faq-3-answer">I typically work 20-25 hours per week on your project. This means a Simple app (1-2 weeks) represents approximately 20-50 hours of focused development time, a Standard app (2-4 weeks) represents 40-100 hours, and a Complex app (6+ weeks) represents 120-150+ hours. You'll receive regular check-ins and progress updates throughout the build process so you can see how things are progressing.</p>
-                    </div>
-                </div>
-                <div class="commissioning-faq-item">
-                    <button class="commissioning-faq-item__button" aria-expanded="false">
-                        <span class="commissioning-faq-item__question translatable-content" data-i18n="commissioning-faq-6-question">Can I customize existing tools?</span>
-                        <span class="commissioning-faq-item__icon" aria-hidden="true">+</span>
-                    </button>
-                    <div class="commissioning-faq-item__answer">
-                        <p class="translatable-content" data-i18n="commissioning-faq-6-answer">Yes! We can customize existing catalog tools or adapt them for your specific needs. You can also commission new features for existing catalog tools (CHF 20-150 depending on difficulty). Contact us to discuss your customization requirements and get a quote based on the complexity of the changes needed.</p>
-                    </div>
-                </div>
-                <div class="commissioning-faq-item">
-                    <button class="commissioning-faq-item__button" aria-expanded="false">
-                        <span class="commissioning-faq-item__question translatable-content" data-i18n="commissioning-faq-8-question">Do you offer payment plans for larger commissions?</span>
-                        <span class="commissioning-faq-item__icon" aria-hidden="true">+</span>
-                    </button>
-                    <div class="commissioning-faq-item__answer">
-                        <p class="translatable-content" data-i18n="commissioning-faq-8-answer">Yes, we can structure payment plans for commissions. We're flexible and can work with you to find a payment schedule that works for your budget. Contact us to discuss options.</p>
-                    </div>
-                </div>
-                <div class="commissioning-faq-item">
-                    <button class="commissioning-faq-item__button" aria-expanded="false">
-                        <span class="commissioning-faq-item__question translatable-content" data-i18n="commissioning-faq-9-question">What about recurring payment services like databases or APIs?</span>
-                        <span class="commissioning-faq-item__icon" aria-hidden="true">+</span>
-                    </button>
-                    <div class="commissioning-faq-item__answer">
-                        <p class="translatable-content" data-i18n="commissioning-faq-9-answer">If your tool requires recurring payment services (such as databases, APIs, or other monthly services), these costs will be discussed and agreed upon during the project scope phase. You'll pay these costs at cost (no profit margin) as part of the project contract. Once the app is actively used by others (threshold to be determined), we can waive these recurring service costs entirely. This only applies to apps requiring recurring payment services.</p>
-                    </div>
-                </div>
-                <div class="commissioning-faq-item">
-                    <button class="commissioning-faq-item__button" aria-expanded="false">
-                        <span class="commissioning-faq-item__question translatable-content" data-i18n="commissioning-faq-10-question">What if I need ongoing support after delivery?</span>
-                        <span class="commissioning-faq-item__icon" aria-hidden="true">+</span>
-                    </button>
-                    <div class="commissioning-faq-item__answer">
-                        <p class="translatable-content" data-i18n="commissioning-faq-10-answer">Your commissioned tool receives updates and maintenance during the build process. After delivery, as the commissioner, you have priority access to new features and enhancements. Simple additions may be added at no cost, while more complex features are priced at reduced rates depending on difficulty. This gives you ongoing value from your initial investment. Post-delivery updates and maintenance for your specific commissioned version can be discussed separately. Contact us to discuss ongoing support options.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Licensing Terms Section -->
-        <section class="commissioning-licensing">
-            <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-licensing-title">Licensing Terms</h2>
-            <div class="commissioning-licensing-content">
-                <div class="commissioning-licensing-item">
-                    <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-perpetual-title">Perpetual License</h3>
-                    <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-perpetual-text">You receive a perpetual-use license for your commissioned tool, granting you the right to use it forever with no recurring license fees. If your tool requires recurring payment services (such as databases or APIs), these costs are discussed during project scope and paid at cost.</p>
-                </div>
-                <div class="commissioning-licensing-item">
-                    <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-ip-title">Rights to Share & Adapt</h3>
-                    <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-ip-text">We retain the rights to adapt your tool for the public catalog and share it with others.</p>
-                </div>
-                <div class="commissioning-licensing-item">
-                    <h3 class="commissioning-licensing-item__title translatable-content" data-i18n="commissioning-licensing-updates-title">Priority Access to Updates</h3>
-                    <p class="commissioning-licensing-item__text translatable-content" data-i18n="commissioning-licensing-updates-text">As the commissioner, you have priority access to new features and enhancements. Simple additions may be added at no cost, while more complex features are priced at reduced rates.</p>
-                </div>
-            </div>
-            <div class="commissioning-licensing-disclaimer">
-                <p class="commissioning-licensing-disclaimer__text">
-                    <span class="translatable-content" data-i18n="commissioning-licensing-disclaimer-text-1">These licensing terms are a summary. The formal commissioning agreement will contain the complete terms and conditions. Your commissioning project is also subject to our</span> 
-                    <a href="/legal-pages/terms" class="commissioning-licensing-disclaimer__link translatable-content" data-i18n="commissioning-licensing-disclaimer-link">Terms of Service</a>
-                    <span class="translatable-content" data-i18n="commissioning-licensing-disclaimer-text-2">, which cover liability limitations, dispute resolution, and other general terms.</span>
+            <!-- FAQ Link Section -->
+            <section id="commissioning-faq" class="commissioning-faq-link">
+                <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-faq-title">Frequently Asked Questions</h2>
+                <p class="commissioning-section__description translatable-content" data-i18n="commissioning-faq-link-description">
+                    Have questions about commissioning, pricing, timelines, or the commissioning process? Visit our comprehensive FAQ page for detailed answers.
                 </p>
-            </div>
-        </section>
+                <div class="commissioning-faq-link__cta">
+                    <a href="/faq/commissioning/" class="commissioning-button commissioning-button--primary translatable-content" data-i18n="commissioning-view-faq">View Commissioning FAQs →</a>
+                </div>
+            </section>
         </div>
 
         

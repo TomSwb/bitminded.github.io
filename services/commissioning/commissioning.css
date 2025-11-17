@@ -20,11 +20,18 @@
   .commissioning-two-column {
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-xl, 2rem);
-    align-items: start;
+    align-items: stretch;
   }
   
   .commissioning-two-column > section {
     min-width: 0; /* Prevent overflow */
+  }
+  
+  /* Center FAQ section vertically */
+  .commissioning-faq-link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   
 }
@@ -310,6 +317,11 @@
   background-color: var(--color-primary-hover, #4f46e5);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
+}
+
+/* FAQ link button hover - use secondary color */
+.commissioning-faq-link__cta .commissioning-button--primary:hover {
+  background-color: var(--color-secondary, #d286bd);
 }
 
 .commissioning-button--coming-soon {

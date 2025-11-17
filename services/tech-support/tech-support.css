@@ -455,6 +455,11 @@
   box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
 }
 
+/* FAQ link button hover - use secondary color */
+.tech-support-faq-link__cta .tech-support-button--primary:hover {
+  background-color: var(--color-secondary, #d286bd);
+}
+
 .tech-support-button--coming-soon {
   background-color: var(--color-secondary, #d286bd);
   cursor: not-allowed;
