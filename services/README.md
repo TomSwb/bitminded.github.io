@@ -52,7 +52,7 @@ See [PRICING-STRATEGY.md](./PRICING-STRATEGY.md) for comprehensive pricing analy
 
 ✅ **Commissioning:**
 - Personal Project Intake: CHF 20 (credited)
-- Simple App: CHF 450-750 (1-2 weeks)
+- Simple App: CHF 350-750 (1-2 weeks)
 - Standard App: CHF 850-1,250 (2-4 weeks)
 - Complex App: CHF 1,350-1,950 (6+ weeks)
 - Commission a Feature: CHF 20-150 (depending on difficulty - for new features on existing catalog tools)

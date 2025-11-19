@@ -49,6 +49,11 @@
   text-align: center;
 }
 
+/* Who These Services Help title */
+.tech-support-section__title[data-i18n="tech-support-audience-title"] {
+  padding-bottom: 1.5rem;
+}
+
 /* Intro Grid (Audience + Process side-by-side) */
 .tech-support-intro {
   display: block;
