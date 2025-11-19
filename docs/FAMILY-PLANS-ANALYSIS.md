@@ -1,7 +1,7 @@
 # Family Plans Feature - Analysis & Planning
 
 > **Last Updated:** January 2025  
-> **Status:** 📋 Planning Phase - Under Review  
+> **Status:** 🚧 Partial Implementation - Pricing UI Complete  
 > **Purpose:** Make tools/subscriptions accessible to families, simplify family management, and support "petite gens" market
 
 ---
@@ -37,7 +37,8 @@
 
 ### Current Context
 
-- **Individual Subscriptions:** CHF 8/month (All-Tools), CHF 15/month (Supporter)
+- **Individual Subscriptions:** CHF 5/month (All-Tools), CHF 8/month (Supporter)
+- **Individual Yearly:** CHF 55/year (All-Tools), CHF 88/year (Supporter)
 - **Family Services:** Family Tech Tune-Up (CHF 140), Family guidance sessions exist
 - **Target Market:** "Petite gens" (ordinary people, families, individuals)
 - **Volume Strategy:** 1000+ subscribers at CHF 5-8/month = sustainable income
@@ -110,24 +111,37 @@
 - ✅ Accessible to "petite gens"
 - ✅ Volume strategy (more users, lower per-user revenue)
 
-#### Option B: Per-Member Pricing
+#### Option B: Per-Member Pricing (Implemented)
 
 **Structure:**
-- Base price: CHF 8/month (1st member)
-- Additional members: CHF 5/month each (up to 5 more)
-- **Examples:**
-  - 2 members: CHF 13/month
-  - 3 members: CHF 18/month
-  - 4 members: CHF 23/month
-  - 5 members: CHF 28/month
-  - 6 members: CHF 33/month
+- **All-Tools Family:** CHF 3.50 per member/month or CHF 38.50 per member/year (11 months = 1 month free)
+- **Supporter Family:** CHF 5 per member/month or CHF 55 per member/year (11 months = 1 month free)
+- **Flexible:** Users can choose how many members (no fixed limit, but recommended max 6-8)
+- **Examples (All-Tools):**
+  - 2 members: CHF 7/month or CHF 77/year
+  - 3 members: CHF 10.50/month or CHF 115.50/year
+  - 4 members: CHF 14/month or CHF 154/year
+  - 5 members: CHF 17.50/month or CHF 192.50/year
+  - 6 members: CHF 21/month or CHF 231/year
+- **Examples (Supporter):**
+  - 2 members: CHF 10/month or CHF 110/year
+  - 3 members: CHF 15/month or CHF 165/year
+  - 4 members: CHF 20/month or CHF 220/year
+  - 5 members: CHF 25/month or CHF 275/year
+  - 6 members: CHF 30/month or CHF 330/year
+
+**Savings vs. Individual:**
+- All-Tools: 30% savings per member (CHF 3.50 vs CHF 5/month)
+- Supporter: 37.5% savings per member (CHF 5 vs CHF 8/month)
+- Yearly: Additional 1 month free (11 months for price of 12)
 
 **Rationale:**
 - ✅ Scales with family size
-- ✅ Still saves money vs. individual subscriptions
 - ✅ Fair pricing (pay for what you use)
-- ❌ More complex to explain
-- ❌ Less clear value proposition
+- ✅ Flexible - no fixed member limit
+- ✅ Accessible pricing that doesn't deter smaller families
+- ✅ Clear per-member value proposition
+- ✅ Yearly option provides additional savings
 
 #### Option C: Tiered Family Plans
 
@@ -150,10 +164,10 @@
 - ❌ More complex to implement
 - ❌ Requires family size selection
 
-**Recommendation:** Option A (Fixed Family Price)
-- **Family All-Tools:** CHF 15/month (up to 6 members)
-- **Family Supporter:** CHF 25/month (up to 6 members)
-- Simple, clear, accessible, strong value
+**Recommendation:** Option B (Per-Member Pricing) - **IMPLEMENTED**
+- **Family All-Tools:** CHF 3.50 per member/month or CHF 38.50 per member/year
+- **Family Supporter:** CHF 5 per member/month or CHF 55 per member/year
+- Flexible member count, accessible pricing, clear value proposition
 
 ---
 
@@ -777,61 +791,73 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ### Pricing Structure
 
-#### Recommended: Fixed Family Price
+#### Implemented: Per-Member Family Pricing
 
 **Family All-Tools Plan:**
-- **Price:** CHF 15/month or CHF 150/year
-- **Members:** Up to 6 family members
-- **Value:** ~CHF 48/month (6 × CHF 8) for CHF 15
-- **Savings:** 69% compared to individual subscriptions
+- **Price:** CHF 3.50 per member/month or CHF 38.50 per member/year
+- **Members:** Flexible (recommended max 6-8)
+- **Example (6 members):** CHF 21/month or CHF 231/year
+- **Savings:** 30% per member vs. individual (CHF 3.50 vs CHF 5/month)
 
 **Family Supporter Plan:**
-- **Price:** CHF 25/month or CHF 250/year
-- **Members:** Up to 6 family members
-- **Value:** ~CHF 60/month (6 × CHF 10) for CHF 25
-- **Savings:** 58% compared to individual subscriptions
+- **Price:** CHF 5 per member/month or CHF 55 per member/year
+- **Members:** Flexible (recommended max 6-8)
+- **Example (6 members):** CHF 30/month or CHF 330/year
+- **Savings:** 37.5% per member vs. individual (CHF 5 vs CHF 8/month)
 
 ### Revenue Impact Analysis
 
 #### Scenario A: Individual Subscriptions Only
 
 **Monthly Revenue:**
-- 1000 individual subscribers × CHF 8/month = CHF 8,000/month
-- After Stripe fees (3%): CHF 7,760/month
-- After tax (~25%): CHF 5,820/month = CHF 69,840/year
+- 1000 individual subscribers (avg CHF 6.50/month) = CHF 6,500/month
+  - 600 × CHF 5/month (All-Tools) = CHF 3,000
+  - 400 × CHF 8/month (Supporter) = CHF 3,200
+- After Stripe fees (3%): CHF 6,305/month
+- After tax (~25%): CHF 4,729/month = CHF 56,748/year
 
-#### Scenario B: Mixed (Families + Individuals)
+#### Scenario B: Mixed (Families + Individuals) - Per-Member Pricing
 
 **Monthly Revenue:**
-- 200 family plans (avg 3 members) × CHF 15/month = CHF 3,000/month
-- 400 individual subscribers × CHF 8/month = CHF 3,200/month
-- **Total: CHF 6,200/month**
-- After Stripe fees (3%): CHF 6,014/month
-- After tax (~25%): CHF 4,511/month = CHF 54,132/year
+- 200 family plans (avg 3 members, avg CHF 4.25/member) = CHF 2,550/month
+  - 120 families × 3 members × CHF 3.50 = CHF 1,260 (All-Tools)
+  - 80 families × 3 members × CHF 5 = CHF 1,200 (Supporter)
+- 400 individual subscribers = CHF 3,200/month
+  - 240 × CHF 5/month (All-Tools) = CHF 1,200
+  - 160 × CHF 8/month (Supporter) = CHF 1,280
+- **Total: CHF 5,750/month**
+- After Stripe fees (3%): CHF 5,578/month
+- After tax (~25%): CHF 4,183/month = CHF 50,196/year
 - **Users: 1,000 (600 family members + 400 individuals)**
 
 **Analysis:**
-- ❌ Lower revenue (CHF 6,200 vs CHF 8,000)
+- ⚠️ Lower revenue (CHF 5,750 vs CHF 6,500)
 - ✅ More users (1,000 vs 1,000, but 600 are family members)
 - ✅ Better retention (families less likely to cancel)
 - ✅ Better engagement (family features, community)
+- ✅ Accessible pricing attracts more families
 
-#### Scenario C: Optimized Family Plans
+#### Scenario C: Optimized Family Plans - Per-Member Pricing
 
 **Monthly Revenue:**
-- 300 family plans (avg 4 members) × CHF 18/month = CHF 5,400/month
-- 200 individual subscribers × CHF 8/month = CHF 1,600/month
-- **Total: CHF 7,000/month**
-- After Stripe fees (3%): CHF 6,790/month
-- After tax (~25%): CHF 5,093/month = CHF 61,116/year
+- 300 family plans (avg 4 members, avg CHF 4.25/member) = CHF 5,100/month
+  - 180 families × 4 members × CHF 3.50 = CHF 2,520 (All-Tools)
+  - 120 families × 4 members × CHF 5 = CHF 2,400 (Supporter)
+- 200 individual subscribers = CHF 1,600/month
+  - 120 × CHF 5/month (All-Tools) = CHF 600
+  - 80 × CHF 8/month (Supporter) = CHF 640
+- **Total: CHF 6,700/month**
+- After Stripe fees (3%): CHF 6,499/month
+- After tax (~25%): CHF 4,874/month = CHF 58,488/year
 - **Users: 1,400 (1,200 family members + 200 individuals)**
 
 **Analysis:**
-- ✅ Similar revenue (CHF 7,000 vs CHF 8,000)
+- ✅ Similar revenue (CHF 6,700 vs CHF 6,500)
 - ✅ More users (1,400 vs 1,000)
 - ✅ Better retention (families less likely to cancel)
 - ✅ Better engagement (family features, community)
 - ✅ Stronger community (more active users)
+- ✅ Flexible pricing attracts diverse family sizes
 
 ### Market Fit
 
@@ -931,26 +957,35 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ## ✅ Recommendations
 
-### Pricing Recommendation
+### Pricing Recommendation (Implemented)
 
 **Family All-Tools Plan:**
-- **Price:** CHF 15/month or CHF 150/year
-- **Members:** Up to 6 family members
+- **Price:** CHF 3.50 per member/month or CHF 38.50 per member/year
+- **Members:** Flexible (recommended max 6-8 members)
 - **Includes:** All-Tools access for all family members
-- **Value:** ~CHF 48/month for CHF 15 (69% savings)
+- **Savings:** 30% per member vs. individual (CHF 3.50 vs CHF 5/month)
+- **Yearly Bonus:** 1 month free (11 months for price of 12)
 
 **Family Supporter Plan:**
-- **Price:** CHF 25/month or CHF 250/year
-- **Members:** Up to 6 family members
+- **Price:** CHF 5 per member/month or CHF 55 per member/year
+- **Members:** Flexible (recommended max 6-8 members)
 - **Includes:** All-Tools + Supporter benefits for all members
-- **Value:** ~CHF 60/month for CHF 25 (58% savings)
+- **Savings:** 37.5% per member vs. individual (CHF 5 vs CHF 8/month)
+- **Yearly Bonus:** 1 month free (11 months for price of 12)
+
+**Examples:**
+- 2-member family (All-Tools): CHF 7/month or CHF 77/year (vs. CHF 10/month individual)
+- 4-member family (All-Tools): CHF 14/month or CHF 154/year (vs. CHF 20/month individual)
+- 6-member family (All-Tools): CHF 21/month or CHF 231/year (vs. CHF 30/month individual)
 
 **Rationale:**
-- ✅ Simple, clear pricing
-- ✅ Strong value proposition
-- ✅ Accessible to "petite gens"
+- ✅ Flexible pricing that scales with family size
+- ✅ Accessible pricing that doesn't deter smaller families
+- ✅ Clear per-member value proposition
+- ✅ Fair pricing (pay for what you use)
 - ✅ Volume strategy (more users, lower per-user revenue)
 - ✅ Better retention (families less likely to cancel)
+- ✅ Yearly option provides additional savings
 
 ### Family Definition Recommendation
 
@@ -1014,11 +1049,12 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - Should family plans include Supporter benefits?
 - How to handle family plan upgrades/downgrades?
 
-**Recommendation:**
-- Fixed price: CHF 15/month (All-Tools), CHF 25/month (Supporter)
-- Up to 6 members per family
-- Clear upgrade/downgrade path
-- Prorated billing for changes
+**Decision:** Per-Member Pricing - **IMPLEMENTED**
+- **All-Tools:** CHF 3.50 per member/month or CHF 38.50 per member/year
+- **Supporter:** CHF 5 per member/month or CHF 55 per member/year
+- Flexible member count (recommended max 6-8 members)
+- Clear upgrade/downgrade path needed
+- Prorated billing for changes needed
 
 ### 3. User Management
 
@@ -1081,10 +1117,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 **Options:**
 - A) Fixed price (CHF 15-20/month)
-- B) Per-member pricing (CHF 8 + CHF 5/member)
+- B) Per-member pricing (CHF 3.50/member for All-Tools, CHF 5/member for Supporter)
 - C) Tiered plans (Small, Medium, Large)
 
-**Recommendation:** Option A (Fixed CHF 15/month)
+**Decision:** Option B (Per-Member Pricing) - **IMPLEMENTED**
+- **All-Tools:** CHF 3.50 per member/month or CHF 38.50 per member/year
+- **Supporter:** CHF 5 per member/month or CHF 55 per member/year
+- Flexible member count, accessible pricing, clear value proposition
 
 ### Decision 3: Max Family Members
 
@@ -1236,11 +1275,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - Business model implications analysis
 - Implementation considerations
 - Recommendations and decision points
+- **Pricing structure implemented:** Per-member pricing (CHF 3.50/member for All-Tools, CHF 5/member for Supporter)
+- **UI implementation:** Family pricing toggle added to catalog access page with yearly options
 
 ---
 
 **Last Updated:** January 2025  
-**Next Review:** After decisions are made and before implementation begins
+**Next Review:** After full implementation is complete
 
-**Status:** 📋 Planning Phase - Under Review
+**Status:** 🚧 Partial Implementation - Pricing UI Complete
 

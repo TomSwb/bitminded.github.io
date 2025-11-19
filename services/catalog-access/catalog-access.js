@@ -219,28 +219,54 @@ class CatalogAccessPageLoader {
     }
 
     initPricingToggle() {
-        const toggleButton = document.getElementById('pricing-toggle');
-        if (!toggleButton) return;
+        const pricingToggleButton = document.getElementById('pricing-toggle');
+        const familyToggleButton = document.getElementById('family-toggle');
+        
+        if (!pricingToggleButton || !familyToggleButton) return;
 
-        let isMonthly = true; // Start with monthly pricing
+        // State management
+        this.pricingState = {
+            isMonthly: true, // Start with monthly pricing
+            isFamily: false  // Start with individual pricing
+        };
 
-        toggleButton.addEventListener('click', () => {
-            isMonthly = !isMonthly;
-            this.updatePricing(isMonthly);
+        // Pricing toggle (monthly/yearly)
+        pricingToggleButton.addEventListener('click', () => {
+            this.pricingState.isMonthly = !this.pricingState.isMonthly;
+            this.updatePricing();
         });
+
+        // Family toggle (individual/family)
+        familyToggleButton.addEventListener('click', () => {
+            this.pricingState.isFamily = !this.pricingState.isFamily;
+            this.updatePricing();
+        });
+
+        // Initialize pricing display
+        this.updatePricing();
     }
 
-    updatePricing(isMonthly) {
-        const toggleButton = document.getElementById('pricing-toggle');
-        const toggleText = toggleButton?.querySelector('.catalog-access-pricing-toggle__text');
+    updatePricing() {
+        const pricingToggleButton = document.getElementById('pricing-toggle');
+        const familyToggleButton = document.getElementById('family-toggle');
+        const pricingToggleText = pricingToggleButton?.querySelector('.catalog-access-pricing-toggle__text');
+        const familyToggleText = familyToggleButton?.querySelector('.catalog-access-pricing-toggle__text');
         const cards = document.querySelectorAll('[data-pricing-toggle="true"]');
 
-        // Update button text
-        if (toggleText) {
-            const text = isMonthly 
-                ? toggleText.getAttribute('data-text-monthly') 
-                : toggleText.getAttribute('data-text-yearly');
-            toggleText.textContent = text;
+        // Update pricing toggle button text
+        if (pricingToggleText) {
+            const text = this.pricingState.isMonthly 
+                ? pricingToggleText.getAttribute('data-text-monthly') 
+                : pricingToggleText.getAttribute('data-text-yearly');
+            pricingToggleText.textContent = text;
+        }
+
+        // Update family toggle button text
+        if (familyToggleText) {
+            const text = this.pricingState.isFamily 
+                ? familyToggleText.getAttribute('data-text-family') 
+                : familyToggleText.getAttribute('data-text-individual');
+            familyToggleText.textContent = text;
         }
 
         // Update each card's pricing
@@ -249,17 +275,35 @@ class CatalogAccessPageLoader {
             const durationElement = card.querySelector('.catalog-access-pricing-comparison-card__duration');
 
             if (priceElement && durationElement) {
-                const monthlyPrice = priceElement.getAttribute('data-price-monthly');
-                const yearlyPrice = priceElement.getAttribute('data-price-yearly');
-                const monthlyDuration = durationElement.getAttribute('data-duration-monthly');
-                const yearlyDuration = durationElement.getAttribute('data-duration-yearly');
-
-                if (isMonthly) {
-                    priceElement.textContent = `CHF ${monthlyPrice}`;
-                    durationElement.textContent = monthlyDuration;
+                if (this.pricingState.isFamily) {
+                    // Family pricing (per-member)
+                    if (this.pricingState.isMonthly) {
+                        // Family monthly
+                        const familyPrice = priceElement.getAttribute('data-price-family');
+                        const familyDuration = durationElement.getAttribute('data-duration-family');
+                        priceElement.textContent = `CHF ${familyPrice}`;
+                        durationElement.textContent = familyDuration;
+                    } else {
+                        // Family yearly
+                        const familyYearlyPrice = priceElement.getAttribute('data-price-family-yearly');
+                        const familyYearlyDuration = durationElement.getAttribute('data-duration-family-yearly');
+                        priceElement.textContent = `CHF ${familyYearlyPrice}`;
+                        durationElement.textContent = familyYearlyDuration;
+                    }
                 } else {
-                    priceElement.textContent = `CHF ${yearlyPrice}`;
-                    durationElement.textContent = yearlyDuration;
+                    // Individual pricing (monthly/yearly)
+                    const monthlyPrice = priceElement.getAttribute('data-price-monthly');
+                    const yearlyPrice = priceElement.getAttribute('data-price-yearly');
+                    const monthlyDuration = durationElement.getAttribute('data-duration-monthly');
+                    const yearlyDuration = durationElement.getAttribute('data-duration-yearly');
+
+                    if (this.pricingState.isMonthly) {
+                        priceElement.textContent = `CHF ${monthlyPrice}`;
+                        durationElement.textContent = monthlyDuration;
+                    } else {
+                        priceElement.textContent = `CHF ${yearlyPrice}`;
+                        durationElement.textContent = yearlyDuration;
+                    }
                 }
             }
         });
