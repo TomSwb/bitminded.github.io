@@ -247,26 +247,62 @@ class CatalogAccessPageLoader {
     }
 
     updatePricing() {
+        // Ensure i18next is available
+        if (typeof i18next === 'undefined') {
+            return;
+        }
+
         const pricingToggleButton = document.getElementById('pricing-toggle');
         const familyToggleButton = document.getElementById('family-toggle');
         const pricingToggleText = pricingToggleButton?.querySelector('.catalog-access-pricing-toggle__text');
         const familyToggleText = familyToggleButton?.querySelector('.catalog-access-pricing-toggle__text');
         const cards = document.querySelectorAll('[data-pricing-toggle="true"]');
 
-        // Update pricing toggle button text
+        // Update pricing toggle button text using i18next
         if (pricingToggleText) {
-            const text = this.pricingState.isMonthly 
-                ? pricingToggleText.getAttribute('data-text-monthly') 
-                : pricingToggleText.getAttribute('data-text-yearly');
-            pricingToggleText.textContent = text;
+            const key = this.pricingState.isMonthly 
+                ? pricingToggleText.getAttribute('data-i18n-text-monthly')
+                : pricingToggleText.getAttribute('data-i18n-text-yearly');
+            if (key) {
+                const translation = i18next.t(key);
+                if (translation && translation !== key) {
+                    pricingToggleText.textContent = translation;
+                }
+            }
         }
 
-        // Update family toggle button text
+        // Update family toggle button text using i18next
         if (familyToggleText) {
-            const text = this.pricingState.isFamily 
-                ? familyToggleText.getAttribute('data-text-family') 
-                : familyToggleText.getAttribute('data-text-individual');
-            familyToggleText.textContent = text;
+            const key = this.pricingState.isFamily 
+                ? familyToggleText.getAttribute('data-i18n-text-family')
+                : familyToggleText.getAttribute('data-i18n-text-individual');
+            if (key) {
+                const translation = i18next.t(key);
+                if (translation && translation !== key) {
+                    familyToggleText.textContent = translation;
+                }
+            }
+        }
+
+        // Update aria-labels for toggle buttons
+        if (pricingToggleButton) {
+            const ariaKey = pricingToggleButton.getAttribute('data-i18n-aria-label');
+            if (ariaKey) {
+                const translation = i18next.t(ariaKey);
+                if (translation && translation !== ariaKey) {
+                    pricingToggleButton.setAttribute('aria-label', translation);
+                }
+            }
+        }
+
+        if (familyToggleButton) {
+            const ariaKey = familyToggleButton.getAttribute('data-i18n-aria-label');
+            if (ariaKey) {
+                const translation = i18next.t(ariaKey);
+                if (translation && translation !== ariaKey) {
+                    familyToggleButton.setAttribute('aria-label', translation);
+                }
+            }
         }
 
         // Update each card's pricing
@@ -280,30 +316,62 @@ class CatalogAccessPageLoader {
                     if (this.pricingState.isMonthly) {
                         // Family monthly
                         const familyPrice = priceElement.getAttribute('data-price-family');
-                        const familyDuration = durationElement.getAttribute('data-duration-family');
+                        const durationKey = durationElement.getAttribute('data-i18n-duration-family');
                         priceElement.textContent = `CHF ${familyPrice}`;
-                        durationElement.textContent = familyDuration;
+                        if (durationKey) {
+                            const translation = i18next.t(durationKey);
+                            if (translation && translation !== durationKey) {
+                                durationElement.textContent = translation;
+                            }
+                        }
                     } else {
                         // Family yearly
                         const familyYearlyPrice = priceElement.getAttribute('data-price-family-yearly');
-                        const familyYearlyDuration = durationElement.getAttribute('data-duration-family-yearly');
+                        const durationKey = durationElement.getAttribute('data-i18n-duration-family-yearly');
                         priceElement.textContent = `CHF ${familyYearlyPrice}`;
-                        durationElement.textContent = familyYearlyDuration;
+                        if (durationKey) {
+                            const translation = i18next.t(durationKey);
+                            if (translation && translation !== durationKey) {
+                                durationElement.textContent = translation;
+                            }
+                        }
                     }
                 } else {
                     // Individual pricing (monthly/yearly)
                     const monthlyPrice = priceElement.getAttribute('data-price-monthly');
                     const yearlyPrice = priceElement.getAttribute('data-price-yearly');
-                    const monthlyDuration = durationElement.getAttribute('data-duration-monthly');
-                    const yearlyDuration = durationElement.getAttribute('data-duration-yearly');
+                    const monthlyDurationKey = durationElement.getAttribute('data-i18n-duration-monthly');
+                    const yearlyDurationKey = durationElement.getAttribute('data-i18n-duration-yearly');
 
                     if (this.pricingState.isMonthly) {
                         priceElement.textContent = `CHF ${monthlyPrice}`;
-                        durationElement.textContent = monthlyDuration;
+                        if (monthlyDurationKey) {
+                            const translation = i18next.t(monthlyDurationKey);
+                            if (translation && translation !== monthlyDurationKey) {
+                                durationElement.textContent = translation;
+                            }
+                        }
                     } else {
                         priceElement.textContent = `CHF ${yearlyPrice}`;
-                        durationElement.textContent = yearlyDuration;
+                        if (yearlyDurationKey) {
+                            const translation = i18next.t(yearlyDurationKey);
+                            if (translation && translation !== yearlyDurationKey) {
+                                durationElement.textContent = translation;
+                            }
+                        }
                     }
+                }
+            }
+        });
+
+        // Update feature indicator aria-labels
+        const featureIndicators = document.querySelectorAll('[data-i18n-aria-label]');
+        featureIndicators.forEach(indicator => {
+            const key = indicator.getAttribute('data-i18n-aria-label');
+            if (key) {
+                const translation = i18next.t(key);
+                if (translation && translation !== key) {
+                    indicator.setAttribute('aria-label', translation);
                 }
             }
         });
@@ -831,6 +899,23 @@ class CatalogAccessPageLoader {
 document.addEventListener('DOMContentLoaded', () => {
     window.catalogAccessPageLoader = new CatalogAccessPageLoader();
     window.catalogAccessPageLoader.init();
+
+    // Listen for language changes to update dynamic translations
+    window.addEventListener('catalogAccessTranslationsApplied', () => {
+        if (window.catalogAccessPageLoader && window.catalogAccessPageLoader.updatePricing) {
+            window.catalogAccessPageLoader.updatePricing();
+        }
+    });
+
+    // Also listen for global language change events
+    window.addEventListener('languageChanged', () => {
+        // Wait a bit for translations to be applied
+        setTimeout(() => {
+            if (window.catalogAccessPageLoader && window.catalogAccessPageLoader.updatePricing) {
+                window.catalogAccessPageLoader.updatePricing();
+            }
+        }, 100);
+    });
 });
 
 // Also run alignment after page fully loads (including images, fonts, etc.)

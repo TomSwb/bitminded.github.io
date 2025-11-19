@@ -48,6 +48,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Handle aria-label translations
+        const ariaLabelElements = document.querySelectorAll('[data-i18n-aria-label]');
+        ariaLabelElements.forEach(element => {
+            const key = element.getAttribute('data-i18n-aria-label');
+            if (!key) {
+                return;
+            }
+
+            const translation = i18next.t(key);
+            if (translation && translation !== key) {
+                element.setAttribute('aria-label', translation);
+            }
+        });
+
         revealContent();
         document.dispatchEvent(new CustomEvent('catalogAccessTranslationsApplied', {
             detail: {

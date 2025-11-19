@@ -89,7 +89,21 @@
       "catalog-access-feature-community-impact-title": "Community Impact",
       "catalog-access-feature-community-impact-description": "Your support directly contributes to making our tools accessible to as many people as possible. This includes funding accessibility improvements, supporting users with financial constraints, and ensuring our artisanal development reaches everyone who needs it.",
       "catalog-access-feature-trial-title": "Free Trial",
-      "catalog-access-feature-trial-description": "Try all tools risk-free before committing. Subscription tiers include a free trial period to explore the catalog."
+      "catalog-access-feature-trial-description": "Try all tools risk-free before committing. Subscription tiers include a free trial period to explore the catalog.",
+      "catalog-access-faq-link-description": "Have questions about catalog access, subscriptions, or tool licenses? Visit our comprehensive FAQ page for detailed answers.",
+      "catalog-access-view-faq": "View Catalog Access FAQs →",
+      "catalog-access-toggle-show-yearly": "Show Yearly Prices",
+      "catalog-access-toggle-show-monthly": "Show Monthly Prices",
+      "catalog-access-toggle-show-family": "Show Family Prices",
+      "catalog-access-toggle-show-individual": "Show Individual Prices",
+      "catalog-access-toggle-aria-monthly-yearly": "Toggle between monthly and yearly pricing",
+      "catalog-access-toggle-aria-individual-family": "Toggle between individual and family pricing",
+      "catalog-access-duration-monthly": "/month",
+      "catalog-access-duration-yearly": "/year",
+      "catalog-access-duration-family": "/member",
+      "catalog-access-duration-family-yearly": "/member/year",
+      "catalog-access-feature-indicator-included": "Included",
+      "catalog-access-feature-indicator-not-included": "Not included"
     }
   },
   "es": {
@@ -182,7 +196,21 @@
       "catalog-access-feature-community-impact-title": "Impacto Comunitario",
       "catalog-access-feature-community-impact-description": "Tu apoyo contribuye directamente a hacer que nuestras herramientas sean accesibles para el mayor número de personas posible. Esto incluye financiar mejoras de accesibilidad, apoyar a usuarios con limitaciones financieras y asegurar que nuestro desarrollo artesanal llegue a todos los que lo necesitan.",
       "catalog-access-feature-trial-title": "Prueba Gratuita",
-      "catalog-access-feature-trial-description": "Prueba todas las herramientas sin riesgo antes de comprometerte. Los niveles de suscripción incluyen un período de prueba gratuito para explorar el catálogo."
+      "catalog-access-feature-trial-description": "Prueba todas las herramientas sin riesgo antes de comprometerte. Los niveles de suscripción incluyen un período de prueba gratuito para explorar el catálogo.",
+      "catalog-access-faq-link-description": "¿Tienes preguntas sobre acceso al catálogo, suscripciones o licencias de herramientas? Visita nuestra página completa de preguntas frecuentes para respuestas detalladas.",
+      "catalog-access-view-faq": "Ver Preguntas Frecuentes de Acceso al Catálogo →",
+      "catalog-access-toggle-show-yearly": "Mostrar Precios Anuales",
+      "catalog-access-toggle-show-monthly": "Mostrar Precios Mensuales",
+      "catalog-access-toggle-show-family": "Mostrar Precios Familiares",
+      "catalog-access-toggle-show-individual": "Mostrar Precios Individuales",
+      "catalog-access-toggle-aria-monthly-yearly": "Alternar entre precios mensuales y anuales",
+      "catalog-access-toggle-aria-individual-family": "Alternar entre precios individuales y familiares",
+      "catalog-access-duration-monthly": "/mes",
+      "catalog-access-duration-yearly": "/año",
+      "catalog-access-duration-family": "/miembro",
+      "catalog-access-duration-family-yearly": "/miembro/año",
+      "catalog-access-feature-indicator-included": "Incluido",
+      "catalog-access-feature-indicator-not-included": "No incluido"
     }
   },
   "fr": {
@@ -275,7 +303,21 @@
       "catalog-access-feature-community-impact-title": "Impact Communautaire",
       "catalog-access-feature-community-impact-description": "Votre soutien contribue directement à rendre nos outils accessibles au plus grand nombre de personnes possible. Cela inclut le financement d'améliorations d'accessibilité, le soutien aux utilisateurs ayant des contraintes financières et l'assurance que notre développement artisanal atteigne tous ceux qui en ont besoin.",
       "catalog-access-feature-trial-title": "Essai Gratuit",
-      "catalog-access-feature-trial-description": "Essayez tous les outils sans risque avant de vous engager. Les niveaux d'abonnement incluent une période d'essai gratuite pour explorer le catalogue."
+      "catalog-access-feature-trial-description": "Essayez tous les outils sans risque avant de vous engager. Les niveaux d'abonnement incluent une période d'essai gratuite pour explorer le catalogue.",
+      "catalog-access-faq-link-description": "Vous avez des questions sur l'accès au catalogue, les abonnements ou les licences d'outils? Visitez notre page FAQ complète pour des réponses détaillées.",
+      "catalog-access-view-faq": "Voir les FAQ d'Accès au Catalogue →",
+      "catalog-access-toggle-show-yearly": "Afficher les Prix Annuels",
+      "catalog-access-toggle-show-monthly": "Afficher les Prix Mensuels",
+      "catalog-access-toggle-show-family": "Afficher les Prix Familiaux",
+      "catalog-access-toggle-show-individual": "Afficher les Prix Individuels",
+      "catalog-access-toggle-aria-monthly-yearly": "Basculer entre les prix mensuels et annuels",
+      "catalog-access-toggle-aria-individual-family": "Basculer entre les prix individuels et familiaux",
+      "catalog-access-duration-monthly": "/mois",
+      "catalog-access-duration-yearly": "/an",
+      "catalog-access-duration-family": "/membre",
+      "catalog-access-duration-family-yearly": "/membre/an",
+      "catalog-access-feature-indicator-included": "Inclus",
+      "catalog-access-feature-indicator-not-included": "Non inclus"
     }
   },
   "de": {
@@ -368,7 +410,21 @@
       "catalog-access-feature-community-impact-title": "Gemeinschaftsauswirkung",
       "catalog-access-feature-community-impact-description": "Ihre Unterstützung trägt direkt dazu bei, unsere Tools für so viele Menschen wie möglich zugänglich zu machen. Dies umfasst die Finanzierung von Barrierefreiheitsverbesserungen, die Unterstützung von Benutzern mit finanziellen Einschränkungen und die Gewährleistung, dass unsere handwerkliche Entwicklung alle erreicht, die sie benötigen.",
       "catalog-access-feature-trial-title": "Kostenlose Testversion",
-      "catalog-access-feature-trial-description": "Testen Sie alle Tools risikofrei, bevor Sie sich verpflichten. Abonnement-Stufen beinhalten eine kostenlose Testphase, um den Katalog zu erkunden."
+      "catalog-access-feature-trial-description": "Testen Sie alle Tools risikofrei, bevor Sie sich verpflichten. Abonnement-Stufen beinhalten eine kostenlose Testphase, um den Katalog zu erkunden.",
+      "catalog-access-faq-link-description": "Haben Sie Fragen zum Katalogzugang, zu Abonnements oder Tool-Lizenzen? Besuchen Sie unsere umfassende FAQ-Seite für detaillierte Antworten.",
+      "catalog-access-view-faq": "Katalogzugang FAQs anzeigen →",
+      "catalog-access-toggle-show-yearly": "Jährliche Preise anzeigen",
+      "catalog-access-toggle-show-monthly": "Monatliche Preise anzeigen",
+      "catalog-access-toggle-show-family": "Familienpreise anzeigen",
+      "catalog-access-toggle-show-individual": "Einzelpreise anzeigen",
+      "catalog-access-toggle-aria-monthly-yearly": "Zwischen monatlichen und jährlichen Preisen umschalten",
+      "catalog-access-toggle-aria-individual-family": "Zwischen Einzel- und Familienpreisen umschalten",
+      "catalog-access-duration-monthly": "/Monat",
+      "catalog-access-duration-yearly": "/Jahr",
+      "catalog-access-duration-family": "/Mitglied",
+      "catalog-access-duration-family-yearly": "/Mitglied/Jahr",
+      "catalog-access-feature-indicator-included": "Enthalten",
+      "catalog-access-feature-indicator-not-included": "Nicht enthalten"
     }
   }
 }

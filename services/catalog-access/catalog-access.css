@@ -349,7 +349,7 @@
   .catalog-access-pricing-toggle-wrapper {
     position: absolute;
     top: -3rem;
-    right: 6rem;
+    right: 0;
     margin: 0 0 3rem 0;
     z-index: 10;
     grid-column: auto;
