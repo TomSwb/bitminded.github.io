@@ -27,6 +27,8 @@ class CommissioningPageLoader {
             
             // Initialize FAQ accordion
             this.initFAQAccordion();
+            // Initialize section tabs
+            this.initSectionTabs();
 
             this.componentsLoaded = true;
             console.log('✅ Commissioning page components loaded');
@@ -202,6 +204,48 @@ class CommissioningPageLoader {
                     // Close
                     button.setAttribute('aria-expanded', 'false');
                     answer.style.maxHeight = '0';
+                }
+            });
+        });
+    }
+
+    initSectionTabs() {
+        const tabs = Array.from(document.querySelectorAll('.commissioning-section-tab'));
+        const panels = Array.from(document.querySelectorAll('.commissioning-section-panel'));
+        if (!tabs.length || !panels.length) return;
+
+        const activate = (tab) => {
+            // update selected
+            tabs.forEach(t => {
+                const selected = t === tab;
+                t.classList.toggle('is-active', selected);
+                t.setAttribute('aria-selected', selected ? 'true' : 'false');
+            });
+            // show matching panel
+            panels.forEach(panel => {
+                const isMatch = panel.id === tab.getAttribute('aria-controls');
+                if (isMatch) {
+                    panel.hidden = false;
+                } else {
+                    panel.hidden = true;
+                }
+            });
+        };
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => activate(tab));
+            tab.addEventListener('keydown', (e) => {
+                const idx = tabs.indexOf(tab);
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const next = tabs[(idx + 1) % tabs.length];
+                    next.focus();
+                    activate(next);
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+                    prev.focus();
+                    activate(prev);
                 }
             });
         });

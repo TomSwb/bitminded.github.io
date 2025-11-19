@@ -81,6 +81,136 @@
   padding-bottom: 1.5rem;
 }
 
+/* Toggle Sections */
+.commissioning-toggle-sections {
+  padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+.commissioning-section-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  border-radius: 0.75rem;
+  padding: 0.25rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  margin: 0 auto var(--spacing-xl, 2rem) auto;
+  width: 66.666%;
+  max-width: 600px;
+}
+
+.commissioning-section-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+  flex: 1 1 0;
+  text-align: center;
+}
+
+.commissioning-section-tab:hover {
+  background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
+}
+
+.commissioning-section-tab.is-active {
+  background: var(--color-primary, #6366f1);
+  color: var(--color-text-dark, #fff);
+}
+
+.commissioning-section-panel {
+  margin-top: var(--spacing-lg, 1.5rem);
+}
+
+.commissioning-section-panel[hidden] {
+  display: none;
+}
+
+/* Who Commissions Tools Section */
+.commissioning-audience {
+  padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+.commissioning-audience-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg, 1.5rem);
+  margin-top: var(--spacing-lg, 1.5rem);
+}
+
+.commissioning-audience-item {
+  padding: var(--spacing-lg, 1.5rem);
+  border-radius: 0.75rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.commissioning-audience-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
+}
+
+.commissioning-audience-item__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+}
+
+.commissioning-audience-item__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* What We Build Section */
+.commissioning-what-we-build {
+  padding: var(--spacing-lg, 1.5rem) 0;
+}
+
+.commissioning-what-we-build-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg, 1.5rem);
+  margin-top: var(--spacing-lg, 1.5rem);
+}
+
+.commissioning-what-we-build-item {
+  padding: var(--spacing-lg, 1.5rem);
+  border-radius: 0.75rem;
+  background: var(--color-surface, rgba(15,23,42,0.45));
+  border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.commissioning-what-we-build-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
+}
+
+.commissioning-what-we-build-item__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 var(--spacing-sm, 0.75rem) 0;
+}
+
+.commissioning-what-we-build-item__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  opacity: 0.85;
+  margin: 0;
+}
+
 .commissioning-section__description {
   font-size: 1.125rem;
   line-height: 1.7;
@@ -481,6 +611,10 @@
 
 /* Tablet/Medium Screen Responsive */
 @media (max-width: 1200px) and (min-width: 769px) {
+  .commissioning-audience-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .commissioning-timeline {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -503,10 +637,18 @@
     gap: var(--spacing-2xl, 3rem);
   }
 
+  .commissioning-section-tabs {
+    width: 100%;
+  }
+  .commissioning-audience-grid {
+    grid-template-columns: 1fr;
+  }
+  .commissioning-what-we-build-grid {
+    grid-template-columns: 1fr;
+  }
   .commissioning-timeline {
     grid-template-columns: 1fr;
   }
-
 
   .commissioning-pricing-grid {
     grid-template-columns: 1fr;

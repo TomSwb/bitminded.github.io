@@ -38,29 +38,90 @@
         <!-- Services Sub-Navigation (only on services pages) -->
         <div id="services-subnav-container"></div>
 
-        <!-- Process Timeline -->
-        <section class="commissioning-process">
-            <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-process-title">The Commissioning Process</h2>
-            <div class="commissioning-timeline">
-                <div class="commissioning-step">
-                    <div class="commissioning-step__number">1</div>
-                    <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-1-title">Personal Project Intake</h3>
-                    <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-1-text">We start with a Personal Project Intake (CHF 20, credited toward your project). We'll have a conversation to understand your needs, goals, and timeline. You'll receive a clear quote and timeline.</p>
+        <!-- Toggle Sections: Audience, What We Build, Process -->
+        <section class="commissioning-toggle-sections">
+            <div class="commissioning-section-tabs" role="tablist" aria-label="Section Categories">
+                <button class="commissioning-section-tab is-active translatable-content" role="tab" aria-selected="true" aria-controls="audience-panel" id="tab-audience" data-section="audience" data-i18n="commissioning-section-tab-audience">Who Commissions</button>
+                <button class="commissioning-section-tab translatable-content" role="tab" aria-selected="false" aria-controls="what-we-build-panel" id="tab-what-we-build" data-section="what-we-build" data-i18n="commissioning-section-tab-what-we-build">What We Build</button>
+                <button class="commissioning-section-tab translatable-content" role="tab" aria-selected="false" aria-controls="process-panel" id="tab-process" data-section="process" data-i18n="commissioning-section-tab-process">The Process</button>
+            </div>
+
+            <!-- Who Commissions Tools Panel -->
+            <div class="commissioning-section-panel" id="audience-panel" role="tabpanel" aria-labelledby="tab-audience">
+                <div class="commissioning-audience">
+                    <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-audience-title">Who Commissions Tools</h2>
+                    <div class="commissioning-audience-grid">
+                        <div class="commissioning-audience-item">
+                            <h3 class="commissioning-audience-item__title translatable-content" data-i18n="commissioning-audience-business-title">Small Business Owners</h3>
+                            <p class="commissioning-audience-item__text translatable-content" data-i18n="commissioning-audience-business-text">Need a custom tool to manage your business? Commission a solution tailored to your workflow—inventory tracking, customer management, or specialized reporting.</p>
+                        </div>
+                        <div class="commissioning-audience-item">
+                            <h3 class="commissioning-audience-item__title translatable-content" data-i18n="commissioning-audience-families-title">Families & Individuals</h3>
+                            <p class="commissioning-audience-item__text translatable-content" data-i18n="commissioning-audience-families-text">Have an idea for a personal tool or automation? Turn your concept into reality—home organization apps, family planning tools, or hobby-specific utilities.</p>
+                        </div>
+                        <div class="commissioning-audience-item">
+                            <h3 class="commissioning-audience-item__title translatable-content" data-i18n="commissioning-audience-nonprofits-title">Non-Profits & Community Groups</h3>
+                            <p class="commissioning-audience-item__text translatable-content" data-i18n="commissioning-audience-nonprofits-text">Looking for affordable custom software? Commission a tool that fits your budget and mission—volunteer coordination, donation tracking, or event management.</p>
+                        </div>
+                        <div class="commissioning-audience-item">
+                            <h3 class="commissioning-audience-item__title translatable-content" data-i18n="commissioning-audience-professionals-title">Professionals & Freelancers</h3>
+                            <p class="commissioning-audience-item__text translatable-content" data-i18n="commissioning-audience-professionals-text">Want to streamline your work? Commission a tool that automates repetitive tasks—invoice generation, time tracking, or client communication workflows.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="commissioning-step">
-                    <div class="commissioning-step__number">2</div>
-                    <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-2-title">We Build Your Tool</h3>
-                    <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-2-text">We'll build your tool over the agreed timeline, with regular check-ins, progress updates, and demos so you can see progress and provide feedback. You'll have access to feedback loops, iteration cycles, technical support during development, and can request changes within project scope.</p>
+            </div>
+
+            <!-- What We Build Panel -->
+            <div class="commissioning-section-panel" id="what-we-build-panel" role="tabpanel" aria-labelledby="tab-what-we-build" hidden>
+                <div class="commissioning-what-we-build">
+                    <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-what-we-build-title">What Can We Build?</h2>
+                    <div class="commissioning-what-we-build-grid">
+                        <div class="commissioning-what-we-build-item">
+                            <h3 class="commissioning-what-we-build-item__title translatable-content" data-i18n="commissioning-what-we-build-business-title">Business Tools</h3>
+                            <p class="commissioning-what-we-build-item__text translatable-content" data-i18n="commissioning-what-we-build-business-text">Custom solutions for managing inventory, customers, orders, invoicing, reporting, and workflow automation tailored to your business needs.</p>
+                        </div>
+                        <div class="commissioning-what-we-build-item">
+                            <h3 class="commissioning-what-we-build-item__title translatable-content" data-i18n="commissioning-what-we-build-personal-title">Personal Apps</h3>
+                            <p class="commissioning-what-we-build-item__text translatable-content" data-i18n="commissioning-what-we-build-personal-text">Home organization tools, family planning apps, hobby trackers, personal finance managers, and lifestyle utilities designed for your specific needs.</p>
+                        </div>
+                        <div class="commissioning-what-we-build-item">
+                            <h3 class="commissioning-what-we-build-item__title translatable-content" data-i18n="commissioning-what-we-build-games-title">Video Games</h3>
+                            <p class="commissioning-what-we-build-item__text translatable-content" data-i18n="commissioning-what-we-build-games-text">Interactive games and playful experiences, from simple browser games to more complex projects. Bring your game ideas to life with custom mechanics and engaging gameplay.</p>
+                        </div>
+                        <div class="commissioning-what-we-build-item">
+                            <h3 class="commissioning-what-we-build-item__title translatable-content" data-i18n="commissioning-what-we-build-educational-title">Educational Tools</h3>
+                            <p class="commissioning-what-we-build-item__text translatable-content" data-i18n="commissioning-what-we-build-educational-text">Learning apps, training simulators, interactive educational experiences, and tools that make teaching and learning more engaging and effective.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="commissioning-step">
-                    <div class="commissioning-step__number">3</div>
-                    <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-3-title">Delivery & License Transfer</h3>
-                    <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-3-text">You receive your complete, functional tool ready for deployment, with deployment support and documentation. You get a full perpetual-use license agreement and access to the application (source code access is not included).</p>
-                </div>
-                <div class="commissioning-step">
-                    <div class="commissioning-step__number">4</div>
-                    <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-4-title">Catalog Onboarding</h3>
-                    <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-4-text">We polish and adapt your tool for the public catalog (included in commission), growing our collection organically. Know that your investment helps make custom software more accessible to others.</p>
+            </div>
+
+            <!-- Process Timeline Panel -->
+            <div class="commissioning-section-panel" id="process-panel" role="tabpanel" aria-labelledby="tab-process" hidden>
+                <div class="commissioning-process">
+                    <h2 class="commissioning-section__title translatable-content" data-i18n="commissioning-process-title">The Commissioning Process</h2>
+                    <div class="commissioning-timeline">
+                        <div class="commissioning-step">
+                            <div class="commissioning-step__number">1</div>
+                            <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-1-title">Personal Project Intake</h3>
+                            <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-1-text">We start with a Personal Project Intake (CHF 20, credited toward your project). We'll have a conversation to understand your needs, goals, and timeline. You'll receive a clear quote and timeline.</p>
+                        </div>
+                        <div class="commissioning-step">
+                            <div class="commissioning-step__number">2</div>
+                            <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-2-title">We Build Your Tool</h3>
+                            <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-2-text">We'll build your tool over the agreed timeline, with regular check-ins, progress updates, and demos so you can see progress and provide feedback. You'll have access to feedback loops, iteration cycles, technical support during development, and can request changes within project scope.</p>
+                        </div>
+                        <div class="commissioning-step">
+                            <div class="commissioning-step__number">3</div>
+                            <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-3-title">Delivery & License Transfer</h3>
+                            <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-3-text">You receive your complete, functional tool ready for deployment, with deployment support and documentation. You get a full perpetual-use license agreement and access to the application (source code access is not included).</p>
+                        </div>
+                        <div class="commissioning-step">
+                            <div class="commissioning-step__number">4</div>
+                            <h3 class="commissioning-step__title translatable-content" data-i18n="commissioning-step-4-title">Catalog Onboarding</h3>
+                            <p class="commissioning-step__text translatable-content" data-i18n="commissioning-step-4-text">We polish and adapt your tool for the public catalog (included in commission), growing our collection organically. Know that your investment helps make custom software more accessible to others.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
