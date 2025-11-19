@@ -1,13 +1,14 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+// Shared helper functions for CORS and rate limiting
+// Note: This file is for reference only - functions are inlined in each edge function
+// because Supabase Edge Functions don't support cross-directory imports
 
-interface RateLimitConfig {
+export interface RateLimitConfig {
   requestsPerMinute: number
   requestsPerHour: number
   windowMinutes: number
 }
 
-function getCorsHeaders(origin: string | null): Record<string, string> {
+export function getCorsHeaders(origin: string | null): Record<string, string> {
   const allowedOriginsEnv = Deno.env.get('ALLOWED_ORIGINS')
   const allowedOrigins = allowedOriginsEnv 
     ? allowedOriginsEnv.split(',').map(o => o.trim())
@@ -43,7 +44,7 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
   }
 }
 
-async function checkRateLimit(
+export async function checkRateLimit(
   supabaseAdmin: any,
   identifier: string,
   identifierType: 'user' | 'ip',
@@ -161,137 +162,3 @@ async function checkRateLimit(
   return { allowed: true }
 }
 
-serve(async (req) => {
-  const origin = req.headers.get('Origin')
-  const corsHeaders = getCorsHeaders(origin)
-  
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    })
-  }
-
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 
-        ...corsHeaders,
-        'Content-Type': 'application/json' 
-      },
-    })
-  }
-
-  try {
-    // Get IP address for rate limiting
-    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-                      req.headers.get('cf-connecting-ip') ||
-                      req.headers.get('x-real-ip') ||
-                      'unknown'
-
-    // Rate limiting: IP-based for CAPTCHA verification - 30/min, 500/hour
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    if (supabaseUrl && supabaseServiceKey) {
-      const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-        auth: { autoRefreshToken: false, persistSession: false }
-      })
-      
-      const rateLimitResult = await checkRateLimit(
-        supabaseAdmin,
-        ipAddress,
-        'ip',
-        'verify-captcha',
-        { requestsPerMinute: 30, requestsPerHour: 500, windowMinutes: 60 }
-      )
-      
-      if (!rateLimitResult.allowed) {
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded', retry_after: rateLimitResult.retryAfter }),
-          { 
-            status: 429, 
-            headers: { 
-              ...corsHeaders, 
-              'Content-Type': 'application/json',
-              'Retry-After': String(rateLimitResult.retryAfter || 60)
-            } 
-          }
-        )
-      }
-    }
-
-    // Parse request body
-    const { token } = await req.json()
-    
-    // Validate token exists
-    if (!token) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'Token is required' 
-      }), {
-        status: 400,
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json' 
-        },
-      })
-    }
-
-    // Get secret key from environment
-    const secret = Deno.env.get('TURNSTILE_SECRET')
-    if (!secret) {
-      console.error('TURNSTILE_SECRET environment variable not set')
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'Server configuration error' 
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    }
-
-    // Verify token with Cloudflare Turnstile
-    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${secret}&response=${token}`
-    })
-    
-    const result = await response.json()
-    
-    // Log verification attempt (for debugging)
-    console.log('CAPTCHA verification result:', {
-      success: result.success,
-      errorCodes: result['error-codes'] || [],
-      timestamp: new Date().toISOString()
-    })
-    
-    // Return verification result
-    return new Response(JSON.stringify({ 
-      success: result.success,
-      errorCodes: result['error-codes'] || []
-    }), {
-      status: 200,
-      headers: { 
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-      },
-    })
-    
-  } catch (error) {
-    console.error('CAPTCHA verification error:', error)
-    
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: 'Internal server error' 
-    }), {
-      status: 500,
-      headers: { 
-        ...corsHeaders,
-        'Content-Type': 'application/json' 
-      },
-    })
-  }
-})
