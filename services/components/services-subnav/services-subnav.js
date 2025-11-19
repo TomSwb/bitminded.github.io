@@ -135,7 +135,14 @@
                 const key = element.getAttribute('data-i18n');
                 const translation = i18nInstance.t(key);
                 if (translation && translation !== key) {
-                    element.textContent = translation;
+                    // Update the span text inside the link, not the link itself
+                    const span = element.querySelector('.services-subnav__text');
+                    if (span) {
+                        span.textContent = translation;
+                    } else {
+                        // Fallback: update the element itself if no span found
+                        element.textContent = translation;
+                    }
                 }
                 element.classList.add('loaded');
             });
