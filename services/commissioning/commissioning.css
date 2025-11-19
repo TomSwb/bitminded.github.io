@@ -76,6 +76,11 @@
   text-align: center;
 }
 
+/* The Commissioning Process title */
+.commissioning-section__title[data-i18n="commissioning-process-title"] {
+  padding-bottom: 1.5rem;
+}
+
 .commissioning-section__description {
   font-size: 1.125rem;
   line-height: 1.7;

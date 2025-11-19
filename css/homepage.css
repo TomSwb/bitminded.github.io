@@ -483,6 +483,10 @@
     min-height: 60px;
   }
 
+  .mission-toggle__container {
+    gap: var(--spacing-sm);
+  }
+
   .philosophy,
   .products,
   .how-we-work,
@@ -553,6 +557,11 @@
     font-size: var(--font-size-base);
     padding: var(--spacing-sm) var(--spacing-md);
     min-height: 50px;
+  }
+
+  .mission-toggle__container {
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs);
   }
 
   .philosophy__intro,

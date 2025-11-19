@@ -44,7 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (element.tagName === 'SELECT' || element.tagName === 'OPTION') {
                 element.textContent = translation;
             } else {
-                element.textContent = translation;
+                // Use innerHTML if translation contains HTML tags (like <br>), otherwise use textContent
+                if (translation.includes('<') && translation.includes('>')) {
+                    element.innerHTML = translation;
+                } else {
+                    element.textContent = translation;
+                }
             }
         });
 

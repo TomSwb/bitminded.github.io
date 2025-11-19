@@ -1,6 +1,6 @@
 /**
  * Mission Toggle Component
- * Handles switching between "We Build" and "We Guide" missions
+ * Handles switching between "We Build", "We Guide", and "We Access" missions
  */
 class MissionToggle {
     constructor() {
@@ -35,10 +35,13 @@ class MissionToggle {
         this.elements = {
             buildButton: document.getElementById('mission-toggle-build'),
             guideButton: document.getElementById('mission-toggle-guide'),
+            accessButton: document.getElementById('mission-toggle-access'),
             buildContent: document.getElementById('mission-build'),
             guideContent: document.getElementById('mission-guide'),
+            accessContent: document.getElementById('mission-access'),
             buildButtonText: document.getElementById('mission-toggle-build-text'),
-            guideButtonText: document.getElementById('mission-toggle-guide-text')
+            guideButtonText: document.getElementById('mission-toggle-guide-text'),
+            accessButtonText: document.getElementById('mission-toggle-access-text')
         };
     }
 
@@ -47,8 +50,8 @@ class MissionToggle {
      */
     loadSavedPreference() {
         const savedMission = localStorage.getItem('selectedMission');
-        if (savedMission === 'guide') {
-            this.setMission('guide', false, false); // false = don't save to localStorage, false = don't scroll
+        if (savedMission === 'guide' || savedMission === 'access') {
+            this.setMission(savedMission, false, false); // false = don't save to localStorage, false = don't scroll
         }
     }
 
@@ -71,6 +74,13 @@ class MissionToggle {
             this.setMission('guide');
         });
 
+        // Access button click (if it exists)
+        if (this.elements.accessButton) {
+            this.elements.accessButton.addEventListener('click', () => {
+                this.setMission('access');
+            });
+        }
+
         // Listen for language changes to update button text
         window.addEventListener('languageChanged', (e) => {
             this.updateTranslations();
@@ -90,6 +100,15 @@ class MissionToggle {
                 this.setMission('guide');
             }
         });
+
+        if (this.elements.accessButton) {
+            this.elements.accessButton.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.setMission('access');
+                }
+            });
+        }
     }
 
     /**
@@ -101,14 +120,20 @@ class MissionToggle {
     }
 
     /**
-     * Set the current mission (build or guide)
-     * @param {string} mission - 'build' or 'guide'
+     * Set the current mission (build, guide, or access)
+     * @param {string} mission - 'build', 'guide', or 'access'
      * @param {boolean} save - Whether to save to localStorage (default: true)
      * @param {boolean} shouldScroll - Whether to scroll to content (default: true)
      */
     setMission(mission, save = true, shouldScroll = true) {
         if (mission === this.currentMission) {
             return; // Already on this mission
+        }
+
+        // Validate mission
+        if (!['build', 'guide', 'access'].includes(mission)) {
+            console.warn(`Invalid mission: ${mission}`);
+            return;
         }
 
         // Update current mission
@@ -127,9 +152,14 @@ class MissionToggle {
 
         // Smooth scroll to top of content (only if requested)
         if (shouldScroll) {
-            const scrollTarget = mission === 'build' 
-                ? this.elements.buildContent 
-                : this.elements.guideContent;
+            let scrollTarget;
+            if (mission === 'build') {
+                scrollTarget = this.elements.buildContent;
+            } else if (mission === 'guide') {
+                scrollTarget = this.elements.guideContent;
+            } else if (mission === 'access') {
+                scrollTarget = this.elements.accessContent;
+            }
             
             if (scrollTarget) {
                 scrollTarget.scrollIntoView({ 
@@ -154,14 +184,22 @@ class MissionToggle {
      */
     updateButtonStates() {
         const isBuilding = this.currentMission === 'build';
+        const isGuiding = this.currentMission === 'guide';
+        const isAccessing = this.currentMission === 'access';
 
         // Update active classes
         this.elements.buildButton.classList.toggle('mission-toggle__button--active', isBuilding);
-        this.elements.guideButton.classList.toggle('mission-toggle__button--active', !isBuilding);
+        this.elements.guideButton.classList.toggle('mission-toggle__button--active', isGuiding);
+        if (this.elements.accessButton) {
+            this.elements.accessButton.classList.toggle('mission-toggle__button--active', isAccessing);
+        }
 
         // Update ARIA attributes
         this.elements.buildButton.setAttribute('aria-pressed', isBuilding);
-        this.elements.guideButton.setAttribute('aria-pressed', !isBuilding);
+        this.elements.guideButton.setAttribute('aria-pressed', isGuiding);
+        if (this.elements.accessButton) {
+            this.elements.accessButton.setAttribute('aria-pressed', isAccessing);
+        }
     }
 
     /**
@@ -169,14 +207,22 @@ class MissionToggle {
      */
     updateContentVisibility() {
         const isBuilding = this.currentMission === 'build';
+        const isGuiding = this.currentMission === 'guide';
+        const isAccessing = this.currentMission === 'access';
 
         // Show/hide content with hidden class
         this.elements.buildContent.classList.toggle('hidden', !isBuilding);
-        this.elements.guideContent.classList.toggle('hidden', isBuilding);
+        this.elements.guideContent.classList.toggle('hidden', !isGuiding);
+        if (this.elements.accessContent) {
+            this.elements.accessContent.classList.toggle('hidden', !isAccessing);
+        }
 
         // Update ARIA attributes
         this.elements.buildContent.setAttribute('aria-hidden', !isBuilding);
-        this.elements.guideContent.setAttribute('aria-hidden', isBuilding);
+        this.elements.guideContent.setAttribute('aria-hidden', !isGuiding);
+        if (this.elements.accessContent) {
+            this.elements.accessContent.setAttribute('aria-hidden', !isAccessing);
+        }
     }
 
     /**
@@ -184,9 +230,16 @@ class MissionToggle {
      * @param {string} mission - The newly selected mission
      */
     announceChange(mission) {
-        const announcement = mission === 'build' 
-            ? 'Showing We Build section'
-            : 'Showing We Guide section';
+        let announcement;
+        if (mission === 'build') {
+            announcement = 'Showing We Build section';
+        } else if (mission === 'guide') {
+            announcement = 'Showing We Guide section';
+        } else if (mission === 'access') {
+            announcement = 'Showing We Access section';
+        } else {
+            announcement = 'Showing services section';
+        }
         
         // Create or update announcement element
         let announcer = document.getElementById('mission-announcer');
@@ -209,7 +262,7 @@ class MissionToggle {
 
     /**
      * Get current mission
-     * @returns {string} Current mission ('build' or 'guide')
+     * @returns {string} Current mission ('build', 'guide', or 'access')
      */
     getCurrentMission() {
         return this.currentMission;

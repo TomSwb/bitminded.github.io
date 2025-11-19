@@ -35,7 +35,7 @@
 | Service | Current Price | Duration | Status |
 |---------|--------------|----------|--------|
 | **Personal Project Intake** | CHF 20 (credited) | Quick call | ✅ Implemented |
-| **Simple App** | CHF 450-750 | 1-2 weeks | ✅ Implemented |
+| **Simple App** | CHF 350-750 | 1-2 weeks | ✅ Implemented |
 | **Standard App** | CHF 850-1,250 | 2-4 weeks | ✅ Implemented |
 | **Complex App** | CHF 1,350-1,950 | 6+ weeks | ✅ Implemented |
 | **Commission a Feature** | CHF 20-150 | depending on difficulty | ✅ Implemented |
@@ -102,7 +102,7 @@
 
 #### Simple App
 - **Duration:** 1-2 weeks
-- **Price:** CHF 450-750
+- **Price:** CHF 350-750
 - **Perfect for:** Personal tools, simple automations, focused utilities
 - **Delivery:** 1-2 weeks
 
@@ -121,13 +121,13 @@
 ### Current Pricing Breakdown
 
 **Effective Hourly Rate:**
-- Simple App (CHF 450-750 for 1-2 weeks): ~CHF 40-50/hour
+- Simple App (CHF 350-750 for 1-2 weeks): ~CHF 40-50/hour
 - Standard App (CHF 850-1,250 for 2-4 weeks): ~CHF 40-50/hour
 - Complex App (CHF 1,350-1,950 for 6+ weeks): ~CHF 40-50/hour
 - **Assessment:** Appropriate for "petite gens" market (accessible, not premium agency pricing)
 
 **Project-Based Pricing:**
-- Simple App: CHF 450-750 (1-2 weeks) - Personal tools, simple automations, focused utilities
+- Simple App: CHF 350-750 (1-2 weeks) - Personal tools, simple automations, focused utilities
 - Standard App: CHF 850-1,250 (2-4 weeks) - Small business tools, multi-feature apps
 - Complex App: CHF 1,350-1,950 (6+ weeks) - Multi-user systems, advanced integrations
 - Commission a Feature: CHF 20-150 (depending on difficulty) - New features for existing catalog tools
@@ -149,7 +149,7 @@
 ### Why Current Pricing Works
 
 1. **Commissioning (CHF 40-50/hour effective rate):**
-   - ✅ Accessible to individuals (CHF 450-750 for simple apps)
+   - ✅ Accessible to individuals (CHF 350-750 for simple apps)
    - ✅ Not competing with premium agencies (CHF 80-150/hour)
    - ✅ Serves "petite gens" market effectively
    - ✅ Sustainable for full-time work (35-45 hours/week)
@@ -188,7 +188,7 @@
 
 ### 1. Pricing for "Petite Gens" (Not Premium Agencies)
 
-**Decision:** Keep commissioning at CHF 40-50/hour effective rate (CHF 450-1,950 per project)
+**Decision:** Keep commissioning at CHF 40-50/hour effective rate (CHF 350-1,950 per project)
 
 **Rationale:**
 - Focus on accessibility, not premium positioning
@@ -263,7 +263,7 @@
 ### Scenario C: Tech Support-Heavy
 
 **Monthly:**
-- 1 simple commission: CHF 450-750
+- 1 simple commission: CHF 350-750
 - 10-15 guidance sessions: CHF 700-2,700
 - Catalog (300 subscribers at CHF 8): CHF 2,400
 - **Total: CHF 3.6k-5.9k/month** = CHF 43.2k-70.8k/year
@@ -271,7 +271,7 @@
 ### Scenario D: Volume Strategy Success
 
 **Monthly:**
-- 1 simple commission: CHF 450-750
+- 1 simple commission: CHF 350-750
 - 5 guidance sessions: CHF 350-700
 - Catalog (1,000 subscribers at CHF 8): CHF 8,000
 - **Total: CHF 8.8k-9.5k/month** = CHF 105.6k-114k/year

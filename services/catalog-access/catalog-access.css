@@ -45,7 +45,8 @@
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   line-height: 1.2;
   color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+  margin: 0;
+  padding-bottom: 1.5rem;
   text-align: center;
 }
 
