@@ -2,10 +2,164 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+interface RateLimitConfig {
+  requestsPerMinute: number
+  requestsPerHour: number
+  windowMinutes: number
+}
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOriginsEnv = Deno.env.get('ALLOWED_ORIGINS')
+  const allowedOrigins = allowedOriginsEnv 
+    ? allowedOriginsEnv.split(',').map(o => o.trim())
+    : [
+        'https://bitminded.ch',
+        'https://www.bitminded.ch',
+        'http://localhost',
+        'http://127.0.0.1:5501',
+        'https://*.github.io'
+      ]
+  
+  let allowedOrigin = allowedOrigins[0]
+  if (origin) {
+    const matched = allowedOrigins.find(pattern => {
+      if (pattern.includes('*')) {
+        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\./g, '\\.') + '$')
+        return regex.test(origin)
+      }
+      if (pattern === 'https://bitminded.ch' || pattern === 'https://www.bitminded.ch') {
+        return origin === pattern || origin.endsWith('.bitminded.ch')
+      }
+      return origin === pattern || origin.startsWith(pattern)
+    })
+    if (matched) {
+      allowedOrigin = origin
+    }
+  }
+  
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  }
+}
+
+async function checkRateLimit(
+  supabaseAdmin: any,
+  identifier: string,
+  identifierType: 'user' | 'ip',
+  functionName: string,
+  config: RateLimitConfig
+): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const now = new Date()
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)
+  await supabaseAdmin
+    .from('rate_limit_tracking')
+    .delete()
+    .lt('window_start', oneHourAgo.toISOString())
+  
+  const minuteWindowStart = new Date(now.getTime() - 60 * 1000)
+  const { data: minuteWindow, error: minuteError } = await supabaseAdmin
+    .from('rate_limit_tracking')
+    .select('request_count, window_start')
+    .eq('identifier', identifier)
+    .eq('identifier_type', identifierType)
+    .eq('function_name', functionName)
+    .gte('window_start', minuteWindowStart.toISOString())
+    .order('window_start', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
+  if (minuteError) {
+    console.error('Rate limit check error (minute):', minuteError)
+    return { allowed: true }
+  }
+  
+  const minuteCount = minuteWindow?.request_count || 0
+  if (minuteCount >= config.requestsPerMinute) {
+    const windowEnd = minuteWindow ? new Date(minuteWindow.window_start) : now
+    windowEnd.setSeconds(windowEnd.getSeconds() + 60)
+    const retryAfter = Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000))
+    return { allowed: false, retryAfter }
+  }
+  
+  const hourWindowStart = new Date(now.getTime() - 60 * 60 * 1000)
+  const { data: hourWindow, error: hourError } = await supabaseAdmin
+    .from('rate_limit_tracking')
+    .select('request_count, window_start')
+    .eq('identifier', identifier)
+    .eq('identifier_type', identifierType)
+    .eq('function_name', functionName)
+    .gte('window_start', hourWindowStart.toISOString())
+    .order('window_start', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
+  if (hourError) {
+    console.error('Rate limit check error (hour):', hourError)
+    return { allowed: true }
+  }
+  
+  const hourCount = hourWindow?.request_count || 0
+  if (hourCount >= config.requestsPerHour) {
+    const windowEnd = hourWindow ? new Date(hourWindow.window_start) : now
+    windowEnd.setHours(windowEnd.getHours() + 1)
+    const retryAfter = Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000))
+    return { allowed: false, retryAfter }
+  }
+  
+  const currentMinuteStart = new Date(now)
+  currentMinuteStart.setSeconds(0, 0)
+  const currentHourStart = new Date(now)
+  currentHourStart.setMinutes(0, 0, 0)
+  
+  if (minuteWindow && minuteWindow.window_start === currentMinuteStart.toISOString()) {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .update({ 
+        request_count: minuteCount + 1,
+        updated_at: now.toISOString()
+      })
+      .eq('identifier', identifier)
+      .eq('identifier_type', identifierType)
+      .eq('function_name', functionName)
+      .eq('window_start', minuteWindow.window_start)
+  } else {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .insert({
+        identifier,
+        identifier_type: identifierType,
+        function_name: functionName,
+        request_count: 1,
+        window_start: currentMinuteStart.toISOString()
+      })
+  }
+  
+  if (hourWindow && hourWindow.window_start === currentHourStart.toISOString()) {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .update({ 
+        request_count: hourCount + 1,
+        updated_at: now.toISOString()
+      })
+      .eq('identifier', identifier)
+      .eq('identifier_type', identifierType)
+      .eq('function_name', functionName)
+      .eq('window_start', hourWindow.window_start)
+  } else {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .insert({
+        identifier,
+        identifier_type: identifierType,
+        function_name: functionName,
+        request_count: 1,
+        window_start: currentHourStart.toISOString()
+      })
+  }
+  
+  return { allowed: true }
 }
 
 type MaintenanceSettingsRecord = {
@@ -38,6 +192,9 @@ const DEFAULT_BASE_URL =
   'https://bitminded.ch'
 
 serve(async (req) => {
+  const origin = req.headers.get('Origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -45,13 +202,19 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      return jsonResponse({ error: 'No authorization header' }, 401)
+      return jsonResponse({ error: 'No authorization header' }, 401, corsHeaders)
     }
 
     const token = authHeader.replace('Bearer ', '').trim()
     if (!token) {
-      return jsonResponse({ error: 'Invalid authorization header' }, 401)
+      return jsonResponse({ error: 'Invalid authorization header' }, 401, corsHeaders)
     }
+
+    // Get IP address for rate limiting fallback
+    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+                      req.headers.get('cf-connecting-ip') ||
+                      req.headers.get('x-real-ip') ||
+                      'unknown'
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -71,7 +234,7 @@ serve(async (req) => {
 
     if (userError || !user) {
       console.error('❌ maintenance-settings: auth failure', userError)
-      return jsonResponse({ error: 'Unauthorized' }, 401)
+      return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders)
     }
 
     // Verify session exists in user_sessions table (prevent use of revoked tokens)
@@ -83,7 +246,24 @@ serve(async (req) => {
 
     if (sessionError || !sessionData) {
       console.error('❌ maintenance-settings: session revoked')
-      return jsonResponse({ error: 'Unauthorized' }, 401)
+      return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders)
+    }
+
+    // Rate limiting: Admin function - 60/min, 2000/hour per user
+    const rateLimitResult = await checkRateLimit(
+      supabaseAdmin,
+      user.id,
+      'user',
+      'maintenance-settings',
+      { requestsPerMinute: 60, requestsPerHour: 2000, windowMinutes: 60 }
+    )
+    
+    if (!rateLimitResult.allowed) {
+      return jsonResponse(
+        { error: 'Rate limit exceeded', retry_after: rateLimitResult.retryAfter },
+        429,
+        corsHeaders
+      )
     }
 
     const { data: roleData, error: roleError } = await supabaseAdmin
@@ -97,7 +277,7 @@ serve(async (req) => {
       console.warn('⚠️ maintenance-settings: non-admin access attempt', {
         user_id: user.id
       })
-      return jsonResponse({ error: 'Forbidden - Admin access required' }, 403)
+      return jsonResponse({ error: 'Forbidden - Admin access required' }, 403, corsHeaders)
     }
 
     let body: any = {}
@@ -112,32 +292,35 @@ serve(async (req) => {
     if (action === 'get') {
       const settings = await getSettings(supabaseAdmin)
       const responsePayload = await decorateSettings(supabaseAdmin, settings)
-      return jsonResponse({ success: true, settings: responsePayload })
+      return jsonResponse({ success: true, settings: responsePayload }, 200, corsHeaders)
     }
 
     if (action === 'update') {
       return await handleUpdate({
         supabaseAdmin,
         userId: user.id,
-        body
+        body,
+        corsHeaders
       })
     }
 
-    return jsonResponse({ error: `Unsupported action: ${action}` }, 400)
-  } catch (error) {
+    return jsonResponse({ error: `Unsupported action: ${action}` }, 400, corsHeaders)
+  } catch (error: any) {
     console.error('❌ maintenance-settings: unhandled error', error)
-    return jsonResponse({ error: 'Internal server error', details: error?.message }, 500)
+    return jsonResponse({ error: 'Internal server error', details: error?.message }, 500, corsHeaders)
   }
 })
 
 async function handleUpdate({
   supabaseAdmin,
   userId,
-  body
+  body,
+  corsHeaders
 }: {
   supabaseAdmin: ReturnType<typeof createClient>
   userId: string
   body: any
+  corsHeaders: Record<string, string>
 }) {
   const currentSettings = await getSettings(supabaseAdmin)
 
@@ -190,11 +373,12 @@ async function handleUpdate({
           hint:
             'Apply the maintenance_settings migration (20251112_create_maintenance_settings.sql) or disable bypass token generation.'
         },
-        400
+        400,
+        corsHeaders
       )
     }
 
-    return jsonResponse({ error: 'Failed to update maintenance settings' }, 500)
+    return jsonResponse({ error: 'Failed to update maintenance settings' }, 500, corsHeaders)
   }
 
   const responseSettings = await decorateSettings(supabaseAdmin, updatedSettings, bypassLink)
@@ -203,7 +387,7 @@ async function handleUpdate({
     success: true,
     message: 'Maintenance settings updated.',
     settings: responseSettings
-  })
+  }, 200, corsHeaders)
 }
 
 async function getSettings(supabaseAdmin: ReturnType<typeof createClient>) {
@@ -322,7 +506,7 @@ function buildBypassLink(token: string) {
   return `${sanitizedBase}/maintenance/unlock?code=${encodeURIComponent(token)}`
 }
 
-function jsonResponse(payload: Record<string, unknown>, status = 200) {
+function jsonResponse(payload: Record<string, unknown>, status = 200, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(payload), {
     status,
     headers: {

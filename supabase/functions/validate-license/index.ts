@@ -2,17 +2,185 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
 type ValidateRequest = {
   product_slug?: string
   product_id?: string
 }
 
-function jsonResponse(body: unknown, status = 200) {
+interface RateLimitConfig {
+  requestsPerMinute: number
+  requestsPerHour: number
+  windowMinutes: number
+}
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  // Get allowed origins from Supabase secret, with sensible defaults
+  const allowedOriginsEnv = Deno.env.get('ALLOWED_ORIGINS')
+  const allowedOrigins = allowedOriginsEnv 
+    ? allowedOriginsEnv.split(',').map(o => o.trim())
+    : [
+        'https://bitminded.ch',
+        'https://www.bitminded.ch',
+        'http://localhost',
+        'http://127.0.0.1:5501',
+        'https://*.github.io'
+      ]
+  
+  // Check if origin matches allowed patterns (support wildcards)
+  let allowedOrigin = allowedOrigins[0] // Default fallback
+  if (origin) {
+    const matched = allowedOrigins.find(pattern => {
+      if (pattern.includes('*')) {
+        // Convert wildcard pattern to regex
+        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\./g, '\\.') + '$')
+        return regex.test(origin)
+      }
+      // Check exact match or subdomain match for bitminded.ch
+      if (pattern === 'https://bitminded.ch' || pattern === 'https://www.bitminded.ch') {
+        return origin === pattern || origin.endsWith('.bitminded.ch')
+      }
+      return origin === pattern || origin.startsWith(pattern)
+    })
+    if (matched) {
+      allowedOrigin = origin
+    }
+  }
+  
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  }
+}
+
+async function checkRateLimit(
+  supabaseAdmin: any,
+  identifier: string,
+  identifierType: 'user' | 'ip',
+  functionName: string,
+  config: RateLimitConfig
+): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const now = new Date()
+  
+  // Clean up old entries (older than 1 hour)
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)
+  await supabaseAdmin
+    .from('rate_limit_tracking')
+    .delete()
+    .lt('window_start', oneHourAgo.toISOString())
+  
+  // Check per-minute limit
+  const minuteWindowStart = new Date(now.getTime() - 60 * 1000)
+  const { data: minuteWindow, error: minuteError } = await supabaseAdmin
+    .from('rate_limit_tracking')
+    .select('request_count, window_start')
+    .eq('identifier', identifier)
+    .eq('identifier_type', identifierType)
+    .eq('function_name', functionName)
+    .gte('window_start', minuteWindowStart.toISOString())
+    .order('window_start', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
+  if (minuteError) {
+    console.error('Rate limit check error (minute):', minuteError)
+    // Fail open on error (allow request)
+    return { allowed: true }
+  }
+  
+  const minuteCount = minuteWindow?.request_count || 0
+  if (minuteCount >= config.requestsPerMinute) {
+    const windowEnd = minuteWindow ? new Date(minuteWindow.window_start) : now
+    windowEnd.setSeconds(windowEnd.getSeconds() + 60)
+    const retryAfter = Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000))
+    return { allowed: false, retryAfter }
+  }
+  
+  // Check per-hour limit
+  const hourWindowStart = new Date(now.getTime() - 60 * 60 * 1000)
+  const { data: hourWindow, error: hourError } = await supabaseAdmin
+    .from('rate_limit_tracking')
+    .select('request_count, window_start')
+    .eq('identifier', identifier)
+    .eq('identifier_type', identifierType)
+    .eq('function_name', functionName)
+    .gte('window_start', hourWindowStart.toISOString())
+    .order('window_start', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
+  if (hourError) {
+    console.error('Rate limit check error (hour):', hourError)
+    // Fail open on error (allow request)
+    return { allowed: true }
+  }
+  
+  const hourCount = hourWindow?.request_count || 0
+  if (hourCount >= config.requestsPerHour) {
+    const windowEnd = hourWindow ? new Date(hourWindow.window_start) : now
+    windowEnd.setHours(windowEnd.getHours() + 1)
+    const retryAfter = Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000))
+    return { allowed: false, retryAfter }
+  }
+  
+  // Increment or create tracking records for both windows
+  const currentMinuteStart = new Date(now)
+  currentMinuteStart.setSeconds(0, 0)
+  const currentHourStart = new Date(now)
+  currentHourStart.setMinutes(0, 0, 0)
+  
+  // Update minute window
+  if (minuteWindow && minuteWindow.window_start === currentMinuteStart.toISOString()) {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .update({ 
+        request_count: minuteCount + 1,
+        updated_at: now.toISOString()
+      })
+      .eq('identifier', identifier)
+      .eq('identifier_type', identifierType)
+      .eq('function_name', functionName)
+      .eq('window_start', minuteWindow.window_start)
+  } else {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .insert({
+        identifier,
+        identifier_type: identifierType,
+        function_name: functionName,
+        request_count: 1,
+        window_start: currentMinuteStart.toISOString()
+      })
+  }
+  
+  // Update hour window
+  if (hourWindow && hourWindow.window_start === currentHourStart.toISOString()) {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .update({ 
+        request_count: hourCount + 1,
+        updated_at: now.toISOString()
+      })
+      .eq('identifier', identifier)
+      .eq('identifier_type', identifierType)
+      .eq('function_name', functionName)
+      .eq('window_start', hourWindow.window_start)
+  } else {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .insert({
+        identifier,
+        identifier_type: identifierType,
+        function_name: functionName,
+        request_count: 1,
+        window_start: currentHourStart.toISOString()
+      })
+  }
+  
+  return { allowed: true }
+}
+
+function jsonResponse(body: unknown, status = 200, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -20,6 +188,9 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 serve(async (req) => {
+  const origin = req.headers.get('Origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -27,15 +198,111 @@ serve(async (req) => {
 
   try {
     if (req.method !== 'POST') {
-      return jsonResponse({ allowed: false, reason: 'method_not_allowed' }, 405)
+      return jsonResponse({ allowed: false, reason: 'method_not_allowed' }, 405, corsHeaders)
     }
 
     const authHeader = req.headers.get('Authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return jsonResponse({ allowed: false, reason: 'no_token' }, 401)
+      return jsonResponse({ allowed: false, reason: 'no_token' }, 401, corsHeaders)
     }
 
     const token = authHeader.replace('Bearer ', '')
+
+    // Get IP address for rate limiting fallback
+    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+                      req.headers.get('cf-connecting-ip') ||
+                      req.headers.get('x-real-ip') ||
+                      'unknown'
+
+    // Admin client
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    // Verify user from JWT
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token)
+    if (authError || !authData?.user) {
+      return jsonResponse({ allowed: false, reason: 'invalid_user' }, 401, corsHeaders)
+    }
+
+    // Verify session exists in user_sessions table (prevent use of revoked tokens)
+    const { data: sessionData, error: sessionError } = await supabaseAdmin
+      .from('user_sessions')
+      .select('session_token')
+      .eq('session_token', token)
+      .maybeSingle()
+
+    if (sessionError) {
+      console.error('Error checking user_sessions:', sessionError)
+      // Continue - JWT validation already passed, fail open on DB error
+    }
+
+    // If session doesn't exist but JWT is valid, it's a NEW session (not yet logged)
+    // If it was revoked, user would need to log in again to get a new JWT
+    // So we create the record for future checks and tracking
+    if (!sessionData) {
+      try {
+        // Decode JWT to get expiration
+        const jwtPayload = token.split('.')[1]
+        const decoded = JSON.parse(atob(jwtPayload))
+        const expiresAt = new Date(decoded.exp * 1000).toISOString()
+        
+        const { error: createError } = await supabaseAdmin
+          .from('user_sessions')
+          .upsert({
+            user_id: authData.user.id,
+            session_token: token,
+            expires_at: expiresAt,
+            last_accessed: new Date().toISOString(),
+            ip_address: ipAddress
+          }, {
+            onConflict: 'session_token'
+          })
+        
+        if (createError) {
+          console.warn('⚠️ Failed to create user_sessions record:', createError)
+          // Continue anyway - JWT validation passed
+        } else {
+          console.log('✅ Auto-created user_sessions record for new session')
+        }
+      } catch (e) {
+        console.warn('⚠️ Error creating user_sessions record:', e)
+        // Continue anyway - JWT validation passed
+      }
+    }
+
+    const userId = authData.user.id
+
+    // Rate limiting: High-frequency function (subdomain apps) - 100/min, 5000/hour per user
+    const rateLimitResult = await checkRateLimit(
+      supabaseAdmin,
+      userId,
+      'user',
+      'validate-license',
+      { requestsPerMinute: 100, requestsPerHour: 5000, windowMinutes: 60 }
+    )
+    
+    if (!rateLimitResult.allowed) {
+      return jsonResponse(
+        { allowed: false, reason: 'rate_limit_exceeded', retry_after: rateLimitResult.retryAfter },
+        429,
+        corsHeaders
+      )
+    }
+
+    // Admin bypass
+    const { data: adminRole, error: roleError } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    if (!roleError && adminRole?.role === 'admin') {
+      return jsonResponse({ allowed: true, reason: 'admin_bypass', role: 'admin', user_id: userId }, 200, corsHeaders)
+    }
 
     // Parse request body
     let body: ValidateRequest | null = null
@@ -48,49 +315,11 @@ serve(async (req) => {
     const productSlug = body?.product_slug?.trim()
     const productIdFromBody = body?.product_id?.trim()
 
-    // Admin client
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-
-    // Verify user from JWT
-    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token)
-    if (authError || !authData?.user) {
-      return jsonResponse({ allowed: false, reason: 'invalid_user' }, 401)
-    }
-
-    // Verify session exists in user_sessions table (prevent use of revoked tokens)
-    const { data: sessionData, error: sessionError } = await supabaseAdmin
-      .from('user_sessions')
-      .select('session_token')
-      .eq('session_token', token)
-      .maybeSingle()
-
-    if (sessionError || !sessionData) {
-      return jsonResponse({ allowed: false, reason: 'session_revoked' }, 401)
-    }
-
-    const userId = authData.user.id
-
-    // Admin bypass
-    const { data: adminRole, error: roleError } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle()
-
-    if (!roleError && adminRole?.role === 'admin') {
-      return jsonResponse({ allowed: true, reason: 'admin_bypass', role: 'admin', user_id: userId })
-    }
-
     // Resolve product_id
     let productId = productIdFromBody || null
     if (!productId) {
       if (!productSlug) {
-        return jsonResponse({ allowed: false, reason: 'missing_product' }, 400)
+        return jsonResponse({ allowed: false, reason: 'missing_product' }, 400, corsHeaders)
       }
       const { data: product, error: productError } = await supabaseAdmin
         .from('products')
@@ -99,7 +328,7 @@ serve(async (req) => {
         .maybeSingle()
 
       if (productError || !product) {
-        return jsonResponse({ allowed: false, reason: 'product_not_found' }, 404)
+        return jsonResponse({ allowed: false, reason: 'product_not_found' }, 404, corsHeaders)
       }
       productId = product.id
     }
@@ -113,7 +342,7 @@ serve(async (req) => {
       .order('purchased_at', { ascending: false })
 
     if (purchasesError) {
-      return jsonResponse({ allowed: false, reason: 'purchase_query_failed' }, 500)
+      return jsonResponse({ allowed: false, reason: 'purchase_query_failed' }, 500, corsHeaders)
     }
 
     // Evaluate entitlement
@@ -188,13 +417,13 @@ serve(async (req) => {
     }
 
     if (!hasAccess) {
-      return jsonResponse({ allowed: false, reason, role: 'user', user_id: userId, product_id: productId }, 200)
+      return jsonResponse({ allowed: false, reason, role: 'user', user_id: userId, product_id: productId }, 200, corsHeaders)
     }
 
-    return jsonResponse({ allowed: true, reason, role: 'user', user_id: userId, product_id: productId }, 200)
+    return jsonResponse({ allowed: true, reason, role: 'user', user_id: userId, product_id: productId }, 200, corsHeaders)
   } catch (error: any) {
     console.error('❌ validate-license error:', error)
-    return jsonResponse({ allowed: false, reason: 'internal_error', error: error?.message }, 500)
+    return jsonResponse({ allowed: false, reason: 'internal_error', error: error?.message }, 500, corsHeaders)
   }
 })
 

@@ -219,19 +219,241 @@ const generatePasswordResetEmail = (data: any, lang: string = 'en') => {
   `
 }
 
-serve(async (req) => {
-  // CORS headers
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  }
+interface RateLimitConfig {
+  requestsPerMinute: number
+  requestsPerHour: number
+  windowMinutes: number
+}
 
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOriginsEnv = Deno.env.get('ALLOWED_ORIGINS')
+  const allowedOrigins = allowedOriginsEnv 
+    ? allowedOriginsEnv.split(',').map(o => o.trim())
+    : [
+        'https://bitminded.ch',
+        'https://www.bitminded.ch',
+        'http://localhost',
+        'http://127.0.0.1:5501',
+        'https://*.github.io'
+      ]
+  
+  let allowedOrigin = allowedOrigins[0]
+  if (origin) {
+    const matched = allowedOrigins.find(pattern => {
+      if (pattern.includes('*')) {
+        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\./g, '\\.') + '$')
+        return regex.test(origin)
+      }
+      if (pattern === 'https://bitminded.ch' || pattern === 'https://www.bitminded.ch') {
+        return origin === pattern || origin.endsWith('.bitminded.ch')
+      }
+      return origin === pattern || origin.startsWith(pattern)
+    })
+    if (matched) {
+      allowedOrigin = origin
+    }
+  }
+  
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  }
+}
+
+async function checkRateLimit(
+  supabaseAdmin: any,
+  identifier: string,
+  identifierType: 'user' | 'ip',
+  functionName: string,
+  config: RateLimitConfig
+): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const now = new Date()
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)
+  await supabaseAdmin
+    .from('rate_limit_tracking')
+    .delete()
+    .lt('window_start', oneHourAgo.toISOString())
+  
+  const minuteWindowStart = new Date(now.getTime() - 60 * 1000)
+  const { data: minuteWindow, error: minuteError } = await supabaseAdmin
+    .from('rate_limit_tracking')
+    .select('request_count, window_start')
+    .eq('identifier', identifier)
+    .eq('identifier_type', identifierType)
+    .eq('function_name', functionName)
+    .gte('window_start', minuteWindowStart.toISOString())
+    .order('window_start', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
+  if (minuteError) {
+    console.error('Rate limit check error (minute):', minuteError)
+    return { allowed: true }
+  }
+  
+  const minuteCount = minuteWindow?.request_count || 0
+  if (minuteCount >= config.requestsPerMinute) {
+    const windowEnd = minuteWindow ? new Date(minuteWindow.window_start) : now
+    windowEnd.setSeconds(windowEnd.getSeconds() + 60)
+    const retryAfter = Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000))
+    return { allowed: false, retryAfter }
+  }
+  
+  const hourWindowStart = new Date(now.getTime() - 60 * 60 * 1000)
+  const { data: hourWindow, error: hourError } = await supabaseAdmin
+    .from('rate_limit_tracking')
+    .select('request_count, window_start')
+    .eq('identifier', identifier)
+    .eq('identifier_type', identifierType)
+    .eq('function_name', functionName)
+    .gte('window_start', hourWindowStart.toISOString())
+    .order('window_start', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
+  if (hourError) {
+    console.error('Rate limit check error (hour):', hourError)
+    return { allowed: true }
+  }
+  
+  const hourCount = hourWindow?.request_count || 0
+  if (hourCount >= config.requestsPerHour) {
+    const windowEnd = hourWindow ? new Date(hourWindow.window_start) : now
+    windowEnd.setHours(windowEnd.getHours() + 1)
+    const retryAfter = Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000))
+    return { allowed: false, retryAfter }
+  }
+  
+  const currentMinuteStart = new Date(now)
+  currentMinuteStart.setSeconds(0, 0)
+  const currentHourStart = new Date(now)
+  currentHourStart.setMinutes(0, 0, 0)
+  
+  if (minuteWindow && minuteWindow.window_start === currentMinuteStart.toISOString()) {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .update({ 
+        request_count: minuteCount + 1,
+        updated_at: now.toISOString()
+      })
+      .eq('identifier', identifier)
+      .eq('identifier_type', identifierType)
+      .eq('function_name', functionName)
+      .eq('window_start', minuteWindow.window_start)
+  } else {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .insert({
+        identifier,
+        identifier_type: identifierType,
+        function_name: functionName,
+        request_count: 1,
+        window_start: currentMinuteStart.toISOString()
+      })
+  }
+  
+  if (hourWindow && hourWindow.window_start === currentHourStart.toISOString()) {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .update({ 
+        request_count: hourCount + 1,
+        updated_at: now.toISOString()
+      })
+      .eq('identifier', identifier)
+      .eq('identifier_type', identifierType)
+      .eq('function_name', functionName)
+      .eq('window_start', hourWindow.window_start)
+  } else {
+    await supabaseAdmin
+      .from('rate_limit_tracking')
+      .insert({
+        identifier,
+        identifier_type: identifierType,
+        function_name: functionName,
+        request_count: 1,
+        window_start: currentHourStart.toISOString()
+      })
+  }
+  
+  return { allowed: true }
+}
+
+serve(async (req) => {
+  const origin = req.headers.get('Origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    // Get authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'No authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Extract the JWT token
+    const token = authHeader.replace('Bearer ', '')
+
+    // Initialize Supabase client with service role
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+
+    // Verify the requesting user is an admin
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    
+    if (userError || !user) {
+      console.error('❌ Auth error:', userError)
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Verify session exists in user_sessions table (prevent use of revoked tokens)
+    const { data: sessionData, error: sessionError } = await supabase
+      .from('user_sessions')
+      .select('session_token')
+      .eq('session_token', token)
+      .maybeSingle()
+
+    if (sessionError || !sessionData) {
+      console.error('❌ Session revoked or not found')
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check if user is admin
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    if (roleError || !roleData) {
+      console.error('❌ Not an admin:', user.id)
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Parse request body
     const { userId, adminId } = await req.json()
 
@@ -239,24 +461,43 @@ serve(async (req) => {
       throw new Error('Missing required parameters: userId and adminId')
     }
 
-    // Initialize Supabase client with service role
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    // Get target user info
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId)
-    
-    if (userError || !user) {
-      throw new Error(`User not found: ${userError?.message}`)
+    // Verify adminId from body matches authenticated user
+    if (adminId !== user.id) {
+      console.error('❌ Admin ID mismatch:', { bodyAdminId: adminId, authenticatedAdminId: user.id })
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Admin ID mismatch' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    // Get admin user info
-    const { data: { user: adminUser }, error: adminError } = await supabase.auth.admin.getUserById(adminId)
+    // Rate limiting: User-based (authenticated admin) - 20/min, 500/hour per admin
+    const rateLimitResult = await checkRateLimit(
+      supabase,
+      user.id,
+      'user',
+      'admin-send-password-reset',
+      { requestsPerMinute: 20, requestsPerHour: 500, windowMinutes: 60 }
+    )
     
-    if (adminError || !adminUser) {
-      throw new Error(`Admin user not found: ${adminError?.message}`)
+    if (!rateLimitResult.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded', retry_after: rateLimitResult.retryAfter }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Retry-After': String(rateLimitResult.retryAfter || 60)
+          } 
+        }
+      )
+    }
+
+    // Get target user info
+    const { data: { user: targetUser }, error: targetUserError } = await supabase.auth.admin.getUserById(userId)
+    
+    if (targetUserError || !targetUser) {
+      throw new Error(`User not found: ${targetUserError?.message}`)
     }
 
     // Get user's language preference
@@ -273,7 +514,7 @@ serve(async (req) => {
     const siteUrl = Deno.env.get('SITE_URL') || 'https://bitminded.ch'
     const { data: resetData, error: resetError } = await supabase.auth.admin.generateLink({
       type: 'recovery',
-      email: user.email,
+      email: targetUser.email,
       options: {
         redirectTo: `${siteUrl}/auth/?action=reset-password`
       }
@@ -286,16 +527,16 @@ serve(async (req) => {
 
     // Prepare email data
     const emailData = {
-      to: user.email,
+      to: targetUser.email,
       subject: EMAIL_TRANSLATIONS[userLanguage as keyof typeof EMAIL_TRANSLATIONS].password_reset_request.subject,
       html: generatePasswordResetEmail({
-        userEmail: user.email,
+        userEmail: targetUser.email,
         resetUrl: resetData.properties.action_link,
         preferencesUrl: 'https://bitminded.ch/account?section=notifications'
       }, userLanguage)
     }
 
-    console.log(`📧 Sending password reset to: ${user.email}`)
+    console.log(`📧 Sending password reset to: ${targetUser.email}`)
     console.log(`📝 Subject: ${emailData.subject}`)
     console.log(`🌐 Language: ${userLanguage}`)
     console.log(`🔗 Reset URL: ${resetData.properties.action_link}`)
@@ -336,12 +577,12 @@ serve(async (req) => {
     await supabase
       .from('admin_activity')
       .insert({
-        admin_id: adminId,
+        admin_id: user.id,
         user_id: userId,
         action: 'password_reset_sent',
         details: {
-          target_user: user.email,
-          admin_user: adminUser.email,
+          target_user: targetUser.email,
+          admin_user: user.email || user.id,
           timestamp: new Date().toISOString()
         }
       })
@@ -350,7 +591,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true,
         message: 'Password reset email sent',
-        sentTo: user.email,
+        sentTo: targetUser.email,
         language: userLanguage,
         emailId: emailResult.id,
         expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour
