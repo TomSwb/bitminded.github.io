@@ -51,6 +51,23 @@ serve(async (req) => {
       )
     }
 
+    // Verify session exists in user_sessions table (prevent use of revoked tokens)
+    const { data: sessionData, error: sessionError } = await supabaseAdmin
+      .from('user_sessions')
+      .select('session_token')
+      .eq('session_token', token)
+      .maybeSingle()
+
+    if (sessionError || !sessionData) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }), 
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Parse request body
     const body: RevokeSessionRequest = await req.json()
     const { session_id, revoke_all, target_user_id } = body

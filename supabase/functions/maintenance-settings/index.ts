@@ -74,6 +74,18 @@ serve(async (req) => {
       return jsonResponse({ error: 'Unauthorized' }, 401)
     }
 
+    // Verify session exists in user_sessions table (prevent use of revoked tokens)
+    const { data: sessionData, error: sessionError } = await supabaseAdmin
+      .from('user_sessions')
+      .select('session_token')
+      .eq('session_token', token)
+      .maybeSingle()
+
+    if (sessionError || !sessionData) {
+      console.error('❌ maintenance-settings: session revoked')
+      return jsonResponse({ error: 'Unauthorized' }, 401)
+    }
+
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
