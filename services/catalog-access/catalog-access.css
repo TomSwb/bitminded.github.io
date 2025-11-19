@@ -299,7 +299,7 @@
 }
 
 .catalog-access-feature-item:nth-child(5) {
-  min-height: 6.5rem; /* Feature Voting - title + 3 lines description (longer text with proposal mention) */
+  min-height: 6.5rem; /* Development Influence - title + 3 lines description (longer text with proposal mention) */
 }
 
 .catalog-access-feature-item__title {
@@ -565,7 +565,7 @@
 }
 
 .catalog-access-feature-row:nth-child(5) {
-  min-height: 6.5rem; /* Feature Voting - matches left card */
+  min-height: 6.5rem; /* Development Influence - matches left card */
 }
 
 .catalog-access-feature-row__label {
