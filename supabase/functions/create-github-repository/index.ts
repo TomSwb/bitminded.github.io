@@ -1181,6 +1181,17 @@ serve(async (req) => {
       throw new Error('Unauthorized')
     }
 
+    // Verify session exists in user_sessions table (prevent use of revoked tokens)
+    const { data: sessionData, error: sessionError } = await supabaseClient
+      .from('user_sessions')
+      .select('session_token')
+      .eq('session_token', token)
+      .maybeSingle()
+
+    if (sessionError || !sessionData) {
+      throw new Error('Unauthorized')
+    }
+
     // Parse request body
     const { repoName, description, private: isPrivate, specification, generatedReadme, productSlug, iconUrl, screenshots } = await req.json()
 

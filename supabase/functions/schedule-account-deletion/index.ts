@@ -42,6 +42,17 @@ serve(async (req) => {
       throw new Error('Unauthorized: Invalid token')
     }
 
+    // Verify session exists in user_sessions table (prevent use of revoked tokens)
+    const { data: sessionData, error: sessionError } = await supabase
+      .from('user_sessions')
+      .select('session_token')
+      .eq('session_token', token)
+      .maybeSingle()
+
+    if (sessionError || !sessionData) {
+      throw new Error('Unauthorized: Session revoked')
+    }
+
     console.log(`🗑️ Processing deletion request for user: ${user.id}`)
 
     // Parse request body (optional reason)
