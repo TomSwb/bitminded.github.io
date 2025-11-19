@@ -333,26 +333,28 @@
   }
 }
 
-/* Pricing Toggle Button */
+/* Pricing Toggle Buttons */
 .catalog-access-pricing-toggle-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: var(--spacing-md, 1rem);
   margin: var(--spacing-lg, 1.5rem) 0;
   grid-column: 1 / -1;
   order: 1; /* Appear after first card (Single Tool) on mobile */
+  min-height: 3rem; /* Prevent layout shift */
 }
 
 @media (min-width: 768px) {
   .catalog-access-pricing-toggle-wrapper {
     position: absolute;
     top: -3rem;
-    left: 66.666%;
-    transform: translateX(-50%);
-    margin: 0;
+    right: 6rem;
+    margin: 0 0 3rem 0;
     z-index: 10;
     grid-column: auto;
     order: 0; /* Reset order on desktop */
+    min-height: 3rem; /* Prevent layout shift */
   }
 }
 
@@ -365,25 +367,43 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 10rem; /* Fixed width to prevent movement */
+  min-height: 2.75rem; /* Fixed height to prevent movement */
+  white-space: nowrap; /* Prevent text wrapping */
+  position: relative; /* For transform on hover */
 }
 
 .catalog-access-pricing-toggle:hover {
   background: var(--color-background-tertiary, rgba(31, 41, 55, 0.6));
   border-color: var(--color-primary, #6366f1);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-md, 0 12px 24px -8px rgba(15,23,42,0.45));
 }
 
 .catalog-access-pricing-toggle:active {
-  transform: translateY(0);
+  transform: scale(0.98); /* Subtle press effect without layout shift */
+}
+
+/* Mobile: Stack buttons vertically on very small screens */
+@media (max-width: 480px) {
+  .catalog-access-pricing-toggle-wrapper {
+    flex-direction: column;
+    gap: var(--spacing-sm, 0.75rem);
+  }
+  
+  .catalog-access-pricing-toggle {
+    width: 100%;
+    min-width: auto;
+  }
 }
 
 .catalog-access-pricing-toggle__text {
   display: block;
+  min-height: 1.2em; /* Prevent text height changes */
+  text-align: center;
 }
 
 .catalog-access-pricing-comparison-card {
