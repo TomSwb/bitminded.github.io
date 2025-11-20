@@ -1,0 +1,204 @@
+/* Currency Switcher Component Styles - Based on language-switcher design system */
+.currency-switcher {
+    position: fixed;
+    top: var(--spacing-lg);
+    left: calc(var(--spacing-md) + 7rem); /* Position after language switcher + notification center */
+    z-index: var(--z-popover);
+}
+
+/* Currency toggle button */
+.currency-switcher__toggle {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--border-color-primary);
+    background: var(--color-background);
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3rem;
+    min-height: 3rem;
+    font-weight: 600;
+}
+
+.currency-switcher__toggle:hover {
+    background: var(--color-primary);
+    color: var(--color-background);
+    transform: scale(1.05);
+}
+
+.currency-switcher__toggle:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.currency-switcher__toggle:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.currency-switcher__toggle[aria-expanded="true"] {
+    background: var(--color-primary);
+    color: var(--color-background);
+}
+
+.currency-switcher__symbol {
+    font-size: var(--font-size-base);
+    line-height: 1;
+    transition: transform var(--transition-fast);
+    font-weight: 600;
+}
+
+.currency-switcher__toggle[aria-expanded="true"] .currency-switcher__symbol {
+    transform: scale(1.1);
+}
+
+/* Dropdown container */
+.currency-switcher__dropdown {
+    position: absolute;
+    top: calc(100% + var(--spacing-xs));
+    left: 0;
+    background: var(--color-background);
+    border: 2px solid var(--border-color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: var(--spacing-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity var(--transition-fast), 
+                transform var(--transition-fast),
+                visibility 0s var(--transition-fast);
+    min-width: 150px;
+}
+
+.currency-switcher__dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity var(--transition-fast), 
+                transform var(--transition-fast),
+                visibility 0s;
+}
+
+/* Currency option buttons */
+.currency-switcher__button {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: none;
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    text-align: left;
+}
+
+.currency-switcher__button:hover {
+    background: var(--color-primary);
+    color: var(--color-background);
+}
+
+.currency-switcher__button.active {
+    background: var(--color-primary);
+    color: var(--color-background);
+    font-weight: 600;
+}
+
+.currency-switcher__code {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 3rem;
+}
+
+.currency-switcher__name {
+    font-size: var(--font-size-sm);
+    flex-grow: 1;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    /* Hide desktop currency switcher on mobile (but not the one in mobile menu) */
+    .currency-switcher:not(.navigation-menu__mobile-components .currency-switcher) {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .currency-switcher {
+        top: var(--spacing-sm);
+        left: calc(var(--spacing-sm) + 7rem);
+    }
+    
+    .currency-switcher__toggle {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: var(--font-size-sm);
+    }
+    
+    .currency-switcher__dropdown {
+        min-width: 140px;
+    }
+}
+
+/* Compact mode for mobile hamburger menu */
+.currency-switcher.compact {
+    position: static;
+    top: auto;
+    left: auto;
+}
+
+.currency-switcher.compact .currency-switcher__toggle {
+    width: 100%;
+}
+
+.currency-switcher.compact .currency-switcher__dropdown {
+    position: relative;
+    top: 0;
+    margin-top: 0;
+    max-height: 0;
+    overflow: hidden;
+    border: none;
+    padding: 0;
+}
+
+.currency-switcher.compact .currency-switcher__dropdown.open {
+    max-height: 300px;
+    margin-top: var(--spacing-xs);
+    border: 2px solid var(--border-color-primary);
+    padding: var(--spacing-xs);
+}
+
+/* Animation for currency change */
+.currency-switcher__button.changing {
+    animation: currencyChange 0.3s ease-in-out;
+}
+
+@keyframes currencyChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* Accessibility improvements */
+.currency-switcher__button:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.currency-switcher__button:focus:not(:focus-visible) {
+    outline: none;
+}
+

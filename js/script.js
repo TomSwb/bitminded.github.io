@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // This helps search engines prioritize the main content over UI components
     setTimeout(() => {
         loadNotificationCenter();
+        // Load currency switcher on services and catalog pages
+        loadCurrencySwitcher();
     }, 500);
     
     // Account page specific initialization is now handled by account-page-loader.js
@@ -109,6 +111,27 @@ async function loadNotificationCenter() {
         // Notification center loaded silently
     } catch (error) {
         console.error('❌ Failed to load notification center component:', error);
+    }
+}
+
+async function loadCurrencySwitcher() {
+    // Only load currency switcher on services and catalog pages
+    const pathname = window.location.pathname;
+    const isServicesPage = pathname.startsWith('/services');
+    const isCatalogPage = pathname.startsWith('/catalog');
+    
+    if (!isServicesPage && !isCatalogPage) {
+        return;
+    }
+    
+    try {
+        await componentLoader.load('currency-switcher', {
+            container: 'header',
+            priority: 'high'
+        });
+        // Currency switcher component loaded
+    } catch (error) {
+        console.error('❌ Failed to load currency switcher component:', error);
     }
 }
 

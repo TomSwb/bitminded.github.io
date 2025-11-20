@@ -1,0 +1,75 @@
+{
+  "en": {
+    "translation": {
+      "Currency": "Currency",
+      "Select currency": "Select currency",
+      "Switch to CHF": "Switch to CHF",
+      "Switch to USD": "Switch to USD",
+      "Switch to EUR": "Switch to EUR",
+      "Switch to GBP": "Switch to GBP",
+      "CHF": "CHF",
+      "USD": "USD",
+      "EUR": "EUR",
+      "GBP": "GBP",
+      "Swiss Franc": "Swiss Franc",
+      "US Dollar": "US Dollar",
+      "Euro": "Euro",
+      "British Pound": "British Pound"
+    }
+  },
+  "es": {
+    "translation": {
+      "Currency": "Moneda",
+      "Select currency": "Seleccionar moneda",
+      "Switch to CHF": "Cambiar a CHF",
+      "Switch to USD": "Cambiar a USD",
+      "Switch to EUR": "Cambiar a EUR",
+      "Switch to GBP": "Cambiar a GBP",
+      "CHF": "CHF",
+      "USD": "USD",
+      "EUR": "EUR",
+      "GBP": "GBP",
+      "Swiss Franc": "Franco Suizo",
+      "US Dollar": "Dólar Estadounidense",
+      "Euro": "Euro",
+      "British Pound": "Libra Esterlina"
+    }
+  },
+  "fr": {
+    "translation": {
+      "Currency": "Devise",
+      "Select currency": "Sélectionner la devise",
+      "Switch to CHF": "Passer à CHF",
+      "Switch to USD": "Passer à USD",
+      "Switch to EUR": "Passer à EUR",
+      "Switch to GBP": "Passer à GBP",
+      "CHF": "CHF",
+      "USD": "USD",
+      "EUR": "EUR",
+      "GBP": "GBP",
+      "Swiss Franc": "Franc Suisse",
+      "US Dollar": "Dollar Américain",
+      "Euro": "Euro",
+      "British Pound": "Livre Sterling"
+    }
+  },
+  "de": {
+    "translation": {
+      "Currency": "Währung",
+      "Select currency": "Währung auswählen",
+      "Switch to CHF": "Zu CHF wechseln",
+      "Switch to USD": "Zu USD wechseln",
+      "Switch to EUR": "Zu EUR wechseln",
+      "Switch to GBP": "Zu GBP wechseln",
+      "CHF": "CHF",
+      "USD": "USD",
+      "EUR": "EUR",
+      "GBP": "GBP",
+      "Swiss Franc": "Schweizer Franken",
+      "US Dollar": "US-Dollar",
+      "Euro": "Euro",
+      "British Pound": "Britisches Pfund"
+    }
+  }
+}
+
