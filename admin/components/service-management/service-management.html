@@ -1,0 +1,445 @@
+<!-- Service Management Component -->
+<div class="service-management" id="service-management">
+    <!-- Header -->
+    <div class="service-management__header">
+        <div class="service-management__title-section">
+            <h1 class="service-management__title translatable-content" data-translation-key="Service Management">Service Management</h1>
+        </div>
+        
+        <div class="service-management__actions">
+            <button class="service-management__button service-management__button--primary" id="add-service-button">
+                <span class="translatable-content" data-translation-key="Add New Service">Add New Service</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="service-management__controls">
+        <!-- Search Bar -->
+        <div class="service-management__search">
+            <input 
+                type="text" 
+                class="service-management__search-input translatable-content" 
+                id="service-search-input"
+                data-translation-key="Search services..."
+                placeholder="Search services...">
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="service-management__filters">
+            <div class="service-management__filters-header">
+                <div class="service-management__filters-controls">
+                    <!-- Category Filter -->
+                    <div class="service-management__filter-group">
+                        <label for="category-filter" class="service-management__filter-label" data-translation-key="Category">Category</label>
+                        <div class="service-management__dropdown">
+                            <button type="button" class="service-management__dropdown-btn" id="category-dropdown-btn">
+                                <span data-translation-key="select_category">Select Category</span>
+                                <span class="service-management__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="service-management__dropdown-content" id="category-dropdown">
+                                <div class="service-management__search">
+                                    <input type="text" placeholder="Search..." class="service-management__search-input" id="category-search">
+                                </div>
+                                <div class="service-management__options" id="category-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="service-management__dropdown-actions">
+                                    <button type="button" class="service-management__action-btn" id="category-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="service-management__action-btn" id="category-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="service-management__filter-group">
+                        <label for="status-filter" class="service-management__filter-label" data-translation-key="Status">Status</label>
+                        <div class="service-management__dropdown">
+                            <button type="button" class="service-management__dropdown-btn" id="status-dropdown-btn">
+                                <span data-translation-key="select_status">Select Status</span>
+                                <span class="service-management__dropdown-arrow">▼</span>
+                            </button>
+                            <div class="service-management__dropdown-content" id="status-dropdown">
+                                <div class="service-management__search">
+                                    <input type="text" placeholder="Search..." class="service-management__search-input" id="status-search">
+                                </div>
+                                <div class="service-management__options" id="status-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                                <div class="service-management__dropdown-actions">
+                                    <button type="button" class="service-management__action-btn" id="status-select-all" data-translation-key="select_all">Select All</button>
+                                    <button type="button" class="service-management__action-btn" id="status-deselect-all" data-translation-key="deselect_all">Deselect All</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sale Status Filter -->
+                    <div class="service-management__filter-group">
+                        <label for="sale-filter" class="service-management__filter-label" data-translation-key="Sale Status">Sale Status</label>
+                        <select id="sale-filter" class="service-management__select">
+                            <option value="all" data-translation-key="all_services">All Services</option>
+                            <option value="on_sale" data-translation-key="on_sale_only">On Sale Only</option>
+                            <option value="not_on_sale" data-translation-key="not_on_sale">Not On Sale</option>
+                        </select>
+                    </div>
+
+                    <!-- Featured Filter -->
+                    <div class="service-management__filter-group">
+                        <label for="featured-filter" class="service-management__filter-label" data-translation-key="Featured">Featured</label>
+                        <select id="featured-filter" class="service-management__select">
+                            <option value="all" data-translation-key="all_services">All Services</option>
+                            <option value="featured" data-translation-key="featured_only">Featured Only</option>
+                            <option value="not_featured" data-translation-key="not_featured">Not Featured</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Summary and Clear Button on same row -->
+                <div class="service-management__summary-row">
+                    <div class="service-management__summary">
+                        <span class="service-management__count" data-translation-key="showing_all_services">Showing all services</span>
+                    </div>
+                    <button type="button" class="service-management__clear-btn" id="service-clear-filters-btn" data-translation-key="clear_all_filters">
+                        Clear All Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Table -->
+    <div class="service-management__table-container">
+        <table class="service-management__table" id="services-table">
+            <thead>
+                <tr>
+                    <th class="service-management__sortable-header" data-sort="name">
+                        <span class="translatable-content" data-translation-key="Service Name">Service Name</span>
+                        <span class="service-management__sort-indicator"></span>
+                    </th>
+                    <th class="translatable-content" data-translation-key="Category">Category</th>
+                    <th class="translatable-content" data-translation-key="Status">Status</th>
+                    <th class="translatable-content" data-translation-key="Pricing">Pricing</th>
+                    <th class="translatable-content" data-translation-key="Sale">Sale</th>
+                    <th class="translatable-content" data-translation-key="Featured">Featured</th>
+                    <th class="translatable-content" data-translation-key="Created">Created</th>
+                    <th class="translatable-content" data-translation-key="Actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="services-table-body">
+                <!-- Service rows will be inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Loading State -->
+        <div class="service-management__loading hidden" id="services-loading">
+            <div class="service-management__spinner"></div>
+            <p class="translatable-content" data-translation-key="Loading services...">Loading services...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="service-management__empty hidden" id="services-empty">
+            <p class="translatable-content" data-translation-key="No services found">No services found</p>
+        </div>
+    </div>
+
+    <!-- Add/Edit Service Modal -->
+    <div class="service-management__modal hidden" id="service-modal">
+        <div class="service-management__modal-overlay" id="service-modal-overlay"></div>
+        <div class="service-management__modal-content">
+            <div class="service-management__modal-header">
+                <h2 class="service-management__modal-title" id="service-modal-title">
+                    <span class="translatable-content" data-translation-key="Add New Service">Add New Service</span>
+                </h2>
+                <button class="service-management__modal-close" id="service-modal-close" aria-label="Close modal">×</button>
+            </div>
+
+            <div class="service-management__modal-body">
+                <!-- Modal Tabs -->
+                <div class="service-management__modal-tabs">
+                    <button class="service-management__modal-tab active" data-tab="basic">
+                        <span class="translatable-content" data-translation-key="Basic Info">Basic Info</span>
+                    </button>
+                    <button class="service-management__modal-tab" data-tab="pricing">
+                        <span class="translatable-content" data-translation-key="Pricing">Pricing</span>
+                    </button>
+                    <button class="service-management__modal-tab" data-tab="reduced-fare">
+                        <span class="translatable-content" data-translation-key="Reduced Fare">Reduced Fare</span>
+                    </button>
+                    <button class="service-management__modal-tab" data-tab="sales">
+                        <span class="translatable-content" data-translation-key="Sales & Offers">Sales & Offers</span>
+                    </button>
+                    <button class="service-management__modal-tab" data-tab="stripe">
+                        <span class="translatable-content" data-translation-key="Stripe">Stripe</span>
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <form id="service-form" class="service-management__form">
+                    <!-- Basic Info Tab -->
+                    <div class="service-management__tab-content active" data-tab-content="basic">
+                        <div class="service-management__form-group">
+                            <label for="service-name" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Service Name">Service Name</span>
+                                <span class="service-management__required">*</span>
+                            </label>
+                            <input type="text" id="service-name" name="name" class="service-management__form-input" required>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="service-slug" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Slug">Slug</span>
+                                <span class="service-management__required">*</span>
+                            </label>
+                            <input type="text" id="service-slug" name="slug" class="service-management__form-input" required>
+                            <small class="service-management__form-help">
+                                <span class="translatable-content" data-translation-key="slug_help">URL-friendly identifier (auto-generated from name)</span>
+                            </small>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="service-category" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Category">Category</span>
+                                <span class="service-management__required">*</span>
+                            </label>
+                            <select id="service-category" name="service_category" class="service-management__form-select" required>
+                                <option value="">Select category...</option>
+                                <option value="commissioning">Commissioning</option>
+                                <option value="tech-support">Tech Support</option>
+                                <option value="catalog-access">Catalog Access</option>
+                            </select>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="service-status" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Status">Status</span>
+                                <span class="service-management__required">*</span>
+                            </label>
+                            <select id="service-status" name="status" class="service-management__form-select" required>
+                                <option value="available">Available</option>
+                                <option value="unavailable">Unavailable</option>
+                                <option value="overbooked">Overbooked</option>
+                                <option value="on-sale">On Sale</option>
+                                <option value="coming-soon">Coming Soon</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="service-short-description" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Short Description">Short Description</span>
+                            </label>
+                            <textarea id="service-short-description" name="short_description" class="service-management__form-textarea" rows="2"></textarea>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="service-description" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Description">Description</span>
+                            </label>
+                            <textarea id="service-description" name="description" class="service-management__form-textarea" rows="4"></textarea>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label class="service-management__form-checkbox" for="service-featured">
+                                <input type="checkbox" id="service-featured" name="is_featured">
+                                <span class="translatable-content" data-translation-key="Featured">Featured</span>
+                            </label>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label class="service-management__form-checkbox" for="service-active">
+                                <input type="checkbox" id="service-active" name="is_active" checked>
+                                <span class="translatable-content" data-translation-key="Active">Active</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Tab -->
+                    <div class="service-management__tab-content" data-tab-content="pricing">
+                        <div class="service-management__form-group">
+                            <label for="pricing-type" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Pricing Type">Pricing Type</span>
+                                <span class="service-management__required">*</span>
+                            </label>
+                            <select id="pricing-type" name="pricing_type" class="service-management__form-select" required>
+                                <option value="fixed">Fixed</option>
+                                <option value="hourly">Hourly</option>
+                                <option value="range">Range</option>
+                                <option value="variable">Variable</option>
+                            </select>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="base-currency" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Base Currency">Base Currency</span>
+                            </label>
+                            <select id="base-currency" name="base_price_currency" class="service-management__form-select">
+                                <option value="CHF">CHF</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                            </select>
+                        </div>
+
+                        <div class="service-management__form-group" id="range-pricing-group" style="display: none;">
+                            <div class="service-management__form-row">
+                                <div class="service-management__form-col">
+                                    <label for="price-range-min" class="service-management__form-label">
+                                        <span class="translatable-content" data-translation-key="Min Price">Min Price</span>
+                                    </label>
+                                    <input type="number" id="price-range-min" name="price_range_min" class="service-management__form-input" step="0.01">
+                                </div>
+                                <div class="service-management__form-col">
+                                    <label for="price-range-max" class="service-management__form-label">
+                                        <span class="translatable-content" data-translation-key="Max Price">Max Price</span>
+                                    </label>
+                                    <input type="number" id="price-range-max" name="price_range_max" class="service-management__form-input" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="service-management__form-group" id="hourly-pricing-group" style="display: none;">
+                            <label for="hourly-rate" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Hourly Rate">Hourly Rate</span>
+                            </label>
+                            <input type="number" id="hourly-rate" name="hourly_rate" class="service-management__form-input" step="0.01">
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="duration" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Duration">Duration</span>
+                            </label>
+                            <input type="text" id="duration" name="duration" class="service-management__form-input" placeholder="e.g., 1 hour, 3 sessions, 1-2 weeks">
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="additional-costs" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Additional Costs">Additional Costs</span>
+                            </label>
+                            <input type="text" id="additional-costs" name="additional_costs" class="service-management__form-input" placeholder="e.g., + travel, + device cost">
+                        </div>
+
+                        <!-- Multi-Currency Pricing Editor -->
+                        <div class="service-management__form-group">
+                            <label class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Multi-Currency Pricing">Multi-Currency Pricing</span>
+                            </label>
+                            <div id="currency-pricing-editor" class="service-management__currency-editor">
+                                <!-- Currency pricing inputs will be dynamically generated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reduced Fare Tab -->
+                    <div class="service-management__tab-content" data-tab-content="reduced-fare">
+                        <div class="service-management__form-group">
+                            <label class="service-management__form-checkbox" for="has-reduced-fare">
+                                <input type="checkbox" id="has-reduced-fare" name="has_reduced_fare">
+                                <span class="translatable-content" data-translation-key="Has Reduced Fare">Has Reduced Fare</span>
+                            </label>
+                        </div>
+
+                        <div class="service-management__form-group" id="reduced-fare-eligibility-group" style="display: none;">
+                            <label for="reduced-fare-eligibility" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Reduced Fare Eligibility">Reduced Fare Eligibility</span>
+                            </label>
+                            <textarea id="reduced-fare-eligibility" name="reduced_fare_eligibility" class="service-management__form-textarea" rows="2" placeholder="e.g., Seniors, students, unemployed"></textarea>
+                        </div>
+
+                        <!-- Reduced Fare Pricing Editor -->
+                        <div class="service-management__form-group" id="reduced-fare-pricing-group" style="display: none;">
+                            <label class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Reduced Fare Pricing">Reduced Fare Pricing</span>
+                            </label>
+                            <div id="reduced-fare-pricing-editor" class="service-management__currency-editor">
+                                <!-- Reduced fare pricing inputs will be dynamically generated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sales & Offers Tab -->
+                    <div class="service-management__tab-content" data-tab-content="sales">
+                        <div class="service-management__form-group">
+                            <label class="service-management__form-checkbox" for="is-on-sale">
+                                <input type="checkbox" id="is-on-sale" name="is_on_sale">
+                                <span class="translatable-content" data-translation-key="On Sale">On Sale</span>
+                            </label>
+                        </div>
+
+                        <div class="service-management__form-group" id="sale-dates-group" style="display: none;">
+                            <div class="service-management__form-row">
+                                <div class="service-management__form-col">
+                                    <label for="sale-start-date" class="service-management__form-label">
+                                        <span class="translatable-content" data-translation-key="Sale Start Date">Sale Start Date</span>
+                                    </label>
+                                    <input type="datetime-local" id="sale-start-date" name="sale_start_date" class="service-management__form-input">
+                                </div>
+                                <div class="service-management__form-col">
+                                    <label for="sale-end-date" class="service-management__form-label">
+                                        <span class="translatable-content" data-translation-key="Sale End Date">Sale End Date</span>
+                                    </label>
+                                    <input type="datetime-local" id="sale-end-date" name="sale_end_date" class="service-management__form-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="service-management__form-group" id="sale-description-group" style="display: none;">
+                            <label for="sale-description" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Sale Description">Sale Description</span>
+                            </label>
+                            <textarea id="sale-description" name="sale_description" class="service-management__form-textarea" rows="3"></textarea>
+                        </div>
+
+                        <!-- Sale Pricing Editor -->
+                        <div class="service-management__form-group" id="sale-pricing-group" style="display: none;">
+                            <label class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Sale Pricing">Sale Pricing</span>
+                            </label>
+                            <div id="sale-pricing-editor" class="service-management__currency-editor">
+                                <!-- Sale pricing inputs will be dynamically generated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stripe Tab -->
+                    <div class="service-management__tab-content" data-tab-content="stripe">
+                        <div class="service-management__form-group">
+                            <label for="stripe-product-id" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Stripe Product ID">Stripe Product ID</span>
+                            </label>
+                            <input type="text" id="stripe-product-id" name="stripe_product_id" class="service-management__form-input" disabled>
+                            <small class="service-management__form-help">
+                                <span class="translatable-content" data-translation-key="stripe_coming_soon">Stripe integration coming soon</span>
+                            </small>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="stripe-price-id" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Stripe Price ID">Stripe Price ID</span>
+                            </label>
+                            <input type="text" id="stripe-price-id" name="stripe_price_id" class="service-management__form-input" disabled>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="stripe-price-reduced-id" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Stripe Reduced Price ID">Stripe Reduced Price ID</span>
+                            </label>
+                            <input type="text" id="stripe-price-reduced-id" name="stripe_price_reduced_id" class="service-management__form-input" disabled>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="service-management__modal-footer">
+                <button type="button" class="service-management__button service-management__button--secondary" id="service-modal-cancel">
+                    <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                </button>
+                <button type="button" class="service-management__button service-management__button--primary" id="service-modal-save">
+                    <span class="translatable-content" data-translation-key="Save Service">Save Service</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

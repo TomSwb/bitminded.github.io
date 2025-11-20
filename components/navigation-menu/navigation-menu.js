@@ -366,6 +366,36 @@ class NavigationMenu {
             }
         }
 
+        // Move existing Currency Switcher to mobile container (only if it exists)
+        const existingCurrencySwitcher = document.querySelector('.currency-switcher');
+        const mobileCurrencyContainer = this.mobileComponents.querySelector('#mobile-currency-switcher');
+        
+        if (existingCurrencySwitcher && mobileCurrencyContainer && !mobileCurrencyContainer.querySelector('.currency-switcher')) {
+            // Clone the existing currency switcher
+            const currencyClone = existingCurrencySwitcher.cloneNode(true);
+            currencyClone.classList.add('compact');
+            mobileCurrencyContainer.appendChild(currencyClone);
+            
+            // Prevent currency switcher clicks from closing the menu
+            const currencyToggle = currencyClone.querySelector('.currency-switcher__toggle');
+            if (currencyToggle) {
+                currencyToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+            
+            // Re-initialize the cloned currency switcher
+            if (window.CurrencySwitcher) {
+                // Create a new instance for the mobile version
+                const mobileCurrencySwitcher = new CurrencySwitcher();
+                mobileCurrencySwitcher.element = currencyClone;
+                mobileCurrencySwitcher.init({ compact: true });
+                console.log('✅ Mobile currency switcher moved and initialized');
+            } else {
+                console.warn('⚠️ window.CurrencySwitcher not available');
+            }
+        }
+
         // Move existing Theme Switcher to mobile container
         const existingThemeSwitcher = document.querySelector('.theme-switcher');
         const mobileThemeContainer = this.mobileComponents.querySelector('#mobile-theme-switcher');
