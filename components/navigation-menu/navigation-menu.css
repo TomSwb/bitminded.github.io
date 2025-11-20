@@ -158,10 +158,10 @@
         background-color: rgba(var(--color-bg-dark-rgb), 0.95);
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
         margin: 0 !important;
-        padding: var(--spacing-md) !important;
+        padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md) !important;
         z-index: var(--z-modal);
         right: 0 !important;
         bottom: 0 !important;
@@ -172,11 +172,17 @@
         box-sizing: border-box;
         min-height: 100vh !important;
         max-width: 100vw !important;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
     }
     
     .navigation-menu__links.active {
         opacity: 1;
         pointer-events: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
     }
     
     /* Light theme mobile menu overlay */
@@ -227,6 +233,99 @@
         outline-offset: 2px;
     }
     
+    /* Sub-navigation container (mobile only) */
+    .navigation-menu__subnav {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+        width: 100%;
+        max-width: 300px;
+        margin: var(--spacing-md) 0;
+        padding-top: var(--spacing-md);
+        border-top: 1px solid rgba(var(--border-color-primary-rgb, 148, 163, 184), 0.3);
+    }
+
+    /* Sub-navigation title (FAQ) */
+    .navigation-menu__subnav-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        opacity: 0.7;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--spacing-xs);
+        text-align: center;
+        padding: 0 var(--spacing-md);
+    }
+
+    /* Sub-navigation links (smaller than main nav links) */
+    .navigation-menu__sublink {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+        font-size: 0.85rem;
+        padding: var(--spacing-sm) var(--spacing-md);
+        margin: var(--spacing-xs) 0;
+        border-radius: var(--radius-sm);
+        min-height: 44px;
+        text-align: center;
+        width: 100%;
+        max-width: 300px;
+        transition: all var(--transition-fast);
+        color: var(--color-text-primary);
+        text-decoration: none;
+        font-weight: 500;
+        opacity: 0.85;
+    }
+
+    .navigation-menu__sublink-icon {
+        font-size: 1rem;
+        line-height: 1;
+        opacity: 0.8;
+    }
+
+    .navigation-menu__sublink-text {
+        letter-spacing: 0.025em;
+    }
+
+    /* Sub-nav link hover/active states */
+    .navigation-menu__sublink:hover,
+    .navigation-menu__sublink:focus {
+        opacity: 1;
+        color: var(--color-secondary, #d286bd);
+        background-color: rgba(var(--color-secondary-rgb, 210, 134, 189), 0.1);
+        transform: scale(1.02);
+    }
+
+    .navigation-menu__sublink.active {
+        opacity: 1;
+        color: var(--color-background-primary);
+        background-color: var(--color-secondary, #d286bd);
+        font-weight: 600;
+    }
+
+    .navigation-menu__sublink.active .navigation-menu__sublink-icon {
+        opacity: 1;
+    }
+
+    /* Sub-nav link touch effects */
+    .navigation-menu__sublink:active {
+        transform: scale(0.98);
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Focus for accessibility */
+    .navigation-menu__sublink:focus {
+        outline: 2px solid var(--color-secondary, #d286bd);
+        outline-offset: 2px;
+    }
+
     /* Show mobile components */
     .navigation-menu__mobile-components {
         display: flex;
@@ -282,6 +381,11 @@
     
     .navigation-menu__mobile-components {
         display: none;
+    }
+
+    /* Hide sub-nav on desktop (it's in page content) */
+    .navigation-menu__subnav {
+        display: none !important;
     }
     
     /* Ensure desktop language switcher is visible */
