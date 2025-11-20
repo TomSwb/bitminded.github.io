@@ -37,7 +37,6 @@ class FAQPageLoader {
 
             this.componentsLoaded = true;
             this.accordionInitialized = true;
-            console.log('✅ FAQ page components loaded');
         } catch (error) {
             console.error('❌ Failed to load FAQ page components:', error);
         }

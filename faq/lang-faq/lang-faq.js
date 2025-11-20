@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hide content until translations load
     document.documentElement.classList.add('hide-translatable');
     
-    fetch('lang-faq/locales-faq.json')
+    fetch('/faq/lang-faq/locales-faq.json')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
