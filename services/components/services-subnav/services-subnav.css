@@ -111,10 +111,9 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    /* Hide sub-nav on mobile - it will be shown in hamburger menu instead */
     .services-subnav {
-        padding: var(--spacing-lg, 1.5rem) var(--spacing-sm, 0.75rem) var(--spacing-md, 1rem);
-        margin: 0 calc(-1 * 1.5rem) calc(-1 * var(--spacing-2xl, 3rem)) calc(-1 * 1.5rem);
-        width: calc(100% + 3rem);
+        display: none !important;
     }
 
     .services-subnav__container {
@@ -161,11 +160,7 @@
 }
 
 @media (max-width: 480px) {
-    .services-subnav {
-        padding: var(--spacing-lg, 1.5rem) var(--spacing-xs, 0.5rem) var(--spacing-md, 1rem);
-        margin: 0 calc(-1 * 1.5rem) calc(-1 * var(--spacing-2xl, 3rem)) calc(-1 * 1.5rem);
-        width: calc(100% + 3rem);
-    }
+    /* Sub-nav already hidden on mobile - no additional changes needed */
 
     .services-subnav__container {
         flex-wrap: wrap;

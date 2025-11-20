@@ -10,6 +10,8 @@ class NavigationMenu {
         this.mobileComponents = null;
         this.isInitialized = false;
         this.mobileComponentsLoaded = false;
+        this.subnavLoaded = false;
+        this.subnavContainer = null;
         this.currentPage = this.detectCurrentPage();
         this.translations = null;
         this.eventListeners = new Map();
@@ -100,11 +102,12 @@ class NavigationMenu {
             });
         });
 
-        // Close menu when clicking outside
+        // Close menu when clicking outside (but not on sub-nav links)
         document.addEventListener('click', (e) => {
             if (this.isMobileMenuOpen() && 
                 !this.element.contains(e.target) &&
-                !e.target.closest('.navigation-menu')) {
+                !e.target.closest('.navigation-menu') &&
+                !e.target.closest('.navigation-menu__sublink')) {
                 this.closeMobileMenu();
             }
         });
@@ -112,6 +115,15 @@ class NavigationMenu {
         // Listen for language changes
         window.addEventListener('languageChanged', (e) => {
             this.updateTranslations(e.detail.language);
+            // Also update sub-nav translations if loaded
+            if (this.subnavLoaded) {
+                const currentPage = this.detectCurrentPage();
+                if (currentPage === 'services') {
+                    this.loadSubnavTranslations('services');
+                } else if (currentPage === 'faq') {
+                    this.loadSubnavTranslations('faq');
+                }
+            }
         });
 
         // Handle escape key
@@ -284,6 +296,11 @@ class NavigationMenu {
             this.loadMobileComponents();
         }
         
+        // Load sub-nav if on Services or FAQ page (mobile only)
+        if (this.isOnServicesPage() || this.isOnFAQPage()) {
+            this.loadSubnav();
+        }
+        
         console.log('📱 Mobile menu opened');
     }
 
@@ -295,6 +312,9 @@ class NavigationMenu {
         this.hamburger.classList.remove('active');
         document.body.style.overflow = '';
         
+        // Don't clear sub-nav on close - keep it for next open (if still on same page)
+        // The sub-nav will be cleared when navigating to a different page
+        
         console.log('📱 Mobile menu closed');
     }
 
@@ -304,6 +324,469 @@ class NavigationMenu {
      */
     isMobileMenuOpen() {
         return this.links.classList.contains('active');
+    }
+
+    /**
+     * Check if current page is a Services page
+     * @returns {boolean} True if on Services page
+     */
+    isOnServicesPage() {
+        const path = window.location.pathname;
+        return path.includes('/services/');
+    }
+
+    /**
+     * Check if current page is a FAQ page
+     * @returns {boolean} True if on FAQ page
+     */
+    isOnFAQPage() {
+        const path = window.location.pathname;
+        return path.includes('/faq/');
+    }
+
+    /**
+     * Load and inject sub-navigation into hamburger menu (mobile only)
+     */
+    async loadSubnav() {
+        // Only load on mobile
+        if (window.innerWidth > 768) {
+            return;
+        }
+
+        // Check if we still need sub-nav (might have navigated away)
+        const needsServicesSubnav = this.isOnServicesPage();
+        const needsFAQSubnav = this.isOnFAQPage();
+        
+        if (!needsServicesSubnav && !needsFAQSubnav) {
+            // No longer on Services/FAQ page - remove sub-nav if exists
+            if (this.subnavContainer) {
+                this.subnavContainer.remove();
+                this.subnavContainer = null;
+                this.subnavLoaded = false;
+            }
+            return;
+        }
+
+        // If sub-nav container exists but is empty or wrong type, reset it
+        if (this.subnavContainer && this.subnavContainer.children.length === 0) {
+            this.subnavLoaded = false;
+        }
+
+        // Don't reload if already loaded and correct
+        if (this.subnavLoaded && this.subnavContainer) {
+            return;
+        }
+
+        // Create sub-nav container if it doesn't exist
+        if (!this.subnavContainer) {
+            this.subnavContainer = document.createElement('div');
+            this.subnavContainer.className = 'navigation-menu__subnav';
+            this.subnavContainer.id = 'navigation-menu-subnav';
+            
+            // Insert after main nav links, before mobile-components
+            const mainLinks = Array.from(this.links.querySelectorAll('.navigation-menu__link'));
+            if (mainLinks.length > 0) {
+                mainLinks[mainLinks.length - 1].insertAdjacentElement('afterend', this.subnavContainer);
+            } else {
+                // Fallback: insert before mobile-components
+                this.links.insertBefore(this.subnavContainer, this.mobileComponents);
+            }
+        }
+
+        try {
+            if (this.isOnServicesPage()) {
+                await this.loadServicesSubnav();
+            } else if (this.isOnFAQPage()) {
+                await this.loadFAQSubnav();
+            }
+        } catch (error) {
+            console.warn('Failed to load sub-navigation:', error);
+        }
+    }
+
+    /**
+     * Load Services sub-navigation
+     */
+    async loadServicesSubnav() {
+        try {
+            // Load CSS
+            if (!document.querySelector('link[href*="services-subnav.css"]')) {
+                const cssLink = document.createElement('link');
+                cssLink.rel = 'stylesheet';
+                cssLink.href = '/services/components/services-subnav/services-subnav.css';
+                document.head.appendChild(cssLink);
+            }
+
+            // Load HTML
+            const htmlResponse = await fetch('/services/components/services-subnav/services-subnav.html');
+            const htmlContent = await htmlResponse.text();
+            
+            // Create a temporary container to parse HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            const subnavElement = tempDiv.querySelector('.services-subnav');
+            
+            if (!subnavElement) {
+                throw new Error('Services subnav HTML not found');
+            }
+
+            // Extract links and convert to navigation menu format
+            const links = subnavElement.querySelectorAll('.services-subnav__link');
+            links.forEach(link => {
+                const sublink = this.createSubnavLink(link);
+                this.subnavContainer.appendChild(sublink);
+            });
+
+            // Load JS for active state detection
+            if (!window.servicesSubnav) {
+                const script = document.createElement('script');
+                script.src = '/services/components/services-subnav/services-subnav.js';
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.body.appendChild(script);
+                });
+                
+                // Wait a bit for the script to initialize
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Manually update active state for injected links
+                this.updateServicesSubnavActiveState();
+            }
+
+            // Ensure links are visible immediately (before translations)
+            const sublinks = this.subnavContainer.querySelectorAll('.navigation-menu__sublink');
+            sublinks.forEach(link => {
+                link.classList.add('loaded');
+                link.style.opacity = '1';
+                link.style.visibility = 'visible';
+            });
+
+            // Load translations after links are created and in DOM
+            await this.loadSubnavTranslations('services');
+
+            this.subnavLoaded = true;
+        } catch (error) {
+            console.warn('Failed to load Services sub-navigation:', error);
+        }
+    }
+
+    /**
+     * Load FAQ sub-navigation
+     */
+    async loadFAQSubnav() {
+        try {
+            // Load CSS
+            if (!document.querySelector('link[href*="faq-subnav.css"]')) {
+                const cssLink = document.createElement('link');
+                cssLink.rel = 'stylesheet';
+                cssLink.href = '/faq/components/faq-subnav/faq-subnav.css';
+                document.head.appendChild(cssLink);
+            }
+
+            // Load HTML
+            const htmlResponse = await fetch('/faq/components/faq-subnav/faq-subnav.html');
+            const htmlContent = await htmlResponse.text();
+            
+            // Create a temporary container to parse HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            const subnavElement = tempDiv.querySelector('.faq-subnav');
+            
+            if (!subnavElement) {
+                throw new Error('FAQ subnav HTML not found');
+            }
+
+            // Add FAQ title before links
+            const title = document.createElement('div');
+            title.className = 'navigation-menu__subnav-title';
+            title.textContent = 'FAQ';
+            title.setAttribute('data-i18n', 'FAQ');
+            title.classList.add('translatable-content', 'loaded');
+            this.subnavContainer.appendChild(title);
+
+            // Extract links and convert to navigation menu format
+            const links = subnavElement.querySelectorAll('.faq-subnav__link');
+            links.forEach(link => {
+                const sublink = this.createSubnavLink(link, 'faq');
+                this.subnavContainer.appendChild(sublink);
+            });
+
+            // Load JS for active state detection
+            if (!window.faqSubnav) {
+                const script = document.createElement('script');
+                script.src = '/faq/components/faq-subnav/faq-subnav.js';
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.body.appendChild(script);
+                });
+                
+                // Wait a bit for the script to initialize
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Manually update active state for injected links
+                this.updateFAQSubnavActiveState();
+            }
+
+            // Ensure links are visible immediately (before translations)
+            const sublinks = this.subnavContainer.querySelectorAll('.navigation-menu__sublink');
+            sublinks.forEach(link => {
+                link.classList.add('loaded');
+                link.style.opacity = '1';
+                link.style.visibility = 'visible';
+            });
+
+            // Load translations after links are created and in DOM
+            await this.loadSubnavTranslations('faq');
+
+            this.subnavLoaded = true;
+        } catch (error) {
+            console.warn('Failed to load FAQ sub-navigation:', error);
+        }
+    }
+
+    /**
+     * Create a subnav link element from original link
+     * @param {HTMLElement} originalLink - Original subnav link element
+     * @param {string} type - 'services' or 'faq'
+     * @returns {HTMLElement} New subnav link element
+     */
+    createSubnavLink(originalLink, type = 'services') {
+        const sublink = document.createElement('a');
+        sublink.className = 'navigation-menu__sublink';
+        sublink.href = originalLink.href;
+        sublink.id = originalLink.id;
+        
+        // Copy icon if exists
+        const icon = originalLink.querySelector(`.${type}-subnav__icon`);
+        const text = originalLink.querySelector(`.${type}-subnav__text`);
+        
+        if (icon) {
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'navigation-menu__sublink-icon';
+            iconSpan.textContent = icon.textContent;
+            sublink.appendChild(iconSpan);
+        }
+        
+        if (text) {
+            const textSpan = document.createElement('span');
+            textSpan.className = 'navigation-menu__sublink-text';
+            // Set initial text content (fallback if translation fails)
+            const i18nKey = originalLink.getAttribute('data-i18n');
+            if (i18nKey) {
+                textSpan.setAttribute('data-i18n', i18nKey);
+            }
+            // Always set initial text content to ensure visibility
+            const initialText = text.textContent || text.textContent.trim() || '';
+            textSpan.textContent = initialText;
+            // Add loaded class immediately to make it visible
+            textSpan.classList.add('loaded');
+            sublink.appendChild(textSpan);
+        } else {
+            // Fallback: use link's text content
+            const linkText = originalLink.textContent.trim();
+            const textSpan = document.createElement('span');
+            textSpan.className = 'navigation-menu__sublink-text';
+            const i18nKey = originalLink.getAttribute('data-i18n');
+            if (i18nKey) {
+                textSpan.setAttribute('data-i18n', i18nKey);
+            }
+            textSpan.textContent = linkText || '';
+            // Add loaded class immediately to make it visible
+            textSpan.classList.add('loaded');
+            sublink.appendChild(textSpan);
+        }
+
+        // Add translatable class if original has it
+        if (originalLink.classList.contains('translatable-content')) {
+            sublink.classList.add('translatable-content');
+            // Add loaded class immediately to make it visible
+            sublink.classList.add('loaded');
+        }
+        
+        // Always add loaded class to ensure visibility
+        sublink.classList.add('loaded');
+
+        // Add click handler that prevents menu closing but allows navigation
+        sublink.addEventListener('click', (e) => {
+            // Prevent event from bubbling up to document listener
+            e.stopPropagation();
+            // Don't prevent default - allow navigation to happen
+            // Menu will stay open until page navigation completes
+        });
+
+        // Set active state based on current page
+        this.setSubnavLinkActive(sublink, type);
+
+        return sublink;
+    }
+
+    /**
+     * Set active state for subnav link
+     * @param {HTMLElement} link - Subnav link element
+     * @param {string} type - 'services' or 'faq'
+     */
+    setSubnavLinkActive(link, type) {
+        const path = window.location.pathname;
+        const linkId = link.id;
+        let isActive = false;
+
+        if (type === 'services') {
+            if (linkId === 'services-subnav-overview' && (path === '/services/' || path === '/services/index.html')) {
+                isActive = true;
+            } else if (linkId === 'services-subnav-commissioning' && path.includes('/services/commissioning')) {
+                isActive = true;
+            } else if (linkId === 'services-subnav-tech-support' && path.includes('/services/tech-support')) {
+                isActive = true;
+            } else if (linkId === 'services-subnav-catalog-access' && path.includes('/services/catalog-access')) {
+                isActive = true;
+            }
+        } else if (type === 'faq') {
+            if (linkId === 'faq-subnav-general' && (path === '/faq/' || path === '/faq/index.html' || path.includes('/faq/general'))) {
+                isActive = true;
+            } else if (linkId === 'faq-subnav-catalog-access' && path.includes('/faq/catalog-access')) {
+                isActive = true;
+            } else if (linkId === 'faq-subnav-commissioning' && path.includes('/faq/commissioning')) {
+                isActive = true;
+            } else if (linkId === 'faq-subnav-tech-support' && path.includes('/faq/tech-support')) {
+                isActive = true;
+            } else if (linkId === 'faq-subnav-account-billing' && path.includes('/faq/account-billing')) {
+                isActive = true;
+            }
+        }
+
+        link.classList.toggle('active', isActive);
+        if (isActive) {
+            link.setAttribute('aria-current', 'page');
+        }
+    }
+
+    /**
+     * Update Services subnav active state
+     */
+    updateServicesSubnavActiveState() {
+        if (!this.subnavContainer) return;
+        const sublinks = this.subnavContainer.querySelectorAll('.navigation-menu__sublink');
+        sublinks.forEach(link => {
+            this.setSubnavLinkActive(link, 'services');
+        });
+    }
+
+    /**
+     * Update FAQ subnav active state
+     */
+    updateFAQSubnavActiveState() {
+        if (!this.subnavContainer) return;
+        const sublinks = this.subnavContainer.querySelectorAll('.navigation-menu__sublink');
+        sublinks.forEach(link => {
+            this.setSubnavLinkActive(link, 'faq');
+        });
+    }
+
+    /**
+     * Load subnav translations
+     * @param {string} type - 'services' or 'faq'
+     */
+    async loadSubnavTranslations(type) {
+        if (!this.subnavContainer) return;
+        
+        try {
+            const localePath = type === 'services' 
+                ? '/services/components/services-subnav/locales/services-subnav-locales.json'
+                : '/faq/components/faq-subnav/locales/faq-subnav-locales.json';
+            
+            const response = await fetch(localePath);
+            if (!response.ok) {
+                console.warn('Failed to fetch subnav translations:', response.status);
+                return;
+            }
+
+            const resources = await response.json();
+            const currentLanguage = this.getCurrentLanguage();
+
+            // Wait for i18next if not available
+            if (typeof i18next === 'undefined') {
+                await new Promise((resolve) => {
+                    const checkInterval = setInterval(() => {
+                        if (typeof i18next !== 'undefined') {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 50);
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }, 2000);
+                });
+            }
+
+            if (typeof i18next !== 'undefined') {
+                const instance = i18next.createInstance();
+                await instance.init({
+                    lng: currentLanguage,
+                    debug: false,
+                    resources
+                });
+
+                // Update translations for subnav title (FAQ)
+                const subnavTitle = this.subnavContainer.querySelector('.navigation-menu__subnav-title[data-i18n]');
+                if (subnavTitle) {
+                    const titleKey = subnavTitle.getAttribute('data-i18n');
+                    if (titleKey) {
+                        try {
+                            const titleTranslation = instance.t(titleKey);
+                            if (titleTranslation && titleTranslation !== titleKey && titleTranslation.trim() !== '') {
+                                subnavTitle.textContent = titleTranslation;
+                            }
+                        } catch (error) {
+                            console.warn('Translation error for FAQ title:', error);
+                        }
+                    }
+                }
+
+                // Update translations for subnav links
+                const sublinks = this.subnavContainer.querySelectorAll('.navigation-menu__sublink-text[data-i18n]');
+                sublinks.forEach(element => {
+                    const key = element.getAttribute('data-i18n');
+                    if (key) {
+                        try {
+                            const translation = instance.t(key);
+                            // Only update if translation exists and is different from key
+                            if (translation && translation !== key && translation.trim() !== '') {
+                                element.textContent = translation;
+                                // Mark as translated
+                                element.classList.add('translated');
+                            } else {
+                                // Keep original text if translation not found
+                                console.warn('Translation not found for key:', key);
+                                element.classList.add('loaded'); // Make sure it's visible
+                            }
+                        } catch (error) {
+                            console.warn('Translation error for key:', key, error);
+                            element.classList.add('loaded'); // Make sure it's visible
+                        }
+                    } else {
+                        // No translation key, just make sure it's visible
+                        element.classList.add('loaded');
+                    }
+                });
+                
+                // Ensure all subnav links are visible
+                const allSubLinks = this.subnavContainer.querySelectorAll('.navigation-menu__sublink');
+                allSubLinks.forEach(link => {
+                    link.classList.add('loaded');
+                    link.style.opacity = '1';
+                    link.style.visibility = 'visible';
+                });
+                
+                console.log('✅ Subnav translations loaded for', type, 'updated', sublinks.length, 'items');
+            } else {
+                console.warn('i18next not available for subnav translations');
+            }
+        } catch (error) {
+            console.warn('Failed to load subnav translations:', error);
+        }
     }
 
     /**

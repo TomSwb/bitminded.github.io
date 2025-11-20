@@ -1,6 +1,7 @@
 {
   "en": {
     "translation": {
+      "FAQ": "FAQ",
       "faq-subnav-general": "General",
       "faq-subnav-catalog-access": "Catalog Access",
       "faq-subnav-commissioning": "Commissioning",
@@ -10,6 +11,7 @@
   },
   "es": {
     "translation": {
+      "FAQ": "FAQ",
       "faq-subnav-general": "General",
       "faq-subnav-catalog-access": "Acceso al Catálogo",
       "faq-subnav-commissioning": "Encargos",
@@ -19,6 +21,7 @@
   },
   "fr": {
     "translation": {
+      "FAQ": "FAQ",
       "faq-subnav-general": "Général",
       "faq-subnav-catalog-access": "Accès au Catalogue",
       "faq-subnav-commissioning": "Commandes",
@@ -28,6 +31,7 @@
   },
   "de": {
     "translation": {
+      "FAQ": "FAQ",
       "faq-subnav-general": "Allgemein",
       "faq-subnav-catalog-access": "Katalogzugang",
       "faq-subnav-commissioning": "Aufträge",
