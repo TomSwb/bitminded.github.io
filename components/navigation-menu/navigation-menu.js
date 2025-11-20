@@ -208,6 +208,10 @@ class NavigationMenu {
         const path = window.location.pathname;
         if (path === '/' || path === '/index.html') {
             return 'home';
+        } else if (path.includes('/faq')) {
+            return 'faq'; // FAQ page - no nav item should be active
+        } else if (path.includes('/legal')) {
+            return 'legal'; // Legal page - no nav item should be active
         } else if (path.includes('/services')) {
             return 'services';
         } else if (path.includes('/catalog')) {
@@ -231,8 +235,8 @@ class NavigationMenu {
     setActivePage(pageId) {
         const navLinks = this.links.querySelectorAll('.navigation-menu__link');
         
-        // Special case: if we're on auth or admin page, don't show any active navigation items
-        if (pageId === 'auth' || pageId === 'admin') {
+        // Special case: if we're on auth, admin, faq, or legal page, don't show any active navigation items
+        if (pageId === 'auth' || pageId === 'admin' || pageId === 'faq' || pageId === 'legal') {
             navLinks.forEach(link => {
                 link.classList.remove('active');
             });
