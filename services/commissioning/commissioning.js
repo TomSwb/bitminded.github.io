@@ -25,6 +25,12 @@ class CommissioningPageLoader {
             // Load services sub-navigation
             await this.loadServicesSubnav();
             
+            // Load service loader and renderer components
+            await this.loadServiceComponents();
+            
+            // Load and render services from database
+            await this.loadAndRenderServices();
+            
             // Initialize FAQ accordion
             this.initFAQAccordion();
             // Initialize section tabs
@@ -34,6 +40,99 @@ class CommissioningPageLoader {
             console.log('✅ Commissioning page components loaded');
         } catch (error) {
             console.error('❌ Failed to load commissioning page components:', error);
+        }
+    }
+
+    async loadServiceComponents() {
+        // Load service loader
+        if (!window.ServiceLoader) {
+            const loaderScript = document.createElement('script');
+            loaderScript.src = '/services/components/service-loader/service-loader.js';
+            await new Promise((resolve, reject) => {
+                loaderScript.onload = resolve;
+                loaderScript.onerror = reject;
+                document.head.appendChild(loaderScript);
+            });
+        }
+
+        // Load service renderer
+        if (!window.ServiceRenderer) {
+            const rendererScript = document.createElement('script');
+            rendererScript.src = '/services/components/service-renderer/service-renderer.js';
+            await new Promise((resolve, reject) => {
+                rendererScript.onload = resolve;
+                rendererScript.onerror = reject;
+                document.head.appendChild(rendererScript);
+            });
+        }
+
+        // Load badge CSS
+        const saleBadgeCSS = document.createElement('link');
+        saleBadgeCSS.rel = 'stylesheet';
+        saleBadgeCSS.href = '/services/components/sale-badge/sale-badge.css';
+        document.head.appendChild(saleBadgeCSS);
+
+        const statusBadgeCSS = document.createElement('link');
+        statusBadgeCSS.rel = 'stylesheet';
+        statusBadgeCSS.href = '/services/components/status-badge/status-badge.css';
+        document.head.appendChild(statusBadgeCSS);
+    }
+
+    async loadAndRenderServices() {
+        try {
+            if (!window.ServiceLoader || !window.ServiceRenderer) {
+                console.warn('Service components not loaded yet');
+                return;
+            }
+
+            const serviceLoader = window.ServiceLoader;
+            const serviceRenderer = new window.ServiceRenderer(serviceLoader);
+
+            // Load services for commissioning category
+            const services = await serviceLoader.loadServices('commissioning');
+            
+            if (!services || services.length === 0) {
+                console.warn('No services found for commissioning');
+                return;
+            }
+
+            // Render each service
+            services.forEach(service => {
+                const card = document.querySelector(`[data-service-slug="${service.slug}"]`);
+                if (!card) {
+                    return;
+                }
+
+                const elements = {
+                    card: card,
+                    price: card.querySelector('[data-element="price"]'),
+                    duration: card.querySelector('[data-element="duration"]'),
+                    description: card.querySelector('[data-element="description"]')
+                };
+
+                serviceRenderer.renderService(service, elements, serviceLoader.currentCurrency);
+            });
+
+            // Listen for currency changes
+            window.addEventListener('servicesCurrencyChanged', (event) => {
+                const currency = event.detail?.currency || serviceLoader.currentCurrency;
+                services.forEach(service => {
+                    const card = document.querySelector(`[data-service-slug="${service.slug}"]`);
+                    if (!card) return;
+
+                    const elements = {
+                        card: card,
+                        price: card.querySelector('[data-element="price"]'),
+                        duration: card.querySelector('[data-element="duration"]'),
+                        description: card.querySelector('[data-element="description"]')
+                    };
+
+                    serviceRenderer.renderService(service, elements, currency);
+                });
+            });
+
+        } catch (error) {
+            console.error('Failed to load and render services:', error);
         }
     }
 

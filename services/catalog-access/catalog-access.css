@@ -407,6 +407,7 @@
   text-align: center;
 }
 
+/* Service Status and Sale Styles */
 .catalog-access-pricing-comparison-card {
   padding: var(--spacing-xl, 2rem);
   border-radius: 1rem;
@@ -419,6 +420,33 @@
   flex-direction: column;
   height: 100%;
   order: 0; /* Default order */
+}
+
+/* Disabled/Grayed-out state for unavailable/overbooked */
+.catalog-access-pricing-comparison-card.service-status-unavailable,
+.catalog-access-pricing-comparison-card.service-status-overbooked {
+  opacity: 0.6;
+  filter: grayscale(0.3);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.catalog-access-pricing-comparison-card.service-status-unavailable .catalog-access-pricing-comparison-card__cta button,
+.catalog-access-pricing-comparison-card.service-status-overbooked .catalog-access-pricing-comparison-card__cta button {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Strikethrough for sale prices */
+.catalog-access-pricing-comparison-card__price .service-price-original {
+  text-decoration: line-through;
+  opacity: 0.6;
+  margin-right: 0.5rem;
+}
+
+.catalog-access-pricing-comparison-card__price .service-price-sale {
+  color: var(--color-error, #ef4444);
+  font-weight: 700;
 }
 
 /* First card (Single Tool) */

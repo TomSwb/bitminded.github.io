@@ -1,0 +1,52 @@
+/* Status Badge Component Styles */
+.service-status-badge {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    background: var(--color-warning, #f59e0b);
+    color: #fff;
+    padding: 0.35rem 0.85rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    z-index: 10;
+}
+
+/* Status badge on different card types */
+.commissioning-pricing-card .service-status-badge,
+.tech-support-service-card .service-status-badge,
+.catalog-access-pricing-comparison-card .service-status-badge {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+}
+
+/* Different status colors */
+.service-status-unavailable .service-status-badge {
+    background: var(--color-error, #ef4444);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.service-status-overbooked .service-status-badge {
+    background: var(--color-warning, #f59e0b);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.service-status-coming-soon .service-status-badge {
+    background: var(--color-info, #3b82f6);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .service-status-badge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.65rem;
+        top: -10px;
+        left: 15px;
+    }
+}
+

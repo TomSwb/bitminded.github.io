@@ -6,6 +6,8 @@ class CatalogAccessPageLoader {
     constructor() {
         this.componentsLoaded = false;
         this.accordionInitialized = false;
+        this.services = [];
+        this.serviceRenderer = null;
     }
 
     async init() {
@@ -26,11 +28,20 @@ class CatalogAccessPageLoader {
             // Load services sub-navigation
             await this.loadServicesSubnav();
 
+            // Load service loader and renderer components
+            await this.loadServiceComponents();
+            
+            // Load services from database
+            await this.loadServices();
+
             // Initialize accordion
             this.initAccordion();
 
             // Initialize pricing toggle
             this.initPricingToggle();
+
+            // Listen for currency changes after services are loaded
+            this.setupCurrencyListener();
 
             // Initialize feature row alignment
             this.initFeatureRowAlignment();
@@ -92,6 +103,66 @@ class CatalogAccessPageLoader {
                 resolve();
             }
         });
+    }
+
+    async loadServiceComponents() {
+        // Load service loader
+        if (!window.ServiceLoader) {
+            const loaderScript = document.createElement('script');
+            loaderScript.src = '/services/components/service-loader/service-loader.js';
+            await new Promise((resolve, reject) => {
+                loaderScript.onload = resolve;
+                loaderScript.onerror = reject;
+                document.head.appendChild(loaderScript);
+            });
+        }
+
+        // Load service renderer
+        if (!window.ServiceRenderer) {
+            const rendererScript = document.createElement('script');
+            rendererScript.src = '/services/components/service-renderer/service-renderer.js';
+            await new Promise((resolve, reject) => {
+                rendererScript.onload = resolve;
+                rendererScript.onerror = reject;
+                document.head.appendChild(rendererScript);
+            });
+        }
+
+        // Load badge CSS
+        const saleBadgeCSS = document.createElement('link');
+        saleBadgeCSS.rel = 'stylesheet';
+        saleBadgeCSS.href = '/services/components/sale-badge/sale-badge.css';
+        document.head.appendChild(saleBadgeCSS);
+
+        const statusBadgeCSS = document.createElement('link');
+        statusBadgeCSS.rel = 'stylesheet';
+        statusBadgeCSS.href = '/services/components/status-badge/status-badge.css';
+        document.head.appendChild(statusBadgeCSS);
+
+        // Initialize renderer
+        if (window.ServiceRenderer) {
+            this.serviceRenderer = new window.ServiceRenderer(window.ServiceLoader);
+        }
+    }
+
+    async loadServices() {
+        try {
+            if (!window.ServiceLoader) {
+                console.warn('ServiceLoader not available');
+                return;
+            }
+
+            this.services = await window.ServiceLoader.loadServices('catalog-access');
+            
+            // Store services by slug for quick lookup
+            this.servicesBySlug = {};
+            this.services.forEach(service => {
+                this.servicesBySlug[service.slug] = service;
+            });
+
+        } catch (error) {
+            console.error('Failed to load services:', error);
+        }
     }
 
     async loadServicesSubnav() {
@@ -218,6 +289,24 @@ class CatalogAccessPageLoader {
         });
     }
 
+    setupCurrencyListener() {
+        // Listen for currency changes from both the currency switcher and service loader
+        const handleCurrencyChange = () => {
+            this.updatePricing();
+        };
+
+        // Listen to the service loader's currency change event
+        window.addEventListener('servicesCurrencyChanged', handleCurrencyChange);
+        
+        // Also listen directly to currency switcher events as a fallback
+        document.addEventListener('currencyChanged', (event) => {
+            if (event.detail && event.detail.currency && window.ServiceLoader) {
+                window.ServiceLoader.setCurrency(event.detail.currency);
+                handleCurrencyChange();
+            }
+        });
+    }
+
     initPricingToggle() {
         const pricingToggleButton = document.getElementById('pricing-toggle');
         const familyToggleButton = document.getElementById('family-toggle');
@@ -305,62 +394,49 @@ class CatalogAccessPageLoader {
             }
         }
 
-        // Update each card's pricing
+        // Update each card's pricing from database
+        const serviceLoader = window.ServiceLoader;
+        const currency = serviceLoader ? serviceLoader.currentCurrency : 'CHF';
+
         cards.forEach(card => {
+            const slug = card.getAttribute('data-service-slug');
+            if (!slug) return;
+
+            const service = this.servicesBySlug && this.servicesBySlug[slug];
+            if (!service) return;
+
             const priceElement = card.querySelector('.catalog-access-pricing-comparison-card__price');
             const durationElement = card.querySelector('.catalog-access-pricing-comparison-card__duration');
 
-            if (priceElement && durationElement) {
-                if (this.pricingState.isFamily) {
-                    // Family pricing (per-member)
-                    if (this.pricingState.isMonthly) {
-                        // Family monthly
-                        const familyPrice = priceElement.getAttribute('data-price-family');
-                        const durationKey = durationElement.getAttribute('data-i18n-duration-family');
-                        priceElement.textContent = `CHF ${familyPrice}`;
-                        if (durationKey) {
-                            const translation = i18next.t(durationKey);
-                            if (translation && translation !== durationKey) {
-                                durationElement.textContent = translation;
-                            }
-                        }
-                    } else {
-                        // Family yearly
-                        const familyYearlyPrice = priceElement.getAttribute('data-price-family-yearly');
-                        const durationKey = durationElement.getAttribute('data-i18n-duration-family-yearly');
-                        priceElement.textContent = `CHF ${familyYearlyPrice}`;
-                        if (durationKey) {
-                            const translation = i18next.t(durationKey);
-                            if (translation && translation !== durationKey) {
-                                durationElement.textContent = translation;
-                            }
-                        }
-                    }
-                } else {
-                    // Individual pricing (monthly/yearly)
-                    const monthlyPrice = priceElement.getAttribute('data-price-monthly');
-                    const yearlyPrice = priceElement.getAttribute('data-price-yearly');
-                    const monthlyDurationKey = durationElement.getAttribute('data-i18n-duration-monthly');
-                    const yearlyDurationKey = durationElement.getAttribute('data-i18n-duration-yearly');
+            if (priceElement && durationElement && this.serviceRenderer) {
+                // Use service renderer to update membership pricing
+                this.serviceRenderer.updateMembershipPricing(
+                    priceElement,
+                    service,
+                    currency,
+                    this.pricingState.isMonthly,
+                    this.pricingState.isFamily
+                );
 
-                    if (this.pricingState.isMonthly) {
-                        priceElement.textContent = `CHF ${monthlyPrice}`;
-                        if (monthlyDurationKey) {
-                            const translation = i18next.t(monthlyDurationKey);
-                            if (translation && translation !== monthlyDurationKey) {
-                                durationElement.textContent = translation;
-                            }
-                        }
-                    } else {
-                        priceElement.textContent = `CHF ${yearlyPrice}`;
-                        if (yearlyDurationKey) {
-                            const translation = i18next.t(yearlyDurationKey);
-                            if (translation && translation !== yearlyDurationKey) {
-                                durationElement.textContent = translation;
-                            }
-                        }
+                // Update duration text
+                const durationKey = this.pricingState.isFamily
+                    ? (this.pricingState.isMonthly 
+                        ? durationElement.getAttribute('data-i18n-duration-family')
+                        : durationElement.getAttribute('data-i18n-duration-family-yearly'))
+                    : (this.pricingState.isMonthly
+                        ? durationElement.getAttribute('data-i18n-duration-monthly')
+                        : durationElement.getAttribute('data-i18n-duration-yearly'));
+
+                if (durationKey && typeof i18next !== 'undefined') {
+                    const translation = i18next.t(durationKey);
+                    if (translation && translation !== durationKey) {
+                        durationElement.textContent = translation;
                     }
                 }
+
+                // Update sale badge and status
+                this.serviceRenderer.updateSaleBadge(card, service);
+                this.serviceRenderer.updateStatus(card, service);
             }
         });
 
