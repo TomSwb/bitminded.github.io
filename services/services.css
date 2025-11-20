@@ -282,9 +282,13 @@
   font-size: 1.125rem;
   line-height: 1.7;
   color: var(--color-text-primary);
-  opacity: 0.9;
   max-width: 700px;
   margin: 0 auto var(--spacing-xl, 2rem) auto;
+  padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+  border-left: 3px solid var(--color-primary, #6366f1);
+  border-right: 3px solid var(--color-primary, #6366f1);
+  font-weight: 500;
+  font-style: italic;
 }
 
 .services-steps {

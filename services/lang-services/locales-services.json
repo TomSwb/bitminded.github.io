@@ -2,7 +2,7 @@
   "en": {
     "translation": {
       "services-hero-title": "We Build. We Guide.",
-      "services-hero-subtitle": "Handcrafted software paired with patient, plain-language tech support.",
+      "services-hero-subtitle": "Thoughtfully designed software paired with patient, plain-language tech support.",
       "mission-toggle-build": "We Build",
       "mission-toggle-guide": "We Guide",
       "mission-toggle-access": "We Access",
@@ -67,7 +67,7 @@
   "es": {
     "translation": {
       "services-hero-title": "Construimos. Guiamos.",
-      "services-hero-subtitle": "Software artesanal combinado con soporte tecnológico paciente y en lenguaje sencillo.",
+      "services-hero-subtitle": "Software cuidadosamente diseñado combinado con soporte tecnológico paciente y en lenguaje sencillo.",
       "mission-toggle-build": "Construimos",
       "mission-toggle-guide": "Guiamos",
       "mission-toggle-access": "Accedemos",
@@ -132,7 +132,7 @@
   "fr": {
     "translation": {
       "services-hero-title": "Nous Construisons. Nous Guidons.",
-      "services-hero-subtitle": "Logiciels artisanaux associés à un support technique patient et en langage simple.",
+      "services-hero-subtitle": "Logiciels soigneusement conçus associés à un support technique patient et en langage simple.",
       "mission-toggle-build": "Nous Construisons",
       "mission-toggle-guide": "Nous Guidons",
       "mission-toggle-access": "Nous Accédons",
@@ -197,7 +197,7 @@
   "de": {
     "translation": {
       "services-hero-title": "Wir Bauen. Wir Begleiten.",
-      "services-hero-subtitle": "Handgefertigte Software gepaart mit geduldiger, leicht verständlicher technischer Unterstützung.",
+      "services-hero-subtitle": "Durchdacht gestaltete Software gepaart mit geduldiger, leicht verständlicher technischer Unterstützung.",
       "mission-toggle-build": "Wir Bauen",
       "mission-toggle-guide": "Wir Begleiten",
       "mission-toggle-access": "Wir Greifen Zu",
