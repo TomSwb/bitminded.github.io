@@ -185,6 +185,20 @@
         -webkit-overflow-scrolling: touch;
     }
     
+    /* Hide page headers when mobile menu is open (using :has() selector) */
+    body:has(.navigation-menu__links.active) .page-header {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+    
+    /* Fallback for browsers that don't support :has() - use body class */
+    body.mobile-menu-open .page-header {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+    
     /* Light theme mobile menu overlay */
     [data-theme="light"] .navigation-menu__links {
         background-color: rgba(var(--color-bg-light-rgb), 0.95);
@@ -205,6 +219,11 @@
         width: 100%;
         max-width: 300px;
         transition: all var(--transition-fast);
+    }
+    
+    /* Extra margin above the first link (Home button) */
+    .navigation-menu__link:first-child {
+        margin-top: var(--spacing-3xl);
     }
     
     /* Mobile touch effects (no hover on mobile) */
@@ -326,6 +345,90 @@
         outline-offset: 2px;
     }
 
+    /* Account navigation container (mobile only, between username and logout) */
+    .navigation-menu__account-nav {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+        width: 100%;
+        max-width: 300px;
+        margin: var(--spacing-md) 0;
+        padding: var(--spacing-md) 0;
+        border-top: 1px solid rgba(var(--border-color-primary-rgb, 148, 163, 184), 0.3);
+        border-bottom: 1px solid rgba(var(--border-color-primary-rgb, 148, 163, 184), 0.3);
+    }
+
+    /* Account navigation links (smaller than main nav links) */
+    .navigation-menu__account-nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+        font-size: 0.85rem;
+        padding: var(--spacing-sm) var(--spacing-md);
+        margin: var(--spacing-xs) 0;
+        border-radius: var(--radius-sm);
+        min-height: 44px;
+        text-align: center;
+        width: 100%;
+        max-width: 300px;
+        transition: all var(--transition-fast);
+        color: var(--color-text-primary);
+        text-decoration: none;
+        font-weight: 500;
+        opacity: 0.85;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .navigation-menu__account-nav-icon {
+        font-size: 1rem;
+        line-height: 1;
+        opacity: 0.8;
+    }
+
+    .navigation-menu__account-nav-text {
+        letter-spacing: 0.025em;
+    }
+
+    /* Account nav link hover/active states */
+    .navigation-menu__account-nav-link:hover,
+    .navigation-menu__account-nav-link:focus {
+        opacity: 1;
+        color: var(--color-secondary, #d286bd);
+        background-color: rgba(var(--color-secondary-rgb, 210, 134, 189), 0.1);
+        transform: scale(1.02);
+    }
+
+    .navigation-menu__account-nav-link.active {
+        opacity: 1;
+        color: var(--color-background-primary);
+        background-color: var(--color-secondary, #d286bd);
+        font-weight: 600;
+    }
+
+    .navigation-menu__account-nav-link.active .navigation-menu__account-nav-icon {
+        opacity: 1;
+    }
+
+    /* Account nav link touch effects */
+    .navigation-menu__account-nav-link:active {
+        transform: scale(0.98);
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Focus for accessibility */
+    .navigation-menu__account-nav-link:focus {
+        outline: 2px solid var(--color-secondary, #d286bd);
+        outline-offset: 2px;
+    }
+
     /* Show mobile components */
     .navigation-menu__mobile-components {
         display: flex;
@@ -385,6 +488,11 @@
 
     /* Hide sub-nav on desktop (it's in page content) */
     .navigation-menu__subnav {
+        display: none !important;
+    }
+
+    /* Hide account nav on desktop (sidebar is visible) */
+    .navigation-menu__account-nav {
         display: none !important;
     }
     

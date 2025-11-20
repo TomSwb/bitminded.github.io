@@ -12,6 +12,10 @@ class NavigationMenu {
         this.mobileComponentsLoaded = false;
         this.subnavLoaded = false;
         this.subnavContainer = null;
+        this.accountNavLoaded = false;
+        this.accountNavContainer = null;
+        this.legalSubnavLoaded = false;
+        this.legalSubnavContainer = null;
         this.currentPage = this.detectCurrentPage();
         this.translations = null;
         this.eventListeners = new Map();
@@ -124,7 +128,41 @@ class NavigationMenu {
                     this.loadSubnavTranslations('faq');
                 }
             }
+            // Update legal subnav translations if loaded
+            if (this.legalSubnavLoaded) {
+                this.loadLegalSubnavTranslations();
+            }
+            // Update account nav translations if loaded
+            if (this.accountNavLoaded) {
+                this.updateAccountNavTranslations();
+            }
         });
+
+        // Listen for account section changes to sync active state
+        if (this.isOnAccountPage()) {
+            // Observe account layout for section changes
+            const accountLayoutObserver = new MutationObserver(() => {
+                if (this.accountNavLoaded) {
+                    this.updateAccountNavActiveState();
+                }
+            });
+            
+            // Start observing when account layout is available
+            const observeAccountLayout = () => {
+                const accountLayout = document.getElementById('account-layout');
+                if (accountLayout) {
+                    accountLayoutObserver.observe(accountLayout, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['class']
+                    });
+                } else {
+                    setTimeout(observeAccountLayout, 100);
+                }
+            };
+            observeAccountLayout();
+        }
 
         // Handle escape key
         document.addEventListener('keydown', (e) => {
@@ -290,6 +328,7 @@ class NavigationMenu {
         this.links.classList.add('active');
         this.hamburger.classList.add('active');
         document.body.style.overflow = 'hidden';
+        document.body.classList.add('mobile-menu-open');
         
         // Load mobile components if not already loaded
         if (!this.mobileComponentsLoaded) {
@@ -299,6 +338,16 @@ class NavigationMenu {
         // Load sub-nav if on Services or FAQ page (mobile only)
         if (this.isOnServicesPage() || this.isOnFAQPage()) {
             this.loadSubnav();
+        }
+        
+        // Load legal sub-nav if on Legal page (mobile only)
+        if (this.isOnLegalPage()) {
+            this.loadLegalSubnav();
+        }
+        
+        // Load account nav if on Account page (mobile only)
+        if (this.isOnAccountPage()) {
+            this.loadAccountNav();
         }
         
         console.log('📱 Mobile menu opened');
@@ -311,9 +360,10 @@ class NavigationMenu {
         this.links.classList.remove('active');
         this.hamburger.classList.remove('active');
         document.body.style.overflow = '';
+        document.body.classList.remove('mobile-menu-open');
         
-        // Don't clear sub-nav on close - keep it for next open (if still on same page)
-        // The sub-nav will be cleared when navigating to a different page
+        // Don't clear sub-nav or account nav on close - keep them for next open (if still on same page)
+        // They will be cleared when navigating to a different page
         
         console.log('📱 Mobile menu closed');
     }
@@ -342,6 +392,24 @@ class NavigationMenu {
     isOnFAQPage() {
         const path = window.location.pathname;
         return path.includes('/faq/');
+    }
+
+    /**
+     * Check if current page is an Account page
+     * @returns {boolean} True if on Account page
+     */
+    isOnAccountPage() {
+        const path = window.location.pathname;
+        return path.includes('/account/');
+    }
+
+    /**
+     * Check if current page is a Legal page
+     * @returns {boolean} True if on Legal page
+     */
+    isOnLegalPage() {
+        const path = window.location.pathname;
+        return path.includes('/legal-pages/') || path.includes('/legal/');
     }
 
     /**
@@ -401,6 +469,275 @@ class NavigationMenu {
             }
         } catch (error) {
             console.warn('Failed to load sub-navigation:', error);
+        }
+    }
+
+    /**
+     * Load and inject legal sub-navigation into hamburger menu (mobile only)
+     */
+    async loadLegalSubnav() {
+        // Only load on mobile
+        if (window.innerWidth > 768) {
+            return;
+        }
+
+        // Check if we still need legal sub-nav (might have navigated away)
+        if (!this.isOnLegalPage()) {
+            // No longer on legal page - remove legal sub-nav if exists
+            if (this.legalSubnavContainer) {
+                this.legalSubnavContainer.remove();
+                this.legalSubnavContainer = null;
+                this.legalSubnavLoaded = false;
+            }
+            return;
+        }
+
+        // If legal sub-nav container exists but is empty, reset it
+        if (this.legalSubnavContainer && this.legalSubnavContainer.children.length === 0) {
+            this.legalSubnavLoaded = false;
+        }
+
+        // Don't reload if already loaded and correct
+        if (this.legalSubnavLoaded && this.legalSubnavContainer) {
+            return;
+        }
+
+        try {
+            // Create legal sub-nav container if it doesn't exist
+            if (!this.legalSubnavContainer) {
+                this.legalSubnavContainer = document.createElement('div');
+                this.legalSubnavContainer.className = 'navigation-menu__subnav';
+                this.legalSubnavContainer.id = 'navigation-menu-legal-subnav';
+                
+                // Insert after main nav links, before mobile-components
+                const mainLinks = Array.from(this.links.querySelectorAll('.navigation-menu__link'));
+                if (mainLinks.length > 0) {
+                    mainLinks[mainLinks.length - 1].insertAdjacentElement('afterend', this.legalSubnavContainer);
+                } else {
+                    // Fallback: insert before mobile-components
+                    this.links.insertBefore(this.legalSubnavContainer, this.mobileComponents);
+                }
+            }
+
+            // Add Legal Pages title
+            const title = document.createElement('div');
+            title.className = 'navigation-menu__subnav-title';
+            title.textContent = 'Legal Pages';
+            title.setAttribute('data-i18n', 'Legal Pages');
+            title.classList.add('translatable-content', 'loaded');
+            this.legalSubnavContainer.appendChild(title);
+
+            // Create legal page links
+            const legalPages = [
+                { href: '/legal-pages/privacy/', id: 'legal-subnav-privacy', icon: '🔒', text: 'Privacy Policy', translationKey: 'Privacy Policy' },
+                { href: '/legal-pages/terms/', id: 'legal-subnav-terms', icon: '📄', text: 'Terms of Service', translationKey: 'Terms of Service' },
+                { href: '/legal-pages/cookies/', id: 'legal-subnav-cookies', icon: '🍪', text: 'Cookie Notice', translationKey: 'Cookie Notice' },
+                { href: '/legal-pages/imprint/', id: 'legal-subnav-imprint', icon: '📋', text: 'Legal Notice', translationKey: 'Legal Notice' }
+            ];
+
+            legalPages.forEach(page => {
+                const sublink = this.createLegalSubnavLink(page);
+                this.legalSubnavContainer.appendChild(sublink);
+            });
+
+            // Update active state
+            this.updateLegalSubnavActiveState();
+
+            // Load translations
+            await this.loadLegalSubnavTranslations();
+
+            // Ensure links are visible immediately
+            const legalSubLinks = this.legalSubnavContainer.querySelectorAll('.navigation-menu__sublink');
+            legalSubLinks.forEach(link => {
+                link.classList.add('loaded');
+                link.style.opacity = '1';
+                link.style.visibility = 'visible';
+            });
+
+            this.legalSubnavLoaded = true;
+            console.log('✅ Legal sub-navigation loaded in hamburger menu');
+        } catch (error) {
+            console.warn('Failed to load legal sub-navigation:', error);
+        }
+    }
+
+    /**
+     * Create a legal subnav link element
+     * @param {Object} page - Page object with href, id, icon, text, translationKey
+     * @returns {HTMLElement} New legal subnav link element
+     */
+    createLegalSubnavLink(page) {
+        const sublink = document.createElement('a');
+        sublink.className = 'navigation-menu__sublink';
+        sublink.href = page.href;
+        sublink.id = page.id;
+        
+        // Add icon
+        if (page.icon) {
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'navigation-menu__sublink-icon';
+            iconSpan.textContent = page.icon;
+            sublink.appendChild(iconSpan);
+        }
+        
+        // Add text
+        const textSpan = document.createElement('span');
+        textSpan.className = 'navigation-menu__sublink-text';
+        if (page.translationKey) {
+            textSpan.setAttribute('data-i18n', page.translationKey);
+        }
+        textSpan.textContent = page.text || '';
+        textSpan.classList.add('loaded');
+        sublink.appendChild(textSpan);
+
+        // Add translatable class
+        if (page.translationKey) {
+            sublink.classList.add('translatable-content');
+        }
+        
+        // Always add loaded class to ensure visibility
+        sublink.classList.add('loaded');
+
+        // Add click handler that prevents menu closing but allows navigation
+        sublink.addEventListener('click', (e) => {
+            // Prevent event from bubbling up to document listener
+            e.stopPropagation();
+            // Don't prevent default - allow navigation to happen
+            // Menu will stay open until page navigation completes
+        });
+
+        // Set initial active state
+        this.setLegalSubnavLinkActive(sublink, page.href);
+
+        return sublink;
+    }
+
+    /**
+     * Set active state for legal subnav link
+     * @param {HTMLElement} link - Legal subnav link element
+     * @param {string} href - Link href
+     */
+    setLegalSubnavLinkActive(link, href) {
+        const path = window.location.pathname;
+        const isActive = path === href || path === href.replace(/\/$/, '') || 
+                        (href.includes('/privacy') && path.includes('/privacy')) ||
+                        (href.includes('/terms') && path.includes('/terms')) ||
+                        (href.includes('/cookies') && path.includes('/cookies')) ||
+                        (href.includes('/imprint') && path.includes('/imprint'));
+        
+        link.classList.toggle('active', isActive);
+        if (isActive) {
+            link.setAttribute('aria-current', 'page');
+        } else {
+            link.removeAttribute('aria-current');
+        }
+    }
+
+    /**
+     * Update legal subnav active state
+     */
+    updateLegalSubnavActiveState() {
+        if (!this.legalSubnavContainer) return;
+        const legalSubLinks = this.legalSubnavContainer.querySelectorAll('.navigation-menu__sublink');
+        legalSubLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href) {
+                this.setLegalSubnavLinkActive(link, href);
+            }
+        });
+    }
+
+    /**
+     * Load legal subnav translations
+     */
+    async loadLegalSubnavTranslations() {
+        if (!this.legalSubnavContainer) return;
+        
+        try {
+            // Load navigation menu translations (they contain legal page translations)
+            if (!this.translations) {
+                await this.loadTranslations();
+            }
+
+            const currentLanguage = this.getCurrentLanguage();
+
+            // Update translations for legal subnav title
+            const legalSubnavTitle = this.legalSubnavContainer.querySelector('.navigation-menu__subnav-title[data-i18n]');
+            if (legalSubnavTitle && this.translations?.[currentLanguage]) {
+                const titleKey = legalSubnavTitle.getAttribute('data-i18n');
+                if (titleKey) {
+                    const t = this.translations[currentLanguage].translation;
+                    const titleTranslation = t[titleKey];
+                    if (titleTranslation && titleTranslation !== titleKey && titleTranslation.trim() !== '') {
+                        legalSubnavTitle.textContent = titleTranslation;
+                    }
+                }
+            }
+
+            // Wait for i18next if not available (for fallback)
+            if (typeof i18next === 'undefined') {
+                await new Promise((resolve) => {
+                    const checkInterval = setInterval(() => {
+                        if (typeof i18next !== 'undefined') {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 50);
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }, 2000);
+                });
+            }
+
+            // Update translations for legal subnav links using navigation translations or i18next
+            const legalSubLinks = this.legalSubnavContainer.querySelectorAll('.navigation-menu__sublink-text[data-i18n]');
+            legalSubLinks.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (key) {
+                    let translation = null;
+                    
+                    // Try navigation translations first
+                    if (this.translations?.[currentLanguage]) {
+                        const t = this.translations[currentLanguage].translation;
+                        translation = t[key];
+                    }
+                    
+                    // Fallback to i18next if available
+                    if (!translation && typeof i18next !== 'undefined') {
+                        try {
+                            translation = i18next.t(key);
+                        } catch (error) {
+                            // Ignore translation errors
+                        }
+                    }
+                    
+                    // Only update if translation exists and is different from key
+                    if (translation && translation !== key && translation.trim() !== '') {
+                        element.textContent = translation;
+                        // Mark as translated
+                        element.classList.add('translated');
+                    } else {
+                        // Keep original text if translation not found
+                        element.classList.add('loaded'); // Make sure it's visible
+                    }
+                } else {
+                    // No translation key, just make sure it's visible
+                    element.classList.add('loaded');
+                }
+            });
+            
+            // Ensure all legal subnav links are visible
+            const allLegalSubLinks = this.legalSubnavContainer.querySelectorAll('.navigation-menu__sublink');
+            allLegalSubLinks.forEach(link => {
+                link.classList.add('loaded');
+                link.style.opacity = '1';
+                link.style.visibility = 'visible';
+            });
+            
+            console.log('✅ Legal subnav translations loaded');
+        } catch (error) {
+            console.warn('Failed to load legal subnav translations:', error);
         }
     }
 
@@ -933,6 +1270,368 @@ class NavigationMenu {
         
         // Mark mobile components as loaded
         this.mobileComponentsLoaded = true;
+    }
+
+    /**
+     * Load and inject account navigation into hamburger menu (mobile only)
+     */
+    async loadAccountNav() {
+        // Only load on mobile
+        if (window.innerWidth > 768) {
+            return;
+        }
+
+        // Only load if user is logged in
+        const authButtons = document.querySelector('.auth-buttons__logged-in');
+        if (!authButtons || authButtons.classList.contains('auth-buttons__logged-in--hidden')) {
+            return;
+        }
+
+        // Check if we still need account nav (might have navigated away or logged out)
+        if (!this.isOnAccountPage()) {
+            // No longer on account page - remove account nav if exists
+            if (this.accountNavContainer) {
+                this.accountNavContainer.remove();
+                this.accountNavContainer = null;
+                this.accountNavLoaded = false;
+            }
+            return;
+        }
+
+        // If account nav container exists but is empty or wrong type, reset it
+        if (this.accountNavContainer && this.accountNavContainer.children.length === 0) {
+            this.accountNavLoaded = false;
+        }
+
+        // Don't reload if already loaded and correct
+        if (this.accountNavLoaded && this.accountNavContainer) {
+            return;
+        }
+
+        try {
+            // Find mobile auth buttons container
+            const mobileAuthContainer = this.mobileComponents.querySelector('#mobile-auth-buttons');
+            if (!mobileAuthContainer) {
+                console.warn('Mobile auth buttons container not found');
+                return;
+            }
+
+            // Find the logout button (or admin button if admin)
+            const authButtonsElement = mobileAuthContainer.querySelector('.auth-buttons');
+            if (!authButtonsElement) {
+                console.warn('Auth buttons element not found');
+                return;
+            }
+
+            const loggedInContainer = authButtonsElement.querySelector('.auth-buttons__logged-in');
+            if (!loggedInContainer) {
+                console.warn('Logged in container not found');
+                return;
+            }
+
+            // For admin: insert between username and admin panel button
+            // For regular user: insert between username and logout button
+            const adminButton = loggedInContainer.querySelector('#auth-admin-button');
+            const logoutButton = loggedInContainer.querySelector('#auth-logout-button');
+            const referenceButton = adminButton && !adminButton.classList.contains('auth-buttons__button--hidden') 
+                ? adminButton 
+                : logoutButton;
+            
+            // Create account nav container if it doesn't exist
+            if (!this.accountNavContainer) {
+                this.accountNavContainer = document.createElement('div');
+                this.accountNavContainer.className = 'navigation-menu__account-nav';
+                this.accountNavContainer.id = 'navigation-menu-account-nav';
+                
+                // Insert before reference button (admin panel for admin, logout for regular user)
+                if (referenceButton) {
+                    referenceButton.parentElement.insertBefore(this.accountNavContainer, referenceButton);
+                } else {
+                    // Fallback: insert at end of logged in container
+                    loggedInContainer.appendChild(this.accountNavContainer);
+                }
+            }
+
+            // Load account navigation HTML
+            const htmlResponse = await fetch('/account/components/account-layout/account-layout.html');
+            const htmlContent = await htmlResponse.text();
+            
+            // Create a temporary container to parse HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            const accountLayout = tempDiv.querySelector('.account-layout');
+            
+            if (!accountLayout) {
+                throw new Error('Account layout HTML not found');
+            }
+
+            // Extract navigation items
+            const navItems = accountLayout.querySelectorAll('.account-layout__nav-item');
+            navItems.forEach(navItem => {
+                const navButton = navItem.querySelector('.account-layout__nav-button');
+                if (navButton) {
+                    const accountNavLink = this.createAccountNavLink(navButton);
+                    this.accountNavContainer.appendChild(accountNavLink);
+                }
+            });
+
+            // Update active state
+            this.updateAccountNavActiveState();
+
+            // Load translations
+            await this.loadAccountNavTranslations();
+
+            // Ensure links are visible immediately
+            const accountNavLinks = this.accountNavContainer.querySelectorAll('.navigation-menu__account-nav-link');
+            accountNavLinks.forEach(link => {
+                link.classList.add('loaded');
+                link.style.opacity = '1';
+                link.style.visibility = 'visible';
+            });
+
+            this.accountNavLoaded = true;
+            console.log('✅ Account navigation loaded in hamburger menu');
+        } catch (error) {
+            console.warn('Failed to load account navigation:', error);
+        }
+    }
+
+    /**
+     * Create an account nav link element from original button
+     * @param {HTMLElement} originalButton - Original account nav button element
+     * @returns {HTMLElement} New account nav link element
+     */
+    createAccountNavLink(originalButton) {
+        const link = document.createElement('button');
+        link.className = 'navigation-menu__account-nav-link';
+        link.type = 'button';
+        link.id = originalButton.id;
+        link.setAttribute('data-section', originalButton.getAttribute('data-section'));
+        
+        // Copy icon if exists
+        const icon = originalButton.querySelector('.account-layout__nav-icon');
+        const text = originalButton.querySelector('.account-layout__nav-text');
+        
+        if (icon) {
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'navigation-menu__account-nav-icon';
+            iconSpan.textContent = icon.textContent;
+            link.appendChild(iconSpan);
+        }
+        
+        if (text) {
+            const textSpan = document.createElement('span');
+            textSpan.className = 'navigation-menu__account-nav-text';
+            const translationKey = text.getAttribute('data-translation-key');
+            if (translationKey) {
+                textSpan.setAttribute('data-translation-key', translationKey);
+            }
+            textSpan.textContent = text.textContent || text.textContent.trim() || '';
+            textSpan.classList.add('loaded');
+            link.appendChild(textSpan);
+        }
+
+        // Add translatable class if original has it
+        if (originalButton.classList.contains('translatable-content') || text?.classList.contains('translatable-content')) {
+            link.classList.add('translatable-content');
+        }
+        
+        // Always add loaded class to ensure visibility
+        link.classList.add('loaded');
+
+            // Add click handler to switch sections
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const section = link.getAttribute('data-section');
+            if (section) {
+                // Call AccountLayout switchSection method
+                if (window.accountLayout) {
+                    window.accountLayout.switchSection(section, true);
+                    
+                    // Wait a bit for section to switch, then update active state
+                    setTimeout(() => {
+                        this.updateAccountNavActiveState();
+                    }, 100);
+                } else {
+                    // Fallback: try to trigger click on original button if it exists
+                    const originalNavButton = document.querySelector(`#account-layout .account-layout__nav-button[data-section="${section}"]`);
+                    if (originalNavButton) {
+                        originalNavButton.click();
+                        // Update active state after click
+                        setTimeout(() => {
+                            this.updateAccountNavActiveState();
+                        }, 100);
+                    }
+                }
+            }
+        });
+
+        // Set initial active state
+        const section = link.getAttribute('data-section');
+        this.setAccountNavLinkActive(link, section);
+
+        return link;
+    }
+
+    /**
+     * Set active state for account nav link
+     * @param {HTMLElement} link - Account nav link element
+     * @param {string} section - Section name
+     */
+    setAccountNavLinkActive(link, section) {
+        // Get current active section
+        let activeSection = 'profile'; // default
+        const accountLayout = document.getElementById('account-layout');
+        if (accountLayout) {
+            const activeSectionElement = accountLayout.querySelector('.account-layout__section.active');
+            if (activeSectionElement) {
+                activeSection = activeSectionElement.getAttribute('data-section') || 'profile';
+            }
+        }
+        
+        // Also check URL parameter as fallback
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSection = urlParams.get('section');
+        if (urlSection) {
+            activeSection = urlSection;
+        }
+        
+        // Set active state
+        const isActive = section === activeSection;
+        link.classList.toggle('active', isActive);
+        if (isActive) {
+            link.setAttribute('aria-current', 'page');
+        } else {
+            link.removeAttribute('aria-current');
+        }
+    }
+
+    /**
+     * Update account nav active state
+     */
+    updateAccountNavActiveState() {
+        if (!this.accountNavContainer) return;
+        
+        // Get the current active section from account layout
+        let activeSection = 'profile'; // default
+        const accountLayout = document.getElementById('account-layout');
+        if (accountLayout) {
+            const activeSectionElement = accountLayout.querySelector('.account-layout__section.active');
+            if (activeSectionElement) {
+                activeSection = activeSectionElement.getAttribute('data-section') || 'profile';
+            }
+        }
+        
+        // Also check URL parameter as fallback
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSection = urlParams.get('section');
+        if (urlSection) {
+            activeSection = urlSection;
+        }
+        
+        // Update all account nav links
+        const accountNavLinks = this.accountNavContainer.querySelectorAll('.navigation-menu__account-nav-link');
+        accountNavLinks.forEach(link => {
+            const section = link.getAttribute('data-section');
+            if (section) {
+                const isActive = section === activeSection;
+                link.classList.toggle('active', isActive);
+                if (isActive) {
+                    link.setAttribute('aria-current', 'page');
+                } else {
+                    link.removeAttribute('aria-current');
+                }
+            }
+        });
+    }
+
+    /**
+     * Load account nav translations
+     */
+    async loadAccountNavTranslations() {
+        if (!this.accountNavContainer) return;
+        
+        try {
+            // Wait for i18next if not available
+            if (typeof i18next === 'undefined') {
+                await new Promise((resolve) => {
+                    const checkInterval = setInterval(() => {
+                        if (typeof i18next !== 'undefined') {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 50);
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }, 2000);
+                });
+            }
+
+            // Update translations for account nav links
+            const accountNavLinks = this.accountNavContainer.querySelectorAll('.navigation-menu__account-nav-text[data-translation-key]');
+            accountNavLinks.forEach(element => {
+                const key = element.getAttribute('data-translation-key');
+                if (key && typeof i18next !== 'undefined') {
+                    try {
+                        const translation = i18next.t(key);
+                        // Only update if translation exists and is different from key
+                        if (translation && translation !== key && translation.trim() !== '') {
+                            element.textContent = translation;
+                            // Mark as translated
+                            element.classList.add('translated');
+                        } else {
+                            // Keep original text if translation not found
+                            element.classList.add('loaded'); // Make sure it's visible
+                        }
+                    } catch (error) {
+                        console.warn('Translation error for key:', key, error);
+                        element.classList.add('loaded'); // Make sure it's visible
+                    }
+                } else {
+                    // No translation key, just make sure it's visible
+                    element.classList.add('loaded');
+                }
+            });
+            
+            // Ensure all account nav links are visible
+            const allAccountNavLinks = this.accountNavContainer.querySelectorAll('.navigation-menu__account-nav-link');
+            allAccountNavLinks.forEach(link => {
+                link.classList.add('loaded');
+                link.style.opacity = '1';
+                link.style.visibility = 'visible';
+            });
+            
+            console.log('✅ Account nav translations loaded');
+        } catch (error) {
+            console.warn('Failed to load account nav translations:', error);
+        }
+    }
+
+    /**
+     * Update account nav translations
+     */
+    updateAccountNavTranslations() {
+        if (!this.accountNavContainer) return;
+        
+        const accountNavLinks = this.accountNavContainer.querySelectorAll('.navigation-menu__account-nav-text[data-translation-key]');
+        accountNavLinks.forEach(element => {
+            const key = element.getAttribute('data-translation-key');
+            if (key && typeof i18next !== 'undefined') {
+                try {
+                    const translation = i18next.t(key);
+                    if (translation && translation !== key && translation.trim() !== '') {
+                        element.textContent = translation;
+                        element.classList.add('translated');
+                    }
+                } catch (error) {
+                    console.warn('Translation error for key:', key, error);
+                }
+            }
+            element.classList.add('loaded');
+        });
     }
 
     /**
