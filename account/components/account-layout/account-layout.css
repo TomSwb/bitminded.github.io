@@ -140,61 +140,14 @@
         gap: var(--spacing-lg);
     }
     
+    /* Hide account sidebar on mobile - navigation will be in hamburger menu */
     .account-layout__sidebar {
-        flex: none;
-        position: static;
-        order: 1;
-        border: none;
-        padding: 0;
-        background: none;
+        display: none !important;
     }
     
     .account-layout__content {
         order: 2;
         padding: var(--spacing-lg);
-    }
-    
-    .account-layout__nav-list {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-        gap: var(--spacing-sm);
-        margin-bottom: var(--spacing-lg);
-    }
-    
-    .account-layout__nav-item {
-        margin: 0;
-    }
-    
-    .account-layout__nav-button {
-        flex-direction: column;
-        gap: var(--spacing-xs);
-        padding: var(--spacing-md);
-        min-height: 60px;
-        text-align: center;
-        border: 2px solid var(--border-color-primary);
-        border-radius: var(--radius-md);
-        background: var(--color-background-primary);
-        transition: all var(--transition-fast);
-    }
-    
-    .account-layout__nav-button:hover {
-        border-color: var(--color-primary);
-        background: var(--color-background-secondary);
-    }
-    
-    .account-layout__nav-button.active {
-        border-color: var(--color-primary);
-        background: var(--color-primary);
-        color: var(--color-background-primary);
-    }
-    
-    .account-layout__nav-text {
-        display: none; /* Hide text on mobile, show only icons */
-    }
-    
-    .account-layout__nav-icon {
-        font-size: var(--font-size-lg);
     }
     
     .account-layout__section-title {

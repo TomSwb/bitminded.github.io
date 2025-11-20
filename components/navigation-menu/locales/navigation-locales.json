@@ -4,7 +4,12 @@
       "nav-home": "Home",
       "nav-catalog": "Catalog",
       "nav-services": "Services",
-      "nav-support": "Support"
+      "nav-support": "Support",
+      "Legal Pages": "Legal Pages",
+      "Privacy Policy": "Privacy Policy",
+      "Terms of Service": "Terms of Service",
+      "Cookie Notice": "Cookie Notice",
+      "Legal Notice": "Legal Notice"
     }
   },
   "es": {
@@ -12,7 +17,12 @@
       "nav-home": "Inicio",
       "nav-catalog": "Catálogo",
       "nav-services": "Servicios",
-      "nav-support": "Soporte"
+      "nav-support": "Soporte",
+      "Legal Pages": "Páginas Legales",
+      "Privacy Policy": "Política de Privacidad",
+      "Terms of Service": "Términos de Servicio",
+      "Cookie Notice": "Aviso de Cookies",
+      "Legal Notice": "Aviso Legal"
     }
   },
   "fr": {
@@ -20,7 +30,12 @@
       "nav-home": "Accueil",
       "nav-catalog": "Catalogue",
       "nav-services": "Services",
-      "nav-support": "Support"
+      "nav-support": "Support",
+      "Legal Pages": "Pages Légales",
+      "Privacy Policy": "Politique de Confidentialité",
+      "Terms of Service": "Conditions d'Utilisation",
+      "Cookie Notice": "Avis sur les Cookies",
+      "Legal Notice": "Mentions Légales"
     }
   },
   "de": {
@@ -28,7 +43,12 @@
       "nav-home": "Startseite",
       "nav-catalog": "Katalog",
       "nav-services": "Dienstleistungen",
-      "nav-support": "Support"
+      "nav-support": "Support",
+      "Legal Pages": "Rechtliche Seiten",
+      "Privacy Policy": "Datenschutzerklärung",
+      "Terms of Service": "Nutzungsbedingungen",
+      "Cookie Notice": "Cookie-Hinweis",
+      "Legal Notice": "Impressum"
     }
   }
 }
