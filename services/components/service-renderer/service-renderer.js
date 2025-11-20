@@ -1,0 +1,326 @@
+/**
+ * Service Renderer Component
+ * Updates DOM elements with service data, handles pricing types, sales, and status
+ */
+
+class ServiceRenderer {
+    constructor(serviceLoader) {
+        this.serviceLoader = serviceLoader || window.ServiceLoader;
+    }
+
+    /**
+     * Main rendering function
+     */
+    renderService(service, elements, currency = null, options = {}) {
+        if (!service) {
+            return;
+        }
+
+        // Check if card has data-force-chf attribute to force CHF pricing
+        const forceCHF = elements.card && elements.card.hasAttribute('data-force-chf');
+        const curr = forceCHF ? 'CHF' : (currency || this.serviceLoader.currentCurrency);
+
+        // Handle status first
+        this.updateStatus(elements.card, service);
+
+        // Update price
+        if (elements.price) {
+            this.updatePrice(elements.price, service, curr, options);
+        }
+
+        // Update duration
+        if (elements.duration && service.duration) {
+            this.updateDuration(elements.duration, service);
+        }
+
+        // Update description
+        if (elements.description && service.description) {
+            this.updateDescription(elements.description, service);
+        }
+
+        // Update sale badge
+        if (elements.card) {
+            this.updateSaleBadge(elements.card, service);
+        }
+    }
+
+    /**
+     * Update price display
+     */
+    updatePrice(element, service, currency, options = {}) {
+        if (!element || !service) {
+            return;
+        }
+
+        // Check if the card has data-force-chf attribute to force CHF pricing
+        const card = element.closest('[data-service-slug]');
+        const forceCHF = card && card.hasAttribute('data-force-chf');
+        const finalCurrency = forceCHF ? 'CHF' : currency;
+
+        const formattedPrice = this.serviceLoader.formatPrice(service, finalCurrency, options);
+        
+        if (!formattedPrice) {
+            return;
+        }
+
+        const isSaleActive = this.serviceLoader.isSaleActive(service);
+        
+        if (isSaleActive) {
+            // Show sale price with original price strikethrough
+            const originalPrice = this.serviceLoader.formatOriginalPrice(service, finalCurrency, options);
+            
+            if (originalPrice) {
+                // Create price container with strikethrough original and sale price
+                element.innerHTML = `
+                    <span class="service-price-original" style="text-decoration: line-through; opacity: 0.6; margin-right: 0.5rem;">${originalPrice}</span>
+                    <span class="service-price-sale">${formattedPrice}</span>
+                `;
+            } else {
+                element.textContent = formattedPrice;
+            }
+        } else {
+            // Regular price
+            element.textContent = formattedPrice;
+        }
+    }
+
+    /**
+     * Update duration
+     */
+    updateDuration(element, service) {
+        if (!element || !service.duration) {
+            return;
+        }
+
+        // Only update if element is empty or has default content
+        if (!element.textContent.trim() || element.hasAttribute('data-i18n')) {
+            element.textContent = service.duration;
+        }
+    }
+
+    /**
+     * Update description
+     */
+    updateDescription(element, service) {
+        if (!element || !service.description) {
+            return;
+        }
+
+        // Use short_description if available, otherwise description
+        const text = service.short_description || service.description;
+        
+        // Only update if element is empty or has default content
+        if (!element.textContent.trim() || element.hasAttribute('data-i18n')) {
+            element.textContent = text;
+        }
+    }
+
+    /**
+     * Update sale badge
+     */
+    updateSaleBadge(cardElement, service) {
+        if (!cardElement || !service) {
+            return;
+        }
+
+        const isSaleActive = this.serviceLoader.isSaleActive(service);
+        let badge = cardElement.querySelector('.service-sale-badge');
+
+        if (isSaleActive) {
+            if (!badge) {
+                // Create sale badge
+                badge = document.createElement('div');
+                badge.className = 'service-sale-badge';
+                badge.textContent = 'ON SALE';
+                
+                // Add sale description as title if available
+                if (service.sale_description) {
+                    badge.setAttribute('title', service.sale_description);
+                }
+                
+                cardElement.appendChild(badge);
+            }
+            badge.style.display = 'block';
+        } else {
+            if (badge) {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    /**
+     * Handle status (hide/disable/badge)
+     */
+    updateStatus(cardElement, service) {
+        if (!cardElement || !service) {
+            return;
+        }
+
+        const status = service.status || 'available';
+
+        // Remove existing status classes and badges
+        cardElement.classList.remove(
+            'service-status-archived',
+            'service-status-unavailable',
+            'service-status-overbooked',
+            'service-status-coming-soon'
+        );
+
+        const existingBadge = cardElement.querySelector('.service-status-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+
+        switch (status) {
+            case 'archived':
+                // Hide card completely
+                cardElement.style.display = 'none';
+                break;
+
+            case 'unavailable':
+            case 'overbooked':
+                // Show card with disabled state and badge
+                cardElement.style.display = '';
+                cardElement.classList.add(`service-status-${status}`);
+                this.addStatusBadge(cardElement, status);
+                break;
+
+            case 'coming-soon':
+                // Show card with badge
+                cardElement.style.display = '';
+                cardElement.classList.add('service-status-coming-soon');
+                this.addStatusBadge(cardElement, status);
+                break;
+
+            case 'available':
+            case 'on-sale':
+            default:
+                // Show normally
+                cardElement.style.display = '';
+                break;
+        }
+    }
+
+    /**
+     * Add status badge
+     */
+    addStatusBadge(cardElement, status) {
+        const badge = document.createElement('div');
+        badge.className = 'service-status-badge';
+        
+        const statusText = {
+            'unavailable': 'Unavailable',
+            'overbooked': 'Overbooked',
+            'coming-soon': 'Coming Soon'
+        };
+
+        badge.textContent = statusText[status] || status;
+        cardElement.appendChild(badge);
+    }
+
+    /**
+     * Format membership price
+     */
+    formatMembershipPrice(service, currency, isMonthly, isFamily) {
+        return this.serviceLoader.formatPrice(service, currency, {
+            isMembership: true,
+            isMonthly,
+            isFamily
+        });
+    }
+
+    /**
+     * Update membership pricing (for catalog access)
+     */
+    updateMembershipPricing(priceElement, service, currency, isMonthly, isFamily) {
+        if (!priceElement || !service) {
+            return;
+        }
+
+        const formattedPrice = this.formatMembershipPrice(service, currency, isMonthly, isFamily);
+        
+        if (!formattedPrice) {
+            return;
+        }
+
+        const isSaleActive = this.serviceLoader.isSaleActive(service);
+        
+        if (isSaleActive) {
+            // Show sale price with original price strikethrough
+            const originalPrice = this.serviceLoader.formatOriginalPrice(service, currency, {
+                isMembership: true,
+                isMonthly,
+                isFamily
+            });
+            
+            if (originalPrice) {
+                priceElement.innerHTML = `
+                    <span class="service-price-original" style="text-decoration: line-through; opacity: 0.6; margin-right: 0.5rem;">${originalPrice}</span>
+                    <span class="service-price-sale">${formattedPrice}</span>
+                `;
+            } else {
+                priceElement.textContent = formattedPrice;
+            }
+        } else {
+            priceElement.textContent = formattedPrice;
+        }
+    }
+
+    /**
+     * Update reduced fare price in table
+     */
+    updateReducedFarePrice(element, service, currency) {
+        if (!element || !service) {
+            return;
+        }
+
+        // Check if the table row has data-force-chf attribute to force CHF pricing
+        const row = element.closest('tr[data-service-slug]');
+        const forceCHF = row && row.hasAttribute('data-force-chf');
+        const curr = forceCHF ? 'CHF' : currency;
+
+        const formattedPrice = this.serviceLoader.formatReducedFarePrice(service, curr);
+        
+        if (!formattedPrice) {
+            return;
+        }
+
+        // Update the element text
+        // For hourly pricing, the formatted price already includes "/hour"
+        element.textContent = formattedPrice;
+    }
+
+    /**
+     * Render all services on a page
+     */
+    renderAllServices(services, currency = null, options = {}) {
+        services.forEach(service => {
+            const card = document.querySelector(`[data-service-slug="${service.slug}"]`);
+            if (!card) {
+                return;
+            }
+
+            const elements = {
+                card: card,
+                price: card.querySelector('[data-service-slug][data-element="price"]') || 
+                       card.querySelector('.commissioning-pricing-card__price') ||
+                       card.querySelector('.catalog-access-pricing-comparison-card__price') ||
+                       card.querySelector('.badge-value'),
+                duration: card.querySelector('[data-service-slug][data-element="duration"]') ||
+                         card.querySelector('.commissioning-pricing-card__duration') ||
+                         card.querySelector('.catalog-access-pricing-comparison-card__duration'),
+                description: card.querySelector('[data-service-slug][data-element="description"]') ||
+                            card.querySelector('.commissioning-pricing-card__description') ||
+                            card.querySelector('.catalog-access-pricing-comparison-card__description')
+            };
+
+            this.renderService(service, elements, currency, options);
+        });
+    }
+}
+
+// Export for use
+if (typeof window.ServiceRenderer === 'undefined') {
+    window.ServiceRenderer = ServiceRenderer;
+}
+

@@ -462,6 +462,38 @@
   }
 }
 
+/* Service Status and Sale Styles */
+.tech-support-service-card {
+  position: relative;
+}
+
+/* Disabled/Grayed-out state for unavailable/overbooked */
+.tech-support-service-card.service-status-unavailable,
+.tech-support-service-card.service-status-overbooked {
+  opacity: 0.6;
+  filter: grayscale(0.3);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.tech-support-service-card.service-status-unavailable .tech-support-service-card__cta button,
+.tech-support-service-card.service-status-overbooked .tech-support-service-card__cta button {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Strikethrough for sale prices */
+.tech-support-service-meta .badge-value .service-price-original {
+  text-decoration: line-through;
+  opacity: 0.6;
+  margin-right: 0.5rem;
+}
+
+.tech-support-service-meta .badge-value .service-price-sale {
+  color: var(--color-error, #ef4444);
+  font-weight: 700;
+}
+
 /* Service Category Wrapper */
 .tech-support-service-category {
   margin-top: var(--spacing-xl, 2rem);

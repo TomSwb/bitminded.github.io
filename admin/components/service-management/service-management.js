@@ -967,6 +967,7 @@ class ServiceManagement {
             }
 
             await this.loadServices();
+            this.applyFilters(); // Reapply filters to preserve filter state
             this.closeModal();
             this.showSuccess(this.currentEditingService ? 'Service updated successfully' : 'Service created successfully');
 
@@ -1005,6 +1006,7 @@ class ServiceManagement {
             }
 
             await this.loadServices();
+            this.applyFilters(); // Reapply filters to preserve filter state
             this.showSuccess('Service deleted successfully');
 
         } catch (error) {
