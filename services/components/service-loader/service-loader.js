@@ -100,6 +100,32 @@ class ServiceLoader {
     }
 
     /**
+     * Clear cache for a specific category or all categories
+     */
+    clearCache(category = null) {
+        if (category) {
+            this.services.delete(category);
+            // Also clear from slug index
+            const services = this.services.get(category) || [];
+            services.forEach(service => {
+                this.servicesBySlug.delete(service.slug);
+            });
+        } else {
+            // Clear all caches
+            this.services.clear();
+            this.servicesBySlug.clear();
+        }
+    }
+
+    /**
+     * Force reload services for a category (clears cache first)
+     */
+    async reloadServices(category) {
+        this.clearCache(category);
+        return await this.loadServices(category);
+    }
+
+    /**
      * Check if sale is currently active
      */
     isSaleActive(service) {

@@ -34,6 +34,9 @@ class CatalogAccessPageLoader {
             // Load services from database
             await this.loadServices();
 
+            // Render all services (including single tool license)
+            this.renderAllCatalogServices();
+
             // Initialize accordion
             this.initAccordion();
 
@@ -51,7 +54,6 @@ class CatalogAccessPageLoader {
 
             this.componentsLoaded = true;
             this.accordionInitialized = true;
-            console.log('✅ Catalog Access page components loaded');
         } catch (error) {
             console.error('❌ Failed to load catalog access page components:', error);
         }
@@ -163,6 +165,54 @@ class CatalogAccessPageLoader {
         } catch (error) {
             console.error('Failed to load services:', error);
         }
+    }
+
+    /**
+     * Render all catalog access services (including single tool license)
+     * This ensures all cards get their prices, badges, and featured styling
+     */
+    renderAllCatalogServices() {
+        if (!this.serviceRenderer || !this.servicesBySlug) {
+            return;
+        }
+
+        const serviceLoader = window.ServiceLoader;
+        const currency = serviceLoader ? serviceLoader.currentCurrency : 'CHF';
+
+        // Get all catalog-access cards (both with and without pricing-toggle)
+        const allCards = document.querySelectorAll('.catalog-access-pricing-comparison-card[data-service-slug]');
+
+        allCards.forEach(card => {
+            const slug = card.getAttribute('data-service-slug');
+            if (!slug) return;
+
+            const service = this.servicesBySlug[slug];
+            if (!service) return;
+
+            const priceElement = card.querySelector('.catalog-access-pricing-comparison-card__price');
+            const durationElement = card.querySelector('.catalog-access-pricing-comparison-card__duration');
+            const hasPricingToggle = card.hasAttribute('data-pricing-toggle');
+
+            if (hasPricingToggle) {
+                // For membership cards, use the existing updatePricing logic
+                // (they'll be handled by updatePricing when toggles change)
+                // But we still need to update badges and status here
+                this.serviceRenderer.updateSaleBadge(card, service);
+                this.serviceRenderer.updateStatus(card, service);
+                this.serviceRenderer.updateFeaturedBadge(card, service);
+            } else {
+                // For single tool license, render it fully
+                if (priceElement && durationElement) {
+                    const elements = {
+                        card: card,
+                        price: priceElement,
+                        duration: durationElement,
+                        description: card.querySelector('[data-element="description"]')
+                    };
+                    this.serviceRenderer.renderService(service, elements, currency);
+                }
+            }
+        });
     }
 
     async loadServicesSubnav() {
@@ -303,6 +353,8 @@ class CatalogAccessPageLoader {
             if (event.detail && event.detail.currency && window.ServiceLoader) {
                 window.ServiceLoader.setCurrency(event.detail.currency);
                 handleCurrencyChange();
+                // Also re-render all services (including single tool license)
+                this.renderAllCatalogServices();
             }
         });
     }
@@ -434,9 +486,10 @@ class CatalogAccessPageLoader {
                     }
                 }
 
-                // Update sale badge and status
+                // Update sale badge, status, and featured badge
                 this.serviceRenderer.updateSaleBadge(card, service);
                 this.serviceRenderer.updateStatus(card, service);
+                this.serviceRenderer.updateFeaturedBadge(card, service);
             }
         });
 

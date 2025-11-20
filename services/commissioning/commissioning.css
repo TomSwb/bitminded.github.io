@@ -295,9 +295,11 @@
   grid-template-columns: repeat(5, 1fr);
   gap: var(--spacing-lg, 1.5rem);
   margin-top: var(--spacing-xl, 2rem);
+  overflow: visible;
 }
 
 .commissioning-pricing-card {
+  position: relative;
   padding: var(--spacing-xl, 2rem);
   border-radius: 1rem;
   background: var(--color-surface, rgba(15,23,42,0.45));
@@ -312,6 +314,43 @@
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(15,23,42,0.25));
   border-color: var(--color-primary, #6366f1);
+}
+
+/* Featured Card Styling - Must come after base card definition */
+.commissioning-pricing-card--featured {
+  border: 3px solid var(--color-primary, #6366f1) !important;
+}
+
+.commissioning-pricing-card__badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--color-primary, #6366f1), var(--color-secondary, #d286bd)) !important;
+  color: var(--color-text-dark, #fff) !important;
+  padding: 0.4rem 1rem;
+  border-radius: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  z-index: 100 !important;
+  animation: pulse-badge 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, box-shadow;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+    transform: translateX(-50%) scale(1.02);
+  }
 }
 
 .commissioning-pricing-card__title {
@@ -352,6 +391,7 @@
 .commissioning-pricing-card {
   position: relative;
 }
+
 
 /* Disabled/Grayed-out state for unavailable/overbooked */
 .commissioning-pricing-card.service-status-unavailable,

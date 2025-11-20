@@ -37,7 +37,6 @@ class CommissioningPageLoader {
             this.initSectionTabs();
 
             this.componentsLoaded = true;
-            console.log('✅ Commissioning page components loaded');
         } catch (error) {
             console.error('❌ Failed to load commissioning page components:', error);
         }

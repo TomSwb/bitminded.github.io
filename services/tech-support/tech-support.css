@@ -266,6 +266,7 @@
 /* Services Grid */
 .tech-support-services {
   padding: var(--spacing-lg, 1.5rem) 0;
+  overflow: visible;
 }
 
 /* Toggle Sections */
@@ -391,12 +392,12 @@
   
   /* Hide desktop bottom row layout */
   .tech-support-services-row--bottom {
-    display: none;
+    display: none !important;
   }
   
   /* Hide desktop bottom CTAs */
   .tech-support-services-bottom-ctas {
-    display: none;
+    display: none !important;
   }
   
   /* Hide desktop category titles */
@@ -439,12 +440,21 @@
   }
   
   .tech-support-service-meta {
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.75rem;
+  }
+  
+  .tech-support-service-meta li {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0;
+    justify-content: center;
   }
   
   .tech-support-service-meta li:last-child {
-    grid-column: 1;
+    /* No special styling needed in flex column */
   }
   
   .tech-support-service-card__cta--coaching,
@@ -494,6 +504,7 @@
   font-weight: 700;
 }
 
+
 /* Service Category Wrapper */
 .tech-support-service-category {
   margin-top: var(--spacing-xl, 2rem);
@@ -533,11 +544,11 @@
   }
   
   .tech-support-services-row--bottom {
-    display: grid;
+    display: grid !important;
   }
   
   .tech-support-services-bottom-ctas {
-    display: grid;
+    display: grid !important;
   }
 }
 
@@ -550,6 +561,7 @@
   max-width: 1600px;
   margin-left: auto;
   margin-right: auto;
+  overflow: visible;
 }
 
 .tech-support-services-row--top {
@@ -566,7 +578,7 @@
 }
 
 .tech-support-services-row--bottom {
-  display: grid;
+  display: none; /* Hidden by default, shown on desktop via media query */
   grid-template-columns: 3fr 3fr 0.2fr 3fr 3fr;
   grid-template-rows: auto auto;
   margin-top: var(--spacing-xl, 2rem);
@@ -628,6 +640,7 @@
 }
 
 .tech-support-service-card {
+  position: relative;
   padding: var(--spacing-lg, 1.5rem);
   border-radius: 1rem;
   background: var(--color-surface, rgba(15,23,42,0.45));
@@ -636,12 +649,51 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: auto;
+  min-width: fit-content;
 }
 
 .tech-support-service-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(15,23,42,0.25));
   border-color: var(--color-primary, #6366f1);
+}
+
+/* Featured Card Styling - Must come after base card definition */
+.tech-support-service-card--featured {
+  border: 3px solid var(--color-primary, #6366f1) !important;
+}
+
+.tech-support-service-card__badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--color-primary, #6366f1), var(--color-secondary, #d286bd)) !important;
+  color: var(--color-text-dark, #fff) !important;
+  padding: 0.4rem 1rem;
+  border-radius: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  z-index: 100 !important;
+  animation: pulse-badge 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, box-shadow;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+    transform: translateX(-50%) scale(1.02);
+  }
 }
 
 .tech-support-service-card__title {
@@ -669,6 +721,10 @@
   margin: 0;
   padding: 0;
   list-style: none;
+  width: fit-content;
+  min-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .tech-support-service-meta li:last-child {
@@ -679,7 +735,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.4rem;
   padding: 0.4rem 0.65rem;
   border-radius: 999px;
@@ -688,9 +744,10 @@
   color: var(--color-text-primary);
   font-size: 0.8rem;
   line-height: 1.2;
-  white-space: normal;
-  width: auto;
-  max-width: 100%;
+  white-space: nowrap;
+  width: fit-content;
+  min-width: fit-content;
+  max-width: none;
   margin: 0 auto;
   text-align: left;
 }
@@ -816,7 +873,7 @@
 }
 
 .tech-support-services-bottom-ctas {
-  display: grid;
+  display: none; /* Hidden by default, shown on desktop via media query */
   grid-template-columns: 3fr 3fr 0.2fr 3fr 3fr;
   gap: var(--spacing-lg, 1.5rem);
   max-width: 1600px;

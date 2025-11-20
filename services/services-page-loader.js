@@ -29,7 +29,6 @@ class ServicesPageLoader {
             await this.loadServicesSubnav();
 
             this.componentsLoaded = true;
-            console.log('✅ Services page components loaded');
         } catch (error) {
             console.error('❌ Failed to load services page components:', error);
         }
