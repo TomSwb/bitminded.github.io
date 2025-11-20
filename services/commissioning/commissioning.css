@@ -328,10 +328,10 @@
   transform: translateX(-50%);
   background: linear-gradient(135deg, var(--color-primary, #6366f1), var(--color-secondary, #d286bd)) !important;
   color: var(--color-text-dark, #fff) !important;
-  padding: 0.4rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 1.5rem;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
@@ -340,9 +340,30 @@
   will-change: transform, box-shadow;
   visibility: visible !important;
   opacity: 1 !important;
+  white-space: nowrap;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+    transform: translateX(-50%) scale(1.02);
+  }
+}
+
+/* When both sale and featured badges are present, adjust positioning symmetrically */
+.commissioning-pricing-card:has(.service-sale-badge) .commissioning-pricing-card__badge {
+  left: calc(50% + 70px); /* Position right of center */
+  transform: translateX(-50%);
+  animation: pulse-badge-shifted 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-badge-shifted {
   0%, 100% {
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
     transform: translateX(-50%) scale(1);
@@ -408,16 +429,24 @@
   cursor: not-allowed;
 }
 
-/* Strikethrough for sale prices */
+/* Sale price wrapper and display */
+.commissioning-pricing-card__price .service-price-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .commissioning-pricing-card__price .service-price-original {
   text-decoration: line-through;
   opacity: 0.6;
-  margin-right: 0.5rem;
+  display: block;
 }
 
 .commissioning-pricing-card__price .service-price-sale {
   color: var(--color-error, #ef4444);
   font-weight: 700;
+  display: block;
 }
 
 /* Licensing Section */
@@ -707,6 +736,14 @@
   .commissioning-page {
     padding: clamp(3rem, 6vw, 5rem) 1rem 4rem;
     gap: var(--spacing-2xl, 3rem);
+  }
+  
+  /* Match badge dimensions on mobile */
+  .commissioning-pricing-card__badge {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+    top: -12px;
+    letter-spacing: 0.5px;
   }
 
   .commissioning-section-tabs {
