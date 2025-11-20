@@ -999,8 +999,7 @@
 }
 
 .service-management__modal-tab:hover {
-    color: var(--color-primary);
-    background: var(--color-background-secondary);
+    color: var(--color-secondary);
 }
 
 .service-management__modal-tab.active {
@@ -1036,10 +1035,80 @@
     gap: var(--spacing-md);
 }
 
+.service-management__form-row:has(.service-management__form-suffix) {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.service-management__form-suffix {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.service-management__sale-preview {
+    margin-top: var(--spacing-md, 1rem);
+    padding: var(--spacing-md, 1rem);
+    background: var(--color-background-primary);
+    border-radius: var(--radius-sm, 0.25rem);
+    border: 1px solid var(--border-color-primary, rgba(148,163,184,0.4));
+}
+
+.service-management__sale-preview strong {
+    color: var(--color-primary, #6366f1);
+}
+
+/* Emoji Picker */
+.service-management__emoji-picker {
+    position: absolute;
+    background: var(--color-background-primary);
+    border: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
+    border-radius: var(--radius-md, 0.5rem);
+    padding: var(--spacing-sm, 0.75rem);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    margin-top: 0.25rem;
+}
+
+.service-management__emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: var(--spacing-xs, 0.5rem);
+    max-width: 300px;
+}
+
+.service-management__emoji-btn {
+    background: transparent;
+    border: 1px solid var(--border-color-primary, rgba(148,163,184,0.2));
+    border-radius: var(--radius-sm, 0.25rem);
+    padding: var(--spacing-xs, 0.5rem);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+}
+
+.service-management__emoji-btn:hover {
+    background: var(--color-background-secondary, rgba(31, 41, 55, 0.3));
+    border-color: var(--color-primary, #6366f1);
+    transform: scale(1.1);
+}
+
+.service-management__emoji-btn:active {
+    transform: scale(0.95);
+}
+
 .service-management__form-col {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
+    position: relative;
 }
 
 .service-management__form-label {

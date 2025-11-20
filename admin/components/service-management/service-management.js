@@ -74,6 +74,10 @@ class ServiceManagement {
             bulkActions: document.getElementById('bulk-actions'),
             bulkFeaturedBtn: document.getElementById('bulk-featured-btn'),
             bulkUnfeaturedBtn: document.getElementById('bulk-unfeatured-btn'),
+            bulkRemoveSaleBtn: document.getElementById('bulk-remove-sale-btn'),
+            bulkStatusOverbookedBtn: document.getElementById('bulk-status-overbooked-btn'),
+            bulkStatusUnavailableBtn: document.getElementById('bulk-status-unavailable-btn'),
+            bulkStatusArchivedBtn: document.getElementById('bulk-status-archived-btn'),
             selectedCount: document.getElementById('selected-count'),
             modal: document.getElementById('service-modal'),
             modalOverlay: document.getElementById('service-modal-overlay'),
@@ -84,7 +88,9 @@ class ServiceManagement {
             form: document.getElementById('service-form'),
             currencyPricingEditor: document.getElementById('currency-pricing-editor'),
             reducedFarePricingEditor: document.getElementById('reduced-fare-pricing-editor'),
-            salePricingEditor: document.getElementById('sale-pricing-editor')
+            saleDiscountPercentage: document.getElementById('sale-discount-percentage'),
+            salePricingPreview: document.getElementById('sale-pricing-preview'),
+            salePricingPreviewContent: document.getElementById('sale-pricing-preview-content')
         };
     }
 
@@ -173,6 +179,30 @@ class ServiceManagement {
             });
         }
 
+        if (this.elements.bulkRemoveSaleBtn) {
+            this.elements.bulkRemoveSaleBtn.addEventListener('click', () => {
+                this.bulkRemoveSale();
+            });
+        }
+
+        if (this.elements.bulkStatusOverbookedBtn) {
+            this.elements.bulkStatusOverbookedBtn.addEventListener('click', () => {
+                this.bulkUpdateStatus('overbooked');
+            });
+        }
+
+        if (this.elements.bulkStatusUnavailableBtn) {
+            this.elements.bulkStatusUnavailableBtn.addEventListener('click', () => {
+                this.bulkUpdateStatus('unavailable');
+            });
+        }
+
+        if (this.elements.bulkStatusArchivedBtn) {
+            this.elements.bulkStatusArchivedBtn.addEventListener('click', () => {
+                this.bulkUpdateStatus('archived');
+            });
+        }
+
         // Modal handlers
         if (this.elements.modalOverlay) {
             this.elements.modalOverlay.addEventListener('click', () => {
@@ -235,13 +265,9 @@ class ServiceManagement {
                             console.warn('Error re-initializing currency editor:', error);
                         }
                     }
-                    if (this.elements.salePricingEditor && this.elements.salePricingEditor.innerHTML) {
-                        try {
-                            const currentSalePricing = this.getSalePricingData() || this.currentEditingService?.sale_pricing || {};
-                            this.initializeSalePricingEditor(currentSalePricing);
-                        } catch (error) {
-                            console.warn('Error re-initializing sale pricing editor:', error);
-                        }
+                    // Update sale price preview when category/slug changes
+                    if (document.getElementById('is-on-sale')?.checked) {
+                        this.updateSalePricePreview();
                     }
                 }
             });
@@ -262,6 +288,26 @@ class ServiceManagement {
                 this.toggleSale(e.target.checked);
             });
         }
+
+        // Sale discount percentage input - update preview on change
+        if (this.elements.saleDiscountPercentage) {
+            this.elements.saleDiscountPercentage.addEventListener('input', () => {
+                this.updateSalePricePreview();
+            });
+        }
+
+        // Update preview when pricing changes
+        if (this.elements.currencyPricingEditor) {
+            // Listen to input events in pricing editor
+            this.elements.currencyPricingEditor.addEventListener('input', () => {
+                if (document.getElementById('is-on-sale')?.checked) {
+                    this.updateSalePricePreview();
+                }
+            });
+        }
+
+        // Emoji picker handlers
+        this.setupEmojiPickers();
 
         // Sortable headers
         const sortableHeaders = document.querySelectorAll('.service-management__sortable-header');
@@ -655,6 +701,197 @@ class ServiceManagement {
     }
 
     /**
+     * Bulk remove sale from selected services
+     */
+    async bulkRemoveSale() {
+        const selectedIds = this.getSelectedServiceIds();
+        
+        if (selectedIds.length === 0) {
+            this.showError('No services selected');
+            return;
+        }
+
+        try {
+            // Show loading state
+            const originalText = this.elements.bulkRemoveSaleBtn.textContent;
+            
+            if (this.elements.bulkRemoveSaleBtn) {
+                this.elements.bulkRemoveSaleBtn.disabled = true;
+                this.elements.bulkRemoveSaleBtn.textContent = 'Removing...';
+            }
+
+            // Update each service
+            const updatePromises = selectedIds.map(serviceId => {
+                return this.updateServiceSaleStatus(serviceId, false);
+            });
+
+            await Promise.all(updatePromises);
+
+            // Reload services and reapply filters
+            await this.loadServices();
+            this.applyFilters();
+
+            // Clear selections
+            this.toggleSelectAll(false);
+
+            // Show success message
+            this.showSuccess(`Successfully removed sale from ${selectedIds.length} service(s)`);
+
+        } catch (error) {
+            console.error('Error bulk removing sale:', error);
+            this.showError('Failed to remove sale from services');
+        } finally {
+            // Restore button state
+            if (this.elements.bulkRemoveSaleBtn) {
+                this.elements.bulkRemoveSaleBtn.disabled = false;
+                this.elements.bulkRemoveSaleBtn.innerHTML = originalText;
+            }
+        }
+    }
+
+    /**
+     * Update a single service's sale status
+     */
+    async updateServiceSaleStatus(serviceId, isOnSale) {
+        try {
+            const { data: service } = await window.supabase
+                .from('services')
+                .select('*')
+                .eq('id', serviceId)
+                .single();
+
+            if (!service) {
+                throw new Error('Service not found');
+            }
+
+            const updateData = {
+                is_on_sale: isOnSale
+            };
+
+            // If removing sale, also clear sale-related fields
+            if (!isOnSale) {
+                updateData.sale_start_date = null;
+                updateData.sale_end_date = null;
+                updateData.sale_description = null;
+                updateData.sale_discount_percentage = null;
+                updateData.sale_emoji_left = null;
+                updateData.sale_emoji_right = null;
+            }
+
+            const { error } = await window.supabase
+                .from('services')
+                .update(updateData)
+                .eq('id', serviceId);
+
+            if (error) {
+                throw error;
+            }
+
+            return true;
+        } catch (error) {
+            console.error(`Error updating service ${serviceId}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * Bulk update service status
+     */
+    async bulkUpdateStatus(status) {
+        const selectedIds = this.getSelectedServiceIds();
+        
+        if (selectedIds.length === 0) {
+            this.showError('No services selected');
+            return;
+        }
+
+        const statusLabels = {
+            'overbooked': 'Overbooked',
+            'unavailable': 'Unavailable',
+            'archived': 'Archived'
+        };
+
+        const statusLabel = statusLabels[status] || status;
+
+        try {
+            // Show loading state
+            let buttonElement = null;
+            if (status === 'overbooked' && this.elements.bulkStatusOverbookedBtn) {
+                buttonElement = this.elements.bulkStatusOverbookedBtn;
+            } else if (status === 'unavailable' && this.elements.bulkStatusUnavailableBtn) {
+                buttonElement = this.elements.bulkStatusUnavailableBtn;
+            } else if (status === 'archived' && this.elements.bulkStatusArchivedBtn) {
+                buttonElement = this.elements.bulkStatusArchivedBtn;
+            }
+
+            const originalText = buttonElement ? buttonElement.textContent : '';
+            
+            if (buttonElement) {
+                buttonElement.disabled = true;
+                buttonElement.textContent = 'Updating...';
+            }
+
+            // Update each service
+            const updatePromises = selectedIds.map(serviceId => {
+                return this.updateServiceStatus(serviceId, status);
+            });
+
+            await Promise.all(updatePromises);
+
+            // Reload services and reapply filters
+            await this.loadServices();
+            this.applyFilters();
+
+            // Clear selections
+            this.toggleSelectAll(false);
+
+            // Show success message
+            this.showSuccess(`Successfully set ${selectedIds.length} service(s) to ${statusLabel}`);
+
+        } catch (error) {
+            console.error('Error bulk updating status:', error);
+            this.showError('Failed to update service status');
+        } finally {
+            // Restore button state
+            if (buttonElement) {
+                buttonElement.disabled = false;
+                buttonElement.innerHTML = originalText;
+            }
+        }
+    }
+
+    /**
+     * Update a single service's status
+     */
+    async updateServiceStatus(serviceId, status) {
+        try {
+            const { data: service } = await window.supabase
+                .from('services')
+                .select('*')
+                .eq('id', serviceId)
+                .single();
+
+            if (!service) {
+                throw new Error('Service not found');
+            }
+
+            const { error } = await window.supabase
+                .from('services')
+                .update({ status: status })
+                .eq('id', serviceId);
+
+            if (error) {
+                throw error;
+            }
+
+            return true;
+        } catch (error) {
+            console.error(`Error updating service ${serviceId}:`, error);
+            throw error;
+        }
+    }
+
+    /**
      * Open add service modal
      */
     openAddModal() {
@@ -716,9 +953,7 @@ class ServiceManagement {
         if (service.has_reduced_fare) {
             this.initializeReducedFarePricingEditor(service.pricing);
         }
-        if (service.is_on_sale && service.sale_pricing) {
-            this.initializeSalePricingEditor(service.sale_pricing);
-        }
+        // Sale pricing is now percentage-based, no need to initialize editor
 
         this.switchTab('basic');
         this.showModal();
@@ -756,6 +991,9 @@ class ServiceManagement {
             'sale-start-date': service.sale_start_date ? new Date(service.sale_start_date).toISOString().slice(0, 16) : '',
             'sale-end-date': service.sale_end_date ? new Date(service.sale_end_date).toISOString().slice(0, 16) : '',
             'sale-description': service.sale_description || '',
+            'sale-emoji-left': service.sale_emoji_left || '✨',
+            'sale-emoji-right': service.sale_emoji_right || '✨',
+            'sale-discount-percentage': service.sale_discount_percentage || '',
             'stripe-product-id': service.stripe_product_id || '',
             'stripe-price-id': service.stripe_price_id || '',
             'stripe-price-reduced-id': service.stripe_price_reduced_id || ''
@@ -930,76 +1168,87 @@ class ServiceManagement {
     }
 
     /**
-     * Initialize sale pricing editor
+     * Calculate sale price from regular price and discount percentage
      */
-    initializeSalePricingEditor(salePricing = {}) {
-        if (!this.elements.salePricingEditor) return;
+    calculateSalePrice(regularPrice, discountPercentage) {
+        if (!regularPrice || !discountPercentage || discountPercentage <= 0) {
+            return null;
+        }
+        const discount = parseFloat(discountPercentage) / 100;
+        return regularPrice * (1 - discount);
+    }
 
-        this.elements.salePricingEditor.innerHTML = '';
+    /**
+     * Update sale price preview based on discount percentage
+     */
+    updateSalePricePreview() {
+        if (!this.elements.salePricingPreview || !this.elements.salePricingPreviewContent) {
+            return;
+        }
 
+        const discountPercentage = parseFloat(this.elements.saleDiscountPercentage?.value || 0);
+        const pricing = this.getPricingData();
+        const pricingType = document.getElementById('pricing-type')?.value || 'fixed';
         const isMembership = this.isMembershipService();
 
+        if (!discountPercentage || discountPercentage <= 0 || !pricing || Object.keys(pricing).length === 0) {
+            this.elements.salePricingPreview.style.display = 'none';
+            return;
+        }
+
+        this.elements.salePricingPreview.style.display = 'block';
+        this.elements.salePricingPreviewContent.innerHTML = '';
+
         this.currencies.forEach(currency => {
-            const currencyData = salePricing[currency] || {};
+            const currencyPricing = pricing[currency] || {};
             const row = document.createElement('div');
-            row.className = 'service-management__currency-row';
-            
+            row.style.marginBottom = 'var(--spacing-sm, 0.75rem)';
+            row.style.padding = 'var(--spacing-sm, 0.75rem)';
+            row.style.background = 'var(--color-background-primary, rgba(15,23,42,0.6))';
+            row.style.borderRadius = 'var(--radius-sm, 0.25rem)';
+
+            let content = `<strong>${currency}:</strong><br>`;
+
             if (isMembership) {
-                // For membership services, create 4 sale price inputs
-                row.innerHTML = `
-                    <div class="service-management__currency-label">${currency}</div>
-                    <input 
-                        type="number" 
-                        class="service-management__currency-input" 
-                        data-currency="${currency}" 
-                        data-type="monthly"
-                        step="0.01"
-                        placeholder="Sale Monthly"
-                        value="${currencyData.monthly || ''}">
-                    <input 
-                        type="number" 
-                        class="service-management__currency-input" 
-                        data-currency="${currency}" 
-                        data-type="yearly"
-                        step="0.01"
-                        placeholder="Sale Yearly"
-                        value="${currencyData.yearly || ''}">
-                    <input 
-                        type="number" 
-                        class="service-management__currency-input" 
-                        data-currency="${currency}" 
-                        data-type="family_monthly"
-                        step="0.01"
-                        placeholder="Sale Family Monthly"
-                        value="${currencyData.family_monthly || ''}">
-                    <input 
-                        type="number" 
-                        class="service-management__currency-input" 
-                        data-currency="${currency}" 
-                        data-type="family_yearly"
-                        step="0.01"
-                        placeholder="Sale Family Yearly"
-                        value="${currencyData.family_yearly || ''}">
-                `;
+                const monthly = currencyPricing.monthly;
+                const yearly = currencyPricing.yearly;
+                const familyMonthly = currencyPricing.family_monthly;
+                const familyYearly = currencyPricing.family_yearly;
+
+                if (monthly !== undefined) {
+                    const salePrice = this.calculateSalePrice(monthly, discountPercentage);
+                    content += `Monthly: ${currencyPricing.monthly} → ${salePrice?.toFixed(2)}<br>`;
+                }
+                if (yearly !== undefined) {
+                    const salePrice = this.calculateSalePrice(yearly, discountPercentage);
+                    content += `Yearly: ${currencyPricing.yearly} → ${salePrice?.toFixed(2)}<br>`;
+                }
+                if (familyMonthly !== undefined) {
+                    const salePrice = this.calculateSalePrice(familyMonthly, discountPercentage);
+                    content += `Family Monthly: ${currencyPricing.family_monthly} → ${salePrice?.toFixed(2)}<br>`;
+                }
+                if (familyYearly !== undefined) {
+                    const salePrice = this.calculateSalePrice(familyYearly, discountPercentage);
+                    content += `Family Yearly: ${currencyPricing.family_yearly} → ${salePrice?.toFixed(2)}<br>`;
+                }
+            } else if (pricingType === 'range') {
+                const min = currencyPricing.min;
+                const max = currencyPricing.max;
+                if (min !== undefined && max !== undefined) {
+                    const saleMin = this.calculateSalePrice(min, discountPercentage);
+                    const saleMax = this.calculateSalePrice(max, discountPercentage);
+                    content += `Range: ${min}-${max} → ${saleMin?.toFixed(2)}-${saleMax?.toFixed(2)}<br>`;
+                }
             } else {
-                // For non-membership services, single sale amount input
-                row.innerHTML = `
-                    <div class="service-management__currency-label">${currency}</div>
-                    <input 
-                        type="number" 
-                        class="service-management__currency-input" 
-                        data-currency="${currency}" 
-                        data-type="amount"
-                        step="0.01"
-                        placeholder="Sale amount"
-                        value="${currencyData.amount || ''}">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                `;
+                const amount = currencyPricing.amount;
+                if (amount !== undefined) {
+                    const salePrice = this.calculateSalePrice(amount, discountPercentage);
+                    content += `${amount} → ${salePrice?.toFixed(2)}<br>`;
+                }
             }
-            
-            this.elements.salePricingEditor.appendChild(row);
+
+            row.innerHTML = content;
+            this.elements.salePricingPreviewContent.appendChild(row);
         });
     }
 
@@ -1051,26 +1300,11 @@ class ServiceManagement {
     }
 
     /**
-     * Get sale pricing data from form
+     * Get sale discount percentage from form
      */
-    getSalePricingData() {
-        const pricing = {};
-        const inputs = this.elements.salePricingEditor?.querySelectorAll('[data-currency]') || [];
-        
-        inputs.forEach(input => {
-            const currency = input.dataset.currency;
-            const value = parseFloat(input.value);
-
-            if (!pricing[currency]) {
-                pricing[currency] = {};
-            }
-
-            if (!isNaN(value)) {
-                pricing[currency].amount = value;
-            }
-        });
-
-        return pricing;
+    getSaleDiscountPercentage() {
+        const percentage = parseFloat(this.elements.saleDiscountPercentage?.value || 0);
+        return (!isNaN(percentage) && percentage > 0 && percentage <= 100) ? percentage : null;
     }
 
     /**
@@ -1120,7 +1354,10 @@ class ServiceManagement {
                 sale_start_date: formData.get('sale_start_date') || null,
                 sale_end_date: formData.get('sale_end_date') || null,
                 sale_description: formData.get('sale_description') || null,
-                sale_pricing: formData.get('is_on_sale') === 'on' ? this.getSalePricingData() : null,
+                sale_emoji_left: formData.get('sale_emoji_left') || '✨',
+                sale_emoji_right: formData.get('sale_emoji_right') || '✨',
+                sale_discount_percentage: formData.get('is_on_sale') === 'on' ? this.getSaleDiscountPercentage() : null,
+                sale_pricing: null, // Will be calculated automatically from percentage
                 stripe_product_id: formData.get('stripe_product_id') || null,
                 stripe_price_id: formData.get('stripe_price_id') || null,
                 stripe_price_reduced_id: formData.get('stripe_price_reduced_id') || null
@@ -1230,10 +1467,9 @@ class ServiceManagement {
             this.initializeCurrencyPricingEditor(currentPricing);
         }
         
-        // Also re-initialize sale pricing editor if it exists and has content
-        if (this.elements.salePricingEditor && this.elements.salePricingEditor.innerHTML) {
-            const currentSalePricing = this.getSalePricingData() || this.currentEditingService?.sale_pricing || {};
-            this.initializeSalePricingEditor(currentSalePricing);
+        // Update sale price preview if sale is enabled
+        if (document.getElementById('is-on-sale')?.checked) {
+            this.updateSalePricePreview();
         }
     }
 
@@ -1267,11 +1503,80 @@ class ServiceManagement {
         if (pricingGroup) {
             pricingGroup.style.display = enabled ? 'block' : 'none';
             if (enabled) {
-                // Always re-initialize to ensure correct layout (membership vs regular)
-                const currentSalePricing = this.getSalePricingData() || this.currentEditingService?.sale_pricing || {};
-                this.initializeSalePricingEditor(currentSalePricing);
+                // Update sale price preview when enabled
+                this.updateSalePricePreview();
             }
         }
+    }
+
+    /**
+     * Setup emoji pickers
+     */
+    setupEmojiPickers() {
+        const leftPickerBtn = document.getElementById('emoji-picker-left-btn');
+        const rightPickerBtn = document.getElementById('emoji-picker-right-btn');
+        const leftPicker = document.getElementById('emoji-picker-left');
+        const rightPicker = document.getElementById('emoji-picker-right');
+        const leftInput = document.getElementById('sale-emoji-left');
+        const rightInput = document.getElementById('sale-emoji-right');
+
+        // Left emoji picker
+        if (leftPickerBtn && leftPicker && leftInput) {
+            leftPickerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Close right picker if open
+                if (rightPicker) rightPicker.style.display = 'none';
+                // Toggle left picker
+                const isVisible = leftPicker.style.display === 'block';
+                leftPicker.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // Handle emoji selection
+            leftPicker.querySelectorAll('.service-management__emoji-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const emoji = btn.getAttribute('data-emoji');
+                    leftInput.value = emoji;
+                    leftPicker.style.display = 'none';
+                });
+            });
+        }
+
+        // Right emoji picker
+        if (rightPickerBtn && rightPicker && rightInput) {
+            rightPickerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Close left picker if open
+                if (leftPicker) leftPicker.style.display = 'none';
+                // Toggle right picker
+                const isVisible = rightPicker.style.display === 'block';
+                rightPicker.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // Handle emoji selection
+            rightPicker.querySelectorAll('.service-management__emoji-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const emoji = btn.getAttribute('data-emoji');
+                    rightInput.value = emoji;
+                    rightPicker.style.display = 'none';
+                });
+            });
+        }
+
+        // Close pickers when clicking outside
+        document.addEventListener('click', (e) => {
+            if (leftPicker && !leftPicker.contains(e.target) && leftPickerBtn && !leftPickerBtn.contains(e.target)) {
+                leftPicker.style.display = 'none';
+            }
+            if (rightPicker && !rightPicker.contains(e.target) && rightPickerBtn && !rightPickerBtn.contains(e.target)) {
+                rightPicker.style.display = 'none';
+            }
+        });
     }
 
     /**

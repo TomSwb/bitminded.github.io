@@ -117,6 +117,18 @@
         <button class="service-management__button service-management__button--secondary" id="bulk-unfeatured-btn">
             <span class="translatable-content" data-translation-key="Mark as Not Featured">Mark as Not Featured</span>
         </button>
+        <button class="service-management__button service-management__button--secondary" id="bulk-remove-sale-btn">
+            <span class="translatable-content" data-translation-key="Remove Sale">Remove Sale</span>
+        </button>
+        <button class="service-management__button service-management__button--secondary" id="bulk-status-overbooked-btn">
+            <span class="translatable-content" data-translation-key="Set to Overbooked">Set to Overbooked</span>
+        </button>
+        <button class="service-management__button service-management__button--secondary" id="bulk-status-unavailable-btn">
+            <span class="translatable-content" data-translation-key="Set to Unavailable">Set to Unavailable</span>
+        </button>
+        <button class="service-management__button service-management__button--secondary" id="bulk-status-archived-btn">
+            <span class="translatable-content" data-translation-key="Set to Archived">Set to Archived</span>
+        </button>
         <span class="service-management__selected-count" id="selected-count">0 selected</span>
     </div>
 
@@ -234,7 +246,6 @@
                                 <option value="available">Available</option>
                                 <option value="unavailable">Unavailable</option>
                                 <option value="overbooked">Overbooked</option>
-                                <option value="on-sale">On Sale</option>
                                 <option value="coming-soon">Coming Soon</option>
                                 <option value="archived">Archived</option>
                             </select>
@@ -403,15 +414,133 @@
                                 <span class="translatable-content" data-translation-key="Sale Description">Sale Description</span>
                             </label>
                             <textarea id="sale-description" name="sale_description" class="service-management__form-textarea" rows="3"></textarea>
+                            
+                            <!-- Emoji Selection -->
+                            <div class="service-management__form-row" style="margin-top: var(--spacing-md, 1rem);">
+                                <div class="service-management__form-col">
+                                    <label for="sale-emoji-left" class="service-management__form-label">
+                                        <span class="translatable-content" data-translation-key="Left Emoji">Left Emoji</span>
+                                    </label>
+                                    <div style="display: flex; gap: var(--spacing-xs, 0.5rem); align-items: center;">
+                                        <input 
+                                            type="text" 
+                                            id="sale-emoji-left" 
+                                            name="sale_emoji_left" 
+                                            class="service-management__form-input" 
+                                            maxlength="10"
+                                            placeholder="✨"
+                                            value="✨"
+                                            style="flex: 1;">
+                                        <button 
+                                            type="button" 
+                                            class="service-management__button service-management__button--secondary" 
+                                            id="emoji-picker-left-btn"
+                                            style="padding: var(--spacing-sm, 0.75rem); min-width: auto;"
+                                            title="Choose emoji">
+                                            😀
+                                        </button>
+                                    </div>
+                                    <div class="service-management__emoji-picker" id="emoji-picker-left" style="display: none;">
+                                        <div class="service-management__emoji-grid">
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="✨">✨</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎉">🎉</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎊">🎊</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎆">🎆</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎇">🎇</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="💫">💫</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="⭐">⭐</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🌟">🌟</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🔥">🔥</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="💥">💥</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎁">🎁</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎈">🎈</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎀">🎀</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🏆">🏆</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="💎">💎</button>
+                                        </div>
+                                    </div>
+                                    <small class="service-management__form-help">
+                                        <span class="translatable-content" data-translation-key="emoji_help">Emoji to show on the left side</span>
+                                    </small>
+                                </div>
+                                <div class="service-management__form-col">
+                                    <label for="sale-emoji-right" class="service-management__form-label">
+                                        <span class="translatable-content" data-translation-key="Right Emoji">Right Emoji</span>
+                                    </label>
+                                    <div style="display: flex; gap: var(--spacing-xs, 0.5rem); align-items: center;">
+                                        <input 
+                                            type="text" 
+                                            id="sale-emoji-right" 
+                                            name="sale_emoji_right" 
+                                            class="service-management__form-input" 
+                                            maxlength="10"
+                                            placeholder="✨"
+                                            value="✨"
+                                            style="flex: 1;">
+                                        <button 
+                                            type="button" 
+                                            class="service-management__button service-management__button--secondary" 
+                                            id="emoji-picker-right-btn"
+                                            style="padding: var(--spacing-sm, 0.75rem); min-width: auto;"
+                                            title="Choose emoji">
+                                            😀
+                                        </button>
+                                    </div>
+                                    <div class="service-management__emoji-picker" id="emoji-picker-right" style="display: none;">
+                                        <div class="service-management__emoji-grid">
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="✨">✨</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎉">🎉</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎊">🎊</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎆">🎆</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎇">🎇</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="💫">💫</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="⭐">⭐</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🌟">🌟</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🔥">🔥</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="💥">💥</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎁">🎁</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎈">🎈</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🎀">🎀</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="🏆">🏆</button>
+                                            <button type="button" class="service-management__emoji-btn" data-emoji="💎">💎</button>
+                                        </div>
+                                    </div>
+                                    <small class="service-management__form-help">
+                                        <span class="translatable-content" data-translation-key="emoji_help">Emoji to show on the right side</span>
+                                    </small>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Sale Pricing Editor -->
+                        <!-- Sale Discount Percentage -->
                         <div class="service-management__form-group" id="sale-pricing-group" style="display: none;">
-                            <label class="service-management__form-label">
-                                <span class="translatable-content" data-translation-key="Sale Pricing">Sale Pricing</span>
+                            <label for="sale-discount-percentage" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Sale Discount Percentage">Sale Discount Percentage</span>
                             </label>
-                            <div id="sale-pricing-editor" class="service-management__currency-editor">
-                                <!-- Sale pricing inputs will be dynamically generated -->
+                            <div class="service-management__form-row">
+                                <input 
+                                    type="number" 
+                                    id="sale-discount-percentage" 
+                                    name="sale_discount_percentage" 
+                                    class="service-management__form-input" 
+                                    min="0" 
+                                    max="100" 
+                                    step="0.01"
+                                    placeholder="e.g. 20 for 20% off">
+                                <span class="service-management__form-suffix">%</span>
+                            </div>
+                            <small class="service-management__form-help">
+                                <span class="translatable-content" data-translation-key="sale_discount_help">Enter discount percentage (0-100). Sale prices will be calculated automatically from regular prices.</span>
+                            </small>
+                            
+                            <!-- Calculated Sale Prices Preview -->
+                            <div id="sale-pricing-preview" class="service-management__sale-preview" style="display: none; margin-top: var(--spacing-md, 1rem); padding: var(--spacing-md, 1rem); background: var(--color-background-primary); border-radius: var(--radius-sm, 0.25rem);">
+                                <div class="service-management__form-label" style="margin-bottom: var(--spacing-sm, 0.75rem);">
+                                    <span class="translatable-content" data-translation-key="Calculated Sale Prices">Calculated Sale Prices</span>
+                                </div>
+                                <div id="sale-pricing-preview-content">
+                                    <!-- Preview will be dynamically generated -->
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -133,19 +133,48 @@ class ServiceLoader {
             return false;
         }
 
-        const now = new Date();
-        const startDate = service.sale_start_date ? new Date(service.sale_start_date) : null;
-        const endDate = service.sale_end_date ? new Date(service.sale_end_date) : null;
-
-        if (startDate && now < startDate) {
+        // Check if discount percentage is set
+        if (!service.sale_discount_percentage || service.sale_discount_percentage <= 0) {
             return false;
         }
 
-        if (endDate && now > endDate) {
-            return false;
+        const now = new Date();
+        
+        // Compare dates only (without time) to allow same-day sales
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        
+        if (service.sale_start_date) {
+            const startDate = new Date(service.sale_start_date);
+            const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+            
+            // Sale hasn't started yet (before start date)
+            if (today < startDateOnly) {
+                return false;
+            }
+        }
+
+        if (service.sale_end_date) {
+            const endDate = new Date(service.sale_end_date);
+            const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+            
+            // Sale has ended (after end date)
+            if (today > endDateOnly) {
+                return false;
+            }
         }
 
         return true;
+    }
+
+    /**
+     * Calculate sale price from regular price and discount percentage
+     */
+    calculateSalePrice(regularPrice, discountPercentage) {
+        if (!regularPrice || !discountPercentage || discountPercentage <= 0) {
+            return regularPrice;
+        }
+        const discount = parseFloat(discountPercentage) / 100;
+        return regularPrice * (1 - discount);
     }
 
     /**
@@ -154,13 +183,14 @@ class ServiceLoader {
     getDisplayPrice(service, currency = null, options = {}) {
         const curr = currency || this.currentCurrency;
         const isSaleActive = this.isSaleActive(service);
-        const pricing = isSaleActive && service.sale_pricing ? service.sale_pricing : service.pricing;
+        const pricing = service.pricing; // Always use regular pricing
         
         if (!pricing || typeof pricing !== 'object') {
             return null;
         }
 
         const currencyPricing = pricing[curr] || pricing[service.base_price_currency] || {};
+        const discountPercentage = service.sale_discount_percentage;
         
         // Handle membership pricing
         if (options.isMembership) {
@@ -168,7 +198,17 @@ class ServiceLoader {
                 ? (options.isMonthly ? 'family_monthly' : 'family_yearly')
                 : (options.isMonthly ? 'monthly' : 'yearly');
             
-            return currencyPricing[key] || null;
+            const regularPrice = currencyPricing[key];
+            if (regularPrice === undefined || regularPrice === null) {
+                return null;
+            }
+            
+            // Calculate sale price if sale is active
+            if (isSaleActive && discountPercentage) {
+                return this.calculateSalePrice(regularPrice, discountPercentage);
+            }
+            
+            return regularPrice;
         }
 
         // Handle range pricing
@@ -176,6 +216,12 @@ class ServiceLoader {
             const min = currencyPricing.min || service.price_range_min;
             const max = currencyPricing.max || service.price_range_max;
             if (min !== undefined && max !== undefined) {
+                if (isSaleActive && discountPercentage) {
+                    return {
+                        min: this.calculateSalePrice(min, discountPercentage),
+                        max: this.calculateSalePrice(max, discountPercentage)
+                    };
+                }
                 return { min, max };
             }
             return null;
@@ -184,12 +230,24 @@ class ServiceLoader {
         // Handle hourly pricing
         if (service.pricing_type === 'hourly') {
             const amount = currencyPricing.amount || service.hourly_rate;
-            return amount !== undefined ? { amount, type: 'hourly' } : null;
+            if (amount !== undefined) {
+                if (isSaleActive && discountPercentage) {
+                    return { amount: this.calculateSalePrice(amount, discountPercentage), type: 'hourly' };
+                }
+                return { amount, type: 'hourly' };
+            }
+            return null;
         }
 
         // Handle fixed/variable pricing
         const amount = currencyPricing.amount || service.price_range_min;
-        return amount !== undefined ? { amount } : null;
+        if (amount !== undefined) {
+            if (isSaleActive && discountPercentage) {
+                return { amount: this.calculateSalePrice(amount, discountPercentage) };
+            }
+            return { amount };
+        }
+        return null;
     }
 
     /**

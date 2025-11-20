@@ -38,9 +38,10 @@ class ServiceRenderer {
             this.updateDescription(elements.description, service);
         }
 
-        // Update sale badge
+        // Update sale badge and sale info
         if (elements.card) {
             this.updateSaleBadge(elements.card, service);
+            this.updateSaleInfo(elements.card, service);
             this.updateFeaturedBadge(elements.card, service);
         }
     }
@@ -75,14 +76,16 @@ class ServiceRenderer {
         const isSaleActive = this.serviceLoader.isSaleActive(service);
         
         if (isSaleActive) {
-            // Show sale price with original price strikethrough
+            // Show sale price with original price strikethrough on separate lines
             const originalPrice = this.serviceLoader.formatOriginalPrice(service, finalCurrency, options);
             
             if (originalPrice) {
-                // Create price container with strikethrough original and sale price
+                // Create price container with original price on first line, sale price on second line
                 element.innerHTML = `
-                    <span class="service-price-original" style="text-decoration: line-through; opacity: 0.6; margin-right: 0.5rem;">${originalPrice}</span>
-                    <span class="service-price-sale">${formattedPrice}</span>
+                    <div class="service-price-wrapper">
+                        <div class="service-price-original" style="text-decoration: line-through; opacity: 0.6;">${originalPrice}</div>
+                        <div class="service-price-sale">${formattedPrice}</div>
+                    </div>
                 `;
                 // Re-append children if they exist
                 if (hasChildren) {
@@ -164,19 +167,92 @@ class ServiceRenderer {
                 // Create sale badge
                 badge = document.createElement('div');
                 badge.className = 'service-sale-badge';
-                badge.textContent = 'ON SALE';
                 
-                // Add sale description as title if available
-                if (service.sale_description) {
-                    badge.setAttribute('title', service.sale_description);
+                // Create festive text with emoji
+                const badgeText = document.createElement('span');
+                badgeText.textContent = '🎉 ON SALE';
+                badge.appendChild(badgeText);
+                
+                // Ensure card has position relative for absolute positioning
+                const cardStyle = window.getComputedStyle(cardElement);
+                if (cardStyle.position === 'static') {
+                    cardElement.style.position = 'relative';
                 }
                 
                 cardElement.appendChild(badge);
             }
+            // Force display with important flags
             badge.style.display = 'block';
+            badge.style.visibility = 'visible';
+            badge.style.opacity = '1';
         } else {
             if (badge) {
                 badge.style.display = 'none';
+                badge.style.visibility = 'hidden';
+                badge.style.opacity = '0';
+            }
+        }
+    }
+
+    /**
+     * Update sale info (description and end date)
+     */
+    updateSaleInfo(cardElement, service) {
+        if (!cardElement || !service) {
+            return;
+        }
+
+        const isSaleActive = this.serviceLoader.isSaleActive(service);
+        let saleInfo = cardElement.querySelector('.service-sale-info');
+
+        if (isSaleActive && (service.sale_description || service.sale_end_date)) {
+            if (!saleInfo) {
+                // Create sale info container
+                saleInfo = document.createElement('div');
+                saleInfo.className = 'service-sale-info';
+                cardElement.appendChild(saleInfo);
+            }
+
+            saleInfo.innerHTML = '';
+
+            // Add sale description if available with custom emojis
+            if (service.sale_description) {
+                const description = document.createElement('div');
+                description.className = 'service-sale-info__description';
+                const leftEmoji = service.sale_emoji_left || '✨';
+                const rightEmoji = service.sale_emoji_right || '✨';
+                description.textContent = `${leftEmoji} ${service.sale_description} ${rightEmoji}`;
+                saleInfo.appendChild(description);
+            }
+
+            // Add end date and time if available
+            if (service.sale_end_date) {
+                const endDate = new Date(service.sale_end_date);
+                
+                // Format date as DD/MM/YYYY
+                const day = String(endDate.getDate()).padStart(2, '0');
+                const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                const year = endDate.getFullYear();
+                const formattedDate = `${day}/${month}/${year}`;
+                
+                // Format time as HH:MM
+                const hours = String(endDate.getHours()).padStart(2, '0');
+                const minutes = String(endDate.getMinutes()).padStart(2, '0');
+                const formattedTime = `${hours}:${minutes}`;
+                
+                const dateInfo = document.createElement('div');
+                dateInfo.className = 'service-sale-info__end-date';
+                dateInfo.innerHTML = `
+                    <div><span class="service-sale-info__label">Ends:</span> ${formattedDate}</div>
+                    <div><span class="service-sale-info__label">Time:</span> ${formattedTime}</div>
+                `;
+                saleInfo.appendChild(dateInfo);
+            }
+
+            saleInfo.style.display = 'block';
+        } else {
+            if (saleInfo) {
+                saleInfo.style.display = 'none';
             }
         }
     }
@@ -363,7 +439,7 @@ class ServiceRenderer {
         const isSaleActive = this.serviceLoader.isSaleActive(service);
         
         if (isSaleActive) {
-            // Show sale price with original price strikethrough
+            // Show sale price with original price strikethrough on separate lines
             const originalPrice = this.serviceLoader.formatOriginalPrice(service, currency, {
                 isMembership: true,
                 isMonthly,
@@ -372,8 +448,10 @@ class ServiceRenderer {
             
             if (originalPrice) {
                 priceElement.innerHTML = `
-                    <span class="service-price-original" style="text-decoration: line-through; opacity: 0.6; margin-right: 0.5rem;">${originalPrice}</span>
-                    <span class="service-price-sale">${formattedPrice}</span>
+                    <div class="service-price-wrapper">
+                        <div class="service-price-original" style="text-decoration: line-through; opacity: 0.6;">${originalPrice}</div>
+                        <div class="service-price-sale">${formattedPrice}</div>
+                    </div>
                 `;
             } else {
                 priceElement.textContent = formattedPrice;

@@ -198,6 +198,7 @@ class CatalogAccessPageLoader {
                 // (they'll be handled by updatePricing when toggles change)
                 // But we still need to update badges and status here
                 this.serviceRenderer.updateSaleBadge(card, service);
+                this.serviceRenderer.updateSaleInfo(card, service);
                 this.serviceRenderer.updateStatus(card, service);
                 this.serviceRenderer.updateFeaturedBadge(card, service);
             } else {
@@ -486,8 +487,9 @@ class CatalogAccessPageLoader {
                     }
                 }
 
-                // Update sale badge, status, and featured badge
+                // Update sale badge, sale info, status, and featured badge
                 this.serviceRenderer.updateSaleBadge(card, service);
+                this.serviceRenderer.updateSaleInfo(card, service);
                 this.serviceRenderer.updateStatus(card, service);
                 this.serviceRenderer.updateFeaturedBadge(card, service);
             }
