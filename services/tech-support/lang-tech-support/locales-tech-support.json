@@ -172,7 +172,8 @@
       "tech-support-reduced-table-title": "Reduced Fares",
       "tech-support-booking-cta-coaching": "Coaching — Coming Soon",
       "tech-support-booking-cta-quickhelp": "Quick Help — Coming Soon",
-      "tech-support-booking-cta-homesetup": "Home Set-up — Coming Soon"
+      "tech-support-booking-cta-homesetup": "Home Set-up — Coming Soon",
+      "tech-support-popular-badge": "Popular"
     }
   },
   "es": {
@@ -345,7 +346,8 @@
       "tech-support-reduced-table-title": "Tarifas Reducidas",
       "tech-support-booking-cta-coaching": "Coaching — Próximamente",
       "tech-support-booking-cta-quickhelp": "Ayuda Rápida — Próximamente",
-      "tech-support-booking-cta-homesetup": "Configuración en el Hogar — Próximamente"
+      "tech-support-booking-cta-homesetup": "Configuración en el Hogar — Próximamente",
+      "tech-support-popular-badge": "Popular"
     }
   },
   "fr": {
@@ -520,7 +522,8 @@
       "tech-support-reduced-table-title": "Tarifs Réduits",
       "tech-support-booking-cta-coaching": "Coaching — Bientôt disponible",
       "tech-support-booking-cta-quickhelp": "Aide Rapide — Bientôt disponible",
-      "tech-support-booking-cta-homesetup": "Mise en Place à Domicile — Bientôt disponible"
+      "tech-support-booking-cta-homesetup": "Mise en Place à Domicile — Bientôt disponible",
+      "tech-support-popular-badge": "Populaire"
     }
   },
   "de": {
@@ -695,7 +698,8 @@
       "tech-support-reduced-table-title": "Ermäßigte Tarife",
       "tech-support-booking-cta-coaching": "Coaching — Demnächst",
       "tech-support-booking-cta-quickhelp": "Schnelle Hilfe — Demnächst",
-      "tech-support-booking-cta-homesetup": "Heim-Setup — Demnächst"
+      "tech-support-booking-cta-homesetup": "Heim-Setup — Demnächst",
+      "tech-support-popular-badge": "Beliebt"
     }
   }
 }

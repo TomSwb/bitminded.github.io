@@ -39,7 +39,6 @@ class TechSupportPageLoader {
             this.initSectionTabs();
 
             this.componentsLoaded = true;
-            console.log('✅ Tech Support page components loaded');
         } catch (error) {
             console.error('❌ Failed to load tech support page components:', error);
         }
@@ -98,24 +97,33 @@ class TechSupportPageLoader {
                 return;
             }
 
-            // Render each service
+            // Render each service - use querySelectorAll to find all cards (in case there are duplicates)
             services.forEach(service => {
-                const card = document.querySelector(`[data-service-slug="${service.slug}"]`);
-                if (!card) {
+                const cards = document.querySelectorAll(`[data-service-slug="${service.slug}"]`);
+                if (!cards || cards.length === 0) {
+                    console.warn(`[Tech Support] Card not found for service: ${service.slug}`);
                     return;
                 }
 
-                const elements = {
-                    card: card,
-                    price: card.querySelector('[data-element="price"]'),
-                    duration: card.querySelector('[data-element="duration"]'),
-                    description: card.querySelector('[data-element="description"]')
-                };
+                // Process all matching cards (should usually be just one)
+                cards.forEach(card => {
+                    // Only process if it's actually a service card (not a nested element)
+                    if (!card.classList.contains('tech-support-service-card')) {
+                        return;
+                    }
 
-                // Check if card forces CHF, otherwise use current currency
-                const forceCHF = card.hasAttribute('data-force-chf');
-                const currency = forceCHF ? 'CHF' : serviceLoader.currentCurrency;
-                serviceRenderer.renderService(service, elements, currency);
+                    const elements = {
+                        card: card,
+                        price: card.querySelector('[data-element="price"]'),
+                        duration: card.querySelector('[data-element="duration"]'),
+                        description: card.querySelector('[data-element="description"]')
+                    };
+
+                    // Check if card forces CHF, otherwise use current currency
+                    const forceCHF = card.hasAttribute('data-force-chf');
+                    const currency = forceCHF ? 'CHF' : serviceLoader.currentCurrency;
+                    serviceRenderer.renderService(service, elements, currency);
+                });
 
                 // Update reduced fare price in table if service has reduced fare
                 if (service.has_reduced_fare) {
@@ -136,19 +144,26 @@ class TechSupportPageLoader {
             window.addEventListener('servicesCurrencyChanged', (event) => {
                 const currency = event.detail?.currency || serviceLoader.currentCurrency;
                 services.forEach(service => {
-                    const card = document.querySelector(`[data-service-slug="${service.slug}"]`);
-                    if (card) {
-                        const elements = {
-                            card: card,
-                            price: card.querySelector('[data-element="price"]'),
-                            duration: card.querySelector('[data-element="duration"]'),
-                            description: card.querySelector('[data-element="description"]')
-                        };
+                    const cards = document.querySelectorAll(`[data-service-slug="${service.slug}"]`);
+                    if (cards && cards.length > 0) {
+                        cards.forEach(card => {
+                            // Only process if it's actually a service card (not a nested element)
+                            if (!card.classList.contains('tech-support-service-card')) {
+                                return;
+                            }
 
-                        // Check if card forces CHF, otherwise use current currency
-                        const forceCHF = card.hasAttribute('data-force-chf');
-                        const finalCurrency = forceCHF ? 'CHF' : currency;
-                        serviceRenderer.renderService(service, elements, finalCurrency);
+                            const elements = {
+                                card: card,
+                                price: card.querySelector('[data-element="price"]'),
+                                duration: card.querySelector('[data-element="duration"]'),
+                                description: card.querySelector('[data-element="description"]')
+                            };
+
+                            // Check if card forces CHF, otherwise use current currency
+                            const forceCHF = card.hasAttribute('data-force-chf');
+                            const finalCurrency = forceCHF ? 'CHF' : currency;
+                            serviceRenderer.renderService(service, elements, finalCurrency);
+                        });
                     }
 
                     // Update reduced fare price in table if service has reduced fare

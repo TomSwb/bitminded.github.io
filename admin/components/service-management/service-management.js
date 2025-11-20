@@ -70,6 +70,11 @@ class ServiceManagement {
             featuredFilter: document.getElementById('featured-filter'),
             clearBtn: document.getElementById('service-clear-filters-btn'),
             addButton: document.getElementById('add-service-button'),
+            selectAllCheckbox: document.getElementById('select-all-checkbox'),
+            bulkActions: document.getElementById('bulk-actions'),
+            bulkFeaturedBtn: document.getElementById('bulk-featured-btn'),
+            bulkUnfeaturedBtn: document.getElementById('bulk-unfeatured-btn'),
+            selectedCount: document.getElementById('selected-count'),
             modal: document.getElementById('service-modal'),
             modalOverlay: document.getElementById('service-modal-overlay'),
             modalClose: document.getElementById('service-modal-close'),
@@ -145,6 +150,26 @@ class ServiceManagement {
         if (this.elements.addButton) {
             this.elements.addButton.addEventListener('click', () => {
                 this.openAddModal();
+            });
+        }
+
+        // Select all checkbox
+        if (this.elements.selectAllCheckbox) {
+            this.elements.selectAllCheckbox.addEventListener('change', (e) => {
+                this.toggleSelectAll(e.target.checked);
+            });
+        }
+
+        // Bulk actions
+        if (this.elements.bulkFeaturedBtn) {
+            this.elements.bulkFeaturedBtn.addEventListener('click', () => {
+                this.bulkUpdateFeatured(true);
+            });
+        }
+
+        if (this.elements.bulkUnfeaturedBtn) {
+            this.elements.bulkUnfeaturedBtn.addEventListener('click', () => {
+                this.bulkUpdateFeatured(false);
             });
         }
 
@@ -339,6 +364,9 @@ class ServiceManagement {
             const row = this.createServiceRow(service);
             tbody.appendChild(row);
         });
+
+        // Update bulk actions visibility after rendering
+        this.updateBulkActionsVisibility();
     }
 
     /**
@@ -347,6 +375,18 @@ class ServiceManagement {
     createServiceRow(service) {
         const tr = document.createElement('tr');
         tr.dataset.serviceId = service.id;
+
+        // Checkbox cell
+        const checkboxCell = document.createElement('td');
+        checkboxCell.className = 'service-management__checkbox-cell';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'service-management__checkbox service-row-checkbox';
+        checkbox.dataset.serviceId = service.id;
+        checkbox.addEventListener('change', () => {
+            this.updateBulkActionsVisibility();
+        });
+        checkboxCell.appendChild(checkbox);
 
         // Get pricing for display
         const pricing = service.pricing || {};
@@ -446,6 +486,7 @@ class ServiceManagement {
             this.deleteService(service.id);
         });
 
+        tr.appendChild(checkboxCell);
         tr.appendChild(nameCell);
         tr.appendChild(categoryCell);
         tr.appendChild(statusCell);
@@ -456,6 +497,161 @@ class ServiceManagement {
         tr.appendChild(actionsCell);
 
         return tr;
+    }
+
+    /**
+     * Toggle select all checkboxes
+     */
+    toggleSelectAll(checked) {
+        // Get all checkboxes in the table body (only visible/filtered rows)
+        const tbody = document.getElementById('services-table-body');
+        if (!tbody) {
+            console.warn('Table body not found');
+            return;
+        }
+        
+        const checkboxes = tbody.querySelectorAll('.service-row-checkbox');
+        if (checkboxes.length === 0) {
+            console.warn('No checkboxes found in table');
+            return;
+        }
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = checked;
+        });
+        
+        // Update bulk actions visibility and select all checkbox state
+        this.updateBulkActionsVisibility();
+    }
+
+    /**
+     * Get selected service IDs
+     */
+    getSelectedServiceIds() {
+        const tbody = document.getElementById('services-table-body');
+        if (!tbody) return [];
+        const checkboxes = tbody.querySelectorAll('.service-row-checkbox:checked');
+        return Array.from(checkboxes).map(cb => cb.dataset.serviceId);
+    }
+
+    /**
+     * Update bulk actions visibility and count
+     */
+    updateBulkActionsVisibility() {
+        const selectedIds = this.getSelectedServiceIds();
+        const count = selectedIds.length;
+
+        if (this.elements.bulkActions) {
+            if (count > 0) {
+                this.elements.bulkActions.classList.remove('hidden');
+            } else {
+                this.elements.bulkActions.classList.add('hidden');
+            }
+        }
+
+        if (this.elements.selectedCount) {
+            const countText = count === 1 ? '1 selected' : `${count} selected`;
+            this.elements.selectedCount.textContent = countText;
+        }
+
+        // Update select all checkbox state (only check visible/filtered rows)
+        if (this.elements.selectAllCheckbox) {
+            const tbody = document.getElementById('services-table-body');
+            if (tbody) {
+                const allCheckboxes = tbody.querySelectorAll('.service-row-checkbox');
+                const checkedCount = tbody.querySelectorAll('.service-row-checkbox:checked').length;
+                this.elements.selectAllCheckbox.checked = allCheckboxes.length > 0 && checkedCount === allCheckboxes.length;
+                this.elements.selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < allCheckboxes.length;
+            }
+        }
+    }
+
+    /**
+     * Bulk update featured status
+     */
+    async bulkUpdateFeatured(isFeatured) {
+        const selectedIds = this.getSelectedServiceIds();
+        
+        if (selectedIds.length === 0) {
+            this.showError('No services selected');
+            return;
+        }
+
+        try {
+            // Show loading state
+            const originalText = isFeatured 
+                ? this.elements.bulkFeaturedBtn.textContent 
+                : this.elements.bulkUnfeaturedBtn.textContent;
+            
+            if (isFeatured && this.elements.bulkFeaturedBtn) {
+                this.elements.bulkFeaturedBtn.disabled = true;
+                this.elements.bulkFeaturedBtn.textContent = 'Updating...';
+            } else if (!isFeatured && this.elements.bulkUnfeaturedBtn) {
+                this.elements.bulkUnfeaturedBtn.disabled = true;
+                this.elements.bulkUnfeaturedBtn.textContent = 'Updating...';
+            }
+
+            // Update each service
+            const updatePromises = selectedIds.map(serviceId => {
+                return this.updateServiceFeaturedStatus(serviceId, isFeatured);
+            });
+
+            await Promise.all(updatePromises);
+
+            // Reload services and reapply filters
+            await this.loadServices();
+            this.applyFilters();
+
+            // Clear selections
+            this.toggleSelectAll(false);
+
+            // Show success message
+            this.showSuccess(`Successfully updated ${selectedIds.length} service(s)`);
+
+        } catch (error) {
+            console.error('Error bulk updating featured status:', error);
+            this.showError('Failed to update services');
+        } finally {
+            // Restore button state
+            if (isFeatured && this.elements.bulkFeaturedBtn) {
+                this.elements.bulkFeaturedBtn.disabled = false;
+                this.elements.bulkFeaturedBtn.innerHTML = originalText;
+            } else if (!isFeatured && this.elements.bulkUnfeaturedBtn) {
+                this.elements.bulkUnfeaturedBtn.disabled = false;
+                this.elements.bulkUnfeaturedBtn.innerHTML = originalText;
+            }
+        }
+    }
+
+    /**
+     * Update a single service's featured status
+     */
+    async updateServiceFeaturedStatus(serviceId, isFeatured) {
+        try {
+            const { data: service } = await window.supabase
+                .from('services')
+                .select('*')
+                .eq('id', serviceId)
+                .single();
+
+            if (!service) {
+                throw new Error('Service not found');
+            }
+
+            const { error } = await window.supabase
+                .from('services')
+                .update({ is_featured: isFeatured })
+                .eq('id', serviceId);
+
+            if (error) {
+                throw error;
+            }
+
+            return true;
+        } catch (error) {
+            console.error(`Error updating service ${serviceId}:`, error);
+            throw error;
+        }
     }
 
     /**

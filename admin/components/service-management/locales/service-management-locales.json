@@ -59,7 +59,10 @@
       "Cancel": "Cancel",
       "Save Service": "Save Service",
       "Edit": "Edit",
-      "Delete": "Delete"
+      "Delete": "Delete",
+      "Mark as Featured": "Mark as Featured",
+      "Mark as Not Featured": "Mark as Not Featured",
+      "selected": "selected"
     }
   },
   "es": {
@@ -122,7 +125,10 @@
       "Cancel": "Cancelar",
       "Save Service": "Guardar Servicio",
       "Edit": "Editar",
-      "Delete": "Eliminar"
+      "Delete": "Eliminar",
+      "Mark as Featured": "Marcar como Destacado",
+      "Mark as Not Featured": "Marcar como No Destacado",
+      "selected": "seleccionado"
     }
   },
   "fr": {
@@ -185,7 +191,10 @@
       "Cancel": "Annuler",
       "Save Service": "Enregistrer le Service",
       "Edit": "Modifier",
-      "Delete": "Supprimer"
+      "Delete": "Supprimer",
+      "Mark as Featured": "Marquer comme En Vedette",
+      "Mark as Not Featured": "Marquer comme Pas en Vedette",
+      "selected": "sélectionné"
     }
   },
   "de": {
@@ -248,7 +257,10 @@
       "Cancel": "Abbrechen",
       "Save Service": "Service Speichern",
       "Edit": "Bearbeiten",
-      "Delete": "Löschen"
+      "Delete": "Löschen",
+      "Mark as Featured": "Als Hervorgehoben Markieren",
+      "Mark as Not Featured": "Als Nicht Hervorgehoben Markieren",
+      "selected": "ausgewählt"
     }
   }
 }

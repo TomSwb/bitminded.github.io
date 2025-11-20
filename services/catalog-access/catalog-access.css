@@ -45,7 +45,7 @@
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   line-height: 1.2;
   color: var(--color-text-primary);
-  margin: 0;
+  margin: 0 0 1rem 0;
   padding-bottom: 1.5rem;
   text-align: center;
 }
@@ -70,6 +70,7 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-lg, 1.5rem);
   margin-top: var(--spacing-xl, 2rem);
+  overflow: visible;
 }
 
 .catalog-access-pricing-card {
@@ -91,8 +92,7 @@
 }
 
 .catalog-access-pricing-card--featured {
-  border-color: var(--color-primary, #6366f1);
-  border-width: 3px;
+  border: 3px solid var(--color-primary, #6366f1) !important;
 }
 
 .catalog-access-pricing-card__badge {
@@ -208,6 +208,7 @@
   grid-template-columns: 1fr;
   gap: var(--spacing-xl, 2rem);
   margin-top: var(--spacing-xl, 2rem);
+  overflow: visible;
 }
 
 /* Desktop: Side-by-side layout */
@@ -216,6 +217,11 @@
     grid-template-columns: 1fr 2fr;
     gap: var(--spacing-2xl, 3rem);
     align-items: start;
+  }
+  
+  /* Align feature card with pricing cards (which have padding-top for toggle buttons) */
+  .catalog-access-features-info {
+    margin-top: 1.5rem;
   }
 }
 
@@ -325,6 +331,8 @@
   gap: var(--spacing-lg, 1.5rem);
   align-items: stretch;
   position: relative;
+  overflow: visible;
+  padding-top: 1.5rem; /* Account for absolutely positioned toggle buttons */
 }
 
 @media (min-width: 768px) {
@@ -341,6 +349,7 @@
   align-items: center;
   gap: var(--spacing-md, 1rem);
   margin: var(--spacing-lg, 1.5rem) 0;
+  padding-bottom: 2rem;
   grid-column: 1 / -1;
   order: 1; /* Appear after first card (Single Tool) on mobile */
   min-height: 3rem; /* Prevent layout shift */
@@ -351,7 +360,8 @@
     position: absolute;
     top: -3rem;
     right: 0;
-    margin: 0 0 3rem 0;
+    margin: 0;
+    padding-bottom: 2rem;
     z-index: 10;
     grid-column: auto;
     order: 0; /* Reset order on desktop */
@@ -361,6 +371,7 @@
 
 .catalog-access-pricing-toggle {
   padding: var(--spacing-sm, 0.75rem) var(--spacing-lg, 1.5rem);
+  margin-top: 1rem;
   border-radius: var(--radius-md, 0.5rem);
   background: var(--color-surface, rgba(15,23,42,0.45));
   border: 2px solid var(--border-color-primary, rgba(148,163,184,0.4));
@@ -471,8 +482,7 @@
 }
 
 .catalog-access-pricing-comparison-card--featured {
-  border-color: var(--color-primary, #6366f1);
-  border-width: 3px;
+  border: 3px solid var(--color-primary, #6366f1) !important;
 }
 
 .catalog-access-pricing-comparison-card__badge {
@@ -480,8 +490,8 @@
   top: -14px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--color-primary, #6366f1), var(--color-secondary, #d286bd));
-  color: var(--color-text-dark, #fff);
+  background: linear-gradient(135deg, var(--color-primary, #6366f1), var(--color-secondary, #d286bd)) !important;
+  color: var(--color-text-dark, #fff) !important;
   padding: 0.4rem 1rem;
   border-radius: 1.5rem;
   font-size: 0.8rem;
@@ -489,9 +499,11 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-  z-index: 10;
+  z-index: 100 !important;
   animation: pulse-badge 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   will-change: transform, box-shadow;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 @keyframes pulse-badge {
@@ -845,6 +857,7 @@
   .catalog-access-features-info {
     position: static;
     margin-bottom: var(--spacing-lg, 1.5rem);
+    margin-top: 0; /* Reset margin-top on mobile */
   }
 
   .catalog-access-pricing-comparison {

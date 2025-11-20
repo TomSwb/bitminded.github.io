@@ -41,6 +41,7 @@ class ServiceRenderer {
         // Update sale badge
         if (elements.card) {
             this.updateSaleBadge(elements.card, service);
+            this.updateFeaturedBadge(elements.card, service);
         }
     }
 
@@ -63,6 +64,14 @@ class ServiceRenderer {
             return;
         }
 
+        // Check if element has child elements (like translatable content for additional costs)
+        const hasChildren = element.children.length > 0;
+        let children = [];
+        if (hasChildren) {
+            // Save children before updating
+            children = Array.from(element.children);
+        }
+
         const isSaleActive = this.serviceLoader.isSaleActive(service);
         
         if (isSaleActive) {
@@ -75,12 +84,36 @@ class ServiceRenderer {
                     <span class="service-price-original" style="text-decoration: line-through; opacity: 0.6; margin-right: 0.5rem;">${originalPrice}</span>
                     <span class="service-price-sale">${formattedPrice}</span>
                 `;
+                // Re-append children if they exist
+                if (hasChildren) {
+                    children.forEach(child => element.appendChild(child));
+                }
+            } else {
+                // Save children before updating
+                if (hasChildren) {
+                    element.textContent = formattedPrice + ' ';
+                    children.forEach(child => element.appendChild(child));
+                } else {
+                    element.textContent = formattedPrice;
+                }
+            }
+        } else {
+            // Regular price - preserve child elements if they exist
+            if (hasChildren) {
+                // Find the first text node and update it, or insert before first child
+                const textNodes = Array.from(element.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
+                if (textNodes.length > 0) {
+                    // Update first text node
+                    textNodes[0].textContent = formattedPrice + ' ';
+                    // Remove other text nodes (they're just whitespace between children)
+                    textNodes.slice(1).forEach(node => node.remove());
+                } else {
+                    // No text node, create one before first child
+                    element.insertBefore(document.createTextNode(formattedPrice + ' '), element.firstChild);
+                }
             } else {
                 element.textContent = formattedPrice;
             }
-        } else {
-            // Regular price
-            element.textContent = formattedPrice;
         }
     }
 
@@ -139,6 +172,90 @@ class ServiceRenderer {
                 }
                 
                 cardElement.appendChild(badge);
+            }
+            badge.style.display = 'block';
+        } else {
+            if (badge) {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    /**
+     * Update featured badge and styling
+     */
+    updateFeaturedBadge(cardElement, service) {
+        if (!cardElement || !service) {
+            return;
+        }
+
+        const isFeatured = service.is_featured === true;
+
+        // Determine badge class name based on card type
+        let badgeClass = '';
+        let featuredClass = '';
+        
+        if (cardElement.classList.contains('commissioning-pricing-card')) {
+            badgeClass = 'commissioning-pricing-card__badge';
+            featuredClass = 'commissioning-pricing-card--featured';
+        } else if (cardElement.classList.contains('tech-support-service-card')) {
+            badgeClass = 'tech-support-service-card__badge';
+            featuredClass = 'tech-support-service-card--featured';
+        } else if (cardElement.classList.contains('catalog-access-pricing-comparison-card')) {
+            badgeClass = 'catalog-access-pricing-comparison-card__badge';
+            featuredClass = 'catalog-access-pricing-comparison-card--featured';
+        } else {
+            // Generic fallback
+            badgeClass = 'service-featured-badge';
+            featuredClass = 'service-featured';
+        }
+
+        // Add or remove featured class
+        if (isFeatured) {
+            cardElement.classList.add(featuredClass);
+        } else {
+            cardElement.classList.remove(featuredClass);
+        }
+
+        // Handle badge - find existing badge by class name
+        let badge = cardElement.querySelector(`.${badgeClass}`);
+        if (!badge) {
+            // Try alternative selectors
+            if (badgeClass.includes('__')) {
+                const baseClass = badgeClass.split('__')[0];
+                badge = cardElement.querySelector(`.${baseClass}__badge`);
+            }
+            if (!badge) {
+                badge = cardElement.querySelector('.service-featured-badge');
+            }
+        }
+
+
+        if (isFeatured) {
+            if (!badge) {
+                // Create featured badge
+                badge = document.createElement('div');
+                badge.className = badgeClass;
+                badge.classList.add('translatable-content');
+                
+                // Use appropriate translation key based on page
+                if (cardElement.classList.contains('catalog-access-pricing-comparison-card')) {
+                    badge.setAttribute('data-i18n', 'catalog-access-popular-badge');
+                } else if (cardElement.classList.contains('commissioning-pricing-card')) {
+                    badge.setAttribute('data-i18n', 'commissioning-popular-badge');
+                } else if (cardElement.classList.contains('tech-support-service-card')) {
+                    badge.setAttribute('data-i18n', 'tech-support-popular-badge');
+                } else {
+                    badge.setAttribute('data-i18n', 'popular-badge');
+                }
+                
+                badge.textContent = 'Popular';
+                cardElement.appendChild(badge);
+                
+                // Trigger translation update if i18next is available
+                if (window.i18next && window.updateTranslatableContent) {
+                    window.updateTranslatableContent(badge);
+                }
             }
             badge.style.display = 'block';
         } else {

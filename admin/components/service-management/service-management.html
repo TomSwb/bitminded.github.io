@@ -109,11 +109,25 @@
         </div>
     </div>
 
+    <!-- Bulk Actions -->
+    <div class="service-management__bulk-actions hidden" id="bulk-actions">
+        <button class="service-management__button service-management__button--secondary" id="bulk-featured-btn">
+            <span class="translatable-content" data-translation-key="Mark as Featured">Mark as Featured</span>
+        </button>
+        <button class="service-management__button service-management__button--secondary" id="bulk-unfeatured-btn">
+            <span class="translatable-content" data-translation-key="Mark as Not Featured">Mark as Not Featured</span>
+        </button>
+        <span class="service-management__selected-count" id="selected-count">0 selected</span>
+    </div>
+
     <!-- Services Table -->
     <div class="service-management__table-container">
         <table class="service-management__table" id="services-table">
             <thead>
                 <tr>
+                    <th class="service-management__checkbox-header">
+                        <input type="checkbox" id="select-all-checkbox" class="service-management__checkbox" aria-label="Select all services">
+                    </th>
                     <th class="service-management__sortable-header" data-sort="name">
                         <span class="translatable-content" data-translation-key="Service Name">Service Name</span>
                         <span class="service-management__sort-indicator"></span>

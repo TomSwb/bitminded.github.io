@@ -21,8 +21,6 @@ class MissionToggle {
             this.bindEvents();
             this.updateTranslations();
             this.isInitialized = true;
-            
-            console.log('✅ Mission Toggle initialized');
         } catch (error) {
             console.error('❌ Failed to initialize Mission Toggle:', error);
         }
