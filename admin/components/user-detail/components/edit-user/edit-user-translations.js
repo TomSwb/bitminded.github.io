@@ -25,10 +25,10 @@ class EditUserTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Edit User translations initialized');
+            window.logger?.log('✅ Edit User translations initialized');
             
         } catch (error) {
-            console.error('❌ Failed to initialize edit user translations:', error);
+            window.logger?.error('❌ Failed to initialize edit user translations:', error);
         }
     }
 
@@ -43,10 +43,10 @@ class EditUserTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Edit User translations loaded');
+            window.logger?.log('✅ Edit User translations loaded');
             
         } catch (error) {
-            console.error('❌ Failed to load edit user translations:', error);
+            window.logger?.error('❌ Failed to load edit user translations:', error);
             // Use fallback translations
             this.translations = this.getFallbackTranslations();
         }
@@ -115,7 +115,7 @@ class EditUserTranslations {
         const currentLanguage = this.getCurrentLanguage();
         
         if (!this.translations[currentLanguage]) {
-            console.warn(`⚠️ No translations found for language: ${currentLanguage}`);
+            window.logger?.warn(`⚠️ No translations found for language: ${currentLanguage}`);
             return;
         }
 
@@ -135,7 +135,7 @@ class EditUserTranslations {
             element.classList.add('loaded');
         });
 
-        console.log('✅ Edit User translations updated');
+        window.logger?.log('✅ Edit User translations updated');
     }
 
     /**

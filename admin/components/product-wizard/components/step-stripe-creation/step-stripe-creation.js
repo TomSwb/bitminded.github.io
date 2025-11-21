@@ -229,9 +229,9 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     this.elements.createStripeBtn.parentElement.style.display = 'none';
                     this.updateStripeStatus(result.data);
                     this.stripeProductCreated = true;
-                    console.log('💾 About to save Stripe data to formData. Result:', result.data);
+                    window.logger?.log('💾 About to save Stripe data to formData. Result:', result.data);
                     this.saveToFormData(result.data);
-                    console.log('💾 After saveToFormData. window.productWizard.formData.stripe_product_id:', window.productWizard?.formData?.stripe_product_id);
+                    window.logger?.log('💾 After saveToFormData. window.productWizard.formData.stripe_product_id:', window.productWizard?.formData?.stripe_product_id);
                     
                     // Ensure form fields remain populated with the values that were used
                     this.populateFormFields();
@@ -241,16 +241,16 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     // Persist immediately to database (no manual Save Draft required)
                     try {
                         if (window.productWizard && typeof window.productWizard.saveDraftToDatabase === 'function') {
-                            console.log('💾 Saving Stripe IDs to database...');
+                            window.logger?.log('💾 Saving Stripe IDs to database...');
                             const saveResult = await window.productWizard.saveDraftToDatabase();
                             if (!saveResult?.success) {
-                                console.warn('⚠️ Failed to persist Stripe IDs automatically:', saveResult?.error);
+                                window.logger?.warn('⚠️ Failed to persist Stripe IDs automatically:', saveResult?.error);
                             } else {
-                                console.log('✅ Stripe IDs persisted to database');
+                                window.logger?.log('✅ Stripe IDs persisted to database');
                             }
                         }
                     } catch (persistError) {
-                        console.warn('⚠️ Could not auto-persist Stripe IDs:', persistError);
+                        window.logger?.warn('⚠️ Could not auto-persist Stripe IDs:', persistError);
                     }
 
                     // Mark step as completed (Stripe is Step 5)
@@ -262,7 +262,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 }
 
             } catch (error) {
-                console.error('❌ Error:', error);
+                window.logger?.error('❌ Error:', error);
                 this.elements.createStripeBtn.disabled = false;
                 this.elements.createStripeBtn.innerHTML = '<span class="btn-icon">💳</span><span>Create Stripe Product</span>';
                 alert('Failed to create Stripe product: ' + error.message);
@@ -305,11 +305,11 @@ if (typeof window.StepStripeCreation === 'undefined') {
 
                 const { data, error } = await window.supabase.functions.invoke('create-stripe-product', { body });
                 if (error) throw error;
-                console.log('✅ Stripe product created:', data);
+                window.logger?.log('✅ Stripe product created:', data);
                 return { success: true, data };
 
             } catch (error) {
-                console.error('❌ Error:', error);
+                window.logger?.error('❌ Error:', error);
                 return { success: false, error: error.message };
             }
         }
@@ -367,13 +367,13 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 }
                 
                 // Update database to reflect the deletion
-                console.log('💾 Saving deleted Stripe status to database...');
+                window.logger?.log('💾 Saving deleted Stripe status to database...');
                 const saveResult = await window.productWizard.saveDraftToDatabase();
                 if (!saveResult.success) {
-                    console.error('❌ Failed to update database after Stripe deletion:', saveResult.error);
+                    window.logger?.error('❌ Failed to update database after Stripe deletion:', saveResult.error);
                     alert('Stripe product archived, but failed to update database. Please refresh the page.');
                 } else {
-                    console.log('✅ Database updated after Stripe deletion');
+                    window.logger?.log('✅ Database updated after Stripe deletion');
                 }
 
                 // Mark step as incomplete (Stripe is Step 5)
@@ -391,7 +391,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 alert('Stripe product archived successfully');
                 
             } catch (error) {
-                console.error('❌ Error deleting Stripe product:', error);
+                window.logger?.error('❌ Error deleting Stripe product:', error);
                 alert('Failed to delete Stripe product: ' + error.message);
             }
         }
@@ -399,12 +399,12 @@ if (typeof window.StepStripeCreation === 'undefined') {
         showFinalState(data) {
             if (!data) data = window.productWizard?.formData || {};
             
-            console.log('🔄 Showing final state for Stripe product:', data.stripe_product_id);
+            window.logger?.log('🔄 Showing final state for Stripe product:', data.stripe_product_id);
             
             // Hide create button section
             if (this.elements.createStripeBtn && this.elements.createStripeBtn.parentElement) {
                 this.elements.createStripeBtn.parentElement.style.display = 'none';
-                console.log('✅ Create button hidden');
+                window.logger?.log('✅ Create button hidden');
             }
             
             if (data.stripe_product_id) {
@@ -428,7 +428,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
             window.productWizard.formData.requires_admin_approval = this.formData.requires_admin_approval;
             window.productWizard.formData.individual_price = this.formData.individual_price;
             
-            console.log('✅ Saved Stripe data to formData');
+            window.logger?.log('✅ Saved Stripe data to formData');
         }
         
         populateFormFields() {
@@ -438,7 +438,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 ? window.productWizard.formData 
                 : this.formData;
             
-            console.log('📝 Populating form fields with saved values:', sourceData);
+            window.logger?.log('📝 Populating form fields with saved values:', sourceData);
             
             // Set pricing type radio buttons
             if (sourceData.pricing_type && this.elements.pricingTypeRadios) {
@@ -490,7 +490,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
             // Sync this.formData with sourceData to keep them in sync
             this.formData = { ...this.formData, ...sourceData };
             
-            console.log('✅ Form fields populated from:', sourceData.stripe_product_id ? 'wizard.formData' : 'this.formData');
+            window.logger?.log('✅ Form fields populated from:', sourceData.stripe_product_id ? 'wizard.formData' : 'this.formData');
         }
 
         /**
@@ -508,7 +508,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
             wizardFormData.requires_admin_approval = this.formData.requires_admin_approval;
             wizardFormData.individual_price = this.formData.individual_price;
             
-            console.log('✅ SaveFormData: Saved Stripe pricing configuration');
+            window.logger?.log('✅ SaveFormData: Saved Stripe pricing configuration');
         }
 
         setFormData(data) {

@@ -19,7 +19,7 @@ class ExportData {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Export Data: Already initialized');
+                window.logger?.log('Export Data: Already initialized');
                 return;
             }
 
@@ -44,7 +44,7 @@ class ExportData {
             }, 100);
 
         } catch (error) {
-            console.error('❌ Export Data: Failed to initialize:', error);
+            window.logger?.error('❌ Export Data: Failed to initialize:', error);
             this.showError('Failed to initialize export data component');
         }
     }
@@ -61,7 +61,7 @@ class ExportData {
         this.errorMessage = document.getElementById('export-data-error-message');
 
         if (!this.btn) {
-            console.error('Export Data button not found');
+            window.logger?.error('Export Data button not found');
             return;
         }
 
@@ -86,7 +86,7 @@ class ExportData {
                 this.updateTranslations();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize export data translations:', error);
+            window.logger?.error('❌ Failed to initialize export data translations:', error);
         }
     }
 
@@ -153,7 +153,7 @@ class ExportData {
             this.showSuccess();
 
         } catch (error) {
-            console.error('Error exporting data:', error);
+            window.logger?.error('Error exporting data:', error);
             this.showError(error.message || 'Failed to export data. Please try again.');
         } finally {
             // Re-enable button
@@ -274,7 +274,7 @@ class ExportData {
             }
 
         } catch (error) {
-            console.error('Error collecting user data:', error);
+            window.logger?.error('Error collecting user data:', error);
             // Continue with partial data rather than failing completely
         }
 

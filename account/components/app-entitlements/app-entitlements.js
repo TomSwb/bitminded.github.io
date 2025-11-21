@@ -20,7 +20,7 @@ class AppEntitlements {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('✅ App Entitlements already initialized');
+            window.logger?.log('✅ App Entitlements already initialized');
             return;
         }
 
@@ -54,10 +54,10 @@ class AppEntitlements {
             await this.loadEntitlements();
 
             this.isInitialized = true;
-            console.log('✅ App Entitlements initialized');
+            window.logger?.log('✅ App Entitlements initialized');
 
         } catch (error) {
-            console.error('❌ App Entitlements: Failed to initialize:', error);
+            window.logger?.error('❌ App Entitlements: Failed to initialize:', error);
             this.showError('Failed to initialize app entitlements');
         }
     }
@@ -105,11 +105,11 @@ class AppEntitlements {
                         );
                     });
                 } catch (i18nextError) {
-                    console.warn('⚠️ Could not add to i18next:', i18nextError);
+                    window.logger?.warn('⚠️ Could not add to i18next:', i18nextError);
                 }
             }
         } catch (error) {
-            console.warn('⚠️ Failed to load app entitlements translations:', error);
+            window.logger?.warn('⚠️ Failed to load app entitlements translations:', error);
             this.translations = {};
         }
     }
@@ -180,7 +180,7 @@ class AppEntitlements {
                 .order('name', { ascending: true });
 
             if (error) {
-                console.error('❌ Error loading products:', error);
+                window.logger?.error('❌ Error loading products:', error);
                 this.productMap = {};
                 return;
             }
@@ -207,7 +207,7 @@ class AppEntitlements {
             };
 
         } catch (error) {
-            console.error('❌ Failed to load products:', error);
+            window.logger?.error('❌ Failed to load products:', error);
             this.productMap = {};
         }
     }
@@ -251,7 +251,7 @@ class AppEntitlements {
             this.showLoading(false);
 
         } catch (error) {
-            console.error('❌ Failed to load entitlements:', error);
+            window.logger?.error('❌ Failed to load entitlements:', error);
             this.showError(this.getTranslation('Failed to load entitlements') || 'Failed to load entitlements');
             this.showLoading(false);
         }

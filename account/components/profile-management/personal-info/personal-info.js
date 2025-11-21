@@ -27,7 +27,7 @@ class PersonalInfo {
             this.isInitialized = true;
             // Initialized
         } catch (error) {
-            console.error('❌ Failed to initialize Personal Info:', error);
+            window.logger?.error('❌ Failed to initialize Personal Info:', error);
         }
     }
 
@@ -47,7 +47,7 @@ class PersonalInfo {
             .single();
         
         if (error) {
-            console.error('❌ Failed to load profile data:', error);
+            window.logger?.error('❌ Failed to load profile data:', error);
             this.profileData = {};
         } else {
             this.profileData = data || {};
@@ -196,10 +196,10 @@ class PersonalInfo {
                 this.validateForm();
             }
             
-            console.log(`✅ Personal info language updated to: ${newLanguage}`);
+            window.logger?.log(`✅ Personal info language updated to: ${newLanguage}`);
             
         } catch (error) {
-            console.error('❌ Failed to handle language change:', error);
+            window.logger?.error('❌ Failed to handle language change:', error);
         }
     }
 
@@ -280,7 +280,7 @@ class PersonalInfo {
             
             // Success
         } catch (error) {
-            console.error('❌ Failed to update personal info:', error);
+            window.logger?.error('❌ Failed to update personal info:', error);
             alert('Failed to update personal information. Please try again.');
         } finally {
             if (this.saveBtn) this.saveBtn.disabled = false;

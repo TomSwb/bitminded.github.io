@@ -22,7 +22,7 @@ class ThemeSwitcher {
      */
     init(config = {}) {
         if (this.isInitialized) {
-            console.log('Theme switcher already initialized');
+            window.logger?.log('Theme switcher already initialized');
             return;
         }
 
@@ -35,7 +35,7 @@ class ThemeSwitcher {
 
         this.element = document.getElementById('theme-switcher');
         if (!this.element) {
-            console.error('❌ Theme switcher element not found');
+            window.logger?.error('❌ Theme switcher element not found');
             return;
         }
 
@@ -43,7 +43,7 @@ class ThemeSwitcher {
         this.icon = this.element.querySelector('#theme-icon');
 
         if (!this.toggleButton || !this.icon) {
-            console.error('❌ Theme switcher elements not found');
+            window.logger?.error('❌ Theme switcher elements not found');
             return;
         }
 
@@ -145,7 +145,7 @@ class ThemeSwitcher {
             return;
         }
 
-        console.log(`🔄 Changing theme from ${this.currentTheme} to: ${theme}`);
+        window.logger?.log(`🔄 Changing theme from ${this.currentTheme} to: ${theme}`);
 
         // Show animation if enabled
         if (this.config.showAnimation) {
@@ -174,7 +174,7 @@ class ThemeSwitcher {
         // Emit theme change event
         this.emitThemeChangeEvent(theme);
 
-        console.log('✅ Theme change completed');
+        window.logger?.log('✅ Theme change completed');
     }
 
     /**
@@ -223,7 +223,7 @@ class ThemeSwitcher {
         });
         
         window.dispatchEvent(event);
-        console.log(`📢 Theme change event emitted: ${theme}`);
+        window.logger?.log(`📢 Theme change event emitted: ${theme}`);
     }
 
     /**
@@ -260,7 +260,7 @@ class ThemeSwitcher {
         }
 
         this.isInitialized = false;
-        console.log('🗑️ Theme switcher destroyed');
+        window.logger?.log('🗑️ Theme switcher destroyed');
     }
 }
 

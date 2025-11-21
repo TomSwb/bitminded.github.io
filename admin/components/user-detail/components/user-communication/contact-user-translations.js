@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resources: resources
             }, function(err, t) {
                 if (err) {
-                    console.error('❌ i18next init error:', err);
+                    window.logger?.error('❌ i18next init error:', err);
                     showContent();
                 } else {
                     updateContent();
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         })
         .catch(error => {
-            console.error('❌ Failed to load Contact User translations:', error);
+            window.logger?.error('❌ Failed to load Contact User translations:', error);
             showContent();
         });
     
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof i18next !== 'undefined' && i18next.changeLanguage) {
             i18next.changeLanguage(lng, function(err, t) {
                 if (err) {
-                    console.error('❌ Language change error:', err);
+                    window.logger?.error('❌ Language change error:', err);
                 } else {
                     updateContent();
                     

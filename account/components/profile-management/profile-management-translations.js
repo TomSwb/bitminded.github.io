@@ -30,7 +30,7 @@ class ProfileManagementTranslations {
             // Initialized silently
             
         } catch (error) {
-            console.error('❌ Failed to initialize profile management translations:', error);
+            window.logger?.error('❌ Failed to initialize profile management translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class ProfileManagementTranslations {
             // Translations loaded silently
             
         } catch (error) {
-            console.error('❌ Failed to load profile management translations:', error);
+            window.logger?.error('❌ Failed to load profile management translations:', error);
             // Use fallback translations
             this.translations = this.getFallbackTranslations();
         }
@@ -142,7 +142,7 @@ class ProfileManagementTranslations {
         const currentLanguage = this.getCurrentLanguage();
         
         if (!this.translations[currentLanguage]) {
-            console.warn(`⚠️ No translations found for language: ${currentLanguage}`);
+            window.logger?.warn(`⚠️ No translations found for language: ${currentLanguage}`);
             return;
         }
 

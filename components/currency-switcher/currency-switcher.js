@@ -38,7 +38,7 @@ class CurrencySwitcher {
             }
 
             if (!this.element) {
-                console.warn('⚠️ Currency switcher element not found');
+                window.logger?.warn('⚠️ Currency switcher element not found');
                 return;
             }
 
@@ -62,7 +62,7 @@ class CurrencySwitcher {
             this.isInitialized = true;
 
         } catch (error) {
-            console.error('❌ Currency Switcher: Failed to initialize:', error);
+            window.logger?.error('❌ Currency Switcher: Failed to initialize:', error);
         }
     }
 
@@ -76,7 +76,7 @@ class CurrencySwitcher {
                 this.currentCurrency = saved;
             }
         } catch (error) {
-            console.warn('⚠️ Could not load currency preference:', error);
+            window.logger?.warn('⚠️ Could not load currency preference:', error);
         }
     }
 
@@ -87,7 +87,7 @@ class CurrencySwitcher {
         try {
             localStorage.setItem('selectedCurrency', this.currentCurrency);
         } catch (error) {
-            console.warn('⚠️ Could not save currency preference:', error);
+            window.logger?.warn('⚠️ Could not save currency preference:', error);
         }
     }
 
@@ -182,7 +182,7 @@ class CurrencySwitcher {
      */
     switchCurrency(currency) {
         if (!this.currencies[currency]) {
-            console.warn(`⚠️ Invalid currency: ${currency}`);
+            window.logger?.warn(`⚠️ Invalid currency: ${currency}`);
             return;
         }
 

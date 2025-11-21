@@ -23,7 +23,7 @@ class EmailChange {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('Email change component already initialized');
+            window.logger?.log('Email change component already initialized');
             return;
         }
 
@@ -43,7 +43,7 @@ class EmailChange {
             // Initialized silently
             
         } catch (error) {
-            console.error('❌ Failed to initialize email change component:', error);
+            window.logger?.error('❌ Failed to initialize email change component:', error);
             this.showError('Failed to load email information');
         }
     }
@@ -71,7 +71,7 @@ class EmailChange {
             this.isEmailVerified = user.email_confirmed_at !== null;
             
         } catch (error) {
-            console.error('❌ Failed to load user data:', error);
+            window.logger?.error('❌ Failed to load user data:', error);
             throw error;
         }
     }
@@ -93,7 +93,7 @@ class EmailChange {
             changeBtn.addEventListener('click', this.handleChangeClick);
             // Event listener added silently
         } else {
-            console.error('❌ Email change button not found for event listener');
+            window.logger?.error('❌ Email change button not found for event listener');
         }
 
         if (cancelBtn) {
@@ -196,7 +196,7 @@ class EmailChange {
             this.showSuccess('Verification email sent to your new email address');
             
         } catch (error) {
-            console.error('❌ Failed to send email change verification:', error);
+            window.logger?.error('❌ Failed to send email change verification:', error);
             this.showError(error.message || 'Failed to send verification email');
         } finally {
             this.showLoading(false);
@@ -236,7 +236,7 @@ class EmailChange {
             this.showSuccess('Verification email sent successfully');
             
         } catch (error) {
-            console.error('❌ Failed to resend verification email:', error);
+            window.logger?.error('❌ Failed to resend verification email:', error);
             this.showError(error.message || 'Failed to resend verification email');
         } finally {
             this.showLoading(false);
@@ -270,9 +270,9 @@ class EmailChange {
         }
 
         // Send email change verification
-        console.log('🔧 Sending email change verification for:', newEmail);
+        window.logger?.log('🔧 Sending email change verification for:', newEmail);
         const redirectUrl = `${window.location.origin}/auth/verify/index.html`;
-        console.log('🔧 Redirect URL being sent:', redirectUrl);
+        window.logger?.log('🔧 Redirect URL being sent:', redirectUrl);
         
         const { data, error } = await window.supabase.auth.updateUser({
             email: newEmail,
@@ -281,10 +281,10 @@ class EmailChange {
             }
         });
 
-        console.log('📧 Email update response:', { data, error });
-        console.log('📧 User data after email update:', data.user);
-        console.log('📧 User email before update:', this.userProfile?.email);
-        console.log('📧 New email requested:', newEmail);
+        window.logger?.log('📧 Email update response:', { data, error });
+        window.logger?.log('📧 User data after email update:', data.user);
+        window.logger?.log('📧 User email before update:', this.userProfile?.email);
+        window.logger?.log('📧 New email requested:', newEmail);
 
         if (error) {
             throw new Error(error.message || 'Failed to send verification email');

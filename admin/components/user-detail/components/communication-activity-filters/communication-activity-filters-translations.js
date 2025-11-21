@@ -41,15 +41,15 @@ if (typeof window.communicationActivityFiltersTranslations === 'undefined') {
                         });
                         // Translations added
                     } catch (i18nextError) {
-                        console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
+                        window.logger?.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
                 } else {
-                    console.log('ℹ️ i18next not ready, using standalone translations');
+                    window.logger?.log('ℹ️ i18next not ready, using standalone translations');
                 }
 
                 return true;
             } catch (error) {
-                console.error('❌ Failed to initialize communication activity filters translations:', error);
+                window.logger?.error('❌ Failed to initialize communication activity filters translations:', error);
                 return false;
             }
         },
@@ -86,12 +86,12 @@ if (typeof window.communicationActivityFiltersTranslations === 'undefined') {
          */
         updateTranslations() {
             if (!this.isInitialized) {
-                console.warn('⚠️ Communication activity filters translations not initialized');
+                window.logger?.warn('⚠️ Communication activity filters translations not initialized');
                 return;
             }
 
             const currentLanguage = this.getCurrentLanguage();
-            console.log('🔄 Updating communication activity filters translations to:', currentLanguage);
+            window.logger?.log('🔄 Updating communication activity filters translations to:', currentLanguage);
 
             // Update all translatable elements
             const elements = document.querySelectorAll('#communication-activity-filters .translatable-content[data-translation-key]');
@@ -110,7 +110,7 @@ if (typeof window.communicationActivityFiltersTranslations === 'undefined') {
                 }
             });
 
-            console.log('✅ Communication activity filters translations updated');
+            window.logger?.log('✅ Communication activity filters translations updated');
         }
     };
 }

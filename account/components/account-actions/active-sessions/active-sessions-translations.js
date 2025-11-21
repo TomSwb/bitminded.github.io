@@ -30,7 +30,7 @@ class ActiveSessionsTranslations {
             // Translations initialized
             
         } catch (error) {
-            console.error('❌ Failed to initialize active sessions translations:', error);
+            window.logger?.error('❌ Failed to initialize active sessions translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class ActiveSessionsTranslations {
             // Translations loaded
             
         } catch (error) {
-            console.error('❌ Failed to load active sessions translations:', error);
+            window.logger?.error('❌ Failed to load active sessions translations:', error);
             // Fallback to empty translations
             this.translations = {};
         }

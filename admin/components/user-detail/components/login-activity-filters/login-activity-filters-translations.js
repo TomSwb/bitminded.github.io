@@ -15,11 +15,11 @@ class LoginActivityFiltersTranslations {
         try {
             await this.loadTranslations();
             this.isLoaded = true;
-            console.log('✅ Login Activity Filters translations loaded');
+            window.logger?.log('✅ Login Activity Filters translations loaded');
             
             // Initialize translations
             this.updateTranslations();
-            console.log('✅ Login Activity Filters translations initialized');
+            window.logger?.log('✅ Login Activity Filters translations initialized');
             
             // Listen for language changes
             window.addEventListener('languageChanged', () => {
@@ -27,7 +27,7 @@ class LoginActivityFiltersTranslations {
             });
             
         } catch (error) {
-            console.error('❌ Failed to load Login Activity Filters translations:', error);
+            window.logger?.error('❌ Failed to load Login Activity Filters translations:', error);
         }
     }
 
@@ -41,9 +41,9 @@ class LoginActivityFiltersTranslations {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             this.translations = await response.json();
-            console.log('✅ Login Activity Filters translations loaded');
+            window.logger?.log('✅ Login Activity Filters translations loaded');
         } catch (error) {
-            console.error('❌ Failed to load Login Activity Filters translations:', error);
+            window.logger?.error('❌ Failed to load Login Activity Filters translations:', error);
             // Fallback to English
             this.translations = {
                 en: {
@@ -94,7 +94,7 @@ class LoginActivityFiltersTranslations {
             }
         });
 
-        console.log('✅ Login Activity Filters translations updated');
+        window.logger?.log('✅ Login Activity Filters translations updated');
     }
 
     /**

@@ -132,7 +132,7 @@ class NotificationHelper {
             await this.init();
 
             if (!this.isInitialized) {
-                console.warn('⚠️ Notification helper not initialized, skipping notification');
+                window.logger?.warn('⚠️ Notification helper not initialized, skipping notification');
                 return { success: false, error: 'Not initialized' };
             }
 
@@ -140,11 +140,11 @@ class NotificationHelper {
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
             if (userError || !user) {
-                console.warn('⚠️ No user found, skipping notification');
+                window.logger?.warn('⚠️ No user found, skipping notification');
                 return { success: false, error: 'No user' };
             }
 
-            console.log(`📧 Sending ${type} notification to user ${user.id}`);
+            window.logger?.log(`📧 Sending ${type} notification to user ${user.id}`);
 
             // Format timestamp in user's timezone and language
             const userLanguage = (typeof i18next !== 'undefined' && i18next.language) || 'en';
@@ -182,20 +182,20 @@ class NotificationHelper {
 
             // Check email result
             if (emailResult.error) {
-                console.error('❌ Failed to send email:', emailResult.error);
+                window.logger?.error('❌ Failed to send email:', emailResult.error);
             } else if (emailResult.data?.skipped) {
-                console.log(`⏭️ Email skipped: ${emailResult.data.reason}`);
+                window.logger?.log(`⏭️ Email skipped: ${emailResult.data.reason}`);
             } else {
-                console.log(`✅ Email sent: ${type}`);
+                window.logger?.log(`✅ Email sent: ${type}`);
             }
 
             // Check in-app result
             if (inAppResult.error) {
-                console.error('❌ Failed to create in-app notification:', inAppResult.error);
+                window.logger?.error('❌ Failed to create in-app notification:', inAppResult.error);
             } else if (inAppResult.skipped) {
-                console.log(`⏭️ In-app notification skipped: ${inAppResult.reason}`);
+                window.logger?.log(`⏭️ In-app notification skipped: ${inAppResult.reason}`);
             } else {
-                console.log(`✅ In-app notification created: ${type}`);
+                window.logger?.log(`✅ In-app notification created: ${type}`);
                 
                 // Refresh notification center if it exists
                 if (typeof window.notificationCenter !== 'undefined' && window.notificationCenter.refresh) {
@@ -210,7 +210,7 @@ class NotificationHelper {
             };
 
         } catch (error) {
-            console.error('❌ Error sending notification:', error);
+            window.logger?.error('❌ Error sending notification:', error);
             return { success: false, error: error.message };
         }
     }

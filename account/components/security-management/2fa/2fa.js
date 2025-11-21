@@ -26,7 +26,7 @@ class TwoFactorAuth {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('2FA: Already initialized');
+                window.logger?.log('2FA: Already initialized');
                 return;
             }
 
@@ -51,7 +51,7 @@ class TwoFactorAuth {
             }, 100);
 
         } catch (error) {
-            console.error('❌ 2FA: Failed to initialize:', error);
+            window.logger?.error('❌ 2FA: Failed to initialize:', error);
             this.showError('Failed to initialize 2FA component');
         }
     }
@@ -63,7 +63,7 @@ class TwoFactorAuth {
         // Check if we're returning from 2FA setup on mobile PWA
         const setupComplete = sessionStorage.getItem('2fa_setup_complete');
         if (setupComplete === 'true') {
-            console.log('📨 Detected 2FA setup completion (mobile mode)');
+            window.logger?.log('📨 Detected 2FA setup completion (mobile mode)');
             sessionStorage.removeItem('2fa_setup_complete');
             sessionStorage.removeItem('2fa_setup_timestamp');
         }
@@ -78,7 +78,7 @@ class TwoFactorAuth {
         this.errorText = document.getElementById('2fa-error-text');
 
         if (!this.statusBadge || !this.actionButton) {
-            console.error('❌ 2FA: Required elements not found');
+            window.logger?.error('❌ 2FA: Required elements not found');
             return;
         }
 
@@ -154,7 +154,7 @@ class TwoFactorAuth {
 
             // Handle 2FA setup completion
             if (event.data && event.data.type === '2fa-setup-complete') {
-                console.log('✅ 2FA: Setup completed, refreshing status...');
+                window.logger?.log('✅ 2FA: Setup completed, refreshing status...');
                 this.refresh2FAStatus();
                 
                 // Send notification email for 2FA enabled
@@ -178,7 +178,7 @@ class TwoFactorAuth {
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
             if (userError || !user) {
-                console.error('❌ 2FA: Failed to get user:', userError);
+                window.logger?.error('❌ 2FA: Failed to get user:', userError);
                 this.update2FAStatus(false, null);
                 this.showLoading(false);
                 return;
@@ -194,7 +194,7 @@ class TwoFactorAuth {
                 .maybeSingle();
             
             if (error) {
-                console.error('❌ 2FA: Failed to load status:', error);
+                window.logger?.error('❌ 2FA: Failed to load status:', error);
                 this.update2FAStatus(false, null);
                 this.showError('Failed to load 2FA status');
                 this.showLoading(false);
@@ -210,7 +210,7 @@ class TwoFactorAuth {
             this.showLoading(false);
 
         } catch (error) {
-            console.error('❌ 2FA: Failed to load status:', error);
+            window.logger?.error('❌ 2FA: Failed to load status:', error);
             this.update2FAStatus(false, null);
             this.showError('Failed to load 2FA status');
             this.showLoading(false);
@@ -307,7 +307,7 @@ class TwoFactorAuth {
         this.hideError();
 
         try {
-            console.log('🔧 2FA: Disabling...');
+            window.logger?.log('🔧 2FA: Disabling...');
 
             // Get current user
             const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -329,7 +329,7 @@ class TwoFactorAuth {
                 throw error;
             }
 
-            console.log('✅ 2FA: Disabled successfully');
+            window.logger?.log('✅ 2FA: Disabled successfully');
 
             // Refresh status
             await this.load2FAStatus();
@@ -343,7 +343,7 @@ class TwoFactorAuth {
             alert('Two-Factor Authentication has been disabled.');
 
         } catch (error) {
-            console.error('❌ 2FA: Failed to disable:', error);
+            window.logger?.error('❌ 2FA: Failed to disable:', error);
             this.showError('Failed to disable 2FA. Please try again.');
         } finally {
             this.showLoading(false);
@@ -361,7 +361,7 @@ class TwoFactorAuth {
             const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
             
-            console.log('🔧 2FA: Opening setup window...', {isMobile, isPWA});
+            window.logger?.log('🔧 2FA: Opening setup window...', {isMobile, isPWA});
             
             if (isMobile || isPWA) {
                 // On mobile/PWA, navigate to the setup page directly
@@ -375,11 +375,11 @@ class TwoFactorAuth {
                     // Fallback to full page navigation if popup blocked
                     window.location.href = setupUrl;
                 } else {
-                    console.log('✅ 2FA: Setup window opened');
+                    window.logger?.log('✅ 2FA: Setup window opened');
                 }
             }
         } catch (error) {
-            console.error('❌ 2FA: Failed to open setup window:', error);
+            window.logger?.error('❌ 2FA: Failed to open setup window:', error);
             this.showError('Failed to open setup window. Please check your browser settings.');
         }
     }
@@ -460,13 +460,13 @@ class TwoFactorAuth {
                 throw error;
             }
 
-            console.log('✅ Backup codes regenerated successfully');
+            window.logger?.log('✅ Backup codes regenerated successfully');
 
             // Show codes in modal
             this.showBackupCodesModal();
 
         } catch (error) {
-            console.error('❌ Failed to regenerate backup codes:', error);
+            window.logger?.error('❌ Failed to regenerate backup codes:', error);
             this.showError('Failed to regenerate backup codes. Please try again.');
         } finally {
             this.showLoading(false);
@@ -547,7 +547,7 @@ If you lose access to your authenticator app, you can use these codes to log in.
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        console.log('✅ Backup codes downloaded');
+        window.logger?.log('✅ Backup codes downloaded');
     }
 
     /**
@@ -580,7 +580,7 @@ If you lose access to your authenticator app, you can use these codes to log in.
         printWindow.document.close();
         printWindow.print();
 
-        console.log('✅ Backup codes printed');
+        window.logger?.log('✅ Backup codes printed');
     }
 
     /**
@@ -603,14 +603,14 @@ If you lose access to your authenticator app, you can use these codes to log in.
      */
     async initializeTranslations() {
         if (!window.twoFactorAuthTranslations) {
-            console.warn('⚠️ 2FA: Translations not loaded yet');
+            window.logger?.warn('⚠️ 2FA: Translations not loaded yet');
             return;
         }
 
         try {
             await window.twoFactorAuthTranslations.init();
         } catch (error) {
-            console.error('❌ 2FA: Failed to initialize translations:', error);
+            window.logger?.error('❌ 2FA: Failed to initialize translations:', error);
         }
     }
 

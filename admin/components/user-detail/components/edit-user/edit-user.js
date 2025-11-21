@@ -29,7 +29,7 @@ class EditUser {
      */
     async init(userData) {
         if (this.isInitialized) {
-            console.log('Edit User component already initialized');
+            window.logger?.log('Edit User component already initialized');
             return;
         }
 
@@ -56,13 +56,13 @@ class EditUser {
             this.updateTranslations();
             
             this.isInitialized = true;
-            console.log('✅ Edit User component initialized');
+            window.logger?.log('✅ Edit User component initialized');
             
             // Dispatch initialization event
             window.dispatchEvent(new CustomEvent('editUserInitialized'));
             
         } catch (error) {
-            console.error('❌ Failed to initialize Edit User component:', error);
+            window.logger?.error('❌ Failed to initialize Edit User component:', error);
             throw error;
         }
     }
@@ -240,7 +240,7 @@ class EditUser {
             window.dispatchEvent(event);
             
         } catch (error) {
-            console.error('❌ Failed to save user changes:', error);
+            window.logger?.error('❌ Failed to save user changes:', error);
             this.showError(error.message || 'Failed to save user changes');
         } finally {
             this.showLoading(false);
@@ -314,11 +314,11 @@ class EditUser {
                     this.currentUser.id
                 );
             } catch (error) {
-                console.warn('⚠️ Failed to log avatar reset action:', error);
+                window.logger?.warn('⚠️ Failed to log avatar reset action:', error);
             }
             
         } catch (error) {
-            console.error('❌ Failed to reset avatar:', error);
+            window.logger?.error('❌ Failed to reset avatar:', error);
             this.showError(error.message || 'Failed to reset avatar');
         } finally {
             this.showLoading(false);
@@ -362,11 +362,11 @@ class EditUser {
             try {
                 await this.logAdminAction('email_change_sent', `Sent email change request to: ${newEmail}`);
             } catch (error) {
-                console.warn('⚠️ Failed to log email change action:', error);
+                window.logger?.warn('⚠️ Failed to log email change action:', error);
             }
             
         } catch (error) {
-            console.error('❌ Failed to send email change request:', error);
+            window.logger?.error('❌ Failed to send email change request:', error);
             this.showError(error.message || 'Failed to send email change request');
         } finally {
             this.showLoading(false);
@@ -393,11 +393,11 @@ class EditUser {
             try {
                 await this.logAdminAction('password_reset_sent', 'Sent password reset email');
             } catch (error) {
-                console.warn('⚠️ Failed to log password reset action:', error);
+                window.logger?.warn('⚠️ Failed to log password reset action:', error);
             }
             
         } catch (error) {
-            console.error('❌ Failed to send password reset email:', error);
+            window.logger?.error('❌ Failed to send password reset email:', error);
             this.showError(error.message || 'Failed to send password reset email');
         } finally {
             this.showLoading(false);
@@ -442,7 +442,7 @@ class EditUser {
             country: document.getElementById('edit-country')?.value || null
         };
         
-        console.log('📝 Collected form data:', formData);
+        window.logger?.log('📝 Collected form data:', formData);
         return formData;
     }
 
@@ -503,7 +503,7 @@ class EditUser {
             }
 
         } catch (error) {
-            console.error('❌ Failed to check username availability:', error);
+            window.logger?.error('❌ Failed to check username availability:', error);
             this.showAvailabilityIndicator('unavailable', 'Error checking availability');
         }
     }
@@ -562,18 +562,18 @@ class EditUser {
             throw new Error('Supabase client not available');
         }
 
-        console.log('🔄 Updating user data:', formData);
-        console.log('🔄 Target user ID:', this.currentUser.id);
+        window.logger?.log('🔄 Updating user data:', formData);
+        window.logger?.log('🔄 Target user ID:', this.currentUser.id);
 
         // Track what fields have changed
         const changes = this.trackFieldChanges(formData);
         
         if (changes.length === 0) {
-            console.log('ℹ️ No changes detected, skipping update');
+            window.logger?.log('ℹ️ No changes detected, skipping update');
             return;
         }
 
-        console.log('📝 Detected changes:', changes);
+        window.logger?.log('📝 Detected changes:', changes);
 
         // Update user profile
         const { data, error } = await window.supabase
@@ -588,19 +588,19 @@ class EditUser {
             .eq('id', this.currentUser.id);
 
         if (error) {
-            console.error('❌ Database update error:', error);
+            window.logger?.error('❌ Database update error:', error);
             if (error.code === '23505') { // Unique constraint violation
                 throw new Error('Username is already taken');
             }
             throw new Error('Failed to update user profile');
         }
 
-        console.log('✅ User profile updated successfully');
-        console.log('📊 Update result data:', data);
+        window.logger?.log('✅ User profile updated successfully');
+        window.logger?.log('📊 Update result data:', data);
         
         // Check if any rows were actually updated
         if (data && data.length === 0) {
-            console.warn('⚠️ No rows were updated - this might indicate a permission issue or the user doesn\'t exist');
+            window.logger?.warn('⚠️ No rows were updated - this might indicate a permission issue or the user doesn\'t exist');
         }
 
         // Log each individual change
@@ -612,7 +612,7 @@ class EditUser {
                     this.currentUser.id
                 );
             } catch (error) {
-                console.warn(`⚠️ Failed to log ${change.field} update:`, error);
+                window.logger?.warn(`⚠️ Failed to log ${change.field} update:`, error);
             }
         }
     }
@@ -762,14 +762,14 @@ class EditUser {
                             timestamp: new Date().toISOString()
                         }
                     });
-                console.log('✅ Admin action logged successfully');
+                window.logger?.log('✅ Admin action logged successfully');
             } catch (logError) {
-                console.warn('⚠️ Failed to log admin action:', logError.message);
+                window.logger?.warn('⚠️ Failed to log admin action:', logError.message);
                 // Don't throw error - admin logging is not critical
             }
 
         } catch (error) {
-            console.warn('⚠️ Failed to log admin action:', error);
+            window.logger?.warn('⚠️ Failed to log admin action:', error);
         }
     }
 

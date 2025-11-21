@@ -40,7 +40,7 @@ class StepBasicInfo {
 
             this.isInitialized = true;
         } catch (error) {
-            console.error('❌ Step 1: Basic Information: Failed to initialize:', error);
+            window.logger?.error('❌ Step 1: Basic Information: Failed to initialize:', error);
             throw error;
         }
     }
@@ -181,7 +181,7 @@ class StepBasicInfo {
                 this.updateTranslationsStatus('No translations returned. Try again.', 'error');
             }
         } catch (error) {
-            console.error('❌ Translation generation failed:', error);
+            window.logger?.error('❌ Translation generation failed:', error);
             const detail = error?.message || 'Unable to reach translation service.';
             this.updateTranslationsStatus(`Translation failed: ${detail}`, 'error');
         } finally {
@@ -352,7 +352,7 @@ class StepBasicInfo {
             this.categories = data || [];
             this.populateCategoryDropdown();
         } catch (error) {
-            console.error('❌ Error loading categories:', error);
+            window.logger?.error('❌ Error loading categories:', error);
         }
     }
 
@@ -500,7 +500,7 @@ class StepBasicInfo {
                 await window.stepBasicInfoTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize translations:', error);
+            window.logger?.error('❌ Failed to initialize translations:', error);
         }
     }
 

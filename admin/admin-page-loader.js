@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         
     } catch (error) {
-        console.error('❌ Failed to initialize admin page:', error);
+        window.logger?.error('❌ Failed to initialize admin page:', error);
         
         // Force hide loading screen before redirect
         if (window.loadingScreen) {

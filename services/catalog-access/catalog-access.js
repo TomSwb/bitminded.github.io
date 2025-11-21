@@ -55,7 +55,7 @@ class CatalogAccessPageLoader {
             this.componentsLoaded = true;
             this.accordionInitialized = true;
         } catch (error) {
-            console.error('❌ Failed to load catalog access page components:', error);
+            window.logger?.error('❌ Failed to load catalog access page components:', error);
         }
     }
 
@@ -150,7 +150,7 @@ class CatalogAccessPageLoader {
     async loadServices() {
         try {
             if (!window.ServiceLoader) {
-                console.warn('ServiceLoader not available');
+                window.logger?.warn('ServiceLoader not available');
                 return;
             }
 
@@ -163,7 +163,7 @@ class CatalogAccessPageLoader {
             });
 
         } catch (error) {
-            console.error('Failed to load services:', error);
+            window.logger?.error('Failed to load services:', error);
         }
     }
 
@@ -244,7 +244,7 @@ class CatalogAccessPageLoader {
                     script.onerror = () => resolve();
                     document.body.appendChild(script);
                 } catch (error) {
-                    console.warn('Failed to load services sub-navigation:', error);
+                    window.logger?.warn('Failed to load services sub-navigation:', error);
                     resolve();
                 }
             };

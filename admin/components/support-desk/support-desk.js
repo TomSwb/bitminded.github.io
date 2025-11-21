@@ -43,7 +43,7 @@ class SupportDesk {
 
             this.isInitialized = true;
         } catch (error) {
-            console.error('❌ Support Desk: failed to initialize', error);
+            window.logger?.error('❌ Support Desk: failed to initialize', error);
             this.showError(this.translate('Failed to load support tickets.', 'Failed to load support tickets.'));
         }
     }
@@ -205,7 +205,7 @@ class SupportDesk {
             }
 
         } catch (error) {
-            console.error('❌ Support Desk: failed to load tickets', error);
+            window.logger?.error('❌ Support Desk: failed to load tickets', error);
             this.showError(this.translate('Failed to load support tickets.', 'Failed to load support tickets.'));
         } finally {
             this.setLoading(false);
@@ -467,7 +467,7 @@ class SupportDesk {
 
             this.showSuccess(this.translate('Status updated successfully.', 'Status updated successfully.'));
         } catch (error) {
-            console.error('❌ Support Desk: failed to update ticket status', error);
+            window.logger?.error('❌ Support Desk: failed to update ticket status', error);
             this.showError(this.translate('Failed to update ticket status.', 'Failed to update ticket status.'));
         } finally {
             this.elements.updateStatusButton.disabled = false;
@@ -576,7 +576,7 @@ class SupportDesk {
         if (window.adminLayout) {
             window.adminLayout.showSuccess(message);
         } else {
-            console.log(message);
+            window.logger?.log(message);
         }
     }
 
@@ -897,7 +897,7 @@ class SupportDesk {
                 this.showSuccess(this.translate(successKey, successKey));
             }
         } catch (error) {
-            console.error('❌ Support Desk: failed to toggle archive state', error);
+            window.logger?.error('❌ Support Desk: failed to toggle archive state', error);
             this.showError(this.translate('Failed to update archive state.', 'Failed to update archive state.'));
         } finally {
             if (this.elements.archiveToggleButton) {

@@ -24,7 +24,7 @@ class UserAccessManagement {
      */
     async init(userId, userData = null) {
         if (this.isInitialized && this.currentUserId === userId) {
-            console.log('✅ User Access Management already initialized for this user');
+            window.logger?.log('✅ User Access Management already initialized for this user');
             return;
         }
 
@@ -51,10 +51,10 @@ class UserAccessManagement {
             this.setupEventListeners();
 
             this.isInitialized = true;
-            console.log('✅ User Access Management initialized');
+            window.logger?.log('✅ User Access Management initialized');
 
         } catch (error) {
-            console.error('❌ User Access Management: Failed to initialize:', error);
+            window.logger?.error('❌ User Access Management: Failed to initialize:', error);
             this.showError('Failed to initialize access management');
         }
     }
@@ -236,7 +236,7 @@ class UserAccessManagement {
                 .order('name', { ascending: true });
 
             if (error) {
-                console.error('❌ Error loading products:', error);
+                window.logger?.error('❌ Error loading products:', error);
                 this.products = ['all'];
                 this.productMap = {};
                 return;
@@ -262,7 +262,7 @@ class UserAccessManagement {
             this.products = ['all', ...productSlugs];
 
         } catch (error) {
-            console.error('❌ Failed to load products:', error);
+            window.logger?.error('❌ Failed to load products:', error);
             this.products = ['all'];
             this.productMap = {};
         }
@@ -335,7 +335,7 @@ class UserAccessManagement {
             this.displayEntitlements();
 
         } catch (error) {
-            console.error('❌ Failed to load entitlements:', error);
+            window.logger?.error('❌ Failed to load entitlements:', error);
             this.showError('Failed to load entitlements: ' + error.message);
         } finally {
             this.showLoading(false);
@@ -501,7 +501,7 @@ class UserAccessManagement {
      */
     openGrantModal() {
         if (!this.elements.grantModal) {
-            console.error('❌ Grant modal element not found!');
+            window.logger?.error('❌ Grant modal element not found!');
             return;
         }
 
@@ -653,7 +653,7 @@ class UserAccessManagement {
             }
 
         } catch (error) {
-            console.error('❌ Failed to grant access:', error);
+            window.logger?.error('❌ Failed to grant access:', error);
             alert('Failed to grant access: ' + (error.message || 'Unknown error'));
         }
     }
@@ -665,7 +665,7 @@ class UserAccessManagement {
         this.currentGrantId = entitlement.id;
 
         if (!this.elements.revokeModal) {
-            console.error('❌ Revoke modal element not found!');
+            window.logger?.error('❌ Revoke modal element not found!');
             return;
         }
 
@@ -757,7 +757,7 @@ class UserAccessManagement {
             await this.loadEntitlements();
 
         } catch (error) {
-            console.error('❌ Failed to revoke access:', error);
+            window.logger?.error('❌ Failed to revoke access:', error);
             alert('Failed to revoke access: ' + (error.message || 'Unknown error'));
         }
     }
@@ -791,7 +791,7 @@ class UserAccessManagement {
             await this.loadEntitlements();
 
         } catch (error) {
-            console.error('❌ Failed to regrant access:', error);
+            window.logger?.error('❌ Failed to regrant access:', error);
             alert('Failed to regrant access: ' + (error.message || 'Unknown error'));
         }
     }
@@ -828,7 +828,7 @@ class UserAccessManagement {
             await this.loadEntitlements();
 
         } catch (error) {
-            console.error('❌ Failed to delete entitlement:', error);
+            window.logger?.error('❌ Failed to delete entitlement:', error);
             alert('Failed to delete entitlement: ' + (error.message || 'Unknown error'));
         }
     }
@@ -1029,11 +1029,11 @@ class UserAccessManagement {
                         );
                     });
                 } catch (i18nextError) {
-                    console.warn('⚠️ Could not add to i18next:', i18nextError);
+                    window.logger?.warn('⚠️ Could not add to i18next:', i18nextError);
                 }
             }
         } catch (error) {
-            console.warn('⚠️ Failed to load user access management translations:', error);
+            window.logger?.warn('⚠️ Failed to load user access management translations:', error);
             // Continue with empty translations - will use keys as fallback
             this.translations = {};
         }

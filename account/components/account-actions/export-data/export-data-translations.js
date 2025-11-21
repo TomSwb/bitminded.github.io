@@ -30,7 +30,7 @@ class ExportDataTranslations {
             // Translations initialized
             
         } catch (error) {
-            console.error('❌ Failed to initialize export data translations:', error);
+            window.logger?.error('❌ Failed to initialize export data translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class ExportDataTranslations {
             // Translations loaded
             
         } catch (error) {
-            console.error('❌ Failed to load export data translations:', error);
+            window.logger?.error('❌ Failed to load export data translations:', error);
             // Fallback to empty translations
             this.translations = {};
         }

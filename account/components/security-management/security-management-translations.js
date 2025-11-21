@@ -30,7 +30,7 @@ class SecurityManagementTranslations {
             // Translations initialized
             
         } catch (error) {
-            console.error('❌ Failed to initialize security management translations:', error);
+            window.logger?.error('❌ Failed to initialize security management translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class SecurityManagementTranslations {
             // Translations loaded
             
         } catch (error) {
-            console.error('❌ Failed to load security management translations:', error);
+            window.logger?.error('❌ Failed to load security management translations:', error);
             // Fallback to empty translations
             this.translations = {};
         }

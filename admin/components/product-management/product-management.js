@@ -62,7 +62,7 @@ class ProductManagement {
             this.isInitialized = true;
 
         } catch (error) {
-            console.error('❌ Product Management: Failed to initialize:', error);
+            window.logger?.error('❌ Product Management: Failed to initialize:', error);
             this.showError('Failed to initialize product management');
         }
     }
@@ -223,7 +223,7 @@ class ProductManagement {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('❌ Database query error:', error);
+                window.logger?.error('❌ Database query error:', error);
                 throw error;
             }
 
@@ -239,7 +239,7 @@ class ProductManagement {
             this.hideLoading();
 
         } catch (error) {
-            console.error('❌ Failed to load products:', error);
+            window.logger?.error('❌ Failed to load products:', error);
             this.hideLoading();
             this.showEmpty();
             this.showError('Failed to load products');
@@ -399,7 +399,7 @@ class ProductManagement {
     renderProducts() {
         const tbody = document.getElementById('products-table-body');
         if (!tbody) {
-            console.error('❌ Table body not found');
+            window.logger?.error('❌ Table body not found');
             return;
         }
 
@@ -656,7 +656,7 @@ Description: ${product.description || 'No description'}
      */
     editProduct(productId) {
         // Open product wizard in edit mode
-        console.log('Edit product:', productId);
+        window.logger?.log('Edit product:', productId);
         window.open(`/admin/components/product-wizard/product-wizard.html?edit=${productId}`, '_blank');
     }
 
@@ -666,8 +666,8 @@ Description: ${product.description || 'No description'}
      * @param {string} productName - Product name
      */
     async publishProduct(productId, productName) {
-        console.log('📢 Publish product:', productId, productName);
-        console.log('⚠️ Publish/Unpublish functionality will be connected when publishing destination is ready');
+        window.logger?.log('📢 Publish product:', productId, productName);
+        window.logger?.log('⚠️ Publish/Unpublish functionality will be connected when publishing destination is ready');
         
         // Placeholder implementation
         alert(`Publish functionality for "${productName}" will be connected when the publishing destination is created.\n\nFor now, this will update the product status from 'draft' to 'active' in the database and make it visible in the public catalog.`);
@@ -685,8 +685,8 @@ Description: ${product.description || 'No description'}
      * @param {string} productName - Product name
      */
     async unpublishProduct(productId, productName) {
-        console.log('📢 Unpublish product:', productId, productName);
-        console.log('⚠️ Publish/Unpublish functionality will be connected when publishing destination is ready');
+        window.logger?.log('📢 Unpublish product:', productId, productName);
+        window.logger?.log('⚠️ Publish/Unpublish functionality will be connected when publishing destination is ready');
         
         // Placeholder implementation
         alert(`Unpublish functionality for "${productName}" will be connected when the publishing destination is created.\n\nFor now, this will update the product status from 'active' to 'draft' and hide it from the public catalog.`);
@@ -741,7 +741,7 @@ Description: ${product.description || 'No description'}
                 .eq('id', productId);
             
             if (error) {
-                console.error('❌ Database error:', error);
+                window.logger?.error('❌ Database error:', error);
                 this.showError(`Failed to delete product: ${error.message}`);
                 this.hideLoading();
                 return;
@@ -753,7 +753,7 @@ Description: ${product.description || 'No description'}
             await this.loadProducts();
             
         } catch (error) {
-            console.error('❌ Error deleting product:', error);
+            window.logger?.error('❌ Error deleting product:', error);
             this.showError(`Failed to delete product: ${error.message || 'Unknown error'}`);
         } finally {
             this.hideLoading();
@@ -764,7 +764,7 @@ Description: ${product.description || 'No description'}
      * Add new product
      */
     addProduct() {
-        console.log('Opening product creation wizard');
+        window.logger?.log('Opening product creation wizard');
         // Open product creation wizard in new tab
         window.open('/admin/components/product-wizard/product-wizard.html', '_blank');
     }
@@ -773,7 +773,7 @@ Description: ${product.description || 'No description'}
      * Create product bundle
      */
     createBundle() {
-        console.log('Create product bundle');
+        window.logger?.log('Create product bundle');
         // TODO: Implement create bundle functionality
         this.showSuccess('Create bundle functionality coming soon!');
     }
@@ -865,7 +865,7 @@ Description: ${product.description || 'No description'}
                 await window.productManagementTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize translations:', error);
+            window.logger?.error('❌ Failed to initialize translations:', error);
         }
     }
 
@@ -898,11 +898,11 @@ Description: ${product.description || 'No description'}
      */
     updateTableHeaders() {
         if (!window.productManagementTranslations || !window.productManagementTranslations.isInitialized) {
-            console.log('❌ Product Management: Translations not initialized, skipping table headers update');
+            window.logger?.log('❌ Product Management: Translations not initialized, skipping table headers update');
             return;
         }
 
-        console.log('🔄 Product Management: Updating table headers');
+        window.logger?.log('🔄 Product Management: Updating table headers');
         const headerMap = {
             'Product Name': 'Product Name',
             'Category': 'Category',
@@ -916,7 +916,7 @@ Description: ${product.description || 'No description'}
 
         // Update table headers
         const tableHeaders = document.querySelectorAll('#products-table th.translatable-content, #products-table th .translatable-content');
-        console.log(`🔄 Product Management: Found ${tableHeaders.length} table headers to update`);
+        window.logger?.log(`🔄 Product Management: Found ${tableHeaders.length} table headers to update`);
         
         const currentLanguage = window.productManagementTranslations.getCurrentLanguage();
         
@@ -924,7 +924,7 @@ Description: ${product.description || 'No description'}
             const translationKey = header.getAttribute('data-translation-key');
             if (translationKey && headerMap[translationKey]) {
                 const newText = window.productManagementTranslations.getTranslation(translationKey, currentLanguage);
-                console.log(`🔄 Product Management: Updating "${translationKey}" from "${header.textContent}" to "${newText}"`);
+                window.logger?.log(`🔄 Product Management: Updating "${translationKey}" from "${header.textContent}" to "${newText}"`);
                 header.textContent = newText;
             }
         });
@@ -935,11 +935,11 @@ Description: ${product.description || 'No description'}
      */
     updateFilterLabels() {
         if (!window.productManagementTranslations || !window.productManagementTranslations.isInitialized) {
-            console.log('❌ Product Management: Translations not initialized, skipping filter labels update');
+            window.logger?.log('❌ Product Management: Translations not initialized, skipping filter labels update');
             return;
         }
 
-        console.log('🔄 Product Management: Updating filter labels');
+        window.logger?.log('🔄 Product Management: Updating filter labels');
         const filterMap = {
             'Status': 'Status',
             'Category': 'Category',
@@ -957,7 +957,7 @@ Description: ${product.description || 'No description'}
 
         // Update filter labels
         const filterLabels = document.querySelectorAll('#product-management .product-management__filter-label[data-translation-key]');
-        console.log(`🔄 Product Management: Found ${filterLabels.length} filter labels to update`);
+        window.logger?.log(`🔄 Product Management: Found ${filterLabels.length} filter labels to update`);
         
         const currentLanguage = window.productManagementTranslations.getCurrentLanguage();
         
@@ -965,20 +965,20 @@ Description: ${product.description || 'No description'}
             const translationKey = label.getAttribute('data-translation-key');
             if (translationKey && filterMap[translationKey]) {
                 const newText = window.productManagementTranslations.getTranslation(translationKey, currentLanguage);
-                console.log(`🔄 Product Management: Updating filter "${translationKey}" from "${label.textContent}" to "${newText}"`);
+                window.logger?.log(`🔄 Product Management: Updating filter "${translationKey}" from "${label.textContent}" to "${newText}"`);
                 label.textContent = newText;
             }
         });
 
         // Update dropdown button text
         const dropdownButtons = document.querySelectorAll('#product-management .product-management__dropdown-btn span');
-        console.log(`🔄 Product Management: Found ${dropdownButtons.length} dropdown buttons to update`);
+        window.logger?.log(`🔄 Product Management: Found ${dropdownButtons.length} dropdown buttons to update`);
         
         dropdownButtons.forEach(button => {
             const translationKey = button.getAttribute('data-translation-key');
             if (translationKey && filterMap[translationKey]) {
                 const newText = window.productManagementTranslations.getTranslation(translationKey);
-                console.log(`🔄 Product Management: Updating dropdown "${translationKey}" from "${button.textContent}" to "${newText}"`);
+                window.logger?.log(`🔄 Product Management: Updating dropdown "${translationKey}" from "${button.textContent}" to "${newText}"`);
                 button.textContent = newText;
             }
         });
@@ -987,7 +987,7 @@ Description: ${product.description || 'No description'}
         const clearButton = document.querySelector('#product-management .product-management__clear-btn');
         if (clearButton) {
             const newText = window.productManagementTranslations.getTranslation('Clear Filters');
-            console.log(`🔄 Product Management: Updating clear button from "${clearButton.textContent}" to "${newText}"`);
+            window.logger?.log(`🔄 Product Management: Updating clear button from "${clearButton.textContent}" to "${newText}"`);
             clearButton.textContent = newText;
         }
     }
@@ -999,7 +999,7 @@ Description: ${product.description || 'No description'}
         if (window.adminLayout) {
             window.adminLayout.showError(message);
         } else {
-            console.error('Product Management Error:', message);
+            window.logger?.error('Product Management Error:', message);
         }
     }
 
@@ -1010,7 +1010,7 @@ Description: ${product.description || 'No description'}
         if (window.adminLayout) {
             window.adminLayout.showSuccess(message);
         } else {
-            console.log('Product Management Success:', message);
+            window.logger?.log('Product Management Success:', message);
         }
     }
 
@@ -1082,7 +1082,7 @@ Description: ${product.description || 'No description'}
                 };
             }
         } catch (error) {
-            console.error('❌ Failed to load preferences:', error);
+            window.logger?.error('❌ Failed to load preferences:', error);
         }
     }
 
@@ -1112,7 +1112,7 @@ Description: ${product.description || 'No description'}
                 }, { onConflict: 'admin_id' });
 
         } catch (error) {
-            console.error('❌ Failed to save preferences:', error);
+            window.logger?.error('❌ Failed to save preferences:', error);
         }
     }
 
@@ -1127,7 +1127,7 @@ Description: ${product.description || 'No description'}
         const categories = [...new Set(this.products.map(product => product.category_slug))];
         const pricingTypes = [...new Set(this.products.map(product => product.pricing_type))];
 
-        console.log('🔍 Filter options found:', { statuses, categories, pricingTypes });
+        window.logger?.log('🔍 Filter options found:', { statuses, categories, pricingTypes });
 
         // Render options for each filter
         this.renderFilterOptions('status', statuses);

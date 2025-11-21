@@ -8,7 +8,7 @@ if (typeof window.userAccessManagementTranslations === 'undefined') {
         init: function() {
             // Translations are loaded via JSON file in the component
             // This file is kept for consistency with other components
-            console.log('✅ User Access Management translations ready');
+            window.logger?.log('✅ User Access Management translations ready');
         }
     };
 }

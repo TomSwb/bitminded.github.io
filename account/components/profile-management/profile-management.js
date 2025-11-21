@@ -18,7 +18,7 @@ class ProfileManagement {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('Profile management component already initialized');
+            window.logger?.log('Profile management component already initialized');
             return;
         }
 
@@ -47,7 +47,7 @@ class ProfileManagement {
             window.dispatchEvent(new CustomEvent('profileManagementInitialized'));
             
         } catch (error) {
-            console.error('❌ Failed to initialize profile management component:', error);
+            window.logger?.error('❌ Failed to initialize profile management component:', error);
             this.showError('Failed to load profile information');
         }
     }
@@ -89,7 +89,7 @@ class ProfileManagement {
             };
             
         } catch (error) {
-            console.error('❌ Failed to load user profile:', error);
+            window.logger?.error('❌ Failed to load user profile:', error);
             throw error;
         }
     }
@@ -146,7 +146,7 @@ class ProfileManagement {
             }
 
         } catch (error) {
-            console.error('❌ Failed to initialize sub-components:', error);
+            window.logger?.error('❌ Failed to initialize sub-components:', error);
             throw error;
         }
     }
@@ -163,7 +163,7 @@ class ProfileManagement {
                 });
             }
         } catch (error) {
-            console.error(`❌ Failed to load component ${componentName}:`, error);
+            window.logger?.error(`❌ Failed to load component ${componentName}:`, error);
         }
     }
 
@@ -176,7 +176,7 @@ class ProfileManagement {
                 await window.profileManagementTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize translations:', error);
+            window.logger?.error('❌ Failed to initialize translations:', error);
         }
     }
 
@@ -251,7 +251,7 @@ class ProfileManagement {
      */
     async handleProfileUpdate(event) {
         try {
-            console.log('🔄 Profile updated:', event.detail);
+            window.logger?.log('🔄 Profile updated:', event.detail);
             
             // Reload profile data
             await this.loadUserProfile();
@@ -269,7 +269,7 @@ class ProfileManagement {
             }
             
         } catch (error) {
-            console.error('❌ Failed to handle profile update:', error);
+            window.logger?.error('❌ Failed to handle profile update:', error);
         }
     }
 

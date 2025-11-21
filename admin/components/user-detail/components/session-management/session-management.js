@@ -24,7 +24,7 @@ class SessionManagement {
      */
     async init(userId) {
         if (!userId) {
-            console.error('❌ Session Management: No user ID provided');
+            window.logger?.error('❌ Session Management: No user ID provided');
             return;
         }
 
@@ -47,7 +47,7 @@ class SessionManagement {
             this.showTranslatableContent();
             
             if (!this.sessionList) {
-                console.error('❌ Session list element not found');
+                window.logger?.error('❌ Session list element not found');
                 return;
             }
             
@@ -58,7 +58,7 @@ class SessionManagement {
             // Initialized
             
         } catch (error) {
-            console.error('❌ Session Management: Failed to initialize:', error);
+            window.logger?.error('❌ Session Management: Failed to initialize:', error);
             this.showError('Failed to initialize session management');
         }
     }
@@ -103,7 +103,7 @@ class SessionManagement {
             }
             
         } catch (error) {
-            console.error('❌ Failed to load sessions:', error);
+            window.logger?.error('❌ Failed to load sessions:', error);
             this.showError('Failed to load sessions: ' + error.message);
         } finally {
             this.showLoading(false);
@@ -195,11 +195,11 @@ class SessionManagement {
             revokeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('🔘 Revoke button clicked!');
+                window.logger?.log('🔘 Revoke button clicked!');
                 this.revokeSession(session.session_token);
             });
         } else {
-            console.error('❌ Revoke button not found in row');
+            window.logger?.error('❌ Revoke button not found in row');
         }
         
         return row;
@@ -288,21 +288,21 @@ class SessionManagement {
      */
     async revokeSession(sessionId) {
         if (!sessionId || !window.supabase) {
-            console.error('❌ No session ID or Supabase client');
+            window.logger?.error('❌ No session ID or Supabase client');
             return;
         }
         
         try {
-            console.log('🚫 Revoking session:', sessionId);
+            window.logger?.log('🚫 Revoking session:', sessionId);
             
             const confirmed = confirm('Are you sure you want to revoke this session?\n\nThe user will be logged out from this device.');
             
             if (!confirmed) {
-                console.log('❌ User cancelled revocation');
+                window.logger?.log('❌ User cancelled revocation');
                 return;
             }
             
-            console.log('🔄 Calling revoke-session Edge Function...');
+            window.logger?.log('🔄 Calling revoke-session Edge Function...');
             
             // Find the table row and button
             const btn = document.querySelector(`[data-session-id="${sessionId}"]`);
@@ -330,33 +330,33 @@ class SessionManagement {
             });
             
             if (error) {
-                console.error('❌ Edge Function error:', error);
+                window.logger?.error('❌ Edge Function error:', error);
                 throw error;
             }
             
             if (!data?.success) {
-                console.error('❌ Revoke failed:', data);
+                window.logger?.error('❌ Revoke failed:', data);
                 throw new Error(data?.error || 'Failed to revoke session');
             }
             
-            console.log('✅ Session revoked successfully in database');
+            window.logger?.log('✅ Session revoked successfully in database');
             
             // Log admin action
             if (window.adminLayout) {
-                console.log('📝 Logging admin action...');
+                window.logger?.log('📝 Logging admin action...');
                 await window.adminLayout.logAdminAction(
                     'session_revoked',
                     `Revoked session ${sessionId.substring(0, 8)}... for user`,
                     this.currentUserId
                 );
-                console.log('✅ Admin action logged');
+                window.logger?.log('✅ Admin action logged');
             }
             
             // Show success message temporarily
             alert('Session revoked successfully!');
             
             // Reload sessions
-            console.log('🔄 Reloading sessions list...');
+            window.logger?.log('🔄 Reloading sessions list...');
             await this.loadSessions();
             
             // Notify parent to refresh stats
@@ -365,7 +365,7 @@ class SessionManagement {
             }
             
         } catch (error) {
-            console.error('❌ Failed to revoke session:', error);
+            window.logger?.error('❌ Failed to revoke session:', error);
             this.showError('Failed to revoke session: ' + error.message);
             alert('Failed to revoke session: ' + error.message);
         }
@@ -433,7 +433,7 @@ class SessionManagement {
             this.translations = await response.json();
             // Translations loaded
         } catch (error) {
-            console.warn('⚠️ Failed to load session management translations:', error);
+            window.logger?.warn('⚠️ Failed to load session management translations:', error);
             // Continue without translations - use English fallback in HTML
         }
     }

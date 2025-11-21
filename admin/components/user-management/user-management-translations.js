@@ -41,16 +41,16 @@ if (typeof window.userManagementTranslations === 'undefined') {
                         });
                         // Translations added
                     } catch (i18nextError) {
-                        console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
+                        window.logger?.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
                 } else {
-                    console.log('ℹ️ i18next not ready, using standalone translations');
+                    window.logger?.log('ℹ️ i18next not ready, using standalone translations');
                 }
 
                 return true;
 
             } catch (error) {
-                console.error('❌ Failed to initialize user management translations:', error);
+                window.logger?.error('❌ Failed to initialize user management translations:', error);
                 return false;
             }
         },
@@ -87,12 +87,12 @@ if (typeof window.userManagementTranslations === 'undefined') {
          */
         updateTranslations() {
             if (!this.isInitialized) {
-                console.warn('⚠️ User management translations not initialized');
+                window.logger?.warn('⚠️ User management translations not initialized');
                 return;
             }
 
             const currentLanguage = this.getCurrentLanguage();
-            console.log('🔄 Updating user management translations to:', currentLanguage);
+            window.logger?.log('🔄 Updating user management translations to:', currentLanguage);
 
             // Update all translatable elements
             const elements = document.querySelectorAll('#user-management .translatable-content[data-translation-key]');
@@ -111,7 +111,7 @@ if (typeof window.userManagementTranslations === 'undefined') {
                 }
             });
 
-            console.log('✅ User management translations updated');
+            window.logger?.log('✅ User management translations updated');
         }
     };
 }

@@ -14,7 +14,7 @@ class AccountActions {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('Account Actions: Already initialized');
+            window.logger?.log('Account Actions: Already initialized');
             return;
         }
 
@@ -32,7 +32,7 @@ class AccountActions {
             // Initialized
 
         } catch (error) {
-            console.error('❌ Account Actions: Failed to initialize:', error);
+            window.logger?.error('❌ Account Actions: Failed to initialize:', error);
             this.showError('Failed to initialize account actions');
         }
     }
@@ -43,7 +43,7 @@ class AccountActions {
     async setupComponent() {
         this.container = document.getElementById('account-actions');
         if (!this.container) {
-            console.error('Account Actions container not found');
+            window.logger?.error('Account Actions container not found');
             return;
         }
 
@@ -69,7 +69,7 @@ class AccountActions {
                 await window.accountActionsTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize account actions translations:', error);
+            window.logger?.error('❌ Failed to initialize account actions translations:', error);
         }
     }
 
@@ -113,7 +113,7 @@ class AccountActions {
     async loadComponent(componentName, containerId) {
         const container = document.getElementById(containerId);
         if (!container) {
-            console.error(`Container ${containerId} not found`);
+            window.logger?.error(`Container ${containerId} not found`);
             return;
         }
 
@@ -143,7 +143,7 @@ class AccountActions {
             }
 
         } catch (error) {
-            console.error(`Error loading ${componentName} component:`, error);
+            window.logger?.error(`Error loading ${componentName} component:`, error);
             container.innerHTML = `<p class="component-error">Failed to load ${componentName} component</p>`;
         }
     }

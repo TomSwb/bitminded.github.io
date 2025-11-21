@@ -24,7 +24,7 @@ class AvatarUpload {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('Avatar upload component already initialized');
+            window.logger?.log('Avatar upload component already initialized');
             return;
         }
 
@@ -34,7 +34,7 @@ class AvatarUpload {
             const cropConfirmed = sessionStorage.getItem('avatar_crop_confirmed');
             
             if (croppedImage && cropConfirmed === 'true') {
-                console.log('📨 Found cropped image in sessionStorage (mobile mode)');
+                window.logger?.log('📨 Found cropped image in sessionStorage (mobile mode)');
                 // Clean up sessionStorage
                 sessionStorage.removeItem('avatar_cropped_image');
                 sessionStorage.removeItem('avatar_crop_confirmed');
@@ -52,12 +52,12 @@ class AvatarUpload {
             // Listen for postMessage from cropper window (desktop popup mode)
             window.addEventListener('message', (event) => {
                 if (event.origin === window.location.origin && event.data.type === 'avatar_cropped') {
-                    console.log('📨 Received avatar_cropped message from cropper');
+                    window.logger?.log('📨 Received avatar_cropped message from cropper');
                     if (event.data.imageData) {
-                        console.log('✅ Received image data, length:', event.data.imageData.length);
+                        window.logger?.log('✅ Received image data, length:', event.data.imageData.length);
                         this.handleCroppedImage(event.data.imageData);
                     } else {
-                        console.error('❌ No image data in message');
+                        window.logger?.error('❌ No image data in message');
                     }
                 }
             });
@@ -66,7 +66,7 @@ class AvatarUpload {
             // Initialized silently
             
         } catch (error) {
-            console.error('❌ Failed to initialize avatar upload component:', error);
+            window.logger?.error('❌ Failed to initialize avatar upload component:', error);
             this.showError('Failed to initialize avatar upload');
         }
     }
@@ -149,7 +149,7 @@ class AvatarUpload {
             reader.readAsDataURL(file);
             
         } catch (error) {
-            console.error('❌ Failed to process file:', error);
+            window.logger?.error('❌ Failed to process file:', error);
             this.showError(error.message || 'Failed to process file');
         } finally {
             // Clear file input so same file can be selected again
@@ -182,7 +182,7 @@ class AvatarUpload {
      */
     async handleCroppedImage(imageDataUrl) {
         try {
-            console.log('🔄 Processing cropped image...');
+            window.logger?.log('🔄 Processing cropped image...');
             
             // Show loading state
             this.showLoading(true);
@@ -191,26 +191,26 @@ class AvatarUpload {
             
             // Convert data URL to File
             const file = await this.dataURLtoFile(imageDataUrl, 'avatar.jpg');
-            console.log('✅ File created:', file.name, file.size, 'bytes');
+            window.logger?.log('✅ File created:', file.name, file.size, 'bytes');
             
-            console.log('🔄 Uploading to Supabase...');
+            window.logger?.log('🔄 Uploading to Supabase...');
             // Upload file
             const avatarUrl = await this.uploadFile(file);
-            console.log('✅ Uploaded, URL:', avatarUrl);
+            window.logger?.log('✅ Uploaded, URL:', avatarUrl);
             
-            console.log('🔄 Updating avatar display...');
+            window.logger?.log('🔄 Updating avatar display...');
             // Update avatar display
             await this.updateAvatarDisplay(avatarUrl);
             
             // Show success
             this.showSuccess('Avatar updated successfully');
-            console.log('✅ Avatar update complete!');
+            window.logger?.log('✅ Avatar update complete!');
             
             // Trigger profile update event
             this.triggerProfileUpdate();
             
         } catch (error) {
-            console.error('❌ Failed to upload avatar:', error);
+            window.logger?.error('❌ Failed to upload avatar:', error);
             this.showError(error.message || 'Failed to upload avatar');
         } finally {
             this.showLoading(false);
@@ -258,7 +258,7 @@ class AvatarUpload {
                     .remove(filesToDelete);
             }
         } catch (cleanupError) {
-            console.warn('Could not clean up old avatars:', cleanupError);
+            window.logger?.warn('Could not clean up old avatars:', cleanupError);
             // Continue anyway - not critical
         }
 

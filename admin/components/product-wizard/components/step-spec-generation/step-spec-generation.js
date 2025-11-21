@@ -41,7 +41,7 @@ class StepSpecGeneration {
             this.checkExistingSpec();
             
         } catch (error) {
-            console.error('❌ Step 2: Failed to initialize:', error);
+            window.logger?.error('❌ Step 2: Failed to initialize:', error);
         }
     }
 
@@ -215,7 +215,7 @@ class StepSpecGeneration {
                     this.loadAiBtn.innerHTML = `<span class="btn-icon">⏳</span>Loading AI Recommendations... (${completed}/${fields.length})`;
                 }
             } catch (error) {
-                console.error(`❌ Error loading recommendation for ${fieldName}:`, error);
+                window.logger?.error(`❌ Error loading recommendation for ${fieldName}:`, error);
                 completed++;
             }
         }
@@ -231,7 +231,7 @@ class StepSpecGeneration {
     async getInitialRecommendation(fieldName) {
         try {
             const productContext = this.getProductContext();
-            console.log(`🤖 Getting AI recommendation for ${fieldName}:`, productContext);
+            window.logger?.log(`🤖 Getting AI recommendation for ${fieldName}:`, productContext);
             
             const response = await window.supabase.functions.invoke('conversational-tech-guidance', {
                 body: {
@@ -241,14 +241,14 @@ class StepSpecGeneration {
                 }
             });
 
-            console.log(`📥 Response for ${fieldName}:`, response);
+            window.logger?.log(`📥 Response for ${fieldName}:`, response);
 
             if (response.error) {
                 throw new Error(response.error.message);
             }
 
             const aiResponse = response.data.response;
-            console.log(`✅ AI Response for ${fieldName}:`, aiResponse);
+            window.logger?.log(`✅ AI Response for ${fieldName}:`, aiResponse);
             
             this.recommendations[fieldName] = aiResponse;
             
@@ -259,7 +259,7 @@ class StepSpecGeneration {
             this.saveState();
             
         } catch (error) {
-            console.error(`❌ Error getting initial recommendation for ${fieldName}:`, error);
+            window.logger?.error(`❌ Error getting initial recommendation for ${fieldName}:`, error);
             this.showRecommendationError(fieldName, error.message);
         }
     }
@@ -365,7 +365,7 @@ class StepSpecGeneration {
             // Clean up
             delete this.pendingRecommendations[fieldName];
             
-            console.log(`✅ Applied new recommendation for ${fieldName}: ${newRecommendation.recommendation}`);
+            window.logger?.log(`✅ Applied new recommendation for ${fieldName}: ${newRecommendation.recommendation}`);
         }
     }
 
@@ -434,7 +434,7 @@ class StepSpecGeneration {
             }
             
         } catch (error) {
-            console.error(`❌ Error in chat for ${fieldName}:`, error);
+            window.logger?.error(`❌ Error in chat for ${fieldName}:`, error);
             this.addChatMessage(messagesElement, `Error: ${error.message}`, 'ai');
         }
     }
@@ -451,7 +451,7 @@ class StepSpecGeneration {
     acceptRecommendation(fieldName) {
         const recommendation = this.recommendations[fieldName];
         if (!recommendation) {
-            console.error(`No recommendation available for ${fieldName}`);
+            window.logger?.error(`No recommendation available for ${fieldName}`);
             return;
         }
 
@@ -506,7 +506,7 @@ class StepSpecGeneration {
             }
             
         } catch (error) {
-            console.error(`❌ Error getting suggestion for ${fieldName}:`, error);
+            window.logger?.error(`❌ Error getting suggestion for ${fieldName}:`, error);
         }
     }
 
@@ -566,7 +566,7 @@ class StepSpecGeneration {
             }
             
         } catch (error) {
-            console.error('❌ Error generating specification:', error);
+            window.logger?.error('❌ Error generating specification:', error);
             if (this.generationStatus) {
                 this.generationStatus.textContent = `Error: ${error.message}`;
             }
@@ -701,7 +701,7 @@ class StepSpecGeneration {
     }
 
     saveState() {
-        console.log('💾 Saving Step 2 state:', {
+        window.logger?.log('💾 Saving Step 2 state:', {
             recommendations: Object.keys(this.recommendations),
             conversationHistory: Object.keys(this.conversationHistory),
             finalDecisions: Object.keys(this.finalDecisions),
@@ -719,9 +719,9 @@ class StepSpecGeneration {
                 pendingRecommendations: this.pendingRecommendations || {}
             };
             
-            console.log('✅ Step 2 state saved to window.productWizard.stepData[2]');
+            window.logger?.log('✅ Step 2 state saved to window.productWizard.stepData[2]');
         } else {
-            console.error('❌ window.productWizard not available for saving state');
+            window.logger?.error('❌ window.productWizard not available for saving state');
         }
     }
 
@@ -801,7 +801,7 @@ class StepSpecGeneration {
 
     async reloadRecommendation(fieldName) {
         try {
-            console.log(`🔄 Reloading recommendation for ${fieldName}`);
+            window.logger?.log(`🔄 Reloading recommendation for ${fieldName}`);
             
             // Clear existing recommendation
             const recommendationElement = document.getElementById(`recommendation-${fieldName}`);
@@ -843,20 +843,20 @@ class StepSpecGeneration {
             // Remove from final decisions
             delete this.finalDecisions[fieldName];
             
-            console.log(`✅ Reloaded recommendation for ${fieldName}`);
+            window.logger?.log(`✅ Reloaded recommendation for ${fieldName}`);
             
         } catch (error) {
-            console.error(`❌ Error reloading recommendation for ${fieldName}:`, error);
+            window.logger?.error(`❌ Error reloading recommendation for ${fieldName}:`, error);
         }
     }
 
     showError(message) {
-        console.error('Step 2 Error:', message);
+        window.logger?.error('Step 2 Error:', message);
         // You can add UI error display here if needed
     }
     
     clearAllAiData() {
-        console.log('🗑️ Clearing all AI data...');
+        window.logger?.log('🗑️ Clearing all AI data...');
         
         // Reset all internal state
         this.recommendations = {};
@@ -906,11 +906,11 @@ class StepSpecGeneration {
             delete window.productWizard.stepData[2];
         }
         
-        console.log('✅ All AI data cleared');
+        window.logger?.log('✅ All AI data cleared');
     }
     
     analyzeDiscrepancies(specification) {
-        console.log('🔍 Analyzing discrepancies between AI recommendations and generated specification...');
+        window.logger?.log('🔍 Analyzing discrepancies between AI recommendations and generated specification...');
         
         const discrepancies = [];
         
@@ -1083,7 +1083,7 @@ class StepSpecGeneration {
     
     displayDiscrepancies(discrepancies) {
         if (!this.discrepancyAnalysis || !this.discrepancyContent) {
-            console.error('❌ Discrepancy analysis elements not found');
+            window.logger?.error('❌ Discrepancy analysis elements not found');
             return;
         }
         
@@ -1123,7 +1123,7 @@ class StepSpecGeneration {
         }
         
         this.discrepancyAnalysis.style.display = 'block';
-        console.log(`✅ Displayed ${discrepancies.length} discrepancies`);
+        window.logger?.log(`✅ Displayed ${discrepancies.length} discrepancies`);
     }
     
     checkGenerationRequirements() {
@@ -1154,14 +1154,14 @@ class StepSpecGeneration {
         if (window.productWizard && window.productWizard.stepData && window.productWizard.stepData[2]) {
             const technicalSpec = window.productWizard.stepData[2].technicalSpecification;
             if (technicalSpec && technicalSpec.trim() !== '') {
-                console.log('✅ Technical specification exists in database, marking Step 2 as completed');
+                window.logger?.log('✅ Technical specification exists in database, marking Step 2 as completed');
                 window.productWizard.markStepCompleted(2);
             }
         }
     }
     
     downloadSpecification() {
-        console.log('📥 Downloading specification...');
+        window.logger?.log('📥 Downloading specification...');
         
         // Get the current specification content
         const currentSpec = window.productWizard && window.productWizard.stepData && window.productWizard.stepData[2] 
@@ -1169,7 +1169,7 @@ class StepSpecGeneration {
             : '';
         
         if (!currentSpec) {
-            console.error('❌ No specification to download');
+            window.logger?.error('❌ No specification to download');
             return;
         }
         
@@ -1193,7 +1193,7 @@ class StepSpecGeneration {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        console.log(`✅ Specification downloaded as ${filename}`);
+        window.logger?.log(`✅ Specification downloaded as ${filename}`);
     }
 }
 

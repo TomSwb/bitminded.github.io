@@ -35,14 +35,14 @@ if (typeof window.ServiceManagementTranslations === 'undefined') {
                             );
                         });
                     } catch (i18nextError) {
-                        console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
+                        window.logger?.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
                 }
 
                 return true;
 
             } catch (error) {
-                console.error('❌ Failed to initialize service management translations:', error);
+                window.logger?.error('❌ Failed to initialize service management translations:', error);
                 return false;
             }
         },
@@ -75,7 +75,7 @@ if (typeof window.ServiceManagementTranslations === 'undefined') {
          */
         updateTranslations() {
             if (!this.isInitialized) {
-                console.warn('⚠️ Service management translations not initialized');
+                window.logger?.warn('⚠️ Service management translations not initialized');
                 return;
             }
 

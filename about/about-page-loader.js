@@ -30,7 +30,7 @@ class AboutPageLoader {
 
             this.componentsLoaded = true;
         } catch (error) {
-            console.error('❌ Failed to load about page components:', error);
+            window.logger?.error('❌ Failed to load about page components:', error);
         }
     }
 
@@ -125,7 +125,7 @@ class AboutPageLoader {
                     script.onerror = () => resolve();
                     document.body.appendChild(script);
                 } catch (error) {
-                    console.warn('Failed to load about sub-navigation:', error);
+                    window.logger?.warn('Failed to load about sub-navigation:', error);
                     resolve();
                 }
             };

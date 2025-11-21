@@ -20,9 +20,9 @@ class EmailVerification {
             await this.handleVerification();
             this.isInitialized = true;
             
-            console.log('✅ Email Verification initialized successfully');
+            window.logger?.log('✅ Email Verification initialized successfully');
         } catch (error) {
-            console.error('❌ Failed to initialize Email Verification:', error);
+            window.logger?.error('❌ Failed to initialize Email Verification:', error);
             this.showError('Failed to initialize verification');
         }
     }
@@ -49,12 +49,12 @@ class EmailVerification {
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Verify page translations loaded');
+                window.logger?.log('✅ Verify page translations loaded');
             } else {
-                console.warn('Failed to load verify page translations:', response.status);
+                window.logger?.warn('Failed to load verify page translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load verify page translations:', error);
+            window.logger?.warn('Failed to load verify page translations:', error);
         }
     }
 
@@ -120,8 +120,8 @@ class EmailVerification {
      */
     async handleVerification() {
         try {
-            console.log('🔧 Verify page loaded, starting verification process...');
-            console.log('🔧 Current URL:', window.location.href);
+            window.logger?.log('🔧 Verify page loaded, starting verification process...');
+            window.logger?.log('🔧 Current URL:', window.location.href);
             
             // Wait for Supabase to be available
             await this.waitForSupabase();
@@ -129,16 +129,16 @@ class EmailVerification {
             // Parse URL parameters
             const urlParams = this.parseUrlParameters();
             
-            console.log('🔍 URL parameters found:', urlParams);
-            console.log('🔍 Full URL:', window.location.href);
-            console.log('🔍 Hash:', window.location.hash);
-            console.log('🔍 Search:', window.location.search);
+            window.logger?.log('🔍 URL parameters found:', urlParams);
+            window.logger?.log('🔍 Full URL:', window.location.href);
+            window.logger?.log('🔍 Hash:', window.location.hash);
+            window.logger?.log('🔍 Search:', window.location.search);
             
             // Handle custom email change verification
             if (urlParams.type === 'email_change' && urlParams.token) {
-                console.log('🔄 Processing custom email change verification...');
-                console.log('🔄 Token:', urlParams.token);
-                console.log('🔄 Type:', urlParams.type);
+                window.logger?.log('🔄 Processing custom email change verification...');
+                window.logger?.log('🔄 Token:', urlParams.token);
+                window.logger?.log('🔄 Type:', urlParams.type);
                 
                 // Verify the custom token with our Edge Function
                 const { data, error } = await window.supabase.functions.invoke('verify-email-change', {
@@ -147,7 +147,7 @@ class EmailVerification {
                     }
                 });
                 
-                console.log('📧 Email change verification response:', { data, error });
+                window.logger?.log('📧 Email change verification response:', { data, error });
                 
                 if (error) {
                     throw new Error(error.message || 'Failed to verify email change token');
@@ -157,8 +157,8 @@ class EmailVerification {
                     throw new Error(data.error || 'Email change verification failed');
                 }
                 
-                console.log('✅ Email change verification successful');
-                console.log('✅ New email:', data.newEmail);
+                window.logger?.log('✅ Email change verification successful');
+                window.logger?.log('✅ New email:', data.newEmail);
                 
                 this.showSuccess();
                 // Redirect to account profile after 3 seconds
@@ -174,11 +174,11 @@ class EmailVerification {
                 const { data: sessionData, error: sessionError } = await window.supabase.auth.getSession();
                 
                 if (sessionError) {
-                    console.error('Session error:', sessionError);
+                    window.logger?.error('Session error:', sessionError);
                 }
                 
                 if (sessionData?.session?.user) {
-                    console.log('✅ Found existing session, user already verified');
+                    window.logger?.log('✅ Found existing session, user already verified');
                     
                     // Log the login activity if this is their first verified session
                     try {
@@ -187,12 +187,12 @@ class EmailVerification {
                         });
                         
                         if (logError) {
-                            console.warn('⚠️ Failed to log login activity:', logError);
+                            window.logger?.warn('⚠️ Failed to log login activity:', logError);
                         } else {
-                            console.log('✅ Login activity logged');
+                            window.logger?.log('✅ Login activity logged');
                         }
                     } catch (logErr) {
-                        console.warn('⚠️ Error logging login activity:', logErr);
+                        window.logger?.warn('⚠️ Error logging login activity:', logErr);
                     }
                     
                     this.showSuccess();
@@ -202,7 +202,7 @@ class EmailVerification {
                 throw new Error('No access token found in URL and no existing session');
             }
 
-            console.log('🔄 Processing email verification...');
+            window.logger?.log('🔄 Processing email verification...');
 
             // Set the session using the access token
             const { data, error } = await window.supabase.auth.setSession({
@@ -215,7 +215,7 @@ class EmailVerification {
             }
 
             if (data.user) {
-                console.log('✅ Email verification successful');
+                window.logger?.log('✅ Email verification successful');
                 
                 // Log the login activity for first-time login after email verification
                 try {
@@ -224,13 +224,13 @@ class EmailVerification {
                     });
                     
                     if (logError) {
-                        console.warn('⚠️ Failed to log login activity:', logError);
+                        window.logger?.warn('⚠️ Failed to log login activity:', logError);
                         // Don't throw error - login activity logging is not critical
                     } else {
-                        console.log('✅ Login activity logged');
+                        window.logger?.log('✅ Login activity logged');
                     }
                 } catch (logErr) {
-                    console.warn('⚠️ Error logging login activity:', logErr);
+                    window.logger?.warn('⚠️ Error logging login activity:', logErr);
                     // Continue anyway - this is not critical
                 }
                 
@@ -240,7 +240,7 @@ class EmailVerification {
             }
 
         } catch (error) {
-            console.error('❌ Email verification failed:', error);
+            window.logger?.error('❌ Email verification failed:', error);
             this.showError(error.message);
         }
     }
@@ -281,15 +281,15 @@ class EmailVerification {
     parseUrlParameters() {
         const params = {};
         
-        console.log('🔍 Parsing URL parameters...');
-        console.log('Full URL:', window.location.href);
-        console.log('Hash:', window.location.hash);
-        console.log('Search:', window.location.search);
+        window.logger?.log('🔍 Parsing URL parameters...');
+        window.logger?.log('Full URL:', window.location.href);
+        window.logger?.log('Hash:', window.location.hash);
+        window.logger?.log('Search:', window.location.search);
         
         // Parse search parameters first (production)
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.size > 0) {
-            console.log('Search params:', Object.fromEntries(searchParams.entries()));
+            window.logger?.log('Search params:', Object.fromEntries(searchParams.entries()));
             
             searchParams.forEach((value, key) => {
                 params[key] = value;
@@ -300,7 +300,7 @@ class EmailVerification {
         const hash = window.location.hash.substring(1);
         if (hash) {
             const hashParams = new URLSearchParams(hash);
-            console.log('Hash params:', Object.fromEntries(hashParams.entries()));
+            window.logger?.log('Hash params:', Object.fromEntries(hashParams.entries()));
             
             hashParams.forEach((value, key) => {
                 // Only use hash params if search params don't have this key (live server fallback)
@@ -310,7 +310,7 @@ class EmailVerification {
             });
         }
         
-        console.log('Final parsed params:', params);
+        window.logger?.log('Final parsed params:', params);
         return params;
     }
 
@@ -372,7 +372,7 @@ class EmailVerification {
                 throw new Error('No email address found for resending verification');
             }
 
-            console.log('🔄 Resending verification email to:', userEmail);
+            window.logger?.log('🔄 Resending verification email to:', userEmail);
 
             // Resend verification email
             const { error } = await window.supabase.auth.resend({
@@ -388,10 +388,10 @@ class EmailVerification {
             const successMessage = this.getTranslation('verify.resendSuccess') || 'Verification email sent! Please check your inbox.';
             alert(successMessage);
 
-            console.log('✅ Verification email resent successfully');
+            window.logger?.log('✅ Verification email resent successfully');
 
         } catch (error) {
-            console.error('❌ Failed to resend verification email:', error);
+            window.logger?.error('❌ Failed to resend verification email:', error);
             const errorMessage = this.getTranslation('verify.resendError') || 'Failed to resend email. Please try again.';
             alert(errorMessage);
         } finally {

@@ -107,7 +107,7 @@
           if (error.code === '23505') {
             updateStatus(statusEl, STATUS_KEYS.duplicate);
           } else {
-            console.error('Catalog newsletter subscription error:', error);
+            window.logger?.error('Catalog newsletter subscription error:', error);
             updateStatus(statusEl, STATUS_KEYS.error);
           }
         } else {
@@ -115,7 +115,7 @@
           form.reset();
         }
       } catch (err) {
-        console.error('Catalog newsletter subscription error:', err);
+        window.logger?.error('Catalog newsletter subscription error:', err);
         updateStatus(statusEl, STATUS_KEYS.error);
       } finally {
         setBusy(false);

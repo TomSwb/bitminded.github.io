@@ -31,7 +31,7 @@ if (typeof window.supportDeskTranslations === 'undefined') {
 
                 return true;
             } catch (error) {
-                console.error('❌ Support desk translations init error:', error);
+                window.logger?.error('❌ Support desk translations init error:', error);
                 return false;
             }
         },

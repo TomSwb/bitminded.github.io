@@ -45,7 +45,7 @@ class ServiceManagement {
 
             this.isInitialized = true;
         } catch (error) {
-            console.error('❌ Service Management: Failed to initialize:', error);
+            window.logger?.error('❌ Service Management: Failed to initialize:', error);
             this.showError('Failed to initialize service management');
         }
     }
@@ -262,7 +262,7 @@ class ServiceManagement {
                             const currentPricing = this.getPricingData() || this.currentEditingService?.pricing || {};
                             this.initializeCurrencyPricingEditor(currentPricing);
                         } catch (error) {
-                            console.warn('Error re-initializing currency editor:', error);
+                            window.logger?.warn('Error re-initializing currency editor:', error);
                         }
                     }
                     // Update sale price preview when category/slug changes
@@ -371,7 +371,7 @@ class ServiceManagement {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('❌ Database query error:', error);
+                window.logger?.error('❌ Database query error:', error);
                 throw error;
             }
 
@@ -382,7 +382,7 @@ class ServiceManagement {
             this.renderServices();
 
         } catch (error) {
-            console.error('❌ Failed to load services:', error);
+            window.logger?.error('❌ Failed to load services:', error);
             this.showError('Failed to load services');
             this.hideLoading();
         }
@@ -552,13 +552,13 @@ class ServiceManagement {
         // Get all checkboxes in the table body (only visible/filtered rows)
         const tbody = document.getElementById('services-table-body');
         if (!tbody) {
-            console.warn('Table body not found');
+            window.logger?.warn('Table body not found');
             return;
         }
         
         const checkboxes = tbody.querySelectorAll('.service-row-checkbox');
         if (checkboxes.length === 0) {
-            console.warn('No checkboxes found in table');
+            window.logger?.warn('No checkboxes found in table');
             return;
         }
         
@@ -655,7 +655,7 @@ class ServiceManagement {
             this.showSuccess(`Successfully updated ${selectedIds.length} service(s)`);
 
         } catch (error) {
-            console.error('Error bulk updating featured status:', error);
+            window.logger?.error('Error bulk updating featured status:', error);
             this.showError('Failed to update services');
         } finally {
             // Restore button state
@@ -695,7 +695,7 @@ class ServiceManagement {
 
             return true;
         } catch (error) {
-            console.error(`Error updating service ${serviceId}:`, error);
+            window.logger?.error(`Error updating service ${serviceId}:`, error);
             throw error;
         }
     }
@@ -738,7 +738,7 @@ class ServiceManagement {
             this.showSuccess(`Successfully removed sale from ${selectedIds.length} service(s)`);
 
         } catch (error) {
-            console.error('Error bulk removing sale:', error);
+            window.logger?.error('Error bulk removing sale:', error);
             this.showError('Failed to remove sale from services');
         } finally {
             // Restore button state
@@ -789,7 +789,7 @@ class ServiceManagement {
 
             return true;
         } catch (error) {
-            console.error(`Error updating service ${serviceId}:`, error);
+            window.logger?.error(`Error updating service ${serviceId}:`, error);
             throw error;
         }
     }
@@ -849,7 +849,7 @@ class ServiceManagement {
             this.showSuccess(`Successfully set ${selectedIds.length} service(s) to ${statusLabel}`);
 
         } catch (error) {
-            console.error('Error bulk updating status:', error);
+            window.logger?.error('Error bulk updating status:', error);
             this.showError('Failed to update service status');
         } finally {
             // Restore button state
@@ -886,7 +886,7 @@ class ServiceManagement {
 
             return true;
         } catch (error) {
-            console.error(`Error updating service ${serviceId}:`, error);
+            window.logger?.error(`Error updating service ${serviceId}:`, error);
             throw error;
         }
     }
@@ -1034,7 +1034,7 @@ class ServiceManagement {
             }
             return false;
         } catch (error) {
-            console.warn('Error checking membership service:', error);
+            window.logger?.warn('Error checking membership service:', error);
             return false;
         }
     }
@@ -1405,7 +1405,7 @@ class ServiceManagement {
             this.showSuccess(this.currentEditingService ? 'Service updated successfully' : 'Service created successfully');
 
         } catch (error) {
-            console.error('❌ Failed to save service:', error);
+            window.logger?.error('❌ Failed to save service:', error);
             this.showError('Failed to save service: ' + error.message);
         }
     }
@@ -1443,7 +1443,7 @@ class ServiceManagement {
             this.showSuccess('Service deleted successfully');
 
         } catch (error) {
-            console.error('❌ Failed to delete service:', error);
+            window.logger?.error('❌ Failed to delete service:', error);
             this.showError('Failed to delete service: ' + error.message);
         }
     }
@@ -1584,7 +1584,7 @@ class ServiceManagement {
      */
     switchTab(tabName) {
         if (!tabName) {
-            console.warn('⚠️ No tab name provided to switchTab');
+            window.logger?.warn('⚠️ No tab name provided to switchTab');
             return;
         }
 

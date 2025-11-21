@@ -35,14 +35,14 @@ if (typeof window.CurrencySwitcherTranslations === 'undefined') {
                             );
                         });
                     } catch (i18nextError) {
-                        console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
+                        window.logger?.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
                 }
 
                 return true;
 
             } catch (error) {
-                console.error('❌ Failed to initialize currency switcher translations:', error);
+                window.logger?.error('❌ Failed to initialize currency switcher translations:', error);
                 return false;
             }
         },

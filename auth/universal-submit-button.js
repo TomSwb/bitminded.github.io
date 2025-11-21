@@ -25,7 +25,7 @@ class UniversalSubmitButton {
             
             // Universal Submit Button initialized silently
         } catch (error) {
-            console.error('❌ Failed to initialize Universal Submit Button:', error);
+            window.logger?.error('❌ Failed to initialize Universal Submit Button:', error);
         }
     }
 
@@ -77,10 +77,10 @@ class UniversalSubmitButton {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
             } else {
-                console.warn('Failed to load universal submit button translations:', response.status);
+                window.logger?.warn('Failed to load universal submit button translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load universal submit button translations:', error);
+            window.logger?.warn('Failed to load universal submit button translations:', error);
         }
     }
 
@@ -178,7 +178,7 @@ class UniversalSubmitButton {
                 await this.handleSignup(e);
             }
         } catch (error) {
-            console.error('Form submission error:', error);
+            window.logger?.error('Form submission error:', error);
             this.showError(error.message || 'An error occurred');
         } finally {
             this.setSubmitting(false);
@@ -287,7 +287,7 @@ class UniversalSubmitButton {
      */
     showError(message) {
         // You could implement a toast notification system here
-        console.error('Form Error:', message);
+        window.logger?.error('Form Error:', message);
         alert(message); // Temporary - replace with better UX
     }
 
@@ -296,7 +296,7 @@ class UniversalSubmitButton {
      * @param {string} message - Success message
      */
     showSuccess(message) {
-        console.log('Form Success:', message);
+        window.logger?.log('Form Success:', message);
         alert(message); // Temporary - replace with better UX
     }
 }

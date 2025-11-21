@@ -106,7 +106,7 @@ class UserManagement {
             this.isInitialized = true;
 
         } catch (error) {
-            console.error('❌ User Management: Failed to initialize:', error);
+            window.logger?.error('❌ User Management: Failed to initialize:', error);
             this.showError('Failed to initialize user management');
         }
     }
@@ -225,7 +225,7 @@ class UserManagement {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('❌ Database query error:', error);
+                window.logger?.error('❌ Database query error:', error);
                 throw error;
             }
 
@@ -279,7 +279,7 @@ class UserManagement {
             this.hideLoading();
 
         } catch (error) {
-            console.error('❌ Failed to load users:', error);
+            window.logger?.error('❌ Failed to load users:', error);
             this.hideLoading();
             this.showEmpty();
             this.showError('Failed to load users');
@@ -530,7 +530,7 @@ class UserManagement {
     renderUsers() {
         const tbody = document.getElementById('users-table-body');
         if (!tbody) {
-            console.error('❌ Table body not found');
+            window.logger?.error('❌ Table body not found');
             return;
         }
 
@@ -816,8 +816,8 @@ class UserManagement {
             
             
             if (response.error) {
-                console.error('❌ Edge Function error:', response.error);
-                console.error('❌ Error data:', response.data);
+                window.logger?.error('❌ Edge Function error:', response.error);
+                window.logger?.error('❌ Error data:', response.data);
                 
                 // Try to extract error message from response
                 const errorMessage = response.data?.error || response.error.message || 'Unknown error';
@@ -832,7 +832,7 @@ class UserManagement {
             await this.loadUsers();
             
         } catch (error) {
-            console.error('❌ Error deleting user:', error);
+            window.logger?.error('❌ Error deleting user:', error);
             this.showError(`Failed to delete user: ${error.message || 'Unknown error'}`);
         } finally {
             this.hideLoading();
@@ -997,7 +997,7 @@ class UserManagement {
                 await window.userManagementTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize translations:', error);
+            window.logger?.error('❌ Failed to initialize translations:', error);
         }
     }
 
@@ -1009,7 +1009,7 @@ class UserManagement {
             window.userManagementTranslations.updateTranslations();
         }
         this.showTranslatableContent();
-        console.log('🔄 User Management: Calling updateTableHeaders and updateFilterLabels');
+        window.logger?.log('🔄 User Management: Calling updateTableHeaders and updateFilterLabels');
         
         // Debug: Check what elements actually exist
         this.debugDOMElements();
@@ -1025,20 +1025,20 @@ class UserManagement {
      * Debug DOM elements to see what's actually available
      */
     debugDOMElements() {
-        console.log('🔍 DEBUG: Checking DOM elements...');
+        window.logger?.log('🔍 DEBUG: Checking DOM elements...');
         
         // Check all th elements
         const allThs = document.querySelectorAll('#users-table th');
-        console.log(`🔍 Found ${allThs.length} total th elements:`);
+        window.logger?.log(`🔍 Found ${allThs.length} total th elements:`);
         allThs.forEach((th, index) => {
-            console.log(`🔍 TH ${index}: class="${th.className}", hasTranslatableContent=${th.classList.contains('translatable-content')}, hasDataKey=${th.hasAttribute('data-translation-key')}, key="${th.getAttribute('data-translation-key')}", text="${th.textContent.trim()}"`);
+            window.logger?.log(`🔍 TH ${index}: class="${th.className}", hasTranslatableContent=${th.classList.contains('translatable-content')}, hasDataKey=${th.hasAttribute('data-translation-key')}, key="${th.getAttribute('data-translation-key')}", text="${th.textContent.trim()}"`);
         });
         
         // Check all filter labels
         const allLabels = document.querySelectorAll('#user-management label');
-        console.log(`🔍 Found ${allLabels.length} total label elements:`);
+        window.logger?.log(`🔍 Found ${allLabels.length} total label elements:`);
         allLabels.forEach((label, index) => {
-            console.log(`🔍 Label ${index}: class="${label.className}", hasDataKey=${label.hasAttribute('data-translation-key')}, key="${label.getAttribute('data-translation-key')}", text="${label.textContent.trim()}"`);
+            window.logger?.log(`🔍 Label ${index}: class="${label.className}", hasDataKey=${label.hasAttribute('data-translation-key')}, key="${label.getAttribute('data-translation-key')}", text="${label.textContent.trim()}"`);
         });
     }
 
@@ -1055,11 +1055,11 @@ class UserManagement {
      */
     updateTableHeaders() {
         if (!window.userManagementTranslations || !window.userManagementTranslations.isInitialized) {
-            console.log('❌ User Management: Translations not initialized, skipping table headers update');
+            window.logger?.log('❌ User Management: Translations not initialized, skipping table headers update');
             return;
         }
 
-        console.log('🔄 User Management: Updating table headers');
+        window.logger?.log('🔄 User Management: Updating table headers');
         const headerMap = {
             'Username': 'Username',
             'Email': 'Email', 
@@ -1075,28 +1075,28 @@ class UserManagement {
 
         // Update table headers
         const tableHeaders = document.querySelectorAll('#users-table th.translatable-content, #users-table th .translatable-content');
-        console.log(`🔄 User Management: Found ${tableHeaders.length} table headers to update`);
+        window.logger?.log(`🔄 User Management: Found ${tableHeaders.length} table headers to update`);
         
         // Debug: Log all found headers
         tableHeaders.forEach((header, index) => {
             const translationKey = header.getAttribute('data-translation-key');
-            console.log(`🔄 Header ${index}: tag="${header.tagName}", class="${header.className}", key="${translationKey}", text="${header.textContent.trim()}"`);
+            window.logger?.log(`🔄 Header ${index}: tag="${header.tagName}", class="${header.className}", key="${translationKey}", text="${header.textContent.trim()}"`);
         });
         
         // Actually update the headers
         const currentLanguage = window.userManagementTranslations.getCurrentLanguage();
-        console.log(`🔍 Debug: Current language is: ${currentLanguage}`);
+        window.logger?.log(`🔍 Debug: Current language is: ${currentLanguage}`);
         
         tableHeaders.forEach(header => {
             const translationKey = header.getAttribute('data-translation-key');
             if (translationKey && headerMap[translationKey]) {
                 const newText = window.userManagementTranslations.getTranslation(translationKey, currentLanguage);
-                console.log(`🔄 User Management: Updating "${translationKey}" from "${header.textContent}" to "${newText}"`);
-                console.log(`🔍 Debug: window.userManagementTranslations exists: ${!!window.userManagementTranslations}`);
-                console.log(`🔍 Debug: getTranslation function exists: ${!!window.userManagementTranslations?.getTranslation}`);
+                window.logger?.log(`🔄 User Management: Updating "${translationKey}" from "${header.textContent}" to "${newText}"`);
+                window.logger?.log(`🔍 Debug: window.userManagementTranslations exists: ${!!window.userManagementTranslations}`);
+                window.logger?.log(`🔍 Debug: getTranslation function exists: ${!!window.userManagementTranslations?.getTranslation}`);
                 header.textContent = newText;
             } else {
-                console.log(`❌ User Management: Skipping header "${translationKey}" - not in headerMap or no translation`);
+                window.logger?.log(`❌ User Management: Skipping header "${translationKey}" - not in headerMap or no translation`);
             }
         });
     }
@@ -1106,11 +1106,11 @@ class UserManagement {
      */
     updateFilterLabels() {
         if (!window.userManagementTranslations || !window.userManagementTranslations.isInitialized) {
-            console.log('❌ User Management: Translations not initialized, skipping filter labels update');
+            window.logger?.log('❌ User Management: Translations not initialized, skipping filter labels update');
             return;
         }
 
-        console.log('🔄 User Management: Updating filter labels');
+        window.logger?.log('🔄 User Management: Updating filter labels');
         const filterMap = {
             'Status': 'Status',
             'Role': 'Role',
@@ -1135,36 +1135,36 @@ class UserManagement {
 
         // Update filter labels
         const filterLabels = document.querySelectorAll('#user-management .user-management__filter-label[data-translation-key]');
-        console.log(`🔄 User Management: Found ${filterLabels.length} filter labels to update`);
+        window.logger?.log(`🔄 User Management: Found ${filterLabels.length} filter labels to update`);
         
         // Debug: Log all found filter labels
         filterLabels.forEach((label, index) => {
             const translationKey = label.getAttribute('data-translation-key');
-            console.log(`🔄 Filter ${index}: tag="${label.tagName}", class="${label.className}", key="${translationKey}", text="${label.textContent.trim()}"`);
+            window.logger?.log(`🔄 Filter ${index}: tag="${label.tagName}", class="${label.className}", key="${translationKey}", text="${label.textContent.trim()}"`);
         });
         
         // Actually update the filter labels
         const currentLanguage = window.userManagementTranslations.getCurrentLanguage();
-        console.log(`🔍 Debug: Current language for filters is: ${currentLanguage}`);
+        window.logger?.log(`🔍 Debug: Current language for filters is: ${currentLanguage}`);
         
         filterLabels.forEach(label => {
             const translationKey = label.getAttribute('data-translation-key');
             if (translationKey && filterMap[translationKey]) {
                 const newText = window.userManagementTranslations.getTranslation(translationKey, currentLanguage);
-                console.log(`🔄 User Management: Updating filter "${translationKey}" from "${label.textContent}" to "${newText}"`);
+                window.logger?.log(`🔄 User Management: Updating filter "${translationKey}" from "${label.textContent}" to "${newText}"`);
                 label.textContent = newText;
             }
         });
 
         // Update dropdown button text
         const dropdownButtons = document.querySelectorAll('#user-management .user-management__dropdown-btn span');
-        console.log(`🔄 User Management: Found ${dropdownButtons.length} dropdown buttons to update`);
+        window.logger?.log(`🔄 User Management: Found ${dropdownButtons.length} dropdown buttons to update`);
         
         dropdownButtons.forEach(button => {
             const translationKey = button.getAttribute('data-translation-key');
             if (translationKey && filterMap[translationKey]) {
                 const newText = window.userManagementTranslations.getTranslation(translationKey);
-                console.log(`🔄 User Management: Updating dropdown "${translationKey}" from "${button.textContent}" to "${newText}"`);
+                window.logger?.log(`🔄 User Management: Updating dropdown "${translationKey}" from "${button.textContent}" to "${newText}"`);
                 button.textContent = newText;
             }
         });
@@ -1173,7 +1173,7 @@ class UserManagement {
         const clearButton = document.querySelector('#user-management .user-management__clear-btn');
         if (clearButton) {
             const newText = window.userManagementTranslations.getTranslation('Clear Filters');
-            console.log(`🔄 User Management: Updating clear button from "${clearButton.textContent}" to "${newText}"`);
+            window.logger?.log(`🔄 User Management: Updating clear button from "${clearButton.textContent}" to "${newText}"`);
             clearButton.textContent = newText;
         }
     }
@@ -1185,7 +1185,7 @@ class UserManagement {
         if (window.adminLayout) {
             window.adminLayout.showError(message);
         } else {
-            console.error('User Management Error:', message);
+            window.logger?.error('User Management Error:', message);
         }
     }
 
@@ -1196,7 +1196,7 @@ class UserManagement {
         if (window.adminLayout) {
             window.adminLayout.showSuccess(message);
         } else {
-            console.log('User Management Success:', message);
+            window.logger?.log('User Management Success:', message);
         }
     }
 
@@ -1312,7 +1312,7 @@ class UserManagement {
 
             this.normalizeFilters();
         } catch (error) {
-            console.error('❌ Failed to load preferences:', error);
+            window.logger?.error('❌ Failed to load preferences:', error);
         }
     }
 
@@ -1344,7 +1344,7 @@ class UserManagement {
                 }, { onConflict: 'admin_id' });
 
         } catch (error) {
-            console.error('❌ Failed to save preferences:', error);
+            window.logger?.error('❌ Failed to save preferences:', error);
         }
     }
 
@@ -1368,7 +1368,7 @@ class UserManagement {
         // Get unique last login locations from users with last_login data
         const lastLoginLocations = [...new Set(this.users.map(user => user.last_login_location).filter(Boolean))];
         
-        console.log('🔍 Last login locations found:', lastLoginLocations);
+        window.logger?.log('🔍 Last login locations found:', lastLoginLocations);
 
         // Render options for each filter
         this.renderFilterOptions('status', statuses);

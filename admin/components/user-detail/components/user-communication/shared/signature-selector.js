@@ -29,11 +29,11 @@ class SignatureSelector {
             this.signatures = signatures || [];
             this.defaultSignature = this.signatures.find(sig => sig.is_default) || null;
             
-            console.log('📝 Signatures loaded:', this.signatures);
+            window.logger?.log('📝 Signatures loaded:', this.signatures);
             return this.signatures;
 
         } catch (error) {
-            console.error('❌ Failed to load signatures:', error);
+            window.logger?.error('❌ Failed to load signatures:', error);
             this.signatures = [];
             this.defaultSignature = null;
             return [];
@@ -124,7 +124,7 @@ class SignatureSelector {
             return data;
 
         } catch (error) {
-            console.error('❌ Failed to create signature:', error);
+            window.logger?.error('❌ Failed to create signature:', error);
             throw error;
         }
     }
@@ -151,7 +151,7 @@ class SignatureSelector {
             return data;
 
         } catch (error) {
-            console.error('❌ Failed to update signature:', error);
+            window.logger?.error('❌ Failed to update signature:', error);
             throw error;
         }
     }
@@ -173,7 +173,7 @@ class SignatureSelector {
             }
 
         } catch (error) {
-            console.error('❌ Failed to delete signature:', error);
+            window.logger?.error('❌ Failed to delete signature:', error);
             throw error;
         }
     }

@@ -19,7 +19,7 @@ class TwoFactorAuthSetup {
      */
     async init() {
         try {
-            console.log('🔐 2FA Setup: Initializing...');
+            window.logger?.log('🔐 2FA Setup: Initializing...');
 
             // Apply saved theme
             this.applySavedTheme();
@@ -38,7 +38,7 @@ class TwoFactorAuthSetup {
             this.userId = user.id;
             this.userEmail = user.email;
             
-            console.log('✅ User loaded:', this.userEmail);
+            window.logger?.log('✅ User loaded:', this.userEmail);
 
             // Generate secret key
             await this.generateSecret();
@@ -52,10 +52,10 @@ class TwoFactorAuthSetup {
             // Update translations
             this.updateTranslations();
 
-            console.log('✅ 2FA Setup: Initialized successfully');
+            window.logger?.log('✅ 2FA Setup: Initialized successfully');
 
         } catch (error) {
-            console.error('❌ 2FA Setup: Failed to initialize:', error);
+            window.logger?.error('❌ 2FA Setup: Failed to initialize:', error);
             alert('Failed to initialize 2FA setup. Please try again.');
             window.close();
         }
@@ -67,7 +67,7 @@ class TwoFactorAuthSetup {
     applySavedTheme() {
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        console.log(`🎨 Theme applied: ${savedTheme}`);
+        window.logger?.log(`🎨 Theme applied: ${savedTheme}`);
     }
 
     /**
@@ -104,9 +104,9 @@ class TwoFactorAuthSetup {
                 }
             });
 
-            console.log(`✅ Wizard translations updated for language: ${currentLanguage}`);
+            window.logger?.log(`✅ Wizard translations updated for language: ${currentLanguage}`);
         } else {
-            console.warn('⚠️ Translations not ready yet, showing default content');
+            window.logger?.warn('⚠️ Translations not ready yet, showing default content');
         }
     }
 
@@ -126,10 +126,10 @@ class TwoFactorAuthSetup {
 
             this.secretKey = this.totp.secret.base32;
             
-            console.log('✅ Secret generated');
+            window.logger?.log('✅ Secret generated');
 
         } catch (error) {
-            console.error('❌ Failed to generate secret:', error);
+            window.logger?.error('❌ Failed to generate secret:', error);
             throw error;
         }
     }
@@ -232,7 +232,7 @@ class TwoFactorAuthSetup {
         try {
             // Wait for QRCode library to be available
             if (typeof QRCode === 'undefined') {
-                console.log('Waiting for QRCode library...');
+                window.logger?.log('Waiting for QRCode library...');
                 await new Promise(resolve => {
                     const checkLibrary = setInterval(() => {
                         if (typeof QRCode !== 'undefined') {
@@ -262,12 +262,12 @@ class TwoFactorAuthSetup {
             // Display manual entry code
             document.getElementById('secret-key-text').textContent = this.secretKey;
 
-            console.log('✅ QR Code generated');
+            window.logger?.log('✅ QR Code generated');
 
         } catch (error) {
-            console.error('❌ Failed to generate QR code:', error);
+            window.logger?.error('❌ Failed to generate QR code:', error);
             // Don't alert since QR is showing - just log error
-            console.log('Continuing anyway - manual entry available');
+            window.logger?.log('Continuing anyway - manual entry available');
         }
     }
 
@@ -332,7 +332,7 @@ class TwoFactorAuthSetup {
                 btn.setAttribute('data-translation-key', originalKey);
             }, 2000);
         } catch (error) {
-            console.error('Failed to copy:', error);
+            window.logger?.error('Failed to copy:', error);
             alert('Failed to copy. Please select and copy manually.');
         }
     }
@@ -377,15 +377,15 @@ class TwoFactorAuthSetup {
             const isValid = delta !== null;
 
             if (isValid) {
-                console.log('✅ Code verified successfully');
+                window.logger?.log('✅ Code verified successfully');
                 this.nextStep();
             } else {
-                console.log('❌ Code verification failed');
+                window.logger?.log('❌ Code verification failed');
                 this.showVerifyError('Invalid code. Please try again.');
             }
 
         } catch (error) {
-            console.error('❌ Verification error:', error);
+            window.logger?.error('❌ Verification error:', error);
             this.showVerifyError('Failed to verify code. Please try again.');
         } finally {
             this.showLoading(false);
@@ -435,10 +435,10 @@ class TwoFactorAuthSetup {
                 grid.appendChild(codeDiv);
             });
 
-            console.log('✅ Backup codes generated');
+            window.logger?.log('✅ Backup codes generated');
 
         } catch (error) {
-            console.error('❌ Failed to generate backup codes:', error);
+            window.logger?.error('❌ Failed to generate backup codes:', error);
         }
     }
 
@@ -484,7 +484,7 @@ If you lose access to your authenticator app, you can use these codes to log in.
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        console.log('✅ Backup codes downloaded');
+        window.logger?.log('✅ Backup codes downloaded');
     }
 
     /**
@@ -515,7 +515,7 @@ If you lose access to your authenticator app, you can use these codes to log in.
         printWindow.document.close();
         printWindow.print();
 
-        console.log('✅ Backup codes printed');
+        window.logger?.log('✅ Backup codes printed');
     }
 
     /**
@@ -539,7 +539,7 @@ If you lose access to your authenticator app, you can use these codes to log in.
 
             // Note: delete error is OK if no record exists
             if (deleteError && deleteError.code !== 'PGRST116') {
-                console.warn('Delete warning:', deleteError);
+                window.logger?.warn('Delete warning:', deleteError);
             }
 
             // Insert fresh 2FA record with new secret
@@ -556,13 +556,13 @@ If you lose access to your authenticator app, you can use these codes to log in.
                 throw insertError;
             }
 
-            console.log('✅ 2FA saved to database with fresh secret');
+            window.logger?.log('✅ 2FA saved to database with fresh secret');
 
             // Show success step
             this.nextStep();
 
         } catch (error) {
-            console.error('❌ Failed to save 2FA:', error);
+            window.logger?.error('❌ Failed to save 2FA:', error);
             alert('Failed to complete setup. Please try again.');
         } finally {
             this.showLoading(false);

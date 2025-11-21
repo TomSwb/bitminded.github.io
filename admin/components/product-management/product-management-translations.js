@@ -41,16 +41,16 @@ if (typeof window.productManagementTranslations === 'undefined') {
                         });
                         // Translations added
                     } catch (i18nextError) {
-                        console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
+                        window.logger?.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
                 } else {
-                    console.log('ℹ️ i18next not ready, using standalone translations');
+                    window.logger?.log('ℹ️ i18next not ready, using standalone translations');
                 }
 
                 return true;
 
             } catch (error) {
-                console.error('❌ Failed to initialize product management translations:', error);
+                window.logger?.error('❌ Failed to initialize product management translations:', error);
                 return false;
             }
         },
@@ -87,12 +87,12 @@ if (typeof window.productManagementTranslations === 'undefined') {
          */
         updateTranslations() {
             if (!this.isInitialized) {
-                console.warn('⚠️ Product management translations not initialized');
+                window.logger?.warn('⚠️ Product management translations not initialized');
                 return;
             }
 
             const currentLanguage = this.getCurrentLanguage();
-            console.log('🔄 Updating product management translations to:', currentLanguage);
+            window.logger?.log('🔄 Updating product management translations to:', currentLanguage);
 
             // Update all translatable elements
             const elements = document.querySelectorAll('#product-management .translatable-content[data-translation-key]');
@@ -111,7 +111,7 @@ if (typeof window.productManagementTranslations === 'undefined') {
                 }
             });
 
-            console.log('✅ Product management translations updated');
+            window.logger?.log('✅ Product management translations updated');
         }
     };
 }

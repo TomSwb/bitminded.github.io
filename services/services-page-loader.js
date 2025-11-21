@@ -30,7 +30,7 @@ class ServicesPageLoader {
 
             this.componentsLoaded = true;
         } catch (error) {
-            console.error('❌ Failed to load services page components:', error);
+            window.logger?.error('❌ Failed to load services page components:', error);
         }
     }
 
@@ -125,7 +125,7 @@ class ServicesPageLoader {
                     script.onerror = () => resolve();
                     document.body.appendChild(script);
                 } catch (error) {
-                    console.warn('Failed to load services sub-navigation:', error);
+                    window.logger?.warn('Failed to load services sub-navigation:', error);
                     resolve();
                 }
             };

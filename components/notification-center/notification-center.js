@@ -62,7 +62,7 @@ class NotificationCenter {
             }, 200);
 
         } catch (error) {
-            console.error('❌ Notification Center: Failed to initialize:', error);
+            window.logger?.error('❌ Notification Center: Failed to initialize:', error);
         }
     }
 
@@ -102,7 +102,7 @@ class NotificationCenter {
             if (error) throw error;
             
             if (!user) {
-                console.log('🔔 No user logged in, hiding notification center');
+                window.logger?.log('🔔 No user logged in, hiding notification center');
                 this.hideComponent();
                 return;
             }
@@ -111,7 +111,7 @@ class NotificationCenter {
             this.showComponent();
             
         } catch (error) {
-            console.error('❌ Notification Center: Failed to load user:', error);
+            window.logger?.error('❌ Notification Center: Failed to load user:', error);
             this.hideComponent();
         }
     }
@@ -130,7 +130,7 @@ class NotificationCenter {
         this.deleteAllBtn = document.getElementById('delete-all-btn');
 
         if (!this.bellButton) {
-            console.error('❌ Notification Center: Bell button not found');
+            window.logger?.error('❌ Notification Center: Bell button not found');
             return;
         }
 
@@ -201,7 +201,7 @@ class NotificationCenter {
             // Notifications loaded
 
         } catch (error) {
-            console.error('❌ Failed to load notifications:', error);
+            window.logger?.error('❌ Failed to load notifications:', error);
         }
     }
 
@@ -383,7 +383,7 @@ class NotificationCenter {
             this.render();
 
         } catch (error) {
-            console.error('❌ Failed to mark notification as read:', error);
+            window.logger?.error('❌ Failed to mark notification as read:', error);
         }
     }
 
@@ -405,10 +405,10 @@ class NotificationCenter {
             this.updateUnreadCount();
             this.render();
 
-            console.log('✅ All notifications marked as read');
+            window.logger?.log('✅ All notifications marked as read');
 
         } catch (error) {
-            console.error('❌ Failed to mark all as read:', error);
+            window.logger?.error('❌ Failed to mark all as read:', error);
         }
     }
 
@@ -435,10 +435,10 @@ class NotificationCenter {
             this.updateUnreadCount();
             this.render();
 
-            console.log('✅ All notifications deleted');
+            window.logger?.log('✅ All notifications deleted');
 
         } catch (error) {
-            console.error('❌ Failed to delete all notifications:', error);
+            window.logger?.error('❌ Failed to delete all notifications:', error);
         }
     }
 
@@ -459,10 +459,10 @@ class NotificationCenter {
             this.updateUnreadCount();
             this.render();
 
-            console.log('✅ Notification deleted');
+            window.logger?.log('✅ Notification deleted');
 
         } catch (error) {
-            console.error('❌ Failed to delete notification:', error);
+            window.logger?.error('❌ Failed to delete notification:', error);
         }
     }
 
@@ -518,7 +518,7 @@ class NotificationCenter {
         if (this.pollingInterval) {
             clearInterval(this.pollingInterval);
             this.pollingInterval = null;
-            console.log('📡 Notification polling stopped');
+            window.logger?.log('📡 Notification polling stopped');
         }
     }
 

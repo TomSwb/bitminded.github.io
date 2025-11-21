@@ -25,7 +25,7 @@ class AuthToggle {
             
             // Auth Toggle initialized silently
         } catch (error) {
-            console.error('❌ Failed to initialize Auth Toggle:', error);
+            window.logger?.error('❌ Failed to initialize Auth Toggle:', error);
         }
     }
 
@@ -53,7 +53,7 @@ class AuthToggle {
      */
     updateButtonStates() {
         if (!this.elements.loginButton || !this.elements.signupButton) {
-            console.warn('Auth toggle buttons not found, cannot update states');
+            window.logger?.warn('Auth toggle buttons not found, cannot update states');
             return;
         }
         
@@ -121,10 +121,10 @@ class AuthToggle {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
             } else {
-                console.warn('Failed to load auth toggle translations:', response.status);
+                window.logger?.warn('Failed to load auth toggle translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load auth toggle translations:', error);
+            window.logger?.warn('Failed to load auth toggle translations:', error);
         }
     }
 
@@ -147,7 +147,7 @@ class AuthToggle {
                 }
             });
         } else {
-            console.warn('❌ No translations found for language:', language);
+            window.logger?.warn('❌ No translations found for language:', language);
         }
 
         // Show translatable content

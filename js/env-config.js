@@ -34,16 +34,32 @@
     
     // Select configuration based on environment
     let config;
+    let environment;
     if (isProduction) {
         config = SUPABASE_CONFIGS.production;
-        console.log('🌐 Environment: PRODUCTION');
+        environment = 'production';
+        if (window.logger) {
+            window.logger.log('🌐 Environment: PRODUCTION');
+        } else {
+            window.logger?.log('🌐 Environment: PRODUCTION');
+        }
     } else if (isDevelopment) {
         config = SUPABASE_CONFIGS.development;
-        console.log('💻 Environment: DEVELOPMENT');
+        environment = 'development';
+        if (window.logger) {
+            window.logger.log('💻 Environment: DEVELOPMENT');
+        } else {
+            window.logger?.log('💻 Environment: DEVELOPMENT');
+        }
     } else {
         // Fallback to production for staging/unknown
         config = SUPABASE_CONFIGS.production;
-        console.log('🔄 Environment: STAGING (using production config)');
+        environment = 'staging';
+        if (window.logger) {
+            window.logger.log('🔄 Environment: STAGING (using production config)');
+        } else {
+            window.logger?.log('🔄 Environment: STAGING (using production config)');
+        }
     }
     
     // Export configuration globally
@@ -51,6 +67,7 @@
         isDevelopment,
         isProduction,
         isStaging,
+        environment,
         hostname,
         supabase: config
     };

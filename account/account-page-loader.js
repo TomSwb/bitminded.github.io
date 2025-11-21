@@ -16,7 +16,7 @@ class AccountPageLoader {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('Account page loader already initialized');
+            window.logger?.log('Account page loader already initialized');
             return;
         }
 
@@ -46,7 +46,7 @@ class AccountPageLoader {
             // Trigger language change event for loaded components
             this.triggerLanguageChange();
         } catch (error) {
-            console.error('❌ Failed to initialize account page loader:', error);
+            window.logger?.error('❌ Failed to initialize account page loader:', error);
             this.showError('Failed to initialize account page');
         }
     }
@@ -67,7 +67,7 @@ class AccountPageLoader {
             }
 
             if (!user) {
-                console.log('🔄 User not authenticated, redirecting to auth page...');
+                window.logger?.log('🔄 User not authenticated, redirecting to auth page...');
                 window.location.href = '/auth/';
                 return;
             }
@@ -76,7 +76,7 @@ class AccountPageLoader {
             return user;
 
         } catch (error) {
-            console.error('❌ Authentication check failed:', error);
+            window.logger?.error('❌ Authentication check failed:', error);
             this.showError('Authentication check failed');
             throw error;
         }
@@ -99,7 +99,7 @@ class AccountPageLoader {
             }
             
         } catch (error) {
-            console.error('❌ Failed to load account layout:', error);
+            window.logger?.error('❌ Failed to load account layout:', error);
             this.showError('Failed to load account layout');
             throw error;
         }
@@ -112,7 +112,7 @@ class AccountPageLoader {
     async loadSection(sectionName) {
         try {
             if (this.loadedComponents.has(sectionName)) {
-                console.log(`Section ${sectionName} already loaded`);
+                window.logger?.log(`Section ${sectionName} already loaded`);
                 return;
             }
 
@@ -130,7 +130,7 @@ class AccountPageLoader {
 
             const componentName = componentMap[sectionName];
             if (!componentName) {
-                console.warn(`⚠️ No component mapped for section: ${sectionName}`);
+                window.logger?.warn(`⚠️ No component mapped for section: ${sectionName}`);
                 return;
             }
 
@@ -159,7 +159,7 @@ class AccountPageLoader {
             }
             
         } catch (error) {
-            console.error(`❌ Failed to load section ${sectionName}:`, error);
+            window.logger?.error(`❌ Failed to load section ${sectionName}:`, error);
             this.showPlaceholder(sectionName);
             this.loadedComponents.set(sectionName, true);
         }
@@ -191,7 +191,7 @@ class AccountPageLoader {
             }
         } catch (error) {
             // Network errors or other issues
-            console.log(`📝 Component check failed: ${componentName} (${error.message})`);
+            window.logger?.log(`📝 Component check failed: ${componentName} (${error.message})`);
             return false;
         }
     }
@@ -279,7 +279,7 @@ class AccountPageLoader {
             // Switched section
 
         } catch (error) {
-            console.error(`❌ Failed to switch to section ${sectionName}:`, error);
+            window.logger?.error(`❌ Failed to switch to section ${sectionName}:`, error);
             this.showError(`Failed to switch to ${sectionName} section`);
         }
     }
@@ -318,7 +318,7 @@ class AccountPageLoader {
         if (window.accountPage?.showError) {
             window.accountPage.showError(message);
         } else {
-            console.error('Account Page Loader Error:', message);
+            window.logger?.error('Account Page Loader Error:', message);
         }
     }
 
@@ -330,7 +330,7 @@ class AccountPageLoader {
         if (window.accountPage?.showSuccess) {
             window.accountPage.showSuccess(message);
         } else {
-            console.log('Account Page Loader Success:', message);
+            window.logger?.log('Account Page Loader Success:', message);
         }
     }
 

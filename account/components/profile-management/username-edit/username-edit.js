@@ -23,7 +23,7 @@ class UsernameEdit {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('Username edit component already initialized');
+            window.logger?.log('Username edit component already initialized');
             return;
         }
 
@@ -43,7 +43,7 @@ class UsernameEdit {
             // Initialized silently
             
         } catch (error) {
-            console.error('❌ Failed to initialize username edit component:', error);
+            window.logger?.error('❌ Failed to initialize username edit component:', error);
             this.showError('Failed to load username information');
         }
     }
@@ -82,7 +82,7 @@ class UsernameEdit {
             this.createdAt = profile.created_at;
             
         } catch (error) {
-            console.error('❌ Failed to load user profile:', error);
+            window.logger?.error('❌ Failed to load user profile:', error);
             throw error;
         }
     }
@@ -102,7 +102,7 @@ class UsernameEdit {
             editBtn.addEventListener('click', this.handleEditClick);
             // Event listener added silently
         } else {
-            console.error('❌ Edit button not found for event listener');
+            window.logger?.error('❌ Edit button not found for event listener');
         }
 
         if (cancelBtn) {
@@ -188,7 +188,7 @@ class UsernameEdit {
             this.triggerProfileUpdate();
             
         } catch (error) {
-            console.error('❌ Failed to update username:', error);
+            window.logger?.error('❌ Failed to update username:', error);
             this.showError(error.message || 'Failed to update username');
         } finally {
             this.showLoading(false);
@@ -260,7 +260,7 @@ class UsernameEdit {
             }
 
         } catch (error) {
-            console.error('❌ Failed to check username availability:', error);
+            window.logger?.error('❌ Failed to check username availability:', error);
             this.showAvailabilityIndicator('unavailable', 'Error checking availability');
         }
     }
@@ -303,7 +303,7 @@ class UsernameEdit {
         });
 
         if (metadataError) {
-            console.warn('Failed to update username in user metadata:', metadataError);
+            window.logger?.warn('Failed to update username in user metadata:', metadataError);
             // Don't throw error here as the profile update succeeded
             // The username will still work, just might not persist across refreshes
         }
@@ -322,14 +322,14 @@ class UsernameEdit {
             form.classList.remove('hidden');
             // Form shown
         } else {
-            console.error('❌ Form not found');
+            window.logger?.error('❌ Form not found');
         }
         
         if (editBtn) {
             editBtn.classList.add('hidden');
             // Button hidden
         } else {
-            console.error('❌ Edit button not found');
+            window.logger?.error('❌ Edit button not found');
         }
 
         // Focus on input
@@ -423,7 +423,7 @@ class UsernameEdit {
         if (window.profileManagement?.showError) {
             window.profileManagement.showError(message);
         } else {
-            console.error('Username Edit Error:', message);
+            window.logger?.error('Username Edit Error:', message);
         }
     }
 
@@ -434,7 +434,7 @@ class UsernameEdit {
         if (window.profileManagement?.showSuccess) {
             window.profileManagement.showSuccess(message);
         } else {
-            console.log('Username Edit Success:', message);
+            window.logger?.log('Username Edit Success:', message);
         }
     }
 

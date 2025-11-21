@@ -30,7 +30,7 @@ class DeleteAccountTranslations {
             // Translations initialized
             
         } catch (error) {
-            console.error('❌ Failed to initialize delete account translations:', error);
+            window.logger?.error('❌ Failed to initialize delete account translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class DeleteAccountTranslations {
             // Translations loaded
             
         } catch (error) {
-            console.error('❌ Failed to load delete account translations:', error);
+            window.logger?.error('❌ Failed to load delete account translations:', error);
             // Fallback to empty translations
             this.translations = {};
         }

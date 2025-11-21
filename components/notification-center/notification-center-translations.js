@@ -24,7 +24,7 @@ class NotificationCenterTranslations {
             this.isInitialized = true;
             
         } catch (error) {
-            console.error('❌ Failed to initialize notification center translations:', error);
+            window.logger?.error('❌ Failed to initialize notification center translations:', error);
         }
     }
 
@@ -41,7 +41,7 @@ class NotificationCenterTranslations {
             this.translations = await response.json();
             
         } catch (error) {
-            console.error('❌ Failed to load notification center translations:', error);
+            window.logger?.error('❌ Failed to load notification center translations:', error);
             throw error;
         }
     }
@@ -51,14 +51,14 @@ class NotificationCenterTranslations {
      */
     async addToI18next() {
         if (typeof i18next === 'undefined') {
-            console.warn('⚠️ i18next not available, waiting...');
+            window.logger?.warn('⚠️ i18next not available, waiting...');
             await this.waitForI18next();
         }
 
         try {
             // Check if i18next methods are available
             if (typeof i18next.addResourceBundle !== 'function') {
-                console.log('ℹ️ i18next methods not ready, using standalone translations');
+                window.logger?.log('ℹ️ i18next methods not ready, using standalone translations');
                 return;
             }
             
@@ -74,7 +74,7 @@ class NotificationCenterTranslations {
             });
 
         } catch (error) {
-            console.warn('⚠️ Could not add to i18next (using standalone):', error);
+            window.logger?.warn('⚠️ Could not add to i18next (using standalone):', error);
         }
     }
 

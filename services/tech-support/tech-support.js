@@ -40,7 +40,7 @@ class TechSupportPageLoader {
 
             this.componentsLoaded = true;
         } catch (error) {
-            console.error('❌ Failed to load tech support page components:', error);
+            window.logger?.error('❌ Failed to load tech support page components:', error);
         }
     }
 
@@ -82,7 +82,7 @@ class TechSupportPageLoader {
     async loadAndRenderServices() {
         try {
             if (!window.ServiceLoader || !window.ServiceRenderer) {
-                console.warn('Service components not loaded yet');
+                window.logger?.warn('Service components not loaded yet');
                 return;
             }
 
@@ -93,7 +93,7 @@ class TechSupportPageLoader {
             const services = await serviceLoader.loadServices('tech-support');
             
             if (!services || services.length === 0) {
-                console.warn('No services found for tech-support');
+                window.logger?.warn('No services found for tech-support');
                 return;
             }
 
@@ -101,7 +101,7 @@ class TechSupportPageLoader {
             services.forEach(service => {
                 const cards = document.querySelectorAll(`[data-service-slug="${service.slug}"]`);
                 if (!cards || cards.length === 0) {
-                    console.warn(`[Tech Support] Card not found for service: ${service.slug}`);
+                    window.logger?.warn(`[Tech Support] Card not found for service: ${service.slug}`);
                     return;
                 }
 
@@ -183,7 +183,7 @@ class TechSupportPageLoader {
             });
 
         } catch (error) {
-            console.error('Failed to load and render services:', error);
+            window.logger?.error('Failed to load and render services:', error);
         }
     }
 
@@ -347,7 +347,7 @@ class TechSupportPageLoader {
                     script.onerror = () => resolve();
                     document.body.appendChild(script);
                 } catch (error) {
-                    console.warn('Failed to load services sub-navigation:', error);
+                    window.logger?.warn('Failed to load services sub-navigation:', error);
                     resolve();
                 }
             };

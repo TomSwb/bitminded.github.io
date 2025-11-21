@@ -31,7 +31,7 @@ if (typeof window.maintenanceModeTranslations === 'undefined') {
 
                 return true;
             } catch (error) {
-                console.error('❌ Failed to initialize maintenance mode translations:', error);
+                window.logger?.error('❌ Failed to initialize maintenance mode translations:', error);
                 return false;
             }
         },

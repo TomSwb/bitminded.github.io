@@ -32,7 +32,7 @@ class FAQPageLoader {
             this.componentsLoaded = true;
             this.accordionInitialized = true;
         } catch (error) {
-            console.error('❌ Failed to load FAQ page components:', error);
+            window.logger?.error('❌ Failed to load FAQ page components:', error);
         }
     }
 
@@ -112,7 +112,7 @@ class FAQPageLoader {
                     script.onerror = () => resolve();
                     document.body.appendChild(script);
                 } catch (error) {
-                    console.warn('Failed to load services sub-navigation:', error);
+                    window.logger?.warn('Failed to load services sub-navigation:', error);
                     resolve();
                 }
             };

@@ -107,7 +107,7 @@
                 applyTranslations();
             })
             .catch((error) => {
-                console.error('Failed to load catalog translations:', error);
+                window.logger?.error('Failed to load catalog translations:', error);
                 revealContentOnFailure();
             });
     }
@@ -132,7 +132,7 @@
                 applyTranslations();
             })
             .catch((error) => {
-                console.error('Failed to change catalog language:', error);
+                window.logger?.error('Failed to change catalog language:', error);
                 applyTranslations();
             });
     }
@@ -145,7 +145,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof i18next === 'undefined') {
-            console.error('i18next is required for catalog translations.');
+            window.logger?.error('i18next is required for catalog translations.');
             revealContentOnFailure();
             return;
         }

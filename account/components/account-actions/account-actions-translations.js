@@ -30,7 +30,7 @@ class AccountActionsTranslations {
             // Translations initialized
             
         } catch (error) {
-            console.error('❌ Failed to initialize account actions translations:', error);
+            window.logger?.error('❌ Failed to initialize account actions translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class AccountActionsTranslations {
             // Translations loaded
             
         } catch (error) {
-            console.error('❌ Failed to load account actions translations:', error);
+            window.logger?.error('❌ Failed to load account actions translations:', error);
             // Use fallback translations
             this.translations = this.getFallbackTranslations();
         }
@@ -101,7 +101,7 @@ class AccountActionsTranslations {
             const langTranslations = this.translations[currentLanguage] || this.translations['en'];
             
             if (!langTranslations) {
-                console.warn('No translations available for language:', currentLanguage);
+                window.logger?.warn('No translations available for language:', currentLanguage);
                 return;
             }
 
@@ -123,7 +123,7 @@ class AccountActionsTranslations {
             // Translations updated
             
         } catch (error) {
-            console.error('❌ Failed to update account actions translations:', error);
+            window.logger?.error('❌ Failed to update account actions translations:', error);
         }
     }
 

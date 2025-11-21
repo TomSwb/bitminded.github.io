@@ -35,7 +35,7 @@ class ServiceLoader {
         try {
             localStorage.setItem('selectedCurrency', currency);
         } catch (error) {
-            console.warn('Failed to store currency:', error);
+            window.logger?.warn('Failed to store currency:', error);
         }
     }
 
@@ -53,7 +53,7 @@ class ServiceLoader {
     async loadServices(category) {
         try {
             if (!window.supabase) {
-                console.error('Supabase not available');
+                window.logger?.error('Supabase not available');
                 return [];
             }
 
@@ -71,7 +71,7 @@ class ServiceLoader {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error loading services:', error);
+                window.logger?.error('Error loading services:', error);
                 return [];
             }
 
@@ -87,7 +87,7 @@ class ServiceLoader {
 
             return services;
         } catch (error) {
-            console.error('Failed to load services:', error);
+            window.logger?.error('Failed to load services:', error);
             return [];
         }
     }

@@ -23,7 +23,7 @@ class TermsCheckbox {
             
             // Terms Checkbox initialized silently
         } catch (error) {
-            console.error('❌ Failed to initialize Terms Checkbox:', error);
+            window.logger?.error('❌ Failed to initialize Terms Checkbox:', error);
         }
     }
 
@@ -68,10 +68,10 @@ class TermsCheckbox {
                 this.updateTranslations(this.getCurrentLanguage());
                 // Translations loaded silently
             } else {
-                console.warn('Failed to load terms checkbox translations:', response.status);
+                window.logger?.warn('Failed to load terms checkbox translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load terms checkbox translations:', error);
+            window.logger?.warn('Failed to load terms checkbox translations:', error);
         }
     }
 

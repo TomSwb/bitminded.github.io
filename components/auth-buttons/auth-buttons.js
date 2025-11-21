@@ -45,7 +45,7 @@ class AuthButtons {
             
             // Auth Buttons initialized successfully
         } catch (error) {
-            console.error('❌ Failed to initialize Auth Buttons:', error);
+            window.logger?.error('❌ Failed to initialize Auth Buttons:', error);
             this.showError('Failed to initialize authentication');
         }
     }
@@ -67,14 +67,14 @@ class AuthButtons {
         const authContainer = document.getElementById('auth-buttons');
         if (authContainer) {
             authContainer.style.display = 'none';
-            console.log('🔒 Auth buttons hidden on auth page');
+            window.logger?.log('🔒 Auth buttons hidden on auth page');
         }
         
         // Also hide any mobile auth buttons in navigation
         const mobileAuthContainer = document.querySelector('#mobile-auth-buttons');
         if (mobileAuthContainer) {
             mobileAuthContainer.style.display = 'none';
-            console.log('🔒 Mobile auth buttons hidden on auth page');
+            window.logger?.log('🔒 Mobile auth buttons hidden on auth page');
         }
     }
 
@@ -136,7 +136,7 @@ class AuthButtons {
             
             // Don't refresh translations if we're on the auth page
             if (this.isOnAuthPage()) {
-                console.log('🔒 Skipping auth buttons translation refresh on auth page');
+                window.logger?.log('🔒 Skipping auth buttons translation refresh on auth page');
                 return;
             }
             
@@ -145,7 +145,7 @@ class AuthButtons {
 
         // Listen for profile updates (like username changes)
         window.addEventListener('profileUpdated', (e) => {
-            console.log('🔄 Profile updated event received:', e.detail);
+            window.logger?.log('🔄 Profile updated event received:', e.detail);
             this.handleProfileUpdate(e.detail);
         });
     }
@@ -156,7 +156,7 @@ class AuthButtons {
     setupSupabaseListener() {
         // Prevent duplicate listeners
         if (this.authStateSubscription) {
-            console.log('⚠️ Auth listener already set up, skipping');
+            window.logger?.log('⚠️ Auth listener already set up, skipping');
             return;
         }
 
@@ -169,7 +169,7 @@ class AuthButtons {
             // Store subscription for cleanup
             this.authStateSubscription = subscription;
         } else {
-            console.log('⏳ Supabase not ready, retrying in 100ms...');
+            window.logger?.log('⏳ Supabase not ready, retrying in 100ms...');
             setTimeout(() => {
                 this.setupSupabaseListener();
             }, 100);
@@ -188,10 +188,10 @@ class AuthButtons {
                 this.updateTranslations(this.getCurrentLanguage());
                 // Auth buttons translations loaded
             } else {
-                console.warn('Failed to load auth buttons translations:', response.status);
+                window.logger?.warn('Failed to load auth buttons translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load auth buttons translations:', error);
+            window.logger?.warn('Failed to load auth buttons translations:', error);
         }
     }
 
@@ -256,7 +256,7 @@ class AuthButtons {
             }
 
             if (!window.supabase || !window.supabase.auth) {
-                console.log('❌ Supabase not available, showing logged out state');
+                window.logger?.log('❌ Supabase not available, showing logged out state');
                 this.showLoggedOutState();
                 return;
             }
@@ -264,7 +264,7 @@ class AuthButtons {
             const { data: { session }, error } = await window.supabase.auth.getSession();
             
             if (error) {
-                console.error('❌ Error getting session:', error);
+                window.logger?.error('❌ Error getting session:', error);
                 throw error;
             }
 
@@ -273,12 +273,12 @@ class AuthButtons {
                 this.currentUser = session.user;
                 await this.showLoggedInState();
             } else {
-                console.log('❌ No active session, showing logged out state');
+                window.logger?.log('❌ No active session, showing logged out state');
                 this.currentUser = null;
                 this.showLoggedOutState();
             }
         } catch (error) {
-            console.error('❌ Error checking auth state:', error);
+            window.logger?.error('❌ Error checking auth state:', error);
             this.showLoggedOutState();
         }
     }
@@ -293,7 +293,7 @@ class AuthButtons {
             
             // If token is expired and this is INITIAL_SESSION, force logout
             if (event === 'INITIAL_SESSION' && expiresIn < 0) {
-                console.warn('⚠️ Token is expired, forcing logout...');
+                window.logger?.warn('⚠️ Token is expired, forcing logout...');
                 // Clear the stale session
                 if (window.supabase) {
                     await window.supabase.auth.signOut();
@@ -309,7 +309,7 @@ class AuthButtons {
             this.currentUser = session.user;
             await this.showLoggedInState();
         } else if (event === 'SIGNED_OUT') {
-            console.log('❌ User signed out, updating UI');
+            window.logger?.log('❌ User signed out, updating UI');
             this.currentUser = null;
             this.showLoggedOutState();
         } else if (event === 'TOKEN_REFRESHED' && session) {
@@ -341,10 +341,10 @@ class AuthButtons {
             if (this.elements.loggedOut) {
                 this.elements.loggedOut.style.display = 'flex';
             } else {
-                console.error('❌ Logged out element not found');
+                window.logger?.error('❌ Logged out element not found');
             }
         } catch (error) {
-            console.error('❌ Error showing logged out state:', error);
+            window.logger?.error('❌ Error showing logged out state:', error);
         }
     }
 
@@ -361,10 +361,10 @@ class AuthButtons {
                 this.elements.loggedIn.classList.remove('auth-buttons__logged-in--hidden');
                 await this.updateUserInfo();
             } else {
-                console.error('❌ Logged in element not found');
+                window.logger?.error('❌ Logged in element not found');
             }
         } catch (error) {
-            console.error('❌ Error showing logged in state:', error);
+            window.logger?.error('❌ Error showing logged in state:', error);
             // Fallback: try to show logged out state
             this.showLoggedOutState();
         }
@@ -388,7 +388,7 @@ class AuthButtons {
      */
     async handleProfileUpdate(eventDetail) {
         try {
-            console.log('🔄 Handling profile update in auth-buttons:', eventDetail);
+            window.logger?.log('🔄 Handling profile update in auth-buttons:', eventDetail);
             
             // If username was updated, refresh user data to get the new username
             if (eventDetail.component === 'username' && eventDetail.username) {
@@ -404,7 +404,7 @@ class AuthButtons {
                 await this.updateUserInfo();
             }
         } catch (error) {
-            console.error('❌ Failed to handle profile update in auth-buttons:', error);
+            window.logger?.error('❌ Failed to handle profile update in auth-buttons:', error);
         }
     }
 
@@ -456,7 +456,7 @@ class AuthButtons {
                             }
                         }
                     } catch (error) {
-                        console.warn('Failed to fetch username from profile:', error);
+                        window.logger?.warn('Failed to fetch username from profile:', error);
                     }
                 }
                 
@@ -465,7 +465,7 @@ class AuthButtons {
             }, 100);
             
         } catch (error) {
-            console.error('Error updating user info:', error);
+            window.logger?.error('Error updating user info:', error);
             // Fallback to basic display
             if (this.elements.userName && this.currentUser) {
                 const displayName = this.currentUser.email?.split('@')[0] || 'User';
@@ -481,7 +481,7 @@ class AuthButtons {
     async checkAdminRole() {
         try {
             if (!this.currentUser || !window.supabase) {
-                console.log('🔍 Admin check: No user or Supabase');
+                window.logger?.log('🔍 Admin check: No user or Supabase');
                 return false;
             }
 
@@ -494,7 +494,7 @@ class AuthButtons {
                 .maybeSingle(); // Use maybeSingle instead of single to avoid error when no row
             
             if (error) {
-                console.error('❌ Error checking admin role:', error);
+                window.logger?.error('❌ Error checking admin role:', error);
                 return false;
             }
 
@@ -502,7 +502,7 @@ class AuthButtons {
             
             return isAdmin;
         } catch (error) {
-            console.error('❌ Failed to check admin role:', error);
+            window.logger?.error('❌ Failed to check admin role:', error);
             return false;
         }
     }
@@ -530,7 +530,7 @@ class AuthButtons {
                 this.updateAdminButtonActiveState();
             }
         } catch (error) {
-            console.error('❌ Failed to update admin button:', error);
+            window.logger?.error('❌ Failed to update admin button:', error);
             // Ensure all buttons are hidden on error
             const allAdminButtons = document.querySelectorAll('#auth-admin-button');
             allAdminButtons.forEach(button => {
@@ -570,9 +570,9 @@ class AuthButtons {
                             allow_current_session: true  // Allow revoking current session during logout
                         }
                     });
-                    console.log('✅ Session cleaned up from user_sessions');
+                    window.logger?.log('✅ Session cleaned up from user_sessions');
                 } catch (cleanupError) {
-                    console.warn('⚠️ Could not clean up session:', cleanupError);
+                    window.logger?.warn('⚠️ Could not clean up session:', cleanupError);
                     // Don't fail logout if cleanup fails
                 }
             }
@@ -585,12 +585,12 @@ class AuthButtons {
             }
 
             // State change will be handled by the auth state change listener
-            console.log('User logged out successfully');
+            window.logger?.log('User logged out successfully');
             
             // Redirect to home page after successful logout
             window.location.href = '/';
         } catch (error) {
-            console.error('Error during logout:', error);
+            window.logger?.error('Error during logout:', error);
             this.showError('Failed to logout. Please try again.');
             this.showLoggedInState();
         }
@@ -600,7 +600,7 @@ class AuthButtons {
      * Show error message
      */
     showError(message) {
-        console.error('Auth Buttons Error:', message);
+        window.logger?.error('Auth Buttons Error:', message);
         // You could implement a toast notification system here
         // For now, we'll just log to console
     }
@@ -612,7 +612,7 @@ class AuthButtons {
     async refreshTranslations(language) {
         // Safety check: don't refresh if we're on auth page
         if (this.isOnAuthPage()) {
-            console.log('🔒 Skipping auth buttons translation refresh on auth page (safety check)');
+            window.logger?.log('🔒 Skipping auth buttons translation refresh on auth page (safety check)');
             return;
         }
         
@@ -696,20 +696,20 @@ class AuthButtons {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🔄 Auth Buttons: DOM Content Loaded, checking for auth-buttons element...');
+    window.logger?.log('🔄 Auth Buttons: DOM Content Loaded, checking for auth-buttons element...');
     
     // Prevent duplicate initialization
     if (window.authButtons) {
-        console.log('⚠️ Auth Buttons already initialized, skipping DOMContentLoaded init');
+        window.logger?.log('⚠️ Auth Buttons already initialized, skipping DOMContentLoaded init');
         return;
     }
     
     // Only initialize if the auth-buttons element exists
     if (document.getElementById('auth-buttons')) {
-        console.log('✅ Auth Buttons: Element found, initializing...');
+        window.logger?.log('✅ Auth Buttons: Element found, initializing...');
         window.authButtons = new AuthButtons();
     } else {
-        console.log('❌ Auth Buttons: Element not found, skipping initialization');
+        window.logger?.log('❌ Auth Buttons: Element not found, skipping initialization');
     }
 });
 
@@ -719,7 +719,7 @@ window['auth-buttons'] = {
     init: function(config = {}) {
         // Prevent duplicate initialization
         if (window.authButtons) {
-            console.log('⚠️ Auth Buttons already initialized, skipping component loader init');
+            window.logger?.log('⚠️ Auth Buttons already initialized, skipping component loader init');
             return;
         }
         

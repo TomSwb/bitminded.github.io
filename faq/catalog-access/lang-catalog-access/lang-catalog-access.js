@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .catch(error => {
-            console.error('Failed to load Catalog Access FAQ translations:', error);
+            window.logger?.error('Failed to load Catalog Access FAQ translations:', error);
             revealContent();
         });
 

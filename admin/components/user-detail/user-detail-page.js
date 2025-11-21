@@ -16,7 +16,7 @@ class UserDetailPage {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('User Detail Page: Already initialized');
+            window.logger?.log('User Detail Page: Already initialized');
             return;
         }
 
@@ -26,7 +26,7 @@ class UserDetailPage {
             // Check authentication and admin access
             const hasAccess = await this.checkAdminAccess();
             if (!hasAccess) {
-                console.log('🔒 Access denied, redirecting...');
+                window.logger?.log('🔒 Access denied, redirecting...');
                 window.location.href = '/';
                 return;
             }
@@ -39,7 +39,7 @@ class UserDetailPage {
             const userId = urlParams.get('id');
             
             if (!userId) {
-                console.error('❌ No user ID provided');
+                window.logger?.error('❌ No user ID provided');
                 this.showError('No user ID provided');
                 return;
             }
@@ -51,7 +51,7 @@ class UserDetailPage {
             // Initialized
             
         } catch (error) {
-            console.error('❌ User Detail Page: Failed to initialize:', error);
+            window.logger?.error('❌ User Detail Page: Failed to initialize:', error);
             this.showError('Failed to initialize user detail page');
         }
     }
@@ -62,7 +62,7 @@ class UserDetailPage {
     async checkAdminAccess() {
         try {
             if (!window.supabase) {
-                console.error('❌ Supabase not available');
+                window.logger?.error('❌ Supabase not available');
                 return false;
             }
 
@@ -70,7 +70,7 @@ class UserDetailPage {
             const { data: { user }, error: userError } = await window.supabase.auth.getUser();
             
             if (userError || !user) {
-                console.log('🔒 User not authenticated');
+                window.logger?.log('🔒 User not authenticated');
                 return false;
             }
 
@@ -83,14 +83,14 @@ class UserDetailPage {
                 .maybeSingle();
             
             if (roleError || !adminRole) {
-                console.log('🔒 User is not admin');
+                window.logger?.log('🔒 User is not admin');
                 return false;
             }
 
             return true;
 
         } catch (error) {
-            console.error('❌ Error checking admin access:', error);
+            window.logger?.error('❌ Error checking admin access:', error);
             return false;
         }
     }
@@ -150,7 +150,7 @@ class UserDetailPage {
         const requiredElements = ['username', 'email', 'backButton'];
         for (const elementName of requiredElements) {
             if (!this.elements[elementName]) {
-                console.warn(`Required element not found: ${elementName}`);
+                window.logger?.warn(`Required element not found: ${elementName}`);
             }
         }
     }
@@ -230,7 +230,7 @@ class UserDetailPage {
      */
     async loadUserData(userId) {
         try {
-            console.log('🔄 Loading user data for ID:', userId);
+            window.logger?.log('🔄 Loading user data for ID:', userId);
             
             if (!window.supabase) {
                 throw new Error('Supabase not available');
@@ -253,11 +253,11 @@ class UserDetailPage {
                 .single();
 
             if (profileError) {
-                console.error('❌ Failed to load user profile:', profileError);
+                window.logger?.error('❌ Failed to load user profile:', profileError);
                 throw profileError;
             }
 
-            console.log('✅ User profile loaded:', profileData);
+            window.logger?.log('✅ User profile loaded:', profileData);
 
             // Get role
             const { data: roleData } = await window.supabase
@@ -287,10 +287,10 @@ class UserDetailPage {
                 if (!error) {
                     twoFaData = data;
                 } else {
-                    console.warn('⚠️ 2FA table query failed:', error);
+                    window.logger?.warn('⚠️ 2FA table query failed:', error);
                 }
             } catch (error) {
-                console.warn('⚠️ 2FA table does not exist or has different structure:', error);
+                window.logger?.warn('⚠️ 2FA table does not exist or has different structure:', error);
             }
 
             // Combine all user data
@@ -324,29 +324,29 @@ class UserDetailPage {
                 const loadingScreen = document.getElementById('loading-screen');
                 if (loadingScreen) {
                     loadingScreen.style.display = 'none';
-                    console.log('✅ Loading screen hidden directly (fallback)');
+                    window.logger?.log('✅ Loading screen hidden directly (fallback)');
                 }
             }
 
             // User data loaded
 
         } catch (error) {
-            console.error('❌ Failed to load user data:', error);
+            window.logger?.error('❌ Failed to load user data:', error);
             this.showError('Failed to load user data');
             
             // Hide loading screen (error case) using proper ready flag system
-            console.log('🔧 Hiding loading screen (error case)...');
+            window.logger?.log('🔧 Hiding loading screen (error case)...');
             
             if (window.loadingScreen) {
                 // Set translation ready flag to true so loading screen can hide
                 window.loadingScreen.setReadyFlag('translation', true);
-                console.log('✅ Loading screen ready flag set (error case)');
+                window.logger?.log('✅ Loading screen ready flag set (error case)');
             } else {
                 // Fallback: hide directly if loading screen component not available
                 const loadingScreen = document.getElementById('loading-screen');
                 if (loadingScreen) {
                     loadingScreen.style.display = 'none';
-                    console.log('✅ Loading screen hidden directly (error case fallback)');
+                    window.logger?.log('✅ Loading screen hidden directly (error case fallback)');
                 }
             }
         }
@@ -476,7 +476,7 @@ class UserDetailPage {
             await this.loadAdminNotes();
 
         } catch (error) {
-            console.error('❌ Failed to load overview data:', error);
+            window.logger?.error('❌ Failed to load overview data:', error);
         }
     }
 
@@ -495,7 +495,7 @@ class UserDetailPage {
                 .limit(10);
 
             if (error) {
-                console.error('❌ Failed to load admin notes:', error);
+                window.logger?.error('❌ Failed to load admin notes:', error);
                 return;
             }
 
@@ -551,7 +551,7 @@ class UserDetailPage {
             }
 
         } catch (error) {
-            console.error('❌ Error loading admin notes:', error);
+            window.logger?.error('❌ Error loading admin notes:', error);
         }
     }
 
@@ -652,17 +652,17 @@ class UserDetailPage {
             }
 
         } catch (error) {
-            console.error('❌ Error loading subscriptions data:', error);
+            window.logger?.error('❌ Error loading subscriptions data:', error);
         }
     }
 
     async loadAdminActivityFilters() {
         try {
-            console.log('🔍 Loading Admin Activity Filters component...');
+            window.logger?.log('🔍 Loading Admin Activity Filters component...');
             
             // Check if component already exists
             if (window.adminActivityFilters) {
-                console.log('✅ Admin Activity Filters component already loaded');
+                window.logger?.log('✅ Admin Activity Filters component already loaded');
                 return;
             }
             
@@ -721,17 +721,17 @@ class UserDetailPage {
                     this.adminActivityFilterListenerSet = true;
                 }
                 
-                console.log('✅ Admin Activity Filters component loaded');
+                window.logger?.log('✅ Admin Activity Filters component loaded');
             }
             
         } catch (error) {
-            console.error('❌ Failed to load Admin Activity Filters component:', error);
+            window.logger?.error('❌ Failed to load Admin Activity Filters component:', error);
         }
     }
 
     async loadCommunicationActivityFilters() {
         try {
-            console.log('🔍 Loading Communication Activity Filters component...');
+            window.logger?.log('🔍 Loading Communication Activity Filters component...');
             
             // Load CSS
             if (!document.querySelector('link[href*="communication-activity-filters.css"]')) {
@@ -782,26 +782,26 @@ class UserDetailPage {
                     // Set up communication activity filter listener
                     if (window.communicationActivityFilters && !this.communicationActivityFilterListenerSet) {
                         window.addEventListener('communicationFiltersChanged', (event) => {
-                            console.log('📧 Communication filters changed:', event.detail.filters);
+                            window.logger?.log('📧 Communication filters changed:', event.detail.filters);
                             this.renderCommunicationActivityTable(event.detail.filteredActivities);
                         });
                         this.communicationActivityFilterListenerSet = true;
                     }
                     
-                    console.log('✅ Communication Activity Filters component loaded');
+                    window.logger?.log('✅ Communication Activity Filters component loaded');
             }
         } catch (error) {
-            console.error('❌ Failed to load communication activity filters:', error);
+            window.logger?.error('❌ Failed to load communication activity filters:', error);
         }
     }
 
     async loadLoginActivityFilters() {
         try {
-            console.log('🔍 Loading Login Activity Filters component...');
+            window.logger?.log('🔍 Loading Login Activity Filters component...');
             
             // Check if component already exists
             if (window.loginActivityFilters) {
-                console.log('✅ Login Activity Filters component already loaded');
+                window.logger?.log('✅ Login Activity Filters component already loaded');
                 return;
             }
 
@@ -860,11 +860,11 @@ class UserDetailPage {
                     this.loginActivityFilterListenerSet = true;
                 }
                 
-                console.log('✅ Login Activity Filters component loaded');
+                window.logger?.log('✅ Login Activity Filters component loaded');
             }
             
         } catch (error) {
-            console.error('❌ Failed to load Login Activity Filters component:', error);
+            window.logger?.error('❌ Failed to load Login Activity Filters component:', error);
         }
     }
 
@@ -940,7 +940,7 @@ class UserDetailPage {
             `;
             
         } catch (error) {
-            console.error('❌ Failed to render admin activity table:', error);
+            window.logger?.error('❌ Failed to render admin activity table:', error);
             adminActionsContainer.innerHTML = '<p style="color: var(--color-danger); text-align: center; padding: var(--spacing-xl);">Failed to load admin activities.</p>';
         }
     }
@@ -1084,10 +1084,10 @@ class UserDetailPage {
                 .order('created_at', { ascending: false });
 
             if (communicationError) {
-                console.error('❌ Failed to load communication activity:', communicationError);
+                window.logger?.error('❌ Failed to load communication activity:', communicationError);
             } else {
                 // User communication activity loaded
-                console.log('📧 Communication activity loaded:', communicationData?.length || 0, 'communications');
+                window.logger?.log('📧 Communication activity loaded:', communicationData?.length || 0, 'communications');
 
                 // Display communication activity
                 const communicationActivityContainer = document.getElementById('user-detail-communication-activity');
@@ -1124,7 +1124,7 @@ class UserDetailPage {
                 // Removed limit to load ALL login activities
 
             if (loginError) {
-                console.error('❌ Failed to load login activity:', error);
+                window.logger?.error('❌ Failed to load login activity:', error);
                 return;
             }
 
@@ -1208,7 +1208,7 @@ class UserDetailPage {
             }
 
         } catch (error) {
-            console.error('❌ Error loading activity:', error);
+            window.logger?.error('❌ Error loading activity:', error);
         }
     }
 
@@ -1251,7 +1251,7 @@ class UserDetailPage {
             // Security tab loaded
 
         } catch (error) {
-            console.error('❌ Error loading security data:', error);
+            window.logger?.error('❌ Error loading security data:', error);
         }
     }
     
@@ -1272,7 +1272,7 @@ class UserDetailPage {
      * Action methods (placeholders for now)
      */
     async saveNotes() {
-        console.log('💾 Save notes clicked');
+        window.logger?.log('💾 Save notes clicked');
         
         if (!this.currentUser || !window.supabase) return;
         
@@ -1307,12 +1307,12 @@ class UserDetailPage {
                 .single();
             
             if (error) {
-                console.error('❌ Failed to save note:', error);
+                window.logger?.error('❌ Failed to save note:', error);
                 this.showError('Failed to save note');
                 return;
             }
             
-            console.log('✅ Note saved:', data);
+            window.logger?.log('✅ Note saved:', data);
             this.showSuccess('Note saved successfully');
             
             // Clear the input
@@ -1322,7 +1322,7 @@ class UserDetailPage {
             await this.loadAdminNotes();
             
         } catch (error) {
-            console.error('❌ Error saving note:', error);
+            window.logger?.error('❌ Error saving note:', error);
             this.showError('Failed to save note');
         }
     }
@@ -1331,7 +1331,7 @@ class UserDetailPage {
      * Edit a note
      */
     editNote(index) {
-        console.log('✏️ Edit note:', index);
+        window.logger?.log('✏️ Edit note:', index);
         
         // Hide content and action buttons, show edit form
         const contentDiv = document.getElementById(`note-content-${index}`);
@@ -1352,7 +1352,7 @@ class UserDetailPage {
      * Cancel editing a note
      */
     cancelEditNote(index) {
-        console.log('❌ Cancel edit note:', index);
+        window.logger?.log('❌ Cancel edit note:', index);
         
         // Show content and action buttons, hide edit form
         const contentDiv = document.getElementById(`note-content-${index}`);
@@ -1373,7 +1373,7 @@ class UserDetailPage {
      * Update a note
      */
     async updateNote(index, noteId) {
-        console.log('💾 Update note:', noteId);
+        window.logger?.log('💾 Update note:', noteId);
         
         if (!window.supabase) return;
         
@@ -1395,19 +1395,19 @@ class UserDetailPage {
                 .eq('id', noteId);
             
             if (error) {
-                console.error('❌ Failed to update note:', error);
+                window.logger?.error('❌ Failed to update note:', error);
                 this.showError('Failed to update note');
                 return;
             }
             
-            console.log('✅ Note updated');
+            window.logger?.log('✅ Note updated');
             this.showSuccess('Note updated successfully');
             
             // Reload notes
             await this.loadAdminNotes();
             
         } catch (error) {
-            console.error('❌ Error updating note:', error);
+            window.logger?.error('❌ Error updating note:', error);
             this.showError('Failed to update note');
         }
     }
@@ -1416,7 +1416,7 @@ class UserDetailPage {
      * Delete a note
      */
     async deleteNote(noteId) {
-        console.log('🗑️ Delete note:', noteId);
+        window.logger?.log('🗑️ Delete note:', noteId);
         
         if (!window.supabase) return;
         
@@ -1433,30 +1433,30 @@ class UserDetailPage {
                 .eq('id', noteId);
             
             if (error) {
-                console.error('❌ Failed to delete note:', error);
+                window.logger?.error('❌ Failed to delete note:', error);
                 this.showError('Failed to delete note');
                 return;
             }
             
-            console.log('✅ Note deleted');
+            window.logger?.log('✅ Note deleted');
             this.showSuccess('Note deleted successfully');
             
             // Reload notes
             await this.loadAdminNotes();
             
         } catch (error) {
-            console.error('❌ Error deleting note:', error);
+            window.logger?.error('❌ Error deleting note:', error);
             this.showError('Failed to delete note');
         }
     }
 
     async grantAccess() {
-        console.log('🎁 Grant access clicked');
+        window.logger?.log('🎁 Grant access clicked');
         // Open grant access modal from user access management component
         if (this.userAccessManagement && typeof this.userAccessManagement.openGrantAccessModal === 'function') {
             this.userAccessManagement.openGrantAccessModal();
         } else {
-            console.error('❌ User access management component not initialized');
+            window.logger?.error('❌ User access management component not initialized');
             alert('Please wait for the page to load completely');
         }
     }
@@ -1465,7 +1465,7 @@ class UserDetailPage {
         if (!this.currentUser || !window.supabase) return;
         
         try {
-            console.log('🚫 Revoking all sessions for user:', this.currentUser.email);
+            window.logger?.log('🚫 Revoking all sessions for user:', this.currentUser.email);
             
             // Confirm action
             const confirmed = confirm(
@@ -1497,7 +1497,7 @@ class UserDetailPage {
             }
             
             this.showSuccess('All sessions revoked successfully');
-            console.log('✅ All sessions revoked successfully');
+            window.logger?.log('✅ All sessions revoked successfully');
             
             // Log admin action
             if (window.adminLayout) {
@@ -1517,7 +1517,7 @@ class UserDetailPage {
             await this.refreshStats();
             
         } catch (error) {
-            console.error('❌ Failed to revoke all sessions:', error);
+            window.logger?.error('❌ Failed to revoke all sessions:', error);
             this.showError('Failed to revoke all sessions: ' + error.message);
         } finally {
             this.showLoading(false);
@@ -1538,7 +1538,7 @@ class UserDetailPage {
             });
             
             if (error) {
-                console.error('❌ Error fetching sessions:', error);
+                window.logger?.error('❌ Error fetching sessions:', error);
                 throw error;
             }
             
@@ -1555,15 +1555,15 @@ class UserDetailPage {
                 this.elements.sessionCount.textContent = this.currentUser.active_sessions;
                 // Session count updated
             } else {
-                console.warn('⚠️ sessionCount element not found!');
+                window.logger?.warn('⚠️ sessionCount element not found!');
             }
         } catch (error) {
-            console.error('❌ Could not refresh stats:', error);
+            window.logger?.error('❌ Could not refresh stats:', error);
         }
     }
 
     async editUser() {
-        console.log('✏️ Edit user clicked');
+        window.logger?.log('✏️ Edit user clicked');
         
         if (!this.currentUser) {
             this.showError('No user data available');
@@ -1619,20 +1619,20 @@ class UserDetailPage {
                 
                 // Listen for user update events
                 window.addEventListener('userUpdated', (event) => {
-                    console.log('🔄 User updated from edit component:', event.detail);
+                    window.logger?.log('🔄 User updated from edit component:', event.detail);
                     // Reload user data and refresh UI - always reload the current user being viewed
                     this.loadUserData(this.currentUser.id);
                 });
 
                 // Listen for close events
                 window.addEventListener('editUserClosed', () => {
-                    console.log('🔄 Edit user form closed');
+                    window.logger?.log('🔄 Edit user form closed');
                     formContainer.classList.add('hidden');
                 });
             }
             
         } catch (error) {
-            console.error('❌ Failed to load edit user component:', error);
+            window.logger?.error('❌ Failed to load edit user component:', error);
             this.showError('Failed to load edit user component');
         }
     }
@@ -1641,7 +1641,7 @@ class UserDetailPage {
         if (!this.currentUser || !window.supabase) return;
         
         try {
-            console.log('🔑 Sending password reset email...');
+            window.logger?.log('🔑 Sending password reset email...');
             
             // Confirm action
             const confirmed = confirm(
@@ -1668,7 +1668,7 @@ class UserDetailPage {
             }
             
             this.showSuccess(`Password reset email sent to ${this.currentUser.email}`);
-            console.log('✅ Password reset email sent successfully');
+            window.logger?.log('✅ Password reset email sent successfully');
             
             // Log admin action
             if (window.adminLayout) {
@@ -1680,7 +1680,7 @@ class UserDetailPage {
             }
             
         } catch (error) {
-            console.error('❌ Failed to send password reset email:', error);
+            window.logger?.error('❌ Failed to send password reset email:', error);
             this.showError('Failed to send password reset email: ' + error.message);
         } finally {
             this.showLoading(false);
@@ -1688,10 +1688,10 @@ class UserDetailPage {
     }
 
     async openContactUser() {
-        console.log('📧 Contact user clicked');
+        window.logger?.log('📧 Contact user clicked');
         
         if (!this.currentUser) {
-            console.error('❌ No user data available');
+            window.logger?.error('❌ No user data available');
             return;
         }
 
@@ -1702,7 +1702,7 @@ class UserDetailPage {
 
     async suspendUser() {
         if (!this.currentUser) {
-            console.error('❌ No current user to suspend');
+            window.logger?.error('❌ No current user to suspend');
             return;
         }
 
@@ -1730,7 +1730,7 @@ class UserDetailPage {
                 .eq('id', this.currentUser.id);
 
             if (error) {
-                console.error('❌ Failed to suspend user:', error);
+                window.logger?.error('❌ Failed to suspend user:', error);
                 this.showAlert('Failed to suspend user', 'error');
                 return;
             }
@@ -1745,12 +1745,12 @@ class UserDetailPage {
                 });
 
                 if (emailError) {
-                    console.error('❌ Failed to send suspension email:', emailError);
+                    window.logger?.error('❌ Failed to send suspension email:', emailError);
                 } else {
-                    console.log('✅ Suspension email sent:', emailResult);
+                    window.logger?.log('✅ Suspension email sent:', emailResult);
                 }
             } catch (emailError) {
-                console.error('❌ Error sending suspension email:', emailError);
+                window.logger?.error('❌ Error sending suspension email:', emailError);
             }
 
             // Log admin action
@@ -1775,10 +1775,10 @@ class UserDetailPage {
             // Show success notification
             this.showAlert(`User ${this.currentUser.username} has been suspended`, 'success');
 
-            console.log('✅ User suspended successfully');
+            window.logger?.log('✅ User suspended successfully');
 
         } catch (error) {
-            console.error('❌ Error suspending user:', error);
+            window.logger?.error('❌ Error suspending user:', error);
             this.showAlert('An error occurred while suspending the user', 'error');
         }
     }
@@ -1805,7 +1805,7 @@ class UserDetailPage {
                 .eq('id', this.currentUser.id);
 
             if (error) {
-                console.error('❌ Failed to reactivate user:', error);
+                window.logger?.error('❌ Failed to reactivate user:', error);
                 this.showAlert('Failed to reactivate user', 'error');
                 return;
             }
@@ -1820,12 +1820,12 @@ class UserDetailPage {
                 });
 
                 if (emailError) {
-                    console.error('❌ Failed to send reactivation email:', emailError);
+                    window.logger?.error('❌ Failed to send reactivation email:', emailError);
                 } else {
-                    console.log('✅ Reactivation email sent:', emailResult);
+                    window.logger?.log('✅ Reactivation email sent:', emailResult);
                 }
             } catch (emailError) {
-                console.error('❌ Error sending reactivation email:', emailError);
+                window.logger?.error('❌ Error sending reactivation email:', emailError);
             }
 
             // Log admin action
@@ -1853,10 +1853,10 @@ class UserDetailPage {
             // Show success notification
             this.showAlert(`User ${this.currentUser.username} has been reactivated`, 'success');
 
-            console.log('✅ User reactivated successfully');
+            window.logger?.log('✅ User reactivated successfully');
 
         } catch (error) {
-            console.error('❌ Error reactivating user:', error);
+            window.logger?.error('❌ Error reactivating user:', error);
             this.showAlert('An error occurred while reactivating the user', 'error');
         }
     }
@@ -2184,7 +2184,7 @@ class UserDetailPage {
 
 
     async permanentDeleteUser() {
-        console.log('💥 Permanent delete clicked');
+        window.logger?.log('💥 Permanent delete clicked');
         
         if (!this.currentUser || !window.supabase) return;
         
@@ -2211,12 +2211,12 @@ class UserDetailPage {
         const doubleConfirm = confirm(`⚠️ FINAL CONFIRMATION ⚠️\n\nAre you ABSOLUTELY SURE you want to delete "${this.currentUser.username}"?\n\nClick OK to DELETE PERMANENTLY or Cancel to abort.`);
         
         if (!doubleConfirm) {
-            console.log('❌ Deletion cancelled by admin');
+            window.logger?.log('❌ Deletion cancelled by admin');
             return;
         }
         
         try {
-            console.log('🗑️ Proceeding with permanent deletion...');
+            window.logger?.log('🗑️ Proceeding with permanent deletion...');
             
             // Get current session
             const { data: { session } } = await window.supabase.auth.getSession();
@@ -2226,7 +2226,7 @@ class UserDetailPage {
                 return;
             }
             
-            console.log('🔑 Calling delete-user Edge Function with auth...');
+            window.logger?.log('🔑 Calling delete-user Edge Function with auth...');
             
             // Call the delete-user Edge Function
             const { data, error } = await window.supabase.functions.invoke('delete-user', {
@@ -2238,19 +2238,19 @@ class UserDetailPage {
             });
             
             if (error) {
-                console.error('❌ Failed to delete user:', error);
+                window.logger?.error('❌ Failed to delete user:', error);
                 this.showError(`Failed to delete user: ${error.message || 'Unknown error'}`);
                 return;
             }
             
-            console.log('✅ User permanently deleted:', data);
+            window.logger?.log('✅ User permanently deleted:', data);
             alert(`User "${this.currentUser.username}" has been permanently deleted.\n\nYou will now be redirected to the user management page.`);
             
             // Redirect back to user management
             window.location.href = '/admin/?section=users';
             
         } catch (error) {
-            console.error('❌ Error deleting user:', error);
+            window.logger?.error('❌ Error deleting user:', error);
             this.showError(`Failed to delete user: ${error.message || 'Unknown error'}`);
         }
     }
@@ -2404,13 +2404,13 @@ class UserDetailPage {
      * Show error message
      */
     showError(message) {
-        console.error('User Detail Page Error:', message);
+        window.logger?.error('User Detail Page Error:', message);
         // TODO: Implement error display in UI
         alert(message); // Temporary fallback
     }
 
     showSuccess(message) {
-        console.log('User Detail Page Success:', message);
+        window.logger?.log('User Detail Page Success:', message);
         // TODO: Implement success display in UI
         // For now, just log it (we could add a toast notification later)
         if (window.showNotification) {

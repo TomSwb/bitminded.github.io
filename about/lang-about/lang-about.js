@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(applyTranslations)
         .catch(error => {
-            console.error('Failed to load about translations:', error);
+            window.logger?.error('Failed to load about translations:', error);
             revealContent();
         });
 
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // If still not found, log warning and skip
             if (!translation || translation === key) {
                 if (element.textContent.trim() === '' && element.innerHTML.trim() === '') {
-                    console.warn('Translation not found for key:', key, 'language:', currentLang);
+                    window.logger?.warn('Translation not found for key:', key, 'language:', currentLang);
                 }
                 element.classList.add('loaded');
                 return;

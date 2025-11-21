@@ -25,10 +25,10 @@ class AdminActivityFiltersTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ Admin Activity Filters translations initialized');
+            window.logger?.log('✅ Admin Activity Filters translations initialized');
             
         } catch (error) {
-            console.error('❌ Failed to initialize admin activity filters translations:', error);
+            window.logger?.error('❌ Failed to initialize admin activity filters translations:', error);
         }
     }
 
@@ -43,10 +43,10 @@ class AdminActivityFiltersTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ Admin Activity Filters translations loaded');
+            window.logger?.log('✅ Admin Activity Filters translations loaded');
             
         } catch (error) {
-            console.error('❌ Failed to load admin activity filters translations:', error);
+            window.logger?.error('❌ Failed to load admin activity filters translations:', error);
             // Use fallback translations
             this.translations = {
                 en: {
@@ -136,10 +136,10 @@ class AdminActivityFiltersTranslations {
             // Store current language translations for use by the main component
             window.adminActivityFiltersTranslations = langTranslations.translation;
             
-            console.log('✅ Admin Activity Filters translations updated');
+            window.logger?.log('✅ Admin Activity Filters translations updated');
             
         } catch (error) {
-            console.error('❌ Failed to update admin activity filters translations:', error);
+            window.logger?.error('❌ Failed to update admin activity filters translations:', error);
         }
     }
 
@@ -199,7 +199,7 @@ class AdminActivityFiltersTranslations {
         let text = langTranslations.translation[key];
         
         if (!text) {
-            console.warn(`Translation key "${key}" not found for language "${currentLanguage}"`);
+            window.logger?.warn(`Translation key "${key}" not found for language "${currentLanguage}"`);
             return key;
         }
         
