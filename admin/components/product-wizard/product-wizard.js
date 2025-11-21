@@ -492,11 +492,12 @@ class ProductWizard {
             await this.steps[1].init();
 
             // Load saved data if available (for drafts) or edit data
-            if (this.isEditMode && this.formData) {
-                // Edit mode: load all form data
+            // Check if formData has step 1 fields (name, slug, etc.) - this covers both edit mode and draft mode
+            if (this.formData && (this.formData.name || this.formData.slug || this.formData.category_id)) {
+                // Load form data (works for both edit mode and draft mode)
                 this.steps[1].setFormData(this.formData);
             } else if (this.formData.step1) {
-                // Draft mode: load step-specific data
+                // Fallback: load step-specific data if stored separately
                 this.steps[1].setFormData(this.formData.step1);
             }
         }

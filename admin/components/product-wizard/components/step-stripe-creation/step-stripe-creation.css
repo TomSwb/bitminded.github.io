@@ -262,6 +262,18 @@
     color: var(--color-text-dark);
 }
 
+.step-stripe-creation__action-btn--update {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.step-stripe-creation__action-btn--update:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+}
+
 .step-stripe-creation__action-btn--delete {
     background: var(--color-error);
     border-color: var(--color-error);

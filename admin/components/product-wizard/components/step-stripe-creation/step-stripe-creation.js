@@ -47,6 +47,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 stripeStatusSection: document.getElementById('stripe-status-section'),
                 stripeStatus: document.getElementById('stripe-status'),
                 stripeActions: document.getElementById('stripe-actions'),
+                updateStripeBtn: document.getElementById('update-stripe-btn'),
                 deleteStripeBtn: document.getElementById('delete-stripe-btn'),
                 viewStripeLink: document.getElementById('view-stripe-link'),
                 freemiumSection: document.getElementById('freemium-pricing'),
@@ -129,6 +130,11 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 });
             }
 
+            if (this.elements.updateStripeBtn) {
+                this.elements.updateStripeBtn.addEventListener('click', () => {
+                    this.handleUpdateStripeProduct();
+                });
+            }
             if (this.elements.deleteStripeBtn) {
                 this.elements.deleteStripeBtn.addEventListener('click', () => {
                     this.handleDeleteStripeProduct();
@@ -424,14 +430,29 @@ if (typeof window.StepStripeCreation === 'undefined') {
 
         updateStripeStatus(data) {
             if (!this.elements.stripeStatus) return;
-            let statusHTML = '<div class="step-stripe-creation__status-item">';
-            statusHTML += '<span class="step-stripe-creation__status-label">Status:</span>';
-            statusHTML += '<span class="step-stripe-creation__status-value step-stripe-creation__status-value--success">✅ Product Created</span>';
-            statusHTML += '</div>';
+            let statusHTML = '';
             if (data.productId) {
                 statusHTML += '<div class="step-stripe-creation__status-item">';
                 statusHTML += '<span class="step-stripe-creation__status-label">Product ID:</span>';
                 statusHTML += `<span class="step-stripe-creation__status-value">${data.productId}</span>`;
+                statusHTML += '</div>';
+            }
+            if (data.monthlyPriceId) {
+                statusHTML += '<div class="step-stripe-creation__status-item">';
+                statusHTML += '<span class="step-stripe-creation__status-label">Monthly Price ID:</span>';
+                statusHTML += `<span class="step-stripe-creation__status-value">${data.monthlyPriceId}</span>`;
+                statusHTML += '</div>';
+            }
+            if (data.yearlyPriceId) {
+                statusHTML += '<div class="step-stripe-creation__status-item">';
+                statusHTML += '<span class="step-stripe-creation__status-label">Yearly Price ID:</span>';
+                statusHTML += `<span class="step-stripe-creation__status-value">${data.yearlyPriceId}</span>`;
+                statusHTML += '</div>';
+            }
+            if (data.priceId && !data.monthlyPriceId && !data.yearlyPriceId) {
+                statusHTML += '<div class="step-stripe-creation__status-item">';
+                statusHTML += '<span class="step-stripe-creation__status-label">Price ID:</span>';
+                statusHTML += `<span class="step-stripe-creation__status-value">${data.priceId}</span>`;
                 statusHTML += '</div>';
             }
             this.elements.stripeStatus.innerHTML = statusHTML;
@@ -444,6 +465,171 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 this.elements.stripeActions.style.display = 'flex';
                 if (this.elements.viewStripeLink) {
                     this.elements.viewStripeLink.href = `https://dashboard.stripe.com/test/products/${data.productId}`;
+                }
+            }
+        }
+        
+        async handleUpdateStripeProduct() {
+            const basicInfo = window.productWizard?.formData || {};
+            const productId = basicInfo.stripe_product_id;
+            
+            if (!productId) {
+                alert('No Stripe product ID found. Please create a Stripe product first.');
+                return;
+            }
+            
+            try {
+                // Build pricing object - same logic as createStripeProduct
+                let pricing = {};
+                if (this.formData.pricing_type === 'freemium') {
+                    pricing = {
+                        CHF: 0,
+                        USD: 0,
+                        EUR: 0,
+                        GBP: 0
+                    };
+                } else if (this.formData.pricing_type === 'subscription') {
+                    const subscriptionPricing = {};
+                    Object.entries(this.formData.subscription_pricing || {}).forEach(([currency, amount]) => {
+                        if (amount > 0) {
+                            subscriptionPricing[currency.toUpperCase()] = {
+                                monthly: amount,
+                                yearly: amount * 12 * 0.9
+                            };
+                        }
+                    });
+                    if (Object.keys(subscriptionPricing).length === 0 && this.formData.subscription_price > 0) {
+                        subscriptionPricing.CHF = {
+                            monthly: this.formData.subscription_price,
+                            yearly: this.formData.subscription_price * 12 * 0.9
+                        };
+                    }
+                    pricing = subscriptionPricing;
+                } else if (this.formData.pricing_type === 'one_time') {
+                    Object.entries(this.formData.one_time_pricing || {}).forEach(([currency, amount]) => {
+                        if (amount > 0) {
+                            pricing[currency.toUpperCase()] = amount;
+                        }
+                    });
+                    if (Object.keys(pricing).length === 0 && this.formData.one_time_price > 0) {
+                        pricing = { CHF: this.formData.one_time_price };
+                    }
+                }
+                
+                // Validate pricing exists
+                if (!pricing || typeof pricing !== 'object' || Object.keys(pricing).length === 0) {
+                    alert('Product must have pricing configured before updating Stripe product.');
+                    return;
+                }
+                
+                // Disable button and show loading
+                this.elements.updateStripeBtn.disabled = true;
+                const btnText = this.elements.updateStripeBtn.querySelector('span:last-child');
+                if (btnText) {
+                    btnText.textContent = 'Updating...';
+                }
+                
+                // Get current session and refresh to ensure we have a valid token
+                let session;
+                try {
+                    const { data: { session: currentSession }, error: sessionError } = await window.supabase.auth.getSession();
+                    
+                    if (currentSession) {
+                        const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.refreshSession();
+                        if (!refreshError && refreshedSession) {
+                            session = refreshedSession;
+                        } else {
+                            session = currentSession;
+                        }
+                    } else if (sessionError) {
+                        throw new Error('Not authenticated. Please log in again.');
+                    } else {
+                        throw new Error('No active session. Please log in again.');
+                    }
+                } catch (authError) {
+                    window.logger?.error('❌ Authentication error:', authError);
+                    throw new Error('Authentication failed. Please log in again.');
+                }
+                
+                if (!session || !session.access_token) {
+                    throw new Error('Invalid session. Please log in again.');
+                }
+                
+                // Prepare update data
+                const updateData = {
+                    productId: productId,
+                    name: basicInfo.name,
+                    description: basicInfo.short_description,
+                    short_description: basicInfo.description,
+                    pricing: pricing,
+                    pricing_type: this.formData.pricing_type,
+                    trial_days: this.formData.pricing_type === 'freemium' ? 0 : (this.formData.trial_days || 0),
+                    trial_requires_payment: this.formData.pricing_type === 'freemium' ? false : (this.formData.trial_requires_payment || false),
+                    // Pass existing price IDs to return when only sales changed
+                    existing_price_id: basicInfo.stripe_price_id || null,
+                    existing_monthly_price_id: basicInfo.stripe_price_monthly_id || null,
+                    existing_yearly_price_id: basicInfo.stripe_price_yearly_id || null,
+                    // Pass old price IDs to deactivate
+                    old_price_id: basicInfo.stripe_price_id || null,
+                    old_monthly_price_id: basicInfo.stripe_price_monthly_id || null,
+                    old_yearly_price_id: basicInfo.stripe_price_yearly_id || null
+                };
+                
+                // Call edge function to update Stripe product
+                const { data, error } = await window.supabase.functions.invoke('update-stripe-product', {
+                    body: updateData,
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // Update form data with new Stripe IDs
+                if (window.productWizard && window.productWizard.formData) {
+                    if (data.priceId) {
+                        window.productWizard.formData.stripe_price_id = data.priceId;
+                    }
+                    if (data.monthlyPriceId) {
+                        window.productWizard.formData.stripe_price_monthly_id = data.monthlyPriceId;
+                    }
+                    if (data.yearlyPriceId) {
+                        window.productWizard.formData.stripe_price_yearly_id = data.yearlyPriceId;
+                    }
+                }
+                
+                // Update database to reflect the changes
+                window.logger?.log('💾 Saving updated Stripe status to database...');
+                const saveResult = await window.productWizard.saveDraftToDatabase();
+                if (!saveResult.success) {
+                    window.logger?.warn('⚠️ Stripe product updated but failed to save to database:', saveResult.error);
+                } else {
+                    window.logger?.log('✅ Database updated after Stripe update');
+                }
+                
+                // Update UI status
+                this.updateStripeStatus({
+                    productId: productId,
+                    priceId: data.priceId || basicInfo.stripe_price_id,
+                    monthlyPriceId: data.monthlyPriceId || basicInfo.stripe_price_monthly_id,
+                    yearlyPriceId: data.yearlyPriceId || basicInfo.stripe_price_yearly_id
+                });
+                
+                // Reset button state
+                this.elements.updateStripeBtn.disabled = false;
+                if (btnText) {
+                    btnText.textContent = 'Update Stripe Product';
+                }
+                
+                alert('Stripe product updated successfully. ' + (data.message || ''));
+                
+            } catch (error) {
+                window.logger?.error('❌ Error updating Stripe product:', error);
+                alert('Failed to update Stripe product: ' + (error.message || error));
+                this.elements.updateStripeBtn.disabled = false;
+                const btnText = this.elements.updateStripeBtn.querySelector('span:last-child');
+                if (btnText) {
+                    btnText.textContent = 'Update Stripe Product';
                 }
             }
         }
@@ -516,7 +702,12 @@ if (typeof window.StepStripeCreation === 'undefined') {
             }
             
             if (data.stripe_product_id) {
-                this.updateStripeStatus({ productId: data.stripe_product_id, priceId: data.stripe_price_id });
+                this.updateStripeStatus({ 
+                    productId: data.stripe_product_id, 
+                    priceId: data.stripe_price_id,
+                    monthlyPriceId: data.stripe_price_monthly_id,
+                    yearlyPriceId: data.stripe_price_yearly_id
+                });
             }
         }
 
