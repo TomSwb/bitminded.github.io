@@ -1044,7 +1044,7 @@ class ServiceManagement {
         });
 
         // Handle conditional fields
-        this.handlePricingTypeChange(service.pricing_type);
+        this.handlePricingTypeChange(service.pricing_type, service.pricing);
         this.toggleReducedFare(service.has_reduced_fare);
         this.toggleSale(service.is_on_sale);
 
@@ -2559,7 +2559,22 @@ class ServiceManagement {
         // Status display removed - it's obvious the product is created
         let statusHTML = '';
 
-        if (data.priceId && !data.monthlyPriceId && !data.yearlyPriceId) {
+        // For subscription services, show monthly and yearly price IDs
+        if (data.monthlyPriceId || data.yearlyPriceId) {
+            if (data.monthlyPriceId) {
+                statusHTML += '<div class="service-management__status-item">';
+                statusHTML += '<span class="service-management__status-label">Monthly Price ID:</span>';
+                statusHTML += `<span class="service-management__status-value">${data.monthlyPriceId}</span>`;
+                statusHTML += '</div>';
+            }
+            if (data.yearlyPriceId) {
+                statusHTML += '<div class="service-management__status-item">';
+                statusHTML += '<span class="service-management__status-label">Yearly Price ID:</span>';
+                statusHTML += `<span class="service-management__status-value">${data.yearlyPriceId}</span>`;
+                statusHTML += '</div>';
+            }
+        } else if (data.priceId) {
+            // For one-time payments, show regular price ID
             statusHTML += '<div class="service-management__status-item">';
             statusHTML += '<span class="service-management__status-label">Price ID:</span>';
             statusHTML += `<span class="service-management__status-value">${data.priceId}</span>`;
