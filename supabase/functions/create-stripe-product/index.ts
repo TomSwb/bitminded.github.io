@@ -341,7 +341,9 @@ serve(async (req) => {
       subscriptionPrice, // Deprecated, use pricing object instead
       oneTimePrice, // Deprecated, use pricing object instead
       trialDays,
-      trialRequiresPayment
+      trialRequiresPayment,
+      productId, // Database product ID (optional)
+      slug // Product slug (optional, used if productId not provided)
     } = body
 
     // Validate required fields
@@ -586,6 +588,91 @@ serve(async (req) => {
       primaryPriceId,
       hasPriceErrors: Object.keys(priceErrors).length > 0
     })
+
+    // Update database with Stripe product ID and price IDs if productId or slug is provided
+    if (productId || slug) {
+      let dbProduct: any = null
+      let dbProductError: any = null
+      
+      if (productId) {
+        const result = await supabaseAdmin
+          .from('products')
+          .select('id')
+          .eq('id', productId)
+          .single()
+        dbProduct = result.data
+        dbProductError = result.error
+      } else if (slug) {
+        const result = await supabaseAdmin
+          .from('products')
+          .select('id')
+          .eq('slug', slug)
+          .single()
+        dbProduct = result.data
+        dbProductError = result.error
+      }
+
+      if (!dbProductError && dbProduct) {
+        const updateData: Record<string, any> = {
+          stripe_product_id: productData.id,
+          pricing_type: pricingType,
+          updated_at: new Date().toISOString()
+        }
+
+        // Update currency-specific price IDs
+        if (Object.keys(prices).length > 0) {
+          if (prices.CHF) updateData.stripe_price_chf_id = prices.CHF
+          if (prices.USD) updateData.stripe_price_usd_id = prices.USD
+          if (prices.EUR) updateData.stripe_price_eur_id = prices.EUR
+          if (prices.GBP) updateData.stripe_price_gbp_id = prices.GBP
+          
+          // Update primary price_id for backward compatibility
+          updateData.stripe_price_id = primaryPriceId
+          
+          // Set price_amount and price_currency from primary currency
+          const primaryCurrency = prices.CHF ? 'CHF' : (prices.USD ? 'USD' : (prices.EUR ? 'EUR' : (prices.GBP ? 'GBP' : 'USD')))
+          const primaryPriceAmount = pricing?.[primaryCurrency]
+          if (typeof primaryPriceAmount === 'number' && primaryPriceAmount > 0) {
+            updateData.price_amount = primaryPriceAmount
+            updateData.price_currency = primaryCurrency
+          }
+        }
+
+        // Update trial days if provided
+        if (trialDays !== undefined) {
+          updateData.trial_days = trialDays
+        }
+        if (trialRequiresPayment !== undefined) {
+          updateData.trial_requires_payment = trialRequiresPayment
+        }
+
+        // Perform database update
+        const { error: updateError } = await supabaseAdmin
+          .from('products')
+          .update(updateData)
+          .eq('id', dbProduct.id)
+
+        if (updateError) {
+          console.error('⚠️ Failed to update database with Stripe product ID and price IDs:', updateError)
+          await logError(
+            supabaseAdmin,
+            'create-stripe-product',
+            'database',
+            'Failed to update database with Stripe product ID and price IDs',
+            { error: updateError.message, productId: dbProduct.id },
+            user.id,
+            { stripeProductId: productData.id, updateData },
+            ipAddress
+          )
+          // Don't fail the request - Stripe product was created successfully
+        } else {
+          console.log('✅ Database updated with Stripe product ID and price IDs for product:', dbProduct.id)
+        }
+      } else if (dbProductError) {
+        console.error('⚠️ Failed to find product in database:', dbProductError)
+        // Don't fail the request - Stripe product was created successfully
+      }
+    }
 
     // Build response
     const responseData: any = {

@@ -898,6 +898,109 @@ serve(async (req) => {
     // Combine all price errors
     const allPriceErrors = { ...regularPriceErrors, ...priceErrors }
 
+    // Update database with new price IDs
+    // Find the product in database by Stripe product ID
+    const { data: productData, error: productError } = await supabaseAdmin
+      .from('products')
+      .select('id')
+      .eq('stripe_product_id', productId)
+      .single()
+
+    if (!productError && productData) {
+      const updateData: Record<string, any> = {
+        pricing_type: pricing_type,
+        updated_at: new Date().toISOString()
+      }
+
+      // Update currency-specific one-time price IDs
+      if (Object.keys(newOneTimePrices).length > 0) {
+        if (newOneTimePrices.CHF) updateData.stripe_price_chf_id = newOneTimePrices.CHF
+        if (newOneTimePrices.USD) updateData.stripe_price_usd_id = newOneTimePrices.USD
+        if (newOneTimePrices.EUR) updateData.stripe_price_eur_id = newOneTimePrices.EUR
+        if (newOneTimePrices.GBP) updateData.stripe_price_gbp_id = newOneTimePrices.GBP
+        
+        // Update primary price_id and price_amount/currency for backward compatibility
+        updateData.stripe_price_id = primaryOneTimePriceId
+        // Set price_amount and price_currency from primary currency (prefer CHF, then USD)
+        const primaryCurrency = newOneTimePrices.CHF ? 'CHF' : (newOneTimePrices.USD ? 'USD' : (newOneTimePrices.EUR ? 'EUR' : (newOneTimePrices.GBP ? 'GBP' : 'USD')))
+        const primaryPriceData = pricing?.[primaryCurrency]
+        if (typeof primaryPriceData === 'number') {
+          updateData.price_amount = primaryPriceData
+          updateData.price_currency = primaryCurrency
+        } else if (typeof primaryPriceData === 'object' && primaryPriceData?.amount) {
+          updateData.price_amount = primaryPriceData.amount
+          updateData.price_currency = primaryCurrency
+        }
+      }
+
+      // Update currency-specific monthly price IDs (for subscriptions)
+      if (Object.keys(newMonthlyPrices).length > 0) {
+        updateData.stripe_price_monthly_id = primaryMonthlyPriceId
+        // For subscriptions, store monthly price in currency-specific fields
+        if (newMonthlyPrices.CHF) updateData.stripe_price_chf_id = newMonthlyPrices.CHF
+        if (newMonthlyPrices.USD) updateData.stripe_price_usd_id = newMonthlyPrices.USD
+        if (newMonthlyPrices.EUR) updateData.stripe_price_eur_id = newMonthlyPrices.EUR
+        if (newMonthlyPrices.GBP) updateData.stripe_price_gbp_id = newMonthlyPrices.GBP
+        
+        // Set price_amount and price_currency from primary currency
+        const primaryCurrency = newMonthlyPrices.CHF ? 'CHF' : (newMonthlyPrices.USD ? 'USD' : (newMonthlyPrices.EUR ? 'EUR' : (newMonthlyPrices.GBP ? 'GBP' : 'USD')))
+        const primaryPriceData = pricing?.[primaryCurrency]
+        if (typeof primaryPriceData === 'object' && primaryPriceData?.monthly) {
+          updateData.price_amount = primaryPriceData.monthly
+          updateData.price_currency = primaryCurrency
+        }
+      }
+
+      // Update currency-specific yearly price IDs (for subscriptions)
+      if (Object.keys(newYearlyPrices).length > 0) {
+        updateData.stripe_price_yearly_id = primaryYearlyPriceId
+      }
+
+      // Update sale price IDs if they exist
+      if (primarySaleOneTimePriceId) {
+        updateData.stripe_price_sale_id = primarySaleOneTimePriceId
+      }
+      if (primarySaleMonthlyPriceId) {
+        updateData.stripe_price_monthly_sale_id = primarySaleMonthlyPriceId
+      }
+      if (primarySaleYearlyPriceId) {
+        updateData.stripe_price_yearly_sale_id = primarySaleYearlyPriceId
+      }
+
+      // Update is_on_sale flag
+      updateData.is_on_sale = is_on_sale
+      if (is_on_sale && sale_discount_percentage !== null) {
+        updateData.sale_discount_percentage = sale_discount_percentage
+      } else if (!is_on_sale) {
+        updateData.sale_discount_percentage = null
+      }
+
+      // Perform database update
+      const { error: updateError } = await supabaseAdmin
+        .from('products')
+        .update(updateData)
+        .eq('id', productData.id)
+
+      if (updateError) {
+        console.error('⚠️ Failed to update database with price IDs:', updateError)
+        await logError(
+          supabaseAdmin,
+          'update-stripe-product',
+          'database',
+          'Failed to update database with price IDs',
+          { error: updateError.message, productId: productData.id },
+          user.id,
+          { productId, updateData },
+          ipAddress
+        )
+      } else {
+        console.log('✅ Database updated with price IDs for product:', productData.id)
+      }
+    } else if (productError) {
+      console.error('⚠️ Failed to find product in database:', productError)
+      // Don't fail the request - Stripe update was successful
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
