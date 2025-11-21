@@ -565,7 +565,10 @@ class AuthButtons {
             if (sessionToken) {
                 try {
                     await window.supabase.functions.invoke('revoke-session', {
-                        body: { session_id: sessionToken }
+                        body: { 
+                            session_id: sessionToken,
+                            allow_current_session: true  // Allow revoking current session during logout
+                        }
                     });
                     console.log('✅ Session cleaned up from user_sessions');
                 } catch (cleanupError) {

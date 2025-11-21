@@ -9,6 +9,7 @@ interface RevokeSessionRequest {
   session_id?: string
   revoke_all?: boolean
   target_user_id?: string  // For admin to revoke other user's sessions
+  allow_current_session?: boolean  // Allow revoking current session (for logout)
 }
 
 interface RateLimitConfig {
@@ -267,7 +268,7 @@ serve(async (req) => {
 
     // Parse request body
     const body: RevokeSessionRequest = await req.json()
-    const { session_id, revoke_all, target_user_id } = body
+    const { session_id, revoke_all, target_user_id, allow_current_session } = body
     
     // Determine which user's sessions to revoke
     let targetUserId = user.id
@@ -409,8 +410,8 @@ serve(async (req) => {
         console.log(`👑 Admin ${user.id} revoking session for user: ${sessionData.user_id}`)
       }
 
-      // Don't allow user revoking their current session (but admin can revoke any)
-      if (!isAdminAction && session_id === token) {
+      // Don't allow user revoking their current session (but admin can revoke any, or if allow_current_session is true for logout)
+      if (!isAdminAction && !allow_current_session && session_id === token) {
         return new Response(
           JSON.stringify({ error: 'Cannot revoke current session' }), 
           { 
