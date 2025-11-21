@@ -240,6 +240,12 @@
         const header = document.createElement('header');
         header.className = 'catalog-card__header';
         header.appendChild(status);
+        
+        // Add sale badge if product is on sale
+        if (product.sale && product.sale.isOnSale) {
+            const saleBadge = buildSaleBadge(product.sale);
+            header.appendChild(saleBadge);
+        }
 
         const title = document.createElement('h3');
         title.className = 'catalog-card__title';
@@ -272,6 +278,14 @@
         }
         body.appendChild(buildTagList(product));
 
+        // Add sale info if product is on sale
+        if (product.sale && product.sale.isOnSale) {
+            const saleInfo = buildSaleInfo(product.sale);
+            if (saleInfo) {
+                body.appendChild(saleInfo);
+            }
+        }
+
         card.appendChild(header);
         card.appendChild(body);
         const featuredPanel = buildDetailPanel(product);
@@ -292,6 +306,12 @@
         const header = document.createElement('header');
         header.className = 'catalog-card__header';
         header.appendChild(status);
+        
+        // Add sale badge if product is on sale
+        if (product.sale && product.sale.isOnSale) {
+            const saleBadge = buildSaleBadge(product.sale);
+            header.appendChild(saleBadge);
+        }
 
         const title = document.createElement('h3');
         title.className = 'catalog-card__title';
@@ -324,6 +344,15 @@
         }
         body.appendChild(tagline);
         body.appendChild(buildTagList(product));
+        
+        // Add sale info if product is on sale
+        if (product.sale && product.sale.isOnSale) {
+            const saleInfo = buildSaleInfo(product.sale);
+            if (saleInfo) {
+                body.appendChild(saleInfo);
+            }
+        }
+        
         card.appendChild(header);
         card.appendChild(body);
         const detailPanel = buildDetailPanel(product);
@@ -345,6 +374,65 @@
         const fallback = product.status.badgeText || '';
         badge.textContent = badgeKey ? translateText(badgeKey, fallback) : fallback;
         return badge;
+    }
+
+    function buildSaleBadge(sale) {
+        const badge = document.createElement('span');
+        badge.className = 'catalog-card__sale-badge';
+        
+        // Create festive text with emoji
+        const badgeText = document.createElement('span');
+        const leftEmoji = sale.emojiLeft || '✨';
+        const rightEmoji = sale.emojiRight || '✨';
+        badgeText.textContent = `${leftEmoji} ON SALE ${rightEmoji}`;
+        badge.appendChild(badgeText);
+        
+        return badge;
+    }
+
+    function buildSaleInfo(sale) {
+        if (!sale || !sale.isOnSale) {
+            return null;
+        }
+
+        const saleInfo = document.createElement('div');
+        saleInfo.className = 'catalog-card__sale-info';
+
+        // Add sale description if available with custom emojis
+        if (sale.description) {
+            const description = document.createElement('div');
+            description.className = 'catalog-card__sale-info__description';
+            const leftEmoji = sale.emojiLeft || '✨';
+            const rightEmoji = sale.emojiRight || '✨';
+            description.textContent = `${leftEmoji} ${sale.description} ${rightEmoji}`;
+            saleInfo.appendChild(description);
+        }
+
+        // Add end date and time if available
+        if (sale.endDate) {
+            const endDate = new Date(sale.endDate);
+            
+            // Format date as DD/MM/YYYY
+            const day = String(endDate.getDate()).padStart(2, '0');
+            const month = String(endDate.getMonth() + 1).padStart(2, '0');
+            const year = endDate.getFullYear();
+            const formattedDate = `${day}/${month}/${year}`;
+            
+            // Format time as HH:MM
+            const hours = String(endDate.getHours()).padStart(2, '0');
+            const minutes = String(endDate.getMinutes()).padStart(2, '0');
+            const formattedTime = `${hours}:${minutes}`;
+            
+            const dateInfo = document.createElement('div');
+            dateInfo.className = 'catalog-card__sale-info__end-date';
+            dateInfo.innerHTML = `
+                <div><span class="catalog-card__sale-info__label">Ends:</span> ${formattedDate}</div>
+                <div><span class="catalog-card__sale-info__label">Time:</span> ${formattedTime}</div>
+            `;
+            saleInfo.appendChild(dateInfo);
+        }
+
+        return saleInfo;
     }
 
     function buildMetaLine(product) {
