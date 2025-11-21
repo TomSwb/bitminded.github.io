@@ -301,7 +301,41 @@ if (event.type === 'customer.subscription.deleted') {
 
 ## 🚀 **Cloudflare Workers Implementation**
 
-### **Worker Logic for Access Control**
+### **Deployment Setup (IMPORTANT)**
+
+#### **Correct Deployment Process:**
+
+1. **Repository Setup:**
+   - Product code is in a GitHub repository (e.g., `measure-mate`)
+   - Repository contains: `worker-updated.js`, `wrangler.toml`, and all static files
+
+2. **Cloudflare Worker Configuration:**
+   - **Manually connect the repository** in Cloudflare Worker dashboard
+   - **Select the main branch** for deployment
+   - **GitHub Pages**: Can be enabled or disabled depending on worker implementation:
+     - **If worker proxies to GitHub Pages**: GitHub Pages must be enabled (but subdomain points to Worker, not GitHub Pages)
+     - **If worker serves files directly**: GitHub Pages can be disabled for full protection
+   - **Subdomain DNS**: Point subdomain (`measure-mate.bitminded.ch`) to Cloudflare Worker, NOT to GitHub Pages
+   - This ensures the app is ONLY accessible through the Cloudflare Worker (protected route)
+
+3. **Deploy Command in Cloudflare:**
+   ```
+   npx wrangler deploy worker-updated.js
+   ```
+   Or use the package.json script:
+   ```
+   npm run deploy
+   ```
+
+4. **Why This Approach:**
+   - ✅ **Full Protection**: App is only accessible via Cloudflare Worker (with auth checks)
+   - ✅ **No Public Access**: GitHub Pages disabled = no direct access to static files
+   - ✅ **Secure**: All requests go through authentication/subscription validation
+   - ✅ **Single Entry Point**: Subdomain points to Worker, Worker serves files
+
+#### **Worker Structure**
+
+The Worker serves static files directly from the repository (via Workers Assets) or proxies to a private GitHub Pages URL. The key is that the subdomain (`measure-mate.bitminded.ch`) points to the Worker, not directly to GitHub Pages.
 
 #### **Basic Worker Structure**
 ```javascript
@@ -322,7 +356,8 @@ export default {
             return redirectToSubscribe(appId);
         }
         
-        // Proxy to GitHub Pages
+        // Serve static files (via Workers Assets) or proxy to GitHub Pages
+        // Note: If GitHub Pages is disabled, use Workers Assets instead
         return fetch(request, {
             cf: {
                 resolveOverride: env.GITHUB_PAGES_URL

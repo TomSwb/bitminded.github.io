@@ -313,7 +313,17 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const body = await req.json()
+    let body: any
+    try {
+      body = await req.json()
+    } catch (parseError) {
+      console.error('❌ Error parsing request body:', parseError)
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body', details: parseError instanceof Error ? parseError.message : String(parseError) }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const {
       name,
       description,
@@ -325,7 +335,7 @@ serve(async (req) => {
       tags,
       pricingType,
       currency = 'chf', // Deprecated, use pricing object instead
-      pricing, // Multi-currency pricing object: {CHF: 50, USD: 55, EUR: 48, GBP: 42}
+      pricing, // Multi-currency pricing object: {CHF: 50, USD: 55, EUR: 48, GBP: 42} or nested for subscriptions
       enterprisePrice, // Deprecated, use pricing object instead
       subscriptionInterval,
       subscriptionPrice, // Deprecated, use pricing object instead
@@ -334,7 +344,22 @@ serve(async (req) => {
       trialRequiresPayment
     } = body
 
-    console.log('💳 Creating Stripe product:', { name, pricingType, pricing })
+    // Validate required fields
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Product name is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!pricingType || !['freemium', 'subscription', 'one_time'].includes(pricingType)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid pricing type. Must be freemium, subscription, or one_time' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log('💳 Creating Stripe product:', { name, pricingType, pricing, hasPricing: !!pricing })
 
     // Build product metadata
     const metadata: Record<string, string> = {
@@ -433,41 +458,58 @@ serve(async (req) => {
       // Multi-currency pricing
       for (const [currency, amount] of Object.entries(pricing)) {
         const currencyUpper = currency.toUpperCase()
-        const priceAmount = typeof amount === 'number' ? amount : parseFloat(String(amount))
         
-        if (priceAmount > 0) {
-          try {
-            const priceData = await createStripePrice(
-              stripeSecretKey,
-              productData.id,
-              priceAmount,
-              currencyUpper.toLowerCase(),
-              priceType,
-              priceNickname,
-              priceInterval || undefined
-            )
-            prices[currencyUpper] = priceData.id
-            console.log(`✅ Stripe price created for ${currencyUpper}:`, priceData.id)
-          } catch (error) {
-            console.error(`❌ Error creating price for ${currencyUpper}:`, error)
-            priceErrors[currencyUpper] = error.message
-            // Log error but continue with other currencies
-            await logError(
-              supabaseAdmin,
-              'create-stripe-product',
-              'stripe_api',
-              `Failed to create price for ${currencyUpper}`,
-              { 
-                currency: currencyUpper,
-                amount: priceAmount,
-                error: error.message,
-                error_string: String(error)
-              },
-              user.id,
-              { name, pricingType, currency: currencyUpper, amount: priceAmount },
-              ipAddress
-            )
-          }
+        // Handle nested pricing structure (for subscriptions: {monthly: X, yearly: Y})
+        // or flat structure (for one-time/freemium: X)
+        let priceAmount: number | null = null
+        
+        if (typeof amount === 'number') {
+          priceAmount = amount
+        } else if (typeof amount === 'object' && amount !== null) {
+          // Nested structure - skip for now (handled by subscription function)
+          console.log(`⚠️ Skipping nested pricing structure for ${currencyUpper} in create-stripe-product`)
+          continue
+        } else {
+          priceAmount = parseFloat(String(amount))
+        }
+        
+        // Skip if amount is NaN or <= 0
+        if (isNaN(priceAmount) || priceAmount <= 0) {
+          console.log(`ℹ️ Skipping price creation for ${currencyUpper} (amount: ${priceAmount})`)
+          continue
+        }
+        
+        try {
+          const priceData = await createStripePrice(
+            stripeSecretKey,
+            productData.id,
+            priceAmount,
+            currencyUpper.toLowerCase(),
+            priceType,
+            priceNickname,
+            priceInterval || undefined
+          )
+          prices[currencyUpper] = priceData.id
+          console.log(`✅ Stripe price created for ${currencyUpper}:`, priceData.id)
+        } catch (error) {
+          console.error(`❌ Error creating price for ${currencyUpper}:`, error)
+          priceErrors[currencyUpper] = error instanceof Error ? error.message : String(error)
+          // Log error but continue with other currencies
+          await logError(
+            supabaseAdmin,
+            'create-stripe-product',
+            'stripe_api',
+            `Failed to create price for ${currencyUpper}`,
+            { 
+              currency: currencyUpper,
+              amount: priceAmount,
+              error: error instanceof Error ? error.message : String(error),
+              error_string: String(error)
+            },
+            user.id,
+            { name, pricingType, currency: currencyUpper, amount: priceAmount },
+            ipAddress
+          )
         }
       }
     } else {
@@ -534,18 +576,34 @@ serve(async (req) => {
     }
 
     // Get primary price ID (first currency or CHF if available)
+    // For freemium products, this will be null since no prices are created
     const primaryPriceId = prices.CHF || prices.USD || prices.EUR || prices.GBP || Object.values(prices)[0] || null
 
+    console.log('✅ Product creation complete:', {
+      productId: productData.id,
+      pricingType,
+      pricesCreated: Object.keys(prices).length,
+      primaryPriceId,
+      hasPriceErrors: Object.keys(priceErrors).length > 0
+    })
+
+    // Build response
+    const responseData: any = {
+      success: true,
+      productId: productData.id,
+      priceId: primaryPriceId, // Primary price ID for backward compatibility (null for freemium)
+      prices: prices, // All price IDs by currency (empty object for freemium)
+      product: productData
+    }
+
+    // Only include priceErrors if there are any
+    if (Object.keys(priceErrors).length > 0) {
+      responseData.priceErrors = priceErrors
+    }
+
     return new Response(
-      JSON.stringify({
-        success: true,
-        productId: productData.id,
-        priceId: primaryPriceId, // Primary price ID for backward compatibility
-        prices: prices, // All price IDs by currency
-        product: productData,
-        priceErrors: Object.keys(priceErrors).length > 0 ? priceErrors : undefined
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify(responseData),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {

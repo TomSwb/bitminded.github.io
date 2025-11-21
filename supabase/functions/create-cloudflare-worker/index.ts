@@ -13,38 +13,52 @@ interface RateLimitConfig {
 }
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOriginsEnv = Deno.env.get('ALLOWED_ORIGINS')
-  const allowedOrigins = allowedOriginsEnv 
-    ? allowedOriginsEnv.split(',').map(o => o.trim())
-    : [
-        'https://bitminded.ch',
-        'https://www.bitminded.ch',
-        'http://localhost',
-        'http://127.0.0.1:5501',
-        'https://*.github.io'
-      ]
-  
-  let allowedOrigin = allowedOrigins[0]
-  if (origin) {
-    const matched = allowedOrigins.find(pattern => {
-      if (pattern.includes('*')) {
-        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\./g, '\\.') + '$')
-        return regex.test(origin)
+  try {
+    const allowedOriginsEnv = Deno.env.get('ALLOWED_ORIGINS')
+    const allowedOrigins = allowedOriginsEnv 
+      ? allowedOriginsEnv.split(',').map(o => o.trim())
+      : [
+          'https://bitminded.ch',
+          'https://www.bitminded.ch',
+          'http://localhost',
+          'http://127.0.0.1:5501',
+          'https://*.github.io'
+        ]
+    
+    let allowedOrigin = allowedOrigins[0] || 'https://bitminded.ch'
+    if (origin) {
+      const matched = allowedOrigins.find(pattern => {
+        try {
+          if (pattern.includes('*')) {
+            const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\./g, '\\.') + '$')
+            return regex.test(origin)
+          }
+          if (pattern === 'https://bitminded.ch' || pattern === 'https://www.bitminded.ch') {
+            return origin === pattern || origin.endsWith('.bitminded.ch')
+          }
+          return origin === pattern || origin.startsWith(pattern)
+        } catch {
+          return false
+        }
+      })
+      if (matched) {
+        allowedOrigin = origin
       }
-      if (pattern === 'https://bitminded.ch' || pattern === 'https://www.bitminded.ch') {
-        return origin === pattern || origin.endsWith('.bitminded.ch')
-      }
-      return origin === pattern || origin.startsWith(pattern)
-    })
-    if (matched) {
-      allowedOrigin = origin
     }
-  }
-  
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    
+    return {
+      'Access-Control-Allow-Origin': allowedOrigin,
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    }
+  } catch (error) {
+    // Fallback to default CORS headers if anything fails
+    console.error('Error generating CORS headers:', error)
+    return {
+      'Access-Control-Allow-Origin': 'https://bitminded.ch',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    }
   }
 }
 
@@ -170,9 +184,12 @@ serve(async (req) => {
   const origin = req.headers.get('Origin')
   const corsHeaders = getCorsHeaders(origin)
   
-  // Handle CORS preflight
+  // Handle CORS preflight - MUST be handled first and return 200
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { 
+      status: 200,
+      headers: corsHeaders 
+    })
   }
 
   try {
@@ -183,10 +200,10 @@ serve(async (req) => {
                       'unknown'
 
     // Rate limiting: IP-based for Cloudflare Worker creation - 5/min, 20/hour (expensive operation)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseUrlForRateLimit = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    if (supabaseUrl && supabaseServiceKey) {
-      const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    if (supabaseUrlForRateLimit && supabaseServiceKey) {
+      const supabaseAdmin = createClient(supabaseUrlForRateLimit, supabaseServiceKey, {
         auth: { autoRefreshToken: false, persistSession: false }
       })
       
@@ -395,7 +412,7 @@ serve(async (req) => {
         workerName,
         workerUrl,
         workerDevUrl,
-        customDomain: domainResponse && domainResponse.ok ? customDomain : null,
+        customDomain: (domainResponse && domainResponse.ok) ? customDomain : null,
         message: 'Cloudflare Worker created successfully'
       }),
       {
