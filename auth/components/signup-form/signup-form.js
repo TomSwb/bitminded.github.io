@@ -173,6 +173,13 @@ class SignupForm {
     async handleSubmit() {
         if (this.isSubmitting) return;
 
+        // Ensure elements are cached
+        if (!this.elements?.username || !this.elements?.email || !this.elements?.password || !this.elements?.confirmPassword) {
+            console.error('❌ Form elements not found. Cannot validate.');
+            this.showError('Form not properly initialized. Please refresh the page.');
+            return;
+        }
+
         // Validate all fields
         const isUsernameValid = this.validateUsername();
         const isEmailValid = this.validateEmail();
@@ -190,10 +197,7 @@ class SignupForm {
             // Wait for Supabase to be available
             await this.waitForSupabase();
 
-            // Record consent before creating account
-            await this.recordConsents();
-
-            // Create user account
+            // Create user account first
             const { data, error } = await window.supabase.auth.signUp({
                 email: this.elements.email.value.trim(),
                 password: this.elements.password.value,
@@ -210,8 +214,8 @@ class SignupForm {
             }
 
             if (data.user) {
-                // Process pending consents with the new user ID
-                await this.processPendingConsents(data.user.id);
+                // Record consents via Edge Function (IP captured server-side)
+                await this.recordConsentsViaEdgeFunction(data.user.id);
                 
                 this.showSuccess();
                 this.resetForm();
@@ -694,98 +698,47 @@ class SignupForm {
     }
 
     /**
-     * Record user consents in the database
+     * Record user consents via Edge Function (IP captured server-side)
+     * @param {string} userId - The newly created user ID
      */
-    async recordConsents() {
+    async recordConsentsViaEdgeFunction(userId) {
         try {
-            console.log('🔄 Recording user consents...');
+            console.log('🔄 Recording user consents via Edge Function...');
             
-            // Get user IP address
-            const ipAddress = await this.getUserIP();
             const userAgent = navigator.userAgent;
             
-            // Record required consents (terms and privacy)
-            await this.recordConsent('terms', '1.0', ipAddress, userAgent);
-            await this.recordConsent('privacy', '1.0', ipAddress, userAgent);
+            // Record required consents (terms and privacy) via Edge Function
+            // IP address is captured server-side from request headers (more reliable)
+            const consents = [
+                { type: 'terms', version: '1.0' },
+                { type: 'privacy', version: '1.0' }
+            ];
+            
+            for (const consent of consents) {
+                const { error } = await window.supabase.functions.invoke('record-signup-consent', {
+                    body: {
+                        user_id: userId,
+                        consent_type: consent.type,
+                        version: consent.version,
+                        user_agent: userAgent
+                        // IP address is captured server-side from request headers
+                    }
+                });
+                
+                if (error) {
+                    console.error(`❌ Failed to record ${consent.type} consent:`, error);
+                    // Continue with other consents even if one fails
+                    continue;
+                }
+                
+                console.log(`✅ Consent recorded: ${consent.type} v${consent.version}`);
+            }
             
             console.log('✅ User consents recorded successfully');
         } catch (error) {
             console.error('❌ Failed to record consents:', error);
-            throw new Error('Failed to record consent. Please try again.');
-        }
-    }
-
-    /**
-     * Record a single consent in the database
-     * @param {string} consentType - Type of consent ('terms', 'privacy', etc.)
-     * @param {string} version - Version of the consent document
-     * @param {string} ipAddress - User's IP address
-     * @param {string} userAgent - User's browser information
-     */
-    async recordConsent(consentType, version, ipAddress, userAgent) {
-        try {
-            // Since we don't have a user ID yet (account not created), we'll use a temporary approach
-            // We'll store the consent data and associate it with the user after account creation
-            const consentData = {
-                type: consentType,
-                version: version,
-                ipAddress: ipAddress,
-                userAgent: userAgent,
-                timestamp: new Date().toISOString()
-            };
-            
-            // Store in sessionStorage temporarily
-            const existingConsents = JSON.parse(sessionStorage.getItem('pendingConsents') || '[]');
-            existingConsents.push(consentData);
-            sessionStorage.setItem('pendingConsents', JSON.stringify(existingConsents));
-            
-            console.log(`✅ Consent recorded: ${consentType} v${version}`);
-        } catch (error) {
-            console.error(`❌ Failed to record consent ${consentType}:`, error);
-            throw error;
-        }
-    }
-
-    /**
-     * Get user's IP address
-     * @returns {Promise<string>} User's IP address
-     */
-    async getUserIP() {
-        try {
-            // Try to get IP from a public service
-            const response = await fetch('https://api.ipify.org?format=json');
-            const data = await response.json();
-            return data.ip;
-        } catch (error) {
-            console.warn('Could not get IP address:', error);
-            return '127.0.0.1'; // Fallback for localhost
-        }
-    }
-
-    /**
-     * Process pending consents after user account is created
-     * @param {string} userId - The newly created user ID
-     */
-    async processPendingConsents(userId) {
-        try {
-            const pendingConsents = JSON.parse(sessionStorage.getItem('pendingConsents') || '[]');
-            
-            for (const consent of pendingConsents) {
-                await window.supabase.rpc('record_consent', {
-                    consent_type_param: consent.type,
-                    version_param: consent.version,
-                    ip_address_param: consent.ipAddress,
-                    user_agent_param: consent.userAgent,
-                    user_uuid: userId
-                });
-            }
-            
-            // Clear pending consents
-            sessionStorage.removeItem('pendingConsents');
-            console.log('✅ Pending consents processed successfully');
-        } catch (error) {
-            console.error('❌ Failed to process pending consents:', error);
             // Don't throw error here as account is already created
+            // Consent recording failure shouldn't block signup success
         }
     }
 }

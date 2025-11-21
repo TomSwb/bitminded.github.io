@@ -431,7 +431,8 @@ class CaptchaComponent {
 
         try {
             // Use Supabase Edge Function for verification
-            const supabaseUrl = 'https://dynxqnrkmjcvgzsugxtm.supabase.co';
+            // Get URL from centralized config (set by env-config.js and supabase-config.js)
+            const supabaseUrl = window.SUPABASE_CONFIG?.url || 'https://dynxqnrkmjcvgzsugxtm.supabase.co';
             const response = await fetch(`${supabaseUrl}/functions/v1/verify-captcha`, {
                 method: 'POST',
                 headers: {
