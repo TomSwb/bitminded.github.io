@@ -289,6 +289,7 @@
                             </label>
                             <select id="pricing-type" name="pricing_type" class="service-management__form-select" required>
                                 <option value="fixed">Fixed</option>
+                                <option value="subscription">Subscription</option>
                                 <option value="hourly">Hourly</option>
                                 <option value="range">Range</option>
                                 <option value="variable">Variable</option>
@@ -324,11 +325,38 @@
                             </div>
                         </div>
 
+
                         <div class="service-management__form-group" id="hourly-pricing-group" style="display: none;">
                             <label for="hourly-rate" class="service-management__form-label">
                                 <span class="translatable-content" data-translation-key="Hourly Rate">Hourly Rate</span>
                             </label>
                             <input type="number" id="hourly-rate" name="hourly_rate" class="service-management__form-input" step="0.01">
+                        </div>
+
+                        <div class="service-management__form-group" id="trial-period-group" style="display: none;">
+                            <label class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Trial Period">Trial Period</span>
+                            </label>
+                            <div class="service-management__form-row">
+                                <div class="service-management__form-col">
+                                    <label for="trial-days" class="service-management__form-label">
+                                        <span class="translatable-content" data-translation-key="Trial Days">Trial Days</span>
+                                    </label>
+                                    <input type="number" id="trial-days" name="trial_days" class="service-management__form-input" min="0" step="1" placeholder="0">
+                                    <small class="service-management__form-help">
+                                        <span class="translatable-content" data-translation-key="trial_days_help">Number of free trial days (0 = no trial)</span>
+                                    </small>
+                                </div>
+                                <div class="service-management__form-col">
+                                    <label class="service-management__form-checkbox" for="trial-requires-payment" style="margin-top: 1.5rem;">
+                                        <input type="checkbox" id="trial-requires-payment" name="trial_requires_payment">
+                                        <span class="translatable-content" data-translation-key="Require Payment Method">Require Payment Method</span>
+                                    </label>
+                                    <small class="service-management__form-help">
+                                        <span class="translatable-content" data-translation-key="trial_requires_payment_help">Require payment method upfront for trial</span>
+                                    </small>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="service-management__form-group">
@@ -547,28 +575,113 @@
 
                     <!-- Stripe Tab -->
                     <div class="service-management__tab-content" data-tab-content="stripe">
+                        <!-- Create Stripe Product Section -->
+                        <div class="service-management__form-group" id="stripe-create-section">
+                            <button type="button" class="service-management__button service-management__button--primary" id="create-stripe-service-btn">
+                                <span class="btn-icon">💳</span>
+                                <span id="create-stripe-btn-text">Create Stripe Product</span>
+                            </button>
+                        </div>
+
+                        <!-- Stripe Status -->
+                        <div class="service-management__form-group" id="stripe-status-section" style="display: none;">
+                            <div class="service-management__status" id="stripe-status">
+                                <!-- Status will be populated here -->
+                            </div>
+                            
+                            <!-- Stripe Action Buttons -->
+                            <div class="service-management__actions" id="stripe-actions" style="display: none;">
+                                <a href="#" target="_blank" class="service-management__button service-management__button--secondary" id="view-stripe-link">
+                                    <span>👁️</span>
+                                    <span class="translatable-content" data-translation-key="View in Stripe Dashboard">View in Stripe Dashboard</span>
+                                </a>
+                                <button type="button" class="service-management__button service-management__button--secondary" id="delete-stripe-service-btn">
+                                    <span>🗑️</span>
+                                    <span class="translatable-content" data-translation-key="Delete in Stripe">Delete in Stripe</span>
+                                </button>
+                                <button type="button" class="service-management__button service-management__button--secondary" id="update-stripe-service-btn">
+                                    <span>🔄</span>
+                                    <span class="translatable-content" data-translation-key="Update Stripe Product">Update Stripe Product</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="service-management__form-group">
                             <label for="stripe-product-id" class="service-management__form-label">
                                 <span class="translatable-content" data-translation-key="Stripe Product ID">Stripe Product ID</span>
                             </label>
-                            <input type="text" id="stripe-product-id" name="stripe_product_id" class="service-management__form-input" disabled>
+                            <input type="text" id="stripe-product-id" name="stripe_product_id" class="service-management__form-input" readonly>
                             <small class="service-management__form-help">
-                                <span class="translatable-content" data-translation-key="stripe_coming_soon">Stripe integration coming soon</span>
+                                <span class="translatable-content" data-translation-key="stripe_product_id_help">Automatically populated when Stripe product is created</span>
                             </small>
                         </div>
 
                         <div class="service-management__form-group">
                             <label for="stripe-price-id" class="service-management__form-label">
-                                <span class="translatable-content" data-translation-key="Stripe Price ID">Stripe Price ID</span>
+                                <span class="translatable-content" data-translation-key="Stripe Price ID">Stripe Price ID (Primary)</span>
                             </label>
-                            <input type="text" id="stripe-price-id" name="stripe_price_id" class="service-management__form-input" disabled>
+                            <input type="text" id="stripe-price-id" name="stripe_price_id" class="service-management__form-input" readonly>
+                            <small class="service-management__form-help">
+                                <span class="translatable-content" data-translation-key="stripe_price_id_help">Primary price ID (CHF if available, legacy/one-time)</span>
+                            </small>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="stripe-price-monthly-id" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Stripe Monthly Price ID">Stripe Monthly Price ID</span>
+                            </label>
+                            <input type="text" id="stripe-price-monthly-id" name="stripe_price_monthly_id" class="service-management__form-input" readonly>
+                            <small class="service-management__form-help">
+                                <span class="translatable-content" data-translation-key="stripe_monthly_price_id_help">Monthly subscription price ID</span>
+                            </small>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="stripe-price-yearly-id" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Stripe Yearly Price ID">Stripe Yearly Price ID</span>
+                            </label>
+                            <input type="text" id="stripe-price-yearly-id" name="stripe_price_yearly_id" class="service-management__form-input" readonly>
+                            <small class="service-management__form-help">
+                                <span class="translatable-content" data-translation-key="stripe_yearly_price_id_help">Yearly subscription price ID</span>
+                            </small>
                         </div>
 
                         <div class="service-management__form-group">
                             <label for="stripe-price-reduced-id" class="service-management__form-label">
                                 <span class="translatable-content" data-translation-key="Stripe Reduced Price ID">Stripe Reduced Price ID</span>
                             </label>
-                            <input type="text" id="stripe-price-reduced-id" name="stripe_price_reduced_id" class="service-management__form-input" disabled>
+                            <input type="text" id="stripe-price-reduced-id" name="stripe_price_reduced_id" class="service-management__form-input" readonly>
+                            <small class="service-management__form-help">
+                                <span class="translatable-content" data-translation-key="stripe_reduced_price_id_help">Reduced fare price ID (if applicable)</span>
+                            </small>
+                        </div>
+
+                        <!-- Sale Price IDs (shown when service is on sale) -->
+                        <div class="service-management__form-group" id="stripe-sale-prices-group" style="display: none;">
+                            <h4 class="service-management__form-label" style="margin-bottom: var(--spacing-sm);">
+                                <span class="translatable-content" data-translation-key="Sale Prices">Sale Prices</span>
+                            </h4>
+                            
+                            <div class="service-management__form-group">
+                                <label for="stripe-price-sale-id" class="service-management__form-label">
+                                    <span class="translatable-content" data-translation-key="Stripe Sale Price ID">Stripe Sale Price ID (One-time)</span>
+                                </label>
+                                <input type="text" id="stripe-price-sale-id" name="stripe_price_sale_id" class="service-management__form-input" readonly>
+                            </div>
+
+                            <div class="service-management__form-group">
+                                <label for="stripe-price-monthly-sale-id" class="service-management__form-label">
+                                    <span class="translatable-content" data-translation-key="Stripe Monthly Sale Price ID">Stripe Monthly Sale Price ID</span>
+                                </label>
+                                <input type="text" id="stripe-price-monthly-sale-id" name="stripe_price_monthly_sale_id" class="service-management__form-input" readonly>
+                            </div>
+
+                            <div class="service-management__form-group">
+                                <label for="stripe-price-yearly-sale-id" class="service-management__form-label">
+                                    <span class="translatable-content" data-translation-key="Stripe Yearly Sale Price ID">Stripe Yearly Sale Price ID</span>
+                                </label>
+                                <input type="text" id="stripe-price-yearly-sale-id" name="stripe_price_yearly_sale_id" class="service-management__form-input" readonly>
+                            </div>
                         </div>
                     </div>
                 </form>
