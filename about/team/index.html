@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Team - BitMinded</title>
+    <link rel="icon" type="image/x-icon" href="../../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="../../icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="../../css/critical.css">
+    <script src="../../js/critical.js"></script>
+    
+    <script src="../../components/shared/component-loader.js"></script>
+
+    <link rel="stylesheet" href="../about.css">
+    <link rel="stylesheet" href="../../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+    </header>
+
+    <main class="about-page">
+        <!-- Hero Section -->
+        <section class="about-hero">
+            <h1 class="about-hero__title translatable-content" data-i18n="team-hero-title">The Team</h1>
+            <p class="about-hero__subtitle translatable-content" data-i18n="team-hero-subtitle">
+                Meet the people behind BitMinded. We're here to build thoughtful software and guide you through technology with patience and warmth.
+            </p>
+        </section>
+
+        <!-- About Sub-Navigation (only on about pages) -->
+        <div id="about-subnav-container"></div>
+
+        <!-- Team Section -->
+        <section class="team-section">
+            <!-- Thomas -->
+            <div class="team-member">
+                <div class="team-member__image-container">
+                    <img src="../../icons/thomas.jpeg" alt="Thomas - Software Architect and Founder of BitMinded" class="team-member__image team-member__image--thomas">
+                </div>
+                <div class="team-member__content">
+                    <h2 class="team-member__name translatable-content" data-i18n="team-thomas-name">Thomas</h2>
+                    <p class="team-member__title translatable-content" data-i18n="team-thomas-title">Software Architect, Tech Coach & Founder</p>
+                    <div class="team-member__bio translatable-content" data-i18n="team-thomas-bio"></div>
+                </div>
+            </div>
+
+            <!-- Kamilah -->
+            <div class="team-member">
+                <div class="team-member__image-container">
+                    <img src="../../icons/kami.JPG" alt="Kamilah - Graphic Designer and Wife" class="team-member__image team-member__image--kamilah">
+                </div>
+                <div class="team-member__content">
+                    <h2 class="team-member__name translatable-content" data-i18n="team-kamilah-name">Kamilah</h2>
+                    <p class="team-member__title translatable-content" data-i18n="team-kamilah-title">Graphic Designer and Wife</p>
+                    <div class="team-member__bio translatable-content" data-i18n="team-kamilah-bio"></div>
+                    <div class="team-member__links">
+                        <span class="team-member__website translatable-content" data-i18n="team-kamilah-website">
+                            <a href="https://kamilahcrystal.com/" target="_blank" rel="noopener noreferrer" class="team-member__website-link">Visit Kamilah's website →</a>
+                        </span>
+                        <span class="team-member__shop translatable-content" data-i18n="team-kamilah-shop">
+                            <a href="http://kamilahcrystal.com/shop" target="_blank" rel="noopener noreferrer" class="team-member__shop-link">Visit Kamilah's shop →</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Connect CTA -->
+        <section class="about-connect">
+            <h2 class="about-connect__title translatable-content" data-i18n="team-connect-title">Let's Work Together</h2>
+            <p class="about-connect__text translatable-content" data-i18n="team-connect-text">
+                Have questions? Want to learn more about working with us? We'd love to hear from you.
+            </p>
+            <div class="about-connect__links">
+                <a href="/services/" class="about-button about-button--primary translatable-content" data-i18n="team-services-link">View Services</a>
+                <a href="/support/" class="about-button about-button--secondary translatable-content" data-i18n="team-contact-link">Contact Us</a>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase CDN (must load before supabase-config.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../../js/env-config.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../../js/supabase-config.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../../js/script.js"></script>
+    <!-- About page translation -->
+    <script src="../lang-about/lang-about.js"></script>
+    <!-- About page loader -->
+    <script src="../about-page-loader.js"></script>
+    <!-- About page scripts -->
+    <script src="../about.js"></script>
+
+</body>
+
+</html>
+

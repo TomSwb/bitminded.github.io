@@ -126,6 +126,8 @@ class NavigationMenu {
                     this.loadSubnavTranslations('services');
                 } else if (currentPage === 'faq') {
                     this.loadSubnavTranslations('faq');
+                } else if (currentPage === 'about') {
+                    this.loadSubnavTranslations('about');
                 }
             }
             // Update legal subnav translations if loaded
@@ -266,6 +268,8 @@ class NavigationMenu {
             return 'services';
         } else if (path.includes('/catalog')) {
             return 'catalog';
+        } else if (path.includes('/about')) {
+            return 'about';
         } else if (path.includes('/support')) {
             return 'support';
         } else if (path.includes('/auth')) {
@@ -336,7 +340,7 @@ class NavigationMenu {
         }
         
         // Load sub-nav if on Services or FAQ page (mobile only)
-        if (this.isOnServicesPage() || this.isOnFAQPage()) {
+        if (this.isOnServicesPage() || this.isOnFAQPage() || this.isOnAboutPage()) {
             this.loadSubnav();
         }
         
@@ -395,6 +399,15 @@ class NavigationMenu {
     }
 
     /**
+     * Check if current page is an About page
+     * @returns {boolean} True if on About page
+     */
+    isOnAboutPage() {
+        const path = window.location.pathname;
+        return path.includes('/about/');
+    }
+
+    /**
      * Check if current page is an Account page
      * @returns {boolean} True if on Account page
      */
@@ -424,9 +437,10 @@ class NavigationMenu {
         // Check if we still need sub-nav (might have navigated away)
         const needsServicesSubnav = this.isOnServicesPage();
         const needsFAQSubnav = this.isOnFAQPage();
+        const needsAboutSubnav = this.isOnAboutPage();
         
-        if (!needsServicesSubnav && !needsFAQSubnav) {
-            // No longer on Services/FAQ page - remove sub-nav if exists
+        if (!needsServicesSubnav && !needsFAQSubnav && !needsAboutSubnav) {
+            // No longer on Services/FAQ/About page - remove sub-nav if exists
             if (this.subnavContainer) {
                 this.subnavContainer.remove();
                 this.subnavContainer = null;
@@ -466,6 +480,8 @@ class NavigationMenu {
                 await this.loadServicesSubnav();
             } else if (this.isOnFAQPage()) {
                 await this.loadFAQSubnav();
+            } else if (this.isOnAboutPage()) {
+                await this.loadAboutSubnav();
             }
         } catch (error) {
             console.warn('Failed to load sub-navigation:', error);
@@ -809,6 +825,73 @@ class NavigationMenu {
     }
 
     /**
+     * Load About sub-navigation
+     */
+    async loadAboutSubnav() {
+        try {
+            // Load CSS
+            if (!document.querySelector('link[href*="about-subnav.css"]')) {
+                const cssLink = document.createElement('link');
+                cssLink.rel = 'stylesheet';
+                cssLink.href = '/about/components/about-subnav/about-subnav.css';
+                document.head.appendChild(cssLink);
+            }
+
+            // Load HTML
+            const htmlResponse = await fetch('/about/components/about-subnav/about-subnav.html');
+            const htmlContent = await htmlResponse.text();
+            
+            // Create a temporary container to parse HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            const subnavElement = tempDiv.querySelector('.about-subnav');
+            
+            if (!subnavElement) {
+                throw new Error('About subnav HTML not found');
+            }
+
+            // Extract links and convert to navigation menu format
+            const links = subnavElement.querySelectorAll('.about-subnav__link');
+            links.forEach(link => {
+                const sublink = this.createSubnavLink(link, 'about');
+                this.subnavContainer.appendChild(sublink);
+            });
+
+            // Load JS for active state detection
+            if (!window.aboutSubnav) {
+                const script = document.createElement('script');
+                script.src = '/about/components/about-subnav/about-subnav.js';
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.body.appendChild(script);
+                });
+                
+                // Wait a bit for the script to initialize
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Manually update active state for injected links
+                this.updateAboutSubnavActiveState();
+            }
+
+            // Ensure links are visible immediately (before translations)
+            const sublinks = this.subnavContainer.querySelectorAll('.navigation-menu__sublink');
+            sublinks.forEach(link => {
+                link.classList.add('loaded');
+                link.style.opacity = '1';
+                link.style.visibility = 'visible';
+            });
+
+            // Load translations after links are created and in DOM
+            await this.loadSubnavTranslations('about');
+
+            this.subnavLoaded = true;
+        } catch (error) {
+            console.warn('Failed to load About sub-navigation:', error);
+        }
+    }
+
+    /**
      * Load FAQ sub-navigation
      */
     async loadFAQSubnav() {
@@ -886,7 +969,7 @@ class NavigationMenu {
     /**
      * Create a subnav link element from original link
      * @param {HTMLElement} originalLink - Original subnav link element
-     * @param {string} type - 'services' or 'faq'
+     * @param {string} type - 'services', 'faq', or 'about'
      * @returns {HTMLElement} New subnav link element
      */
     createSubnavLink(originalLink, type = 'services') {
@@ -896,8 +979,8 @@ class NavigationMenu {
         sublink.id = originalLink.id;
         
         // Copy icon if exists
-        const icon = originalLink.querySelector(`.${type}-subnav__icon`);
-        const text = originalLink.querySelector(`.${type}-subnav__text`);
+        const icon = originalLink.querySelector(`.${type}-subnav__icon`) || originalLink.querySelector('.about-subnav__icon');
+        const text = originalLink.querySelector(`.${type}-subnav__text`) || originalLink.querySelector('.about-subnav__text');
         
         if (icon) {
             const iconSpan = document.createElement('span');
@@ -962,7 +1045,7 @@ class NavigationMenu {
     /**
      * Set active state for subnav link
      * @param {HTMLElement} link - Subnav link element
-     * @param {string} type - 'services' or 'faq'
+     * @param {string} type - 'services', 'faq', or 'about'
      */
     setSubnavLinkActive(link, type) {
         const path = window.location.pathname;
@@ -989,6 +1072,14 @@ class NavigationMenu {
             } else if (linkId === 'faq-subnav-tech-support' && path.includes('/faq/tech-support')) {
                 isActive = true;
             } else if (linkId === 'faq-subnav-account-billing' && path.includes('/faq/account-billing')) {
+                isActive = true;
+            }
+        } else if (type === 'about') {
+            if (linkId === 'about-subnav-overview' && (path === '/about/' || path === '/about/index.html')) {
+                isActive = true;
+            } else if (linkId === 'about-subnav-vision-mission' && path.includes('/about/vision-mission')) {
+                isActive = true;
+            } else if (linkId === 'about-subnav-team' && path.includes('/about/team')) {
                 isActive = true;
             }
         }
@@ -1022,16 +1113,35 @@ class NavigationMenu {
     }
 
     /**
+     * Update About subnav active state
+     */
+    updateAboutSubnavActiveState() {
+        if (!this.subnavContainer) return;
+        const sublinks = this.subnavContainer.querySelectorAll('.navigation-menu__sublink');
+        sublinks.forEach(link => {
+            this.setSubnavLinkActive(link, 'about');
+        });
+    }
+
+    /**
      * Load subnav translations
-     * @param {string} type - 'services' or 'faq'
+     * @param {string} type - 'services', 'faq', or 'about'
      */
     async loadSubnavTranslations(type) {
         if (!this.subnavContainer) return;
         
         try {
-            const localePath = type === 'services' 
-                ? '/services/components/services-subnav/locales/services-subnav-locales.json'
-                : '/faq/components/faq-subnav/locales/faq-subnav-locales.json';
+            let localePath;
+            if (type === 'services') {
+                localePath = '/services/components/services-subnav/locales/services-subnav-locales.json';
+            } else if (type === 'faq') {
+                localePath = '/faq/components/faq-subnav/locales/faq-subnav-locales.json';
+            } else if (type === 'about') {
+                localePath = '/about/components/about-subnav/locales/about-subnav-locales.json';
+            } else {
+                console.warn('Unknown subnav type:', type);
+                return;
+            }
             
             const response = await fetch(localePath);
             if (!response.ok) {
