@@ -156,7 +156,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
         }
 
         checkAndShowExpoWarning() {
-            // Check if this is an Expo/React Native app by looking at the technical specification
+            // Check framework type by looking at the technical specification
             if (!window.productWizard) return;
             
             const stepData = window.productWizard.stepData || {};
@@ -165,18 +165,48 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             if (!spec) return;
             
             const specLower = spec.toLowerCase();
-            const isExpo = specLower.includes('expo') || 
-                          specLower.includes('react native') || 
-                          specLower.includes('react-native') ||
-                          specLower.includes('expo/');
+            // Detect frameworks that need gh-pages branch
+            const needsGhPages = specLower.includes('expo') || 
+                                specLower.includes('react native') || 
+                                specLower.includes('react-native') ||
+                                specLower.includes('expo/');
             
-            if (isExpo && this.elements.expoWarning) {
+            // Detect frameworks that need base path configuration
+            const needsBasePath = specLower.includes('next.js') ||
+                                 specLower.includes('nextjs') ||
+                                 specLower.includes('vite') ||
+                                 specLower.includes('vue') ||
+                                 specLower.includes('gatsby') ||
+                                 specLower.includes('angular') ||
+                                 specLower.includes('svelte');
+            
+            if (needsGhPages && this.elements.expoWarning) {
+                // Update warning text for Expo/React Native
+                const warningTitle = this.elements.expoWarning.querySelector('h4');
+                const warningText = this.elements.expoWarning.querySelector('p');
+                if (warningTitle) warningTitle.textContent = '⚠️ Expo/React Native App Detected';
+                if (warningText) warningText.innerHTML = '<strong>This app uses the <code>gh-pages</code> branch for deployment.</strong>';
+                
                 this.elements.expoWarning.style.display = 'block';
                 if (this.elements.deploymentBranchName) {
                     this.elements.deploymentBranchName.textContent = 'gh-pages';
                 }
                 if (this.elements.expoBranchNote) {
                     this.elements.expoBranchNote.style.display = 'none';
+                }
+            } else if (needsBasePath && this.elements.expoWarning) {
+                // Show warning for frameworks that need base path config
+                const warningTitle = this.elements.expoWarning.querySelector('h4');
+                const warningText = this.elements.expoWarning.querySelector('p');
+                if (warningTitle) warningTitle.textContent = '⚠️ Framework-Specific Configuration Required';
+                if (warningText) warningText.innerHTML = '<strong>This framework requires base path configuration for GitHub Pages.</strong> Configuration files have been automatically created.';
+                
+                this.elements.expoWarning.style.display = 'block';
+                if (this.elements.deploymentBranchName) {
+                    this.elements.deploymentBranchName.textContent = 'main';
+                }
+                if (this.elements.expoBranchNote) {
+                    this.elements.expoBranchNote.style.display = 'inline';
                 }
             } else {
                 if (this.elements.expoWarning) {
