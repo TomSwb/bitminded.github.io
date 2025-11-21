@@ -883,7 +883,7 @@ serve(async (req) => {
     const primaryOneTimePriceId = Object.keys(newOneTimePrices).length > 0
       ? (newOneTimePrices.CHF || newOneTimePrices.USD || newOneTimePrices.EUR || newOneTimePrices.GBP || Object.values(newOneTimePrices)[0] || null)
       : null
-    
+
     // Get primary sale price IDs
     const primarySaleMonthlyPriceId = Object.keys(newSaleMonthlyPrices).length > 0 
       ? (newSaleMonthlyPrices.CHF || newSaleMonthlyPrices.USD || newSaleMonthlyPrices.EUR || newSaleMonthlyPrices.GBP || Object.values(newSaleMonthlyPrices)[0] || null)
@@ -920,7 +920,7 @@ serve(async (req) => {
         message: (Object.keys(newMonthlyPrices).length > 0 || Object.keys(newYearlyPrices).length > 0 || Object.keys(newOneTimePrices).length > 0)
           ? 'Product and prices updated successfully.'
           : (is_on_sale 
-            ? 'Sale prices created/updated successfully.' 
+          ? 'Sale prices created/updated successfully.' 
             : 'Product updated successfully.')
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

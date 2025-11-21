@@ -255,7 +255,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
             }
             
             // Always toggle sections after setup
-            this.togglePricingSections();
+                this.togglePricingSections();
         }
 
         togglePricingSections() {
