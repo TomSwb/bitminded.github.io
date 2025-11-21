@@ -14,9 +14,9 @@
             <div class="step-stripe-creation__pricing-options">
                 <label class="step-stripe-creation__radio-label">
                     <input type="radio" name="pricing_type" value="freemium" checked>
-                    <span>Freemium (Individual Free, Enterprise Paid)</span>
+                    <span>Freemium (Free with immediate access)</span>
                 </label>
-                <small class="step-stripe-creation__help">Individual users get it free, enterprise users pay</small>
+                <small class="step-stripe-creation__help">Free product with immediate access, no pricing or trial configuration needed</small>
 
                 <label class="step-stripe-creation__radio-label">
                     <input type="radio" name="pricing_type" value="one_time">
@@ -32,33 +32,13 @@
             </div>
         </div>
 
-        <!-- Freemium Pricing -->
+        <!-- Freemium Info -->
         <div class="step-stripe-creation__section" id="freemium-pricing">
-            <h3 class="step-stripe-creation__section-title">Freemium Pricing</h3>
-            
             <div class="step-stripe-creation__field-group">
-                <label for="individual-price" class="step-stripe-creation__label">
-                    Individual Price
-                </label>
-                <input type="number" id="individual-price" name="individual_price" class="step-stripe-creation__input" 
-                       step="0.01" min="0" value="0" readonly>
-                <small class="step-stripe-creation__help">Free for individual users</small>
-            </div>
-
-            <div class="step-stripe-creation__field-group">
-                <label for="enterprise-price" class="step-stripe-creation__label">
-                    Enterprise Price (CHF)
-                </label>
-                <input type="number" id="enterprise-price" name="enterprise_price" class="step-stripe-creation__input" 
-                       step="0.01" min="0" placeholder="e.g. 29.99">
-                <small class="step-stripe-creation__help">Price for enterprise users</small>
-            </div>
-
-            <div class="step-stripe-creation__field-group">
-                <label class="step-stripe-creation__checkbox-label">
-                    <input type="checkbox" id="requires-admin-approval" name="requires_admin_approval">
-                    <span>Require admin approval for enterprise access</span>
-                </label>
+                <p class="step-stripe-creation__info">
+                    <strong>Freemium products are free with immediate access.</strong><br>
+                    No pricing configuration or trial period is needed. The product will be created with 0 CHF, USD, EUR, and GBP prices.
+                </p>
             </div>
         </div>
 
@@ -67,22 +47,35 @@
             <h3 class="step-stripe-creation__section-title">Subscription Pricing</h3>
             
             <div class="step-stripe-creation__field-group">
-                <label for="subscription-interval" class="step-stripe-creation__label">
-                    Billing Interval
+                <label class="step-stripe-creation__label">
+                    Monthly Price (Multi-Currency)
                 </label>
-                <select id="subscription-interval" name="subscription_interval" class="step-stripe-creation__select">
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                </select>
-            </div>
-
-            <div class="step-stripe-creation__field-group">
-                <label for="subscription-price" class="step-stripe-creation__label">
-                    Price (CHF)
-                </label>
+                <div class="step-stripe-creation__multi-currency">
+                    <div class="step-stripe-creation__currency-input">
+                        <label for="subscription-price-chf" class="step-stripe-creation__currency-label">CHF</label>
+                        <input type="number" id="subscription-price-chf" name="subscription_price_chf" class="step-stripe-creation__input" 
+                               step="0.01" min="0" placeholder="e.g. 9.99">
+                    </div>
+                    <div class="step-stripe-creation__currency-input">
+                        <label for="subscription-price-usd" class="step-stripe-creation__currency-label">USD</label>
+                        <input type="number" id="subscription-price-usd" name="subscription_price_usd" class="step-stripe-creation__input" 
+                               step="0.01" min="0" placeholder="e.g. 10.99">
+                    </div>
+                    <div class="step-stripe-creation__currency-input">
+                        <label for="subscription-price-eur" class="step-stripe-creation__currency-label">EUR</label>
+                        <input type="number" id="subscription-price-eur" name="subscription_price_eur" class="step-stripe-creation__input" 
+                               step="0.01" min="0" placeholder="e.g. 9.99">
+                    </div>
+                    <div class="step-stripe-creation__currency-input">
+                        <label for="subscription-price-gbp" class="step-stripe-creation__currency-label">GBP</label>
+                        <input type="number" id="subscription-price-gbp" name="subscription_price_gbp" class="step-stripe-creation__input" 
+                               step="0.01" min="0" placeholder="e.g. 8.99">
+                    </div>
+                </div>
+                <small class="step-stripe-creation__help">Both monthly and yearly prices will be created. Yearly price is automatically calculated (monthly × 12 × 0.9). At least one currency required.</small>
+                <!-- Keep old input for backward compatibility (hidden) -->
                 <input type="number" id="subscription-price" name="subscription_price" class="step-stripe-creation__input" 
-                       step="0.01" min="0" placeholder="e.g. 9.99">
-                <small class="step-stripe-creation__help">Monthly or yearly price depending on interval</small>
+                       step="0.01" min="0" style="display: none;">
             </div>
         </div>
 
@@ -91,17 +84,40 @@
             <h3 class="step-stripe-creation__section-title">One-Time Payment</h3>
             
             <div class="step-stripe-creation__field-group">
-                <label for="one-time-price" class="step-stripe-creation__label">
-                    Price (CHF)
+                <label class="step-stripe-creation__label">
+                    Price (Multi-Currency)
                 </label>
+                <div class="step-stripe-creation__multi-currency">
+                    <div class="step-stripe-creation__currency-input">
+                        <label for="one-time-price-chf" class="step-stripe-creation__currency-label">CHF</label>
+                        <input type="number" id="one-time-price-chf" name="one_time_price_chf" class="step-stripe-creation__input" 
+                               step="0.01" min="0" placeholder="e.g. 49.99">
+                    </div>
+                    <div class="step-stripe-creation__currency-input">
+                        <label for="one-time-price-usd" class="step-stripe-creation__currency-label">USD</label>
+                        <input type="number" id="one-time-price-usd" name="one_time_price_usd" class="step-stripe-creation__input" 
+                               step="0.01" min="0" placeholder="e.g. 54.99">
+                    </div>
+                    <div class="step-stripe-creation__currency-input">
+                        <label for="one-time-price-eur" class="step-stripe-creation__currency-label">EUR</label>
+                        <input type="number" id="one-time-price-eur" name="one_time_price_eur" class="step-stripe-creation__input" 
+                               step="0.01" min="0" placeholder="e.g. 49.99">
+                    </div>
+                    <div class="step-stripe-creation__currency-input">
+                        <label for="one-time-price-gbp" class="step-stripe-creation__currency-label">GBP</label>
+                        <input type="number" id="one-time-price-gbp" name="one_time_price_gbp" class="step-stripe-creation__input" 
+                               step="0.01" min="0" placeholder="e.g. 42.99">
+                    </div>
+                </div>
+                <small class="step-stripe-creation__help">Single payment for lifetime access (at least one currency required)</small>
+                <!-- Keep old input for backward compatibility (hidden) -->
                 <input type="number" id="one-time-price" name="one_time_price" class="step-stripe-creation__input" 
-                       step="0.01" min="0" placeholder="e.g. 49.99">
-                <small class="step-stripe-creation__help">Single payment for lifetime access</small>
+                       step="0.01" min="0" style="display: none;">
             </div>
         </div>
 
         <!-- Trial Configuration -->
-        <div class="step-stripe-creation__section">
+        <div class="step-stripe-creation__section" id="trial-section">
             <h3 class="step-stripe-creation__section-title">Free Trial (Optional)</h3>
             
             <div class="step-stripe-creation__field-group">

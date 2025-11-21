@@ -1,9 +1,16 @@
 /**
- * Delete Stripe Product Edge Function
- * Archives a Stripe product (doesn't actually delete, Stripe doesn't allow permanent deletion)
+ * Create Stripe Subscription Product
+ * 
+ * Dedicated edge function for creating Stripe products specifically for subscriptions.
+ * This ensures proper setup for subscription-based products with trial periods,
+ * recurring prices, and subscription-optimized metadata.
+ * 
+ * Used for:
+ * - Catalog access services (All-Tools Membership, Supporter Tier)
+ * - Product Wizard subscription products
  */
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 interface RateLimitConfig {
@@ -48,6 +55,9 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
   }
 }
 
+/**
+ * Rate limiting check
+ */
 async function checkRateLimit(
   supabaseAdmin: any,
   identifier: string,
@@ -192,11 +202,53 @@ async function logError(
         ip_address: ipAddress || null
       })
   } catch (logError) {
-    // Don't throw - error logging should not break the main flow
     console.error('❌ Failed to log error to database:', logError)
   }
 }
 
+/**
+ * Create Stripe recurring price
+ */
+async function createStripeRecurringPrice(
+  secretKey: string,
+  productId: string,
+  amount: number,
+  currency: string,
+  interval: 'month' | 'year',
+  nickname?: string
+) {
+  const params: Record<string, string> = {
+    product: productId,
+    unit_amount: String(Math.round(amount * 100)), // Convert to cents
+    currency: currency.toLowerCase(),
+    'recurring[interval]': interval
+  }
+
+  if (nickname) {
+    params.nickname = nickname
+  }
+
+  const response = await fetch('https://api.stripe.com/v1/prices', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${secretKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Stripe-Version': '2024-11-20.acacia'
+    },
+    body: new URLSearchParams(params)
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Failed to create recurring price: ${error}`)
+  }
+
+  return await response.json()
+}
+
+/**
+ * Main handler
+ */
 serve(async (req) => {
   const origin = req.headers.get('Origin')
   const corsHeaders = getCorsHeaders(origin)
@@ -229,7 +281,7 @@ serve(async (req) => {
       )
     }
 
-    // Extract token from Authorization header and verify session exists (prevent use of revoked tokens)
+    // Extract token from Authorization header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(
@@ -237,48 +289,26 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-    const token = authHeader.replace('Bearer ', '')
 
-    // Get IP address for rate limiting fallback
+    // Get IP address for rate limiting
     const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
                       req.headers.get('cf-connecting-ip') ||
                       req.headers.get('x-real-ip') ||
                       'unknown'
 
-    // Create admin client for user_sessions query
+    // Create admin client
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // Verify session exists (optional check - getUser() above is the primary auth)
-    // This check helps prevent use of revoked tokens, but we don't fail if the table doesn't exist
-    try {
-      const { data: sessionData, error: sessionError } = await supabaseAdmin
-        .from('user_sessions')
-        .select('session_token')
-        .eq('session_token', token)
-        .maybeSingle()
-
-      // Only fail if there's a specific error indicating the session was revoked
-      // If the table doesn't exist or query fails, we still allow the request since getUser() succeeded
-      if (sessionError && sessionError.code !== 'PGRST116') { // PGRST116 = table not found
-        console.warn('⚠️ Session verification warning:', sessionError.message)
-        // Don't fail - getUser() already verified the user is authenticated
-      }
-    } catch (sessionCheckError) {
-      // If session check fails (e.g., table doesn't exist), log but don't fail
-      // The getUser() check above is sufficient for authentication
-      console.warn('⚠️ Could not verify session in user_sessions table:', sessionCheckError)
-    }
-
     // Rate limiting: Admin function - 20/min, 200/hour per user
     const rateLimitResult = await checkRateLimit(
       supabaseAdmin,
       user.id,
       'user',
-      'delete-stripe-product',
+      'create-stripe-subscription-product',
       { requestsPerMinute: 20, requestsPerHour: 200, windowMinutes: 60 }
     )
     
@@ -296,20 +326,9 @@ serve(async (req) => {
       )
     }
 
-    // Get Stripe secret key from environment
+    // Get Stripe secret key
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
     if (!stripeSecretKey) {
-      console.error('❌ STRIPE_SECRET_KEY not found in environment')
-      await logError(
-        supabaseAdmin,
-        'delete-stripe-product',
-        'validation',
-        'STRIPE_SECRET_KEY not found in environment',
-        { missing_secret: 'STRIPE_SECRET_KEY' },
-        user.id,
-        { has_auth: true },
-        ipAddress
-      )
       return new Response(
         JSON.stringify({ error: 'Stripe configuration missing' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -317,129 +336,234 @@ serve(async (req) => {
     }
 
     // Parse request body
-    let body: any
-    try {
-      body = await req.json()
-    } catch (parseError) {
+    const body = await req.json()
+    const {
+      name,
+      description,
+      short_description,
+      pricing, // JSONB pricing object: {"CHF": {"monthly": 10, "yearly": 100}, ...}
+      trial_days = 0,
+      trial_requires_payment = false,
+      entity_type = 'service' // 'service' or 'product'
+    } = body
+
+    // Validation
+    if (!name) {
       return new Response(
-        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        JSON.stringify({ error: 'Product name is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const { productId } = body
-
-    if (!productId) {
+    if (!pricing || typeof pricing !== 'object' || Object.keys(pricing).length === 0) {
       return new Response(
-        JSON.stringify({ error: 'Product ID is required' }),
+        JSON.stringify({ error: 'Pricing data is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('🗑️ Archiving Stripe product:', productId)
+    console.log('💳 Creating Stripe subscription product:', { name, trial_days, trial_requires_payment })
 
-    // Archive the Stripe product (Stripe doesn't allow permanent deletion)
-    const response = await fetch(`https://api.stripe.com/v1/products/${productId}`, {
+    // Build product metadata optimized for subscriptions
+    const metadata: Record<string, string> = {
+      entity_type: entity_type,
+      pricing_type: 'subscription',
+      subscription_optimized: 'true',
+      trial_days: String(trial_days || 0),
+      trial_requires_payment: String(trial_requires_payment || false)
+    }
+
+    // Build Stripe product params
+    const productParams: Record<string, string> = {
+      name: name,
+      description: description || short_description || '',
+      statement_descriptor: name.substring(0, 22) // Stripe limit: 22 characters
+    }
+
+    // Add metadata
+    Object.keys(metadata).forEach((key) => {
+      productParams[`metadata[${key}]`] = metadata[key]
+    })
+
+    // Create Stripe product
+    const stripeProductResponse = await fetch('https://api.stripe.com/v1/products', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${stripeSecretKey}`,
         'Content-Type': 'application/x-www-form-urlencoded',
         'Stripe-Version': '2024-11-20.acacia'
       },
-      body: new URLSearchParams({
-        active: 'false'
-      })
+      body: new URLSearchParams(productParams)
     })
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('❌ Error archiving Stripe product:', error)
+    if (!stripeProductResponse.ok) {
+      const error = await stripeProductResponse.text()
+      console.error('❌ Error creating Stripe product:', error)
       await logError(
         supabaseAdmin,
-        'delete-stripe-product',
+        'create-stripe-subscription-product',
         'stripe_api',
-        'Failed to archive Stripe product',
-        { stripe_error: error, status: response.status, product_id: productId },
+        'Failed to create Stripe product',
+        { stripe_error: error, status: stripeProductResponse.status },
         user.id,
-        { productId },
+        { name, description },
         ipAddress
       )
-      throw new Error('Failed to archive Stripe product')
+      return new Response(
+        JSON.stringify({ error: 'Failed to create Stripe product', details: error }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    const productData = await response.json()
-    console.log('✅ Stripe product archived:', productData.id)
+    const stripeProduct = await stripeProductResponse.json()
+    console.log('✅ Stripe subscription product created:', stripeProduct.id)
+
+    // Create recurring prices for all currencies
+    const monthlyPrices: Record<string, any> = {}
+    const yearlyPrices: Record<string, any> = {}
+    const priceErrors: Record<string, string> = {}
+
+    // Determine if we need to create monthly and/or yearly prices
+    let hasMonthly = false
+    let hasYearly = false
+    
+    const firstCurrencyData = Object.values(pricing)[0]
+    if (typeof firstCurrencyData === 'object' && firstCurrencyData !== null) {
+      const priceObj = firstCurrencyData as { monthly?: number; yearly?: number; [key: string]: any }
+      hasMonthly = priceObj.monthly !== undefined && priceObj.monthly > 0
+      hasYearly = priceObj.yearly !== undefined && priceObj.yearly > 0
+    }
+
+    const shouldCreateMonthly = hasMonthly || !hasYearly // Create monthly if specified, or if no yearly
+    const shouldCreateYearly = hasYearly
+
+    for (const [currency, priceData] of Object.entries(pricing)) {
+      const currencyUpper = currency.toUpperCase()
+      
+      if (typeof priceData === 'object' && priceData !== null) {
+        const priceObj = priceData as { 
+          monthly?: number;
+          yearly?: number;
+          amount?: number; // Fallback
+          [key: string]: any;
+        }
+        
+        const monthlyAmount = priceObj.monthly || 0
+        const yearlyAmount = priceObj.yearly || 0
+        const fallbackAmount = priceObj.amount || 0
+
+        // Create monthly recurring price
+        if (shouldCreateMonthly) {
+          const amount = monthlyAmount > 0 ? monthlyAmount : fallbackAmount
+          if (amount > 0) {
+            try {
+              const price = await createStripeRecurringPrice(
+                stripeSecretKey,
+                stripeProduct.id,
+                amount,
+                currencyUpper.toLowerCase(),
+                'month',
+                'Monthly'
+              )
+              monthlyPrices[currencyUpper] = price.id
+              console.log(`✅ Stripe monthly subscription price created for ${currencyUpper} (amount: ${amount}):`, price.id)
+            } catch (error: any) {
+              console.error(`❌ Error creating monthly price for ${currencyUpper}:`, error)
+              priceErrors[`${currencyUpper}_monthly`] = error.message
+              await logError(
+                supabaseAdmin,
+                'create-stripe-subscription-product',
+                'stripe_api',
+                `Failed to create monthly price for ${currencyUpper}`,
+                { currency: currencyUpper, amount, error: error.message },
+                user.id,
+                { name, currency: currencyUpper, amount },
+                ipAddress
+              )
+            }
+          }
+        }
+
+        // Create yearly recurring price
+        if (shouldCreateYearly) {
+          const amount = yearlyAmount > 0 ? yearlyAmount : fallbackAmount
+          if (amount > 0) {
+            try {
+              const price = await createStripeRecurringPrice(
+                stripeSecretKey,
+                stripeProduct.id,
+                amount,
+                currencyUpper.toLowerCase(),
+                'year',
+                'Yearly'
+              )
+              yearlyPrices[currencyUpper] = price.id
+              console.log(`✅ Stripe yearly subscription price created for ${currencyUpper} (amount: ${amount}):`, price.id)
+            } catch (error: any) {
+              console.error(`❌ Error creating yearly price for ${currencyUpper}:`, error)
+              priceErrors[`${currencyUpper}_yearly`] = error.message
+              await logError(
+                supabaseAdmin,
+                'create-stripe-subscription-product',
+                'stripe_api',
+                `Failed to create yearly price for ${currencyUpper}`,
+                { currency: currencyUpper, amount, error: error.message },
+                user.id,
+                { name, currency: currencyUpper, amount },
+                ipAddress
+              )
+            }
+          }
+        }
+      }
+    }
+
+    // Get primary price IDs (prefer CHF, then USD, EUR, GBP, then first available)
+    const primaryMonthlyPriceId = monthlyPrices.CHF || monthlyPrices.USD || monthlyPrices.EUR || monthlyPrices.GBP || Object.values(monthlyPrices)[0] || null
+    const primaryYearlyPriceId = yearlyPrices.CHF || yearlyPrices.USD || yearlyPrices.EUR || yearlyPrices.GBP || Object.values(yearlyPrices)[0] || null
 
     return new Response(
       JSON.stringify({
         success: true,
-        productId: productData.id,
-        archived: true
+        productId: stripeProduct.id,
+        monthlyPriceId: primaryMonthlyPriceId,
+        yearlyPriceId: primaryYearlyPriceId,
+        priceId: primaryMonthlyPriceId || primaryYearlyPriceId, // Backward compatibility
+        monthlyPrices: Object.keys(monthlyPrices).length > 0 ? monthlyPrices : undefined,
+        yearlyPrices: Object.keys(yearlyPrices).length > 0 ? yearlyPrices : undefined,
+        product: stripeProduct,
+        priceErrors: Object.keys(priceErrors).length > 0 ? priceErrors : undefined,
+        message: 'Subscription product created successfully with recurring prices. Trial period info stored in metadata for use when creating subscriptions.'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
-    console.error('❌ Error in delete-stripe-product:', error)
+  } catch (error: any) {
+    console.error('❌ Error creating Stripe subscription product:', error)
     
-    // Try to get user ID for logging (may not be available in all error cases)
-    let userId: string | null = null
+    // Try to log error
     try {
-      const authHeader = req.headers.get('Authorization')
-      if (authHeader) {
-        const supabaseClient = createClient(
-          Deno.env.get('SUPABASE_URL') ?? '',
-          Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-          {
-            global: {
-              headers: { Authorization: authHeader },
-            },
-          }
-        )
-        const { data: { user } } = await supabaseClient.auth.getUser()
-        userId = user?.id || null
-      }
-    } catch {
-      // Ignore auth errors when logging
-    }
-    
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-    
-    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-                      req.headers.get('cf-connecting-ip') ||
-                      req.headers.get('x-real-ip') ||
-                      'unknown'
-    
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    const errorName = error instanceof Error ? error.name : 'UnknownError'
-    const errorStack = error instanceof Error ? error.stack : undefined
-    
-    try {
+      const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      )
       await logError(
         supabaseAdmin,
-        'delete-stripe-product',
+        'create-stripe-subscription-product',
         'other',
-        errorMessage || 'Unknown error',
-        { 
-          error_name: errorName,
-          error_stack: errorStack,
-          error_string: String(error)
-        },
-        userId,
-        { method: req.method, url: req.url },
-        ipAddress
+        error.message || 'Internal server error',
+        { error: String(error), stack: error.stack },
+        null,
+        {},
+        req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
       )
     } catch (logErr) {
-      // Don't fail if logging fails
-      console.error('Failed to log error:', logErr)
+      // Ignore logging errors
     }
     
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: error.message || 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

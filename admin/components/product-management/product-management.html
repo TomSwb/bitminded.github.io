@@ -159,6 +159,7 @@
                     <th class="translatable-content" data-translation-key="Category">Category</th>
                     <th class="translatable-content" data-translation-key="Status">Status</th>
                     <th class="translatable-content" data-translation-key="Pricing">Pricing</th>
+                    <th class="translatable-content" data-translation-key="Sale">Sale</th>
                     <th class="translatable-content" data-translation-key="Commissioned">Commissioned</th>
                     <th class="translatable-content" data-translation-key="Featured">Featured</th>
                     <th class="translatable-content" data-translation-key="Created">Created</th>
@@ -179,6 +180,157 @@
         <!-- Empty State -->
         <div class="product-management__empty hidden" id="products-empty">
             <p class="translatable-content" data-translation-key="No products found">No products found</p>
+        </div>
+    </div>
+
+    <!-- Sale Management Modal -->
+    <div class="product-management__modal-overlay" id="sale-modal-overlay" style="display: none;">
+        <div class="product-management__modal" id="sale-modal">
+            <div class="product-management__modal-header">
+                <h2 class="product-management__modal-title" id="sale-modal-title">
+                    <span class="translatable-content" data-translation-key="Manage Sale">Manage Sale</span>
+                </h2>
+                <button class="product-management__modal-close" id="sale-modal-close" aria-label="Close">
+                    ×
+                </button>
+            </div>
+
+            <div class="product-management__modal-content">
+                <form id="sale-form">
+                    <!-- Sale Toggle -->
+                    <div class="product-management__form-group">
+                        <label class="product-management__checkbox-label">
+                            <input type="checkbox" id="sale-is-on-sale" name="is_on_sale">
+                            <span class="translatable-content" data-translation-key="Product is on sale">Product is on sale</span>
+                        </label>
+                    </div>
+
+                    <!-- Sale Dates -->
+                    <div class="product-management__form-group" id="sale-dates-group" style="display: none;">
+                        <div class="product-management__form-row">
+                            <div class="product-management__form-field">
+                                <label for="sale-start-date" class="product-management__label">
+                                    <span class="translatable-content" data-translation-key="Sale Start Date">Sale Start Date</span>
+                                </label>
+                                <input type="datetime-local" id="sale-start-date" name="sale_start_date" class="product-management__input">
+                            </div>
+                            <div class="product-management__form-field">
+                                <label for="sale-end-date" class="product-management__label">
+                                    <span class="translatable-content" data-translation-key="Sale End Date">Sale End Date</span>
+                                </label>
+                                <input type="datetime-local" id="sale-end-date" name="sale_end_date" class="product-management__input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sale Discount Percentage -->
+                    <div class="product-management__form-group" id="sale-discount-group" style="display: none;">
+                        <label for="sale-discount-percentage" class="product-management__label">
+                            <span class="translatable-content" data-translation-key="Discount Percentage">Discount Percentage</span>
+                            <small class="product-management__help">(0-100%)</small>
+                        </label>
+                        <input type="number" id="sale-discount-percentage" name="sale_discount_percentage" 
+                               class="product-management__input" min="0" max="100" step="0.01" placeholder="e.g. 20">
+                        <small class="product-management__help">
+                            <span class="translatable-content" data-translation-key="Sale prices will be calculated automatically from regular prices">Sale prices will be calculated automatically from regular prices</span>
+                        </small>
+                    </div>
+
+                    <!-- Sale Description -->
+                    <div class="product-management__form-group" id="sale-description-group" style="display: none;">
+                        <label for="sale-description" class="product-management__label">
+                            <span class="translatable-content" data-translation-key="Sale Description">Sale Description</span>
+                        </label>
+                        <textarea id="sale-description" name="sale_description" class="product-management__textarea" 
+                                  rows="3" placeholder="e.g. Limited time offer!"></textarea>
+                    </div>
+
+                    <!-- Sale Emojis -->
+                    <div class="product-management__form-group" id="sale-emoji-group" style="display: none;">
+                        <div class="product-management__form-row">
+                            <div class="product-management__form-field" style="position: relative;">
+                                <label for="sale-emoji-left" class="product-management__label">
+                                    <span class="translatable-content" data-translation-key="Left Emoji">Left Emoji</span>
+                                </label>
+                                <div style="display: flex; gap: var(--spacing-xs); align-items: center;">
+                                    <input type="text" id="sale-emoji-left" name="sale_emoji_left" 
+                                           class="product-management__input" maxlength="10" placeholder="✨" value="✨" style="flex: 1;">
+                                    <button type="button" class="product-management__button product-management__button--secondary" 
+                                            id="emoji-picker-left-btn" style="padding: var(--spacing-sm); min-width: auto;" title="Choose emoji">
+                                        😀
+                                    </button>
+                                </div>
+                                <div class="product-management__emoji-picker" id="emoji-picker-left" style="display: none;">
+                                    <div class="product-management__emoji-grid">
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="✨">✨</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎉">🎉</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎊">🎊</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎆">🎆</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎇">🎇</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="💫">💫</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="⭐">⭐</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🌟">🌟</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🔥">🔥</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="💥">💥</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎁">🎁</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎈">🎈</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎀">🎀</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🏆">🏆</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="💎">💎</button>
+                                    </div>
+                                </div>
+                                <small class="product-management__help">
+                                    <span class="translatable-content" data-translation-key="emoji_help">Emoji to show on the left side</span>
+                                </small>
+                            </div>
+                            <div class="product-management__form-field" style="position: relative;">
+                                <label for="sale-emoji-right" class="product-management__label">
+                                    <span class="translatable-content" data-translation-key="Right Emoji">Right Emoji</span>
+                                </label>
+                                <div style="display: flex; gap: var(--spacing-xs); align-items: center;">
+                                    <input type="text" id="sale-emoji-right" name="sale_emoji_right" 
+                                           class="product-management__input" maxlength="10" placeholder="✨" value="✨" style="flex: 1;">
+                                    <button type="button" class="product-management__button product-management__button--secondary" 
+                                            id="emoji-picker-right-btn" style="padding: var(--spacing-sm); min-width: auto;" title="Choose emoji">
+                                        😀
+                                    </button>
+                                </div>
+                                <div class="product-management__emoji-picker" id="emoji-picker-right" style="display: none;">
+                                    <div class="product-management__emoji-grid">
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="✨">✨</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎉">🎉</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎊">🎊</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎆">🎆</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎇">🎇</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="💫">💫</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="⭐">⭐</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🌟">🌟</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🔥">🔥</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="💥">💥</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎁">🎁</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎈">🎈</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🎀">🎀</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="🏆">🏆</button>
+                                        <button type="button" class="product-management__emoji-btn" data-emoji="💎">💎</button>
+                                    </div>
+                                </div>
+                                <small class="product-management__help">
+                                    <span class="translatable-content" data-translation-key="emoji_help">Emoji to show on the right side</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="product-management__modal-footer">
+                <button type="button" class="product-management__button product-management__button--secondary" id="sale-modal-cancel">
+                    <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                </button>
+                <button type="button" class="product-management__button product-management__button--primary" id="sale-modal-save">
+                    <span class="translatable-content" data-translation-key="Save Sale">Save Sale</span>
+                </button>
+            </div>
         </div>
     </div>
 

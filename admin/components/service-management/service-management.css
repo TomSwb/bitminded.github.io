@@ -24,7 +24,8 @@
     order: 2;
 }
 
-.service-management__actions {
+/* Actions in header (table) */
+.service-management__header .service-management__actions {
     position: absolute;
     right: 0;
     order: 3;
@@ -44,9 +45,23 @@
     opacity: 0.7;
 }
 
+/* Actions in modal/content (not absolute) */
 .service-management__actions {
     display: flex;
     gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-top: var(--spacing-md);
+}
+
+/* Stripe actions specifically */
+#stripe-actions {
+    position: static;
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
 }
 
 /* ===== BUTTONS ===== */
@@ -1172,43 +1187,55 @@
 .service-management__currency-editor {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
+    gap: var(--spacing-sm, 0.75rem);
+    padding: var(--spacing-sm, 0.75rem);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-background-primary);
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
 }
 
 .service-management__currency-row {
     display: grid;
-    grid-template-columns: 120px 1fr 1fr;
-    gap: var(--spacing-md);
+    grid-template-columns: minmax(80px, 100px) repeat(auto-fit, minmax(70px, 1fr));
+    gap: var(--spacing-xs, 0.5rem);
     align-items: center;
+    min-width: 0;
+    width: 100%;
 }
 
-/* Membership pricing: 5 columns (label + 4 inputs) */
+/* Membership pricing: 5 columns (label + 4 inputs) - responsive */
 .service-management__currency-row:has(input[data-type="monthly"]) {
-    grid-template-columns: 120px 1fr 1fr 1fr 1fr;
+    grid-template-columns: minmax(80px, 100px) repeat(4, minmax(70px, 1fr));
 }
 
 /* Range pricing: 3 columns (label + 2 inputs) */
 .service-management__currency-row:has(input[data-type="min"]) {
-    grid-template-columns: 120px 1fr 1fr;
+    grid-template-columns: minmax(80px, 100px) repeat(2, minmax(70px, 1fr));
 }
 
 .service-management__currency-label {
     font-weight: 600;
     color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs, 0.75rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .service-management__currency-input {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs, 0.5rem);
     border: 1px solid var(--color-border);
     background: var(--color-background-primary);
     color: var(--color-text-primary);
     border-radius: var(--radius-sm);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs, 0.75rem);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .service-management__currency-input:focus {
