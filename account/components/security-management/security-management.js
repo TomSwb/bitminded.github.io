@@ -10,6 +10,7 @@ class SecurityManagement {
         this.loadedComponents = new Set();
         this.sections = ['overview', 'password', '2fa', 'activity'];
         this.lastPasswordChangedDate = null; // Store for language change updates
+        this.lastLoginActivityData = null; // Store for language change updates
     }
 
     /**
@@ -89,6 +90,10 @@ class SecurityManagement {
             // Re-update password status with new language
             if (this.lastPasswordChangedDate !== undefined) {
                 this.updatePasswordStatus(this.lastPasswordChangedDate);
+            }
+            // Re-update login activity status with new language
+            if (this.lastLoginActivityData !== null) {
+                this.updateLoginActivityStatus(this.lastLoginActivityData);
             }
         });
     }
@@ -410,15 +415,125 @@ class SecurityManagement {
     }
 
     /**
+     * Format time ago (e.g., "2 hours ago", "Yesterday at 15:30", "3 days ago")
+     * @param {Date} date - Date to format
+     * @returns {string} Formatted time ago string
+     */
+    formatTimeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        // Get translation helper
+        const getTranslation = (key, fallback) => {
+            if (window.securityManagementTranslations) {
+                return window.securityManagementTranslations.getTranslation(key) || fallback;
+            }
+            return fallback;
+        };
+
+        // Less than 1 minute ago
+        if (diffMins < 1) {
+            return getTranslation('Just now', 'Just now');
+        }
+
+        // Less than 1 hour ago
+        if (diffMins < 60) {
+            const minsText = diffMins === 1 
+                ? getTranslation('minute ago', 'minute ago')
+                : getTranslation('minutes ago', 'minutes ago');
+            return `${diffMins} ${minsText}`;
+        }
+
+        // Less than 24 hours ago
+        if (diffHours < 24) {
+            const hoursText = diffHours === 1
+                ? getTranslation('hour ago', 'hour ago')
+                : getTranslation('hours ago', 'hours ago');
+            return `${diffHours} ${hoursText}`;
+        }
+
+        // Yesterday
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (date.toDateString() === yesterday.toDateString()) {
+            const time = this.formatEuropeanDateTime(date).split(' ')[1]; // Get just the time part
+            const yesterdayText = getTranslation('Yesterday at', 'Yesterday at');
+            return `${yesterdayText} ${time}`;
+        }
+
+        // Today (if somehow we got here, but just in case)
+        if (date.toDateString() === now.toDateString()) {
+            const time = this.formatEuropeanDateTime(date).split(' ')[1];
+            const todayText = getTranslation('Today at', 'Today at');
+            return `${todayText} ${time}`;
+        }
+
+        // Less than 7 days ago
+        if (diffDays < 7) {
+            const daysText = diffDays === 1
+                ? getTranslation('day ago', 'day ago')
+                : getTranslation('days ago', 'days ago');
+            return `${diffDays} ${daysText}`;
+        }
+
+        // Older than 7 days - show full date
+        return this.formatEuropeanDateTime(date);
+    }
+
+    /**
      * Load login activity status
      */
     async loadLoginActivityStatus() {
         try {
-            // TODO: Implement login activity status check when login activity component is ready
-            // Login activity loaded
+            // Loading login activity status
+            
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError || !user) {
+                window.logger?.error('❌ Security Management: Failed to get user for login activity status');
+                this.updateLoginActivityStatus(null);
+                return;
+            }
+
+            // Query user_login_activity table for recent successful logins
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            
+            const { data: activityData, error } = await supabase
+                .from('user_login_activity')
+                .select('login_time, success')
+                .eq('user_id', user.id)
+                .eq('success', true)
+                .gte('login_time', sevenDaysAgo.toISOString())
+                .order('login_time', { ascending: false })
+                .limit(10);
+            
+            if (error) {
+                window.logger?.error('❌ Security Management: Failed to load login activity status:', error);
+                this.updateLoginActivityStatus(null);
+                return;
+            }
+
+            // Prepare activity data for display
+            const activityInfo = {
+                lastLogin: activityData && activityData.length > 0 ? new Date(activityData[0].login_time) : null,
+                recentCount: activityData ? activityData.length : 0,
+                allActivities: activityData || []
+            };
+            
+            // Store for language change updates
+            this.lastLoginActivityData = activityInfo;
+            
+            // Login activity status loaded
+            this.updateLoginActivityStatus(activityInfo);
 
         } catch (error) {
             window.logger?.error('❌ Security Management: Failed to load login activity status:', error);
+            this.lastLoginActivityData = null;
+            this.updateLoginActivityStatus(null);
         }
     }
 
@@ -447,11 +562,60 @@ class SecurityManagement {
 
     /**
      * Update login activity status display
-     * @param {Object} activityData - Login activity data
+     * @param {Object|null} activityData - Login activity data with lastLogin, recentCount, and allActivities
      */
     updateLoginActivityStatus(activityData) {
-        // TODO: Implement login activity status update
-        window.logger?.log('📝 Security Management: Login activity status updated:', activityData);
+        const statusElement = document.getElementById('activity-status-description');
+        
+        if (!statusElement) {
+            window.logger?.error('❌ Security Management: Activity status element not found');
+            return;
+        }
+
+        // Remove translatable-content class and data-translation-key to allow dynamic content
+        statusElement.classList.remove('translatable-content');
+        statusElement.removeAttribute('data-translation-key');
+
+        if (!activityData || !activityData.lastLogin) {
+            // No login activity found - restore default translatable content
+            statusElement.classList.add('translatable-content');
+            statusElement.setAttribute('data-translation-key', 'View recent login history');
+            
+            let defaultText = 'View recent login history';
+            if (window.securityManagementTranslations) {
+                defaultText = window.securityManagementTranslations.getTranslation('View recent login history');
+            }
+            statusElement.innerHTML = `<span>${defaultText}</span>`;
+            return;
+        }
+
+        // Format the status message
+        const lastLogin = activityData.lastLogin;
+        const recentCount = activityData.recentCount;
+        const timeAgo = this.formatTimeAgo(lastLogin);
+        
+        // Build status text
+        let statusText = '';
+        if (recentCount === 1) {
+            // Only one login in the last 7 days
+            let lastLoginText = 'Last login: ';
+            if (window.securityManagementTranslations) {
+                lastLoginText = window.securityManagementTranslations.getTranslation('Last login: ') || 'Last login: ';
+            }
+            statusText = `${lastLoginText}${timeAgo}`;
+        } else {
+            // Multiple logins
+            let lastLoginText = 'Last login: ';
+            let loginsThisWeekText = ` (${recentCount} logins this week)`;
+            if (window.securityManagementTranslations) {
+                lastLoginText = window.securityManagementTranslations.getTranslation('Last login: ') || 'Last login: ';
+                const weekText = window.securityManagementTranslations.getTranslation('logins this week') || 'logins this week';
+                loginsThisWeekText = ` (${recentCount} ${weekText})`;
+            }
+            statusText = `${lastLoginText}${timeAgo}${loginsThisWeekText}`;
+        }
+
+        statusElement.textContent = statusText;
     }
 
     /**
@@ -482,7 +646,31 @@ class SecurityManagement {
      */
     showError(message) {
         window.logger?.error('Security Management Error:', message);
-        // TODO: Implement error display UI
+        
+        const errorContainer = document.getElementById('security-management-error');
+        const errorText = document.getElementById('security-management-error-text');
+        
+        if (errorContainer && errorText) {
+            errorText.textContent = message;
+            errorContainer.style.display = 'flex';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                this.hideError();
+            }, 5000);
+        } else {
+            window.logger?.error('❌ Security Management: Error display elements not found');
+        }
+    }
+
+    /**
+     * Hide error message
+     */
+    hideError() {
+        const errorContainer = document.getElementById('security-management-error');
+        if (errorContainer) {
+            errorContainer.style.display = 'none';
+        }
     }
 
     /**
