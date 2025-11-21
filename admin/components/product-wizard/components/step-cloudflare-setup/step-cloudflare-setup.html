@@ -50,6 +50,19 @@
             <small class="step-cloudflare-setup__help">Regenerate the Cloudflare Worker with the latest Edge Function code</small>
         </div>
 
+        <!-- Expo/React Native Warning (shown conditionally) -->
+        <div class="step-cloudflare-setup__warning" id="expo-deployment-warning" style="display: none; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+            <h4 style="margin-top: 0; color: #856404;">⚠️ Expo/React Native App Detected</h4>
+            <p style="margin-bottom: 0.5rem; color: #856404;"><strong>This app uses the <code>gh-pages</code> branch for deployment.</strong></p>
+            <p style="margin-bottom: 0.5rem; color: #856404;">Make sure:</p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem; color: #856404;">
+                <li>GitHub Pages is configured to use the <code>gh-pages</code> branch (Settings → Pages → Source: <code>gh-pages</code> branch)</li>
+                <li>Cloudflare Worker is connected to the <code>gh-pages</code> branch (not <code>main</code>)</li>
+                <li>Worker files (<code>worker-updated.js</code>, <code>wrangler.toml</code>) are on the <code>gh-pages</code> branch</li>
+                <li>After building, run <code>npm run deploy</code> to build and deploy to <code>gh-pages</code></li>
+            </ul>
+        </div>
+
         <!-- How it works -->
         <div class="step-cloudflare-setup__instructions">
             <h3 class="step-cloudflare-setup__instructions-title">How it works</h3>
@@ -68,7 +81,7 @@
                     <li>Go to <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare Dashboard</a> → <strong>Workers & Pages</strong></li>
                     <li>Click <strong>Create application</strong> → <strong>Create Worker</strong></li>
                     <li>Click <strong>Connect to Git</strong> and select your repository: <strong id="github-repo-link">[Repository URL]</strong></li>
-                    <li>Select the <strong>main</strong> branch (or <strong>master</strong>)</li>
+                    <li>Select the <strong id="deployment-branch-name">main</strong> branch <span id="expo-branch-note" style="display: none;">(or <strong>gh-pages</strong> for Expo/React Native apps)</span></li>
                     <li><strong>DO NOT enable GitHub Pages</strong> - Keep it disabled for full protection</li>
                     <li>Set the <strong>Deploy command</strong> to: <code>npx wrangler deploy worker-updated.js</code></li>
                     <li>Or use: <code>npm run deploy</code> (if package.json has deploy script)</li>

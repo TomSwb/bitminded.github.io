@@ -26,6 +26,9 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             this.elements.workerStatus = document.getElementById('worker-status');
             this.elements.createSection = document.querySelector('.step-cloudflare-setup__create-section');
             this.elements.recreateSection = document.getElementById('recreate-worker-section');
+            this.elements.expoWarning = document.getElementById('expo-deployment-warning');
+            this.elements.deploymentBranchName = document.getElementById('deployment-branch-name');
+            this.elements.expoBranchNote = document.getElementById('expo-branch-note');
         }
 
         setupEventListeners() {
@@ -126,6 +129,9 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             
             // Update GitHub Pages instructions with dynamic URLs
             this.updateGitHubPagesInstructions();
+            
+            // Check if this is an Expo/React Native app and show warning
+            this.checkAndShowExpoWarning();
 
             // Mark step as completed if data exists
             if (basicInfo.cloudflare_domain || basicInfo.cloudflare_worker_url) {
@@ -145,6 +151,42 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                     if (this.elements.recreateSection) {
                         this.elements.recreateSection.style.display = 'block';
                     }
+                }
+            }
+        }
+
+        checkAndShowExpoWarning() {
+            // Check if this is an Expo/React Native app by looking at the technical specification
+            if (!window.productWizard) return;
+            
+            const stepData = window.productWizard.stepData || {};
+            const spec = stepData[2]?.technicalSpecification || '';
+            
+            if (!spec) return;
+            
+            const specLower = spec.toLowerCase();
+            const isExpo = specLower.includes('expo') || 
+                          specLower.includes('react native') || 
+                          specLower.includes('react-native') ||
+                          specLower.includes('expo/');
+            
+            if (isExpo && this.elements.expoWarning) {
+                this.elements.expoWarning.style.display = 'block';
+                if (this.elements.deploymentBranchName) {
+                    this.elements.deploymentBranchName.textContent = 'gh-pages';
+                }
+                if (this.elements.expoBranchNote) {
+                    this.elements.expoBranchNote.style.display = 'none';
+                }
+            } else {
+                if (this.elements.expoWarning) {
+                    this.elements.expoWarning.style.display = 'none';
+                }
+                if (this.elements.deploymentBranchName) {
+                    this.elements.deploymentBranchName.textContent = 'main';
+                }
+                if (this.elements.expoBranchNote) {
+                    this.elements.expoBranchNote.style.display = 'inline';
                 }
             }
         }
