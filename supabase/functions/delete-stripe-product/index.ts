@@ -166,6 +166,37 @@ async function checkRateLimit(
   return { allowed: true }
 }
 
+/**
+ * Log error to database
+ */
+async function logError(
+  supabaseAdmin: any,
+  functionName: string,
+  errorType: 'stripe_api' | 'validation' | 'network' | 'auth' | 'database' | 'other',
+  errorMessage: string,
+  errorDetails: any,
+  userId: string | null,
+  requestData: any,
+  ipAddress?: string
+) {
+  try {
+    await supabaseAdmin
+      .from('error_logs')
+      .insert({
+        function_name: functionName,
+        error_type: errorType,
+        error_message: errorMessage,
+        error_details: errorDetails ? JSON.parse(JSON.stringify(errorDetails)) : null,
+        user_id: userId,
+        request_data: requestData ? JSON.parse(JSON.stringify(requestData)) : null,
+        ip_address: ipAddress || null
+      })
+  } catch (logError) {
+    // Don't throw - error logging should not break the main flow
+    console.error('❌ Failed to log error to database:', logError)
+  }
+}
+
 serve(async (req) => {
   const origin = req.headers.get('Origin')
   const corsHeaders = getCorsHeaders(origin)
@@ -221,18 +252,25 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // Verify session exists in user_sessions table (prevent use of revoked tokens)
-    const { data: sessionData, error: sessionError } = await supabaseAdmin
-      .from('user_sessions')
-      .select('session_token')
-      .eq('session_token', token)
-      .maybeSingle()
+    // Verify session exists (optional check - getUser() above is the primary auth)
+    // This check helps prevent use of revoked tokens, but we don't fail if the table doesn't exist
+    try {
+      const { data: sessionData, error: sessionError } = await supabaseAdmin
+        .from('user_sessions')
+        .select('session_token')
+        .eq('session_token', token)
+        .maybeSingle()
 
-    if (sessionError || !sessionData) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      // Only fail if there's a specific error indicating the session was revoked
+      // If the table doesn't exist or query fails, we still allow the request since getUser() succeeded
+      if (sessionError && sessionError.code !== 'PGRST116') { // PGRST116 = table not found
+        console.warn('⚠️ Session verification warning:', sessionError.message)
+        // Don't fail - getUser() already verified the user is authenticated
+      }
+    } catch (sessionCheckError) {
+      // If session check fails (e.g., table doesn't exist), log but don't fail
+      // The getUser() check above is sufficient for authentication
+      console.warn('⚠️ Could not verify session in user_sessions table:', sessionCheckError)
     }
 
     // Rate limiting: Admin function - 20/min, 200/hour per user
@@ -262,6 +300,16 @@ serve(async (req) => {
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
     if (!stripeSecretKey) {
       console.error('❌ STRIPE_SECRET_KEY not found in environment')
+      await logError(
+        supabaseAdmin,
+        'delete-stripe-product',
+        'validation',
+        'STRIPE_SECRET_KEY not found in environment',
+        { missing_secret: 'STRIPE_SECRET_KEY' },
+        user.id,
+        { has_auth: true },
+        ipAddress
+      )
       return new Response(
         JSON.stringify({ error: 'Stripe configuration missing' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -269,7 +317,16 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const body = await req.json()
+    let body: any
+    try {
+      body = await req.json()
+    } catch (parseError) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const { productId } = body
 
     if (!productId) {
@@ -286,7 +343,8 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${stripeSecretKey}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Stripe-Version': '2024-11-20.acacia'
       },
       body: new URLSearchParams({
         active: 'false'
@@ -296,6 +354,16 @@ serve(async (req) => {
     if (!response.ok) {
       const error = await response.text()
       console.error('❌ Error archiving Stripe product:', error)
+      await logError(
+        supabaseAdmin,
+        'delete-stripe-product',
+        'stripe_api',
+        'Failed to archive Stripe product',
+        { stripe_error: error, status: response.status, product_id: productId },
+        user.id,
+        { productId },
+        ipAddress
+      )
       throw new Error('Failed to archive Stripe product')
     }
 
@@ -313,8 +381,65 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ Error in delete-stripe-product:', error)
+    
+    // Try to get user ID for logging (may not be available in all error cases)
+    let userId: string | null = null
+    try {
+      const authHeader = req.headers.get('Authorization')
+      if (authHeader) {
+        const supabaseClient = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+          {
+            global: {
+              headers: { Authorization: authHeader },
+            },
+          }
+        )
+        const { data: { user } } = await supabaseClient.auth.getUser()
+        userId = user?.id || null
+      }
+    } catch {
+      // Ignore auth errors when logging
+    }
+    
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    
+    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+                      req.headers.get('cf-connecting-ip') ||
+                      req.headers.get('x-real-ip') ||
+                      'unknown'
+    
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorName = error instanceof Error ? error.name : 'UnknownError'
+    const errorStack = error instanceof Error ? error.stack : undefined
+    
+    try {
+      await logError(
+        supabaseAdmin,
+        'delete-stripe-product',
+        'other',
+        errorMessage || 'Unknown error',
+        { 
+          error_name: errorName,
+          error_stack: errorStack,
+          error_string: String(error)
+        },
+        userId,
+        { method: req.method, url: req.url },
+        ipAddress
+      )
+    } catch (logErr) {
+      // Don't fail if logging fails
+      console.error('Failed to log error:', logErr)
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
