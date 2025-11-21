@@ -169,6 +169,42 @@ class ProductManagement {
         window.addEventListener('languageChanged', () => {
             this.updateTranslations();
         });
+
+        // Sale modal event listeners
+        if (this.elements.saleModalClose) {
+            this.elements.saleModalClose.addEventListener('click', () => {
+                this.closeSaleModal();
+            });
+        }
+
+        if (this.elements.saleModalCancel) {
+            this.elements.saleModalCancel.addEventListener('click', () => {
+                this.closeSaleModal();
+            });
+        }
+
+        if (this.elements.saleModalOverlay) {
+            this.elements.saleModalOverlay.addEventListener('click', (e) => {
+                if (e.target === this.elements.saleModalOverlay) {
+                    this.closeSaleModal();
+                }
+            });
+        }
+
+        if (this.elements.saleModalSave) {
+            this.elements.saleModalSave.addEventListener('click', () => {
+                this.saveSale();
+            });
+        }
+
+        if (this.elements.saleIsOnSale) {
+            this.elements.saleIsOnSale.addEventListener('change', (e) => {
+                this.toggleSaleFields(e.target.checked);
+            });
+        }
+
+        // Setup emoji pickers
+        this.setupEmojiPickers();
     }
 
     /**
@@ -211,6 +247,20 @@ class ProductManagement {
                     commissioned_client_name,
                     is_featured,
                     is_available_for_purchase,
+                    is_on_sale,
+                    sale_start_date,
+                    sale_end_date,
+                    sale_discount_percentage,
+                    sale_description,
+                    sale_emoji_left,
+                    sale_emoji_right,
+                    stripe_product_id,
+                    stripe_price_id,
+                    stripe_price_monthly_id,
+                    stripe_price_yearly_id,
+                    stripe_price_sale_id,
+                    stripe_price_monthly_sale_id,
+                    stripe_price_yearly_sale_id,
                     created_at,
                     updated_at,
                     published_at,
@@ -457,20 +507,66 @@ class ProductManagement {
         categoryCell.style.color = 'var(--color-text-primary)';
         categoryCell.textContent = product.category_name;
 
-        // Status cell
+        // Status cell with editable dropdown
         const statusCell = document.createElement('td');
         statusCell.setAttribute('data-label', 'Status');
         statusCell.style.padding = 'var(--spacing-sm)';
+        statusCell.style.position = 'relative';
         const status = product.status || 'draft';
         
         // Determine badge class based on status
         const badgeClass = `product-management__badge--${status}`;
         
+        const statusOptions = ['draft', 'active', 'beta', 'coming-soon', 'suspended', 'archived'];
+        
         statusCell.innerHTML = `
-            <span class="product-management__badge ${badgeClass}">
-                ${status}
-            </span>
+            <div class="product-management__status-editor" data-product-id="${product.id}">
+                <span class="product-management__badge ${badgeClass} product-management__status-badge" style="cursor: pointer; user-select: none;">
+                    ${status}
+                </span>
+                <select class="product-management__status-select" style="display: none;">
+                    ${statusOptions.map(opt => `<option value="${opt}" ${status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>
+            </div>
         `;
+        
+        // Add click handler to show dropdown
+        const statusEditor = statusCell.querySelector('.product-management__status-editor');
+        const statusBadge = statusCell.querySelector('.product-management__status-badge');
+        const statusSelect = statusCell.querySelector('.product-management__status-select');
+        
+        // Make badge clickable to trigger select
+        statusBadge.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Position select over badge and make it visible
+            statusSelect.style.display = 'block';
+            statusSelect.style.position = 'absolute';
+            statusSelect.style.top = '0';
+            statusSelect.style.left = '0';
+            statusSelect.style.width = '100%';
+            statusSelect.style.height = '100%';
+            statusSelect.style.opacity = '0';
+            statusSelect.style.cursor = 'pointer';
+            statusSelect.style.zIndex = '100';
+            statusSelect.focus();
+            // Trigger native dropdown
+            statusSelect.click();
+        });
+        
+        // Handle status change
+        statusSelect.addEventListener('change', async (e) => {
+            e.stopPropagation();
+            const newStatus = e.target.value;
+            if (newStatus !== status) {
+                await this.updateProductStatus(product.id, product, newStatus);
+            }
+            statusSelect.style.display = 'none';
+        });
+        
+        // Hide dropdown when losing focus
+        statusSelect.addEventListener('blur', () => {
+            statusSelect.style.display = 'none';
+        });
 
         // Pricing cell
         const pricingCell = document.createElement('td');
@@ -482,14 +578,29 @@ class ProductManagement {
         if (product.pricing_type === 'one_time') {
             pricingText = `${product.price_amount || 0} ${product.price_currency || 'USD'}`;
         } else if (product.pricing_type === 'subscription') {
-            const individualPrice = product.individual_price || 0;
-            const enterprisePrice = product.enterprise_price || 0;
-            pricingText = `Individual: ${individualPrice} | Enterprise: ${enterprisePrice}`;
+            // Show subscription pricing (monthly/yearly if available, otherwise just the type)
+            if (product.stripe_price_monthly_id || product.stripe_price_yearly_id) {
+                pricingText = 'Subscription';
+            } else {
+                pricingText = `${product.price_amount || 0} ${product.price_currency || 'USD'}/mo`;
+            }
         } else if (product.pricing_type === 'freemium') {
             pricingText = 'Freemium';
         }
         
         pricingCell.textContent = pricingText;
+
+        // Sale cell
+        const saleCell = document.createElement('td');
+        saleCell.setAttribute('data-label', 'Sale');
+        saleCell.style.padding = 'var(--spacing-sm)';
+        saleCell.style.textAlign = 'center';
+        
+        if (product.is_on_sale) {
+            saleCell.innerHTML = '<span class="product-management__sale-badge" style="background: var(--color-secondary); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;">ON SALE</span>';
+        } else {
+            saleCell.textContent = '-';
+        }
 
         // Commissioned cell
         const commissionedCell = document.createElement('td');
@@ -529,7 +640,7 @@ class ProductManagement {
         actionsCell.style.padding = 'var(--spacing-sm)';
         
         // Determine which buttons to show based on status (status already declared above)
-        const showPublish = status === 'draft';
+        const showPublish = status === 'draft' || status === 'coming-soon' || status === 'beta';
         const showUnpublish = status === 'active';
         
         let actionButtons = `
@@ -556,6 +667,9 @@ class ProductManagement {
         }
         
         actionButtons += `
+            <button class="product-management__action-btn product-management__action-btn--sale" data-action="sale" data-product-id="${product.id}">
+                ${product.is_on_sale ? 'Edit Sale' : 'Manage Sale'}
+            </button>
             <button class="product-management__action-btn product-management__action-btn--delete" data-action="delete" data-product-id="${product.id}">
                 Delete
             </button>
@@ -600,6 +714,14 @@ class ProductManagement {
             });
         }
 
+        const saleButton = actionsCell.querySelector('[data-action="sale"]');
+        if (saleButton) {
+            saleButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openSaleModal(product.id);
+            });
+        }
+
         const deleteButton = actionsCell.querySelector('[data-action="delete"]');
         if (deleteButton) {
             deleteButton.addEventListener('click', (e) => {
@@ -613,6 +735,7 @@ class ProductManagement {
         tr.appendChild(categoryCell);
         tr.appendChild(statusCell);
         tr.appendChild(pricingCell);
+        tr.appendChild(saleCell);
         tr.appendChild(commissionedCell);
         tr.appendChild(featuredCell);
         tr.appendChild(createdCell);
@@ -665,17 +788,161 @@ Description: ${product.description || 'No description'}
      * @param {string} productId - Product ID to publish
      * @param {string} productName - Product name
      */
+    /**
+     * Check if a product is a test product
+     * @param {Object} product - Product object
+     * @returns {boolean} True if product is a test product
+     */
+    isTestProduct(product) {
+        if (!product) return false;
+        // Check if name starts with "Test"
+        if (product.name && product.name.startsWith('Test ')) {
+            return true;
+        }
+        // Check if Stripe product ID is a test ID
+        if (product.stripe_product_id && product.stripe_product_id.startsWith('prod_test_')) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Update product status
+     * @param {string} productId - Product ID
+     * @param {Object} product - Product object
+     * @param {string} newStatus - New status value
+     */
+    async updateProductStatus(productId, product, newStatus) {
+        try {
+            const isTest = this.isTestProduct(product);
+            
+            // For real products, validate required fields when publishing (status = 'active')
+            if (!isTest && newStatus === 'active') {
+                const missingFields = [];
+                
+                if (!product.github_repo_url && !product.github_repo_name) {
+                    missingFields.push('GitHub repository');
+                }
+                if (!product.cloudflare_domain && !product.cloudflare_worker_url) {
+                    missingFields.push('Cloudflare configuration');
+                }
+                if (!product.stripe_product_id) {
+                    missingFields.push('Stripe product');
+                }
+                if (!product.icon_url) {
+                    missingFields.push('Product icon');
+                }
+                
+                if (missingFields.length > 0) {
+                    this.showError(`Cannot set status to 'active'. Missing required fields: ${missingFields.join(', ')}`);
+                    // Reload to reset the dropdown
+                    await this.loadProducts();
+                    return;
+                }
+            }
+            
+            // Prepare update data
+            const updateData = {
+                status: newStatus
+            };
+            
+            // Set published_at when status becomes 'active', clear it otherwise
+            if (newStatus === 'active') {
+                updateData.published_at = new Date().toISOString();
+            } else if (product.status === 'active' && newStatus !== 'active') {
+                updateData.published_at = null;
+            }
+            
+            // Update product in database
+            const { error } = await window.supabase
+                .from('products')
+                .update(updateData)
+                .eq('id', productId);
+            
+            if (error) {
+                throw error;
+            }
+            
+            // Reload products to reflect changes
+            await this.loadProducts();
+            
+            // Show success message
+            const message = isTest && newStatus === 'active'
+                ? `Test product status updated to '${newStatus}' (test mode - validation skipped)`
+                : `Product status updated to '${newStatus}'`;
+            this.showSuccess(message);
+            
+        } catch (error) {
+            window.logger?.error('❌ Error updating product status:', error);
+            this.showError(`Failed to update status: ${error.message || 'Unknown error'}`);
+            // Reload to reset the dropdown
+            await this.loadProducts();
+        }
+    }
+
     async publishProduct(productId, productName) {
         window.logger?.log('📢 Publish product:', productId, productName);
-        window.logger?.log('⚠️ Publish/Unpublish functionality will be connected when publishing destination is ready');
         
-        // Placeholder implementation
-        alert(`Publish functionality for "${productName}" will be connected when the publishing destination is created.\n\nFor now, this will update the product status from 'draft' to 'active' in the database and make it visible in the public catalog.`);
-        
-        // TODO: When publishing destination is ready:
-        // 1. Update product status from 'draft' to 'active' in database
-        // 2. Make product visible in public catalog
-        // 3. Enable purchase flow (if applicable)
+        try {
+            // Get product data
+            const product = this.products.find(p => p.id === productId);
+            if (!product) {
+                this.showError('Product not found');
+                return;
+            }
+
+            const isTest = this.isTestProduct(product);
+            
+            // For real products, validate required fields (unless it's a test product)
+            if (!isTest) {
+                // Validate required fields for real products
+                const missingFields = [];
+                
+                if (!product.github_repo_url && !product.github_repo_name) {
+                    missingFields.push('GitHub repository');
+                }
+                if (!product.cloudflare_domain && !product.cloudflare_worker_url) {
+                    missingFields.push('Cloudflare configuration');
+                }
+                if (!product.stripe_product_id) {
+                    missingFields.push('Stripe product');
+                }
+                if (!product.icon_url) {
+                    missingFields.push('Product icon');
+                }
+                
+                if (missingFields.length > 0) {
+                    this.showError(`Cannot publish product. Missing required fields: ${missingFields.join(', ')}`);
+                    return;
+                }
+            }
+            
+            // Update product status to 'active' and set published_at
+            const { error } = await window.supabase
+                .from('products')
+                .update({
+                    status: 'active',
+                    published_at: new Date().toISOString()
+                })
+                .eq('id', productId);
+            
+            if (error) {
+                throw error;
+            }
+            
+            // Reload products to reflect changes
+            await this.loadProducts();
+            
+            // Show success message
+            const message = isTest 
+                ? `Test product "${productName}" has been published (test mode - validation skipped)`
+                : `Product "${productName}" has been published successfully`;
+            this.showSuccess(message);
+            
+        } catch (error) {
+            window.logger?.error('❌ Error publishing product:', error);
+            this.showError(`Failed to publish product: ${error.message || 'Unknown error'}`);
+        }
         // 4. Refresh product list
     }
 
@@ -686,15 +953,31 @@ Description: ${product.description || 'No description'}
      */
     async unpublishProduct(productId, productName) {
         window.logger?.log('📢 Unpublish product:', productId, productName);
-        window.logger?.log('⚠️ Publish/Unpublish functionality will be connected when publishing destination is ready');
         
-        // Placeholder implementation
-        alert(`Unpublish functionality for "${productName}" will be connected when the publishing destination is created.\n\nFor now, this will update the product status from 'active' to 'draft' and hide it from the public catalog.`);
-        
-        // TODO: When publishing destination is ready:
-        // 1. Update product status from 'active' to 'draft' (or 'archived')
-        // 2. Hide product from public catalog
-        // 3. Disable purchase flow
+        try {
+            // Update product status to 'draft' and clear published_at
+            const { error } = await window.supabase
+                .from('products')
+                .update({
+                    status: 'draft',
+                    published_at: null
+                })
+                .eq('id', productId);
+            
+            if (error) {
+                throw error;
+            }
+            
+            // Reload products to reflect changes
+            await this.loadProducts();
+            
+            // Show success message
+            this.showSuccess(`Product "${productName}" has been unpublished`);
+            
+        } catch (error) {
+            window.logger?.error('❌ Error unpublishing product:', error);
+            this.showError(`Failed to unpublish product: ${error.message || 'Unknown error'}`);
+        }
         // 4. Refresh product list
     }
 
@@ -1021,6 +1304,25 @@ Description: ${product.description || 'No description'}
         this.elements = {
             // Search
             searchInput: document.getElementById('product-search-input'),
+            // Sale modal elements
+            saleModal: document.getElementById('sale-modal'),
+            saleModalOverlay: document.getElementById('sale-modal-overlay'),
+            saleModalClose: document.getElementById('sale-modal-close'),
+            saleModalCancel: document.getElementById('sale-modal-cancel'),
+            saleModalSave: document.getElementById('sale-modal-save'),
+            saleModalTitle: document.getElementById('sale-modal-title'),
+            saleForm: document.getElementById('sale-form'),
+            saleIsOnSale: document.getElementById('sale-is-on-sale'),
+            saleStartDate: document.getElementById('sale-start-date'),
+            saleEndDate: document.getElementById('sale-end-date'),
+            saleDiscountPercentage: document.getElementById('sale-discount-percentage'),
+            saleDescription: document.getElementById('sale-description'),
+            saleEmojiLeft: document.getElementById('sale-emoji-left'),
+            saleEmojiRight: document.getElementById('sale-emoji-right'),
+            saleDatesGroup: document.getElementById('sale-dates-group'),
+            saleDiscountGroup: document.getElementById('sale-discount-group'),
+            saleDescriptionGroup: document.getElementById('sale-description-group'),
+            saleEmojiGroup: document.getElementById('sale-emoji-group'),
             
             // Dropdown buttons
             statusDropdownBtn: document.getElementById('status-dropdown-btn'),
@@ -1057,7 +1359,26 @@ Description: ${product.description || 'No description'}
             
             // Summary and clear
             clearBtn: document.getElementById('product-clear-filters-btn'),
-            filterSummary: document.querySelector('.product-management__summary .product-management__count')
+            filterSummary: document.querySelector('.product-management__summary .product-management__count'),
+            // Sale modal elements
+            saleModal: document.getElementById('sale-modal'),
+            saleModalOverlay: document.getElementById('sale-modal-overlay'),
+            saleModalClose: document.getElementById('sale-modal-close'),
+            saleModalCancel: document.getElementById('sale-modal-cancel'),
+            saleModalSave: document.getElementById('sale-modal-save'),
+            saleModalTitle: document.getElementById('sale-modal-title'),
+            saleForm: document.getElementById('sale-form'),
+            saleIsOnSale: document.getElementById('sale-is-on-sale'),
+            saleStartDate: document.getElementById('sale-start-date'),
+            saleEndDate: document.getElementById('sale-end-date'),
+            saleDiscountPercentage: document.getElementById('sale-discount-percentage'),
+            saleDescription: document.getElementById('sale-description'),
+            saleEmojiLeft: document.getElementById('sale-emoji-left'),
+            saleEmojiRight: document.getElementById('sale-emoji-right'),
+            saleDatesGroup: document.getElementById('sale-dates-group'),
+            saleDiscountGroup: document.getElementById('sale-discount-group'),
+            saleDescriptionGroup: document.getElementById('sale-description-group'),
+            saleEmojiGroup: document.getElementById('sale-emoji-group')
         };
     }
 
@@ -1401,6 +1722,378 @@ Description: ${product.description || 'No description'}
             
             if (btn && dropdown) {
                 this.closeDropdown(btn, dropdown);
+            }
+        });
+    }
+
+    /**
+     * Open sale management modal
+     * @param {string} productId - Product ID
+     */
+    async openSaleModal(productId) {
+        try {
+            const product = this.products.find(p => p.id === productId);
+            if (!product) {
+                this.showError('Product not found');
+                return;
+            }
+
+            this.currentEditingProduct = product;
+
+            // Update modal title
+            if (this.elements.saleModalTitle) {
+                this.elements.saleModalTitle.textContent = `Manage Sale - ${product.name}`;
+            }
+
+            // Populate form fields
+            if (this.elements.saleIsOnSale) {
+                this.elements.saleIsOnSale.checked = product.is_on_sale || false;
+            }
+
+            if (this.elements.saleStartDate) {
+                this.elements.saleStartDate.value = product.sale_start_date 
+                    ? new Date(product.sale_start_date).toISOString().slice(0, 16) 
+                    : '';
+            }
+
+            if (this.elements.saleEndDate) {
+                this.elements.saleEndDate.value = product.sale_end_date 
+                    ? new Date(product.sale_end_date).toISOString().slice(0, 16) 
+                    : '';
+            }
+
+            if (this.elements.saleDiscountPercentage) {
+                this.elements.saleDiscountPercentage.value = product.sale_discount_percentage || '';
+            }
+
+            if (this.elements.saleDescription) {
+                this.elements.saleDescription.value = product.sale_description || '';
+            }
+
+            if (this.elements.saleEmojiLeft) {
+                this.elements.saleEmojiLeft.value = product.sale_emoji_left || '✨';
+            }
+
+            if (this.elements.saleEmojiRight) {
+                this.elements.saleEmojiRight.value = product.sale_emoji_right || '✨';
+            }
+
+            // Toggle fields based on sale status
+            this.toggleSaleFields(product.is_on_sale || false);
+
+            // Show modal
+            if (this.elements.saleModalOverlay) {
+                this.elements.saleModalOverlay.style.display = 'flex';
+            }
+        } catch (error) {
+            window.logger?.error('❌ Failed to open sale modal:', error);
+            this.showError('Failed to open sale management');
+        }
+    }
+
+    /**
+     * Close sale modal
+     */
+    closeSaleModal() {
+        if (this.elements.saleModalOverlay) {
+            this.elements.saleModalOverlay.style.display = 'none';
+        }
+        this.currentEditingProduct = null;
+        
+        // Reset form
+        if (this.elements.saleForm) {
+            this.elements.saleForm.reset();
+        }
+    }
+
+    /**
+     * Toggle sale fields visibility
+     * @param {boolean} enabled - Whether sale is enabled
+     */
+    toggleSaleFields(enabled) {
+        if (this.elements.saleDatesGroup) {
+            this.elements.saleDatesGroup.style.display = enabled ? 'block' : 'none';
+        }
+        if (this.elements.saleDiscountGroup) {
+            this.elements.saleDiscountGroup.style.display = enabled ? 'block' : 'none';
+        }
+        if (this.elements.saleDescriptionGroup) {
+            this.elements.saleDescriptionGroup.style.display = enabled ? 'block' : 'none';
+        }
+        if (this.elements.saleEmojiGroup) {
+            this.elements.saleEmojiGroup.style.display = enabled ? 'block' : 'none';
+        }
+    }
+
+    /**
+     * Save sale configuration
+     */
+    async saveSale() {
+        try {
+            if (!this.currentEditingProduct) {
+                this.showError('No product selected');
+                return;
+            }
+
+            const isOnSale = this.elements.saleIsOnSale?.checked || false;
+            const saleStartDate = this.elements.saleStartDate?.value || null;
+            const saleEndDate = this.elements.saleEndDate?.value || null;
+            const saleDiscountPercentage = this.elements.saleDiscountPercentage?.value 
+                ? parseFloat(this.elements.saleDiscountPercentage.value) 
+                : null;
+            const saleDescription = this.elements.saleDescription?.value || null;
+            const saleEmojiLeft = this.elements.saleEmojiLeft?.value || '✨';
+            const saleEmojiRight = this.elements.saleEmojiRight?.value || '✨';
+
+            // Validate discount percentage
+            if (isOnSale && saleDiscountPercentage !== null) {
+                if (saleDiscountPercentage < 0 || saleDiscountPercentage > 100) {
+                    this.showError('Discount percentage must be between 0 and 100');
+                    return;
+                }
+            }
+
+            // Prepare update data
+            const updateData = {
+                is_on_sale: isOnSale,
+                sale_start_date: saleStartDate ? new Date(saleStartDate).toISOString() : null,
+                sale_end_date: saleEndDate ? new Date(saleEndDate).toISOString() : null,
+                sale_discount_percentage: isOnSale ? saleDiscountPercentage : null,
+                sale_description: isOnSale ? saleDescription : null,
+                sale_emoji_left: isOnSale ? saleEmojiLeft : '✨',
+                sale_emoji_right: isOnSale ? saleEmojiRight : '✨'
+            };
+
+            // If removing sale, clear sale-related fields
+            if (!isOnSale) {
+                updateData.sale_start_date = null;
+                updateData.sale_end_date = null;
+                updateData.sale_description = null;
+                updateData.sale_discount_percentage = null;
+                updateData.sale_emoji_left = '✨';
+                updateData.sale_emoji_right = '✨';
+            }
+
+            // Calculate sale pricing if discount percentage is provided
+            let salePricing = null;
+            if (isOnSale && saleDiscountPercentage !== null && this.currentEditingProduct) {
+                salePricing = this.calculateSalePricing(this.currentEditingProduct, saleDiscountPercentage);
+                updateData.sale_pricing = salePricing;
+            } else if (!isOnSale) {
+                updateData.sale_pricing = null;
+            }
+
+            // Update product in database
+            const { error: updateError } = await window.supabase
+                .from('products')
+                .update(updateData)
+                .eq('id', this.currentEditingProduct.id);
+
+            if (updateError) {
+                throw updateError;
+            }
+
+            // If product has Stripe integration, update Stripe sale prices
+            // Skip Stripe update for test products (they have fake Stripe IDs)
+            if (this.currentEditingProduct.stripe_product_id && !this.isTestProduct(this.currentEditingProduct)) {
+                await this.updateStripeSalePrices(
+                    this.currentEditingProduct.id,
+                    isOnSale,
+                    salePricing,
+                    saleDiscountPercentage
+                );
+            } else if (this.isTestProduct(this.currentEditingProduct)) {
+                window.logger?.log('ℹ️ Skipping Stripe update for test product');
+            }
+
+            // Reload products to reflect changes
+            await this.loadProducts();
+
+            // Close modal
+            this.closeSaleModal();
+
+            // Show success message
+            this.showSuccess('Sale configuration saved successfully');
+
+        } catch (error) {
+            window.logger?.error('❌ Failed to save sale:', error);
+            this.showError('Failed to save sale configuration: ' + (error.message || error));
+        }
+    }
+
+    /**
+     * Calculate sale pricing based on discount percentage
+     * @param {Object} product - Product object
+     * @param {number} discountPercentage - Discount percentage (0-100)
+     * @returns {Object} Sale pricing object
+     */
+    calculateSalePricing(product, discountPercentage) {
+        const salePricing = {};
+        const discountMultiplier = 1 - (discountPercentage / 100);
+
+        // Handle different pricing types
+        if (product.pricing_type === 'one_time' && product.price_amount) {
+            // For one-time products, calculate sale price per currency
+            // We need to get the pricing from the product (might need to query for full pricing data)
+            // For now, use the price_amount as base
+            salePricing[product.price_currency || 'USD'] = Math.round(product.price_amount * discountMultiplier * 100) / 100;
+        } else if (product.pricing_type === 'subscription') {
+            // For subscriptions, we need monthly and yearly prices
+            // This would need to be calculated from the actual pricing structure
+            // For now, return empty object - will be handled by Stripe update
+            salePricing = {};
+        }
+
+        return salePricing;
+    }
+
+    /**
+     * Update Stripe sale prices
+     * @param {string} productId - Product ID
+     * @param {boolean} isOnSale - Whether product is on sale
+     * @param {Object} salePricing - Sale pricing object
+     * @param {number} discountPercentage - Discount percentage
+     */
+    async updateStripeSalePrices(productId, isOnSale, salePricing, discountPercentage) {
+        try {
+            const product = this.products.find(p => p.id === productId);
+            if (!product || !product.stripe_product_id) {
+                return;
+            }
+
+            // Get current session
+            const { data: { session } } = await window.supabase.auth.getSession();
+            if (!session) {
+                window.logger?.warn('⚠️ No session available for Stripe update');
+                return;
+            }
+
+            // Prepare request body
+            const body = {
+                productId: product.stripe_product_id,
+                is_on_sale: isOnSale,
+                sale_discount_percentage: discountPercentage,
+                pricing_type: product.pricing_type,
+                // Pass existing price IDs
+                existing_price_id: product.stripe_price_id,
+                existing_monthly_price_id: product.stripe_price_monthly_id,
+                existing_yearly_price_id: product.stripe_price_yearly_id,
+                // Pass existing sale price IDs
+                old_sale_price_id: product.stripe_price_sale_id,
+                old_sale_monthly_price_id: product.stripe_price_monthly_sale_id,
+                old_sale_yearly_price_id: product.stripe_price_yearly_sale_id
+            };
+
+            // Get pricing data for calculation
+            if (product.pricing_type === 'one_time' && product.price_amount) {
+                body.pricing = {
+                    [product.price_currency || 'USD']: product.price_amount
+                };
+            } else if (product.pricing_type === 'subscription') {
+                // For subscriptions, we'd need the full pricing structure
+                // This might need to be fetched separately or stored differently
+                body.pricing = salePricing || {};
+            }
+
+            // Call update edge function
+            const { data, error } = await window.supabase.functions.invoke('update-stripe-product', {
+                body: body,
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            // Update product with new sale price IDs
+            if (data && (data.sale_price_id || data.sale_monthly_price_id || data.sale_yearly_price_id)) {
+                const updateData = {};
+                if (data.sale_price_id) updateData.stripe_price_sale_id = data.sale_price_id;
+                if (data.sale_monthly_price_id) updateData.stripe_price_monthly_sale_id = data.sale_monthly_price_id;
+                if (data.sale_yearly_price_id) updateData.stripe_price_yearly_sale_id = data.sale_yearly_price_id;
+
+                await window.supabase
+                    .from('products')
+                    .update(updateData)
+                    .eq('id', productId);
+            }
+
+            window.logger?.log('✅ Stripe sale prices updated successfully');
+
+        } catch (error) {
+            window.logger?.error('❌ Failed to update Stripe sale prices:', error);
+            // Don't throw - allow the sale to be saved even if Stripe update fails
+        }
+    }
+
+    /**
+     * Setup emoji pickers
+     */
+    setupEmojiPickers() {
+        const leftPickerBtn = document.getElementById('emoji-picker-left-btn');
+        const rightPickerBtn = document.getElementById('emoji-picker-right-btn');
+        const leftPicker = document.getElementById('emoji-picker-left');
+        const rightPicker = document.getElementById('emoji-picker-right');
+        const leftInput = document.getElementById('sale-emoji-left');
+        const rightInput = document.getElementById('sale-emoji-right');
+
+        // Left emoji picker
+        if (leftPickerBtn && leftPicker && leftInput) {
+            leftPickerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Close right picker if open
+                if (rightPicker) rightPicker.style.display = 'none';
+                // Toggle left picker
+                const isVisible = leftPicker.style.display === 'block';
+                leftPicker.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // Handle emoji selection
+            leftPicker.querySelectorAll('.product-management__emoji-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const emoji = btn.getAttribute('data-emoji');
+                    leftInput.value = emoji;
+                    leftPicker.style.display = 'none';
+                });
+            });
+        }
+
+        // Right emoji picker
+        if (rightPickerBtn && rightPicker && rightInput) {
+            rightPickerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Close left picker if open
+                if (leftPicker) leftPicker.style.display = 'none';
+                // Toggle right picker
+                const isVisible = rightPicker.style.display === 'block';
+                rightPicker.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // Handle emoji selection
+            rightPicker.querySelectorAll('.product-management__emoji-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const emoji = btn.getAttribute('data-emoji');
+                    rightInput.value = emoji;
+                    rightPicker.style.display = 'none';
+                });
+            });
+        }
+
+        // Close pickers when clicking outside
+        document.addEventListener('click', (e) => {
+            if (leftPicker && !leftPicker.contains(e.target) && leftPickerBtn && !leftPickerBtn.contains(e.target)) {
+                leftPicker.style.display = 'none';
+            }
+            if (rightPicker && !rightPicker.contains(e.target) && rightPickerBtn && !rightPickerBtn.contains(e.target)) {
+                rightPicker.style.display = 'none';
             }
         });
     }

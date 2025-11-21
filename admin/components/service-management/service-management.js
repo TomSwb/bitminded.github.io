@@ -90,7 +90,16 @@ class ServiceManagement {
             reducedFarePricingEditor: document.getElementById('reduced-fare-pricing-editor'),
             saleDiscountPercentage: document.getElementById('sale-discount-percentage'),
             salePricingPreview: document.getElementById('sale-pricing-preview'),
-            salePricingPreviewContent: document.getElementById('sale-pricing-preview-content')
+            salePricingPreviewContent: document.getElementById('sale-pricing-preview-content'),
+            // Stripe elements
+            createStripeBtn: document.getElementById('create-stripe-service-btn'),
+            stripeStatusSection: document.getElementById('stripe-status-section'),
+            stripeStatus: document.getElementById('stripe-status'),
+            stripeActions: document.getElementById('stripe-actions'),
+            viewStripeLink: document.getElementById('view-stripe-link'),
+            stripeCreateSection: document.getElementById('stripe-create-section'),
+            deleteStripeBtn: document.getElementById('delete-stripe-service-btn'),
+            updateStripeBtn: document.getElementById('update-stripe-service-btn')
         };
     }
 
@@ -224,7 +233,24 @@ class ServiceManagement {
 
         if (this.elements.modalSave) {
             this.elements.modalSave.addEventListener('click', () => {
-                this.saveService();
+                this.saveService({ skipModalClose: true });
+            });
+        }
+
+        // Stripe product creation
+        if (this.elements.createStripeBtn) {
+            this.elements.createStripeBtn.addEventListener('click', () => {
+                this.handleCreateStripeProduct();
+            });
+        }
+        if (this.elements.deleteStripeBtn) {
+            this.elements.deleteStripeBtn.addEventListener('click', () => {
+                this.handleDeleteStripeProduct();
+            });
+        }
+        if (this.elements.updateStripeBtn) {
+            this.elements.updateStripeBtn.addEventListener('click', () => {
+                this.handleUpdateStripeProduct();
             });
         }
 
@@ -983,6 +1009,8 @@ class ServiceManagement {
             'price-range-min': service.price_range_min || '',
             'price-range-max': service.price_range_max || '',
             'hourly-rate': service.hourly_rate || '',
+            'trial-days': service.trial_days || 0,
+            'trial-requires-payment': service.trial_requires_payment || false,
             'duration': service.duration || '',
             'additional-costs': service.additional_costs || '',
             'has-reduced-fare': service.has_reduced_fare,
@@ -996,7 +1024,12 @@ class ServiceManagement {
             'sale-discount-percentage': service.sale_discount_percentage || '',
             'stripe-product-id': service.stripe_product_id || '',
             'stripe-price-id': service.stripe_price_id || '',
-            'stripe-price-reduced-id': service.stripe_price_reduced_id || ''
+            'stripe-price-monthly-id': service.stripe_price_monthly_id || '',
+            'stripe-price-yearly-id': service.stripe_price_yearly_id || '',
+            'stripe-price-reduced-id': service.stripe_price_reduced_id || '',
+            'stripe-price-sale-id': service.stripe_price_sale_id || '',
+            'stripe-price-monthly-sale-id': service.stripe_price_monthly_sale_id || '',
+            'stripe-price-yearly-sale-id': service.stripe_price_yearly_sale_id || ''
         };
 
         Object.entries(fields).forEach(([id, value]) => {
@@ -1014,6 +1047,44 @@ class ServiceManagement {
         this.handlePricingTypeChange(service.pricing_type);
         this.toggleReducedFare(service.has_reduced_fare);
         this.toggleSale(service.is_on_sale);
+
+        // Show/hide Stripe create button based on whether product exists
+        if (this.elements.createStripeBtn && this.elements.stripeCreateSection) {
+            if (service.stripe_product_id) {
+                this.elements.stripeCreateSection.style.display = 'none';
+                if (this.elements.stripeStatusSection) {
+                    this.elements.stripeStatusSection.style.display = 'block';
+                    this.updateStripeStatus({
+                        productId: service.stripe_product_id,
+                        priceId: service.stripe_price_id,
+                        monthlyPriceId: service.stripe_price_monthly_id,
+                        yearlyPriceId: service.stripe_price_yearly_id,
+                        reducedPriceId: service.stripe_price_reduced_id
+                    });
+                }
+                // Show action buttons
+                if (this.elements.stripeActions) {
+                    this.elements.stripeActions.style.display = 'flex';
+                }
+            } else {
+                this.elements.stripeCreateSection.style.display = 'block';
+                if (this.elements.stripeStatusSection) {
+                    this.elements.stripeStatusSection.style.display = 'none';
+                }
+                // Hide action buttons
+                if (this.elements.stripeActions) {
+                    this.elements.stripeActions.style.display = 'none';
+                }
+            }
+            // Reset button state
+            this.elements.createStripeBtn.disabled = false;
+            const btnText = document.getElementById('create-stripe-btn-text');
+            if (btnText) {
+                btnText.textContent = 'Create Stripe Product';
+            } else {
+                this.elements.createStripeBtn.innerHTML = '<span class="btn-icon">💳</span><span id="create-stripe-btn-text">Create Stripe Product</span>';
+            }
+        }
     }
 
     /**
@@ -1310,15 +1381,43 @@ class ServiceManagement {
     /**
      * Save service
      */
-    async saveService() {
+    async saveService(options = {}) {
+        const { skipModalClose = false, skipReload = false, skipSuccessMessage = false } = options;
+        
         try {
             if (!this.elements.form || !this.elements.form.checkValidity()) {
                 this.elements.form?.reportValidity();
-                return;
+                return { success: false, error: 'Form validation failed' };
             }
 
             const formData = new FormData(this.elements.form);
             const pricing = this.getPricingData();
+            const isOnSale = formData.get('is_on_sale') === 'on';
+            const discountPercentage = isOnSale ? this.getSaleDiscountPercentage() : null;
+            
+            // Calculate sale pricing from discount percentage if on sale
+            let salePricing = null;
+            if (isOnSale && discountPercentage && discountPercentage > 0) {
+                salePricing = {};
+                this.currencies.forEach(currency => {
+                    const currencyPricing = pricing[currency] || {};
+                    const saleCurrencyPricing = {};
+                    
+                    if (currencyPricing.amount !== undefined) {
+                        saleCurrencyPricing.amount = this.calculateSalePrice(currencyPricing.amount, discountPercentage);
+                    }
+                    if (currencyPricing.monthly !== undefined) {
+                        saleCurrencyPricing.monthly = this.calculateSalePrice(currencyPricing.monthly, discountPercentage);
+                    }
+                    if (currencyPricing.yearly !== undefined) {
+                        saleCurrencyPricing.yearly = this.calculateSalePrice(currencyPricing.yearly, discountPercentage);
+                    }
+                    
+                    if (Object.keys(saleCurrencyPricing).length > 0) {
+                        salePricing[currency] = saleCurrencyPricing;
+                    }
+                });
+            }
             
             // Merge reduced fare pricing into main pricing
             if (formData.get('has_reduced_fare') === 'on') {
@@ -1346,6 +1445,8 @@ class ServiceManagement {
                 price_range_min: formData.get('price_range_min') ? parseFloat(formData.get('price_range_min')) : null,
                 price_range_max: formData.get('price_range_max') ? parseFloat(formData.get('price_range_max')) : null,
                 hourly_rate: formData.get('hourly_rate') ? parseFloat(formData.get('hourly_rate')) : null,
+                trial_days: formData.get('pricing_type') === 'subscription' ? (parseInt(formData.get('trial_days')) || 0) : null,
+                trial_requires_payment: formData.get('pricing_type') === 'subscription' ? (formData.get('trial_requires_payment') === 'on') : false,
                 duration: formData.get('duration') || null,
                 additional_costs: formData.get('additional_costs') || null,
                 has_reduced_fare: formData.get('has_reduced_fare') === 'on',
@@ -1356,11 +1457,13 @@ class ServiceManagement {
                 sale_description: formData.get('sale_description') || null,
                 sale_emoji_left: formData.get('sale_emoji_left') || '✨',
                 sale_emoji_right: formData.get('sale_emoji_right') || '✨',
-                sale_discount_percentage: formData.get('is_on_sale') === 'on' ? this.getSaleDiscountPercentage() : null,
-                sale_pricing: null, // Will be calculated automatically from percentage
-                stripe_product_id: formData.get('stripe_product_id') || null,
-                stripe_price_id: formData.get('stripe_price_id') || null,
-                stripe_price_reduced_id: formData.get('stripe_price_reduced_id') || null
+                sale_discount_percentage: isOnSale ? discountPercentage : null,
+                sale_pricing: salePricing, // Calculated from discount percentage
+                stripe_product_id: formData.get('stripe_product_id') || this.currentEditingService?.stripe_product_id || null,
+                stripe_price_id: formData.get('stripe_price_id') || this.currentEditingService?.stripe_price_id || null,
+                stripe_price_monthly_id: formData.get('stripe_price_monthly_id') || this.currentEditingService?.stripe_price_monthly_id || null,
+                stripe_price_yearly_id: formData.get('stripe_price_yearly_id') || this.currentEditingService?.stripe_price_yearly_id || null,
+                stripe_price_reduced_id: formData.get('stripe_price_reduced_id') || this.currentEditingService?.stripe_price_reduced_id || null
             };
 
             if (!window.supabase) {
@@ -1399,14 +1502,25 @@ class ServiceManagement {
                 );
             }
 
-            await this.loadServices();
-            this.applyFilters(); // Reapply filters to preserve filter state
-            this.closeModal();
-            this.showSuccess(this.currentEditingService ? 'Service updated successfully' : 'Service created successfully');
+            if (!skipReload) {
+                await this.loadServices();
+                this.applyFilters(); // Reapply filters to preserve filter state
+            }
+            
+            if (!skipModalClose) {
+                this.closeModal();
+            }
+            
+            if (!skipSuccessMessage) {
+                this.showSuccess(this.currentEditingService ? 'Service updated successfully' : 'Service created successfully');
+            }
+
+            return { success: true, data: result };
 
         } catch (error) {
             window.logger?.error('❌ Failed to save service:', error);
             this.showError('Failed to save service: ' + error.message);
+            return { success: false, error: error.message };
         }
     }
 
@@ -1456,9 +1570,11 @@ class ServiceManagement {
     handlePricingTypeChange(pricingType, pricingData = null) {
         const rangeGroup = document.getElementById('range-pricing-group');
         const hourlyGroup = document.getElementById('hourly-pricing-group');
+        const trialGroup = document.getElementById('trial-period-group');
 
         if (rangeGroup) rangeGroup.style.display = pricingType === 'range' ? 'block' : 'none';
         if (hourlyGroup) hourlyGroup.style.display = pricingType === 'hourly' ? 'block' : 'none';
+        if (trialGroup) trialGroup.style.display = pricingType === 'subscription' ? 'block' : 'none';
         
         // Re-initialize currency editor with current pricing data to switch between single/multiple inputs
         if (this.elements.currencyPricingEditor) {
@@ -1497,6 +1613,7 @@ class ServiceManagement {
         const datesGroup = document.getElementById('sale-dates-group');
         const descriptionGroup = document.getElementById('sale-description-group');
         const pricingGroup = document.getElementById('sale-pricing-group');
+        const salePricesGroup = document.getElementById('stripe-sale-prices-group');
 
         if (datesGroup) datesGroup.style.display = enabled ? 'block' : 'none';
         if (descriptionGroup) descriptionGroup.style.display = enabled ? 'block' : 'none';
@@ -1878,6 +1995,598 @@ class ServiceManagement {
     }
 
     /**
+     * Handle Stripe product creation
+     */
+    async handleCreateStripeProduct() {
+        if (!this.currentEditingService) {
+            this.showError('Please save the service first before creating Stripe product');
+            return;
+        }
+
+        // Check if service pricing type is compatible with Stripe
+        const pricingType = this.currentEditingService.pricing_type || 
+                           document.getElementById('pricing-type')?.value;
+        
+        // Only fixed and subscription pricing can use Stripe (range/hourly/variable need custom quotes)
+        if (pricingType !== 'fixed' && pricingType !== 'subscription') {
+            const pricingTypeLabels = {
+                'range': 'Range',
+                'hourly': 'Hourly',
+                'variable': 'Variable'
+            };
+            const label = pricingTypeLabels[pricingType] || pricingType;
+            this.showError(`Stripe integration is only available for fixed or subscription pricing services. This service uses ${label} pricing, which requires custom quotes.`);
+            return;
+        }
+
+        try {
+            // Get service data from form
+            const formData = new FormData(this.elements.form);
+            
+            // Get pricing - try from currentEditingService first, then form
+            let pricing = this.currentEditingService?.pricing || {};
+            
+            // If pricing is empty or invalid, try to get it from the form
+            if (!pricing || typeof pricing !== 'object' || Object.keys(pricing).length === 0) {
+                // Try to parse pricing from form if available
+                const pricingInput = document.getElementById('pricing-editor');
+                if (pricingInput && pricingInput.value) {
+                    try {
+                        pricing = JSON.parse(pricingInput.value);
+                    } catch (e) {
+                        window.logger?.warn('Could not parse pricing from form');
+                    }
+                }
+            }
+            
+            const pricingType = formData.get('pricing_type') || 'fixed';
+            
+            // Use subscription-specific function for subscription products
+            const isSubscription = pricingType === 'subscription';
+            const functionName = isSubscription 
+                ? 'create-stripe-subscription-product' 
+                : 'create-stripe-service-product';
+            
+            const serviceData = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                short_description: formData.get('short_description'),
+                pricing: pricing,
+                has_reduced_fare: formData.get('has_reduced_fare') === 'on',
+                pricing_type: pricingType,
+                // Subscription-specific fields
+                ...(isSubscription && {
+                    trial_days: parseInt(formData.get('trial_days')) || 0,
+                    trial_requires_payment: formData.get('trial_requires_payment') === 'on',
+                    entity_type: 'service'
+                })
+            };
+
+            // Validate pricing exists
+            if (!serviceData.pricing || typeof serviceData.pricing !== 'object' || Object.keys(serviceData.pricing).length === 0) {
+                this.showError('Service must have pricing configured before creating Stripe product. Please save the service with pricing first.');
+                // Reset button
+                this.elements.createStripeBtn.disabled = false;
+                this.elements.createStripeBtn.innerHTML = '<span class="btn-icon">💳</span><span class="translatable-content" data-translation-key="Create Stripe Product" data-original-text="Create Stripe Product">Create Stripe Product</span>';
+                this.updateTranslations();
+                return;
+            }
+            
+            // Log the data being sent for debugging
+            window.logger?.log('📤 Sending to Stripe:', { 
+                name: serviceData.name, 
+                pricing_type: serviceData.pricing_type,
+                pricing_keys: Object.keys(serviceData.pricing),
+                has_reduced_fare: serviceData.has_reduced_fare
+            });
+
+            // Disable button and show loading
+            this.elements.createStripeBtn.disabled = true;
+            let btnText = document.getElementById('create-stripe-btn-text');
+            if (btnText) {
+                btnText.textContent = 'Creating...';
+            } else {
+                this.elements.createStripeBtn.innerHTML = '<span class="btn-icon">⏳</span><span id="create-stripe-btn-text">Creating...</span>';
+                btnText = document.getElementById('create-stripe-btn-text');
+            }
+
+            // Get current session to ensure we have proper authentication
+            // Always refresh the session to ensure we have a valid, non-expired token
+            let session;
+            try {
+                // First try to get current session
+                const { data: { session: currentSession }, error: sessionError } = await window.supabase.auth.getSession();
+                
+                // If we have a session, try to refresh it to ensure it's still valid
+                if (currentSession) {
+                    const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.refreshSession();
+                    if (!refreshError && refreshedSession) {
+                        session = refreshedSession;
+                    } else {
+                        // If refresh fails, use current session (it might still be valid)
+                        session = currentSession;
+                    }
+                } else if (sessionError) {
+                    // No session at all - user needs to log in
+                    throw new Error('Not authenticated. Please log in again.');
+                } else {
+                    throw new Error('No active session. Please log in again.');
+                }
+            } catch (authError) {
+                window.logger?.error('❌ Authentication error:', authError);
+                throw new Error('Authentication failed. Please log in again.');
+            }
+
+            if (!session || !session.access_token) {
+                throw new Error('Invalid session. Please log in again.');
+            }
+
+            // Call edge function to create Stripe product (subscription or regular)
+            const { data, error } = await window.supabase.functions.invoke(functionName, {
+                body: serviceData,
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+
+            if (error) throw error;
+
+            // Update form fields with Stripe IDs
+            if (data.productId) {
+                const productIdField = document.getElementById('stripe-product-id');
+                if (productIdField) productIdField.value = data.productId;
+            }
+            if (data.priceId) {
+                const priceIdField = document.getElementById('stripe-price-id');
+                if (priceIdField) priceIdField.value = data.priceId;
+            }
+            if (data.monthlyPriceId) {
+                const monthlyPriceIdField = document.getElementById('stripe-price-monthly-id');
+                if (monthlyPriceIdField) monthlyPriceIdField.value = data.monthlyPriceId;
+            }
+            if (data.yearlyPriceId) {
+                const yearlyPriceIdField = document.getElementById('stripe-price-yearly-id');
+                if (yearlyPriceIdField) yearlyPriceIdField.value = data.yearlyPriceId;
+            }
+            if (data.reducedPriceId) {
+                const reducedPriceIdField = document.getElementById('stripe-price-reduced-id');
+                if (reducedPriceIdField) reducedPriceIdField.value = data.reducedPriceId;
+            }
+
+            // Update current editing service
+            this.currentEditingService.stripe_product_id = data.productId;
+            this.currentEditingService.stripe_price_id = data.priceId; // Backward compatibility
+            this.currentEditingService.stripe_price_monthly_id = data.monthlyPriceId || null;
+            this.currentEditingService.stripe_price_yearly_id = data.yearlyPriceId || null;
+            this.currentEditingService.stripe_price_reduced_id = data.reducedPriceId || null;
+
+            // Save the service to persist Stripe IDs to database
+            try {
+                const saveResult = await this.saveService({ 
+                    skipModalClose: true, 
+                    skipReload: true, 
+                    skipSuccessMessage: true 
+                });
+                if (!saveResult || !saveResult.success) {
+                    window.logger?.warn('⚠️ Stripe product created but failed to save to database:', saveResult?.error);
+                    this.showError('Stripe product created, but failed to save to database. Please save the service manually.');
+                } else {
+                    window.logger?.log('✅ Service saved with Stripe IDs');
+                    // Update currentEditingService with the saved data
+                    if (saveResult.data) {
+                        this.currentEditingService = saveResult.data;
+                    }
+                }
+            } catch (saveError) {
+                window.logger?.warn('⚠️ Could not auto-save service after Stripe creation:', saveError);
+            }
+
+            // Show status
+            this.updateStripeStatus(data);
+
+            // Hide create button, show status
+            if (this.elements.stripeCreateSection) {
+                this.elements.stripeCreateSection.style.display = 'none';
+            }
+            if (this.elements.stripeStatusSection) {
+                this.elements.stripeStatusSection.style.display = 'block';
+            }
+            if (this.elements.stripeActions) {
+                this.elements.stripeActions.style.display = 'flex';
+            }
+
+            // Reset button state
+            this.elements.createStripeBtn.disabled = false;
+            btnText = document.getElementById('create-stripe-btn-text');
+            if (btnText) {
+                btnText.textContent = 'Create Stripe Product';
+            } else {
+                this.elements.createStripeBtn.innerHTML = '<span class="btn-icon">💳</span><span id="create-stripe-btn-text">Create Stripe Product</span>';
+            }
+
+            this.showSuccess('Stripe product created successfully');
+
+        } catch (error) {
+            window.logger?.error('❌ Error creating Stripe product:', error);
+            this.showError('Failed to create Stripe product: ' + (error.message || error));
+            this.elements.createStripeBtn.disabled = false;
+            const btnText = document.getElementById('create-stripe-btn-text');
+            if (btnText) {
+                btnText.textContent = 'Create Stripe Product';
+            } else {
+                this.elements.createStripeBtn.innerHTML = '<span class="btn-icon">💳</span><span id="create-stripe-btn-text">Create Stripe Product</span>';
+            }
+        }
+    }
+
+    /**
+     * Handle delete Stripe product
+     */
+    async handleDeleteStripeProduct() {
+        if (!this.currentEditingService || !this.currentEditingService.stripe_product_id) {
+            this.showError('No Stripe product ID found');
+            return;
+        }
+
+        const confirmed = confirm('Are you sure you want to archive this Stripe product? This will archive the product in Stripe (products cannot be permanently deleted). The Stripe IDs will be removed from this service.');
+        if (!confirmed) return;
+
+        try {
+            // Get current session and refresh to ensure we have a valid token
+            let session;
+            try {
+                // First try to get current session
+                const { data: { session: currentSession }, error: sessionError } = await window.supabase.auth.getSession();
+                
+                // If we have a session, try to refresh it to ensure it's still valid
+                if (currentSession) {
+                    const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.refreshSession();
+                    if (!refreshError && refreshedSession) {
+                        session = refreshedSession;
+                    } else {
+                        // If refresh fails, use current session (it might still be valid)
+                        session = currentSession;
+                    }
+                } else if (sessionError) {
+                    // No session at all - user needs to log in
+                    throw new Error('Not authenticated. Please log in again.');
+                } else {
+                    throw new Error('No active session. Please log in again.');
+                }
+            } catch (authError) {
+                window.logger?.error('❌ Authentication error:', authError);
+                throw new Error('Authentication failed. Please log in again.');
+            }
+
+            if (!session || !session.access_token) {
+                throw new Error('Invalid session. Please log in again.');
+            }
+
+            // Call edge function to archive the product
+            const { data, error } = await window.supabase.functions.invoke('delete-stripe-product', {
+                body: { productId: this.currentEditingService.stripe_product_id },
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+
+            if (error) throw error;
+
+            // Clear Stripe IDs from current editing service
+            this.currentEditingService.stripe_product_id = null;
+            this.currentEditingService.stripe_price_id = null;
+            this.currentEditingService.stripe_price_monthly_id = null;
+            this.currentEditingService.stripe_price_yearly_id = null;
+            this.currentEditingService.stripe_price_reduced_id = null;
+
+            // Clear form fields
+            const productIdField = document.getElementById('stripe-product-id');
+            if (productIdField) productIdField.value = '';
+            const priceIdField = document.getElementById('stripe-price-id');
+            if (priceIdField) priceIdField.value = '';
+            const monthlyPriceIdField = document.getElementById('stripe-price-monthly-id');
+            if (monthlyPriceIdField) monthlyPriceIdField.value = '';
+            const yearlyPriceIdField = document.getElementById('stripe-price-yearly-id');
+            if (yearlyPriceIdField) yearlyPriceIdField.value = '';
+            const reducedPriceIdField = document.getElementById('stripe-price-reduced-id');
+            if (reducedPriceIdField) reducedPriceIdField.value = '';
+
+            // Save the service to persist the removal
+            try {
+                const saveResult = await this.saveService();
+                if (!saveResult.success) {
+                    window.logger?.warn('⚠️ Stripe product archived but failed to update database:', saveResult.error);
+                    this.showError('Stripe product archived, but failed to update database. Please save the service manually.');
+                } else {
+                    window.logger?.log('✅ Service updated after Stripe deletion');
+                }
+            } catch (saveError) {
+                window.logger?.warn('⚠️ Could not auto-save service after Stripe deletion:', saveError);
+            }
+
+            // Update UI
+            if (this.elements.stripeCreateSection) {
+                this.elements.stripeCreateSection.style.display = 'block';
+            }
+            if (this.elements.stripeStatusSection) {
+                this.elements.stripeStatusSection.style.display = 'none';
+            }
+            if (this.elements.stripeActions) {
+                this.elements.stripeActions.style.display = 'none';
+            }
+
+            this.showSuccess('Stripe product archived successfully');
+        } catch (error) {
+            window.logger?.error('❌ Error deleting Stripe product:', error);
+            this.showError('Failed to archive Stripe product: ' + (error.message || error));
+        }
+    }
+
+    /**
+     * Handle update Stripe product (update product info and create new prices if needed)
+     */
+    async handleUpdateStripeProduct() {
+        if (!this.currentEditingService || !this.currentEditingService.stripe_product_id) {
+            this.showError('No Stripe product ID found. Please create a Stripe product first.');
+            return;
+        }
+
+        if (!this.currentEditingService) {
+            this.showError('Please save the service first before updating Stripe product');
+            return;
+        }
+
+        try {
+            // Get service data from form
+            const formData = new FormData(this.elements.form);
+            
+            // Get pricing - try from currentEditingService first, then form
+            let pricing = this.currentEditingService?.pricing || {};
+            
+            // If pricing is empty or invalid, try to get it from the form
+            if (!pricing || typeof pricing !== 'object' || Object.keys(pricing).length === 0) {
+                const pricingInput = document.getElementById('pricing-editor');
+                if (pricingInput && pricingInput.value) {
+                    try {
+                        pricing = JSON.parse(pricingInput.value);
+                    } catch (e) {
+                        window.logger?.warn('Could not parse pricing from form');
+                    }
+                }
+            }
+            
+            const pricingType = formData.get('pricing_type') || 'fixed';
+            const isOnSale = formData.get('is_on_sale') === 'on';
+            const discountPercentage = isOnSale ? this.getSaleDiscountPercentage() : null;
+            
+            // Calculate sale pricing from discount percentage if on sale
+            let salePricing = null;
+            if (isOnSale && discountPercentage && discountPercentage > 0) {
+                salePricing = {};
+                this.currencies.forEach(currency => {
+                    const currencyPricing = pricing[currency] || {};
+                    const saleCurrencyPricing = {};
+                    
+                    if (currencyPricing.amount !== undefined) {
+                        saleCurrencyPricing.amount = this.calculateSalePrice(currencyPricing.amount, discountPercentage);
+                    }
+                    if (currencyPricing.monthly !== undefined) {
+                        saleCurrencyPricing.monthly = this.calculateSalePrice(currencyPricing.monthly, discountPercentage);
+                    }
+                    if (currencyPricing.yearly !== undefined) {
+                        saleCurrencyPricing.yearly = this.calculateSalePrice(currencyPricing.yearly, discountPercentage);
+                    }
+                    
+                    if (Object.keys(saleCurrencyPricing).length > 0) {
+                        salePricing[currency] = saleCurrencyPricing;
+                    }
+                });
+            }
+            
+            // Detect if only sales changed (optimization to avoid recreating regular prices)
+            // Compare current form values with saved service values
+            const savedPricing = this.currentEditingService.pricing || {};
+            const savedIsOnSale = this.currentEditingService.is_on_sale || false;
+            const savedDiscountPercentage = this.currentEditingService.sale_discount_percentage || null;
+            
+            // Check if regular pricing changed
+            const pricingChanged = JSON.stringify(pricing) !== JSON.stringify(savedPricing);
+            const pricingTypeChanged = pricingType !== (this.currentEditingService.pricing_type || 'fixed');
+            const reducedFareChanged = (formData.get('has_reduced_fare') === 'on') !== (this.currentEditingService.has_reduced_fare || false);
+            
+            // Check if only sales changed
+            const onlySalesChanged = !pricingChanged && 
+                                    !pricingTypeChanged && 
+                                    !reducedFareChanged &&
+                                    (isOnSale !== savedIsOnSale || 
+                                     (isOnSale && discountPercentage !== savedDiscountPercentage));
+            
+            const serviceData = {
+                productId: this.currentEditingService.stripe_product_id,
+                name: formData.get('name'),
+                description: formData.get('description'),
+                short_description: formData.get('short_description'),
+                pricing: pricing,
+                has_reduced_fare: formData.get('has_reduced_fare') === 'on',
+                pricing_type: pricingType,
+                trial_days: pricingType === 'subscription' ? (parseInt(formData.get('trial_days')) || 0) : 0,
+                trial_requires_payment: pricingType === 'subscription' ? (formData.get('trial_requires_payment') === 'on') : false,
+                is_on_sale: isOnSale,
+                sale_pricing: salePricing,
+                only_sales_changed: onlySalesChanged, // Optimization flag
+                // Pass existing regular price IDs (to return when only sales changed)
+                existing_price_id: this.currentEditingService.stripe_price_id || null,
+                existing_monthly_price_id: this.currentEditingService.stripe_price_monthly_id || null,
+                existing_yearly_price_id: this.currentEditingService.stripe_price_yearly_id || null,
+                // Pass old price IDs to deactivate
+                old_price_id: this.currentEditingService.stripe_price_id || null,
+                old_monthly_price_id: this.currentEditingService.stripe_price_monthly_id || null,
+                old_yearly_price_id: this.currentEditingService.stripe_price_yearly_id || null,
+                old_reduced_price_id: this.currentEditingService.stripe_price_reduced_id || null,
+                old_sale_price_id: this.currentEditingService.stripe_price_sale_id || null,
+                old_sale_monthly_price_id: this.currentEditingService.stripe_price_monthly_sale_id || null,
+                old_sale_yearly_price_id: this.currentEditingService.stripe_price_yearly_sale_id || null
+            };
+
+            // Validate pricing exists
+            if (!serviceData.pricing || typeof serviceData.pricing !== 'object' || Object.keys(serviceData.pricing).length === 0) {
+                this.showError('Service must have pricing configured before updating Stripe product.');
+                return;
+            }
+
+            // Disable button and show loading
+            this.elements.updateStripeBtn.disabled = true;
+            const btnText = this.elements.updateStripeBtn.querySelector('span:last-child');
+            if (btnText) {
+                btnText.textContent = 'Updating...';
+            }
+
+            // Get current session and refresh to ensure we have a valid token
+            let session;
+            try {
+                const { data: { session: currentSession }, error: sessionError } = await window.supabase.auth.getSession();
+                
+                if (currentSession) {
+                    const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.refreshSession();
+                    if (!refreshError && refreshedSession) {
+                        session = refreshedSession;
+                    } else {
+                        session = currentSession;
+                    }
+                } else if (sessionError) {
+                    throw new Error('Not authenticated. Please log in again.');
+                } else {
+                    throw new Error('No active session. Please log in again.');
+                }
+            } catch (authError) {
+                window.logger?.error('❌ Authentication error:', authError);
+                throw new Error('Authentication failed. Please log in again.');
+            }
+
+            if (!session || !session.access_token) {
+                throw new Error('Invalid session. Please log in again.');
+            }
+
+            // Call edge function to update Stripe product
+            const { data, error } = await window.supabase.functions.invoke('update-stripe-service-product', {
+                body: serviceData,
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+
+            if (error) throw error;
+
+            // Update form fields with new Stripe IDs (if new prices were created)
+            if (data.monthlyPriceId) {
+                const monthlyPriceIdField = document.getElementById('stripe-price-monthly-id');
+                if (monthlyPriceIdField) monthlyPriceIdField.value = data.monthlyPriceId;
+                this.currentEditingService.stripe_price_monthly_id = data.monthlyPriceId;
+            }
+            if (data.yearlyPriceId) {
+                const yearlyPriceIdField = document.getElementById('stripe-price-yearly-id');
+                if (yearlyPriceIdField) yearlyPriceIdField.value = data.yearlyPriceId;
+                this.currentEditingService.stripe_price_yearly_id = data.yearlyPriceId;
+            }
+            if (data.priceId) {
+                const priceIdField = document.getElementById('stripe-price-id');
+                if (priceIdField) priceIdField.value = data.priceId;
+                this.currentEditingService.stripe_price_id = data.priceId;
+            }
+            // Update sale price IDs
+            if (data.salePriceId) {
+                const salePriceIdField = document.getElementById('stripe-price-sale-id');
+                if (salePriceIdField) salePriceIdField.value = data.salePriceId;
+                this.currentEditingService.stripe_price_sale_id = data.salePriceId;
+            }
+            if (data.saleMonthlyPriceId) {
+                const saleMonthlyPriceIdField = document.getElementById('stripe-price-monthly-sale-id');
+                if (saleMonthlyPriceIdField) saleMonthlyPriceIdField.value = data.saleMonthlyPriceId;
+                this.currentEditingService.stripe_price_monthly_sale_id = data.saleMonthlyPriceId;
+            }
+            if (data.saleYearlyPriceId) {
+                const saleYearlyPriceIdField = document.getElementById('stripe-price-yearly-sale-id');
+                if (saleYearlyPriceIdField) saleYearlyPriceIdField.value = data.saleYearlyPriceId;
+                this.currentEditingService.stripe_price_yearly_sale_id = data.saleYearlyPriceId;
+            }
+
+            // Save the service to persist any new price IDs
+            try {
+                const saveResult = await this.saveService({ 
+                    skipModalClose: true, 
+                    skipReload: true, 
+                    skipSuccessMessage: true 
+                });
+                if (!saveResult || !saveResult.success) {
+                    window.logger?.warn('⚠️ Stripe product updated but failed to save to database:', saveResult?.error);
+                } else {
+                    window.logger?.log('✅ Service saved with updated Stripe IDs');
+                    if (saveResult.data) {
+                        this.currentEditingService = saveResult.data;
+                    }
+                }
+            } catch (saveError) {
+                window.logger?.warn('⚠️ Could not auto-save service after Stripe update:', saveError);
+            }
+
+            // Show status
+            this.updateStripeStatus(data);
+
+            // Reset button state
+            this.elements.updateStripeBtn.disabled = false;
+            if (btnText) {
+                btnText.textContent = 'Update Stripe Product';
+            }
+
+            this.showSuccess('Stripe product updated successfully. ' + (data.message || ''));
+        } catch (error) {
+            window.logger?.error('❌ Error updating Stripe product:', error);
+            this.showError('Failed to update Stripe product: ' + (error.message || error));
+            this.elements.updateStripeBtn.disabled = false;
+            const btnText = this.elements.updateStripeBtn.querySelector('span:last-child');
+            if (btnText) {
+                btnText.textContent = 'Update Stripe Product';
+            }
+        }
+    }
+
+    /**
+     * Update Stripe status display
+     */
+    updateStripeStatus(data) {
+        if (!this.elements.stripeStatus) return;
+
+        // Status display removed - it's obvious the product is created
+        let statusHTML = '';
+
+        if (data.priceId && !data.monthlyPriceId && !data.yearlyPriceId) {
+            statusHTML += '<div class="service-management__status-item">';
+            statusHTML += '<span class="service-management__status-label">Price ID:</span>';
+            statusHTML += `<span class="service-management__status-value">${data.priceId}</span>`;
+            statusHTML += '</div>';
+        }
+
+        if (data.reducedPriceId) {
+            statusHTML += '<div class="service-management__status-item">';
+            statusHTML += '<span class="service-management__status-label">Reduced Price ID:</span>';
+            statusHTML += `<span class="service-management__status-value">${data.reducedPriceId}</span>`;
+            statusHTML += '</div>';
+        }
+
+        this.elements.stripeStatus.innerHTML = statusHTML;
+
+        // Show action buttons and set up links
+        if (data.productId && this.elements.stripeActions) {
+            this.elements.stripeActions.style.display = 'flex';
+            if (this.elements.viewStripeLink) {
+                this.elements.viewStripeLink.href = `https://dashboard.stripe.com/test/products/${data.productId}`;
+            }
+        } else if (this.elements.stripeActions) {
+            this.elements.stripeActions.style.display = 'none';
+        }
+    }
+
+    /**
      * Show error
      */
     showError(message) {
@@ -1913,8 +2622,33 @@ class ServiceManagement {
      * Show translatable content
      */
     showTranslatableContent() {
-        document.querySelectorAll('.translatable-content').forEach(el => {
+        // Find all translatable elements, including those in modals
+        const selectors = [
+            '#service-management .translatable-content',
+            '.service-management__modal .translatable-content',
+            '#service-modal .translatable-content'
+        ];
+        
+        const elements = new Set();
+        selectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => elements.add(el));
+        });
+        
+        elements.forEach(el => {
             el.classList.add('loaded');
+            // Store original text if not already stored
+            // Check HTML attribute first, then textContent, then innerHTML
+            if (!el.hasAttribute('data-original-text')) {
+                const htmlAttr = el.getAttribute('data-original-text'); // From HTML
+                const textContent = el.textContent.trim();
+                const innerHTML = el.innerHTML.trim().replace(/<[^>]*>/g, ''); // Strip HTML tags
+                const key = el.getAttribute('data-translation-key');
+                
+                const originalText = htmlAttr || textContent || innerHTML || key;
+                if (originalText) {
+                    el.setAttribute('data-original-text', originalText);
+                }
+            }
         });
     }
 
@@ -1924,6 +2658,20 @@ class ServiceManagement {
     updateTranslations() {
         if (window.ServiceManagementTranslations) {
             window.ServiceManagementTranslations.updateTranslations();
+        }
+        
+        // Manually update Create Stripe Product button text if translation system is available
+        const btnText = document.getElementById('create-stripe-btn-text');
+        if (btnText && window.ServiceManagementTranslations && window.ServiceManagementTranslations.isInitialized) {
+            const translation = window.ServiceManagementTranslations.getTranslation('Create Stripe Product');
+            if (translation && translation !== 'Create Stripe Product') {
+                btnText.textContent = translation;
+            } else if (!btnText.textContent || btnText.textContent.trim() === '') {
+                btnText.textContent = 'Create Stripe Product';
+            }
+        } else if (btnText && (!btnText.textContent || btnText.textContent.trim() === '')) {
+            // Fallback: ensure text is always there
+            btnText.textContent = 'Create Stripe Product';
         }
     }
 }

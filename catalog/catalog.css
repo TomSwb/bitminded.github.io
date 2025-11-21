@@ -222,9 +222,12 @@
 
 .catalog-card__header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-sm);
+  justify-content: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  position: relative;
 }
 
 .catalog-card__status {
@@ -238,6 +241,8 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   border: 1px solid transparent;
+  position: relative;
+  z-index: 10;
 }
 
 .catalog-card__status--available {
@@ -256,6 +261,127 @@
   background-color: rgba(210, 134, 189, 0.18);
   color: var(--color-secondary);
   border-color: rgba(210, 134, 189, 0.45);
+}
+
+.catalog-card__sale-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  color: #fff;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 
+    0 4px 12px rgba(245, 158, 11, 0.5),
+    0 0 20px rgba(245, 158, 11, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: festive-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+/* Hide status badge when sale badge is present */
+.catalog-card:has(.catalog-card__sale-badge) .catalog-card__status {
+  display: none;
+}
+
+/* Festive animation with glow effect */
+@keyframes festive-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 
+      0 4px 12px rgba(245, 158, 11, 0.5),
+      0 0 20px rgba(245, 158, 11, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+    box-shadow: 
+      0 6px 16px rgba(245, 158, 11, 0.6),
+      0 0 30px rgba(245, 158, 11, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* Ensure catalog cards have relative positioning */
+.catalog-card {
+  position: relative;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .catalog-card {
+    padding: var(--spacing-sm);
+    padding-top: var(--spacing-xs);
+  }
+  
+  .catalog-card__header {
+    gap: 0;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .catalog-card__status {
+    margin: 0;
+    padding: var(--spacing-xxs, 0.25rem) var(--spacing-xs);
+  }
+  
+  .catalog-card__sale-badge {
+    font-size: 0.7rem;
+    padding: var(--spacing-xxs, 0.25rem) var(--spacing-xs);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+  
+  .catalog-grid__content {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+/* Sale Info Container */
+.catalog-card__sale-info {
+  margin-top: var(--spacing-md, 1rem);
+  padding: var(--spacing-md, 1rem);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md, 0.5rem);
+  border-left: 3px solid #f59e0b;
+}
+
+.catalog-card__sale-info__description {
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: var(--spacing-sm, 0.75rem);
+  font-weight: 500;
+}
+
+.catalog-card__sale-info__end-date {
+  color: var(--color-text-primary);
+  font-size: 0.85rem;
+  opacity: 0.9;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.catalog-card__sale-info__end-date > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.catalog-card__sale-info__label {
+  font-weight: 600;
+  color: #f59e0b;
 }
 
 .catalog-card__body {
@@ -444,7 +570,7 @@
 .catalog-grid__content {
   margin-top: var(--spacing-2xl);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--spacing-xl);
   width: 100%;
   justify-items: stretch;

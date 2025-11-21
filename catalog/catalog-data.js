@@ -221,6 +221,10 @@
               }
             : null;
 
+        // Check if sale is active (is_on_sale is true and product is published/active)
+        const isSaleActive = Boolean(product.is_on_sale) && 
+                            (product.status === 'active' || product.status === 'published');
+
         return {
             id: product.id,
             name: localizedName,
@@ -238,6 +242,15 @@
             category,
             tags: localizedTags,
             isFeatured: Boolean(product.is_featured),
+            sale: isSaleActive ? {
+                isOnSale: true,
+                discountPercentage: product.sale_discount_percentage || null,
+                description: product.sale_description || null,
+                emojiLeft: product.sale_emoji_left || '✨',
+                emojiRight: product.sale_emoji_right || '✨',
+                startDate: product.sale_start_date ? new Date(product.sale_start_date) : null,
+                endDate: product.sale_end_date ? new Date(product.sale_end_date) : null
+            } : null,
             media: {
                 icon: product.icon_url || null,
                 screenshots: Array.isArray(product.screenshots) ? product.screenshots : [],
@@ -317,6 +330,13 @@
                 is_available_for_purchase,
                 stripe_product_id,
                 stripe_price_id,
+                is_on_sale,
+                sale_start_date,
+                sale_end_date,
+                sale_discount_percentage,
+                sale_description,
+                sale_emoji_left,
+                sale_emoji_right,
                 icon_url,
                 screenshots,
                 demo_video_url,

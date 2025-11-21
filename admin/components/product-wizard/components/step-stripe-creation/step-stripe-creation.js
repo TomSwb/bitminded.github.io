@@ -4,14 +4,12 @@ if (typeof window.StepStripeCreation === 'undefined') {
             this.elements = {};
             this.formData = {
                 pricing_type: 'freemium',
-                individual_price: 0,
-                enterprise_price: 0,
-                subscription_interval: 'monthly',
                 subscription_price: 0,
+                subscription_pricing: { CHF: 0, USD: 0, EUR: 0, GBP: 0 },
                 one_time_price: 0,
+                one_time_pricing: { CHF: 0, USD: 0, EUR: 0, GBP: 0 },
                 trial_days: 0,
-                trial_requires_payment: false,
-                requires_admin_approval: false
+                trial_requires_payment: false
             };
             this.stripeProductCreated = false;
         }
@@ -21,19 +19,30 @@ if (typeof window.StepStripeCreation === 'undefined') {
             this.attachEventListeners();
             this.setupDefaults();
             this.togglePricingSections();
+            // Ensure freemium defaults are set on init
+            if (this.formData.pricing_type === 'freemium') {
+                this.setFreemiumPricesToZero();
+            }
         }
 
         initializeElements() {
             this.elements = {
                 pricingTypeRadios: document.querySelectorAll('input[name="pricing_type"]'),
-                individualPriceInput: document.getElementById('individual-price'),
-                enterprisePriceInput: document.getElementById('enterprise-price'),
-                requiresAdminApprovalCheckbox: document.getElementById('requires-admin-approval'),
-                subscriptionIntervalSelect: document.getElementById('subscription-interval'),
                 subscriptionPriceInput: document.getElementById('subscription-price'),
+                // Multi-currency subscription price inputs
+                subscriptionPriceChf: document.getElementById('subscription-price-chf'),
+                subscriptionPriceUsd: document.getElementById('subscription-price-usd'),
+                subscriptionPriceEur: document.getElementById('subscription-price-eur'),
+                subscriptionPriceGbp: document.getElementById('subscription-price-gbp'),
                 oneTimePriceInput: document.getElementById('one-time-price'),
+                // Multi-currency one-time price inputs
+                oneTimePriceChf: document.getElementById('one-time-price-chf'),
+                oneTimePriceUsd: document.getElementById('one-time-price-usd'),
+                oneTimePriceEur: document.getElementById('one-time-price-eur'),
+                oneTimePriceGbp: document.getElementById('one-time-price-gbp'),
                 trialDaysInput: document.getElementById('trial-days'),
                 trialRequiresPaymentCheckbox: document.getElementById('trial-requires-payment'),
+                trialSection: document.getElementById('trial-section') || document.getElementById('trial-days')?.closest('.step-stripe-creation__section'),
                 createStripeBtn: document.getElementById('create-stripe-btn'),
                 stripeStatusSection: document.getElementById('stripe-status-section'),
                 stripeStatus: document.getElementById('stripe-status'),
@@ -56,27 +65,49 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 });
             }
 
-            if (this.elements.enterprisePriceInput) {
-                this.elements.enterprisePriceInput.addEventListener('input', () => {
-                    this.formData.enterprise_price = parseFloat(this.elements.enterprisePriceInput.value) || 0;
+            // Multi-currency subscription price inputs
+            if (this.elements.subscriptionPriceChf) {
+                this.elements.subscriptionPriceChf.addEventListener('input', () => {
+                    this.formData.subscription_pricing.CHF = parseFloat(this.elements.subscriptionPriceChf.value) || 0;
+                    this.formData.subscription_price = this.formData.subscription_pricing.CHF; // Keep for backward compatibility
+                });
+            }
+            if (this.elements.subscriptionPriceUsd) {
+                this.elements.subscriptionPriceUsd.addEventListener('input', () => {
+                    this.formData.subscription_pricing.USD = parseFloat(this.elements.subscriptionPriceUsd.value) || 0;
+                });
+            }
+            if (this.elements.subscriptionPriceEur) {
+                this.elements.subscriptionPriceEur.addEventListener('input', () => {
+                    this.formData.subscription_pricing.EUR = parseFloat(this.elements.subscriptionPriceEur.value) || 0;
+                });
+            }
+            if (this.elements.subscriptionPriceGbp) {
+                this.elements.subscriptionPriceGbp.addEventListener('input', () => {
+                    this.formData.subscription_pricing.GBP = parseFloat(this.elements.subscriptionPriceGbp.value) || 0;
                 });
             }
 
-            if (this.elements.subscriptionPriceInput) {
-                this.elements.subscriptionPriceInput.addEventListener('input', () => {
-                    this.formData.subscription_price = parseFloat(this.elements.subscriptionPriceInput.value) || 0;
+            // Multi-currency one-time price inputs
+            if (this.elements.oneTimePriceChf) {
+                this.elements.oneTimePriceChf.addEventListener('input', () => {
+                    this.formData.one_time_pricing.CHF = parseFloat(this.elements.oneTimePriceChf.value) || 0;
+                    this.formData.one_time_price = this.formData.one_time_pricing.CHF; // Keep for backward compatibility
                 });
             }
-
-            if (this.elements.oneTimePriceInput) {
-                this.elements.oneTimePriceInput.addEventListener('input', () => {
-                    this.formData.one_time_price = parseFloat(this.elements.oneTimePriceInput.value) || 0;
+            if (this.elements.oneTimePriceUsd) {
+                this.elements.oneTimePriceUsd.addEventListener('input', () => {
+                    this.formData.one_time_pricing.USD = parseFloat(this.elements.oneTimePriceUsd.value) || 0;
                 });
             }
-
-            if (this.elements.subscriptionIntervalSelect) {
-                this.elements.subscriptionIntervalSelect.addEventListener('change', () => {
-                    this.formData.subscription_interval = this.elements.subscriptionIntervalSelect.value;
+            if (this.elements.oneTimePriceEur) {
+                this.elements.oneTimePriceEur.addEventListener('input', () => {
+                    this.formData.one_time_pricing.EUR = parseFloat(this.elements.oneTimePriceEur.value) || 0;
+                });
+            }
+            if (this.elements.oneTimePriceGbp) {
+                this.elements.oneTimePriceGbp.addEventListener('input', () => {
+                    this.formData.one_time_pricing.GBP = parseFloat(this.elements.oneTimePriceGbp.value) || 0;
                 });
             }
 
@@ -89,12 +120,6 @@ if (typeof window.StepStripeCreation === 'undefined') {
             if (this.elements.trialRequiresPaymentCheckbox) {
                 this.elements.trialRequiresPaymentCheckbox.addEventListener('change', () => {
                     this.formData.trial_requires_payment = this.elements.trialRequiresPaymentCheckbox.checked;
-                });
-            }
-
-            if (this.elements.requiresAdminApprovalCheckbox) {
-                this.elements.requiresAdminApprovalCheckbox.addEventListener('change', () => {
-                    this.formData.requires_admin_approval = this.elements.requiresAdminApprovalCheckbox.checked;
                 });
             }
 
@@ -127,31 +152,27 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     }
                 }
 
-                if (basicInfo.enterprise_price !== undefined) {
-                    this.formData.enterprise_price = basicInfo.enterprise_price;
-                    if (this.elements.enterprisePriceInput) {
-                        this.elements.enterprisePriceInput.value = basicInfo.enterprise_price;
-                    }
+                // Load subscription pricing (multi-currency or single)
+                if (basicInfo.subscription_pricing) {
+                    this.formData.subscription_pricing = { ...this.formData.subscription_pricing, ...basicInfo.subscription_pricing };
                 }
-
                 if (basicInfo.subscription_price !== undefined) {
                     this.formData.subscription_price = basicInfo.subscription_price;
-                    if (this.elements.subscriptionPriceInput) {
-                        this.elements.subscriptionPriceInput.value = basicInfo.subscription_price;
+                    // If no multi-currency pricing, use single price for CHF
+                    if (!this.formData.subscription_pricing.CHF && basicInfo.subscription_price > 0) {
+                        this.formData.subscription_pricing.CHF = basicInfo.subscription_price;
                     }
                 }
 
+                // Load one-time pricing (multi-currency or single)
+                if (basicInfo.one_time_pricing) {
+                    this.formData.one_time_pricing = { ...this.formData.one_time_pricing, ...basicInfo.one_time_pricing };
+                }
                 if (basicInfo.one_time_price !== undefined) {
                     this.formData.one_time_price = basicInfo.one_time_price;
-                    if (this.elements.oneTimePriceInput) {
-                        this.elements.oneTimePriceInput.value = basicInfo.one_time_price;
-                    }
-                }
-
-                if (basicInfo.subscription_interval) {
-                    this.formData.subscription_interval = basicInfo.subscription_interval;
-                    if (this.elements.subscriptionIntervalSelect) {
-                        this.elements.subscriptionIntervalSelect.value = basicInfo.subscription_interval;
+                    // If no multi-currency pricing, use single price for CHF
+                    if (!this.formData.one_time_pricing.CHF && basicInfo.one_time_price > 0) {
+                        this.formData.one_time_pricing.CHF = basicInfo.one_time_price;
                     }
                 }
 
@@ -169,13 +190,6 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     }
                 }
 
-                if (basicInfo.requires_admin_approval !== undefined) {
-                    this.formData.requires_admin_approval = basicInfo.requires_admin_approval;
-                    if (this.elements.requiresAdminApprovalCheckbox) {
-                        this.elements.requiresAdminApprovalCheckbox.checked = basicInfo.requires_admin_approval;
-                    }
-                }
-                
                 // Sync this.formData with basicInfo to ensure consistency
                 this.formData = { ...this.formData, ...basicInfo };
 
@@ -199,18 +213,50 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     this.elements.freemiumSection.style.display = 'block';
                     this.elements.subscriptionSection.style.display = 'none';
                     this.elements.oneTimeSection.style.display = 'none';
+                    // Hide trial section for freemium (immediate access, no trial)
+                    if (this.elements.trialSection) {
+                        this.elements.trialSection.style.display = 'none';
+                    }
+                    // Set all prices to 0 for freemium
+                    this.setFreemiumPricesToZero();
+                    // Set trial to 0 and no payment required
+                    this.formData.trial_days = 0;
+                    this.formData.trial_requires_payment = false;
+                    if (this.elements.trialDaysInput) {
+                        this.elements.trialDaysInput.value = 0;
+                    }
+                    if (this.elements.trialRequiresPaymentCheckbox) {
+                        this.elements.trialRequiresPaymentCheckbox.checked = false;
+                    }
                     break;
                 case 'subscription':
                     this.elements.freemiumSection.style.display = 'none';
                     this.elements.subscriptionSection.style.display = 'block';
                     this.elements.oneTimeSection.style.display = 'none';
+                    // Show trial section for subscriptions
+                    if (this.elements.trialSection) {
+                        this.elements.trialSection.style.display = 'block';
+                    }
                     break;
                 case 'one_time':
                     this.elements.freemiumSection.style.display = 'none';
                     this.elements.subscriptionSection.style.display = 'none';
                     this.elements.oneTimeSection.style.display = 'block';
+                    // Show trial section for one-time (optional)
+                    if (this.elements.trialSection) {
+                        this.elements.trialSection.style.display = 'block';
+                    }
                     break;
             }
+        }
+
+        setFreemiumPricesToZero() {
+            // Set all prices to 0 for freemium (no pricing needed)
+            // This ensures the pricing object is set correctly for Stripe creation
+            this.formData.subscription_pricing = { CHF: 0, USD: 0, EUR: 0, GBP: 0 };
+            this.formData.subscription_price = 0;
+            this.formData.one_time_pricing = { CHF: 0, USD: 0, EUR: 0, GBP: 0 };
+            this.formData.one_time_price = 0;
         }
 
         async handleCreateStripeProduct() {
@@ -272,11 +318,16 @@ if (typeof window.StepStripeCreation === 'undefined') {
         validate() {
             switch (this.formData.pricing_type) {
                 case 'freemium':
-                    return this.formData.enterprise_price > 0;
+                    // Freemium is always valid (prices are 0, immediate access)
+                    return true;
                 case 'subscription':
-                    return this.formData.subscription_price > 0;
+                    // Check if at least one currency has a price
+                    const hasSubscriptionPrice = Object.values(this.formData.subscription_pricing || {}).some(price => price > 0);
+                    return hasSubscriptionPrice || this.formData.subscription_price > 0;
                 case 'one_time':
-                    return this.formData.one_time_price > 0;
+                    // Check if at least one currency has a price
+                    const hasOneTimePrice = Object.values(this.formData.one_time_pricing || {}).some(price => price > 0);
+                    return hasOneTimePrice || this.formData.one_time_price > 0;
             }
             return true;
         }
@@ -284,6 +335,48 @@ if (typeof window.StepStripeCreation === 'undefined') {
         async createStripeProduct() {
             try {
                 const basicInfo = window.productWizard?.formData || {};
+                
+                // Build pricing object - filter out zero values and convert to lowercase for Stripe
+                let pricing = {};
+                if (this.formData.pricing_type === 'freemium') {
+                    // For freemium, always set all currencies to 0 (immediate free access)
+                    pricing = {
+                        CHF: 0,
+                        USD: 0,
+                        EUR: 0,
+                        GBP: 0
+                    };
+                } else if (this.formData.pricing_type === 'subscription') {
+                    // For subscriptions, we need monthly and yearly pricing structure
+                    const subscriptionPricing = {};
+                    Object.entries(this.formData.subscription_pricing || {}).forEach(([currency, amount]) => {
+                        if (amount > 0) {
+                            subscriptionPricing[currency.toUpperCase()] = {
+                                monthly: amount, // Use same amount for monthly if not specified separately
+                                yearly: amount * 12 * 0.9 // Estimate yearly (10% discount) if not specified
+                            };
+                        }
+                    });
+                    // Fallback to old single price if no multi-currency prices set
+                    if (Object.keys(subscriptionPricing).length === 0 && this.formData.subscription_price > 0) {
+                        subscriptionPricing.CHF = {
+                            monthly: this.formData.subscription_price,
+                            yearly: this.formData.subscription_price * 12 * 0.9
+                        };
+                    }
+                    pricing = subscriptionPricing;
+                } else if (this.formData.pricing_type === 'one_time') {
+                    Object.entries(this.formData.one_time_pricing || {}).forEach(([currency, amount]) => {
+                        if (amount > 0) {
+                            pricing[currency.toUpperCase()] = amount;
+                        }
+                    });
+                    // Fallback to old single price if no multi-currency prices set
+                    if (Object.keys(pricing).length === 0 && this.formData.one_time_price > 0) {
+                        pricing = { CHF: this.formData.one_time_price };
+                    }
+                }
+                
                 const body = {
                     name: basicInfo.name,
                     description: basicInfo.short_description,
@@ -294,16 +387,31 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     category: basicInfo.category,
                     tags: Array.isArray(basicInfo.tags) ? basicInfo.tags.join(', ') : basicInfo.tags,
                     pricingType: this.formData.pricing_type,
-                    currency: 'chf',
-                    enterprisePrice: this.formData.enterprise_price,
-                    subscriptionInterval: this.formData.subscription_interval,
-                    subscriptionPrice: this.formData.subscription_price,
-                    oneTimePrice: this.formData.one_time_price,
-                    trialDays: this.formData.trial_days,
-                    trialRequiresPayment: this.formData.trial_requires_payment
+                    pricing: pricing, // Multi-currency pricing object
+                    // For freemium, always set trial to 0 (immediate access)
+                    trialDays: this.formData.pricing_type === 'freemium' ? 0 : this.formData.trial_days,
+                    trialRequiresPayment: this.formData.pricing_type === 'freemium' ? false : this.formData.trial_requires_payment
                 };
 
-                const { data, error } = await window.supabase.functions.invoke('create-stripe-product', { body });
+                // Use subscription-specific function for subscription products
+                const functionName = this.formData.pricing_type === 'subscription' 
+                    ? 'create-stripe-subscription-product' 
+                    : 'create-stripe-product';
+                
+                // For subscription products, rebuild body with correct format
+                if (this.formData.pricing_type === 'subscription') {
+                    body = {
+                        name: basicInfo.name,
+                        description: basicInfo.short_description,
+                        short_description: basicInfo.description,
+                        pricing: pricing, // Should have monthly/yearly structure from above
+                        trial_days: this.formData.trial_days || 0,
+                        trial_requires_payment: this.formData.trial_requires_payment || false,
+                        entity_type: 'product'
+                    };
+                }
+                
+                const { data, error } = await window.supabase.functions.invoke(functionName, { body });
                 if (error) throw error;
                 window.logger?.log('✅ Stripe product created:', data);
                 return { success: true, data };
@@ -416,17 +524,19 @@ if (typeof window.StepStripeCreation === 'undefined') {
             if (!window.productWizard || !window.productWizard.formData) return;
             if (data.productId) window.productWizard.formData.stripe_product_id = data.productId;
             if (data.priceId) window.productWizard.formData.stripe_price_id = data.priceId;
+            // Save multi-currency price IDs if returned
+            if (data.prices) {
+                window.productWizard.formData.stripe_prices = data.prices;
+            }
             
             // Save all pricing configuration
             window.productWizard.formData.pricing_type = this.formData.pricing_type;
-            window.productWizard.formData.enterprise_price = this.formData.enterprise_price;
             window.productWizard.formData.subscription_price = this.formData.subscription_price;
+            window.productWizard.formData.subscription_pricing = this.formData.subscription_pricing;
             window.productWizard.formData.one_time_price = this.formData.one_time_price;
-            window.productWizard.formData.subscription_interval = this.formData.subscription_interval;
+            window.productWizard.formData.one_time_pricing = this.formData.one_time_pricing;
             window.productWizard.formData.trial_days = this.formData.trial_days;
             window.productWizard.formData.trial_requires_payment = this.formData.trial_requires_payment;
-            window.productWizard.formData.requires_admin_approval = this.formData.requires_admin_approval;
-            window.productWizard.formData.individual_price = this.formData.individual_price;
             
             window.logger?.log('✅ Saved Stripe data to formData');
         }
@@ -447,24 +557,40 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 });
             }
             
-            // Populate enterprise price
-            if (this.elements.enterprisePriceInput) {
-                this.elements.enterprisePriceInput.value = sourceData.enterprise_price !== undefined ? sourceData.enterprise_price : '';
+            // Populate subscription price (multi-currency)
+            const subscriptionPricing = sourceData.subscription_pricing || {};
+            if (this.elements.subscriptionPriceChf) {
+                this.elements.subscriptionPriceChf.value = subscriptionPricing.CHF || sourceData.subscription_price || '';
             }
-            
-            // Populate subscription price
+            if (this.elements.subscriptionPriceUsd) {
+                this.elements.subscriptionPriceUsd.value = subscriptionPricing.USD || '';
+            }
+            if (this.elements.subscriptionPriceEur) {
+                this.elements.subscriptionPriceEur.value = subscriptionPricing.EUR || '';
+            }
+            if (this.elements.subscriptionPriceGbp) {
+                this.elements.subscriptionPriceGbp.value = subscriptionPricing.GBP || '';
+            }
             if (this.elements.subscriptionPriceInput) {
                 this.elements.subscriptionPriceInput.value = sourceData.subscription_price !== undefined ? sourceData.subscription_price : '';
             }
             
-            // Populate one-time price
+            // Populate one-time price (multi-currency)
+            const oneTimePricing = sourceData.one_time_pricing || {};
+            if (this.elements.oneTimePriceChf) {
+                this.elements.oneTimePriceChf.value = oneTimePricing.CHF || sourceData.one_time_price || '';
+            }
+            if (this.elements.oneTimePriceUsd) {
+                this.elements.oneTimePriceUsd.value = oneTimePricing.USD || '';
+            }
+            if (this.elements.oneTimePriceEur) {
+                this.elements.oneTimePriceEur.value = oneTimePricing.EUR || '';
+            }
+            if (this.elements.oneTimePriceGbp) {
+                this.elements.oneTimePriceGbp.value = oneTimePricing.GBP || '';
+            }
             if (this.elements.oneTimePriceInput) {
                 this.elements.oneTimePriceInput.value = sourceData.one_time_price !== undefined ? sourceData.one_time_price : '';
-            }
-            
-            // Populate subscription interval
-            if (sourceData.subscription_interval && this.elements.subscriptionIntervalSelect) {
-                this.elements.subscriptionIntervalSelect.value = sourceData.subscription_interval;
             }
             
             // Populate trial days
@@ -475,16 +601,6 @@ if (typeof window.StepStripeCreation === 'undefined') {
             // Populate trial requires payment checkbox
             if (this.elements.trialRequiresPaymentCheckbox) {
                 this.elements.trialRequiresPaymentCheckbox.checked = sourceData.trial_requires_payment || false;
-            }
-            
-            // Populate requires admin approval checkbox
-            if (this.elements.requiresAdminApprovalCheckbox) {
-                this.elements.requiresAdminApprovalCheckbox.checked = sourceData.requires_admin_approval || false;
-            }
-            
-            // Populate individual price (always 0 for freemium)
-            if (this.elements.individualPriceInput) {
-                this.elements.individualPriceInput.value = sourceData.individual_price !== undefined ? sourceData.individual_price : 0;
             }
             
             // Sync this.formData with sourceData to keep them in sync
@@ -499,14 +615,12 @@ if (typeof window.StepStripeCreation === 'undefined') {
         saveFormData(wizardFormData) {
             // Save all pricing configuration to wizard's formData
             wizardFormData.pricing_type = this.formData.pricing_type;
-            wizardFormData.enterprise_price = this.formData.enterprise_price;
             wizardFormData.subscription_price = this.formData.subscription_price;
+            wizardFormData.subscription_pricing = this.formData.subscription_pricing;
             wizardFormData.one_time_price = this.formData.one_time_price;
-            wizardFormData.subscription_interval = this.formData.subscription_interval;
+            wizardFormData.one_time_pricing = this.formData.one_time_pricing;
             wizardFormData.trial_days = this.formData.trial_days;
             wizardFormData.trial_requires_payment = this.formData.trial_requires_payment;
-            wizardFormData.requires_admin_approval = this.formData.requires_admin_approval;
-            wizardFormData.individual_price = this.formData.individual_price;
             
             window.logger?.log('✅ SaveFormData: Saved Stripe pricing configuration');
         }
