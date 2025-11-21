@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document -->
+    <meta charset="UTF-8">
+    
+    <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--Browser Tab title-->
+    <title>About - BitMinded</title>
+    <!--Browser Tab icon-->
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+
+    <!--iOS home-saved app icon-->
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+    <!-- iOS status bar style -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Critical CSS to prevent white flash -->
+    <link rel="stylesheet" href="../css/critical.css">
+
+    <!-- Critical JavaScript for immediate initialization -->
+    <script src="../js/critical.js"></script>
+    
+    <!-- Component Loader -->
+    <script src="../components/shared/component-loader.js"></script>
+
+    <!-- About Page CSS -->
+    <link rel="stylesheet" href="about.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+        
+        <!-- Language Switcher Component will be loaded here -->
+    </header>
+
+    <main class="about-page">
+        <!-- Hero Section -->
+        <section class="about-hero">
+            <h1 class="about-hero__title translatable-content" data-i18n="about-hero-title">About BitMinded</h1>
+            <p class="about-hero__subtitle translatable-content" data-i18n="about-hero-subtitle">
+                Handcrafted software and patient guidance—built with intention, delivered with care.
+            </p>
+        </section>
+
+        <!-- About Sub-Navigation (only on about pages) -->
+        <div id="about-subnav-container"></div>
+
+        <!-- About Overview Section -->
+        <section class="about-overview">
+            <h2 class="about-overview__title translatable-content" data-i18n="about-overview-title">Get to Know BitMinded</h2>
+            <div class="about-overview__grid">
+                <div class="about-overview-card">
+                    <div class="about-overview-card__icon">✨</div>
+                    <h3 class="about-overview-card__title translatable-content" data-i18n="about-overview-vision-title">Vision & Mission</h3>
+                    <p class="about-overview-card__summary translatable-content" data-i18n="about-overview-vision-summary">Learn about our artisanal approach to software, our commitment to ethical and transparent craft, and our mission to make technology more accessible and humane.</p>
+                    <p class="about-overview-card__benefit translatable-content" data-i18n="about-overview-vision-benefit">Discover what drives us and why we do what we do.</p>
+                    <a href="/about/vision-mission/" class="about-overview-card__link translatable-content" data-i18n="about-vision-cta">Explore Vision & Mission →</a>
+                </div>
+                <div class="about-overview-card">
+                    <div class="about-overview-card__icon">👥</div>
+                    <h3 class="about-overview-card__title translatable-content" data-i18n="about-overview-team-title">The Team</h3>
+                    <p class="about-overview-card__summary translatable-content" data-i18n="about-overview-team-summary">Meet the people behind BitMinded. Learn about our backgrounds, passions, and the values that guide our work every day.</p>
+                    <p class="about-overview-card__benefit translatable-content" data-i18n="about-overview-team-benefit">Get to know who you'll be working with.</p>
+                    <a href="/about/team/" class="about-overview-card__link translatable-content" data-i18n="about-team-cta">Meet The Team →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why BitMinded Section -->
+        <section class="about-why">
+            <h2 class="about-why__title translatable-content" data-i18n="about-why-title">Why BitMinded?</h2>
+            <p class="about-why__intro translatable-content" data-i18n="about-why-intro">
+                We believe in building software the way artisans build their craft—with intention, care, and a deep respect for the people who use it.
+            </p>
+            <div class="about-why__highlights">
+                <div class="about-highlight">
+                    <h3 class="about-highlight__title translatable-content" data-i18n="about-highlight-human-title">Human-Scale</h3>
+                    <p class="about-highlight__text translatable-content" data-i18n="about-highlight-human-text">We keep things small and purposeful. Every project gets personal attention, and every client gets direct access to the maker.</p>
+                </div>
+                <div class="about-highlight">
+                    <h3 class="about-highlight__title translatable-content" data-i18n="about-highlight-ethical-title">Ethical & Transparent</h3>
+                    <p class="about-highlight__text translatable-content" data-i18n="about-highlight-ethical-text">Like Swiss artisans, we build sustainably and teach safe digital habits. Trust compounds over time through honest, transparent relationships.</p>
+                </div>
+                <div class="about-highlight">
+                    <h3 class="about-highlight__title translatable-content" data-i18n="about-highlight-attainable-title">Attainable Software</h3>
+                    <p class="about-highlight__text translatable-content" data-i18n="about-highlight-attainable-text">We believe custom software should be accessible. Our commission-to-catalog model makes affordable solutions possible for individuals and small businesses.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Connect Section -->
+        <section class="about-connect">
+            <h2 class="about-connect__title translatable-content" data-i18n="about-connect-title">Let's Connect</h2>
+            <p class="about-connect__text translatable-content" data-i18n="about-connect-text">
+                Have questions about our approach? Want to learn more about how we work? We'd love to hear from you.
+            </p>
+            <div class="about-connect__links">
+                <a href="/services/" class="about-button about-button--primary translatable-content" data-i18n="about-services-link">View Services</a>
+                <a href="/support/" class="about-button about-button--secondary translatable-content" data-i18n="about-contact-link">Contact Us</a>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase CDN (must load before supabase-config.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../js/env-config.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../js/supabase-config.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../js/script.js"></script>
+    <!-- About page translation -->
+    <script src="lang-about/lang-about.js"></script>
+    <!-- About page loader -->
+    <script src="about-page-loader.js"></script>
+    <!-- About page scripts -->
+    <script src="about.js"></script>
+
+</body>
+
+</html>
+

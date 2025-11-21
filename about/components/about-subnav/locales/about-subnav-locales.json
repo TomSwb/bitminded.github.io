@@ -1,0 +1,31 @@
+{
+  "en": {
+    "translation": {
+      "about-subnav-overview": "Overview",
+      "about-subnav-vision-mission": "Vision & Mission",
+      "about-subnav-team": "The Team"
+    }
+  },
+  "es": {
+    "translation": {
+      "about-subnav-overview": "Resumen",
+      "about-subnav-vision-mission": "Visión y Misión",
+      "about-subnav-team": "El Equipo"
+    }
+  },
+  "fr": {
+    "translation": {
+      "about-subnav-overview": "Aperçu",
+      "about-subnav-vision-mission": "Vision et Mission",
+      "about-subnav-team": "L'Équipe"
+    }
+  },
+  "de": {
+    "translation": {
+      "about-subnav-overview": "Übersicht",
+      "about-subnav-vision-mission": "Vision & Mission",
+      "about-subnav-team": "Das Team"
+    }
+  }
+}
+
