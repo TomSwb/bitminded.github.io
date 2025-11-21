@@ -58,26 +58,43 @@
                     <li>Creates a Cloudflare Worker and sets the route for <strong id="subdomain-preview">[subdomain].bitminded.ch</strong>.</li>
                     <li>Enforces access automatically via Supabase (validate-license) with admin bypass.</li>
                     <li>Unauthenticated users are redirected to login; non-subscribers to subscribe.</li>
-                    <li>Worker proxies requests to your GitHub Pages deployment.</li>
+                    <li>Worker serves files directly from your repository (via Workers Assets) or proxies to GitHub Pages if enabled.</li>
                 </ul>
             </div>
             <div class="step-cloudflare-setup__instruction-step">
-                <h4>Enable GitHub Pages</h4>
-                <p><strong>Important:</strong> Before creating the Worker, you need to enable GitHub Pages for your repository:</p>
+                <h4>Cloudflare Worker Deployment Setup</h4>
+                <p><strong>Important:</strong> For full protection, configure the Worker to deploy directly from your repository:</p>
                 <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                    <li>Go to your GitHub repository: <strong id="github-repo-link">[Repository URL]</strong></li>
-                    <li>Click <strong>Settings</strong> → Scroll to <strong>Pages</strong> section</li>
-                    <li>Under <strong>Source</strong>, select <strong>Deploy from a branch</strong></li>
-                    <li>Choose <strong>main</strong> (or <strong>master</strong>) branch and <strong>/ (root)</strong> folder</li>
-                    <li>Click <strong>Save</strong></li>
-                    <li>Wait 1-2 minutes for GitHub to deploy your site</li>
-                    <li>Your site will be available at: <code id="github-pages-url">https://[username].github.io/[repo-name]</code></li>
+                    <li>Go to <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare Dashboard</a> → <strong>Workers & Pages</strong></li>
+                    <li>Click <strong>Create application</strong> → <strong>Create Worker</strong></li>
+                    <li>Click <strong>Connect to Git</strong> and select your repository: <strong id="github-repo-link">[Repository URL]</strong></li>
+                    <li>Select the <strong>main</strong> branch (or <strong>master</strong>)</li>
+                    <li><strong>DO NOT enable GitHub Pages</strong> - Keep it disabled for full protection</li>
+                    <li>Set the <strong>Deploy command</strong> to: <code>npx wrangler deploy worker-updated.js</code></li>
+                    <li>Or use: <code>npm run deploy</code> (if package.json has deploy script)</li>
+                    <li>Click <strong>Save and Deploy</strong></li>
                 </ol>
-                <p style="margin-top: 0.75rem;"><strong>Note:</strong> The access protection script is automatically included in your repo's index.html to block direct GitHub Pages access.</p>
+                <p style="margin-top: 0.75rem;"><strong>Why this approach:</strong></p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>✅ <strong>Full Protection:</strong> App is only accessible via Cloudflare Worker (with auth checks)</li>
+                    <li>✅ <strong>No Public Access:</strong> GitHub Pages disabled = no direct access to static files</li>
+                    <li>✅ <strong>Secure:</strong> All requests go through authentication/subscription validation</li>
+                    <li>✅ <strong>Single Entry Point:</strong> Subdomain points to Worker, Worker serves files</li>
+                </ul>
+                <p style="margin-top: 0.75rem;"><strong>Note:</strong> Your repository must contain <code>wrangler.toml</code> and <code>worker-updated.js</code> for this to work. The access protection script is automatically included in your repo's index.html.</p>
             </div>
             <div class="step-cloudflare-setup__instruction-step">
-                <h4>Manual route (fallback)</h4>
-                <p>If route creation fails, add the domain in Cloudflare → Workers & Pages → Triggers.</p>
+                <h4>Configure Subdomain Route</h4>
+                <p>After the Worker is created, configure the subdomain route:</p>
+                <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Go to Cloudflare Dashboard → <strong>Workers & Pages</strong> → Your Worker</li>
+                    <li>Click <strong>Triggers</strong> tab</li>
+                    <li>Under <strong>Custom Domains</strong>, click <strong>Add Custom Domain</strong></li>
+                    <li>Enter: <strong id="subdomain-preview-route">[subdomain].bitminded.ch</strong></li>
+                    <li>Click <strong>Add Custom Domain</strong></li>
+                    <li>Update DNS if needed (Cloudflare will guide you)</li>
+                </ol>
+                <p style="margin-top: 0.75rem;"><strong>Important:</strong> The subdomain must point to the Cloudflare Worker, NOT to GitHub Pages.</p>
                 <p><a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Open Cloudflare Dashboard</a></p>
             </div>
         </div>
