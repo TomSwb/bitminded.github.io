@@ -317,6 +317,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
                 
                 // Get media files from form data
                 const basicInfo = window.productWizard?.formData || {};
+                const productName = basicInfo.name || null; // Get actual product name from Step 1
                 const iconUrl = basicInfo.icon_url || null;
                 const screenshots = basicInfo.screenshots || null;
                 
@@ -329,6 +330,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
                         specification: spec,
                         generatedReadme: this.generatedReadme || undefined,
                         productSlug: productSlug, // Pass slug for access protection script
+                        productName: productName, // Pass actual product name
                         iconUrl: iconUrl, // Pass icon URL if available
                         screenshots: screenshots // Pass screenshots array if available
                     }

@@ -175,16 +175,20 @@ async function createInitialFiles(
   spec: string, 
   generatedReadme?: string, 
   productSlug?: string,
+  productName?: string,
   iconUrl?: string,
   screenshots?: string[]
 ) {
-  // Extract key info from specification
-  const productName = extractProductName(spec)
+  // Use provided productName, fallback to extraction
+  const finalProductName = productName || extractProductName(spec)
   const techStack = extractTechStack(spec)
   
   // Extract repo name for subdomain (default to repo name if productSlug not provided)
   const repoName = repoFullName.split('/')[1]
   const subdomain = productSlug || repoName
+  
+  // Detect deployment type (Expo/React Native vs standard)
+  const deploymentInfo = detectDeploymentType(spec)
   
   // Create README.md using spec as content
   await createFile(token, repoFullName, 'README.md', spec)
@@ -194,17 +198,30 @@ async function createInitialFiles(
   await createFile(token, repoFullName, '.gitignore', gitignore)
   
   // Create package.json if it's a Node.js project
-  if (techStack.includes('Node.js') || techStack.includes('React') || techStack.includes('Next.js')) {
-    const packageJson = generatePackageJson(productName, techStack)
+  if (techStack.includes('Node.js') || techStack.includes('React') || techStack.includes('Next.js') || techStack.includes('Expo')) {
+    const packageJson = generatePackageJson(finalProductName, techStack, deploymentInfo.type === 'expo')
     await createFile(token, repoFullName, 'package.json', packageJson)
   }
   
-  // Create index.html with access protection script and token checker
-  const indexHtml = generateIndexHtml(productName, subdomain, repoName)
-  await createFile(token, repoFullName, 'index.html', indexHtml)
+  // Create index.html with access protection script and token checker (only for non-Expo apps)
+  if (deploymentInfo.type !== 'expo') {
+    const indexHtml = generateIndexHtml(finalProductName, subdomain, repoName)
+    await createFile(token, repoFullName, 'index.html', indexHtml)
+  }
   
-  // Create auth page files
-  await createAuthFiles(token, repoFullName, productName, subdomain)
+  // Create auth page files (in web/auth/ for Expo apps, root auth/ for standard apps)
+  await createAuthFiles(token, repoFullName, finalProductName, subdomain, iconUrl, deploymentInfo.type === 'expo')
+  
+  // Create post-build script for Expo apps
+  if (deploymentInfo.type === 'expo') {
+    await createExpoPostBuildScript(token, repoFullName, finalProductName, productSlug || subdomain)
+  }
+  
+  // Create worker files
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+  const supabaseFunctionsUrl = supabaseUrl ? supabaseUrl.replace('.supabase.co', '.functions.supabase.co') : ''
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5bnhxbnJrbWpjdmd6c3VneHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjgzNDMsImV4cCI6MjA3NDE0NDM0M30.-HAyQJV9SjJa0DrT-n3dCkHR44BQrdMTP-8qX3SADDY'
+  await createWorkerFiles(token, repoFullName, finalProductName, productSlug || subdomain, supabaseFunctionsUrl, supabaseAnonKey, deploymentInfo)
   
   // Upload media files if provided
   const uploadedFiles: string[] = []
@@ -415,6 +432,22 @@ function extractTechStack(spec: string): string[] {
 }
 
 /**
+ * Detect deployment type and branch based on tech stack
+ */
+function detectDeploymentType(spec: string): { type: 'expo' | 'standard', branch: string } {
+  const specLower = spec.toLowerCase()
+  const isExpo = specLower.includes('expo') || 
+                 specLower.includes('react native') || 
+                 specLower.includes('react-native') ||
+                 specLower.includes('expo/')
+  
+  return {
+    type: isExpo ? 'expo' : 'standard',
+    branch: isExpo ? 'gh-pages' : 'main'
+  }
+}
+
+/**
  * Generate README.md content
  */
 function generateReadme(productName: string, spec: string): string {
@@ -608,28 +641,38 @@ async function createAuthFiles(
   token: string,
   repoFullName: string,
   productName: string,
-  subdomain: string
+  subdomain: string,
+  iconUrl?: string,
+  isExpo: boolean = false
 ) {
+  // For Expo apps, create auth files in web/auth/, otherwise in root auth/
+  const authPrefix = isExpo ? 'web/auth' : 'auth'
+  
   // Create auth directory structure
-  const authIndexHtml = generateAuthIndexHtml(productName, subdomain)
-  await createFile(token, repoFullName, 'auth/index.html', authIndexHtml)
+  const authIndexHtml = generateAuthIndexHtml(productName, subdomain, iconUrl)
+  await createFile(token, repoFullName, `${authPrefix}/index.html`, authIndexHtml)
   
   const authCss = generateAuthCss()
-  await createFile(token, repoFullName, 'auth/auth.css', authCss)
+  await createFile(token, repoFullName, `${authPrefix}/auth.css`, authCss)
   
   const authJs = generateAuthJs(subdomain)
-  await createFile(token, repoFullName, 'auth/auth.js', authJs)
+  await createFile(token, repoFullName, `${authPrefix}/auth.js`, authJs)
   
   const authConfig = generateAuthConfig(productName, subdomain)
-  await createFile(token, repoFullName, 'auth/config.js', authConfig)
+  await createFile(token, repoFullName, `${authPrefix}/config.js`, authConfig)
   
-  console.log('✅ Auth page files created successfully')
+  console.log(`✅ Auth page files created successfully in ${authPrefix}/`)
 }
 
 /**
  * Generate auth/index.html - Login-only auth page
  */
-function generateAuthIndexHtml(productName: string, subdomain: string): string {
+function generateAuthIndexHtml(productName: string, subdomain: string, iconUrl?: string): string {
+  // Generate favicon/icon links
+  const faviconLink = iconUrl 
+    ? `<link rel="icon" type="image/png" href="${iconUrl}">`
+    : `<link rel="icon" type="image/x-icon" href="/favicon.ico">`
+  
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -637,6 +680,12 @@ function generateAuthIndexHtml(productName: string, subdomain: string): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - ${productName}</title>
     <link rel="stylesheet" href="/auth/auth.css">
+    ${faviconLink}
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 </head>
 <body>
     <main class="auth-main">
@@ -1292,25 +1341,494 @@ window.AUTH_CONFIG = {
 }
 
 /**
+ * Create worker files in repository
+ */
+async function createWorkerFiles(
+  token: string,
+  repoFullName: string,
+  productName: string,
+  productSlug: string,
+  supabaseFunctionsUrl: string,
+  supabaseAnonKey: string,
+  deploymentInfo: { type: 'expo' | 'standard', branch: string }
+) {
+  // Extract GitHub username from repoFullName (format: username/repo)
+  const [githubUsername] = repoFullName.split('/')
+  const githubPagesUrl = `https://${githubUsername}.github.io/${productSlug}`
+  
+  // Generate worker-updated.js (ES modules format for Wrangler v4)
+  const workerCode = generateWorkerCodeForRepo(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey, githubPagesUrl)
+  await createFile(token, repoFullName, 'worker-updated.js', workerCode)
+  
+  // Generate wrangler.toml
+  const wranglerConfig = generateWranglerConfig(productSlug)
+  await createFile(token, repoFullName, 'wrangler.toml', wranglerConfig)
+  
+  console.log('✅ Worker files created successfully')
+}
+
+/**
+ * Generate worker-updated.js for repository (ES modules format)
+ */
+function generateWorkerCodeForRepo(
+  productName: string,
+  productSlug: string,
+  supabaseFunctionsUrl: string,
+  supabaseAnonKey: string,
+  githubPagesUrl: string
+): string {
+  return `/**
+* ${productName} - Cloudflare Worker (ES Modules)
+* Enforces access via Supabase validate-license.
+* Proxies requests to GitHub Pages after authentication.
+*/
+
+const SUBSCRIBE_URL = 'https://bitminded.ch/subscribe?tool=${productSlug}'
+const VALIDATE_URL = '${supabaseFunctionsUrl}/validate-license'
+const SUPABASE_ANON_KEY = '${supabaseAnonKey}'
+const GITHUB_PAGES_URL = '${githubPagesUrl}'
+
+function getCookie(name, cookieHeader) {
+  if (!cookieHeader) return null
+  const parts = cookieHeader.split(';').map(p => p.trim())
+  for (const part of parts) {
+    if (part.startsWith(name + '=')) {
+      return part.substring(name.length + 1)
+    }
+  }
+  return null
+}
+
+function getToken(req) {
+  const cookieHeader = req.headers.get('Cookie') || ''
+  // Try common cookie names set by Supabase or app
+  const candidates = ['sb-access-token', 'supabase-auth-token']
+  for (const name of candidates) {
+    const v = getCookie(name, cookieHeader)
+    if (v) return v
+  }
+  const authHeader = req.headers.get('Authorization') || ''
+  if (authHeader.startsWith('Bearer ')) return authHeader.slice(7)
+  return null
+}
+
+async function handleRequest(request) {
+  const url = new URL(request.url)
+
+  // Bypass trivial assets to avoid noisy errors before app routing is wired
+  if (url.pathname === '/favicon.ico' || url.pathname === '/robots.txt') {
+    return new Response(null, { status: 204 })
+  }
+
+  // Allow auth pages to bypass authentication check
+  // This allows users to login when their token expires
+  if (url.pathname.startsWith('/auth')) {
+    if (GITHUB_PAGES_URL) {
+      const targetUrl = GITHUB_PAGES_URL + url.pathname + url.search
+      return fetch(targetUrl, {
+        headers: request.headers,
+        method: request.method,
+        body: request.body
+      })
+    }
+  }
+
+  // Proxy static assets directly to GitHub Pages without authentication
+  // This allows React/Expo apps to load their JavaScript bundles, CSS, images, etc.
+  // Static assets don't need auth - only the HTML page does
+  
+  // Allow static assets to bypass authentication check
+  if (GITHUB_PAGES_URL && (
+    url.pathname.startsWith('/_expo/') ||
+    url.pathname.startsWith('/assets/') ||
+    url.pathname.startsWith('/static/') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.json') ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.jpeg') ||
+    url.pathname.endsWith('.gif') ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.endsWith('.webp') ||
+    url.pathname.endsWith('.mp3') ||
+    url.pathname.endsWith('.mp4') ||
+    url.pathname.endsWith('.woff') ||
+    url.pathname.endsWith('.woff2') ||
+    url.pathname.endsWith('.ttf') ||
+    url.pathname.endsWith('.eot') ||
+    url.pathname.endsWith('.ico')
+  )) {
+    const targetUrl = GITHUB_PAGES_URL + url.pathname + url.search
+    return fetch(targetUrl, {
+      headers: request.headers,
+      method: request.method,
+      body: request.body
+    })
+  }
+
+  const token = getToken(request)
+
+  // Lightweight debug mode: append ?debug=1 to see diagnostics (no secrets leaked)
+  const debug = url.searchParams.get('debug') === '1'
+  if (!token) {
+    // Redirect to app's own auth page instead of main site
+    const authUrl = '/auth?redirect=' + encodeURIComponent(url.pathname + url.search)
+    return new Response(null, {
+      status: 302,
+      headers: { 'Location': authUrl }
+    })
+  }
+
+  try {
+    const validateRes = await fetch(VALIDATE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ product_slug: '${productSlug}' })
+    })
+
+    if (!validateRes.ok) {
+      // If token is expired/invalid (401/403), redirect to auth page
+      if (validateRes.status === 401 || validateRes.status === 403) {
+        const authUrl = '/auth?redirect=' + encodeURIComponent(url.pathname + url.search)
+        return new Response(null, {
+          status: 302,
+          headers: { 'Location': authUrl }
+        })
+      }
+      
+      if (debug) {
+        const bodyTxt = await validateRes.text().catch(() => '')
+        const diag = { validate_url: VALIDATE_URL, status: validateRes.status, token_present: !!token, token_len: token ? token.length : 0, body_preview: bodyTxt.slice(0, 160) }
+        return new Response(JSON.stringify(diag), { status: 502, headers: { 'Content-Type': 'application/json' } })
+      }
+      return new Response('Access check failed: ' + validateRes.status, { status: 502 })
+    }
+
+    const result = await validateRes.json()
+    if (!result || !result.allowed) {
+      if (debug) {
+        const diag = { validate_url: VALIDATE_URL, status: 200, token_present: !!token, token_len: token ? token.length : 0, result }
+        return new Response(JSON.stringify(diag), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      }
+      return new Response(null, { status: 302, headers: { 'Location': SUBSCRIBE_URL } })
+    }
+  } catch (e) {
+    if (debug) {
+      const diag = { error: 'validation_exception', message: String(e), validate_url: VALIDATE_URL, token_present: !!token }
+      return new Response(JSON.stringify(diag), { status: 502, headers: { 'Content-Type': 'application/json' } })
+    }
+    return new Response('Access validation error', { status: 502 })
+  }
+
+  // Proxy to GitHub Pages for the actual app (HTML pages and other authenticated routes)
+  if (!GITHUB_PAGES_URL) {
+    return new Response('App not configured: GitHub Pages URL missing', { 
+      status: 502,
+      headers: { 'Content-Type': 'text/plain' }
+    })
+  }
+  
+  const targetUrl = GITHUB_PAGES_URL + url.pathname + url.search
+  
+  // Forward the request to GitHub Pages
+  return fetch(targetUrl, {
+    headers: request.headers,
+    method: request.method,
+    body: request.body
+  })
+}
+
+// Modern ES modules export format for Wrangler v4
+export default {
+  async fetch(request, env, ctx) {
+    return handleRequest(request)
+  }
+}
+`
+}
+
+/**
+ * Generate wrangler.toml configuration
+ */
+function generateWranglerConfig(productSlug: string): string {
+  const currentDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+  // Cloudflare automatically adds "-worker" suffix, so match that in wrangler.toml
+  const workerName = `${productSlug}-worker`
+  return `name = "${workerName}"
+compatibility_date = "${currentDate}"
+main = "worker-updated.js"
+compatibility_flags = ["nodejs_compat"]
+`
+}
+
+/**
+ * Create post-build script for Expo apps
+ */
+async function createExpoPostBuildScript(
+  token: string,
+  repoFullName: string,
+  productName: string,
+  productSlug: string
+) {
+  const protectedUrl = `https://${productSlug}.bitminded.ch`
+  const postBuildScript = generateExpoPostBuildScript(productName, productSlug, protectedUrl)
+  await createFile(token, repoFullName, 'scripts/post-build.js', postBuildScript)
+  console.log('✅ Post-build script created successfully')
+}
+
+/**
+ * Generate post-build script for Expo apps
+ */
+function generateExpoPostBuildScript(productName: string, productSlug: string, protectedUrl: string): string {
+  return `#!/usr/bin/env node
+
+/**
+ * Post-build script to inject GitHub Pages redirect protection
+ * This ensures the protection script is included in the built HTML
+ * Also copies auth folder and injects token checker
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const webBuildPath = path.join(__dirname, '..', 'dist');
+const indexHtmlPath = path.join(webBuildPath, 'index.html');
+const webAuthPath = path.join(__dirname, '..', 'web', 'auth');
+const distAuthPath = path.join(webBuildPath, 'auth');
+
+// Protection script to inject
+const protectionScript = \`
+  <meta name="bitminded-protected-url" content="${protectedUrl}">
+  <script>
+    (function() {
+      'use strict';
+      // Get protected URL from meta tag (with fallback)
+      const metaTag = document.querySelector('meta[name="bitminded-protected-url"]');
+      const protectedUrl = metaTag ? metaTag.getAttribute('content') : '${protectedUrl}';
+      
+      // Check if accessed via GitHub Pages
+      const hostname = window.location.hostname;
+      if (hostname.includes('.github.io') || hostname.includes('github.com')) {
+        // Strip repository name from path if present, preserve query params and hash
+        let path = window.location.pathname;
+        // Remove '/${productSlug}' prefix if it exists (for GitHub Pages project sites)
+        if (path.startsWith('/${productSlug}')) {
+          path = path.replace('/${productSlug}', '') || '/';
+        }
+        // Build redirect URL with query params and hash
+        const queryAndHash = window.location.search + window.location.hash;
+        const redirectUrl = (path === '/' ? protectedUrl : protectedUrl + path) + queryAndHash;
+        // Use replace() to avoid adding to browser history
+        window.location.replace(redirectUrl);
+      }
+    })();
+  </script>\`;
+
+// Token checker script to inject
+const tokenCheckerScript = \`
+  <script>
+    (function() {
+      'use strict';
+      // Only run on protected subdomain, not GitHub Pages
+      const hostname = window.location.hostname;
+      if (!hostname.includes('bitminded.ch')) return;
+      
+      // Skip token check for auth pages
+      if (window.location.pathname.startsWith('/auth')) return;
+      
+      try {
+        // Check localStorage for Supabase session (format: sb-<project-ref>-auth-token)
+        // Try to find any Supabase session key
+        let sessionKey = null;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.includes('sb-') && key.includes('-auth-token')) {
+            sessionKey = key;
+            break;
+          }
+        }
+        
+        if (!sessionKey) {
+          // No session found, redirect to auth
+          window.location.href = '/auth?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+          return;
+        }
+        
+        const sessionData = localStorage.getItem(sessionKey);
+        if (!sessionData) {
+          window.location.href = '/auth?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+          return;
+        }
+        
+        const session = JSON.parse(sessionData);
+        if (!session || !session.expires_at) {
+          window.location.href = '/auth?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+          return;
+        }
+        
+        // Check if token is expired (expires_at is in seconds)
+        const expiresAt = session.expires_at * 1000; // Convert to milliseconds
+        const now = Date.now();
+        
+        // If expired or expires in less than 5 minutes, redirect to auth
+        if (now >= expiresAt || (expiresAt - now) < 5 * 60 * 1000) {
+          console.log('Token expired or expiring soon, redirecting to auth...');
+          window.location.href = '/auth?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        }
+      } catch (e) {
+        // Silently fail - Cloudflare Worker will handle auth check
+        console.debug('Token check error:', e);
+      }
+    })();
+  </script>\`;
+
+// Helper function to copy directory recursively
+function copyDir(src, dest) {
+  if (!fs.existsSync(src)) {
+    console.warn(\`Warning: Source directory \${src} does not exist\`);
+    return;
+  }
+
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+try {
+  // Check if dist directory exists
+  if (!fs.existsSync(webBuildPath)) {
+    console.error('Error: dist directory not found. Run "npm run build:web" first.');
+    process.exit(1);
+  }
+
+  // Copy auth folder from web/auth/ to dist/auth/
+  if (fs.existsSync(webAuthPath)) {
+    copyDir(webAuthPath, distAuthPath);
+    console.log('✓ Copied auth folder to dist/auth/');
+  } else {
+    console.warn('⚠ Warning: web/auth/ folder not found');
+  }
+
+  // Read the generated index.html
+  if (!fs.existsSync(indexHtmlPath)) {
+    console.error('Error: index.html not found in dist directory.');
+    process.exit(1);
+  }
+
+  let html = fs.readFileSync(indexHtmlPath, 'utf8');
+  let protectionInjected = false;
+  let tokenCheckerInjected = false;
+
+  // Check if protection is already injected (to avoid duplicates)
+  if (html.includes('bitminded-protected-url')) {
+    console.log('✓ Protection script already exists in index.html');
+    protectionInjected = true;
+  } else {
+    // Inject the protection script right after <head> tag
+    html = html.replace(/<head>/i, \`<head>\${protectionScript}\`);
+  }
+
+  // Inject token checker script if not already present
+  if (html.includes('Token expired or expiring soon')) {
+    console.log('✓ Token checker already exists in index.html');
+    tokenCheckerInjected = true;
+  } else {
+    // Inject token checker script right before closing </head> tag
+    if (html.includes('</head>')) {
+      html = html.replace('</head>', \`\${tokenCheckerScript}</head>\`);
+    } else {
+      // Fallback: inject after protection script if </head> not found
+      html = html.replace(/bitminded-protected-url.*?<\\/script>/is, \`$&\${tokenCheckerScript}\`);
+    }
+  }
+
+  // Fix asset paths for GitHub Pages - convert absolute paths to relative
+  // This fixes 404 errors for assets when hosted on GitHub Pages project sites
+  html = html.replace(/href="\\/(?!\\/)/g, 'href="./');
+  html = html.replace(/src="\\/(?!\\/)/g, 'src="./');
+
+  // Write the modified HTML back
+  fs.writeFileSync(indexHtmlPath, html, 'utf8');
+  
+  // Note: .nojekyll file will be created by gh-pages CLI using --nojekyll flag
+  
+  if (!protectionInjected) {
+    console.log('✓ Successfully injected GitHub Pages redirect protection');
+  }
+  if (!tokenCheckerInjected) {
+    console.log('✓ Successfully injected token checker script');
+  }
+  console.log('✓ Fixed asset paths for GitHub Pages compatibility');
+  
+} catch (error) {
+  console.error('Error in post-build script:', error);
+  process.exit(1);
+}
+`
+}
+
+/**
  * Generate package.json
  */
-function generatePackageJson(productName: string, stack: string[]): string {
+function generatePackageJson(productName: string, stack: string[], isExpo: boolean = false): string {
   const name = productName.toLowerCase().replace(/\s+/g, '-')
   
-  return JSON.stringify({
+  const basePackage: any = {
     name,
     version: '0.1.0',
     description: 'Generated by BitMinded Product Creation Wizard',
     main: 'index.js',
-    scripts: {
+    scripts: {},
+    dependencies: {},
+    devDependencies: {
+      wrangler: '^3.0.0' // Always include wrangler for worker deployment
+    }
+  }
+  
+  if (isExpo) {
+    // Expo/React Native projects
+    basePackage.scripts = {
+      start: 'expo start',
+      android: 'expo start --android',
+      ios: 'expo start --ios',
+      web: 'expo start --web',
+      'build:web': 'npx expo export --platform web',
+      deploy: 'npm run build:web && node scripts/post-build.js && npm run deploy:gh-pages',
+      'deploy:gh-pages': 'gh-pages -d dist --nojekyll',
+      'deploy:worker': 'npx wrangler deploy'
+    }
+    // Add gh-pages dependency for Expo apps
+    basePackage.devDependencies['gh-pages'] = '^6.1.1'
+  } else {
+    // Standard web projects
+    basePackage.scripts = {
       dev: 'next dev',
       build: 'next build',
       start: 'next start',
-      lint: 'next lint'
-    },
-    dependencies: {},
-    devDependencies: {}
-  }, null, 2)
+      lint: 'next lint',
+      deploy: 'npx wrangler deploy'
+    }
+  }
+  
+  return JSON.stringify(basePackage, null, 2)
 }
 
 serve(async (req) => {
@@ -1393,7 +1911,7 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { repoName, description, private: isPrivate, specification, generatedReadme, productSlug, iconUrl, screenshots } = await req.json()
+    const { repoName, description, private: isPrivate, specification, generatedReadme, productSlug, productName, iconUrl, screenshots } = await req.json()
 
     // TODO: Get GitHub token from user's stored credentials
     // For now, we'll use an environment variable
@@ -1465,7 +1983,7 @@ serve(async (req) => {
 
     // Only create files if repository is new
     if (!repoExists) {
-      await createInitialFiles(githubToken, repoData.full_name, specification, generatedReadme, productSlug, iconUrl, screenshots)
+      await createInitialFiles(githubToken, repoData.full_name, specification, generatedReadme, productSlug, productName, iconUrl, screenshots)
     }
 
     return new Response(
