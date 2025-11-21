@@ -20,6 +20,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             this.elements.subdomainInput = document.getElementById('cloudflare-subdomain');
             this.elements.workerUrlInput = document.getElementById('cloudflare-worker-url');
             this.elements.subdomainPreview = document.getElementById('subdomain-preview');
+            this.elements.subdomainPreviewRoute = document.getElementById('subdomain-preview-route');
             this.elements.createWorkerBtn = document.getElementById('create-worker-btn');
             this.elements.recreateWorkerBtn = document.getElementById('recreate-worker-btn');
             this.elements.workerStatus = document.getElementById('worker-status');
@@ -52,9 +53,17 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
         }
 
         updateSubdomainPreview() {
-            if (this.elements.subdomainInput && this.elements.subdomainPreview) {
+            if (this.elements.subdomainInput) {
                 const subdomain = this.elements.subdomainInput.value || '[subdomain]';
-                this.elements.subdomainPreview.textContent = `${subdomain}.bitminded.ch`;
+                const fullDomain = `${subdomain}.bitminded.ch`;
+                
+                if (this.elements.subdomainPreview) {
+                    this.elements.subdomainPreview.textContent = fullDomain;
+                }
+                
+                if (this.elements.subdomainPreviewRoute) {
+                    this.elements.subdomainPreviewRoute.textContent = fullDomain;
+                }
             }
             // Also update GitHub Pages instructions when subdomain changes
             this.updateGitHubPagesInstructions();
