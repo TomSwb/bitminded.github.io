@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 interface RateLimitConfig {
@@ -161,13 +162,13 @@ async function checkRateLimit(
   return { allowed: true }
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   const origin = req.headers.get('Origin')
   const corsHeaders = getCorsHeaders(origin)
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { status: 200, headers: corsHeaders })
   }
 
   try {
@@ -249,6 +250,13 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Parse request body
+    const { user_id } = await req.json()
+    
+    if (!user_id) {
+      throw new Error('user_id is required')
+    }
+
     // Check if user is admin
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from('user_roles')
@@ -257,32 +265,28 @@ Deno.serve(async (req) => {
       .eq('role', 'admin')
       .maybeSingle()
 
-    if (roleError || !roleData) {
-      console.error('❌ Not an admin:', user.id)
+    const isAdmin = !roleError && roleData
+
+    // Non-admin users can only view their own sessions
+    if (!isAdmin && user_id !== user.id) {
+      console.error('❌ User attempted to access another user\'s sessions:', user.id, 'requested:', user_id)
       return new Response(
-        JSON.stringify({ error: 'Forbidden - Admin access required' }),
+        JSON.stringify({ error: 'Forbidden - You can only view your own sessions' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Parse request body
-    const { user_id } = await req.json()
-    
-    if (!user_id) {
-      throw new Error('user_id is required')
-    }
-
-    console.log('🔍 Getting sessions for user:', user_id)
+    console.log('🔍 Getting sessions for user:', user_id, isAdmin ? '(admin request)' : '(own sessions)')
 
     // Get active sessions from user_sessions table (now includes user_agent, ip, etc.)
-    const { data: userSessions, error: sessionError } = await supabaseAdmin
+    const { data: userSessions, error: userSessionsError } = await supabaseAdmin
       .from('user_sessions')
       .select('*')
       .eq('user_id', user_id)
       .order('created_at', { ascending: false })
 
-    if (sessionError) {
-      throw sessionError
+    if (userSessionsError) {
+      throw userSessionsError
     }
 
     // Get active auth.sessions using database function (has proper permissions)
