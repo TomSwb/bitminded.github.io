@@ -18,11 +18,24 @@ if (typeof window.StepStripeCreation === 'undefined') {
             this.initializeElements();
             this.attachEventListeners();
             this.setupDefaults();
-            this.togglePricingSections();
-            // Ensure freemium defaults are set on init
+            
+            // Ensure pricing_type is set from radio buttons if not already set
+            if (this.elements.pricingTypeRadios) {
+                const checkedRadio = Array.from(this.elements.pricingTypeRadios).find(radio => radio.checked);
+                if (checkedRadio && !this.formData.pricing_type) {
+                    this.formData.pricing_type = checkedRadio.value;
+                }
+            }
+            
+            // Ensure freemium defaults are set on init if freemium is selected
             if (this.formData.pricing_type === 'freemium') {
                 this.setFreemiumPricesToZero();
             }
+            
+            this.togglePricingSections();
+            
+            // Populate form fields after everything is set up
+            this.populateFormFields();
         }
 
         initializeElements() {
@@ -61,7 +74,12 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 this.elements.pricingTypeRadios.forEach(radio => {
                     radio.addEventListener('change', () => {
                         this.formData.pricing_type = radio.value;
+                        // Ensure prices are set correctly when switching
+                        if (this.formData.pricing_type === 'freemium') {
+                            this.setFreemiumPricesToZero();
+                        }
                         this.togglePricingSections();
+                        this.saveFormData(window.productWizard?.formData || {});
                     });
                 });
             }
@@ -153,6 +171,20 @@ if (typeof window.StepStripeCreation === 'undefined') {
                         this.elements.pricingTypeRadios.forEach(radio => {
                             if (radio.value === basicInfo.pricing_type) {
                                 radio.checked = true;
+                            } else {
+                                radio.checked = false;
+                            }
+                        });
+                    }
+                } else {
+                    // No existing pricing_type - default to freemium and ensure it's checked
+                    this.formData.pricing_type = 'freemium';
+                    if (this.elements.pricingTypeRadios) {
+                        this.elements.pricingTypeRadios.forEach(radio => {
+                            if (radio.value === 'freemium') {
+                                radio.checked = true;
+                            } else {
+                                radio.checked = false;
                             }
                         });
                     }
@@ -207,8 +239,23 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 
                 // Always ensure form fields are populated and correct section is visible
                 this.populateFormFields();
-                this.togglePricingSections();
+            } else {
+                // No existing data - ensure freemium is properly set as default
+                this.formData.pricing_type = 'freemium';
+                if (this.elements.pricingTypeRadios) {
+                    this.elements.pricingTypeRadios.forEach(radio => {
+                        if (radio.value === 'freemium') {
+                            radio.checked = true;
+                        } else {
+                            radio.checked = false;
+                        }
+                    });
+                }
+                this.setFreemiumPricesToZero();
             }
+            
+            // Always toggle sections after setup
+            this.togglePricingSections();
         }
 
         togglePricingSections() {
