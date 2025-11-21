@@ -443,7 +443,10 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     pricing: pricing, // Multi-currency pricing object
                     // For freemium, always set trial to 0 (immediate access)
                     trialDays: this.formData.pricing_type === 'freemium' ? 0 : this.formData.trial_days,
-                    trialRequiresPayment: this.formData.pricing_type === 'freemium' ? false : this.formData.trial_requires_payment
+                    trialRequiresPayment: this.formData.pricing_type === 'freemium' ? false : this.formData.trial_requires_payment,
+                    // Pass product ID or slug to enable database update
+                    productId: basicInfo.id || null,
+                    slug: basicInfo.slug || null
                 };
 
                 // Use subscription-specific function for subscription products
@@ -460,7 +463,10 @@ if (typeof window.StepStripeCreation === 'undefined') {
                         pricing: pricing, // Should have monthly/yearly structure from above
                         trial_days: this.formData.trial_days || 0,
                         trial_requires_payment: this.formData.trial_requires_payment || false,
-                        entity_type: 'product'
+                        entity_type: 'product',
+                        // Pass product ID or slug to enable database update
+                        productId: basicInfo.id || null,
+                        slug: basicInfo.slug || null
                     };
                 }
                 
@@ -647,6 +653,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 
                 // Update form data with new Stripe IDs
                 if (window.productWizard && window.productWizard.formData) {
+                    // Primary price IDs (backward compatibility)
                     if (data.priceId) {
                         window.productWizard.formData.stripe_price_id = data.priceId;
                     }
@@ -655,6 +662,23 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     }
                     if (data.yearlyPriceId) {
                         window.productWizard.formData.stripe_price_yearly_id = data.yearlyPriceId;
+                    }
+                    
+                    // Currency-specific one-time price IDs
+                    if (data.oneTimePrices) {
+                        if (data.oneTimePrices.CHF) window.productWizard.formData.stripe_price_chf_id = data.oneTimePrices.CHF;
+                        if (data.oneTimePrices.USD) window.productWizard.formData.stripe_price_usd_id = data.oneTimePrices.USD;
+                        if (data.oneTimePrices.EUR) window.productWizard.formData.stripe_price_eur_id = data.oneTimePrices.EUR;
+                        if (data.oneTimePrices.GBP) window.productWizard.formData.stripe_price_gbp_id = data.oneTimePrices.GBP;
+                    }
+                    
+                    // Currency-specific monthly price IDs (for subscriptions)
+                    if (data.monthlyPrices) {
+                        // For subscriptions, monthly prices go into the currency-specific fields
+                        if (data.monthlyPrices.CHF) window.productWizard.formData.stripe_price_chf_id = data.monthlyPrices.CHF;
+                        if (data.monthlyPrices.USD) window.productWizard.formData.stripe_price_usd_id = data.monthlyPrices.USD;
+                        if (data.monthlyPrices.EUR) window.productWizard.formData.stripe_price_eur_id = data.monthlyPrices.EUR;
+                        if (data.monthlyPrices.GBP) window.productWizard.formData.stripe_price_gbp_id = data.monthlyPrices.GBP;
                     }
                     
                     // Also save pricing configuration
@@ -784,9 +808,35 @@ if (typeof window.StepStripeCreation === 'undefined') {
             if (!window.productWizard || !window.productWizard.formData) return;
             if (data.productId) window.productWizard.formData.stripe_product_id = data.productId;
             if (data.priceId) window.productWizard.formData.stripe_price_id = data.priceId;
-            // Save multi-currency price IDs if returned
+            
+            // Save multi-currency price IDs if returned (from create-stripe-product)
             if (data.prices) {
                 window.productWizard.formData.stripe_prices = data.prices;
+                
+                // Extract currency-specific price IDs for one-time pricing
+                if (this.formData.pricing_type === 'one_time') {
+                    if (data.prices.CHF) window.productWizard.formData.stripe_price_chf_id = data.prices.CHF;
+                    if (data.prices.USD) window.productWizard.formData.stripe_price_usd_id = data.prices.USD;
+                    if (data.prices.EUR) window.productWizard.formData.stripe_price_eur_id = data.prices.EUR;
+                    if (data.prices.GBP) window.productWizard.formData.stripe_price_gbp_id = data.prices.GBP;
+                }
+            }
+            
+            // Handle subscription prices (monthlyPrices, yearlyPrices from update response)
+            if (data.monthlyPrices) {
+                // For subscriptions, monthly prices go into the currency-specific fields
+                if (data.monthlyPrices.CHF) window.productWizard.formData.stripe_price_chf_id = data.monthlyPrices.CHF;
+                if (data.monthlyPrices.USD) window.productWizard.formData.stripe_price_usd_id = data.monthlyPrices.USD;
+                if (data.monthlyPrices.EUR) window.productWizard.formData.stripe_price_eur_id = data.monthlyPrices.EUR;
+                if (data.monthlyPrices.GBP) window.productWizard.formData.stripe_price_gbp_id = data.monthlyPrices.GBP;
+            }
+            
+            // Handle one-time prices from update response
+            if (data.oneTimePrices) {
+                if (data.oneTimePrices.CHF) window.productWizard.formData.stripe_price_chf_id = data.oneTimePrices.CHF;
+                if (data.oneTimePrices.USD) window.productWizard.formData.stripe_price_usd_id = data.oneTimePrices.USD;
+                if (data.oneTimePrices.EUR) window.productWizard.formData.stripe_price_eur_id = data.oneTimePrices.EUR;
+                if (data.oneTimePrices.GBP) window.productWizard.formData.stripe_price_gbp_id = data.oneTimePrices.GBP;
             }
             
             // Save all pricing configuration

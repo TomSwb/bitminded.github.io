@@ -1153,6 +1153,13 @@ class ProductWizard {
             productData.stripe_price_monthly_id = this.formData.stripe_price_monthly_id || null;
             productData.stripe_price_yearly_id = this.formData.stripe_price_yearly_id || null;
             productData.stripe_price_lifetime_id = this.formData.stripe_price_lifetime_id || null;
+            
+            // Add currency-specific price IDs
+            productData.stripe_price_chf_id = this.formData.stripe_price_chf_id || null;
+            productData.stripe_price_usd_id = this.formData.stripe_price_usd_id || null;
+            productData.stripe_price_eur_id = this.formData.stripe_price_eur_id || null;
+            productData.stripe_price_gbp_id = this.formData.stripe_price_gbp_id || null;
+            
             productData.pricing_type = this.formData.pricing_type || 'one_time';
             productData.price_amount = this.formData.price_amount || null;
             productData.price_currency = this.formData.price_currency || 'USD';
