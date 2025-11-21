@@ -302,6 +302,7 @@ serve(async (request) => {
   }
 
   const translations: TranslationResponse["translations"] = {};
+  const errors: Record<string, string> = {};
 
   for (const targetLanguage of targetLanguages) {
     if (!targetLanguage || targetLanguage === sourceLanguage) {
@@ -318,18 +319,32 @@ serve(async (request) => {
         `Translation failed for ${targetLanguage}:`,
         error,
       );
-      return new Response(
-        JSON.stringify({
-          error: `Translation failed for ${targetLanguage}`,
-          details: error instanceof Error ? error.message : String(error),
-        }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      // Continue processing other languages instead of failing immediately
+      errors[targetLanguage] = error instanceof Error ? error.message : String(error);
     }
   }
 
+  // Return partial results if we have any successful translations
+  // If all translations failed, return an error
+  if (Object.keys(translations).length === 0 && Object.keys(errors).length > 0) {
+    return new Response(
+      JSON.stringify({
+        error: "All translations failed",
+        details: errors,
+      }),
+      { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  // Return successful translations, with errors included if any occurred
+  const response: any = { translations };
+  if (Object.keys(errors).length > 0) {
+    response.errors = errors;
+    response.warning = "Some translations failed, but partial results are included";
+  }
+
   return new Response(
-    JSON.stringify({ translations }),
+    JSON.stringify(response),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 });
