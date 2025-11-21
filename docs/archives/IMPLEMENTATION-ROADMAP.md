@@ -1,5 +1,12 @@
 # 🚀 BitMinded Implementation Roadmap
 
+> ⚠️ **OUTDATED DOCUMENT**  
+> **This document has been superseded by `REVISED-PRIORITY-LIST.md`**  
+> **See `../REVISED-PRIORITY-LIST.md` for the current master plan and TODO list**  
+> **Archived**: January 2025
+
+---
+
 **Last Updated**: January 2025  
 **Status**: Planning Phase - Ready to implement Admin Panel  
 
