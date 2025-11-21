@@ -198,24 +198,28 @@ async function createInitialFiles(
   await createFile(token, repoFullName, '.gitignore', gitignore)
   
   // Create package.json if it's a Node.js project
-  if (techStack.includes('Node.js') || techStack.includes('React') || techStack.includes('Next.js') || techStack.includes('Expo')) {
-    const packageJson = generatePackageJson(finalProductName, techStack, deploymentInfo.type === 'expo')
+  if (techStack.includes('Node.js') || techStack.includes('React') || techStack.includes('Next.js') || techStack.includes('Expo') || 
+      techStack.includes('Vue') || techStack.includes('Angular') || techStack.includes('Svelte') || techStack.includes('Vite')) {
+    const packageJson = generatePackageJson(finalProductName, techStack, deploymentInfo)
     await createFile(token, repoFullName, 'package.json', packageJson)
   }
   
-  // Create index.html with access protection script and token checker (only for non-Expo apps)
-  if (deploymentInfo.type !== 'expo') {
+  // Create index.html with access protection script and token checker (only for plain HTML or frameworks that need it)
+  if (deploymentInfo.framework === 'plain' || deploymentInfo.framework === 'unknown') {
     const indexHtml = generateIndexHtml(finalProductName, subdomain, repoName)
-    await createFile(token, repoFullName, 'index.html', indexHtml)
+  await createFile(token, repoFullName, 'index.html', indexHtml)
   }
   
-  // Create auth page files (in web/auth/ for Expo apps, root auth/ for standard apps)
-  await createAuthFiles(token, repoFullName, finalProductName, subdomain, iconUrl, deploymentInfo.type === 'expo')
+  // Create auth page files (location depends on framework)
+  await createAuthFiles(token, repoFullName, finalProductName, subdomain, iconUrl, deploymentInfo)
   
-  // Create post-build script for Expo apps
-  if (deploymentInfo.type === 'expo') {
-    await createExpoPostBuildScript(token, repoFullName, finalProductName, productSlug || subdomain)
+  // Create post-build script for frameworks that need it
+  if (deploymentInfo.needsPostBuild) {
+    await createPostBuildScript(token, repoFullName, finalProductName, productSlug || subdomain, deploymentInfo)
   }
+  
+  // Create framework-specific configuration files
+  await createFrameworkConfigFiles(token, repoFullName, productSlug || subdomain, deploymentInfo)
   
   // Create worker files
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
@@ -432,18 +436,164 @@ function extractTechStack(spec: string): string[] {
 }
 
 /**
- * Detect deployment type and branch based on tech stack
+ * Framework detection result
  */
-function detectDeploymentType(spec: string): { type: 'expo' | 'standard', branch: string } {
+interface FrameworkInfo {
+  framework: 'expo' | 'nextjs' | 'vite' | 'create-react-app' | 'vue' | 'angular' | 'svelte' | 'gatsby' | 'nuxt' | 'plain' | 'unknown'
+  buildOutput: string
+  branch: string
+  needsPostBuild: boolean
+  needsBasePath: boolean
+  authFolder: string
+}
+
+/**
+ * Detect framework and deployment configuration based on tech stack
+ */
+function detectDeploymentType(spec: string): FrameworkInfo {
   const specLower = spec.toLowerCase()
-  const isExpo = specLower.includes('expo') || 
-                 specLower.includes('react native') || 
-                 specLower.includes('react-native') ||
-                 specLower.includes('expo/')
   
+  // Expo/React Native
+  if (specLower.includes('expo') || 
+      specLower.includes('react native') || 
+      specLower.includes('react-native') ||
+      specLower.includes('expo/')) {
+    return {
+      framework: 'expo',
+      buildOutput: 'dist',
+      branch: 'gh-pages',
+      needsPostBuild: true,
+      needsBasePath: false,
+      authFolder: 'web/auth'
+    }
+  }
+  
+  // Next.js
+  if (specLower.includes('next.js') || 
+      specLower.includes('nextjs') ||
+      specLower.includes('next.js static') ||
+      specLower.includes('next static export')) {
+    return {
+      framework: 'nextjs',
+      buildOutput: 'out', // Next.js static export uses 'out'
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: true, // Next.js needs basePath for GitHub Pages
+      authFolder: 'auth'
+    }
+  }
+  
+  // Vite
+  if (specLower.includes('vite') && !specLower.includes('vue')) {
+    return {
+      framework: 'vite',
+      buildOutput: 'dist',
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: true, // Vite needs base config for GitHub Pages
+      authFolder: 'auth'
+    }
+  }
+  
+  // Vue.js
+  if (specLower.includes('vue') && !specLower.includes('nuxt')) {
+    return {
+      framework: 'vue',
+      buildOutput: 'dist',
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: true,
+      authFolder: 'auth'
+    }
+  }
+  
+  // Nuxt.js
+  if (specLower.includes('nuxt')) {
+    return {
+      framework: 'nuxt',
+      buildOutput: 'dist',
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: true,
+      authFolder: 'auth'
+    }
+  }
+  
+  // Angular
+  if (specLower.includes('angular')) {
+    return {
+      framework: 'angular',
+      buildOutput: 'dist',
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: true,
+      authFolder: 'auth'
+    }
+  }
+  
+  // Svelte/SvelteKit
+  if (specLower.includes('svelte')) {
+    return {
+      framework: 'svelte',
+      buildOutput: 'build',
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: true,
+      authFolder: 'auth'
+    }
+  }
+  
+  // Gatsby
+  if (specLower.includes('gatsby')) {
+    return {
+      framework: 'gatsby',
+      buildOutput: 'public',
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: true,
+      authFolder: 'auth'
+    }
+  }
+  
+  // Create React App
+  if (specLower.includes('create react app') || 
+      specLower.includes('cra') ||
+      (specLower.includes('react') && specLower.includes('webpack'))) {
+    return {
+      framework: 'create-react-app',
+      buildOutput: 'build',
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: true,
+      authFolder: 'auth'
+    }
+  }
+  
+  // Plain HTML/CSS/JS (no framework)
+  if (specLower.includes('html') && 
+      specLower.includes('css') && 
+      specLower.includes('javascript') &&
+      !specLower.includes('react') &&
+      !specLower.includes('vue') &&
+      !specLower.includes('angular')) {
+    return {
+      framework: 'plain',
+      buildOutput: '',
+      branch: 'main',
+      needsPostBuild: false,
+      needsBasePath: false,
+      authFolder: 'auth'
+    }
+  }
+  
+  // Default/Unknown - assume standard React or similar
   return {
-    type: isExpo ? 'expo' : 'standard',
-    branch: isExpo ? 'gh-pages' : 'main'
+    framework: 'unknown',
+    buildOutput: 'dist',
+    branch: 'main',
+    needsPostBuild: false,
+    needsBasePath: false,
+    authFolder: 'auth'
   }
 }
 
@@ -642,11 +792,11 @@ async function createAuthFiles(
   repoFullName: string,
   productName: string,
   subdomain: string,
-  iconUrl?: string,
-  isExpo: boolean = false
+  iconUrl: string | undefined,
+  deploymentInfo: FrameworkInfo
 ) {
-  // For Expo apps, create auth files in web/auth/, otherwise in root auth/
-  const authPrefix = isExpo ? 'web/auth' : 'auth'
+  // Use framework-specific auth folder location
+  const authPrefix = deploymentInfo.authFolder
   
   // Create auth directory structure
   const authIndexHtml = generateAuthIndexHtml(productName, subdomain, iconUrl)
@@ -1350,14 +1500,14 @@ async function createWorkerFiles(
   productSlug: string,
   supabaseFunctionsUrl: string,
   supabaseAnonKey: string,
-  deploymentInfo: { type: 'expo' | 'standard', branch: string }
+  deploymentInfo: FrameworkInfo
 ) {
   // Extract GitHub username from repoFullName (format: username/repo)
   const [githubUsername] = repoFullName.split('/')
   const githubPagesUrl = `https://${githubUsername}.github.io/${productSlug}`
   
   // Generate worker-updated.js (ES modules format for Wrangler v4)
-  const workerCode = generateWorkerCodeForRepo(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey, githubPagesUrl)
+  const workerCode = generateWorkerCodeForRepo(productName, productSlug, supabaseFunctionsUrl, supabaseAnonKey, githubPagesUrl, deploymentInfo)
   await createFile(token, repoFullName, 'worker-updated.js', workerCode)
   
   // Generate wrangler.toml
@@ -1375,7 +1525,8 @@ function generateWorkerCodeForRepo(
   productSlug: string,
   supabaseFunctionsUrl: string,
   supabaseAnonKey: string,
-  githubPagesUrl: string
+  githubPagesUrl: string,
+  deploymentInfo: FrameworkInfo
 ): string {
   return `/**
 * ${productName} - Cloudflare Worker (ES Modules)
@@ -1567,24 +1718,143 @@ compatibility_flags = ["nodejs_compat"]
 }
 
 /**
- * Create post-build script for Expo apps
+ * Create framework-specific configuration files
  */
-async function createExpoPostBuildScript(
+async function createFrameworkConfigFiles(
+  token: string,
+  repoFullName: string,
+  productSlug: string,
+  deploymentInfo: FrameworkInfo
+) {
+  if (!deploymentInfo.needsBasePath) {
+    return // No config files needed
+  }
+  
+  const basePath = `/${productSlug}` // GitHub Pages project site base path
+  
+  switch (deploymentInfo.framework) {
+    case 'nextjs': {
+      // Create next.config.js with basePath for GitHub Pages
+      const nextConfig = `/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  basePath: '${basePath}',
+  assetPrefix: '${basePath}',
+  images: {
+    unoptimized: true
+  }
+}
+
+module.exports = nextConfig
+`
+      await createFile(token, repoFullName, 'next.config.js', nextConfig)
+      console.log('✅ Next.js config created')
+      break
+    }
+      
+    case 'vite': {
+      // Create vite.config.js with base path
+      const viteConfig = `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  base: '${basePath}',
+  plugins: [react()],
+  build: {
+    outDir: '${deploymentInfo.buildOutput}'
+  }
+})
+`
+      await createFile(token, repoFullName, 'vite.config.js', viteConfig)
+      console.log('✅ Vite config created')
+      break
+    }
+      
+    case 'gatsby': {
+      // Create gatsby-config.js with pathPrefix
+      const gatsbyConfig = `module.exports = {
+  pathPrefix: '${basePath}',
+  siteMetadata: {
+    title: '${productSlug}',
+  },
+  plugins: []
+}
+`
+      await createFile(token, repoFullName, 'gatsby-config.js', gatsbyConfig)
+      console.log('✅ Gatsby config created')
+      break
+    }
+      
+    case 'vue': {
+      // Create vue.config.js with publicPath
+      const vueConfig = `module.exports = {
+  publicPath: process.env.NODE_ENV === 'production'
+    ? '${basePath}'
+    : '/',
+  outputDir: '${deploymentInfo.buildOutput}'
+}
+`
+      await createFile(token, repoFullName, 'vue.config.js', vueConfig)
+      console.log('✅ Vue config created')
+      break
+    }
+      
+    case 'angular': {
+      // Create angular.json baseHref (would need to update existing angular.json)
+      // For now, just document it in a comment file
+      const angularNote = `# Angular Configuration for GitHub Pages
+
+To configure Angular for GitHub Pages, update your angular.json:
+
+1. Set "outputPath" to "${deploymentInfo.buildOutput}"
+2. Add "baseHref": "${basePath}" to the build options
+
+Example:
+{
+  "projects": {
+    "your-project": {
+      "architect": {
+        "build": {
+          "options": {
+            "outputPath": "${deploymentInfo.buildOutput}",
+            "baseHref": "${basePath}"
+          }
+        }
+      }
+    }
+  }
+}
+`
+      await createFile(token, repoFullName, 'ANGULAR_GITHUB_PAGES_SETUP.md', angularNote)
+      console.log('✅ Angular setup notes created')
+      break
+    }
+  }
+}
+
+/**
+ * Create post-build script for frameworks that need it
+ */
+async function createPostBuildScript(
   token: string,
   repoFullName: string,
   productName: string,
-  productSlug: string
+  productSlug: string,
+  deploymentInfo: FrameworkInfo
 ) {
   const protectedUrl = `https://${productSlug}.bitminded.ch`
-  const postBuildScript = generateExpoPostBuildScript(productName, productSlug, protectedUrl)
+  const postBuildScript = generatePostBuildScript(productName, productSlug, protectedUrl, deploymentInfo)
   await createFile(token, repoFullName, 'scripts/post-build.js', postBuildScript)
   console.log('✅ Post-build script created successfully')
 }
 
 /**
- * Generate post-build script for Expo apps
+ * Generate post-build script for frameworks that need it
  */
-function generateExpoPostBuildScript(productName: string, productSlug: string, protectedUrl: string): string {
+function generatePostBuildScript(productName: string, productSlug: string, protectedUrl: string, deploymentInfo: FrameworkInfo): string {
+  const buildOutput = deploymentInfo.buildOutput || 'dist'
+  const authSourceFolder = deploymentInfo.authFolder === 'web/auth' ? 'web/auth' : 'auth'
+  
   return `#!/usr/bin/env node
 
 /**
@@ -1596,10 +1866,10 @@ function generateExpoPostBuildScript(productName: string, productSlug: string, p
 const fs = require('fs');
 const path = require('path');
 
-const webBuildPath = path.join(__dirname, '..', 'dist');
+const webBuildPath = path.join(__dirname, '..', '${buildOutput}');
 const indexHtmlPath = path.join(webBuildPath, 'index.html');
-const webAuthPath = path.join(__dirname, '..', 'web', 'auth');
-const distAuthPath = path.join(webBuildPath, 'auth');
+const authSourcePath = path.join(__dirname, '..', '${authSourceFolder}');
+const authDestPath = path.join(webBuildPath, 'auth');
 
 // Protection script to inject
 const protectionScript = \`
@@ -1713,18 +1983,18 @@ function copyDir(src, dest) {
 }
 
 try {
-  // Check if dist directory exists
+  // Check if build output directory exists
   if (!fs.existsSync(webBuildPath)) {
-    console.error('Error: dist directory not found. Run "npm run build:web" first.');
+    console.error(\`Error: \${webBuildPath} directory not found. Run the build command first.\`);
     process.exit(1);
   }
 
-  // Copy auth folder from web/auth/ to dist/auth/
-  if (fs.existsSync(webAuthPath)) {
-    copyDir(webAuthPath, distAuthPath);
-    console.log('✓ Copied auth folder to dist/auth/');
+  // Copy auth folder to build output
+  if (fs.existsSync(authSourcePath)) {
+    copyDir(authSourcePath, authDestPath);
+    console.log(\`✓ Copied auth folder to \${authDestPath}\`);
   } else {
-    console.warn('⚠ Warning: web/auth/ folder not found');
+    console.warn(\`⚠ Warning: \${authSourcePath} folder not found\`);
   }
 
   // Read the generated index.html
@@ -1786,9 +2056,9 @@ try {
 }
 
 /**
- * Generate package.json
+ * Generate package.json based on framework
  */
-function generatePackageJson(productName: string, stack: string[], isExpo: boolean = false): string {
+function generatePackageJson(productName: string, stack: string[], deploymentInfo: FrameworkInfo): string {
   const name = productName.toLowerCase().replace(/\s+/g, '-')
   
   const basePackage: any = {
@@ -1803,29 +2073,101 @@ function generatePackageJson(productName: string, stack: string[], isExpo: boole
     }
   }
   
-  if (isExpo) {
-    // Expo/React Native projects
-    basePackage.scripts = {
-      start: 'expo start',
-      android: 'expo start --android',
-      ios: 'expo start --ios',
-      web: 'expo start --web',
-      'build:web': 'npx expo export --platform web',
-      deploy: 'npm run build:web && node scripts/post-build.js && npm run deploy:gh-pages',
-      'deploy:gh-pages': 'gh-pages -d dist --nojekyll',
-      'deploy:worker': 'npx wrangler deploy'
-    }
-    // Add gh-pages dependency for Expo apps
-    basePackage.devDependencies['gh-pages'] = '^6.1.1'
-  } else {
-    // Standard web projects
-    basePackage.scripts = {
+  switch (deploymentInfo.framework) {
+    case 'expo':
+      basePackage.scripts = {
+        start: 'expo start',
+        android: 'expo start --android',
+        ios: 'expo start --ios',
+        web: 'expo start --web',
+        'build:web': 'npx expo export --platform web',
+        deploy: 'npm run build:web && node scripts/post-build.js && npm run deploy:gh-pages',
+        'deploy:gh-pages': `gh-pages -d ${deploymentInfo.buildOutput} --nojekyll`,
+        'deploy:worker': 'npx wrangler deploy'
+      }
+      basePackage.devDependencies['gh-pages'] = '^6.1.1'
+      break
+      
+    case 'nextjs':
+      basePackage.scripts = {
       dev: 'next dev',
       build: 'next build',
+        export: 'next export', // For static export
       start: 'next start',
-      lint: 'next lint',
-      deploy: 'npx wrangler deploy'
-    }
+        lint: 'next lint',
+        deploy: 'npx wrangler deploy'
+      }
+      break
+      
+    case 'vite':
+      basePackage.scripts = {
+        dev: 'vite',
+        build: 'vite build',
+        preview: 'vite preview',
+        deploy: 'npx wrangler deploy'
+      }
+      break
+      
+    case 'vue':
+      basePackage.scripts = {
+        serve: 'vue-cli-service serve',
+        build: 'vue-cli-service build',
+        lint: 'vue-cli-service lint',
+        deploy: 'npx wrangler deploy'
+      }
+      break
+      
+    case 'angular':
+      basePackage.scripts = {
+        ng: 'ng',
+        start: 'ng serve',
+        build: 'ng build',
+        test: 'ng test',
+        lint: 'ng lint',
+        deploy: 'npx wrangler deploy'
+      }
+      break
+      
+    case 'svelte':
+      basePackage.scripts = {
+        dev: 'vite dev',
+        build: 'vite build',
+        preview: 'vite preview',
+        deploy: 'npx wrangler deploy'
+      }
+      break
+      
+    case 'gatsby':
+      basePackage.scripts = {
+        develop: 'gatsby develop',
+        build: 'gatsby build',
+        serve: 'gatsby serve',
+        clean: 'gatsby clean',
+        deploy: 'npx wrangler deploy'
+      }
+      break
+      
+    case 'create-react-app':
+      basePackage.scripts = {
+        start: 'react-scripts start',
+        build: 'react-scripts build',
+        test: 'react-scripts test',
+        eject: 'react-scripts eject',
+        deploy: 'npx wrangler deploy'
+      }
+      // Add homepage for GitHub Pages
+      basePackage.homepage = `https://${name}.github.io/${name}`
+      break
+      
+    default:
+      // Standard/default scripts
+      basePackage.scripts = {
+        dev: 'next dev',
+        build: 'next build',
+        start: 'next start',
+        lint: 'next lint',
+        deploy: 'npx wrangler deploy'
+      }
   }
   
   return JSON.stringify(basePackage, null, 2)
