@@ -451,6 +451,171 @@ serve(async (req) => {
       console.log('✅ Stripe product updated:', updatedProduct.id)
     }
 
+    // Handle regular (non-sale) prices - create new prices if pricing_type changed or pricing provided
+    const newMonthlyPrices: Record<string, any> = {}
+    const newYearlyPrices: Record<string, any> = {}
+    const newOneTimePrices: Record<string, any> = {}
+    const regularPriceErrors: Record<string, string> = {}
+    
+    // Always deactivate old regular prices when pricing_type changes (to avoid orphaned prices)
+    const oldPriceIdsToDeactivate = [
+      existing_price_id,
+      existing_monthly_price_id,
+      existing_yearly_price_id
+    ].filter(id => id && typeof id === 'string' && id.trim() !== '')
+    
+    // If changing TO freemium, deactivate all existing prices
+    if (pricing_type === 'freemium' && oldPriceIdsToDeactivate.length > 0) {
+      console.log('🆓 Changing to freemium - deactivating all existing prices')
+      for (const oldPriceId of oldPriceIdsToDeactivate) {
+        try {
+          await deactivateStripePrice(stripeSecretKey, oldPriceId)
+          console.log(`✅ Deactivated old price (freemium): ${oldPriceId}`)
+        } catch (error: any) {
+          console.error(`⚠️ Failed to deactivate old price ${oldPriceId}:`, error.message)
+        }
+      }
+    }
+    
+    // Check if we need to create regular prices (not freemium and pricing provided)
+    if (pricing_type !== 'freemium' && pricing && typeof pricing === 'object' && Object.keys(pricing).length > 0) {
+      console.log('💰 Creating regular prices for pricing_type:', pricing_type)
+      
+      // Deactivate old regular prices if they exist (when changing between one_time/subscription)
+      if (oldPriceIdsToDeactivate.length > 0) {
+        for (const oldPriceId of oldPriceIdsToDeactivate) {
+          try {
+            await deactivateStripePrice(stripeSecretKey, oldPriceId)
+            console.log(`✅ Deactivated old regular price: ${oldPriceId}`)
+          } catch (error: any) {
+            console.error(`⚠️ Failed to deactivate old price ${oldPriceId}:`, error.message)
+          }
+        }
+      }
+      
+      // Determine if we need monthly/yearly prices for subscriptions
+      let hasMonthly = false
+      let hasYearly = false
+      
+      if (pricing_type === 'subscription' && pricing) {
+        const firstCurrencyData = Object.values(pricing)[0]
+        if (typeof firstCurrencyData === 'object' && firstCurrencyData !== null) {
+          const priceObj = firstCurrencyData as { monthly?: number; yearly?: number; [key: string]: any }
+          hasMonthly = priceObj.monthly !== undefined && priceObj.monthly > 0
+          hasYearly = priceObj.yearly !== undefined && priceObj.yearly > 0
+        }
+      }
+      
+      const shouldCreateMonthly = pricing_type === 'subscription' && (hasMonthly || !hasYearly)
+      const shouldCreateYearly = pricing_type === 'subscription' && hasYearly
+      
+      // Create regular prices
+      for (const [currency, priceData] of Object.entries(pricing)) {
+        const currencyUpper = currency.toUpperCase()
+        
+        if (typeof priceData === 'object' && priceData !== null) {
+          const priceObj = priceData as { 
+            amount?: number; 
+            monthly?: number;
+            yearly?: number;
+            [key: string]: any;
+          }
+          
+          const amount = priceObj.amount || 0
+          const monthlyAmount = priceObj.monthly || 0
+          const yearlyAmount = priceObj.yearly || 0
+          
+          if (pricing_type === 'subscription') {
+            // Create monthly price
+            if (shouldCreateMonthly && (monthlyAmount > 0 || amount > 0)) {
+              const finalAmount = monthlyAmount > 0 ? monthlyAmount : amount
+              if (finalAmount > 0) {
+                try {
+                  const price = await createStripePrice(
+                    stripeSecretKey,
+                    productId,
+                    finalAmount,
+                    currencyUpper.toLowerCase(),
+                    'recurring',
+                    'Monthly',
+                    'month'
+                  )
+                  newMonthlyPrices[currencyUpper] = price.id
+                  console.log(`✅ New monthly price created for ${currencyUpper}: ${price.id} (${finalAmount})`)
+                } catch (error: any) {
+                  console.error(`❌ Error creating monthly price for ${currencyUpper}:`, error)
+                  regularPriceErrors[`${currencyUpper}_monthly`] = error.message
+                }
+              }
+            }
+            
+            // Create yearly price
+            if (shouldCreateYearly && (yearlyAmount > 0 || amount > 0)) {
+              const finalAmount = yearlyAmount > 0 ? yearlyAmount : (amount * 12 * 0.9) // Default yearly calculation
+              if (finalAmount > 0) {
+                try {
+                  const price = await createStripePrice(
+                    stripeSecretKey,
+                    productId,
+                    finalAmount,
+                    currencyUpper.toLowerCase(),
+                    'recurring',
+                    'Yearly',
+                    'year'
+                  )
+                  newYearlyPrices[currencyUpper] = price.id
+                  console.log(`✅ New yearly price created for ${currencyUpper}: ${price.id} (${finalAmount})`)
+                } catch (error: any) {
+                  console.error(`❌ Error creating yearly price for ${currencyUpper}:`, error)
+                  regularPriceErrors[`${currencyUpper}_yearly`] = error.message
+                }
+              }
+            }
+          } else if (pricing_type === 'one_time') {
+            // One-time price
+            if (amount > 0) {
+              try {
+                const price = await createStripePrice(
+                  stripeSecretKey,
+                  productId,
+                  amount,
+                  currencyUpper.toLowerCase(),
+                  'one_time',
+                  'Regular',
+                  undefined
+                )
+                newOneTimePrices[currencyUpper] = price.id
+                console.log(`✅ New one-time price created for ${currencyUpper}: ${price.id} (${amount})`)
+              } catch (error: any) {
+                console.error(`❌ Error creating one-time price for ${currencyUpper}:`, error)
+                regularPriceErrors[`${currencyUpper}`] = error.message
+              }
+            }
+          }
+        } else if (typeof priceData === 'number' && priceData > 0) {
+          // Simple number format (backward compatibility)
+          if (pricing_type === 'one_time') {
+            try {
+              const price = await createStripePrice(
+                stripeSecretKey,
+                productId,
+                priceData,
+                currencyUpper.toLowerCase(),
+                'one_time',
+                'Regular',
+                undefined
+              )
+              newOneTimePrices[currencyUpper] = price.id
+              console.log(`✅ New one-time price created for ${currencyUpper}: ${price.id} (${priceData})`)
+            } catch (error: any) {
+              console.error(`❌ Error creating one-time price for ${currencyUpper}:`, error)
+              regularPriceErrors[`${currencyUpper}`] = error.message
+            }
+          }
+        }
+      }
+    }
+
     // Handle sale prices
     const deactivatedPrices: string[] = []
     
@@ -708,6 +873,17 @@ serve(async (req) => {
       }
     }
 
+    // Get primary regular price IDs
+    const primaryMonthlyPriceId = Object.keys(newMonthlyPrices).length > 0 
+      ? (newMonthlyPrices.CHF || newMonthlyPrices.USD || newMonthlyPrices.EUR || newMonthlyPrices.GBP || Object.values(newMonthlyPrices)[0] || null)
+      : null
+    const primaryYearlyPriceId = Object.keys(newYearlyPrices).length > 0
+      ? (newYearlyPrices.CHF || newYearlyPrices.USD || newYearlyPrices.EUR || newYearlyPrices.GBP || Object.values(newYearlyPrices)[0] || null)
+      : null
+    const primaryOneTimePriceId = Object.keys(newOneTimePrices).length > 0
+      ? (newOneTimePrices.CHF || newOneTimePrices.USD || newOneTimePrices.EUR || newOneTimePrices.GBP || Object.values(newOneTimePrices)[0] || null)
+      : null
+    
     // Get primary sale price IDs
     const primarySaleMonthlyPriceId = Object.keys(newSaleMonthlyPrices).length > 0 
       ? (newSaleMonthlyPrices.CHF || newSaleMonthlyPrices.USD || newSaleMonthlyPrices.EUR || newSaleMonthlyPrices.GBP || Object.values(newSaleMonthlyPrices)[0] || null)
@@ -719,10 +895,20 @@ serve(async (req) => {
       ? (newSaleOneTimePrices.CHF || newSaleOneTimePrices.USD || newSaleOneTimePrices.EUR || newSaleOneTimePrices.GBP || Object.values(newSaleOneTimePrices)[0] || null)
       : null
 
+    // Combine all price errors
+    const allPriceErrors = { ...regularPriceErrors, ...priceErrors }
+
     return new Response(
       JSON.stringify({
         success: true,
         productId: productId,
+        // Regular prices
+        priceId: primaryOneTimePriceId || null,
+        monthlyPriceId: primaryMonthlyPriceId || null,
+        yearlyPriceId: primaryYearlyPriceId || null,
+        monthlyPrices: Object.keys(newMonthlyPrices).length > 0 ? newMonthlyPrices : undefined,
+        yearlyPrices: Object.keys(newYearlyPrices).length > 0 ? newYearlyPrices : undefined,
+        oneTimePrices: Object.keys(newOneTimePrices).length > 0 ? newOneTimePrices : undefined,
         // Sale prices
         sale_monthly_price_id: primarySaleMonthlyPriceId || null,
         sale_yearly_price_id: primarySaleYearlyPriceId || null,
@@ -730,10 +916,12 @@ serve(async (req) => {
         saleMonthlyPrices: Object.keys(newSaleMonthlyPrices).length > 0 ? newSaleMonthlyPrices : undefined,
         saleYearlyPrices: Object.keys(newSaleYearlyPrices).length > 0 ? newSaleYearlyPrices : undefined,
         saleOneTimePrices: Object.keys(newSaleOneTimePrices).length > 0 ? newSaleOneTimePrices : undefined,
-        priceErrors: Object.keys(priceErrors).length > 0 ? priceErrors : undefined,
-        message: is_on_sale 
-          ? 'Sale prices created/updated successfully.' 
-          : 'Sale prices deactivated successfully.'
+        priceErrors: Object.keys(allPriceErrors).length > 0 ? allPriceErrors : undefined,
+        message: (Object.keys(newMonthlyPrices).length > 0 || Object.keys(newYearlyPrices).length > 0 || Object.keys(newOneTimePrices).length > 0)
+          ? 'Product and prices updated successfully.'
+          : (is_on_sale 
+            ? 'Sale prices created/updated successfully.' 
+            : 'Product updated successfully.')
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
