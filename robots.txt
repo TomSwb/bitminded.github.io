@@ -1,0 +1,27 @@
+# robots.txt for bitminded.ch
+# Instructions for search engine crawlers
+
+User-agent: *
+Allow: /
+
+# Block private/authentication areas
+Disallow: /auth/
+Disallow: /account/
+Disallow: /admin/
+Disallow: /maintenance/
+
+# Block static assets (not needed for indexing)
+Disallow: /css/
+Disallow: /js/
+Disallow: /images/
+Disallow: /icons/
+Disallow: /supabase/
+Disallow: /docs/
+Disallow: /cloudflare/
+
+# Block component files (internal structure)
+Disallow: /components/
+
+# Sitemap location
+Sitemap: https://bitminded.ch/sitemap.xml
+
