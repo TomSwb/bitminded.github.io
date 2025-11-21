@@ -34,7 +34,9 @@
             <div class="security-management__status-icon">📱</div>
             <div class="security-management__status-content">
                 <div class="security-management__status-title translatable-content" data-translation-key="Login Activity">Login Activity</div>
-                <div class="security-management__status-description translatable-content" data-translation-key="View recent login history">View recent login history</div>
+                <div class="security-management__status-description" id="activity-status-description">
+                    <span class="translatable-content" data-translation-key="View recent login history">View recent login history</span>
+                </div>
             </div>
             <div class="security-management__status-action">
                 <button class="security-management__action-btn" data-action="activity" id="activity-action-btn">
@@ -90,6 +92,11 @@
                     <h3 class="security-management__overview-title translatable-content" data-translation-key="Security Overview">Security Overview</h3>
                     <p class="security-management__overview-description translatable-content" data-translation-key="Choose a security option above to manage your account security settings">Choose a security option above to manage your account security settings</p>
                 </div>
+            </div>
+            <!-- Error Message -->
+            <div class="security-management__error-message" id="security-management-error" style="display: none;">
+                <div class="security-management__error-icon">⚠️</div>
+                <div class="security-management__error-text" id="security-management-error-text"></div>
             </div>
         </div>
     </div>

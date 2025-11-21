@@ -20,7 +20,18 @@
     "Security Overview": "Security Overview",
     "Choose a security option above to manage your account security settings": "Choose a security option above to manage your account security settings",
     "2FA component coming soon": "2FA component coming soon",
-    "Login activity component coming soon": "Login activity component coming soon"
+    "Login activity component coming soon": "Login activity component coming soon",
+    "Last login: ": "Last login: ",
+    "Just now": "Just now",
+    "minute ago": "minute ago",
+    "minutes ago": "minutes ago",
+    "hour ago": "hour ago",
+    "hours ago": "hours ago",
+    "Yesterday at": "Yesterday at",
+    "Today at": "Today at",
+    "day ago": "day ago",
+    "days ago": "days ago",
+    "logins this week": "logins this week"
   },
   "es": {
     "Security Settings": "Configuración de Seguridad",
@@ -43,7 +54,18 @@
     "Security Overview": "Resumen de Seguridad",
     "Choose a security option above to manage your account security settings": "Elige una opción de seguridad arriba para administrar la configuración de seguridad de tu cuenta",
     "2FA component coming soon": "Componente 2FA próximamente",
-    "Login activity component coming soon": "Componente de actividad de inicio de sesión próximamente"
+    "Login activity component coming soon": "Componente de actividad de inicio de sesión próximamente",
+    "Last login: ": "Último inicio de sesión: ",
+    "Just now": "Ahora mismo",
+    "minute ago": "hace un minuto",
+    "minutes ago": "hace minutos",
+    "hour ago": "hace una hora",
+    "hours ago": "hace horas",
+    "Yesterday at": "Ayer a las",
+    "Today at": "Hoy a las",
+    "day ago": "hace un día",
+    "days ago": "hace días",
+    "logins this week": "inicios de sesión esta semana"
   },
   "fr": {
     "Security Settings": "Paramètres de Sécurité",
@@ -66,7 +88,18 @@
     "Security Overview": "Résumé de Sécurité",
     "Choose a security option above to manage your account security settings": "Choisissez une option de sécurité ci-dessus pour gérer les paramètres de sécurité de votre compte",
     "2FA component coming soon": "Composant 2FA bientôt disponible",
-    "Login activity component coming soon": "Composant d'activité de connexion bientôt disponible"
+    "Login activity component coming soon": "Composant d'activité de connexion bientôt disponible",
+    "Last login: ": "Dernière connexion : ",
+    "Just now": "À l'instant",
+    "minute ago": "il y a une minute",
+    "minutes ago": "il y a minutes",
+    "hour ago": "il y a une heure",
+    "hours ago": "il y a heures",
+    "Yesterday at": "Hier à",
+    "Today at": "Aujourd'hui à",
+    "day ago": "il y a un jour",
+    "days ago": "il y a jours",
+    "logins this week": "connexions cette semaine"
   },
   "de": {
     "Security Settings": "Sicherheitseinstellungen",
@@ -89,6 +122,17 @@
     "Security Overview": "Sicherheitsübersicht",
     "Choose a security option above to manage your account security settings": "Wählen Sie oben eine Sicherheitsoption aus, um Ihre Kontosicherheitseinstellungen zu verwalten",
     "2FA component coming soon": "2FA-Komponente kommt bald",
-    "Login activity component coming soon": "Anmeldeaktivitäts-Komponente kommt bald"
+    "Login activity component coming soon": "Anmeldeaktivitäts-Komponente kommt bald",
+    "Last login: ": "Letzte Anmeldung: ",
+    "Just now": "Gerade eben",
+    "minute ago": "vor einer Minute",
+    "minutes ago": "vor Minuten",
+    "hour ago": "vor einer Stunde",
+    "hours ago": "vor Stunden",
+    "Yesterday at": "Gestern um",
+    "Today at": "Heute um",
+    "day ago": "vor einem Tag",
+    "days ago": "vor Tagen",
+    "logins this week": "Anmeldungen diese Woche"
   }
 }
