@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         })
         .catch(error => {
-            console.error('Failed to load imprint translations:', error);
+            window.logger?.error('Failed to load imprint translations:', error);
             showContent();
         });
 

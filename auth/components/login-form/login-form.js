@@ -25,7 +25,7 @@ class LoginForm {
         try {
             // Security: If user navigated back from 2FA without completing, sign them out
             if (sessionStorage.getItem('pending_2fa_user')) {
-                console.log('🔒 Pending 2FA detected on login page - signing out incomplete session');
+                window.logger?.log('🔒 Pending 2FA detected on login page - signing out incomplete session');
                 await window.supabase.auth.signOut();
                 sessionStorage.removeItem('pending_2fa_user');
                 sessionStorage.removeItem('pending_2fa_time');
@@ -40,7 +40,7 @@ class LoginForm {
             
             // Login Form initialized silently
         } catch (error) {
-            console.error('❌ Failed to initialize Login Form:', error);
+            window.logger?.error('❌ Failed to initialize Login Form:', error);
             this.showError('Failed to initialize login form');
         }
     }
@@ -54,9 +54,9 @@ class LoginForm {
             this.bindEvents();
             this.updateTranslations();
             this.loadFailedAttempts();
-            console.log('✅ Login Form re-initialized successfully');
+            window.logger?.log('✅ Login Form re-initialized successfully');
         } catch (error) {
-            console.error('❌ Failed to re-initialize Login Form:', error);
+            window.logger?.error('❌ Failed to re-initialize Login Form:', error);
         }
     }
 
@@ -116,10 +116,10 @@ class LoginForm {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
             } else {
-                console.warn('Failed to load login form translations:', response.status);
+                window.logger?.warn('Failed to load login form translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load login form translations:', error);
+            window.logger?.warn('Failed to load login form translations:', error);
         }
     }
 
@@ -233,7 +233,7 @@ class LoginForm {
 
                 if (has2FA) {
                     // User has 2FA enabled - DON'T log yet, wait for 2FA verification
-                    console.log('🔐 2FA enabled for user - redirecting to verification');
+                    window.logger?.log('🔐 2FA enabled for user - redirecting to verification');
                     sessionStorage.setItem('pending_2fa_user', data.user.id);
                     sessionStorage.setItem('pending_2fa_time', Date.now().toString());
                     window.location.href = '/auth/2fa-verify/';
@@ -246,7 +246,7 @@ class LoginForm {
             }
 
         } catch (error) {
-            console.error('Login error:', error);
+            window.logger?.error('Login error:', error);
             await this.handleLoginError(error);
         } finally {
             this.setSubmitting(false);
@@ -376,7 +376,7 @@ class LoginForm {
      */
     showError(message) {
         // You could implement a toast notification system here
-        console.error('Login Form Error:', message);
+        window.logger?.error('Login Form Error:', message);
         alert(message); // Temporary - replace with better UX
     }
 
@@ -428,7 +428,7 @@ class LoginForm {
             const stored = localStorage.getItem('login_failed_attempts');
             this.failedAttempts = stored ? parseInt(stored, 10) : 0;
         } catch (error) {
-            console.warn('Failed to load failed attempts:', error);
+            window.logger?.warn('Failed to load failed attempts:', error);
             this.failedAttempts = 0;
         }
     }
@@ -440,7 +440,7 @@ class LoginForm {
         try {
             localStorage.setItem('login_failed_attempts', this.failedAttempts.toString());
         } catch (error) {
-            console.warn('Failed to save failed attempts:', error);
+            window.logger?.warn('Failed to save failed attempts:', error);
         }
     }
 
@@ -465,7 +465,7 @@ class LoginForm {
         this.failedAttempts = 0;
         this.saveFailedAttempts();
         this.hideCaptcha();
-        console.log('✅ Reset failed attempts counter');
+        window.logger?.log('✅ Reset failed attempts counter');
     }
 
     /**
@@ -474,7 +474,7 @@ class LoginForm {
      */
     requiresCaptcha() {
         const required = this.failedAttempts >= this.maxAttempts;
-        console.log(`🔍 CAPTCHA check: ${this.failedAttempts}/${this.maxAttempts} = ${required}`);
+        window.logger?.log(`🔍 CAPTCHA check: ${this.failedAttempts}/${this.maxAttempts} = ${required}`);
         return required;
     }
 
@@ -493,7 +493,7 @@ class LoginForm {
         const captchaContainer = document.getElementById('captcha-container');
         if (captchaContainer) {
             captchaContainer.classList.remove('hidden');
-            console.log('🔒 CAPTCHA required - showing widget');
+            window.logger?.log('🔒 CAPTCHA required - showing widget');
             
             // Wait a bit for the container to be visible, then initialize CAPTCHA
             setTimeout(async () => {
@@ -509,34 +509,34 @@ class LoginForm {
         try {
             // Check if CAPTCHA component exists
             if (!window.CaptchaComponent) {
-                console.error('❌ CAPTCHA component not loaded');
+                window.logger?.error('❌ CAPTCHA component not loaded');
                 return;
             }
 
             // Check if container is visible
             const captchaContainer = document.getElementById('captcha-container');
             if (!captchaContainer) {
-                console.error('❌ CAPTCHA container not found');
+                window.logger?.error('❌ CAPTCHA container not found');
                 return;
             }
 
-            console.log('🔍 CAPTCHA container found:', captchaContainer);
+            window.logger?.log('🔍 CAPTCHA container found:', captchaContainer);
 
             // Ensure container is visible
             captchaContainer.classList.remove('hidden');
 
             // Initialize if not already done
             if (!window.captcha) {
-                console.log('🔄 Initializing CAPTCHA for login...');
+                window.logger?.log('🔄 Initializing CAPTCHA for login...');
                 window.captcha = new window.CaptchaComponent({
                     siteKey: '0x4AAAAAAB3ePnQXAhy39NwT',
                     theme: 'auto',
                     size: 'normal',
                     callback: (token) => {
-                        console.log('✅ CAPTCHA verified for login:', token);
+                        window.logger?.log('✅ CAPTCHA verified for login:', token);
                     },
                     errorCallback: (error) => {
-                        console.error('❌ CAPTCHA error for login:', error);
+                        window.logger?.error('❌ CAPTCHA error for login:', error);
                     }
                 });
             }
@@ -544,7 +544,7 @@ class LoginForm {
             // Initialize the component if needed
             if (window.captcha && !window.captcha.isInitialized) {
                 await window.captcha.init();
-                console.log('✅ CAPTCHA initialized for login');
+                window.logger?.log('✅ CAPTCHA initialized for login');
             }
 
             // Wait a bit for the container to be visible in the DOM
@@ -552,18 +552,18 @@ class LoginForm {
 
             // Render the widget - renderWidget() will handle if already rendered
             if (window.captcha && window.captcha.isInitialized) {
-                console.log('🔄 Ensuring CAPTCHA widget is rendered...');
+                window.logger?.log('🔄 Ensuring CAPTCHA widget is rendered...');
                 // Check if widget element exists and is empty (needs rendering)
                 const widgetElement = document.getElementById('captcha-widget');
                 if (widgetElement && (!window.captcha.widgetId || widgetElement.children.length === 0)) {
                     await window.captcha.renderWidget();
                 } else if (window.captcha.widgetId) {
                     // Widget already rendered, just ensure it's visible
-                    console.log('✅ CAPTCHA widget already rendered');
+                    window.logger?.log('✅ CAPTCHA widget already rendered');
                 }
             }
         } catch (error) {
-            console.error('❌ Failed to initialize CAPTCHA for login:', error);
+            window.logger?.error('❌ Failed to initialize CAPTCHA for login:', error);
         }
     }
 
@@ -574,7 +574,7 @@ class LoginForm {
         const captchaContainer = document.getElementById('captcha-container');
         if (captchaContainer) {
             captchaContainer.classList.add('hidden');
-            console.log('🔓 CAPTCHA no longer required - hiding widget');
+            window.logger?.log('🔓 CAPTCHA no longer required - hiding widget');
         }
     }
 
@@ -585,7 +585,7 @@ class LoginForm {
         this.failedAttempts = 0;
         this.saveFailedAttempts();
         this.hideCaptcha();
-        console.log('🧹 Cleared failed attempts counter');
+        window.logger?.log('🧹 Cleared failed attempts counter');
     }
 
     /**
@@ -618,11 +618,11 @@ class LoginForm {
             });
 
             if (error) {
-                console.error('❌ Error logging login attempt:', error);
+                window.logger?.error('❌ Error logging login attempt:', error);
                 return;
             }
 
-            console.log(`📊 Login attempt logged: ${success ? 'Success' : 'Failed'}${sessionId ? ' (session tracked)' : ''}`);
+            window.logger?.log(`📊 Login attempt logged: ${success ? 'Success' : 'Failed'}${sessionId ? ' (session tracked)' : ''}`);
 
             // Send new login notification ONLY if login was successful AND 2FA was NOT used
             // (If 2FA is enabled, notification will be sent from 2fa-verify.js instead)
@@ -635,7 +635,7 @@ class LoginForm {
 
         } catch (error) {
             // Don't fail login if logging fails
-            console.error('Failed to log login attempt:', error);
+            window.logger?.error('Failed to log login attempt:', error);
         }
     }
 

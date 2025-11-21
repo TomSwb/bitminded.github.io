@@ -49,7 +49,7 @@
 
                 this.updateTranslations();
             } catch (error) {
-                console.error('Footer translations failed to load:', error);
+                window.logger?.error('Footer translations failed to load:', error);
                 this.showFallback();
             }
         },

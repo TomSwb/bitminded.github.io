@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     })
     .catch(error => {
-        console.error('Failed to load admin translations:', error);
+        window.logger?.error('Failed to load admin translations:', error);
         // Still show content even if translation fails
         showContent();
     });

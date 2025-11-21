@@ -26,7 +26,7 @@ class BulkOperations {
 
             translationsReady = await this.initializeTranslations();
         } catch (error) {
-            console.error('❌ BulkOperations: failed to initialize component', error);
+            window.logger?.error('❌ BulkOperations: failed to initialize component', error);
             this.showError(this.translate('Failed to initialize bulk operations.', 'Failed to initialize bulk operations.'));
         } finally {
             this.showTranslatableContent();
@@ -41,7 +41,7 @@ class BulkOperations {
 
             this.isInitialized = true;
         } catch (error) {
-            console.error('❌ BulkOperations: failed to load initial tab', error);
+            window.logger?.error('❌ BulkOperations: failed to load initial tab', error);
             if (!translationsReady) {
                 this.showError(this.translate('Failed to load maintenance controls.', 'Failed to load maintenance controls.'));
             }
@@ -101,7 +101,7 @@ class BulkOperations {
         }
 
         if (!window.componentLoader || !this.elements.maintenanceContainer) {
-            console.error('❌ Maintenance tab container not available');
+            window.logger?.error('❌ Maintenance tab container not available');
             return;
         }
 
@@ -130,7 +130,7 @@ class BulkOperations {
 
             this.loadedTabs.add('maintenance');
         } catch (error) {
-            console.error('❌ Failed to load maintenance mode component:', error);
+            window.logger?.error('❌ Failed to load maintenance mode component:', error);
             this.showError(this.translate('Failed to load maintenance controls.', 'Failed to load maintenance controls.'));
         }
     }
@@ -146,7 +146,7 @@ class BulkOperations {
             }
             return true; // Indicate translations are ready
         } catch (error) {
-            console.error('❌ Failed to initialize bulk operations translations:', error);
+            window.logger?.error('❌ Failed to initialize bulk operations translations:', error);
             return false; // Indicate translations failed to initialize
         }
     }

@@ -34,7 +34,7 @@ class NotificationsPreferences {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Notifications Preferences: Already initialized');
+                window.logger?.log('Notifications Preferences: Already initialized');
                 return;
             }
 
@@ -65,7 +65,7 @@ class NotificationsPreferences {
             }, 100);
 
         } catch (error) {
-            console.error('❌ Notifications Preferences: Failed to initialize:', error);
+            window.logger?.error('❌ Notifications Preferences: Failed to initialize:', error);
             this.showError('Failed to initialize notifications preferences');
         }
     }
@@ -106,7 +106,7 @@ class NotificationsPreferences {
             await this.loadPreferences();
             
         } catch (error) {
-            console.error('❌ Notifications Preferences: Failed to load user:', error);
+            window.logger?.error('❌ Notifications Preferences: Failed to load user:', error);
             throw error;
         }
     }
@@ -123,11 +123,11 @@ class NotificationsPreferences {
                 .single();
             
             if (error) {
-                console.error('Error loading preferences:', error);
+                window.logger?.error('Error loading preferences:', error);
                 
                 // If no record exists (PGRST116), create one
                 if (error.code === 'PGRST116') {
-                    console.log('📝 Creating new user preferences record...');
+                    window.logger?.log('📝 Creating new user preferences record...');
                     await this.createUserPreferences();
                     return;
                 }
@@ -179,10 +179,10 @@ class NotificationsPreferences {
                 }
             }
             
-            console.log('✅ Preferences loaded:', this.preferences);
+            window.logger?.log('✅ Preferences loaded:', this.preferences);
             
         } catch (error) {
-            console.error('❌ Notifications Preferences: Failed to load preferences:', error);
+            window.logger?.error('❌ Notifications Preferences: Failed to load preferences:', error);
             // Use defaults on error
             this.preferences = {
                 email_notifications: true,
@@ -249,10 +249,10 @@ class NotificationsPreferences {
             if (error) throw error;
 
             this.preferences = data;
-            console.log('✅ User preferences record created successfully');
+            window.logger?.log('✅ User preferences record created successfully');
             
         } catch (error) {
-            console.error('❌ Failed to create user preferences:', error);
+            window.logger?.error('❌ Failed to create user preferences:', error);
             // Fall back to defaults
             this.preferences = {
                 email_notifications: true,
@@ -300,7 +300,7 @@ class NotificationsPreferences {
         this.inappUsernameChangedCheckbox = document.getElementById('inapp-username-changed');
 
         if (!this.form) {
-            console.error('❌ Notifications Preferences: Form not found');
+            window.logger?.error('❌ Notifications Preferences: Form not found');
             return;
         }
 
@@ -420,7 +420,7 @@ class NotificationsPreferences {
             if (error) {
                 // If update fails because record doesn't exist, try to create it
                 if (error.code === 'PGRST116') {
-                    console.log('📝 Record not found, creating new preferences...');
+                    window.logger?.log('📝 Record not found, creating new preferences...');
                     await this.createUserPreferences();
                     // Try update again with the new record
                     const { error: updateError } = await supabase
@@ -436,11 +436,11 @@ class NotificationsPreferences {
             // Update local preferences
             this.preferences = { ...this.preferences, ...preferences };
 
-            console.log('✅ Notifications Preferences: Preferences saved');
+            window.logger?.log('✅ Notifications Preferences: Preferences saved');
             this.showSuccess(this.getTranslation('Preferences saved successfully'));
 
         } catch (error) {
-            console.error('❌ Notifications Preferences: Failed to save:', error);
+            window.logger?.error('❌ Notifications Preferences: Failed to save:', error);
             this.showError(this.getTranslation('Failed to save preferences'));
         } finally {
             this.isSubmitting = false;

@@ -33,7 +33,7 @@ class DeleteAccount {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Delete Account: Already initialized');
+                window.logger?.log('Delete Account: Already initialized');
                 return;
             }
 
@@ -58,7 +58,7 @@ class DeleteAccount {
             }, 100);
 
         } catch (error) {
-            console.error('❌ Delete Account: Failed to initialize:', error);
+            window.logger?.error('❌ Delete Account: Failed to initialize:', error);
             this.showError('Failed to initialize delete account component');
         }
     }
@@ -83,7 +83,7 @@ class DeleteAccount {
         this.cancellationContainer = document.getElementById('deletion-cancellation-container');
 
         if (!this.deleteBtn) {
-            console.error('Delete Account elements not found');
+            window.logger?.error('Delete Account elements not found');
             return;
         }
 
@@ -111,7 +111,7 @@ class DeleteAccount {
                 this.updateTranslations();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize delete account translations:', error);
+            window.logger?.error('❌ Failed to initialize delete account translations:', error);
         }
     }
 
@@ -237,7 +237,7 @@ class DeleteAccount {
                 throw new Error(result.error || 'Failed to schedule deletion');
             }
 
-            console.log('✅ Account deletion scheduled:', result);
+            window.logger?.log('✅ Account deletion scheduled:', result);
             
             this.deletionRequest = result.deletionRequest;
             this.hideProcessing();
@@ -250,7 +250,7 @@ class DeleteAccount {
             }, 2000);
             
         } catch (error) {
-            console.error('Error deleting account:', error);
+            window.logger?.error('Error deleting account:', error);
             this.hideProcessing();
             this.confirmBtn.disabled = false;
             this.showError(error.message || 'Failed to delete account. Please try again.');
@@ -354,7 +354,7 @@ class DeleteAccount {
             this.showCancellationUI(data);
 
         } catch (error) {
-            console.error('Error checking pending deletion:', error);
+            window.logger?.error('Error checking pending deletion:', error);
         }
     }
 
@@ -461,7 +461,7 @@ class DeleteAccount {
                 throw new Error(result.error || 'Failed to cancel deletion');
             }
 
-            console.log('✅ Account deletion cancelled:', result);
+            window.logger?.log('✅ Account deletion cancelled:', result);
 
             // Hide cancellation UI
             if (this.cancellationContainer) {
@@ -477,7 +477,7 @@ class DeleteAccount {
             }, 2000);
 
         } catch (error) {
-            console.error('Error cancelling deletion:', error);
+            window.logger?.error('Error cancelling deletion:', error);
             this.showError(error.message || 'Failed to cancel deletion. Please try again.');
             
             const cancelButton = document.getElementById('cancel-deletion-btn');
@@ -493,7 +493,7 @@ class DeleteAccount {
      */
     async handleCancellationFromEmail(token) {
         try {
-            console.log('Cancelling deletion via email token');
+            window.logger?.log('Cancelling deletion via email token');
 
             const response = await fetch(
                 `${window.supabase.supabaseUrl}/functions/v1/cancel-account-deletion`,
@@ -514,7 +514,7 @@ class DeleteAccount {
                 throw new Error(result.error || 'Failed to cancel deletion');
             }
 
-            console.log('✅ Account deletion cancelled via email:', result);
+            window.logger?.log('✅ Account deletion cancelled via email:', result);
 
             // Show success and remove URL parameters
             this.showSuccessCancellation();
@@ -528,7 +528,7 @@ class DeleteAccount {
             }, 2000);
 
         } catch (error) {
-            console.error('Error cancelling deletion from email:', error);
+            window.logger?.error('Error cancelling deletion from email:', error);
             this.showError(error.message || 'Failed to cancel deletion. Please try again.');
         }
     }

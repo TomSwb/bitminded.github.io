@@ -17,7 +17,7 @@ class LanguageSwitcher {
      */
     init(config = {}) {
         if (this.isInitialized) {
-            console.log('Language switcher already initialized');
+            window.logger?.log('Language switcher already initialized');
             return;
         }
 
@@ -32,7 +32,7 @@ class LanguageSwitcher {
 
         this.element = document.getElementById('language-switcher');
         if (!this.element) {
-            console.error('❌ Language switcher element not found');
+            window.logger?.error('❌ Language switcher element not found');
             return;
         }
 
@@ -190,7 +190,7 @@ class LanguageSwitcher {
      */
     changeLanguage(language) {
         if (language === this.currentLanguage) {
-            console.log('Language already set to:', language);
+            window.logger?.log('Language already set to:', language);
             this.closeDropdown();
             return;
         }
@@ -218,7 +218,7 @@ class LanguageSwitcher {
             // Calling changeLanguage silently
             window.changeLanguage(language);
         } else {
-            console.warn('Global changeLanguage function not found');
+            window.logger?.warn('Global changeLanguage function not found');
         }
 
         // Update i18next directly if available
@@ -238,7 +238,7 @@ class LanguageSwitcher {
         try {
             // Check if Supabase is available
             if (typeof window.supabase === 'undefined') {
-                console.log('Supabase not available, skipping database save');
+                window.logger?.log('Supabase not available, skipping database save');
                 return;
             }
 
@@ -257,13 +257,13 @@ class LanguageSwitcher {
                 .eq('id', user.id);
 
             if (error) {
-                console.error('Failed to save language to database:', error);
+                window.logger?.error('Failed to save language to database:', error);
             } else {
-                console.log(`✅ Language saved to database: ${language}`);
+                window.logger?.log(`✅ Language saved to database: ${language}`);
             }
 
         } catch (error) {
-            console.error('Error saving language to database:', error);
+            window.logger?.error('Error saving language to database:', error);
             // Don't fail the language change if database save fails
         }
     }
@@ -374,7 +374,7 @@ class LanguageSwitcher {
         });
 
         this.isInitialized = false;
-        console.log('🗑️ Language switcher destroyed');
+        window.logger?.log('🗑️ Language switcher destroyed');
     }
 }
 

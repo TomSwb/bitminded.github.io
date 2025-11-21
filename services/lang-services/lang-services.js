@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }))
         .then(applyTranslations)
         .catch(error => {
-            console.error('Failed to load services translations:', error);
+            window.logger?.error('Failed to load services translations:', error);
             revealContent();
         });
 

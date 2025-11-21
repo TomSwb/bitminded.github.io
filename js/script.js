@@ -65,7 +65,7 @@ async function loadNavigationMenu() {
         });
         // Navigation menu component loaded
     } catch (error) {
-        console.error('❌ Failed to load navigation menu component:', error);
+        window.logger?.error('❌ Failed to load navigation menu component:', error);
     }
 }
 
@@ -77,7 +77,7 @@ async function loadLanguageSwitcher() {
         });
         // Language switcher component loaded
     } catch (error) {
-        console.error('❌ Failed to load language switcher component:', error);
+        window.logger?.error('❌ Failed to load language switcher component:', error);
     }
 }
 
@@ -90,7 +90,7 @@ async function loadThemeSwitcher() {
         });
         // Theme switcher component loaded
     } catch (error) {
-        console.error('❌ Failed to load theme switcher component:', error);
+        window.logger?.error('❌ Failed to load theme switcher component:', error);
     }
 }
 
@@ -110,7 +110,7 @@ async function loadNotificationCenter() {
         });
         // Notification center loaded silently
     } catch (error) {
-        console.error('❌ Failed to load notification center component:', error);
+        window.logger?.error('❌ Failed to load notification center component:', error);
     }
 }
 
@@ -131,7 +131,7 @@ async function loadCurrencySwitcher() {
         });
         // Currency switcher component loaded
     } catch (error) {
-        console.error('❌ Failed to load currency switcher component:', error);
+        window.logger?.error('❌ Failed to load currency switcher component:', error);
     }
 }
 
@@ -152,7 +152,7 @@ async function loadAuthButtons() {
         // Auth buttons component loaded
         
     } catch (error) {
-        console.error('❌ Script: Failed to load auth buttons component:', error);
+        window.logger?.error('❌ Script: Failed to load auth buttons component:', error);
     }
 }
 
@@ -164,7 +164,7 @@ async function loadSiteFooter() {
         });
         // Site footer component loaded
     } catch (error) {
-        console.error('❌ Failed to load site footer component:', error);
+        window.logger?.error('❌ Failed to load site footer component:', error);
         throw error;
     }
 }

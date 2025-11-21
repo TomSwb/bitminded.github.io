@@ -187,9 +187,9 @@ class AvatarCropperPage {
     
     async handleConfirm() {
         try {
-            console.log('🔄 Cropping image...');
+            window.logger?.log('🔄 Cropping image...');
             const croppedImage = await this.getCroppedImage();
-            console.log('✅ Image cropped, data URL length:', croppedImage.length);
+            window.logger?.log('✅ Image cropped, data URL length:', croppedImage.length);
             
             // Check if we're in a popup window or full page
             const isPopup = window.opener && !window.opener.closed;
@@ -197,12 +197,12 @@ class AvatarCropperPage {
             if (isPopup) {
                 // Send cropped image to parent window via postMessage
                 try {
-                    console.log('📤 Sending cropped image to parent window...');
+                    window.logger?.log('📤 Sending cropped image to parent window...');
                     window.opener.postMessage({ 
                         type: 'avatar_cropped',
                         imageData: croppedImage
                     }, window.location.origin);
-                    console.log('✅ Message sent to parent');
+                    window.logger?.log('✅ Message sent to parent');
                     
                     // Small delay before closing
                     await new Promise(resolve => setTimeout(resolve, 200));
@@ -210,13 +210,13 @@ class AvatarCropperPage {
                     // Close window
                     window.close();
                 } catch (e) {
-                    console.error('Could not post message to opener:', e);
+                    window.logger?.error('Could not post message to opener:', e);
                     alert('Failed to send image data. Please try again.');
                     return;
                 }
             } else {
                 // Full page mode (mobile) - store in sessionStorage and navigate back
-                console.log('📤 Storing cropped image in sessionStorage for mobile...');
+                window.logger?.log('📤 Storing cropped image in sessionStorage for mobile...');
                 sessionStorage.setItem('avatar_cropped_image', croppedImage);
                 sessionStorage.setItem('avatar_crop_confirmed', 'true');
                 
@@ -224,7 +224,7 @@ class AvatarCropperPage {
                 window.location.href = '/account/';
             }
         } catch (error) {
-            console.error('Error cropping image:', error);
+            window.logger?.error('Error cropping image:', error);
             alert('Failed to crop image. Please try again.');
         }
     }
@@ -249,7 +249,7 @@ class AvatarCropperPage {
     async getCroppedImage() {
         return new Promise((resolve, reject) => {
             try {
-                console.log('📊 Crop state:', {
+                window.logger?.log('📊 Crop state:', {
                     imageX: this.imageX,
                     imageY: this.imageY,
                     scale: this.scale
@@ -258,13 +258,13 @@ class AvatarCropperPage {
                 // Get the preview circle dimensions
                 const circleSize = this.previewCircle.offsetWidth;
                 
-                console.log('Circle size:', circleSize);
+                window.logger?.log('Circle size:', circleSize);
                 
                 // Get natural image dimensions
                 const natWidth = this.image.naturalWidth;
                 const natHeight = this.image.naturalHeight;
                 
-                console.log('Natural dimensions:', natWidth, 'x', natHeight);
+                window.logger?.log('Natural dimensions:', natWidth, 'x', natHeight);
                 
                 // Create a canvas that matches the preview circle exactly
                 const tempCanvas = document.createElement('canvas');
@@ -278,7 +278,7 @@ class AvatarCropperPage {
                 const displayHeight = circleSize;
                 const displayWidth = (natWidth / natHeight) * displayHeight;
                 
-                console.log('CSS display dimensions:', displayWidth, 'x', displayHeight);
+                window.logger?.log('CSS display dimensions:', displayWidth, 'x', displayHeight);
                 
                 // Apply the same transforms as CSS: translate(calc(-50% + Xpx), calc(-50% + Ypx)) scale(Z)
                 tempCtx.save();
@@ -323,11 +323,11 @@ class AvatarCropperPage {
                 ctx.restore();
                 
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                console.log('✅ Cropped image created');
+                window.logger?.log('✅ Cropped image created');
                 resolve(dataUrl);
                 
             } catch (error) {
-                console.error('❌ Error in getCroppedImage:', error);
+                window.logger?.error('❌ Error in getCroppedImage:', error);
                 reject(error);
             }
         });
@@ -354,7 +354,7 @@ class AvatarCropperPage {
             const languageTranslations = translations[currentLanguage];
             
             if (!languageTranslations) {
-                console.warn('No translations found for language:', currentLanguage);
+                window.logger?.warn('No translations found for language:', currentLanguage);
                 return;
             }
             
@@ -362,7 +362,7 @@ class AvatarCropperPage {
             this.updateTranslations(languageTranslations);
             
         } catch (error) {
-            console.error('Failed to load translations:', error);
+            window.logger?.error('Failed to load translations:', error);
         }
     }
     

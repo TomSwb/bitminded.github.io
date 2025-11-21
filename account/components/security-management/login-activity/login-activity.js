@@ -22,7 +22,7 @@ class LoginActivity {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Login Activity: Already initialized');
+                window.logger?.log('Login Activity: Already initialized');
                 return;
             }
 
@@ -47,7 +47,7 @@ class LoginActivity {
             }, 100);
 
         } catch (error) {
-            console.error('❌ Login Activity: Failed to initialize:', error);
+            window.logger?.error('❌ Login Activity: Failed to initialize:', error);
             this.showError('Failed to initialize login activity component');
         }
     }
@@ -64,7 +64,7 @@ class LoginActivity {
         this.errorText = document.getElementById('activity-error-text');
 
         if (!this.listContainer) {
-            console.error('❌ Login Activity: Required elements not found');
+            window.logger?.error('❌ Login Activity: Required elements not found');
             return;
         }
 
@@ -105,7 +105,7 @@ class LoginActivity {
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
             if (userError || !user) {
-                console.error('❌ Login Activity: Failed to get user:', userError);
+                window.logger?.error('❌ Login Activity: Failed to get user:', userError);
                 this.showEmpty();
                 this.showLoading(false);
                 return;
@@ -120,7 +120,7 @@ class LoginActivity {
                 .limit(20);
             
             if (error) {
-                console.error('❌ Login Activity: Failed to load activity:', error);
+                window.logger?.error('❌ Login Activity: Failed to load activity:', error);
                 this.showError('Failed to load login activity');
                 this.showLoading(false);
                 return;
@@ -133,7 +133,7 @@ class LoginActivity {
             this.showLoading(false);
 
         } catch (error) {
-            console.error('❌ Login Activity: Failed to load activity:', error);
+            window.logger?.error('❌ Login Activity: Failed to load activity:', error);
             this.showError('Failed to load login activity');
             this.showLoading(false);
         }
@@ -359,14 +359,14 @@ class LoginActivity {
      */
     async initializeTranslations() {
         if (!window.loginActivityTranslations) {
-            console.warn('⚠️ Login Activity: Translations not loaded yet');
+            window.logger?.warn('⚠️ Login Activity: Translations not loaded yet');
             return;
         }
 
         try {
             await window.loginActivityTranslations.init();
         } catch (error) {
-            console.error('❌ Login Activity: Failed to initialize translations:', error);
+            window.logger?.error('❌ Login Activity: Failed to initialize translations:', error);
         }
     }
 

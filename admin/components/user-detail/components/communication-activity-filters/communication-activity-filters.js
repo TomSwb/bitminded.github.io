@@ -29,9 +29,9 @@ class CommunicationActivityFilters {
             this.initializeDropdowns();
             
             this.isInitialized = true;
-            console.log('✅ Communication Activity Filters initialized');
+            window.logger?.log('✅ Communication Activity Filters initialized');
         } catch (error) {
-            console.error('❌ Failed to initialize communication activity filters:', error);
+            window.logger?.error('❌ Failed to initialize communication activity filters:', error);
         }
     }
 

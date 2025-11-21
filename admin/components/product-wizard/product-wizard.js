@@ -31,7 +31,7 @@ class ProductWizard {
             // Check authentication first
             const isAuthenticated = await this.checkAuthentication();
             if (!isAuthenticated) {
-                console.error('❌ User not authenticated');
+                window.logger?.error('❌ User not authenticated');
                 this.showError('Please log in to access the admin panel');
                 return;
             }
@@ -71,7 +71,7 @@ class ProductWizard {
             this.isInitialized = true;
 
         } catch (error) {
-            console.error('❌ Product Creation Wizard: Failed to initialize:', error);
+            window.logger?.error('❌ Product Creation Wizard: Failed to initialize:', error);
             this.showError('Failed to initialize product wizard');
         }
     }
@@ -175,7 +175,7 @@ class ProductWizard {
                 .single();
 
             if (error) {
-                console.error('❌ Error loading product:', error);
+                window.logger?.error('❌ Error loading product:', error);
                 this.showError('Failed to load product data');
                 return;
             }
@@ -247,12 +247,12 @@ class ProductWizard {
 
             // Load completed steps from database (but we'll rebuild them based on actual data to handle step reordering)
             if (data.completed_steps && Array.isArray(data.completed_steps)) {
-                console.log('⚠️ Loaded old completed_steps:', Array.from(data.completed_steps));
-                console.log('ℹ️ Will rebuild based on actual data to handle step reordering');
+                window.logger?.log('⚠️ Loaded old completed_steps:', Array.from(data.completed_steps));
+                window.logger?.log('ℹ️ Will rebuild based on actual data to handle step reordering');
             }
 
         } catch (error) {
-            console.error('❌ Error loading existing product:', error);
+            window.logger?.error('❌ Error loading existing product:', error);
             this.showError('Failed to load product data');
         }
     }
@@ -272,32 +272,32 @@ class ProductWizard {
             const technicalSpec = this.stepData[2].technicalSpecification;
             if (technicalSpec && technicalSpec.trim() !== '') {
                 this.markStepCompleted(2);
-                console.log('✅ Step 2 marked as completed (technical spec exists)');
+                window.logger?.log('✅ Step 2 marked as completed (technical spec exists)');
             }
         }
 
         // Step 3: Check if content & media exists (icon is required)
         if (this.formData.icon_url && this.formData.features && this.formData.features.length > 0) {
             this.markStepCompleted(3);
-            console.log('✅ Step 3 marked as completed (icon and features exist)');
+            window.logger?.log('✅ Step 3 marked as completed (icon and features exist)');
         }
 
         // Step 4: Check if GitHub repository exists
         if (this.formData.github_repo_created && this.formData.github_repo_url) {
             this.markStepCompleted(4);
-            console.log('✅ Step 4 marked as completed (GitHub repo exists)');
+            window.logger?.log('✅ Step 4 marked as completed (GitHub repo exists)');
         }
 
         // Step 5: Check if Stripe product exists
         if (this.formData.stripe_product_id) {
             this.markStepCompleted(5);
-            console.log('✅ Step 5 marked as completed (Stripe product exists)');
+            window.logger?.log('✅ Step 5 marked as completed (Stripe product exists)');
         }
 
         // Step 6: Check if Cloudflare domain is configured
         if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
             this.markStepCompleted(6);
-            console.log('✅ Step 6 marked as completed (Cloudflare configured)');
+            window.logger?.log('✅ Step 6 marked as completed (Cloudflare configured)');
         }
     }
 
@@ -307,7 +307,7 @@ class ProductWizard {
     async checkAuthentication() {
         try {
             if (typeof window.supabase === 'undefined') {
-                console.error('❌ Supabase client not available');
+                window.logger?.error('❌ Supabase client not available');
                 return false;
             }
 
@@ -321,7 +321,7 @@ class ProductWizard {
             return true;
 
         } catch (error) {
-            console.error('❌ Authentication check failed:', error);
+            window.logger?.error('❌ Authentication check failed:', error);
             return false;
         }
     }
@@ -440,7 +440,7 @@ class ProductWizard {
         try {
             const stepContent = document.getElementById(`step-${stepNumber}`);
             if (!stepContent) {
-                console.error(`Step ${stepNumber} content not found`);
+                window.logger?.error(`Step ${stepNumber} content not found`);
                 return;
             }
 
@@ -468,11 +468,11 @@ class ProductWizard {
                     await this.loadStep7(stepContent); // Review & Publish (was Step 8)
                     break;
                 default:
-                    console.error(`Unknown step: ${stepNumber}`);
+                    window.logger?.error(`Unknown step: ${stepNumber}`);
             }
 
         } catch (error) {
-            console.error(`Error loading step ${stepNumber}:`, error);
+            window.logger?.error(`Error loading step ${stepNumber}:`, error);
             this.showError(`Failed to load step ${stepNumber}`);
         }
     }
@@ -528,7 +528,7 @@ class ProductWizard {
             }
 
         } else {
-            console.error('❌ StepSpecGeneration component not available');
+            window.logger?.error('❌ StepSpecGeneration component not available');
             stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 2: Technical Specification</h2><p>Component not available</p></div>';
         }
     }
@@ -576,7 +576,7 @@ class ProductWizard {
             }
 
         } else {
-            console.error('❌ StepGithubSetup component not available');
+            window.logger?.error('❌ StepGithubSetup component not available');
             stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 4: GitHub Repository Setup</h2><p>Component not available</p></div>';
         }
     }
@@ -595,7 +595,7 @@ class ProductWizard {
                 this.steps[5].setFormData(this.formData);
             }
         } else {
-            console.error('❌ StepStripeCreation component not available');
+            window.logger?.error('❌ StepStripeCreation component not available');
             stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 5: Stripe Product Creation</h2><p>Component not available</p></div>';
         }
     }
@@ -637,7 +637,7 @@ class ProductWizard {
             this.steps[7] = new window.StepReviewSummary();
             await this.steps[7].init();
         } else {
-            console.error('❌ StepReviewSummary component not available');
+            window.logger?.error('❌ StepReviewSummary component not available');
             stepContent.innerHTML = '<div class="product-wizard__step-header"><h2>Step 7: Review & Summary</h2><p>Component not available</p></div>';
         }
     }
@@ -657,7 +657,7 @@ class ProductWizard {
         try {
             await this.saveDraftToDatabase();
         } catch (e) {
-            console.warn('⚠️ Autosave failed while navigating:', e);
+            window.logger?.warn('⚠️ Autosave failed while navigating:', e);
         } finally {
             // Always reflect completion state based on in-memory data
             this.updateCompletionForStep(previousStep);
@@ -832,7 +832,7 @@ class ProductWizard {
         });
 
         if (!isValid) {
-            console.log('❌ Missing mandatory fields:', missingFields);
+            window.logger?.log('❌ Missing mandatory fields:', missingFields);
         }
 
         return isValid;
@@ -892,7 +892,7 @@ class ProductWizard {
      */
     markStepCompleted(stepNumber) {
         this.completedSteps.add(stepNumber);
-        console.log(`✅ Marked step ${stepNumber} as completed`);
+        window.logger?.log(`✅ Marked step ${stepNumber} as completed`);
         this.updateStepIndicators();
     }
 
@@ -902,7 +902,7 @@ class ProductWizard {
      */
     markStepIncomplete(stepNumber) {
         this.completedSteps.delete(stepNumber);
-        console.log(`❌ Marked step ${stepNumber} as incomplete`);
+        window.logger?.log(`❌ Marked step ${stepNumber} as incomplete`);
         this.updateStepIndicators();
     }
 
@@ -921,7 +921,7 @@ class ProductWizard {
             
             if (result.success) {
                 this.showSuccess('Draft saved successfully!');
-                console.log('💾 Draft saved:', this.formData);
+                window.logger?.log('💾 Draft saved:', this.formData);
                 
                 // Mark Step 1 as completed (basic info is saved)
                 this.markStepCompleted(1);
@@ -930,7 +930,7 @@ class ProductWizard {
             }
 
         } catch (error) {
-            console.error('❌ Error saving draft:', error);
+            window.logger?.error('❌ Error saving draft:', error);
             this.showError('Failed to save draft: ' + error.message);
         } finally {
             this.hideLoading();
@@ -1029,7 +1029,7 @@ class ProductWizard {
                     });
                 }
             } catch (error) {
-                console.error('⚠️ Automatic translation failed:', error);
+                window.logger?.error('⚠️ Automatic translation failed:', error);
             }
         }
 
@@ -1051,7 +1051,7 @@ class ProductWizard {
     async saveDraftToDatabase(statusOverride = null) {
         try {
             // Prepare product data
-            console.log('🔍 formData before saveDraft:', { 
+            window.logger?.log('🔍 formData before saveDraft:', { 
                 stripe_product_id: this.formData.stripe_product_id,
                 stripe_price_id: this.formData.stripe_price_id 
             });
@@ -1079,7 +1079,7 @@ class ProductWizard {
             };
 
             // Add AI data from Step 2 if available
-            console.log('🔍 Checking for Step 2 data:', {
+            window.logger?.log('🔍 Checking for Step 2 data:', {
                 hasStepData: !!this.stepData,
                 stepDataKeys: this.stepData ? Object.keys(this.stepData) : [],
                 step2Data: this.stepData && this.stepData[2] ? this.stepData[2] : null
@@ -1088,7 +1088,7 @@ class ProductWizard {
             if (this.stepData && this.stepData[2]) {
                 const step2Data = this.stepData[2];
                 
-                console.log('📊 Step 2 data details:', {
+                window.logger?.log('📊 Step 2 data details:', {
                     hasRecommendations: !!step2Data.recommendations,
                     recommendationsKeys: step2Data.recommendations ? Object.keys(step2Data.recommendations) : [],
                     hasConversationHistory: !!step2Data.conversationHistory,
@@ -1101,24 +1101,24 @@ class ProductWizard {
                 // Add AI recommendations and conversations
                 if (step2Data.recommendations) {
                     productData.ai_recommendations = step2Data.recommendations;
-                    console.log('✅ Added ai_recommendations to productData');
+                    window.logger?.log('✅ Added ai_recommendations to productData');
                 }
                 if (step2Data.conversationHistory) {
                     productData.ai_conversations = step2Data.conversationHistory;
-                    console.log('✅ Added ai_conversations to productData');
+                    window.logger?.log('✅ Added ai_conversations to productData');
                 }
                 if (step2Data.finalDecisions) {
                     productData.ai_final_decisions = step2Data.finalDecisions;
-                    console.log('✅ Added ai_final_decisions to productData');
+                    window.logger?.log('✅ Added ai_final_decisions to productData');
                 }
                 
                 // Add technical specification if generated
                 if (step2Data.technicalSpecification) {
                     productData.technical_specification = step2Data.technicalSpecification;
-                    console.log('✅ Added technical_specification to productData');
+                    window.logger?.log('✅ Added technical_specification to productData');
                 }
             } else {
-                console.log('❌ No Step 2 data found to save');
+                window.logger?.log('❌ No Step 2 data found to save');
             }
             
             // Add GitHub repository status if created
@@ -1127,14 +1127,14 @@ class ProductWizard {
                 productData.github_repo_url = this.formData.github_repo_url;
                 productData.github_repo_name = this.formData.github_repo_name;
                 productData.github_branch = this.formData.github_branch;
-                console.log('✅ Added GitHub repository status to productData');
+                window.logger?.log('✅ Added GitHub repository status to productData');
             }
 
             // Add Cloudflare configuration if set
             productData.cloudflare_domain = this.formData.cloudflare_domain || null;
             productData.cloudflare_worker_url = this.formData.cloudflare_worker_url || null;
             if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
-                console.log('✅ Added Cloudflare configuration to productData');
+                window.logger?.log('✅ Added Cloudflare configuration to productData');
             }
 
             // Add media fields from Step 3
@@ -1144,7 +1144,7 @@ class ProductWizard {
             productData.documentation_url = this.formData.documentation_url || null;
             productData.support_email = this.formData.support_email || null;
             productData.features = this.formData.features || null;
-            console.log('✅ Added media fields to productData');
+            window.logger?.log('✅ Added media fields to productData');
 
             // Add Stripe fields (always, so we can save null when deleting)
             productData.stripe_product_id = this.formData.stripe_product_id || null;
@@ -1161,30 +1161,30 @@ class ProductWizard {
             productData.trial_days = this.formData.trial_days || 0;
             productData.trial_requires_payment = this.formData.trial_requires_payment || false;
             productData.requires_admin_approval = this.formData.requires_admin_approval || false;
-            console.log('✅ Added Stripe fields to productData');
+            window.logger?.log('✅ Added Stripe fields to productData');
 
             // Add completed steps array
             productData.completed_steps = Array.from(this.completedSteps);
-            console.log('✅ Added completed_steps to productData:', productData.completed_steps);
+            window.logger?.log('✅ Added completed_steps to productData:', productData.completed_steps);
 
-            console.log('📤 Final productData being sent to database:', productData);
+            window.logger?.log('📤 Final productData being sent to database:', productData);
 
             // Test if AI columns exist by checking the current product
             if (this.formData.product_id) {
-                console.log('🔍 Testing AI columns existence...');
+                window.logger?.log('🔍 Testing AI columns existence...');
                 const { data: testData, error: testError } = await window.supabase
                     .from('products')
                     .select('ai_recommendations, ai_conversations, ai_final_decisions')
                     .eq('id', this.formData.product_id)
                     .single();
                 
-                console.log('🧪 AI columns test result:', { testData, testError });
+                window.logger?.log('🧪 AI columns test result:', { testData, testError });
             }
 
             // Check if this is an update to existing draft
             if (this.formData.product_id) {
-                console.log('🔄 Updating existing product with ID:', this.formData.product_id);
-                console.log('🔍 Stripe fields in productData:', {
+                window.logger?.log('🔄 Updating existing product with ID:', this.formData.product_id);
+                window.logger?.log('🔍 Stripe fields in productData:', {
                     stripe_product_id: productData.stripe_product_id,
                     stripe_price_id: productData.stripe_price_id
                 });
@@ -1196,14 +1196,14 @@ class ProductWizard {
                     .select()
                     .single();
 
-                console.log('📥 Database update response:', { data, error });
+                window.logger?.log('📥 Database update response:', { data, error });
 
                 if (error) {
-                    console.error('❌ Database update error:', error);
+                    window.logger?.error('❌ Database update error:', error);
                     throw error;
                 }
                 
-                console.log('✅ Product updated successfully:', data);
+                window.logger?.log('✅ Product updated successfully:', data);
                 return { success: true, data };
             } else {
                 // Create new draft
@@ -1222,7 +1222,7 @@ class ProductWizard {
             }
 
         } catch (error) {
-            console.error('❌ Database error:', error);
+            window.logger?.error('❌ Database error:', error);
             return { success: false, error: error.message };
         }
     }
@@ -1244,7 +1244,7 @@ class ProductWizard {
             
             if (result.success) {
                 this.showSuccess('Product updated successfully!');
-                console.log('✅ Product updated:', this.formData);
+                window.logger?.log('✅ Product updated:', this.formData);
                 
                 // Close the tab after a short delay
                 setTimeout(() => {
@@ -1255,7 +1255,7 @@ class ProductWizard {
             }
 
         } catch (error) {
-            console.error('❌ Error updating product:', error);
+            window.logger?.error('❌ Error updating product:', error);
             this.showError('Failed to update product: ' + error.message);
         } finally {
             this.hideLoading();
@@ -1325,14 +1325,14 @@ class ProductWizard {
                 .single();
 
             if (error) {
-                console.error('❌ Database error:', error);
+                window.logger?.error('❌ Database error:', error);
                 return { success: false, error: error.message };
             }
 
             return { success: true, data: data };
 
         } catch (error) {
-            console.error('❌ Error updating product in database:', error);
+            window.logger?.error('❌ Error updating product in database:', error);
             return { success: false, error: error.message };
         }
     }
@@ -1350,11 +1350,11 @@ class ProductWizard {
             }
 
             // Here you would create the product
-            console.log('🚀 Creating product with data:', this.formData);
+            window.logger?.log('🚀 Creating product with data:', this.formData);
             this.showSuccess('Product created successfully!');
 
         } catch (error) {
-            console.error('❌ Error creating product:', error);
+            window.logger?.error('❌ Error creating product:', error);
             this.showError('Failed to create product');
         } finally {
             this.hideLoading();
@@ -1392,7 +1392,7 @@ class ProductWizard {
                 await window.productWizardTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize translations:', error);
+            window.logger?.error('❌ Failed to initialize translations:', error);
         }
     }
 

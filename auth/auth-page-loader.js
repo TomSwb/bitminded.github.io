@@ -14,7 +14,7 @@ class AuthPageLoader {
      */
     async init() {
         if (this.isInitialized) {
-            console.log('Auth page loader already initialized');
+            window.logger?.log('Auth page loader already initialized');
             return;
         }
 
@@ -51,7 +51,7 @@ class AuthPageLoader {
             this.isInitialized = true;
             // Auth page loader initialized successfully
         } catch (error) {
-            console.error('❌ Failed to initialize auth page loader:', error);
+            window.logger?.error('❌ Failed to initialize auth page loader:', error);
         }
     }
 
@@ -80,7 +80,7 @@ class AuthPageLoader {
         // Check if user is coming from Supabase password reset
         // This happens when Supabase redirects after processing a recovery link
         if (document.referrer && document.referrer.includes('supabase.co/auth/v1/verify')) {
-            console.log('🔍 Detected Supabase password reset redirect');
+            window.logger?.log('🔍 Detected Supabase password reset redirect');
             return 'reset-password';
         }
 
@@ -94,7 +94,7 @@ class AuthPageLoader {
         }
 
         // Default to signup
-        console.log('⚠️ No valid action found, defaulting to signup');
+        window.logger?.log('⚠️ No valid action found, defaulting to signup');
         return 'signup';
     }
 
@@ -148,7 +148,7 @@ class AuthPageLoader {
             this.triggerLanguageChange();
 
         } catch (error) {
-            console.error('❌ Failed to load auth toggle component:', error);
+            window.logger?.error('❌ Failed to load auth toggle component:', error);
             throw error;
         }
     }
@@ -228,7 +228,7 @@ class AuthPageLoader {
             this.triggerLanguageChange();
 
         } catch (error) {
-            console.error('❌ Failed to load signup form component:', error);
+            window.logger?.error('❌ Failed to load signup form component:', error);
             throw error;
         }
     }
@@ -291,7 +291,7 @@ class AuthPageLoader {
             // Component loaded silently
 
         } catch (error) {
-            console.error('❌ Failed to load terms checkbox component:', error);
+            window.logger?.error('❌ Failed to load terms checkbox component:', error);
             throw error;
         }
     }
@@ -360,7 +360,7 @@ class AuthPageLoader {
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();
         } catch (error) {
-            console.error('❌ Failed to load forgot password form component:', error);
+            window.logger?.error('❌ Failed to load forgot password form component:', error);
             throw error;
         }
     }
@@ -442,7 +442,7 @@ class AuthPageLoader {
             this.triggerLanguageChange();
 
         } catch (error) {
-            console.error('❌ Failed to load login form component:', error);
+            window.logger?.error('❌ Failed to load login form component:', error);
             throw error;
         }
     }
@@ -454,7 +454,7 @@ class AuthPageLoader {
         try {
             // Check if CAPTCHA is already loaded
             if (this.loadedComponents.has('captcha')) {
-                console.log('🔄 CAPTCHA component already loaded, skipping...');
+                window.logger?.log('🔄 CAPTCHA component already loaded, skipping...');
                 return;
             }
 
@@ -467,10 +467,10 @@ class AuthPageLoader {
                     theme: 'auto',
                     size: 'normal',
                     callback: (token) => {
-                        console.log('✅ CAPTCHA verified:', token);
+                        window.logger?.log('✅ CAPTCHA verified:', token);
                     },
                     errorCallback: (error) => {
-                        console.error('❌ CAPTCHA error:', error);
+                        window.logger?.error('❌ CAPTCHA error:', error);
                     }
                 });
                 
@@ -484,7 +484,7 @@ class AuthPageLoader {
             // Component loaded silently
 
         } catch (error) {
-            console.error('❌ Failed to load CAPTCHA component:', error);
+            window.logger?.error('❌ Failed to load CAPTCHA component:', error);
             throw error;
         }
     }
@@ -546,7 +546,7 @@ class AuthPageLoader {
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('signup');
-            console.log('🔄 Auth toggle updated to signup mode');
+            window.logger?.log('🔄 Auth toggle updated to signup mode');
         }
     }
 
@@ -600,7 +600,7 @@ class AuthPageLoader {
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('login');
-            console.log('🔄 Auth toggle updated to login mode');
+            window.logger?.log('🔄 Auth toggle updated to login mode');
         }
     }
 
@@ -610,7 +610,7 @@ class AuthPageLoader {
     bindFormSwitchEvents() {
         window.addEventListener('authFormSwitch', async (e) => {
             const { form } = e.detail;
-            console.log(`🔄 Switching to ${form} form`);
+            window.logger?.log(`🔄 Switching to ${form} form`);
             
             try {
                 if (form === 'login') {
@@ -623,7 +623,7 @@ class AuthPageLoader {
                     await this.switchToResetPasswordForm();
                 }
             } catch (error) {
-                console.error(`❌ Failed to switch to ${form} form:`, error);
+                window.logger?.error(`❌ Failed to switch to ${form} form:`, error);
             }
         });
     }
@@ -708,7 +708,7 @@ class AuthPageLoader {
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('login');
-            console.log('🔄 Auth toggle updated to login mode');
+            window.logger?.log('🔄 Auth toggle updated to login mode');
         }
         
         // Update submit button to login mode
@@ -773,7 +773,7 @@ class AuthPageLoader {
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('signup');
-            console.log('🔄 Auth toggle updated to signup mode');
+            window.logger?.log('🔄 Auth toggle updated to signup mode');
         }
         
         // Update submit button to signup mode
@@ -820,7 +820,7 @@ class AuthPageLoader {
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('forgot-password');
-            console.log('🔄 Auth toggle updated to forgot-password mode');
+            window.logger?.log('🔄 Auth toggle updated to forgot-password mode');
         }
     }
 
@@ -885,7 +885,7 @@ class AuthPageLoader {
                 // Re-initialize to pick up the newly injected HTML
                 await window.resetPasswordForm.reinit();
             } else {
-                console.warn('Reset password form instance not found');
+                window.logger?.warn('Reset password form instance not found');
             }
 
             // Mark as loaded
@@ -901,7 +901,7 @@ class AuthPageLoader {
             // Trigger language change event for the loaded component
             this.triggerLanguageChange();
         } catch (error) {
-            console.error('❌ Failed to load reset password form component:', error);
+            window.logger?.error('❌ Failed to load reset password form component:', error);
             throw error;
         }
     }
@@ -948,7 +948,7 @@ class AuthPageLoader {
         // Update auth toggle state
         if (window.authToggle) {
             window.authToggle.setMode('reset-password');
-            console.log('🔄 Auth toggle updated to reset-password mode');
+            window.logger?.log('🔄 Auth toggle updated to reset-password mode');
         }
     }
 }

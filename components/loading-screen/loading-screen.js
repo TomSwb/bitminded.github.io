@@ -46,7 +46,7 @@ class LoadingScreen {
     injectHTML() {
         const container = document.querySelector(this.options.container);
         if (!container) {
-            console.error('Loading screen container not found:', this.options.container);
+            window.logger?.error('Loading screen container not found:', this.options.container);
             return;
         }
 
@@ -63,7 +63,7 @@ class LoadingScreen {
         this.loadingElement = document.getElementById('loading-screen');
         
         if (!this.loadingElement) {
-            console.error('Failed to create loading screen element');
+            window.logger?.error('Failed to create loading screen element');
         }
     }
 
@@ -100,7 +100,7 @@ class LoadingScreen {
         // Legacy support for window.translationReady
         // Check immediately first in case it's already set
         if (window.translationReady) {
-            console.log('✅ Translation already ready on init');
+            window.logger?.log('✅ Translation already ready on init');
             this.setReadyFlag('translation', true);
         } else {
             // If not ready yet, start polling
@@ -112,7 +112,7 @@ class LoadingScreen {
                     // Translation ready
                     this.setReadyFlag('translation', true);
                 } else if (pollCount >= maxPolls) {
-                    console.warn('⚠️ Translation polling timeout, forcing hide');
+                    window.logger?.warn('⚠️ Translation polling timeout, forcing hide');
                     this.forceHide();
                 } else {
                     setTimeout(checkTranslationReady, 50); // Check more frequently
@@ -129,7 +129,7 @@ class LoadingScreen {
         if (this.options.timeout > 0) {
             setTimeout(() => {
                 if (this.isVisible) {
-                    console.warn('⚠️ Loading screen timeout reached, forcing hide');
+                    window.logger?.warn('⚠️ Loading screen timeout reached, forcing hide');
                     this.forceHide();
                 }
             }, this.options.timeout);
@@ -150,7 +150,7 @@ class LoadingScreen {
             // All conditions met
             this.hide();
         } else {
-            console.log('⏳ Not ready to hide yet:', {
+            window.logger?.log('⏳ Not ready to hide yet:', {
                 hasOptions: !!this.options,
                 autoHide: this.options?.autoHide,
                 isReadyToHide: this.isReadyToHide()
@@ -174,7 +174,7 @@ class LoadingScreen {
         if (this.loadingElement) {
             this.loadingElement.classList.remove('hidden');
             this.isVisible = true;
-            console.log('🔄 Loading screen shown');
+            window.logger?.log('🔄 Loading screen shown');
         }
     }
 
@@ -231,7 +231,7 @@ class LoadingScreen {
             this.loadingElement = null;
         }
         this.isVisible = false;
-        console.log('🗑️ Loading screen component destroyed');
+        window.logger?.log('🗑️ Loading screen component destroyed');
     }
 }
 

@@ -18,7 +18,7 @@ class SecurityManagement {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Security Management: Already initialized');
+                window.logger?.log('Security Management: Already initialized');
                 return;
             }
 
@@ -35,7 +35,7 @@ class SecurityManagement {
             // Initialized
 
         } catch (error) {
-            console.error('❌ Security Management: Failed to initialize:', error);
+            window.logger?.error('❌ Security Management: Failed to initialize:', error);
             this.showError('Failed to initialize security management');
         }
     }
@@ -100,7 +100,7 @@ class SecurityManagement {
     async showSection(sectionName) {
         try {
             if (!this.sections.includes(sectionName)) {
-                console.error('❌ Security Management: Invalid section:', sectionName);
+                window.logger?.error('❌ Security Management: Invalid section:', sectionName);
                 return;
             }
 
@@ -127,7 +127,7 @@ class SecurityManagement {
             // Switched section
 
         } catch (error) {
-            console.error('❌ Security Management: Failed to switch section:', error);
+            window.logger?.error('❌ Security Management: Failed to switch section:', error);
             this.showError('Failed to switch section');
         }
     }
@@ -186,14 +186,14 @@ class SecurityManagement {
 
             const componentName = componentMap[sectionName];
             if (!componentName) {
-                console.warn(`⚠️ Security Management: No component mapped for section: ${sectionName}`);
+                window.logger?.warn(`⚠️ Security Management: No component mapped for section: ${sectionName}`);
                 return;
             }
 
             // Check if component exists
             const componentExists = await this.componentExists(componentName);
             if (!componentExists) {
-                console.log(`📝 Security Management: Component ${componentName} not yet implemented`);
+                window.logger?.log(`📝 Security Management: Component ${componentName} not yet implemented`);
                 this.loadedComponents.add(sectionName);
                 return;
             }
@@ -214,11 +214,11 @@ class SecurityManagement {
                 // Update translations after component is loaded
                 this.updateTranslations();
             } else {
-                console.warn('⚠️ Security Management: componentLoader not available');
+                window.logger?.warn('⚠️ Security Management: componentLoader not available');
             }
 
         } catch (error) {
-            console.error(`❌ Security Management: Failed to load content for section ${sectionName}:`, error);
+            window.logger?.error(`❌ Security Management: Failed to load content for section ${sectionName}:`, error);
         }
     }
 
@@ -258,7 +258,7 @@ class SecurityManagement {
             await this.loadLoginActivityStatus();
 
         } catch (error) {
-            console.error('❌ Security Management: Failed to load security status:', error);
+            window.logger?.error('❌ Security Management: Failed to load security status:', error);
         }
     }
 
@@ -272,7 +272,7 @@ class SecurityManagement {
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
             if (userError || !user) {
-                console.error('❌ Security Management: Failed to get user for 2FA status');
+                window.logger?.error('❌ Security Management: Failed to get user for 2FA status');
                 this.update2FAStatus(false);
                 return;
             }
@@ -285,7 +285,7 @@ class SecurityManagement {
                 .maybeSingle();
             
             if (error) {
-                console.error('❌ Security Management: Failed to load 2FA status:', error);
+                window.logger?.error('❌ Security Management: Failed to load 2FA status:', error);
                 this.update2FAStatus(false);
                 return;
             }
@@ -296,7 +296,7 @@ class SecurityManagement {
             this.update2FAStatus(isEnabled);
 
         } catch (error) {
-            console.error('❌ Security Management: Failed to load 2FA status:', error);
+            window.logger?.error('❌ Security Management: Failed to load 2FA status:', error);
             this.update2FAStatus(false);
         }
     }
@@ -312,13 +312,13 @@ class SecurityManagement {
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
             if (userError) {
-                console.error('❌ Security Management: Failed to get user:', userError);
+                window.logger?.error('❌ Security Management: Failed to get user:', userError);
                 this.updatePasswordStatus(null);
                 return;
             }
             
             if (!user) {
-                console.error('❌ Security Management: No user found');
+                window.logger?.error('❌ Security Management: No user found');
                 this.updatePasswordStatus(null);
                 return;
             }
@@ -332,11 +332,11 @@ class SecurityManagement {
                 .single();
             
             if (error) {
-                console.error('❌ Security Management: Failed to load password status:', error);
+                window.logger?.error('❌ Security Management: Failed to load password status:', error);
                 this.lastPasswordChangedDate = null;
                 this.updatePasswordStatus(null);
             } else if (profile && profile.password_last_changed) {
-                console.log('🔧 Security Management: Password last changed found:', profile.password_last_changed);
+                window.logger?.log('🔧 Security Management: Password last changed found:', profile.password_last_changed);
                 this.lastPasswordChangedDate = new Date(profile.password_last_changed);
                 this.updatePasswordStatus(this.lastPasswordChangedDate);
             } else {
@@ -349,7 +349,7 @@ class SecurityManagement {
             // Password status loaded
 
         } catch (error) {
-            console.error('❌ Security Management: Failed to load password status:', error);
+            window.logger?.error('❌ Security Management: Failed to load password status:', error);
             this.lastPasswordChangedDate = null;
             this.updatePasswordStatus(null);
         }
@@ -390,7 +390,7 @@ class SecurityManagement {
                 // Password display updated
             }
         } else {
-            console.error('❌ Security Management: Status element not found');
+            window.logger?.error('❌ Security Management: Status element not found');
         }
     }
 
@@ -418,7 +418,7 @@ class SecurityManagement {
             // Login activity loaded
 
         } catch (error) {
-            console.error('❌ Security Management: Failed to load login activity status:', error);
+            window.logger?.error('❌ Security Management: Failed to load login activity status:', error);
         }
     }
 
@@ -451,7 +451,7 @@ class SecurityManagement {
      */
     updateLoginActivityStatus(activityData) {
         // TODO: Implement login activity status update
-        console.log('📝 Security Management: Login activity status updated:', activityData);
+        window.logger?.log('📝 Security Management: Login activity status updated:', activityData);
     }
 
     /**
@@ -463,7 +463,7 @@ class SecurityManagement {
                 await window.securityManagementTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize security management translations:', error);
+            window.logger?.error('❌ Failed to initialize security management translations:', error);
         }
     }
 
@@ -481,7 +481,7 @@ class SecurityManagement {
      * @param {string} message - Error message to display
      */
     showError(message) {
-        console.error('Security Management Error:', message);
+        window.logger?.error('Security Management Error:', message);
         // TODO: Implement error display UI
     }
 

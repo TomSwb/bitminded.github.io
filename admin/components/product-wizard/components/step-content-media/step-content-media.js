@@ -12,7 +12,7 @@ if (typeof window.StepContentMedia === 'undefined') {
         }
 
         async init() {
-            console.log('🎨 Initializing Step 3: Content & Media');
+            window.logger?.log('🎨 Initializing Step 3: Content & Media');
             this.initializeElements();
             this.setupEventListeners();
             this.setupDefaults();
@@ -204,9 +204,9 @@ if (typeof window.StepContentMedia === 'undefined') {
                     this.saveFormData();
                 }
 
-                console.log('✅ Icon uploaded successfully:', urlData.publicUrl);
+                window.logger?.log('✅ Icon uploaded successfully:', urlData.publicUrl);
             } catch (error) {
-                console.error('❌ Error uploading icon:', error);
+                window.logger?.error('❌ Error uploading icon:', error);
                 alert('Failed to upload icon. Please try again.');
             }
         }
@@ -315,9 +315,9 @@ if (typeof window.StepContentMedia === 'undefined') {
                 // Save to form data
                 this.saveFormData();
 
-                console.log('✅ Screenshot uploaded successfully:', urlData.publicUrl);
+                window.logger?.log('✅ Screenshot uploaded successfully:', urlData.publicUrl);
             } catch (error) {
-                console.error('❌ Error uploading screenshot:', error);
+                window.logger?.error('❌ Error uploading screenshot:', error);
                 alert('Failed to upload screenshot. Please try again.');
             }
         }
@@ -385,7 +385,7 @@ if (typeof window.StepContentMedia === 'undefined') {
             window.productWizard.formData.documentation_url = documentationUrl || null;
             window.productWizard.formData.support_email = supportEmail || null;
 
-            console.log('💾 Saved content & media data to formData');
+            window.logger?.log('💾 Saved content & media data to formData');
         }
 
         setFormData(formData) {

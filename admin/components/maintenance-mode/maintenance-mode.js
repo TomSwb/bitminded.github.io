@@ -36,7 +36,7 @@ class MaintenanceMode {
 
             translationsReady = await this.initializeTranslations();
         } catch (error) {
-            console.error('❌ MaintenanceMode: failed to initialize component', error);
+            window.logger?.error('❌ MaintenanceMode: failed to initialize component', error);
             this.showError(this.translate('Failed to load maintenance settings.', 'Failed to load maintenance settings.'));
         } finally {
             this.showTranslatableContent();
@@ -51,7 +51,7 @@ class MaintenanceMode {
 
             this.isInitialized = true;
         } catch (error) {
-            console.error('❌ MaintenanceMode: failed to load maintenance settings', error);
+            window.logger?.error('❌ MaintenanceMode: failed to load maintenance settings', error);
             if (!translationsReady) {
                 this.showError(this.translate('Failed to load maintenance settings.', 'Failed to load maintenance settings.'));
             }
@@ -113,7 +113,7 @@ class MaintenanceMode {
             }
             return true; // Indicate translations are ready
         } catch (error) {
-            console.error('❌ Failed to initialize maintenance translations:', error);
+            window.logger?.error('❌ Failed to initialize maintenance translations:', error);
             return false; // Indicate translations failed
         }
     }
@@ -167,7 +167,7 @@ class MaintenanceMode {
             this.renderAllowlist();
             this.renderAlert(settings.alert || null);
         } catch (error) {
-            console.error('❌ Failed to load maintenance settings:', error);
+            window.logger?.error('❌ Failed to load maintenance settings:', error);
             if (showErrors) {
                 this.showError(this.translate('Failed to load maintenance settings.', 'Failed to load maintenance settings.'));
             } else {
@@ -380,7 +380,7 @@ class MaintenanceMode {
                 });
             }
         } catch (error) {
-            console.error('❌ Failed to update maintenance settings:', error);
+            window.logger?.error('❌ Failed to update maintenance settings:', error);
             const message = error?.message || this.translate('Failed to update maintenance settings.', 'Failed to update maintenance settings.');
             this.showError(message);
         } finally {
@@ -446,7 +446,7 @@ class MaintenanceMode {
         try {
             await window.adminLayout.logAdminAction(action, details);
         } catch (error) {
-            console.warn('⚠️ Failed to log admin action:', error);
+            window.logger?.warn('⚠️ Failed to log admin action:', error);
         }
     }
 
@@ -462,7 +462,7 @@ class MaintenanceMode {
         if (window.adminLayout && typeof window.adminLayout.showSuccess === 'function') {
             window.adminLayout.showSuccess(message);
         } else {
-            console.log(message);
+            window.logger?.log(message);
         }
     }
 

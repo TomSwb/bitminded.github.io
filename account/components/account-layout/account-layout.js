@@ -17,7 +17,7 @@ class AccountLayout {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Account Layout already initialized');
+                window.logger?.log('Account Layout already initialized');
                 return;
             }
             
@@ -56,7 +56,7 @@ class AccountLayout {
             this.waitForTranslationsAndUpdate();
             
         } catch (error) {
-            console.error('❌ Account Layout: Failed to initialize:', error);
+            window.logger?.error('❌ Account Layout: Failed to initialize:', error);
             this.showError('Failed to initialize account layout');
         }
     }
@@ -117,7 +117,7 @@ class AccountLayout {
     async switchSection(sectionName, updateHistory = true) {
         try {
             if (!this.sections.includes(sectionName)) {
-                console.error('❌ Account Layout: Invalid section:', sectionName);
+                window.logger?.error('❌ Account Layout: Invalid section:', sectionName);
                 return;
             }
 
@@ -125,7 +125,7 @@ class AccountLayout {
                 return; // Already on this section
             }
 
-            console.log(`🔄 Account Layout: Switching to section: ${sectionName}`);
+            window.logger?.log(`🔄 Account Layout: Switching to section: ${sectionName}`);
 
             // Update navigation state
             this.updateNavigationState(sectionName);
@@ -154,10 +154,10 @@ class AccountLayout {
                 history.pushState({ section: sectionName }, '', url);
             }
 
-            console.log(`✅ Account Layout: Switched to section: ${sectionName}`);
+            window.logger?.log(`✅ Account Layout: Switched to section: ${sectionName}`);
 
         } catch (error) {
-            console.error('❌ Account Layout: Failed to switch section:', error);
+            window.logger?.error('❌ Account Layout: Failed to switch section:', error);
             this.showError('Failed to switch section');
         }
     }
@@ -231,7 +231,7 @@ class AccountLayout {
             // Account Layout: Section loaded
 
         } catch (error) {
-            console.error(`❌ Account Layout: Failed to load section ${sectionName}:`, error);
+            window.logger?.error(`❌ Account Layout: Failed to load section ${sectionName}:`, error);
             this.showError(`Failed to load ${sectionName} section`);
         }
     }
@@ -253,7 +253,7 @@ class AccountLayout {
 
         const componentName = componentMap[sectionName];
         if (!componentName) {
-            console.warn(`⚠️ Account Layout: No component mapped for section: ${sectionName}`);
+            window.logger?.warn(`⚠️ Account Layout: No component mapped for section: ${sectionName}`);
             return;
         }
 
@@ -273,7 +273,7 @@ class AccountLayout {
                 basePath: 'account/components'
             });
         } else {
-            console.warn('⚠️ Account Layout: componentLoader not available');
+            window.logger?.warn('⚠️ Account Layout: componentLoader not available');
             this.showPlaceholder(sectionName);
         }
     }
@@ -296,7 +296,7 @@ class AccountLayout {
             });
             
             if (response.ok) {
-                console.log(`✅ Component exists: ${componentName}`);
+                window.logger?.log(`✅ Component exists: ${componentName}`);
                 return true;
             } else {
                 // Component not found
@@ -304,7 +304,7 @@ class AccountLayout {
             }
         } catch (error) {
             // Network errors or other issues
-            console.log(`📝 Component check failed: ${componentName} (${error.message})`);
+            window.logger?.log(`📝 Component check failed: ${componentName} (${error.message})`);
             return false;
         }
     }
@@ -425,7 +425,7 @@ class AccountLayout {
         if (window.accountPage?.showError) {
             window.accountPage.showError(message);
         } else {
-            console.error('Account Layout Error:', message);
+            window.logger?.error('Account Layout Error:', message);
         }
     }
 

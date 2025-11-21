@@ -115,7 +115,7 @@
             setupFilterControls();
             renderCatalog();
         } catch (error) {
-            console.error('Failed to load catalog products', error);
+            window.logger?.error('Failed to load catalog products', error);
             renderErrorState(error);
         }
     }

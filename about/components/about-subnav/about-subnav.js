@@ -22,7 +22,7 @@
 
             this.element = document.getElementById('about-subnav');
             if (!this.element) {
-                console.warn('About sub-navigation container not found');
+                window.logger?.warn('About sub-navigation container not found');
                 return;
             }
 
@@ -118,7 +118,7 @@
                     this.updateTranslations(instance);
                 }
             } catch (error) {
-                console.warn('Failed to load sub-navigation translations:', error);
+                window.logger?.warn('Failed to load sub-navigation translations:', error);
                 this.showFallback();
             }
         }

@@ -23,7 +23,7 @@ class TwoFactorVerify {
      */
     async init() {
         try {
-            console.log('🔐 2FA Verify: Initializing...');
+            window.logger?.log('🔐 2FA Verify: Initializing...');
 
             // Apply saved theme
             this.applySavedTheme();
@@ -78,10 +78,10 @@ class TwoFactorVerify {
             }
 
             this.isInitialized = true;
-            console.log('✅ 2FA Verify: Initialized successfully');
+            window.logger?.log('✅ 2FA Verify: Initialized successfully');
 
         } catch (error) {
-            console.error('❌ 2FA Verify: Failed to initialize:', error);
+            window.logger?.error('❌ 2FA Verify: Failed to initialize:', error);
             this.showError('Failed to initialize verification. Please try again.');
         }
     }
@@ -243,7 +243,7 @@ class TwoFactorVerify {
         this.hideError();
 
         try {
-            console.log(`🔧 2FA Verify: Verifying ${this.isUsingBackupCode ? 'backup code' : 'TOTP code'}...`);
+            window.logger?.log(`🔧 2FA Verify: Verifying ${this.isUsingBackupCode ? 'backup code' : 'TOTP code'}...`);
 
             // Get current session token
             const { data: { session } } = await supabase.auth.getSession();
@@ -273,7 +273,7 @@ class TwoFactorVerify {
             const result = await response.json();
 
             if (result.success) {
-                console.log('✅ 2FA Verify: Code verified successfully');
+                window.logger?.log('✅ 2FA Verify: Code verified successfully');
                 
                 // Get current session to capture session ID
                 const { data: sessionData } = await supabase.auth.getSession();
@@ -309,7 +309,7 @@ class TwoFactorVerify {
                 // Redirect to home page after successful 2FA
                 window.location.href = '/';
             } else {
-                console.log('❌ 2FA Verify: Invalid code');
+                window.logger?.log('❌ 2FA Verify: Invalid code');
                 
                 // Log failed 2FA verification (no session ID for failed attempts)
                 const failureReason = this.isUsingBackupCode ? 'invalid_backup_code' : 'invalid_2fa';
@@ -322,7 +322,7 @@ class TwoFactorVerify {
             }
 
         } catch (error) {
-            console.error('❌ 2FA Verify: Verification error:', error);
+            window.logger?.error('❌ 2FA Verify: Verification error:', error);
             this.showVerifyError('Failed to verify code. Please try again.');
         } finally {
             this.showLoading(false);
@@ -380,7 +380,7 @@ class TwoFactorVerify {
     applySavedTheme() {
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        console.log(`🎨 Theme applied: ${savedTheme}`);
+        window.logger?.log(`🎨 Theme applied: ${savedTheme}`);
     }
 
     /**
@@ -437,11 +437,11 @@ class TwoFactorVerify {
             });
 
             if (error) {
-                console.error('❌ Error logging login attempt:', error);
+                window.logger?.error('❌ Error logging login attempt:', error);
                 return;
             }
 
-            console.log(`📊 Login attempt logged: ${success ? 'Success with 2FA' : 'Failed 2FA'}${sessionId ? ' (session tracked)' : ''}`);
+            window.logger?.log(`📊 Login attempt logged: ${success ? 'Success with 2FA' : 'Failed 2FA'}${sessionId ? ' (session tracked)' : ''}`);
 
             // Send new login notification if login was successful
             if (success && typeof window.notificationHelper !== 'undefined') {
@@ -452,7 +452,7 @@ class TwoFactorVerify {
             }
 
         } catch (error) {
-            console.error('Failed to log login attempt:', error);
+            window.logger?.error('Failed to log login attempt:', error);
         }
     }
 
@@ -491,7 +491,7 @@ class TwoFactorVerify {
      */
     async cancel() {
         try {
-            console.log('🚫 Cancelling 2FA verification and signing out');
+            window.logger?.log('🚫 Cancelling 2FA verification and signing out');
             
             // Sign out from Supabase
             await window.supabase.auth.signOut();
@@ -503,7 +503,7 @@ class TwoFactorVerify {
             // Redirect to login
             window.location.href = '/auth/';
         } catch (error) {
-            console.error('Error during cancel:', error);
+            window.logger?.error('Error during cancel:', error);
             // Redirect anyway
             window.location.href = '/auth/';
         }

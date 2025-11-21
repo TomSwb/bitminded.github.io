@@ -28,7 +28,7 @@ class ComponentLoader {
         try {
             // Check if component is already loaded
             if (this.loadedComponents.has(componentName)) {
-                console.log(`Component ${componentName} already loaded`);
+                window.logger?.log(`Component ${componentName} already loaded`);
                 return this.loadedComponents.get(componentName);
             }
 
@@ -44,7 +44,7 @@ class ComponentLoader {
             return component;
 
         } catch (error) {
-            console.error(`❌ ComponentLoader: Failed to load component ${componentName}:`, error);
+            window.logger?.error(`❌ ComponentLoader: Failed to load component ${componentName}:`, error);
             throw error;
         }
     }
@@ -69,7 +69,7 @@ class ComponentLoader {
                     resolve();
                 };
                 script.onerror = () => {
-                    console.warn(`⚠️ Failed to load sub-component: ${componentName}`);
+                    window.logger?.warn(`⚠️ Failed to load sub-component: ${componentName}`);
                     resolve(); // Don't fail if one sub-component is missing
                 };
                 document.head.appendChild(script);
@@ -154,7 +154,7 @@ class ComponentLoader {
                 resolve();
             };
             link.onerror = () => {
-                console.warn(`CSS not found for component: ${cssPath}`);
+                window.logger?.warn(`CSS not found for component: ${cssPath}`);
                 resolve(); // Don't fail if CSS is missing
             };
             document.head.appendChild(link);
@@ -176,7 +176,7 @@ class ComponentLoader {
             }
             return await response.text();
         } catch (error) {
-            console.error(`Failed to load HTML for ${componentPath}:`, error);
+            window.logger?.error(`Failed to load HTML for ${componentPath}:`, error);
             throw error;
         }
     }
@@ -383,7 +383,7 @@ class ComponentLoader {
                 resolve();
             };
             script.onerror = () => {
-                console.warn(`JavaScript not found for component: ${jsPath}`);
+                window.logger?.warn(`JavaScript not found for component: ${jsPath}`);
                 resolve(); // Don't fail if JS is missing
             };
             document.head.appendChild(script);
@@ -409,7 +409,7 @@ class ComponentLoader {
 
             // Remove from loaded components
             this.loadedComponents.delete(componentName);
-            console.log(`🗑️ Component ${componentName} unloaded`);
+            window.logger?.log(`🗑️ Component ${componentName} unloaded`);
         }
     }
 
@@ -451,7 +451,7 @@ window.componentLoader = new ComponentLoader();
 //         });
 //         // Critical components auto-loaded
 //     } catch (error) {
-//         console.error('❌ Failed to auto-load critical components:', error);
+//         window.logger?.error('❌ Failed to auto-load critical components:', error);
 //     }
 // });
 

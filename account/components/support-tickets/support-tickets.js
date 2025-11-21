@@ -64,7 +64,7 @@ class SupportTickets {
 
             this.isInitialized = true;
         } catch (error) {
-            console.error('❌ SupportTickets: failed to initialize', error);
+            window.logger?.error('❌ SupportTickets: failed to initialize', error);
             this.showError(this.translate('support-tickets-load-error', 'Failed to load your support tickets.'));
         }
     }
@@ -98,7 +98,7 @@ class SupportTickets {
                 });
             }
         } catch (error) {
-            console.warn('⚠️ SupportTickets: translation load failed', error);
+            window.logger?.warn('⚠️ SupportTickets: translation load failed', error);
             this.translations = {};
         }
     }
@@ -160,7 +160,7 @@ class SupportTickets {
             this.renderList();
             this.renderDetail();
         } catch (error) {
-            console.error('❌ SupportTickets: failed to load tickets', error);
+            window.logger?.error('❌ SupportTickets: failed to load tickets', error);
             this.showError(this.translate('support-tickets-load-error', 'Failed to load your support tickets.'));
         } finally {
             this.setLoading(false);
@@ -562,7 +562,7 @@ class SupportTickets {
             this.renderDetail();
             this.showSuccess(this.translate('support-tickets-update-success', 'Ticket updated successfully.'));
         } catch (error) {
-            console.error('❌ SupportTickets: update failed', error);
+            window.logger?.error('❌ SupportTickets: update failed', error);
             this.showError(this.translate('support-tickets-update-error', 'Failed to update the ticket. Please try again.'));
         } finally {
             submitButton.disabled = false;
@@ -641,7 +641,7 @@ class SupportTickets {
             this.elements.error.hidden = false;
             this.elements.errorText.textContent = message;
         } else {
-            console.error(message);
+            window.logger?.error(message);
         }
     }
 
@@ -649,7 +649,7 @@ class SupportTickets {
         if (window.accountPageLoader?.showSuccess) {
             window.accountPageLoader.showSuccess(message);
         } else {
-            console.log(message);
+            window.logger?.log(message);
         }
     }
 

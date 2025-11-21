@@ -29,7 +29,7 @@ class SignupForm {
             
             // Signup Form initialized silently
         } catch (error) {
-            console.error('❌ Failed to initialize Signup Form:', error);
+            window.logger?.error('❌ Failed to initialize Signup Form:', error);
             this.showError('Failed to initialize signup form');
         }
     }
@@ -103,10 +103,10 @@ class SignupForm {
                 this.updateTranslations(this.getCurrentLanguage());
                 // Translations loaded silently
             } else {
-                console.warn('Failed to load signup form translations:', response.status);
+                window.logger?.warn('Failed to load signup form translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load signup form translations:', error);
+            window.logger?.warn('Failed to load signup form translations:', error);
         }
     }
 
@@ -175,7 +175,7 @@ class SignupForm {
 
         // Ensure elements are cached
         if (!this.elements?.username || !this.elements?.email || !this.elements?.password || !this.elements?.confirmPassword) {
-            console.error('❌ Form elements not found. Cannot validate.');
+            window.logger?.error('❌ Form elements not found. Cannot validate.');
             this.showError('Form not properly initialized. Please refresh the page.');
             return;
         }
@@ -222,7 +222,7 @@ class SignupForm {
             }
 
         } catch (error) {
-            console.error('Signup error:', error);
+            window.logger?.error('Signup error:', error);
             this.handleSignupError(error);
         } finally {
             this.setSubmitting(false);
@@ -471,7 +471,7 @@ class SignupForm {
      */
     showError(message) {
         // You could implement a toast notification system here
-        console.error('Signup Form Error:', message);
+        window.logger?.error('Signup Form Error:', message);
         
         // Use translated message if available, otherwise use the provided message
         const translatedMessage = this.getTranslation('signup.error') || message;
@@ -503,7 +503,7 @@ class SignupForm {
         if (this.elements.success) {
             this.elements.success.classList.add('active');
         } else {
-            console.warn('Success element not found, showing fallback message');
+            window.logger?.warn('Success element not found, showing fallback message');
             // Use translated success message
             const successMessage = this.getTranslation('signup.successMessage') || 'Account created successfully! Please check your email to verify your account.';
             alert(successMessage);
@@ -587,7 +587,7 @@ class SignupForm {
                 throw new Error('No email address found');
             }
 
-            console.log('🔄 Resending verification email to:', userEmail);
+            window.logger?.log('🔄 Resending verification email to:', userEmail);
 
             // Resend verification email
             const { error } = await window.supabase.auth.resend({
@@ -603,10 +603,10 @@ class SignupForm {
             const successMessage = this.getTranslation('signup.resendSuccess') || 'Verification email sent! Please check your inbox.';
             alert(successMessage);
 
-            console.log('✅ Verification email resent successfully');
+            window.logger?.log('✅ Verification email resent successfully');
 
         } catch (error) {
-            console.error('❌ Failed to resend verification email:', error);
+            window.logger?.error('❌ Failed to resend verification email:', error);
             const errorMessage = this.getTranslation('signup.resendError') || 'Failed to resend email. Please try again.';
             alert(errorMessage);
         } finally {
@@ -703,7 +703,7 @@ class SignupForm {
      */
     async recordConsentsViaEdgeFunction(userId) {
         try {
-            console.log('🔄 Recording user consents via Edge Function...');
+            window.logger?.log('🔄 Recording user consents via Edge Function...');
             
             const userAgent = navigator.userAgent;
             
@@ -726,17 +726,17 @@ class SignupForm {
                 });
                 
                 if (error) {
-                    console.error(`❌ Failed to record ${consent.type} consent:`, error);
+                    window.logger?.error(`❌ Failed to record ${consent.type} consent:`, error);
                     // Continue with other consents even if one fails
                     continue;
                 }
                 
-                console.log(`✅ Consent recorded: ${consent.type} v${consent.version}`);
+                window.logger?.log(`✅ Consent recorded: ${consent.type} v${consent.version}`);
             }
             
-            console.log('✅ User consents recorded successfully');
+            window.logger?.log('✅ User consents recorded successfully');
         } catch (error) {
-            console.error('❌ Failed to record consents:', error);
+            window.logger?.error('❌ Failed to record consents:', error);
             // Don't throw error here as account is already created
             // Consent recording failure shouldn't block signup success
         }

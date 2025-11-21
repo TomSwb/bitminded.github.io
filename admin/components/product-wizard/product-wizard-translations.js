@@ -41,14 +41,14 @@ if (typeof window.productWizardTranslations === 'undefined') {
                         });
                         // Translations added
                     } catch (i18nextError) {
-                        console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
+                        window.logger?.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
                 }
 
                 return true;
 
             } catch (error) {
-                console.error('❌ Failed to initialize product wizard translations:', error);
+                window.logger?.error('❌ Failed to initialize product wizard translations:', error);
                 return false;
             }
         },
@@ -85,12 +85,12 @@ if (typeof window.productWizardTranslations === 'undefined') {
          */
         updateTranslations() {
             if (!this.isInitialized) {
-                console.warn('⚠️ Product wizard translations not initialized');
+                window.logger?.warn('⚠️ Product wizard translations not initialized');
                 return;
             }
 
             const currentLanguage = this.getCurrentLanguage();
-            console.log('🔄 Updating product wizard translations to:', currentLanguage);
+            window.logger?.log('🔄 Updating product wizard translations to:', currentLanguage);
 
             // Update all translatable elements
             const elements = document.querySelectorAll('#product-wizard .translatable-content[data-translation-key]');
@@ -109,7 +109,7 @@ if (typeof window.productWizardTranslations === 'undefined') {
                 }
             });
 
-            console.log('✅ Product wizard translations updated');
+            window.logger?.log('✅ Product wizard translations updated');
         }
     };
 }

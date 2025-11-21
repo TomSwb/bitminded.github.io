@@ -32,7 +32,7 @@ if (typeof window.bulkOperationsTranslations === 'undefined') {
 
                 return true;
             } catch (error) {
-                console.error('❌ Failed to initialize bulk operations translations:', error);
+                window.logger?.error('❌ Failed to initialize bulk operations translations:', error);
                 return false;
             }
         },

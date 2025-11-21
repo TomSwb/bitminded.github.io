@@ -22,7 +22,7 @@
 
             this.element = document.getElementById('faq-subnav');
             if (!this.element) {
-                console.warn('FAQ sub-navigation container not found');
+                window.logger?.warn('FAQ sub-navigation container not found');
                 return;
             }
 
@@ -122,7 +122,7 @@
                     this.updateTranslations(instance);
                 }
             } catch (error) {
-                console.warn('Failed to load sub-navigation translations:', error);
+                window.logger?.warn('Failed to load sub-navigation translations:', error);
                 this.showFallback();
             }
         }

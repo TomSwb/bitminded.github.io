@@ -66,7 +66,7 @@ class AccessControl {
             this.isInitialized = true;
 
         } catch (error) {
-            console.error('❌ Access Control: Failed to initialize:', error);
+            window.logger?.error('❌ Access Control: Failed to initialize:', error);
             this.showError('Failed to initialize access control');
         }
     }
@@ -75,7 +75,7 @@ class AccessControl {
      * Initialize DOM elements
      */
     initializeElements() {
-        console.log('🔍 Initializing elements...');
+        window.logger?.log('🔍 Initializing elements...');
         this.elements = {
             // Header
             totalActiveGrants: document.getElementById('total-active-grants'),
@@ -163,7 +163,7 @@ class AccessControl {
                 this.openGrantModal();
             });
         } else {
-            console.error('❌ Grant Access button NOT found!', document.getElementById('grant-access-button'));
+            window.logger?.error('❌ Grant Access button NOT found!', document.getElementById('grant-access-button'));
         }
 
         // Export Button
@@ -482,7 +482,7 @@ class AccessControl {
     async loadProducts() {
         try {
             if (!window.supabase) {
-                console.error('❌ Supabase not available');
+                window.logger?.error('❌ Supabase not available');
                 // Fallback to hardcoded list
                 this.products = ['all'];
                 this.productMap = {};
@@ -497,8 +497,8 @@ class AccessControl {
                 .order('name', { ascending: true });
 
             if (error) {
-                console.error('❌ Error loading products:', error);
-                console.error('❌ Error details:', JSON.stringify(error, null, 2));
+                window.logger?.error('❌ Error loading products:', error);
+                window.logger?.error('❌ Error details:', JSON.stringify(error, null, 2));
                 // Fallback to hardcoded list
                 this.products = ['all'];
                 this.productMap = {};
@@ -512,7 +512,7 @@ class AccessControl {
                 // Use slug if available, otherwise fall back to id
                 const slug = p.slug || p.id;
                 if (!slug) {
-                    console.warn('⚠️ Product missing both slug and id:', p);
+                    window.logger?.warn('⚠️ Product missing both slug and id:', p);
                     return;
                 }
                 this.productMap[slug] = {
@@ -533,8 +533,8 @@ class AccessControl {
             
 
         } catch (error) {
-            console.error('❌ Failed to load products:', error);
-            console.error('❌ Error stack:', error.stack);
+            window.logger?.error('❌ Failed to load products:', error);
+            window.logger?.error('❌ Error stack:', error.stack);
             // Fallback to hardcoded list
             this.products = ['all'];
             this.productMap = {};
@@ -580,7 +580,7 @@ class AccessControl {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('❌ Database query error:', error);
+                window.logger?.error('❌ Database query error:', error);
                 throw error;
             }
 
@@ -638,7 +638,7 @@ class AccessControl {
             this.hideLoading();
 
         } catch (error) {
-            console.error('❌ Error loading grants:', error);
+            window.logger?.error('❌ Error loading grants:', error);
             this.showError('Failed to load access grants');
             this.hideLoading();
         }
@@ -840,7 +840,7 @@ class AccessControl {
     renderGrants() {
         const tbody = this.elements.tableBody;
         if (!tbody) {
-            console.error('❌ Table body not found');
+            window.logger?.error('❌ Table body not found');
             return;
         }
 
@@ -1103,9 +1103,9 @@ class AccessControl {
                 this.elements.grantProductSelect.value = '';
             }
         } else {
-            console.error('❌ Grant modal element NOT found!');
+            window.logger?.error('❌ Grant modal element NOT found!');
         }
-        console.log('📋 openGrantModal() completed');
+        window.logger?.log('📋 openGrantModal() completed');
     }
 
     /**
@@ -1124,7 +1124,7 @@ class AccessControl {
         this.currentGrantId = grant.id;
         
         if (!this.elements.revokeModal) {
-            console.error('❌ Revoke modal element not found!');
+            window.logger?.error('❌ Revoke modal element not found!');
             return;
         }
         
@@ -1204,7 +1204,7 @@ class AccessControl {
                     .limit(10);
 
                 if (error) {
-                    console.error('❌ User search error:', error);
+                    window.logger?.error('❌ User search error:', error);
                     return;
                 }
 
@@ -1231,7 +1231,7 @@ class AccessControl {
                     this.elements.userSuggestions.classList.remove('hidden');
                 }
             } catch (error) {
-                console.error('❌ Error searching users:', error);
+                window.logger?.error('❌ Error searching users:', error);
             }
         }, 300);
     }
@@ -1278,9 +1278,9 @@ class AccessControl {
             try {
                 const queryLower = query.toLowerCase();
                 
-                console.log('🔍 Product search query:', query);
-                console.log('🔍 Available products:', this.products);
-                console.log('🔍 Product map:', this.productMap);
+                window.logger?.log('🔍 Product search query:', query);
+                window.logger?.log('🔍 Available products:', this.products);
+                window.logger?.log('🔍 Product map:', this.productMap);
                 
                 // Filter products by name or slug
                 const matchingProducts = this.products
@@ -1291,7 +1291,7 @@ class AccessControl {
                         }
                         const product = this.productMap[slug];
                         if (!product) {
-                            console.warn('⚠️ Product not found in map:', slug);
+                            window.logger?.warn('⚠️ Product not found in map:', slug);
                             return false;
                         }
                         const name = (product.name || '').toLowerCase();
@@ -1330,7 +1330,7 @@ class AccessControl {
                     this.elements.productSuggestions.classList.remove('hidden');
                 }
             } catch (error) {
-                console.error('❌ Error searching products:', error);
+                window.logger?.error('❌ Error searching products:', error);
             }
         }, 300);
     }
@@ -1408,7 +1408,7 @@ class AccessControl {
             }
 
             // Debug: Log what we're sending
-            console.log('📤 Granting access with:', {
+            window.logger?.log('📤 Granting access with:', {
                 userId,
                 productId,
                 productSlug: productId, // This should be the slug (e.g., 'converter')
@@ -1448,7 +1448,7 @@ class AccessControl {
             this.applyFilters();
 
         } catch (error) {
-            console.error('❌ Error granting access:', error);
+            window.logger?.error('❌ Error granting access:', error);
             this.showError(error.message || 'Failed to grant access');
         }
     }
@@ -1500,7 +1500,7 @@ class AccessControl {
             this.applyFilters();
 
         } catch (error) {
-            console.error('❌ Error regranting access:', error);
+            window.logger?.error('❌ Error regranting access:', error);
             this.showError(error.message || 'Failed to regrant access');
         }
     }
@@ -1554,7 +1554,7 @@ class AccessControl {
             this.applyFilters();
 
         } catch (error) {
-            console.error('❌ Error deleting entitlement:', error);
+            window.logger?.error('❌ Error deleting entitlement:', error);
             this.showError(error.message || 'Failed to delete entitlement');
         }
     }
@@ -1610,7 +1610,7 @@ class AccessControl {
             this.applyFilters();
 
         } catch (error) {
-            console.error('❌ Error revoking access:', error);
+            window.logger?.error('❌ Error revoking access:', error);
             this.showError(error.message || 'Failed to revoke access');
         }
     }
@@ -1765,7 +1765,7 @@ class AccessControl {
                 await window.accessControlTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize translations:', error);
+            window.logger?.error('❌ Failed to initialize translations:', error);
         }
     }
 

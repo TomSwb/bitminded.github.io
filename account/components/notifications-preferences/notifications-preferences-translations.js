@@ -30,7 +30,7 @@ class NotificationsPreferencesTranslations {
             // Translations initialized
             
         } catch (error) {
-            console.error('❌ Failed to initialize notifications preferences translations:', error);
+            window.logger?.error('❌ Failed to initialize notifications preferences translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class NotificationsPreferencesTranslations {
             // Translations loaded
             
         } catch (error) {
-            console.error('❌ Failed to load notifications preferences translations:', error);
+            window.logger?.error('❌ Failed to load notifications preferences translations:', error);
             throw error;
         }
     }
@@ -58,7 +58,7 @@ class NotificationsPreferencesTranslations {
      */
     async addToI18next() {
         if (typeof i18next === 'undefined') {
-            console.warn('⚠️ i18next not available, waiting...');
+            window.logger?.warn('⚠️ i18next not available, waiting...');
             await this.waitForI18next();
         }
 
@@ -77,7 +77,7 @@ class NotificationsPreferencesTranslations {
 
             // Translations added
         } catch (error) {
-            console.error('❌ Failed to add notifications preferences translations to i18next:', error);
+            window.logger?.error('❌ Failed to add notifications preferences translations to i18next:', error);
         }
     }
 
@@ -103,7 +103,7 @@ class NotificationsPreferencesTranslations {
     setupEventListeners() {
         // Listen for language change events
         window.addEventListener('languageChanged', async (e) => {
-            console.log('🌐 Language changed, reloading notifications preferences translations...');
+            window.logger?.log('🌐 Language changed, reloading notifications preferences translations...');
             await this.addToI18next();
         });
 

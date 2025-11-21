@@ -30,7 +30,7 @@ class TwoFactorAuthTranslations {
             // Translations initialized
             
         } catch (error) {
-            console.error('❌ Failed to initialize 2FA translations:', error);
+            window.logger?.error('❌ Failed to initialize 2FA translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class TwoFactorAuthTranslations {
             // Translations loaded
             
         } catch (error) {
-            console.error('❌ Failed to load 2FA translations:', error);
+            window.logger?.error('❌ Failed to load 2FA translations:', error);
             // Fallback to empty translations
             this.translations = {};
         }

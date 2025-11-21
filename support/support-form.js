@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
     } catch (error) {
-        console.log('User not logged in, email fields remain editable');
+        window.logger?.log('User not logged in, email fields remain editable');
     }
 
     const hashAliasMap = new Map([
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     setStatus('error', errorMessage);
                 }
             } catch (error) {
-                console.error('Support form error:', error);
+                window.logger?.error('Support form error:', error);
                 setStatus('error', translate('support-status-error', 'Failed to send message. Please check your connection and try again.'));
             } finally {
                 resetSubmitButton(submitButton);

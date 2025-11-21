@@ -10,7 +10,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
         }
 
         async init() {
-            console.log('☁️ Initializing Step 6: Cloudflare Configuration');
+            window.logger?.log('☁️ Initializing Step 6: Cloudflare Configuration');
             this.initializeElements();
             this.setupEventListeners();
             this.setupDefaults();
@@ -152,7 +152,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 : null;
             window.productWizard.formData.cloudflare_worker_url = workerUrl || null;
 
-            console.log('💾 Saved Cloudflare data to formData');
+            window.logger?.log('💾 Saved Cloudflare data to formData');
         }
 
         setFormData(formData) {
@@ -202,10 +202,10 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                         const owner = match[1];
                         const repo = match[2];
                         githubPagesUrl = `https://${owner}.github.io/${repo}`;
-                        console.log(`📦 Constructed GitHub Pages URL: ${githubPagesUrl}`);
+                        window.logger?.log(`📦 Constructed GitHub Pages URL: ${githubPagesUrl}`);
                     }
                 } catch (e) {
-                    console.warn('Failed to construct GitHub Pages URL:', e);
+                    window.logger?.warn('Failed to construct GitHub Pages URL:', e);
                 }
             }
 
@@ -218,7 +218,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                 githubPagesUrl // GitHub Pages URL (public until Enterprise plan)
             };
 
-            console.log('☁️ Creating Cloudflare Worker:', workerData);
+            window.logger?.log('☁️ Creating Cloudflare Worker:', workerData);
 
             try {
                 const { data, error } = await window.supabase.functions.invoke('create-cloudflare-worker', {
@@ -269,7 +269,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                     throw new Error(data?.error || 'Failed to create Worker');
                 }
             } catch (error) {
-                console.error('❌ Error creating Cloudflare Worker:', error);
+                window.logger?.error('❌ Error creating Cloudflare Worker:', error);
                 alert('Failed to create Cloudflare Worker: ' + error.message);
                 
                 // Re-enable appropriate button

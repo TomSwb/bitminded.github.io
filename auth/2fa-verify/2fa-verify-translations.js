@@ -17,7 +17,7 @@ class TwoFactorVerifyTranslations {
         }
 
         try {
-            console.log('🔧 Initializing 2FA verification translations...');
+            window.logger?.log('🔧 Initializing 2FA verification translations...');
             
             // Load translation files
             await this.loadTranslations();
@@ -26,10 +26,10 @@ class TwoFactorVerifyTranslations {
             this.setupEventListeners();
             
             this.isInitialized = true;
-            console.log('✅ 2FA verification translations initialized successfully');
+            window.logger?.log('✅ 2FA verification translations initialized successfully');
             
         } catch (error) {
-            console.error('❌ Failed to initialize 2FA verification translations:', error);
+            window.logger?.error('❌ Failed to initialize 2FA verification translations:', error);
         }
     }
 
@@ -44,10 +44,10 @@ class TwoFactorVerifyTranslations {
             }
             
             this.translations = await response.json();
-            console.log('✅ 2FA verification translations loaded');
+            window.logger?.log('✅ 2FA verification translations loaded');
             
         } catch (error) {
-            console.error('❌ Failed to load 2FA verification translations:', error);
+            window.logger?.error('❌ Failed to load 2FA verification translations:', error);
             // Fallback to empty translations
             this.translations = {};
         }
@@ -87,7 +87,7 @@ class TwoFactorVerifyTranslations {
             element.style.opacity = '1';
         });
 
-        console.log(`✅ 2FA verification translations updated for language: ${currentLanguage}`);
+        window.logger?.log(`✅ 2FA verification translations updated for language: ${currentLanguage}`);
     }
 
     /**

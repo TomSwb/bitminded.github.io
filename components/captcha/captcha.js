@@ -38,7 +38,7 @@ class CaptchaComponent {
             this.isInitialized = true;
             // CAPTCHA Component initialized silently
         } catch (error) {
-            console.error('❌ Failed to initialize CAPTCHA Component:', error);
+            window.logger?.error('❌ Failed to initialize CAPTCHA Component:', error);
             this.showError('Failed to initialize security verification');
         }
     }
@@ -89,7 +89,7 @@ class CaptchaComponent {
                 this.updateTranslations(this.getCurrentLanguage());
                 // Translations loaded silently
             } else {
-                console.warn('Failed to load CAPTCHA translations from any path');
+                window.logger?.warn('Failed to load CAPTCHA translations from any path');
                 // Use fallback translations
                 this.translations = {
                     en: {
@@ -114,7 +114,7 @@ class CaptchaComponent {
                 this.updateTranslations(this.getCurrentLanguage());
             }
         } catch (error) {
-            console.warn('Failed to load CAPTCHA translations:', error);
+            window.logger?.warn('Failed to load CAPTCHA translations:', error);
         }
     }
 
@@ -184,7 +184,7 @@ class CaptchaComponent {
 
         // Check if widget is already rendered
         if (this.widgetId !== null) {
-            console.log('🔄 CAPTCHA widget already rendered, skipping...');
+            window.logger?.log('🔄 CAPTCHA widget already rendered, skipping...');
             return;
         }
 
@@ -204,7 +204,7 @@ class CaptchaComponent {
 
             // Turnstile widget rendered silently
         } catch (error) {
-            console.error('❌ Failed to render Turnstile widget:', error);
+            window.logger?.error('❌ Failed to render Turnstile widget:', error);
             this.showError('Failed to initialize security verification');
         }
     }
@@ -214,7 +214,7 @@ class CaptchaComponent {
      */
     renderMockCaptcha() {
         if (!this.elements.widget) {
-            console.error('❌ CAPTCHA widget element not found');
+            window.logger?.error('❌ CAPTCHA widget element not found');
             return;
         }
         
@@ -234,7 +234,7 @@ class CaptchaComponent {
         // Ensure widget is visible
         this.elements.widget.style.display = 'flex';
         
-        console.log('✅ Mock CAPTCHA rendered for development');
+        window.logger?.log('✅ Mock CAPTCHA rendered for development');
     }
 
     /**
@@ -255,7 +255,7 @@ class CaptchaComponent {
         this.clearError();
         this.elements.widget.classList.add('success');
         
-        console.log('✅ CAPTCHA verified successfully');
+        window.logger?.log('✅ CAPTCHA verified successfully');
         
         // Call custom callback if provided
         if (this.options.callback && typeof this.options.callback === 'function') {
@@ -275,7 +275,7 @@ class CaptchaComponent {
         this.token = null;
         this.elements.widget.classList.add('error');
         
-        console.error('❌ CAPTCHA error:', error);
+        window.logger?.error('❌ CAPTCHA error:', error);
         this.showError(this.getTranslation('captcha.error') || 'Security verification failed. Please try again.');
         
         // Call custom error callback if provided
@@ -295,7 +295,7 @@ class CaptchaComponent {
         this.token = null;
         this.elements.widget.classList.remove('success');
         
-        console.log('⚠️ CAPTCHA expired');
+        window.logger?.log('⚠️ CAPTCHA expired');
         this.showError(this.getTranslation('captcha.expired') || 'Security verification expired. Please try again.');
         
         // Call custom expired callback if provided
@@ -315,7 +315,7 @@ class CaptchaComponent {
         this.token = null;
         this.elements.widget.classList.remove('success');
         
-        console.log('⚠️ CAPTCHA timeout');
+        window.logger?.log('⚠️ CAPTCHA timeout');
         this.showError(this.getTranslation('captcha.timeout') || 'Security verification timed out. Please try again.');
         
         // Call custom timeout callback if provided
@@ -400,7 +400,7 @@ class CaptchaComponent {
         this.clearError();
         this.elements.widget.classList.remove('success');
         
-        console.log('🔄 CAPTCHA reset');
+        window.logger?.log('🔄 CAPTCHA reset');
     }
 
     /**
@@ -444,7 +444,7 @@ class CaptchaComponent {
             const result = await response.json();
             return result.success === true;
         } catch (error) {
-            console.error('❌ Failed to verify CAPTCHA token:', error);
+            window.logger?.error('❌ Failed to verify CAPTCHA token:', error);
             return false;
         }
     }
@@ -489,7 +489,7 @@ class CaptchaComponent {
         this.token = null;
         this.widgetId = null;
         
-        console.log('🗑️ CAPTCHA component destroyed');
+        window.logger?.log('🗑️ CAPTCHA component destroyed');
     }
 }
 

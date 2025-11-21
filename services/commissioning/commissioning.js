@@ -38,7 +38,7 @@ class CommissioningPageLoader {
 
             this.componentsLoaded = true;
         } catch (error) {
-            console.error('❌ Failed to load commissioning page components:', error);
+            window.logger?.error('❌ Failed to load commissioning page components:', error);
         }
     }
 
@@ -80,7 +80,7 @@ class CommissioningPageLoader {
     async loadAndRenderServices() {
         try {
             if (!window.ServiceLoader || !window.ServiceRenderer) {
-                console.warn('Service components not loaded yet');
+                window.logger?.warn('Service components not loaded yet');
                 return;
             }
 
@@ -91,7 +91,7 @@ class CommissioningPageLoader {
             const services = await serviceLoader.loadServices('commissioning');
             
             if (!services || services.length === 0) {
-                console.warn('No services found for commissioning');
+                window.logger?.warn('No services found for commissioning');
                 return;
             }
 
@@ -131,7 +131,7 @@ class CommissioningPageLoader {
             });
 
         } catch (error) {
-            console.error('Failed to load and render services:', error);
+            window.logger?.error('Failed to load and render services:', error);
         }
     }
 
@@ -211,7 +211,7 @@ class CommissioningPageLoader {
                     script.onerror = () => resolve();
                     document.body.appendChild(script);
                 } catch (error) {
-                    console.warn('Failed to load services sub-navigation:', error);
+                    window.logger?.warn('Failed to load services sub-navigation:', error);
                     resolve();
                 }
             };

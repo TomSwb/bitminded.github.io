@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resources: resources
             }, function(err, t) {
                 if (err) {
-                    console.error('❌ i18next init error:', err);
+                    window.logger?.error('❌ i18next init error:', err);
                     showContent();
                 } else {
                     // i18next initialized
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         })
         .catch(error => {
-            console.error('❌ Failed to load user detail translations:', error);
+            window.logger?.error('❌ Failed to load user detail translations:', error);
             showContent();
         });
 
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showContent() {
-        console.log('⚠️ Showing content without translations');
+        window.logger?.log('⚠️ Showing content without translations');
         
         // Show all translatable content
         const translatableElements = document.querySelectorAll('.translatable-content');
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Global function for language switching
     window.changeLanguage = function(lng) {
-        console.log('🌐 Changing language to:', lng);
+        window.logger?.log('🌐 Changing language to:', lng);
         localStorage.setItem('language', lng);
         i18next.changeLanguage(lng, function() {
             updateContent();

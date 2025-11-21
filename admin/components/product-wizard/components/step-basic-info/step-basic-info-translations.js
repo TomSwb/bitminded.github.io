@@ -41,14 +41,14 @@ if (typeof window.stepBasicInfoTranslations === 'undefined') {
                         });
                         // Translations added
                     } catch (i18nextError) {
-                        console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
+                        window.logger?.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
                 }
 
                 return true;
 
             } catch (error) {
-                console.error('❌ Step 1 Translations: Failed to initialize:', error);
+                window.logger?.error('❌ Step 1 Translations: Failed to initialize:', error);
                 return false;
             }
         },
@@ -58,7 +58,7 @@ if (typeof window.stepBasicInfoTranslations === 'undefined') {
          */
         updateTranslations() {
             if (!this.isInitialized) {
-                console.warn('⚠️ Step 1 Translations: Not initialized, cannot update');
+                window.logger?.warn('⚠️ Step 1 Translations: Not initialized, cannot update');
                 return;
             }
 

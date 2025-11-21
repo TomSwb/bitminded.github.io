@@ -10,7 +10,7 @@ if (typeof window.appEntitlementsTranslations === 'undefined') {
         // Load translations when i18next is ready
         function loadTranslations() {
             if (typeof window.i18next === 'undefined') {
-                console.warn('⚠️ i18next not available, app-entitlements translations will use fallback');
+                window.logger?.warn('⚠️ i18next not available, app-entitlements translations will use fallback');
                 return;
             }
 
@@ -40,10 +40,10 @@ if (typeof window.appEntitlementsTranslations === 'undefined') {
                             );
                         }
                     });
-                    console.log('✅ App Entitlements translations loaded');
+                    window.logger?.log('✅ App Entitlements translations loaded');
                 })
                 .catch(error => {
-                    console.warn('⚠️ Failed to load app-entitlements translations:', error);
+                    window.logger?.warn('⚠️ Failed to load app-entitlements translations:', error);
                 });
         }
 

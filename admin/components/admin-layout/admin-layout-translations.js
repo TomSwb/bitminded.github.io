@@ -41,16 +41,16 @@ if (typeof window.adminLayoutTranslations === 'undefined') {
                         });
                         // Translations added
                     } catch (i18nextError) {
-                        console.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
+                        window.logger?.warn('⚠️ Could not add to i18next (fallback mode):', i18nextError);
                     }
                 } else {
-                    console.log('ℹ️ i18next not ready, using standalone translations');
+                    window.logger?.log('ℹ️ i18next not ready, using standalone translations');
                 }
 
                 return true;
 
             } catch (error) {
-                console.error('❌ Failed to initialize admin layout translations:', error);
+                window.logger?.error('❌ Failed to initialize admin layout translations:', error);
                 return false;
             }
         },
@@ -110,7 +110,7 @@ if (typeof window.adminLayoutTranslations === 'undefined') {
                 }
             });
 
-            console.log('✅ Admin layout translations updated');
+            window.logger?.log('✅ Admin layout translations updated');
         }
     };
 }

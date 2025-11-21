@@ -34,7 +34,7 @@ class AdminActivityFilters {
         if (this.isInitialized) return;
         
         try {
-            console.log('🔍 Initializing Admin Activity Filters...');
+            window.logger?.log('🔍 Initializing Admin Activity Filters...');
             
             // Load saved preferences
             await this.loadPreferences();
@@ -46,10 +46,10 @@ class AdminActivityFilters {
             // Note: populateOptions() will be called when setActivities() is called
             
             this.isInitialized = true;
-            console.log('✅ Admin Activity Filters initialized');
+            window.logger?.log('✅ Admin Activity Filters initialized');
             
         } catch (error) {
-            console.error('❌ Failed to initialize Admin Activity Filters:', error);
+            window.logger?.error('❌ Failed to initialize Admin Activity Filters:', error);
         }
     }
 
@@ -85,10 +85,10 @@ class AdminActivityFilters {
         
         // Clear filters button
         if (this.elements.clearBtn) {
-            console.log('🔗 Setting up admin clear button event listener');
+            window.logger?.log('🔗 Setting up admin clear button event listener');
             this.elements.clearBtn.addEventListener('click', this.handleClearFilters);
         } else {
-            console.error('❌ Admin clear button not found');
+            window.logger?.error('❌ Admin clear button not found');
         }
         
         // Action type multiselect
@@ -142,7 +142,7 @@ class AdminActivityFilters {
                 .maybeSingle();
             
             if (error) {
-                console.warn('⚠️ Failed to load admin preferences:', error);
+                window.logger?.warn('⚠️ Failed to load admin preferences:', error);
                 return;
             }
             
@@ -154,11 +154,11 @@ class AdminActivityFilters {
                     targetUsers: savedFilters.targetUsers || []
                 };
                 
-                console.log('📋 Loaded saved admin activity filter preferences:', this.currentFilters);
+                window.logger?.log('📋 Loaded saved admin activity filter preferences:', this.currentFilters);
             }
             
         } catch (error) {
-            console.warn('⚠️ Error loading preferences:', error);
+            window.logger?.warn('⚠️ Error loading preferences:', error);
         }
     }
 
@@ -194,13 +194,13 @@ class AdminActivityFilters {
                 });
             
             if (error) {
-                console.warn('⚠️ Failed to save admin preferences:', error);
+                window.logger?.warn('⚠️ Failed to save admin preferences:', error);
             } else {
-                console.log('💾 Saved admin activity filter preferences');
+                window.logger?.log('💾 Saved admin activity filter preferences');
             }
             
         } catch (error) {
-            console.warn('⚠️ Error saving preferences:', error);
+            window.logger?.warn('⚠️ Error saving preferences:', error);
         }
     }
 
@@ -232,7 +232,7 @@ class AdminActivityFilters {
             this.renderOptions();
             
         } catch (error) {
-            console.error('❌ Failed to populate filter options:', error);
+            window.logger?.error('❌ Failed to populate filter options:', error);
         }
     }
 
@@ -345,7 +345,7 @@ class AdminActivityFilters {
         const action = event.target.value;
         const isChecked = event.target.checked;
         
-        console.log('🔍 Action type toggle:', { action, isChecked, currentFilters: this.currentFilters.actionTypes });
+        window.logger?.log('🔍 Action type toggle:', { action, isChecked, currentFilters: this.currentFilters.actionTypes });
         
         // If currently showing all (empty array), initialize with all actions
         if (this.currentFilters.actionTypes.length === 0) {
@@ -362,7 +362,7 @@ class AdminActivityFilters {
             this.currentFilters.actionTypes = this.currentFilters.actionTypes.filter(a => a !== action);
         }
         
-        console.log('🔍 Updated filters:', this.currentFilters);
+        window.logger?.log('🔍 Updated filters:', this.currentFilters);
         
         this.updateTriggerText();
         this.applyFilters();
@@ -373,7 +373,7 @@ class AdminActivityFilters {
         const userId = event.target.value === 'admin' ? null : event.target.value;
         const isChecked = event.target.checked;
         
-        console.log('🔍 Target user toggle:', { userId, isChecked, currentFilters: this.currentFilters.targetUsers });
+        window.logger?.log('🔍 Target user toggle:', { userId, isChecked, currentFilters: this.currentFilters.targetUsers });
         
         // If currently showing all (empty array), initialize with all users
         if (this.currentFilters.targetUsers.length === 0) {
@@ -390,7 +390,7 @@ class AdminActivityFilters {
             this.currentFilters.targetUsers = this.currentFilters.targetUsers.filter(u => u !== userId);
         }
         
-        console.log('🔍 Updated target user filters:', this.currentFilters);
+        window.logger?.log('🔍 Updated target user filters:', this.currentFilters);
         
         this.updateTriggerText();
         this.applyFilters();
@@ -398,7 +398,7 @@ class AdminActivityFilters {
     }
 
     handleClearFilters() {
-        console.log('🧹 Admin clear filters clicked');
+        window.logger?.log('🧹 Admin clear filters clicked');
         this.currentFilters = {
             dateRange: 'all',
             actionTypes: [],
@@ -413,7 +413,7 @@ class AdminActivityFilters {
         this.renderOptions();
         this.applyFilters();
         this.savePreferences();
-        console.log('✅ Admin filters cleared');
+        window.logger?.log('✅ Admin filters cleared');
     }
 
     handleMultiselectToggle(event) {
@@ -479,8 +479,8 @@ class AdminActivityFilters {
 
     async applyFilters() {
         try {
-            console.log('🔍 Applying filters:', this.currentFilters);
-            console.log('🔍 Total activities:', this.allActivities.length);
+            window.logger?.log('🔍 Applying filters:', this.currentFilters);
+            window.logger?.log('🔍 Total activities:', this.allActivities.length);
             
             let filtered = [...this.allActivities];
             
@@ -516,23 +516,23 @@ class AdminActivityFilters {
             
             // Apply action type filter
             if (this.currentFilters.actionTypes.length > 0) {
-                console.log('🔍 Filtering by action types:', this.currentFilters.actionTypes);
+                window.logger?.log('🔍 Filtering by action types:', this.currentFilters.actionTypes);
                 filtered = filtered.filter(activity => 
                     this.currentFilters.actionTypes.includes(activity.action)
                 );
-                console.log('🔍 After action type filter:', filtered.length);
+                window.logger?.log('🔍 After action type filter:', filtered.length);
             }
             
             // Apply target user filter
             if (this.currentFilters.targetUsers.length > 0) {
-                console.log('🔍 Filtering by target users:', this.currentFilters.targetUsers);
+                window.logger?.log('🔍 Filtering by target users:', this.currentFilters.targetUsers);
                 filtered = filtered.filter(activity => {
                     if (!activity.user_id) {
                         return this.currentFilters.targetUsers.includes(null);
                     }
                     return this.currentFilters.targetUsers.includes(activity.user_id);
                 });
-                console.log('🔍 After target user filter:', filtered.length);
+                window.logger?.log('🔍 After target user filter:', filtered.length);
             }
             
             this.filteredActivities = filtered;
@@ -548,19 +548,19 @@ class AdminActivityFilters {
             }));
             
         } catch (error) {
-            console.error('❌ Failed to apply filters:', error);
+            window.logger?.error('❌ Failed to apply filters:', error);
         }
     }
 
     updateFilterSummary() {
-        console.log('📊 Updating filter summary...', { 
+        window.logger?.log('📊 Updating filter summary...', { 
             filterSummaryElement: !!this.elements.filterSummary,
             totalCount: this.allActivities.length,
             filteredCount: this.filteredActivities.length
         });
         
         if (!this.elements.filterSummary) {
-            console.error('❌ Filter summary element not found');
+            window.logger?.error('❌ Filter summary element not found');
             return;
         }
         
@@ -580,14 +580,14 @@ class AdminActivityFilters {
         }
         
         this.elements.filterSummary.querySelector('.admin-activity-filters__count').textContent = summaryText;
-        console.log('✅ Filter summary updated:', summaryText);
+        window.logger?.log('✅ Filter summary updated:', summaryText);
     }
 
     /**
      * Refresh filter states after HTML re-render
      */
     refreshFilterStates() {
-        console.log('🔄 Refreshing admin filter states...');
+        window.logger?.log('🔄 Refreshing admin filter states...');
         
         // Re-initialize elements after HTML re-render
         this.initializeElements();
@@ -607,7 +607,7 @@ class AdminActivityFilters {
         // Apply current filters
         this.applyFilters();
         
-        console.log('✅ Admin filter states refreshed');
+        window.logger?.log('✅ Admin filter states refreshed');
     }
 
     // Public methods for parent component

@@ -27,7 +27,7 @@ class NavigationMenu {
      */
     init(config = {}) {
         if (this.isInitialized) {
-            console.log('Navigation menu already initialized');
+            window.logger?.log('Navigation menu already initialized');
             return;
         }
 
@@ -41,7 +41,7 @@ class NavigationMenu {
 
         this.element = document.getElementById('navigation-menu');
         if (!this.element) {
-            console.error('❌ Navigation menu element not found');
+            window.logger?.error('❌ Navigation menu element not found');
             return;
         }
 
@@ -50,7 +50,7 @@ class NavigationMenu {
         this.mobileComponents = this.element.querySelector('.navigation-menu__mobile-components');
 
         if (!this.hamburger || !this.links) {
-            console.error('❌ Navigation menu elements not found');
+            window.logger?.error('❌ Navigation menu elements not found');
             return;
         }
 
@@ -185,10 +185,10 @@ class NavigationMenu {
                 this.updateTranslations(this.getCurrentLanguage());
                 // Navigation menu translations loaded
             } else {
-                console.warn('Failed to load navigation menu translations:', response.status);
+                window.logger?.warn('Failed to load navigation menu translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load navigation menu translations:', error);
+            window.logger?.warn('Failed to load navigation menu translations:', error);
         }
     }
 
@@ -354,7 +354,7 @@ class NavigationMenu {
             this.loadAccountNav();
         }
         
-        console.log('📱 Mobile menu opened');
+        window.logger?.log('📱 Mobile menu opened');
     }
 
     /**
@@ -369,7 +369,7 @@ class NavigationMenu {
         // Don't clear sub-nav or account nav on close - keep them for next open (if still on same page)
         // They will be cleared when navigating to a different page
         
-        console.log('📱 Mobile menu closed');
+        window.logger?.log('📱 Mobile menu closed');
     }
 
     /**
@@ -484,7 +484,7 @@ class NavigationMenu {
                 await this.loadAboutSubnav();
             }
         } catch (error) {
-            console.warn('Failed to load sub-navigation:', error);
+            window.logger?.warn('Failed to load sub-navigation:', error);
         }
     }
 
@@ -571,9 +571,9 @@ class NavigationMenu {
             });
 
             this.legalSubnavLoaded = true;
-            console.log('✅ Legal sub-navigation loaded in hamburger menu');
+            window.logger?.log('✅ Legal sub-navigation loaded in hamburger menu');
         } catch (error) {
-            console.warn('Failed to load legal sub-navigation:', error);
+            window.logger?.warn('Failed to load legal sub-navigation:', error);
         }
     }
 
@@ -751,9 +751,9 @@ class NavigationMenu {
                 link.style.visibility = 'visible';
             });
             
-            console.log('✅ Legal subnav translations loaded');
+            window.logger?.log('✅ Legal subnav translations loaded');
         } catch (error) {
-            console.warn('Failed to load legal subnav translations:', error);
+            window.logger?.warn('Failed to load legal subnav translations:', error);
         }
     }
 
@@ -820,7 +820,7 @@ class NavigationMenu {
 
             this.subnavLoaded = true;
         } catch (error) {
-            console.warn('Failed to load Services sub-navigation:', error);
+            window.logger?.warn('Failed to load Services sub-navigation:', error);
         }
     }
 
@@ -887,7 +887,7 @@ class NavigationMenu {
 
             this.subnavLoaded = true;
         } catch (error) {
-            console.warn('Failed to load About sub-navigation:', error);
+            window.logger?.warn('Failed to load About sub-navigation:', error);
         }
     }
 
@@ -962,7 +962,7 @@ class NavigationMenu {
 
             this.subnavLoaded = true;
         } catch (error) {
-            console.warn('Failed to load FAQ sub-navigation:', error);
+            window.logger?.warn('Failed to load FAQ sub-navigation:', error);
         }
     }
 
@@ -1139,13 +1139,13 @@ class NavigationMenu {
             } else if (type === 'about') {
                 localePath = '/about/components/about-subnav/locales/about-subnav-locales.json';
             } else {
-                console.warn('Unknown subnav type:', type);
+                window.logger?.warn('Unknown subnav type:', type);
                 return;
             }
             
             const response = await fetch(localePath);
             if (!response.ok) {
-                console.warn('Failed to fetch subnav translations:', response.status);
+                window.logger?.warn('Failed to fetch subnav translations:', response.status);
                 return;
             }
 
@@ -1187,7 +1187,7 @@ class NavigationMenu {
                                 subnavTitle.textContent = titleTranslation;
                             }
                         } catch (error) {
-                            console.warn('Translation error for FAQ title:', error);
+                            window.logger?.warn('Translation error for FAQ title:', error);
                         }
                     }
                 }
@@ -1206,11 +1206,11 @@ class NavigationMenu {
                                 element.classList.add('translated');
                             } else {
                                 // Keep original text if translation not found
-                                console.warn('Translation not found for key:', key);
+                                window.logger?.warn('Translation not found for key:', key);
                                 element.classList.add('loaded'); // Make sure it's visible
                             }
                         } catch (error) {
-                            console.warn('Translation error for key:', key, error);
+                            window.logger?.warn('Translation error for key:', key, error);
                             element.classList.add('loaded'); // Make sure it's visible
                         }
                     } else {
@@ -1227,12 +1227,12 @@ class NavigationMenu {
                     link.style.visibility = 'visible';
                 });
                 
-                console.log('✅ Subnav translations loaded for', type, 'updated', sublinks.length, 'items');
+                window.logger?.log('✅ Subnav translations loaded for', type, 'updated', sublinks.length, 'items');
             } else {
-                console.warn('i18next not available for subnav translations');
+                window.logger?.warn('i18next not available for subnav translations');
             }
         } catch (error) {
-            console.warn('Failed to load subnav translations:', error);
+            window.logger?.warn('Failed to load subnav translations:', error);
         }
     }
 
@@ -1244,9 +1244,9 @@ class NavigationMenu {
         const existingLangSwitcher = document.querySelector('.language-switcher');
         const mobileLangContainer = this.mobileComponents.querySelector('#mobile-language-switcher');
         
-        console.log('🔍 Debug - existingLangSwitcher:', existingLangSwitcher);
-        console.log('🔍 Debug - mobileLangContainer:', mobileLangContainer);
-        console.log('🔍 Debug - already has language switcher:', mobileLangContainer?.querySelector('.language-switcher'));
+        window.logger?.log('🔍 Debug - existingLangSwitcher:', existingLangSwitcher);
+        window.logger?.log('🔍 Debug - mobileLangContainer:', mobileLangContainer);
+        window.logger?.log('🔍 Debug - already has language switcher:', mobileLangContainer?.querySelector('.language-switcher'));
         
         if (existingLangSwitcher && mobileLangContainer && !mobileLangContainer.querySelector('.language-switcher')) {
             // Clone the existing language switcher
@@ -1254,7 +1254,7 @@ class NavigationMenu {
             langClone.classList.add('compact');
             mobileLangContainer.appendChild(langClone);
             
-            console.log('🔍 Debug - langClone created:', langClone);
+            window.logger?.log('🔍 Debug - langClone created:', langClone);
             
             // Re-initialize the cloned language switcher
             if (window.languageSwitcher) {
@@ -1262,12 +1262,12 @@ class NavigationMenu {
                 const mobileLangSwitcher = new LanguageSwitcher();
                 mobileLangSwitcher.element = langClone;
                 mobileLangSwitcher.init({ compact: true });
-                console.log('✅ Mobile language switcher moved and initialized');
+                window.logger?.log('✅ Mobile language switcher moved and initialized');
             } else {
-                console.warn('⚠️ window.languageSwitcher not available');
+                window.logger?.warn('⚠️ window.languageSwitcher not available');
             }
         } else {
-            console.log('❌ Language switcher not loaded - conditions not met');
+            window.logger?.log('❌ Language switcher not loaded - conditions not met');
         }
 
         // Move existing Notification Center to mobile container
@@ -1294,9 +1294,9 @@ class NavigationMenu {
                 const mobileNotificationCenter = new NotificationCenter();
                 mobileNotificationCenter.element = notificationClone;
                 mobileNotificationCenter.init({ compact: true });
-                console.log('✅ Mobile notification center moved and initialized');
+                window.logger?.log('✅ Mobile notification center moved and initialized');
             } else {
-                console.warn('⚠️ window.notificationCenter not available');
+                window.logger?.warn('⚠️ window.notificationCenter not available');
             }
         }
 
@@ -1324,9 +1324,9 @@ class NavigationMenu {
                 const mobileCurrencySwitcher = new CurrencySwitcher();
                 mobileCurrencySwitcher.element = currencyClone;
                 mobileCurrencySwitcher.init({ compact: true });
-                console.log('✅ Mobile currency switcher moved and initialized');
+                window.logger?.log('✅ Mobile currency switcher moved and initialized');
             } else {
-                console.warn('⚠️ window.CurrencySwitcher not available');
+                window.logger?.warn('⚠️ window.CurrencySwitcher not available');
             }
         }
 
@@ -1355,7 +1355,7 @@ class NavigationMenu {
                 mobileThemeSwitcher.init();
             }
             
-            console.log('✅ Mobile theme switcher moved and initialized');
+            window.logger?.log('✅ Mobile theme switcher moved and initialized');
         }
 
         // Move existing Auth Buttons to mobile container (no cloning needed)
@@ -1375,7 +1375,7 @@ class NavigationMenu {
                 });
             });
             
-            console.log('✅ Mobile auth buttons moved (no cloning)');
+            window.logger?.log('✅ Mobile auth buttons moved (no cloning)');
         }
         
         // Mark mobile components as loaded
@@ -1422,20 +1422,20 @@ class NavigationMenu {
             // Find mobile auth buttons container
             const mobileAuthContainer = this.mobileComponents.querySelector('#mobile-auth-buttons');
             if (!mobileAuthContainer) {
-                console.warn('Mobile auth buttons container not found');
+                window.logger?.warn('Mobile auth buttons container not found');
                 return;
             }
 
             // Find the logout button (or admin button if admin)
             const authButtonsElement = mobileAuthContainer.querySelector('.auth-buttons');
             if (!authButtonsElement) {
-                console.warn('Auth buttons element not found');
+                window.logger?.warn('Auth buttons element not found');
                 return;
             }
 
             const loggedInContainer = authButtonsElement.querySelector('.auth-buttons__logged-in');
             if (!loggedInContainer) {
-                console.warn('Logged in container not found');
+                window.logger?.warn('Logged in container not found');
                 return;
             }
 
@@ -1500,9 +1500,9 @@ class NavigationMenu {
             });
 
             this.accountNavLoaded = true;
-            console.log('✅ Account navigation loaded in hamburger menu');
+            window.logger?.log('✅ Account navigation loaded in hamburger menu');
         } catch (error) {
-            console.warn('Failed to load account navigation:', error);
+            window.logger?.warn('Failed to load account navigation:', error);
         }
     }
 
@@ -1697,7 +1697,7 @@ class NavigationMenu {
                             element.classList.add('loaded'); // Make sure it's visible
                         }
                     } catch (error) {
-                        console.warn('Translation error for key:', key, error);
+                        window.logger?.warn('Translation error for key:', key, error);
                         element.classList.add('loaded'); // Make sure it's visible
                     }
                 } else {
@@ -1714,9 +1714,9 @@ class NavigationMenu {
                 link.style.visibility = 'visible';
             });
             
-            console.log('✅ Account nav translations loaded');
+            window.logger?.log('✅ Account nav translations loaded');
         } catch (error) {
-            console.warn('Failed to load account nav translations:', error);
+            window.logger?.warn('Failed to load account nav translations:', error);
         }
     }
 
@@ -1737,7 +1737,7 @@ class NavigationMenu {
                         element.classList.add('translated');
                     }
                 } catch (error) {
-                    console.warn('Translation error for key:', key, error);
+                    window.logger?.warn('Translation error for key:', key, error);
                 }
             }
             element.classList.add('loaded');
@@ -1767,7 +1767,7 @@ class NavigationMenu {
             }
         });
         
-        console.log(`✅ Added navigation item: ${id}`);
+        window.logger?.log(`✅ Added navigation item: ${id}`);
     }
 
     /**
@@ -1778,7 +1778,7 @@ class NavigationMenu {
         const link = this.links.querySelector(`#nav-${id}`);
         if (link) {
             link.remove();
-            console.log(`✅ Removed navigation item: ${id}`);
+            window.logger?.log(`✅ Removed navigation item: ${id}`);
         }
     }
 
@@ -1829,7 +1829,7 @@ class NavigationMenu {
         }
 
         this.isInitialized = false;
-        console.log('🗑️ Navigation menu destroyed');
+        window.logger?.log('🗑️ Navigation menu destroyed');
     }
 }
 

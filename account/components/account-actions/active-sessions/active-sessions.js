@@ -29,7 +29,7 @@ class ActiveSessions {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Active Sessions: Already initialized');
+                window.logger?.log('Active Sessions: Already initialized');
                 return;
             }
 
@@ -57,7 +57,7 @@ class ActiveSessions {
             }, 100);
 
         } catch (error) {
-            console.error('❌ Active Sessions initialization error:', error);
+            window.logger?.error('❌ Active Sessions initialization error:', error);
             this.showError('Failed to initialize Active Sessions component');
         }
     }
@@ -68,7 +68,7 @@ class ActiveSessions {
     setupComponent() {
         this.container = document.getElementById('active-sessions');
         if (!this.container) {
-            console.error('Active Sessions container not found');
+            window.logger?.error('Active Sessions container not found');
             return;
         }
 
@@ -89,7 +89,7 @@ class ActiveSessions {
 
         // Listen for language changes and re-render sessions
         window.addEventListener('languageChanged', () => {
-            console.log('🌐 Active Sessions: Language changed, re-rendering sessions');
+            window.logger?.log('🌐 Active Sessions: Language changed, re-rendering sessions');
             this.displaySessions();
         });
 
@@ -113,7 +113,7 @@ class ActiveSessions {
                 this.updateTranslations();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize active sessions translations:', error);
+            window.logger?.error('❌ Failed to initialize active sessions translations:', error);
         }
     }
 
@@ -181,7 +181,7 @@ class ActiveSessions {
             this.displaySessions();
 
         } catch (error) {
-            console.error('❌ Error loading sessions:', error);
+            window.logger?.error('❌ Error loading sessions:', error);
             this.showError(this.t('Failed to load sessions'));
         }
     }
@@ -199,7 +199,7 @@ class ActiveSessions {
             });
             
             if (error) {
-                console.error('Failed to load active sessions:', error);
+                window.logger?.error('Failed to load active sessions:', error);
                 throw error;
             }
             
@@ -241,7 +241,7 @@ class ActiveSessions {
             }
             
         } catch (error) {
-            console.error('Failed to load active sessions:', error);
+            window.logger?.error('Failed to load active sessions:', error);
             // Fallback: show current session only
             const deviceInfo = this.getDeviceInfo();
             sessions.push({
@@ -521,7 +521,7 @@ class ActiveSessions {
      * Remove expired session from list
      */
     removeExpiredSession(sessionId) {
-        console.log('🕐 Session token expired:', sessionId);
+        window.logger?.log('🕐 Session token expired:', sessionId);
         
         // Clear timer
         if (this.timerIntervals.has(sessionId)) {
@@ -550,7 +550,7 @@ class ActiveSessions {
         }
 
         try {
-            console.log('🔐 Revoking session:', session.id);
+            window.logger?.log('🔐 Revoking session:', session.id);
             
             // Call edge function to revoke the session
             const { data, error } = await window.supabase.functions.invoke('revoke-session', {
@@ -563,7 +563,7 @@ class ActiveSessions {
                 throw error;
             }
 
-            console.log('✅ Session revoked successfully');
+            window.logger?.log('✅ Session revoked successfully');
             
             // Mark session as revoked instead of removing it
             const revokedSession = this.sessions.find(s => s.id === session.id);
@@ -581,7 +581,7 @@ class ActiveSessions {
             }
 
         } catch (error) {
-            console.error('❌ Error logging out session:', error);
+            window.logger?.error('❌ Error logging out session:', error);
             this.showError(this.t('Failed to logout session'));
         }
     }
@@ -598,7 +598,7 @@ class ActiveSessions {
             this.logoutAllBtn.disabled = true;
             this.logoutAllBtn.textContent = 'Logging out...';
 
-            console.log('🔐 Revoking all other sessions');
+            window.logger?.log('🔐 Revoking all other sessions');
             
             // Call edge function to revoke all sessions
             const { data, error } = await window.supabase.functions.invoke('revoke-session', {
@@ -611,7 +611,7 @@ class ActiveSessions {
                 throw error;
             }
 
-            console.log('✅ All other sessions revoked:', data);
+            window.logger?.log('✅ All other sessions revoked:', data);
 
             // Mark all non-current sessions as revoked
             const now = new Date();
@@ -634,7 +634,7 @@ class ActiveSessions {
             }
 
         } catch (error) {
-            console.error('❌ Error logging out all sessions:', error);
+            window.logger?.error('❌ Error logging out all sessions:', error);
             this.showError(this.t('Failed to logout session'));
         } finally {
             this.logoutAllBtn.disabled = false;

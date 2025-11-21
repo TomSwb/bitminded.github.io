@@ -36,7 +36,7 @@ class CategoryModal {
             this.isInitialized = true;
 
         } catch (error) {
-            console.error('❌ Category Modal: Failed to initialize:', error);
+            window.logger?.error('❌ Category Modal: Failed to initialize:', error);
             throw error;
         }
     }
@@ -176,10 +176,10 @@ class CategoryModal {
             // Show success message
             this.showSuccess(`Category "${data.name}" created successfully!`);
 
-            console.log('✅ Category created:', data);
+            window.logger?.log('✅ Category created:', data);
 
         } catch (error) {
-            console.error('❌ Error creating category:', error);
+            window.logger?.error('❌ Error creating category:', error);
             this.showError(`Failed to create category: ${error.message}`);
         } finally {
             this.hideLoading();
@@ -231,7 +231,7 @@ class CategoryModal {
      */
     showError(message) {
         // This would integrate with the main wizard's message system
-        console.error('Category Modal Error:', message);
+        window.logger?.error('Category Modal Error:', message);
         // For now, just alert - this should be replaced with proper message system
         alert(message);
     }
@@ -241,7 +241,7 @@ class CategoryModal {
      */
     showSuccess(message) {
         // This would integrate with the main wizard's message system
-        console.log('Category Modal Success:', message);
+        window.logger?.log('Category Modal Success:', message);
         // For now, just log - this should be replaced with proper message system
     }
 
@@ -254,7 +254,7 @@ class CategoryModal {
                 await window.categoryModalTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize translations:', error);
+            window.logger?.error('❌ Failed to initialize translations:', error);
         }
     }
 

@@ -66,7 +66,7 @@ class AdminLayout {
             this.isInitialized = true;
 
         } catch (error) {
-            console.error('❌ Admin Layout: Failed to initialize:', error);
+            window.logger?.error('❌ Admin Layout: Failed to initialize:', error);
             this.showError('Failed to initialize admin panel');
         }
     }
@@ -78,7 +78,7 @@ class AdminLayout {
     async checkAdminAccess() {
         try {
             if (typeof window.supabase === 'undefined') {
-                console.error('❌ Supabase client not available');
+                window.logger?.error('❌ Supabase client not available');
                 return false;
             }
 
@@ -124,7 +124,7 @@ class AdminLayout {
             return true;
 
         } catch (error) {
-            console.error('❌ Error checking admin access:', error);
+            window.logger?.error('❌ Error checking admin access:', error);
             return false;
         }
     }
@@ -246,7 +246,7 @@ class AdminLayout {
 
 
         } catch (error) {
-            console.error('❌ Failed to navigate:', error);
+            window.logger?.error('❌ Failed to navigate:', error);
             this.showError('Failed to navigate to section');
         }
     }
@@ -347,7 +347,7 @@ class AdminLayout {
             this.hideLoading();
 
         } catch (error) {
-            console.error(`❌ Failed to load section ${sectionName}:`, error);
+            window.logger?.error(`❌ Failed to load section ${sectionName}:`, error);
             this.showPlaceholder(sectionName);
             this.loadedComponents.set(sectionName, true);
             this.hideLoading();
@@ -412,7 +412,7 @@ class AdminLayout {
             window[`${sectionName}Component`] = instance;
 
         } catch (error) {
-            console.error(`❌ Failed to initialize component ${componentName}:`, error);
+            window.logger?.error(`❌ Failed to initialize component ${componentName}:`, error);
         }
     }
 
@@ -436,7 +436,7 @@ class AdminLayout {
                 document.head.appendChild(script);
             });
         } catch (error) {
-            console.warn(`Failed to load translations for ${componentName}:`, error);
+            window.logger?.warn(`Failed to load translations for ${componentName}:`, error);
         }
     }
 
@@ -518,7 +518,7 @@ class AdminLayout {
             }
 
         } catch (error) {
-            console.error('❌ Failed to load admin info:', error);
+            window.logger?.error('❌ Failed to load admin info:', error);
         }
     }
 
@@ -556,7 +556,7 @@ class AdminLayout {
                 await window.adminLayoutTranslations.init();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize translations:', error);
+            window.logger?.error('❌ Failed to initialize translations:', error);
         }
     }
 

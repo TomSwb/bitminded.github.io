@@ -17,7 +17,7 @@ class ContactUserPage {
 
     async init() {
         try {
-            console.log('🚀 Initializing Contact User Page...');
+            window.logger?.log('🚀 Initializing Contact User Page...');
             
             // Get URL parameters
             this.parseUrlParameters();
@@ -38,10 +38,10 @@ class ContactUserPage {
             this.waitForTranslationsAndUpdateUI();
             
             this.isInitialized = true;
-            console.log('✅ Contact User Page initialized successfully');
+            window.logger?.log('✅ Contact User Page initialized successfully');
             
         } catch (error) {
-            console.error('❌ Failed to initialize Contact User Page:', error);
+            window.logger?.error('❌ Failed to initialize Contact User Page:', error);
             this.showError(`Failed to initialize page: ${error.message}`);
         }
     }
@@ -55,7 +55,7 @@ class ContactUserPage {
             throw new Error('Missing required URL parameters: userId and username');
         }
         
-        console.log('📋 URL Parameters:', { userId: this.userId, username: this.username });
+        window.logger?.log('📋 URL Parameters:', { userId: this.userId, username: this.username });
     }
 
     initializeElements() {
@@ -111,10 +111,10 @@ class ContactUserPage {
 
             this.userLanguage = userProfile.language || 'en';
             this.userEmail = userProfile.email;
-            console.log('👤 User data loaded:', { username: userProfile.username, email: this.userEmail, language: this.userLanguage });
+            window.logger?.log('👤 User data loaded:', { username: userProfile.username, email: this.userEmail, language: this.userLanguage });
 
         } catch (error) {
-            console.error('❌ Failed to load user data:', error);
+            window.logger?.error('❌ Failed to load user data:', error);
             throw error;
         }
     }
@@ -143,11 +143,11 @@ class ContactUserPage {
             }
 
             this.signatures = signatures || [];
-            console.log('📝 Signatures loaded:', this.signatures);
-            console.log('📝 Number of signatures:', this.signatures.length);
+            window.logger?.log('📝 Signatures loaded:', this.signatures);
+            window.logger?.log('📝 Number of signatures:', this.signatures.length);
 
         } catch (error) {
-            console.error('❌ Failed to load signatures:', error);
+            window.logger?.error('❌ Failed to load signatures:', error);
             // Continue without signatures - user can still send messages
             this.signatures = [];
         }
@@ -274,7 +274,7 @@ class ContactUserPage {
     populateSignatureDropdown() {
         if (!this.elements.messageSignature) return;
 
-        console.log('📝 Populating signature dropdown with', this.signatures.length, 'signatures');
+        window.logger?.log('📝 Populating signature dropdown with', this.signatures.length, 'signatures');
 
         // Clear existing options
         this.elements.messageSignature.innerHTML = '';
@@ -296,12 +296,12 @@ class ContactUserPage {
             
             if (signature.is_default) {
                 option.selected = true;
-                console.log('📝 Set default signature:', translatedName);
+                window.logger?.log('📝 Set default signature:', translatedName);
             }
             this.elements.messageSignature.appendChild(option);
         });
 
-        console.log('📝 Signature dropdown populated with', this.elements.messageSignature.options.length, 'options');
+        window.logger?.log('📝 Signature dropdown populated with', this.elements.messageSignature.options.length, 'options');
         
         // Update signature preview after populating dropdown
         this.updateSignaturePreview();
@@ -418,12 +418,12 @@ class ContactUserPage {
             this.elements.sendBtnText.textContent = type === 'email' ? i18next.t('Send Email') : i18next.t('Send Notification');
         }
 
-        console.log('📧 Communication type set to:', type);
+        window.logger?.log('📧 Communication type set to:', type);
     }
 
     async sendMessage() {
         try {
-            console.log('📤 Sending message...');
+            window.logger?.log('📤 Sending message...');
 
             // Validate form
             if (!this.validateForm()) {
@@ -468,7 +468,7 @@ class ContactUserPage {
             }
 
         } catch (error) {
-            console.error('❌ Failed to send message:', error);
+            window.logger?.error('❌ Failed to send message:', error);
             this.showError(`Failed to send ${this.communicationType}: ${error.message}`);
         } finally {
             // Re-enable send button
@@ -550,7 +550,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.contactUserPage = contactUserPage;
         
     } catch (error) {
-        console.error('❌ Failed to initialize Contact User Page:', error);
+        window.logger?.error('❌ Failed to initialize Contact User Page:', error);
         document.body.innerHTML = `
             <div style="padding: 2rem; text-align: center;">
                 <h1>Error</h1>

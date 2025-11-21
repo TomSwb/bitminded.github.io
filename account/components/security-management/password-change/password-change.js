@@ -36,7 +36,7 @@ class PasswordChange {
     async init() {
         try {
             if (this.isInitialized) {
-                console.log('Password Change: Already initialized');
+                window.logger?.log('Password Change: Already initialized');
                 return;
             }
 
@@ -61,7 +61,7 @@ class PasswordChange {
             }, 100);
 
         } catch (error) {
-            console.error('❌ Password Change: Failed to initialize:', error);
+            window.logger?.error('❌ Password Change: Failed to initialize:', error);
             this.showError('Failed to initialize password change component');
         }
     }
@@ -79,7 +79,7 @@ class PasswordChange {
         this.cancelButton = document.getElementById('cancel-password-change');
 
         if (!this.form || !this.currentPasswordInput || !this.newPasswordInput || !this.confirmPasswordInput) {
-            console.error('❌ Password Change: Required form elements not found');
+            window.logger?.error('❌ Password Change: Required form elements not found');
             return;
         }
 
@@ -163,7 +163,7 @@ class PasswordChange {
             this.setSubmitButtonLoading(true);
             this.hideMessages();
 
-            console.log('🔐 Password Change: Submitting password change...');
+            window.logger?.log('🔐 Password Change: Submitting password change...');
 
             // Get form data
             const currentPassword = this.currentPasswordInput.value;
@@ -178,7 +178,7 @@ class PasswordChange {
             // Update password status in security management
             this.updatePasswordStatus();
 
-            console.log('✅ Password Change: Password changed successfully');
+            window.logger?.log('✅ Password Change: Password changed successfully');
 
             // Send notification email
             if (typeof window.notificationHelper !== 'undefined') {
@@ -186,7 +186,7 @@ class PasswordChange {
             }
 
         } catch (error) {
-            console.error('❌ Password Change: Failed to change password:', error);
+            window.logger?.error('❌ Password Change: Failed to change password:', error);
             this.showError(this.getErrorMessage(error));
         } finally {
             this.isSubmitting = false;
@@ -752,7 +752,7 @@ class PasswordChange {
                 this.updateTranslations();
             }
         } catch (error) {
-            console.error('❌ Failed to initialize password change translations:', error);
+            window.logger?.error('❌ Failed to initialize password change translations:', error);
         }
     }
 
@@ -827,22 +827,22 @@ class PasswordChange {
      */
     async updatePasswordStatus() {
         try {
-            console.log('🔧 Password Change: Starting password status update...');
+            window.logger?.log('🔧 Password Change: Starting password status update...');
             
             // Get current user
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
             if (userError) {
-                console.error('❌ Password Change: Failed to get user:', userError);
+                window.logger?.error('❌ Password Change: Failed to get user:', userError);
                 return;
             }
             
             if (!user) {
-                console.error('❌ Password Change: No user found');
+                window.logger?.error('❌ Password Change: No user found');
                 return;
             }
             
-            console.log('🔧 Password Change: User found:', user.id, user.email);
+            window.logger?.log('🔧 Password Change: User found:', user.id, user.email);
             
             // First, check if user profile exists
             const { data: existingProfile, error: selectError } = await supabase
@@ -852,11 +852,11 @@ class PasswordChange {
                 .single();
             
             if (selectError) {
-                console.error('❌ Password Change: Failed to check existing profile:', selectError);
+                window.logger?.error('❌ Password Change: Failed to check existing profile:', selectError);
                 return;
             }
             
-            console.log('🔧 Password Change: Existing profile:', existingProfile);
+            window.logger?.log('🔧 Password Change: Existing profile:', existingProfile);
             
             // Update password_last_changed in database
             const { data: updateData, error: updateError } = await supabase
@@ -866,9 +866,9 @@ class PasswordChange {
                 .select();
             
             if (updateError) {
-                console.error('❌ Password Change: Failed to update password status in database:', updateError);
+                window.logger?.error('❌ Password Change: Failed to update password status in database:', updateError);
             } else {
-                console.log('✅ Password Change: Password status updated in database:', updateData);
+                window.logger?.log('✅ Password Change: Password status updated in database:', updateData);
             }
             
             // Update security management status if available
@@ -877,7 +877,7 @@ class PasswordChange {
             }
             
         } catch (error) {
-            console.error('❌ Password Change: Failed to update password status:', error);
+            window.logger?.error('❌ Password Change: Failed to update password status:', error);
         }
     }
 

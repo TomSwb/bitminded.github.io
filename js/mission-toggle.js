@@ -22,7 +22,7 @@ class MissionToggle {
             this.updateTranslations();
             this.isInitialized = true;
         } catch (error) {
-            console.error('❌ Failed to initialize Mission Toggle:', error);
+            window.logger?.error('❌ Failed to initialize Mission Toggle:', error);
         }
     }
 
@@ -58,7 +58,7 @@ class MissionToggle {
      */
     bindEvents() {
         if (!this.elements.buildButton || !this.elements.guideButton) {
-            console.warn('Mission toggle buttons not found');
+            window.logger?.warn('Mission toggle buttons not found');
             return;
         }
 
@@ -130,7 +130,7 @@ class MissionToggle {
 
         // Validate mission
         if (!['build', 'guide', 'access'].includes(mission)) {
-            console.warn(`Invalid mission: ${mission}`);
+            window.logger?.warn(`Invalid mission: ${mission}`);
             return;
         }
 

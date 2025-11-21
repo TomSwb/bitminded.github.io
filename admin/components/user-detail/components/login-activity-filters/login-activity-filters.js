@@ -25,7 +25,7 @@ class LoginActivityFilters {
     }
 
     async init() {
-        console.log('🔍 Initializing Login Activity Filters...');
+        window.logger?.log('🔍 Initializing Login Activity Filters...');
         
         try {
             // Load saved preferences
@@ -37,9 +37,9 @@ class LoginActivityFilters {
             // Set up event listeners
             this.setupEventListeners();
             
-            console.log('✅ Login Activity Filters initialized');
+            window.logger?.log('✅ Login Activity Filters initialized');
         } catch (error) {
-            console.error('❌ Failed to initialize Login Activity Filters:', error);
+            window.logger?.error('❌ Failed to initialize Login Activity Filters:', error);
         }
     }
 
@@ -62,10 +62,10 @@ class LoginActivityFilters {
                     ...this.currentFilters,
                     ...preferences.preferences.loginActivityFilters
                 };
-                console.log('📋 Loaded saved filter preferences:', this.currentFilters);
+                window.logger?.log('📋 Loaded saved filter preferences:', this.currentFilters);
             }
         } catch (error) {
-            console.error('❌ Failed to load preferences:', error);
+            window.logger?.error('❌ Failed to load preferences:', error);
         }
     }
 
@@ -99,9 +99,9 @@ class LoginActivityFilters {
                 }, { onConflict: 'admin_id' });
 
             if (error) throw error;
-            console.log('💾 Saved login activity filter preferences');
+            window.logger?.log('💾 Saved login activity filter preferences');
         } catch (error) {
-            console.error('❌ Failed to save preferences:', error);
+            window.logger?.error('❌ Failed to save preferences:', error);
         }
     }
 
@@ -331,7 +331,7 @@ class LoginActivityFilters {
      * Handle filter toggle for multi-select filters
      */
     handleFilterToggle(filterKey, option, isChecked) {
-        console.log('🔍 Filter toggle:', { filterKey, option, isChecked, currentFilters: this.currentFilters[filterKey] });
+        window.logger?.log('🔍 Filter toggle:', { filterKey, option, isChecked, currentFilters: this.currentFilters[filterKey] });
         
         if (isChecked) {
             // Add to filters if not already present
@@ -343,7 +343,7 @@ class LoginActivityFilters {
             this.currentFilters[filterKey] = this.currentFilters[filterKey].filter(item => item !== option);
         }
         
-        console.log('🔍 Updated filters:', this.currentFilters);
+        window.logger?.log('🔍 Updated filters:', this.currentFilters);
         this.applyFilters();
         this.savePreferences();
     }
@@ -368,8 +368,8 @@ class LoginActivityFilters {
      * Apply current filters to activities
      */
     applyFilters() {
-        console.log('🔍 Applying filters:', this.currentFilters);
-        console.log('🔍 Total activities:', this.allActivities.length);
+        window.logger?.log('🔍 Applying filters:', this.currentFilters);
+        window.logger?.log('🔍 Total activities:', this.allActivities.length);
         
         let filteredActivities = [...this.allActivities];
 
@@ -437,7 +437,7 @@ class LoginActivityFilters {
             );
         }
 
-        console.log('🔍 Filtered activities:', filteredActivities.length);
+        window.logger?.log('🔍 Filtered activities:', filteredActivities.length);
         
         // Update filter summary
         this.updateFilterSummary(filteredActivities.length);
@@ -611,7 +611,7 @@ class LoginActivityFilters {
      * Refresh filter states after HTML re-render
      */
     refreshFilterStates() {
-        console.log('🔄 Refreshing filter states...');
+        window.logger?.log('🔄 Refreshing filter states...');
         
         // Restore date range
         const dateRangeSelect = document.getElementById('date-range-select');
@@ -632,14 +632,14 @@ class LoginActivityFilters {
         // Apply current filters
         this.applyFilters();
         
-        console.log('✅ Filter states refreshed');
+        window.logger?.log('✅ Filter states refreshed');
     }
 
     /**
      * Clear all filters
      */
     clearAllFilters() {
-        console.log('🧹 Login clear filters clicked');
+        window.logger?.log('🧹 Login clear filters clicked');
         this.currentFilters = {
             dateRange: '7d',
             status: [],
@@ -663,7 +663,7 @@ class LoginActivityFilters {
         
         this.applyFilters();
         this.savePreferences();
-        console.log('✅ Login filters cleared');
+        window.logger?.log('✅ Login filters cleared');
     }
 
     /**

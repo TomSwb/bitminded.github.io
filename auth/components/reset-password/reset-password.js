@@ -32,9 +32,9 @@ class ResetPasswordForm {
             
             this.isInitialized = true;
             
-            console.log('✅ Reset Password Form initialized successfully');
+            window.logger?.log('✅ Reset Password Form initialized successfully');
         } catch (error) {
-            console.error('❌ Failed to initialize Reset Password Form:', error);
+            window.logger?.error('❌ Failed to initialize Reset Password Form:', error);
             this.showError('Failed to initialize reset password form');
         }
     }
@@ -49,9 +49,9 @@ class ResetPasswordForm {
             this.showTranslatableContent(); // Show content immediately
             this.initializePasswordRequirements(); // Initialize requirements display
             this.updateTranslations();
-            console.log('✅ Reset Password Form re-initialized successfully');
+            window.logger?.log('✅ Reset Password Form re-initialized successfully');
         } catch (error) {
-            console.error('❌ Failed to re-initialize Reset Password Form:', error);
+            window.logger?.error('❌ Failed to re-initialize Reset Password Form:', error);
         }
     }
 
@@ -93,7 +93,7 @@ class ResetPasswordForm {
         });
         
         if (missingCritical.length > 0) {
-            console.warn('Reset password form missing critical elements:', missingCritical);
+            window.logger?.warn('Reset password form missing critical elements:', missingCritical);
         }
     }
 
@@ -155,12 +155,12 @@ class ResetPasswordForm {
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Reset password form translations loaded');
+                window.logger?.log('✅ Reset password form translations loaded');
             } else {
-                console.warn('Failed to load reset password form translations:', response.status);
+                window.logger?.warn('Failed to load reset password form translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load reset password form translations:', error);
+            window.logger?.warn('Failed to load reset password form translations:', error);
         }
     }
 
@@ -217,8 +217,8 @@ class ResetPasswordForm {
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const urlType = hashParams.get('type');
             
-            console.log('🔍 Checking reset link type:', urlType);
-            console.log('🔍 URL hash params:', Array.from(hashParams.entries()));
+            window.logger?.log('🔍 Checking reset link type:', urlType);
+            window.logger?.log('🔍 URL hash params:', Array.from(hashParams.entries()));
 
             // Small delay to ensure Supabase has processed the URL tokens
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -227,12 +227,12 @@ class ResetPasswordForm {
             const { data: { session }, error } = await window.supabase.auth.getSession();
             
             if (error) {
-                console.error('❌ Session verification error:', error);
+                window.logger?.error('❌ Session verification error:', error);
                 throw new Error('Unable to verify reset session');
             }
 
             if (!session) {
-                console.error('❌ No active session found for password reset');
+                window.logger?.error('❌ No active session found for password reset');
                 this.showError('Invalid or expired reset link. Please request a new password reset link from the forgot password page.');
                 // Disable the form
                 if (this.elements.email) this.elements.email.disabled = true;
@@ -241,14 +241,14 @@ class ResetPasswordForm {
                 throw new Error('No active session');
             }
 
-            console.log('✅ Valid reset session found for user:', session.user.email);
+            window.logger?.log('✅ Valid reset session found for user:', session.user.email);
             
             // Populate email field for password manager detection
             if (this.elements.email && session.user.email) {
                 this.elements.email.value = session.user.email;
             }
         } catch (error) {
-            console.error('❌ Session verification failed:', error);
+            window.logger?.error('❌ Session verification failed:', error);
             throw error;
         }
     }
@@ -282,7 +282,7 @@ class ResetPasswordForm {
             this.elements.form.reset();
             
         } catch (error) {
-            console.error('❌ Password update failed:', error);
+            window.logger?.error('❌ Password update failed:', error);
             this.showError('Failed to update password. Please try again.');
         } finally {
             this.setSubmitting(false);
@@ -294,7 +294,7 @@ class ResetPasswordForm {
      * @param {string} newPassword - New password
      */
     async updatePassword(newPassword) {
-        console.log('🔐 Updating password...');
+        window.logger?.log('🔐 Updating password...');
         
         // Wait for Supabase to be available
         if (!window.supabase) {
@@ -305,11 +305,11 @@ class ResetPasswordForm {
         const { data: { session } } = await window.supabase.auth.getSession();
         
         if (!session) {
-            console.error('❌ No active session found');
+            window.logger?.error('❌ No active session found');
             throw new Error('You must access this page through the password reset link sent to your email. The link contains authentication tokens required to update your password.');
         }
         
-        console.log('✅ Active session found, updating password...');
+        window.logger?.log('✅ Active session found, updating password...');
         
         // Update password
         const { error } = await window.supabase.auth.updateUser({
@@ -317,11 +317,11 @@ class ResetPasswordForm {
         });
         
         if (error) {
-            console.error('❌ Supabase password update error:', error);
+            window.logger?.error('❌ Supabase password update error:', error);
             throw new Error(error.message || 'Failed to update password');
         }
         
-        console.log('✅ Password updated successfully');
+        window.logger?.log('✅ Password updated successfully');
     }
 
     /**
@@ -453,7 +453,7 @@ class ResetPasswordForm {
         }
         
         // Redirect to login after 5 seconds
-        console.log('✅ Password updated successfully, redirecting to login...');
+        window.logger?.log('✅ Password updated successfully, redirecting to login...');
         setTimeout(() => {
             window.dispatchEvent(new CustomEvent('authFormSwitch', {
                 detail: { form: 'login' }

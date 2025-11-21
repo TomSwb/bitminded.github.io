@@ -242,7 +242,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
             }
 
             if (!this.formData.github_repo_name) {
-                console.error('❌ Repository name is required');
+                window.logger?.error('❌ Repository name is required');
                 return false;
             }
 
@@ -286,7 +286,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
                 }
 
             } catch (error) {
-                console.error('❌ Error creating repository:', error);
+                window.logger?.error('❌ Error creating repository:', error);
                 
                 // Re-enable button
                 if (this.elements.createRepoBtn) {
@@ -303,7 +303,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
          */
         async createRepository() {
             try {
-                console.log('🚀 Creating GitHub repository...');
+                window.logger?.log('🚀 Creating GitHub repository...');
                 
                 if (!this.validate()) {
                     throw new Error('Invalid form data');
@@ -340,14 +340,14 @@ if (typeof window.StepGithubSetup === 'undefined') {
                     this.repositoryCreated = true;
                     this.formData.github_repo_url = data.repoUrl;
                     this.updateGitHubStatus(data);
-                    console.log('✅ GitHub repository created successfully');
+                    window.logger?.log('✅ GitHub repository created successfully');
                     return { success: true, data };
                 } else {
                     throw new Error(data?.error || 'Failed to create repository');
                 }
 
             } catch (error) {
-                console.error('❌ Error creating GitHub repository:', error);
+                window.logger?.error('❌ Error creating GitHub repository:', error);
                 throw error;
             }
         }
@@ -500,7 +500,7 @@ cd ${repoName}`;
                     }, 2000);
                 }
             } catch (err) {
-                console.error('Failed to copy:', err);
+                window.logger?.error('Failed to copy:', err);
             }
         }
 
@@ -521,7 +521,7 @@ cd ${repoName}`;
                 screenshots: basicInfo.screenshots || null
             };
 
-            console.log('🖼️ Updating repository with media:', mediaData);
+            window.logger?.log('🖼️ Updating repository with media:', mediaData);
 
             try {
                 const { data, error } = await window.supabase.functions.invoke('update-github-repo-media', {
@@ -532,12 +532,12 @@ cd ${repoName}`;
 
                 if (data && data.success) {
                     alert(`✅ Successfully uploaded ${data.uploadedFiles?.length || 0} media file(s) to GitHub repository!`);
-                    console.log('✅ Media files uploaded:', data.uploadedFiles);
+                    window.logger?.log('✅ Media files uploaded:', data.uploadedFiles);
                 } else {
                     throw new Error(data?.error || 'Failed to upload media');
                 }
             } catch (error) {
-                console.error('❌ Error updating repository with media:', error);
+                window.logger?.error('❌ Error updating repository with media:', error);
                 alert('Failed to upload media to GitHub: ' + error.message);
             }
         }

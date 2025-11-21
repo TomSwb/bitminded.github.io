@@ -23,7 +23,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
                 this.showTranslatableContent();
                 this.isInitialized = true;
             } catch (error) {
-                console.error('❌ Step 7: Review & Summary: Failed to initialize:', error);
+                window.logger?.error('❌ Step 7: Review & Summary: Failed to initialize:', error);
             }
         }
 
@@ -69,7 +69,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
 
         loadSummaryData() {
             if (!window.productWizard) {
-                console.error('Product wizard not available');
+                window.logger?.error('Product wizard not available');
                 return;
             }
 
@@ -497,7 +497,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
         async handleSaveAndExit() {
             try {
                 if (!window.productWizard) {
-                    console.error('Product wizard not available');
+                    window.logger?.error('Product wizard not available');
                     return;
                 }
 
@@ -517,7 +517,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
                     alert('Failed to save product: ' + (result.error || 'Unknown error'));
                 }
             } catch (error) {
-                console.error('❌ Error saving and exiting:', error);
+                window.logger?.error('❌ Error saving and exiting:', error);
                 alert('Failed to save product: ' + error.message);
             }
         }
@@ -542,7 +542,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
                     // Translations will be handled by the main wizard translation system
                 }
             } catch (error) {
-                console.error('❌ Failed to initialize translations:', error);
+                window.logger?.error('❌ Failed to initialize translations:', error);
             }
         }
 

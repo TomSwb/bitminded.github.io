@@ -26,9 +26,9 @@ class ForgotPasswordForm {
             await this.loadTranslations();
             this.isInitialized = true;
             
-            console.log('✅ Forgot Password Form initialized successfully');
+            window.logger?.log('✅ Forgot Password Form initialized successfully');
         } catch (error) {
-            console.error('❌ Failed to initialize Forgot Password Form:', error);
+            window.logger?.error('❌ Failed to initialize Forgot Password Form:', error);
             this.showError('Failed to initialize forgot password form');
         }
     }
@@ -41,9 +41,9 @@ class ForgotPasswordForm {
             this.cacheElements();
             this.bindEvents();
             this.updateTranslations();
-            console.log('✅ Forgot Password Form re-initialized successfully');
+            window.logger?.log('✅ Forgot Password Form re-initialized successfully');
         } catch (error) {
-            console.error('❌ Failed to re-initialize Forgot Password Form:', error);
+            window.logger?.error('❌ Failed to re-initialize Forgot Password Form:', error);
         }
     }
 
@@ -102,12 +102,12 @@ class ForgotPasswordForm {
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateTranslations(this.getCurrentLanguage());
-                console.log('✅ Forgot password form translations loaded');
+                window.logger?.log('✅ Forgot password form translations loaded');
             } else {
-                console.warn('Failed to load forgot password form translations:', response.status);
+                window.logger?.warn('Failed to load forgot password form translations:', response.status);
             }
         } catch (error) {
-            console.warn('Failed to load forgot password form translations:', error);
+            window.logger?.warn('Failed to load forgot password form translations:', error);
         }
     }
 
@@ -176,7 +176,7 @@ class ForgotPasswordForm {
             this.elements.form.reset();
             
         } catch (error) {
-            console.error('❌ Password reset failed:', error);
+            window.logger?.error('❌ Password reset failed:', error);
             this.showError('Failed to send password reset email. Please try again.');
         } finally {
             this.setSubmitting(false);
@@ -188,7 +188,7 @@ class ForgotPasswordForm {
      * @param {string} email - User email
      */
     async sendPasswordResetEmail(email) {
-        console.log('🔐 Password reset requested for:', email);
+        window.logger?.log('🔐 Password reset requested for:', email);
         
         // Wait for Supabase to be available
         if (!window.supabase) {
@@ -196,22 +196,22 @@ class ForgotPasswordForm {
         }
         
         const redirectUrl = `${window.location.origin}/auth/index.html?action=reset-password`;
-        console.log('🔗 Redirect URL being sent to Supabase:', redirectUrl);
+        window.logger?.log('🔗 Redirect URL being sent to Supabase:', redirectUrl);
         
         // Send password reset email
         const { data, error } = await window.supabase.auth.resetPasswordForEmail(email, {
             redirectTo: redirectUrl
         });
         
-        console.log('📧 Password reset response:', { data, error });
+        window.logger?.log('📧 Password reset response:', { data, error });
         
         if (error) {
-            console.error('❌ Supabase password reset error:', error);
+            window.logger?.error('❌ Supabase password reset error:', error);
             throw new Error(error.message || 'Failed to send password reset email');
         }
         
-        console.log('✅ Password reset email sent successfully');
-        console.log('⚠️ Make sure this URL is in your Supabase Redirect URLs:', redirectUrl);
+        window.logger?.log('✅ Password reset email sent successfully');
+        window.logger?.log('⚠️ Make sure this URL is in your Supabase Redirect URLs:', redirectUrl);
     }
 
     /**

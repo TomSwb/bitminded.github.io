@@ -24,7 +24,7 @@ class MessageComposition {
         }
         
         this.communicationType = type;
-        console.log('📧 Communication type set to:', type);
+        window.logger?.log('📧 Communication type set to:', type);
     }
 
     /**

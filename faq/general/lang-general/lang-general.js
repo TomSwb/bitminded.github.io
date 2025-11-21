@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 waitForI18next();
             })
             .catch(error => {
-                console.error('Failed to load General FAQ translations:', error);
+                window.logger?.error('Failed to load General FAQ translations:', error);
                 revealContent();
             });
     };

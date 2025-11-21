@@ -30,7 +30,7 @@ class PasswordChangeTranslations {
             // Translations initialized
             
         } catch (error) {
-            console.error('❌ Failed to initialize password change translations:', error);
+            window.logger?.error('❌ Failed to initialize password change translations:', error);
         }
     }
 
@@ -48,7 +48,7 @@ class PasswordChangeTranslations {
             // Translations loaded
             
         } catch (error) {
-            console.error('❌ Failed to load password change translations:', error);
+            window.logger?.error('❌ Failed to load password change translations:', error);
             // Fallback to empty translations
             this.translations = {};
         }
