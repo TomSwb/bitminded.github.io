@@ -334,4 +334,26 @@
         </div>
     </div>
 
+    <!-- Product Overview Modal -->
+    <div class="product-management__modal-overlay hidden" id="product-overview-modal-overlay">
+        <div class="product-management__modal product-management__modal--large" id="product-overview-modal">
+            <div class="product-management__modal-header">
+                <h2 class="product-management__modal-title" id="product-overview-modal-title">
+                    <span class="translatable-content" data-translation-key="Product Overview">Product Overview</span>
+                </h2>
+                <button class="product-management__modal-close" id="product-overview-modal-close" aria-label="Close">
+                    ×
+                </button>
+            </div>
+
+            <div class="product-management__modal-content" id="product-overview-modal-body">
+                <!-- Content will be populated by JavaScript -->
+                <div class="product-overview__loading">
+                    <div class="product-management__spinner"></div>
+                    <p>Loading product details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
