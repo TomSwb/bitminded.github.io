@@ -376,9 +376,19 @@ serve(async (req) => {
       existing_price_id = null,
       existing_monthly_price_id = null,
       existing_yearly_price_id = null,
+      // Currency-specific price IDs for proper deactivation
+      existing_chf_price_id = null,
+      existing_usd_price_id = null,
+      existing_eur_price_id = null,
+      existing_gbp_price_id = null,
       old_sale_price_id = null,
       old_sale_monthly_price_id = null,
       old_sale_yearly_price_id = null,
+      // Currency-specific old price IDs to deactivate
+      old_chf_price_id = null,
+      old_usd_price_id = null,
+      old_eur_price_id = null,
+      old_gbp_price_id = null,
       // Flag to indicate if only sales changed (optimization)
       only_sales_changed = false
     } = body
@@ -458,11 +468,20 @@ serve(async (req) => {
     const regularPriceErrors: Record<string, string> = {}
     
     // Always deactivate old regular prices when pricing_type changes (to avoid orphaned prices)
+    // Include ALL currency-specific price IDs to ensure we deactivate all prices, not just primary ones
     const oldPriceIdsToDeactivate = [
       existing_price_id,
       existing_monthly_price_id,
-      existing_yearly_price_id
-    ].filter(id => id && typeof id === 'string' && id.trim() !== '')
+      existing_yearly_price_id,
+      existing_chf_price_id,
+      existing_usd_price_id,
+      existing_eur_price_id,
+      existing_gbp_price_id,
+      old_chf_price_id,
+      old_usd_price_id,
+      old_eur_price_id,
+      old_gbp_price_id
+    ].filter((id, index, self) => id && typeof id === 'string' && id.trim() !== '' && self.indexOf(id) === index) // Remove duplicates
     
     // If changing TO freemium, deactivate all existing prices
     if (pricing_type === 'freemium' && oldPriceIdsToDeactivate.length > 0) {
@@ -478,17 +497,84 @@ serve(async (req) => {
     }
     
     // Check if we need to create regular prices (not freemium and pricing provided)
-    if (pricing_type !== 'freemium' && pricing && typeof pricing === 'object' && Object.keys(pricing).length > 0) {
+    // Also create regular prices when removing a sale (is_on_sale is false) to ensure regular prices exist
+    const shouldCreateRegularPrices = pricing_type !== 'freemium' && 
+      pricing && typeof pricing === 'object' && Object.keys(pricing).length > 0
+    
+    if (shouldCreateRegularPrices) {
       console.log('💰 Creating regular prices for pricing_type:', pricing_type)
       
-      // Deactivate old regular prices if they exist (when changing between one_time/subscription)
+      // Fetch all active prices for this product from Stripe to ensure we deactivate ALL old prices
+      // This is important because we might not have all price IDs in the database
+      try {
+        const allPricesResponse = await fetch(`https://api.stripe.com/v1/prices?product=${productId}&active=true`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${stripeSecretKey}`,
+            'Stripe-Version': '2024-11-20.acacia'
+          }
+        })
+
+        if (allPricesResponse.ok) {
+          const allPricesData = await allPricesResponse.json()
+          const allActivePrices = allPricesData.data || []
+          
+          // Filter to get only regular (non-sale) prices that match our pricing type
+          const regularPricesToDeactivate = allActivePrices.filter((price: any) => {
+            // Skip sale prices (they're handled separately)
+            if (price.nickname && price.nickname.toLowerCase().includes('sale')) {
+              return false
+            }
+            
+            // For one_time pricing, deactivate all one_time prices
+            if (pricing_type === 'one_time') {
+              return price.type === 'one_time'
+            }
+            
+            // For subscription pricing, deactivate all recurring prices
+            if (pricing_type === 'subscription') {
+              return price.type === 'recurring'
+            }
+            
+            return false
+          })
+          
+          console.log(`🔄 Found ${regularPricesToDeactivate.length} active regular price(s) to deactivate`)
+          
+          // Deactivate all matching regular prices
+          for (const price of regularPricesToDeactivate) {
+            try {
+              await deactivateStripePrice(stripeSecretKey, price.id)
+              console.log(`✅ Deactivated old regular price from Stripe: ${price.id} (${price.currency.toUpperCase()}, ${price.nickname || 'no nickname'})`)
+            } catch (error: any) {
+              console.error(`⚠️ Failed to deactivate price ${price.id}:`, error.message)
+            }
+          }
+        }
+      } catch (error: any) {
+        console.warn('⚠️ Could not fetch all prices from Stripe, falling back to known price IDs:', error.message)
+        // Fallback: deactivate known price IDs
+        if (oldPriceIdsToDeactivate.length > 0) {
+          for (const oldPriceId of oldPriceIdsToDeactivate) {
+            try {
+              await deactivateStripePrice(stripeSecretKey, oldPriceId)
+              console.log(`✅ Deactivated old regular price (fallback): ${oldPriceId}`)
+            } catch (error: any) {
+              console.error(`⚠️ Failed to deactivate old price ${oldPriceId}:`, error.message)
+            }
+          }
+        }
+      }
+      
+      // Also deactivate known price IDs as a safety measure (in case they weren't in the active prices list)
       if (oldPriceIdsToDeactivate.length > 0) {
         for (const oldPriceId of oldPriceIdsToDeactivate) {
           try {
             await deactivateStripePrice(stripeSecretKey, oldPriceId)
-            console.log(`✅ Deactivated old regular price: ${oldPriceId}`)
+            console.log(`✅ Deactivated old regular price (known ID): ${oldPriceId}`)
           } catch (error: any) {
-            console.error(`⚠️ Failed to deactivate old price ${oldPriceId}:`, error.message)
+            // Ignore errors - price might already be deactivated or not exist
+            console.log(`ℹ️ Price ${oldPriceId} may already be deactivated or not exist`)
           }
         }
       }
@@ -572,7 +658,7 @@ serve(async (req) => {
               }
             }
           } else if (pricing_type === 'one_time') {
-            // One-time price
+            // One-time price - use 'Lifetime' nickname instead of 'Regular'
             if (amount > 0) {
               try {
                 const price = await createStripePrice(
@@ -581,7 +667,7 @@ serve(async (req) => {
                   amount,
                   currencyUpper.toLowerCase(),
                   'one_time',
-                  'Regular',
+                  'Lifetime',
                   undefined
                 )
                 newOneTimePrices[currencyUpper] = price.id
@@ -602,7 +688,7 @@ serve(async (req) => {
                 priceData,
                 currencyUpper.toLowerCase(),
                 'one_time',
-                'Regular',
+                'Lifetime',
                 undefined
               )
               newOneTimePrices[currencyUpper] = price.id
@@ -882,7 +968,7 @@ serve(async (req) => {
               }
             }
           } else if (pricing_type === 'one_time') {
-            // One-time sale price
+            // One-time sale price - use 'Lifetime (Sale)' nickname instead of 'Regular (Sale)'
             if (amount > 0) {
               const saleAmount = Math.round(amount * discountMultiplier * 100) / 100
               
@@ -893,7 +979,7 @@ serve(async (req) => {
                   saleAmount,
                   currencyUpper.toLowerCase(),
                   'one_time',
-                  'Regular (Sale)',
+                  'Lifetime (Sale)',
                   undefined
                 )
                 newSaleOneTimePrices[currencyUpper] = salePrice.id
@@ -926,7 +1012,7 @@ serve(async (req) => {
                 saleAmount,
                 currencyUpper.toLowerCase(),
                 'one_time',
-                'Regular (Sale)',
+                'Lifetime (Sale)',
                 undefined
               )
               newSaleOneTimePrices[currencyUpper] = salePrice.id
