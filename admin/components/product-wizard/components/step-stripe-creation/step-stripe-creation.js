@@ -1164,18 +1164,50 @@ if (typeof window.StepStripeCreation === 'undefined') {
 
         /**
          * Save form data (called by parent wizard on save)
+         * Only saves if step has been initialized and has meaningful data (not just defaults)
          */
         saveFormData(wizardFormData) {
-            // Save all pricing configuration to wizard's formData
-            wizardFormData.pricing_type = this.formData.pricing_type;
-            wizardFormData.subscription_price = this.formData.subscription_price;
-            wizardFormData.subscription_pricing = this.formData.subscription_pricing;
-            wizardFormData.one_time_price = this.formData.one_time_price;
-            wizardFormData.one_time_pricing = this.formData.one_time_pricing;
-            wizardFormData.trial_days = this.formData.trial_days;
-            wizardFormData.trial_requires_payment = this.formData.trial_requires_payment;
+            // Only save if step has been initialized (user has visited this step)
+            if (!this.isInitialized) {
+                window.logger?.log('⚠️ SaveFormData: Step not initialized, skipping save to prevent overwriting with defaults');
+                return;
+            }
             
-            window.logger?.log('✅ SaveFormData: Saved Stripe pricing configuration');
+            // Check if we have meaningful pricing data (not just defaults)
+            // If pricing_type is freemium and all prices are 0, that's valid
+            // But if we have actual prices set, or if pricing_type is set to something other than default, save it
+            const hasNonDefaultPricing = 
+                (this.formData.pricing_type && this.formData.pricing_type !== 'freemium') ||
+                (this.formData.subscription_pricing && Object.values(this.formData.subscription_pricing).some(price => price > 0)) ||
+                (this.formData.one_time_pricing && Object.values(this.formData.one_time_pricing).some(price => price > 0)) ||
+                (this.formData.subscription_price > 0) ||
+                (this.formData.one_time_price > 0) ||
+                (wizardFormData.stripe_product_id); // If Stripe product exists, we should save the pricing config
+            
+            // Only save if we have meaningful data OR if wizardFormData already has pricing data (preserve existing)
+            // Check if wizardFormData has actual pricing data (not just empty/null values)
+            const hasExistingPricingData = 
+                (wizardFormData.pricing_type && wizardFormData.pricing_type !== '') ||
+                (wizardFormData.subscription_pricing && typeof wizardFormData.subscription_pricing === 'object' && Object.keys(wizardFormData.subscription_pricing).length > 0) ||
+                (wizardFormData.one_time_pricing && typeof wizardFormData.one_time_pricing === 'object' && Object.keys(wizardFormData.one_time_pricing).length > 0) ||
+                (wizardFormData.subscription_price && wizardFormData.subscription_price > 0) ||
+                (wizardFormData.one_time_price && wizardFormData.one_time_price > 0) ||
+                wizardFormData.stripe_product_id; // If Stripe product exists, we should save the pricing config
+            
+            if (hasNonDefaultPricing || hasExistingPricingData) {
+                // Save all pricing configuration to wizard's formData
+                wizardFormData.pricing_type = this.formData.pricing_type;
+                wizardFormData.subscription_price = this.formData.subscription_price;
+                wizardFormData.subscription_pricing = this.formData.subscription_pricing;
+                wizardFormData.one_time_price = this.formData.one_time_price;
+                wizardFormData.one_time_pricing = this.formData.one_time_pricing;
+                wizardFormData.trial_days = this.formData.trial_days;
+                wizardFormData.trial_requires_payment = this.formData.trial_requires_payment;
+                
+                window.logger?.log('✅ SaveFormData: Saved Stripe pricing configuration');
+            } else {
+                window.logger?.log('⚠️ SaveFormData: No meaningful pricing data to save, preserving existing wizardFormData values');
+            }
         }
 
         setFormData(data) {
