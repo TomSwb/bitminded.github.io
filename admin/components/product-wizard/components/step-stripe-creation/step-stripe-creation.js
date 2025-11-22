@@ -884,6 +884,40 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     if (error.context) {
                         window.logger?.error('❌ Error context:', error.context);
                     }
+                    // Try to extract error details from Supabase error
+                    let errorDetails = null;
+                    try {
+                        // Supabase errors sometimes have the response in error.context
+                        if (error.context?.response) {
+                            const response = error.context.response;
+                            if (response.json) {
+                                errorDetails = await response.json();
+                                window.logger?.error('❌ Error response body:', errorDetails);
+                            } else if (response.text) {
+                                const text = await response.text();
+                                window.logger?.error('❌ Error response text:', text);
+                                try {
+                                    errorDetails = JSON.parse(text);
+                                } catch (e) {
+                                    errorDetails = { raw: text };
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        window.logger?.error('❌ Could not extract error details:', e);
+                    }
+                    
+                    // Check if it's a 401 and provide more helpful message
+                    const isUnauthorized = error.message?.includes('401') || 
+                                         error.message?.includes('Unauthorized') ||
+                                         errorDetails?.error?.includes('Unauthorized');
+                    
+                    if (isUnauthorized) {
+                        const detailedMessage = errorDetails?.error || errorDetails?.details 
+                            ? `Authentication failed: ${errorDetails.error || JSON.stringify(errorDetails.details)}`
+                            : 'Authentication failed. Please make sure you are logged in and try refreshing the page. If the problem persists, please log out and log back in.';
+                        throw new Error(detailedMessage);
+                    }
                     throw error;
                 }
                 window.logger?.log('✅ Stripe product created:', data);
