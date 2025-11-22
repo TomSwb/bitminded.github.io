@@ -845,8 +845,10 @@ if (typeof window.StepStripeCreation === 'undefined') {
                             session = currentSession;
                         }
                     } else if (sessionError) {
+                        window.logger?.error('❌ Session error:', sessionError);
                         throw new Error('Not authenticated. Please log in again.');
                     } else {
+                        window.logger?.error('❌ No active session found');
                         throw new Error('No active session. Please log in again.');
                     }
                 } catch (authError) {
@@ -855,8 +857,15 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 }
                 
                 if (!session || !session.access_token) {
+                    window.logger?.error('❌ No access token in session:', { hasSession: !!session, hasToken: !!session?.access_token });
                     throw new Error('Invalid session. Please log in again.');
                 }
+                
+                window.logger?.log('🔐 Calling edge function with auth token:', { 
+                    functionName, 
+                    hasToken: !!session.access_token,
+                    tokenLength: session.access_token?.length 
+                });
                 
                 const { data, error } = await window.supabase.functions.invoke(functionName, {
                     body,
@@ -864,7 +873,18 @@ if (typeof window.StepStripeCreation === 'undefined') {
                         'Authorization': `Bearer ${session.access_token}`
                     }
                 });
-                if (error) throw error;
+                
+                if (error) {
+                    window.logger?.error('❌ Edge function error:', error);
+                    // Log more details about the error
+                    if (error.message) {
+                        window.logger?.error('❌ Error message:', error.message);
+                    }
+                    if (error.context) {
+                        window.logger?.error('❌ Error context:', error.context);
+                    }
+                    throw error;
+                }
                 window.logger?.log('✅ Stripe product created:', data);
                 return { success: true, data };
 
