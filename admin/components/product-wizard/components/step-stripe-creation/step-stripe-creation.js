@@ -927,6 +927,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 return { success: true, data };
 
             } catch (error) {
+                // Error handling for createStripeProduct
                 window.logger?.error('❌ Error:', error);
                 return { success: false, error: error.message };
             }
@@ -1202,12 +1203,24 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     window.logger?.log('✅ Database updated after Stripe update, Step 5 marked as saved');
                 }
                 
-                // Update UI status
+                // Update UI status - pass full data structure including price amounts and currency-specific IDs
                 this.updateStripeStatus({
                     productId: productId,
                     priceId: data.priceId || basicInfo.stripe_price_id,
                     monthlyPriceId: data.monthlyPriceId || basicInfo.stripe_price_monthly_id,
-                    yearlyPriceId: data.yearlyPriceId || basicInfo.stripe_price_yearly_id
+                    yearlyPriceId: data.yearlyPriceId || basicInfo.stripe_price_yearly_id,
+                    // Include price amounts for display
+                    price_amount: data.price_amount || window.productWizard?.formData?.price_amount,
+                    price_currency: data.price_currency || window.productWizard?.formData?.price_currency,
+                    price_amount_chf: data.price_amount_chf !== undefined ? data.price_amount_chf : window.productWizard?.formData?.price_amount_chf,
+                    price_amount_usd: data.price_amount_usd !== undefined ? data.price_amount_usd : window.productWizard?.formData?.price_amount_usd,
+                    price_amount_eur: data.price_amount_eur !== undefined ? data.price_amount_eur : window.productWizard?.formData?.price_amount_eur,
+                    price_amount_gbp: data.price_amount_gbp !== undefined ? data.price_amount_gbp : window.productWizard?.formData?.price_amount_gbp,
+                    // Include currency-specific price IDs if available
+                    stripe_price_chf_id: data.oneTimePrices?.CHF || data.monthlyPrices?.CHF || window.productWizard?.formData?.stripe_price_chf_id,
+                    stripe_price_usd_id: data.oneTimePrices?.USD || data.monthlyPrices?.USD || window.productWizard?.formData?.stripe_price_usd_id,
+                    stripe_price_eur_id: data.oneTimePrices?.EUR || data.monthlyPrices?.EUR || window.productWizard?.formData?.stripe_price_eur_id,
+                    stripe_price_gbp_id: data.oneTimePrices?.GBP || data.monthlyPrices?.GBP || window.productWizard?.formData?.stripe_price_gbp_id
                 });
                 
                 // Reset button state
@@ -1307,17 +1320,13 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     window.productWizard.formData.trial_requires_payment = null;
                 }
                 
-                // Update database to reflect the deletion
-                // The edge function should have already cleared the database, but we'll also call saveStepToDatabase
-                // to ensure everything is synced (it will only update if there are changes)
-                window.logger?.log('💾 Saving deleted Stripe status to database...');
-                const saveResult = await window.productWizard.saveStepToDatabase(5);
-                if (!saveResult.success) {
-                    window.logger?.warn('⚠️ Failed to update database after Stripe deletion (edge function should have handled it):', saveResult.error);
-                    // Don't show error - edge function should have cleared it
-                } else {
-                    window.logger?.log('✅ Database updated after Stripe deletion');
-                }
+                // NOTE: We do NOT call saveStepToDatabase here because:
+                // 1. The edge function has already cleared all Stripe and pricing data from the database
+                // 2. Calling saveStepToDatabase would read from form fields (which still have old values)
+                //    and repopulate formData, then save those old values back to the database
+                // 3. The formData has been cleared above, but the form fields themselves still have values
+                //    which would be read by saveFormData and saved back
+                window.logger?.log('💾 Edge function has cleared database. Skipping saveStepToDatabase to avoid repopulating pricing data from form fields.');
 
                 // Mark step as incomplete (Stripe is Step 5) - deletion means step is no longer saved
                 if (window.productWizard) {
