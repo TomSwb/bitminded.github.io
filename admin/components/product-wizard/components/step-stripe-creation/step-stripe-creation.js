@@ -925,53 +925,6 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 
                 window.logger?.log('✅ Stripe product created:', data);
                 return { success: true, data };
-                    window.logger?.error('❌ Edge function error:', error);
-                    
-                    // Try to extract error details from the response
-                    try {
-                        // Supabase FunctionsHttpError has the response in error.context
-                        if (error.context?.response) {
-                            const response = error.context.response;
-                            // Clone the response so we can read it multiple times
-                            const clonedResponse = response.clone();
-                            const responseText = await clonedResponse.text();
-                            window.logger?.error('❌ Error response text:', responseText);
-                            
-                            try {
-                                errorDetails = JSON.parse(responseText);
-                                window.logger?.error('❌ Error response parsed:', errorDetails);
-                            } catch (parseError) {
-                                errorDetails = { raw: responseText };
-                            }
-                        }
-                    } catch (extractError) {
-                        window.logger?.error('❌ Could not extract error details:', extractError);
-                    }
-                    
-                    // Log more details about the error
-                    if (error.message) {
-                        window.logger?.error('❌ Error message:', error.message);
-                    }
-                    if (error.context) {
-                        window.logger?.error('❌ Error context:', error.context);
-                    }
-                    
-                    // Check if it's a 401 and provide more helpful message
-                    const isUnauthorized = error.message?.includes('401') || 
-                                         error.message?.includes('Unauthorized') ||
-                                         errorDetails?.error?.includes('Unauthorized') ||
-                                         error.context?.response?.status === 401;
-                    
-                    if (isUnauthorized) {
-                        const detailedMessage = errorDetails?.error || errorDetails?.details 
-                            ? `Authentication failed: ${errorDetails.error || JSON.stringify(errorDetails.details)}`
-                            : 'Authentication failed. Please make sure you are logged in and try refreshing the page. If the problem persists, please log out and log back in.';
-                        throw new Error(detailedMessage);
-                    }
-                    throw error;
-                }
-                window.logger?.log('✅ Stripe product created:', data);
-                return { success: true, data };
 
             } catch (error) {
                 window.logger?.error('❌ Error:', error);
