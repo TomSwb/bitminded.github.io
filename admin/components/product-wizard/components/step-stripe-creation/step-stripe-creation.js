@@ -1017,10 +1017,19 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     existing_price_id: basicInfo.stripe_price_id || null,
                     existing_monthly_price_id: basicInfo.stripe_price_monthly_id || null,
                     existing_yearly_price_id: basicInfo.stripe_price_yearly_id || null,
-                    // Pass old price IDs to deactivate
+                    // Pass currency-specific price IDs for proper deactivation
+                    existing_chf_price_id: basicInfo.stripe_price_chf_id || null,
+                    existing_usd_price_id: basicInfo.stripe_price_usd_id || null,
+                    existing_eur_price_id: basicInfo.stripe_price_eur_id || null,
+                    existing_gbp_price_id: basicInfo.stripe_price_gbp_id || null,
+                    // Pass old price IDs to deactivate (including currency-specific)
                     old_price_id: basicInfo.stripe_price_id || null,
                     old_monthly_price_id: basicInfo.stripe_price_monthly_id || null,
-                    old_yearly_price_id: basicInfo.stripe_price_yearly_id || null
+                    old_yearly_price_id: basicInfo.stripe_price_yearly_id || null,
+                    old_chf_price_id: basicInfo.stripe_price_chf_id || null,
+                    old_usd_price_id: basicInfo.stripe_price_usd_id || null,
+                    old_eur_price_id: basicInfo.stripe_price_eur_id || null,
+                    old_gbp_price_id: basicInfo.stripe_price_gbp_id || null
                 };
                 
                 // Call edge function to update Stripe product
