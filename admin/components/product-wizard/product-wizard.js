@@ -711,9 +711,16 @@ class ProductWizard {
 
         // Save current step data before moving and auto-persist
         const previousStep = this.currentStep;
-        // For Stripe step (step 5), read form field values before saving to preserve user input
-        if (previousStep === 5 && this.steps[5] && typeof this.steps[5].readFormFieldValues === 'function') {
-            this.steps[5].readFormFieldValues();
+        // For Stripe step (step 5), ensure form fields are populated from DB before reading them
+        if (previousStep === 5 && this.steps[5] && this.steps[5].isInitialized) {
+            // Ensure form fields are populated from DB first (in case they weren't loaded yet)
+            if (typeof this.steps[5].populateFormFields === 'function') {
+                this.steps[5].populateFormFields();
+            }
+            // Then read current form field values to capture any user changes
+            if (typeof this.steps[5].readFormFieldValues === 'function') {
+                this.steps[5].readFormFieldValues();
+            }
         }
         this.saveCurrentStepData(previousStep);
         // Silent autosave; do not block navigation on failure
@@ -1234,20 +1241,55 @@ class ProductWizard {
             productData.price_amount = this.formData.price_amount || null;
             productData.price_currency = this.formData.price_currency || 'USD';
             
+            // Fetch current DB state for Stripe price amounts to preserve existing values
+            let existingPriceAmounts = {};
+            if (this.formData.product_id) {
+                try {
+                    const { data: currentProduct, error: fetchError } = await window.supabase
+                        .from('products')
+                        .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp')
+                        .eq('id', this.formData.product_id)
+                        .single();
+                    
+                    if (!fetchError && currentProduct) {
+                        existingPriceAmounts = currentProduct;
+                        window.logger?.log('📥 Fetched existing price amounts from DB:', existingPriceAmounts);
+                    }
+                } catch (error) {
+                    window.logger?.warn('⚠️ Could not fetch existing price amounts:', error);
+                }
+            }
+            
             // Only update currency amounts if they exist in formData
-            // This prevents overwriting values that were saved by Edge Functions but not yet in formData
+            // If formData doesn't have them, preserve existing DB values
             // Use !== undefined to distinguish between "not set" (undefined) and "explicitly null"
             if (this.formData.price_amount_chf !== undefined) {
                 productData.price_amount_chf = this.formData.price_amount_chf;
+            } else if (existingPriceAmounts.price_amount_chf !== undefined && existingPriceAmounts.price_amount_chf !== null) {
+                // Preserve existing DB value if formData doesn't have it
+                productData.price_amount_chf = existingPriceAmounts.price_amount_chf;
+                window.logger?.log('💾 Preserving existing price_amount_chf from DB:', existingPriceAmounts.price_amount_chf);
             }
+            
             if (this.formData.price_amount_usd !== undefined) {
                 productData.price_amount_usd = this.formData.price_amount_usd;
+            } else if (existingPriceAmounts.price_amount_usd !== undefined && existingPriceAmounts.price_amount_usd !== null) {
+                productData.price_amount_usd = existingPriceAmounts.price_amount_usd;
+                window.logger?.log('💾 Preserving existing price_amount_usd from DB:', existingPriceAmounts.price_amount_usd);
             }
+            
             if (this.formData.price_amount_eur !== undefined) {
                 productData.price_amount_eur = this.formData.price_amount_eur;
+            } else if (existingPriceAmounts.price_amount_eur !== undefined && existingPriceAmounts.price_amount_eur !== null) {
+                productData.price_amount_eur = existingPriceAmounts.price_amount_eur;
+                window.logger?.log('💾 Preserving existing price_amount_eur from DB:', existingPriceAmounts.price_amount_eur);
             }
+            
             if (this.formData.price_amount_gbp !== undefined) {
                 productData.price_amount_gbp = this.formData.price_amount_gbp;
+            } else if (existingPriceAmounts.price_amount_gbp !== undefined && existingPriceAmounts.price_amount_gbp !== null) {
+                productData.price_amount_gbp = existingPriceAmounts.price_amount_gbp;
+                window.logger?.log('💾 Preserving existing price_amount_gbp from DB:', existingPriceAmounts.price_amount_gbp);
             }
             productData.individual_price = this.formData.individual_price || null;
             productData.enterprise_price = this.formData.enterprise_price || null;

@@ -81,7 +81,7 @@
       "featured_product_help": "Show on homepage and featured sections",
       "Previous": "Previous",
       "Next": "Next",
-      "Save Draft": "Save Draft",
+      "Save Draft": "Update Data",
       "Creating Product...": "Creating Product...",
       "step1_description": "Let's start with the basic details about your product"
     }
@@ -168,7 +168,7 @@
       "featured_product_help": "Mostrar en página principal y secciones destacadas",
       "Previous": "Anterior",
       "Next": "Siguiente",
-      "Save Draft": "Guardar Borrador",
+      "Save Draft": "Actualizar Datos",
       "Creating Product...": "Creando Producto...",
       "step1_description": "Comencemos con los detalles básicos de tu producto"
     }
@@ -255,7 +255,7 @@
       "featured_product_help": "Afficher sur la page d'accueil et les sections en vedette",
       "Previous": "Précédent",
       "Next": "Suivant",
-      "Save Draft": "Sauvegarder Brouillon",
+      "Save Draft": "Mettre à jour les données",
       "Creating Product...": "Création du Produit...",
       "step1_description": "Commençons par les détails de base de votre produit"
     }
@@ -342,7 +342,7 @@
       "featured_product_help": "Auf Startseite und empfohlenen Bereichen anzeigen",
       "Previous": "Zurück",
       "Next": "Weiter",
-      "Save Draft": "Entwurf Speichern",
+      "Save Draft": "Daten aktualisieren",
       "Creating Product...": "Produkt wird erstellt...",
       "step1_description": "Beginnen wir mit den grundlegenden Details Ihres Produkts"
     }
