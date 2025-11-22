@@ -238,6 +238,52 @@ class ProductWizard {
                 requires_admin_approval: data.requires_admin_approval || false
             };
 
+            // Convert price_amount_* fields to pricing objects if they don't exist
+            // This ensures the Stripe step can properly load existing pricing data
+            if (!this.formData.subscription_pricing && !this.formData.one_time_pricing) {
+                const pricingType = this.formData.pricing_type || 'one_time';
+                
+                if (pricingType === 'subscription' && (this.formData.price_amount_chf || this.formData.price_amount_usd || this.formData.price_amount_eur || this.formData.price_amount_gbp)) {
+                    // Build subscription_pricing from price_amount_* fields
+                    this.formData.subscription_pricing = {};
+                    if (this.formData.price_amount_chf) this.formData.subscription_pricing.CHF = parseFloat(this.formData.price_amount_chf);
+                    if (this.formData.price_amount_usd) this.formData.subscription_pricing.USD = parseFloat(this.formData.price_amount_usd);
+                    if (this.formData.price_amount_eur) this.formData.subscription_pricing.EUR = parseFloat(this.formData.price_amount_eur);
+                    if (this.formData.price_amount_gbp) this.formData.subscription_pricing.GBP = parseFloat(this.formData.price_amount_gbp);
+                    
+                    // Set subscription_price to CHF or first available
+                    if (this.formData.subscription_pricing.CHF) {
+                        this.formData.subscription_price = this.formData.subscription_pricing.CHF;
+                    } else if (this.formData.subscription_pricing.USD) {
+                        this.formData.subscription_price = this.formData.subscription_pricing.USD;
+                    } else if (this.formData.subscription_pricing.EUR) {
+                        this.formData.subscription_price = this.formData.subscription_pricing.EUR;
+                    } else if (this.formData.subscription_pricing.GBP) {
+                        this.formData.subscription_price = this.formData.subscription_pricing.GBP;
+                    }
+                    window.logger?.log('✅ Converted price_amount_* to subscription_pricing:', this.formData.subscription_pricing);
+                } else if (pricingType === 'one_time' && (this.formData.price_amount_chf || this.formData.price_amount_usd || this.formData.price_amount_eur || this.formData.price_amount_gbp)) {
+                    // Build one_time_pricing from price_amount_* fields
+                    this.formData.one_time_pricing = {};
+                    if (this.formData.price_amount_chf) this.formData.one_time_pricing.CHF = parseFloat(this.formData.price_amount_chf);
+                    if (this.formData.price_amount_usd) this.formData.one_time_pricing.USD = parseFloat(this.formData.price_amount_usd);
+                    if (this.formData.price_amount_eur) this.formData.one_time_pricing.EUR = parseFloat(this.formData.price_amount_eur);
+                    if (this.formData.price_amount_gbp) this.formData.one_time_pricing.GBP = parseFloat(this.formData.price_amount_gbp);
+                    
+                    // Set one_time_price to CHF or first available
+                    if (this.formData.one_time_pricing.CHF) {
+                        this.formData.one_time_price = this.formData.one_time_pricing.CHF;
+                    } else if (this.formData.one_time_pricing.USD) {
+                        this.formData.one_time_price = this.formData.one_time_pricing.USD;
+                    } else if (this.formData.one_time_pricing.EUR) {
+                        this.formData.one_time_price = this.formData.one_time_pricing.EUR;
+                    } else if (this.formData.one_time_pricing.GBP) {
+                        this.formData.one_time_price = this.formData.one_time_pricing.GBP;
+                    }
+                    window.logger?.log('✅ Converted price_amount_* to one_time_pricing:', this.formData.one_time_pricing);
+                }
+            }
+
             // Load AI data into stepData for Step 2
             if (data.ai_recommendations || data.ai_conversations || data.ai_final_decisions || data.technical_specification) {
                 this.stepData = this.stepData || {};

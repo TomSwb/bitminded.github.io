@@ -241,6 +241,43 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     }
                 }
 
+                // If pricing objects don't exist but price_amount_* fields do, convert them
+                // This handles the case where database has price_amount_* but not pricing objects
+                if ((!basicInfo.subscription_pricing || Object.keys(basicInfo.subscription_pricing).length === 0) && 
+                    (!basicInfo.one_time_pricing || Object.keys(basicInfo.one_time_pricing).length === 0)) {
+                    const pricingType = basicInfo.pricing_type || 'one_time';
+                    
+                    if (pricingType === 'subscription' && (basicInfo.price_amount_chf || basicInfo.price_amount_usd || basicInfo.price_amount_eur || basicInfo.price_amount_gbp)) {
+                        // Build subscription_pricing from price_amount_* fields
+                        if (!this.formData.subscription_pricing || Object.keys(this.formData.subscription_pricing).length === 0) {
+                            this.formData.subscription_pricing = {};
+                            if (basicInfo.price_amount_chf) this.formData.subscription_pricing.CHF = parseFloat(basicInfo.price_amount_chf);
+                            if (basicInfo.price_amount_usd) this.formData.subscription_pricing.USD = parseFloat(basicInfo.price_amount_usd);
+                            if (basicInfo.price_amount_eur) this.formData.subscription_pricing.EUR = parseFloat(basicInfo.price_amount_eur);
+                            if (basicInfo.price_amount_gbp) this.formData.subscription_pricing.GBP = parseFloat(basicInfo.price_amount_gbp);
+                            
+                            if (this.formData.subscription_pricing.CHF) {
+                                this.formData.subscription_price = this.formData.subscription_pricing.CHF;
+                            }
+                            window.logger?.log('✅ Converted price_amount_* to subscription_pricing in setupDefaults:', this.formData.subscription_pricing);
+                        }
+                    } else if (pricingType === 'one_time' && (basicInfo.price_amount_chf || basicInfo.price_amount_usd || basicInfo.price_amount_eur || basicInfo.price_amount_gbp)) {
+                        // Build one_time_pricing from price_amount_* fields
+                        if (!this.formData.one_time_pricing || Object.keys(this.formData.one_time_pricing).length === 0) {
+                            this.formData.one_time_pricing = {};
+                            if (basicInfo.price_amount_chf) this.formData.one_time_pricing.CHF = parseFloat(basicInfo.price_amount_chf);
+                            if (basicInfo.price_amount_usd) this.formData.one_time_pricing.USD = parseFloat(basicInfo.price_amount_usd);
+                            if (basicInfo.price_amount_eur) this.formData.one_time_pricing.EUR = parseFloat(basicInfo.price_amount_eur);
+                            if (basicInfo.price_amount_gbp) this.formData.one_time_pricing.GBP = parseFloat(basicInfo.price_amount_gbp);
+                            
+                            if (this.formData.one_time_pricing.CHF) {
+                                this.formData.one_time_price = this.formData.one_time_pricing.CHF;
+                            }
+                            window.logger?.log('✅ Converted price_amount_* to one_time_pricing in setupDefaults:', this.formData.one_time_pricing);
+                        }
+                    }
+                }
+
                 if (basicInfo.trial_days !== undefined) {
                     this.formData.trial_days = basicInfo.trial_days;
                     if (this.elements.trialDaysInput) {
@@ -263,7 +300,13 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 
                 // Merge basicInfo into formData, but only for fields that have actual values
                 // This prevents empty/null values from overwriting good data
+                // IMPORTANT: Skip subscription_pricing and one_time_pricing - we handle them separately above
                 Object.keys(basicInfo).forEach(key => {
+                    // Skip pricing objects - we handle them separately to preserve converted data
+                    if (key === 'subscription_pricing' || key === 'one_time_pricing') {
+                        return;
+                    }
+                    
                     const value = basicInfo[key];
                     // Only overwrite if value is not null, undefined, or empty object/array
                     if (value !== null && value !== undefined) {
@@ -289,6 +332,22 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 // Restore pricing_type if basicInfo had a null/undefined value
                 if (!basicInfo.pricing_type || !['freemium', 'one_time', 'subscription'].includes(basicInfo.pricing_type)) {
                     this.formData.pricing_type = currentPricingType;
+                }
+                
+                // Preserve pricing objects we just created from price_amount_* fields
+                // Don't let the merge overwrite them with empty objects from basicInfo
+                if (this.formData.subscription_pricing && Object.keys(this.formData.subscription_pricing).length > 0 && Object.values(this.formData.subscription_pricing).some(price => price > 0)) {
+                    // Keep our converted pricing object
+                } else if (basicInfo.subscription_pricing && typeof basicInfo.subscription_pricing === 'object' && Object.keys(basicInfo.subscription_pricing).length > 0) {
+                    // Use basicInfo's pricing object if we don't have one
+                    this.formData.subscription_pricing = { ...this.formData.subscription_pricing, ...basicInfo.subscription_pricing };
+                }
+                
+                if (this.formData.one_time_pricing && Object.keys(this.formData.one_time_pricing).length > 0 && Object.values(this.formData.one_time_pricing).some(price => price > 0)) {
+                    // Keep our converted pricing object
+                } else if (basicInfo.one_time_pricing && typeof basicInfo.one_time_pricing === 'object' && Object.keys(basicInfo.one_time_pricing).length > 0) {
+                    // Use basicInfo's pricing object if we don't have one
+                    this.formData.one_time_pricing = { ...this.formData.one_time_pricing, ...basicInfo.one_time_pricing };
                 }
 
                 // Check if Stripe product was already created
@@ -1173,40 +1232,53 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 return;
             }
             
-            // Check if we have meaningful pricing data (not just defaults)
-            // If pricing_type is freemium and all prices are 0, that's valid
-            // But if we have actual prices set, or if pricing_type is set to something other than default, save it
+            // Check if we have meaningful pricing data in this.formData
             const hasNonDefaultPricing = 
                 (this.formData.pricing_type && this.formData.pricing_type !== 'freemium') ||
                 (this.formData.subscription_pricing && Object.values(this.formData.subscription_pricing).some(price => price > 0)) ||
                 (this.formData.one_time_pricing && Object.values(this.formData.one_time_pricing).some(price => price > 0)) ||
                 (this.formData.subscription_price > 0) ||
-                (this.formData.one_time_price > 0) ||
-                (wizardFormData.stripe_product_id); // If Stripe product exists, we should save the pricing config
+                (this.formData.one_time_price > 0);
             
-            // Only save if we have meaningful data OR if wizardFormData already has pricing data (preserve existing)
-            // Check if wizardFormData has actual pricing data (not just empty/null values)
-            const hasExistingPricingData = 
-                (wizardFormData.pricing_type && wizardFormData.pricing_type !== '') ||
-                (wizardFormData.subscription_pricing && typeof wizardFormData.subscription_pricing === 'object' && Object.keys(wizardFormData.subscription_pricing).length > 0) ||
-                (wizardFormData.one_time_pricing && typeof wizardFormData.one_time_pricing === 'object' && Object.keys(wizardFormData.one_time_pricing).length > 0) ||
-                (wizardFormData.subscription_price && wizardFormData.subscription_price > 0) ||
-                (wizardFormData.one_time_price && wizardFormData.one_time_price > 0) ||
-                wizardFormData.stripe_product_id; // If Stripe product exists, we should save the pricing config
+            // Check if wizardFormData has existing pricing objects with meaningful data
+            const hasExistingPricingObjects = 
+                (wizardFormData.subscription_pricing && typeof wizardFormData.subscription_pricing === 'object' && Object.keys(wizardFormData.subscription_pricing).length > 0 && Object.values(wizardFormData.subscription_pricing).some(price => price > 0)) ||
+                (wizardFormData.one_time_pricing && typeof wizardFormData.one_time_pricing === 'object' && Object.keys(wizardFormData.one_time_pricing).length > 0 && Object.values(wizardFormData.one_time_pricing).some(price => price > 0));
             
-            if (hasNonDefaultPricing || hasExistingPricingData) {
-                // Save all pricing configuration to wizard's formData
-                wizardFormData.pricing_type = this.formData.pricing_type;
+            // Check if wizardFormData has price_amount_* fields (from database)
+            const hasExistingPriceAmounts = 
+                (wizardFormData.price_amount_chf && wizardFormData.price_amount_chf > 0) ||
+                (wizardFormData.price_amount_usd && wizardFormData.price_amount_usd > 0) ||
+                (wizardFormData.price_amount_eur && wizardFormData.price_amount_eur > 0) ||
+                (wizardFormData.price_amount_gbp && wizardFormData.price_amount_gbp > 0);
+            
+            // Always save pricing_type and trial settings if step is initialized
+            wizardFormData.pricing_type = this.formData.pricing_type;
+            wizardFormData.trial_days = this.formData.trial_days;
+            wizardFormData.trial_requires_payment = this.formData.trial_requires_payment;
+            
+            // Only save pricing objects if we have meaningful data, otherwise preserve existing
+            if (hasNonDefaultPricing) {
+                // We have meaningful pricing data - save it
                 wizardFormData.subscription_price = this.formData.subscription_price;
                 wizardFormData.subscription_pricing = this.formData.subscription_pricing;
                 wizardFormData.one_time_price = this.formData.one_time_price;
                 wizardFormData.one_time_pricing = this.formData.one_time_pricing;
-                wizardFormData.trial_days = this.formData.trial_days;
-                wizardFormData.trial_requires_payment = this.formData.trial_requires_payment;
-                
-                window.logger?.log('✅ SaveFormData: Saved Stripe pricing configuration');
+                window.logger?.log('✅ SaveFormData: Saved Stripe pricing configuration with meaningful data');
+            } else if (wizardFormData.stripe_product_id && (!hasExistingPricingObjects && !hasExistingPriceAmounts)) {
+                // Stripe product exists but no pricing data - save defaults (freemium case)
+                wizardFormData.subscription_price = this.formData.subscription_price;
+                wizardFormData.subscription_pricing = this.formData.subscription_pricing;
+                wizardFormData.one_time_price = this.formData.one_time_price;
+                wizardFormData.one_time_pricing = this.formData.one_time_pricing;
+                window.logger?.log('✅ SaveFormData: Saved Stripe pricing configuration (freemium/defaults)');
             } else {
-                window.logger?.log('⚠️ SaveFormData: No meaningful pricing data to save, preserving existing wizardFormData values');
+                // Preserve existing pricing data - don't overwrite with empty objects
+                window.logger?.log('⚠️ SaveFormData: Preserving existing pricing data, not overwriting with empty objects. Existing:', {
+                    hasPricingObjects: hasExistingPricingObjects,
+                    hasPriceAmounts: hasExistingPriceAmounts,
+                    stripe_product_id: wizardFormData.stripe_product_id
+                });
             }
         }
 
