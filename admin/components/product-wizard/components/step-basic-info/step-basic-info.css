@@ -333,3 +333,24 @@
         font-size: var(--font-size-sm);
     }
 }
+
+/* Save Section */
+.step-basic-info__save-section {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.step-basic-info__save-section .save-status {
+    margin-left: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.step-basic-info__save-section .save-status:not(:empty) {
+    color: var(--color-success);
+}

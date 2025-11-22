@@ -147,6 +147,15 @@
             <small class="step-stripe-creation__help">This will create the product and prices in your Stripe account</small>
         </div>
 
+        <!-- TEMPORARY: Save Data Without Stripe (for dev/testing) -->
+        <div class="step-stripe-creation__create-section" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #666;">
+            <button type="button" class="step-stripe-creation__create-btn" id="save-step-5-without-stripe-btn" style="background-color: #ffa500; border-color: #ffa500;">
+                <span class="btn-icon">💾</span>
+                <span>TEMPORARY: Save Data (No Stripe)</span>
+            </button>
+            <small class="step-stripe-creation__help" style="color: #ffa500;">⚠️ Dev/Testing Only: Saves pricing data to DB without creating Stripe products</small>
+        </div>
+
         <!-- Stripe Status -->
         <div class="step-stripe-creation__section" id="stripe-status-section" style="display: none;">
             <h3 class="step-stripe-creation__section-title">Stripe Product Status</h3>

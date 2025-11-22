@@ -83,7 +83,12 @@
       "Next": "Next",
       "Save Draft": "Update Data",
       "Creating Product...": "Creating Product...",
-      "step1_description": "Let's start with the basic details about your product"
+      "step1_description": "Let's start with the basic details about your product",
+      "Save Basic Info": "Save Basic Info",
+      "Save Technical Spec": "Save Technical Spec",
+      "Save Content & Media": "Save Content & Media",
+      "Saving...": "Saving...",
+      "Saved": "Saved"
     }
   },
   "es": {
@@ -170,7 +175,12 @@
       "Next": "Siguiente",
       "Save Draft": "Actualizar Datos",
       "Creating Product...": "Creando Producto...",
-      "step1_description": "Comencemos con los detalles básicos de tu producto"
+      "step1_description": "Comencemos con los detalles básicos de tu producto",
+      "Save Basic Info": "Guardar Información Básica",
+      "Save Technical Spec": "Guardar Especificación Técnica",
+      "Save Content & Media": "Guardar Contenido y Medios",
+      "Saving...": "Guardando...",
+      "Saved": "Guardado"
     }
   },
   "fr": {
@@ -257,7 +267,12 @@
       "Next": "Suivant",
       "Save Draft": "Mettre à jour les données",
       "Creating Product...": "Création du Produit...",
-      "step1_description": "Commençons par les détails de base de votre produit"
+      "step1_description": "Commençons par les détails de base de votre produit",
+      "Save Basic Info": "Enregistrer les Informations de Base",
+      "Save Technical Spec": "Enregistrer la Spécification Technique",
+      "Save Content & Media": "Enregistrer le Contenu et les Médias",
+      "Saving...": "Enregistrement...",
+      "Saved": "Enregistré"
     }
   },
   "de": {
@@ -344,7 +359,12 @@
       "Next": "Weiter",
       "Save Draft": "Daten aktualisieren",
       "Creating Product...": "Produkt wird erstellt...",
-      "step1_description": "Beginnen wir mit den grundlegenden Details Ihres Produkts"
+      "step1_description": "Beginnen wir mit den grundlegenden Details Ihres Produkts",
+      "Save Basic Info": "Grundinformationen Speichern",
+      "Save Technical Spec": "Technische Spezifikation Speichern",
+      "Save Content & Media": "Inhalt und Medien Speichern",
+      "Saving...": "Wird gespeichert...",
+      "Saved": "Gespeichert"
     }
   }
 }

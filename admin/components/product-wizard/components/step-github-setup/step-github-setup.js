@@ -341,7 +341,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
                 if (data && data.success) {
                     this.repositoryCreated = true;
                     this.formData.github_repo_url = data.repoUrl;
-                    this.updateGitHubStatus(data);
+                    await this.updateGitHubStatus(data);
                     window.logger?.log('✅ GitHub repository created successfully');
                     return { success: true, data };
                 } else {
@@ -367,7 +367,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
         /**
          * Update GitHub status display
          */
-        updateGitHubStatus(data) {
+        async updateGitHubStatus(data) {
             if (!this.elements.githubStatusSection || !this.elements.githubStatus) {
                 return;
             }
@@ -391,6 +391,14 @@ if (typeof window.StepGithubSetup === 'undefined') {
             // Save repository status to wizard formData
             if (window.productWizard && window.productWizard.formData) {
                 window.productWizard.formData.github_repo_created = true;
+                
+                // Mark step as saved
+                if (window.productWizard && typeof window.productWizard.saveStepToDatabase === 'function') {
+                    const saveResult = await window.productWizard.saveStepToDatabase(4);
+                    if (saveResult?.success) {
+                        window.logger?.log('✅ Step 4 marked as saved after repository creation');
+                    }
+                }
                 window.productWizard.formData.github_repo_url = data.repoUrl;
                 window.productWizard.formData.github_repo_name = data.repoName;
                 window.productWizard.formData.github_branch = data.defaultBranch || 'main';

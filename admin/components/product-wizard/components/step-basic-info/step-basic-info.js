@@ -59,7 +59,9 @@ class StepBasicInfo {
             pricingType: document.getElementById('pricing-type'),
             addCategoryBtn: document.getElementById('add-category-btn'),
             generateTranslationsBtn: document.getElementById('generate-translations-btn'),
-            generateTranslationsStatus: document.getElementById('generate-translations-status')
+            generateTranslationsStatus: document.getElementById('generate-translations-status'),
+            saveBtn: document.getElementById('save-step-1-btn'),
+            saveStatus: document.getElementById('save-step-1-status')
         };
 
         this.elements.generateTranslationsLabel = this.elements.generateTranslationsBtn
@@ -88,6 +90,74 @@ class StepBasicInfo {
 
         this.setupTranslationTabs();
         this.setupGenerateTranslations();
+        this.setupSaveButton();
+    }
+
+    /**
+     * Setup save button event listener
+     */
+    setupSaveButton() {
+        if (this.elements.saveBtn) {
+            this.elements.saveBtn.addEventListener('click', async () => {
+                await this.handleSave();
+            });
+        }
+    }
+
+    /**
+     * Handle save button click
+     */
+    async handleSave() {
+        if (!window.productWizard) {
+            window.logger?.error('❌ ProductWizard not available');
+            return;
+        }
+
+        const saveBtn = this.elements.saveBtn;
+        const saveStatus = this.elements.saveStatus;
+
+        if (!saveBtn || saveBtn.disabled) {
+            return;
+        }
+
+        try {
+            // Disable button and show saving state
+            saveBtn.disabled = true;
+            if (saveStatus) {
+                saveStatus.textContent = window.productWizardTranslations?.getTranslation('Saving...') || 'Saving...';
+            }
+
+            // Save step data
+            const result = await window.productWizard.saveStepToDatabase(1);
+
+            if (result.success) {
+                // Show success message
+                if (saveStatus) {
+                    saveStatus.textContent = window.productWizardTranslations?.getTranslation('Saved') || 'Saved';
+                    setTimeout(() => {
+                        saveStatus.textContent = '';
+                    }, 2000);
+                }
+                
+                // Update navigation buttons to re-enable Next
+                await window.productWizard.updateNavigationButtons();
+                
+                window.logger?.log('✅ Step 1 saved successfully');
+            } else {
+                throw new Error(result.error || 'Failed to save step');
+            }
+        } catch (error) {
+            window.logger?.error('❌ Error saving Step 1:', error);
+            if (saveStatus) {
+                saveStatus.textContent = 'Error: ' + (error.message || 'Failed to save');
+            }
+            window.productWizard?.showError('Failed to save Step 1: ' + (error.message || 'Unknown error'));
+        } finally {
+            // Re-enable button
+            if (saveBtn) {
+                saveBtn.disabled = false;
+            }
+        }
     }
 
     setupTranslationTabs() {

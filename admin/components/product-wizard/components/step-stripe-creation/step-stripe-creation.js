@@ -18,12 +18,50 @@ if (typeof window.StepStripeCreation === 'undefined') {
         async init() {
             this.initializeElements();
             this.attachEventListeners();
+            
+            // On first load, ensure we have fresh data from database before setting defaults
+            // This is especially important for price_amount_* fields that might not be in formData yet
+            if (window.productWizard && window.productWizard.formData && window.productWizard.formData.product_id) {
+                const productId = window.productWizard.formData.product_id;
+                // Check if we have price_amount_* fields, if not, fetch from database
+                const hasPriceAmountFields = window.productWizard.formData.price_amount_chf !== null && window.productWizard.formData.price_amount_chf !== undefined ||
+                                            window.productWizard.formData.price_amount_usd !== null && window.productWizard.formData.price_amount_usd !== undefined ||
+                                            window.productWizard.formData.price_amount_eur !== null && window.productWizard.formData.price_amount_eur !== undefined ||
+                                            window.productWizard.formData.price_amount_gbp !== null && window.productWizard.formData.price_amount_gbp !== undefined;
+                
+                if (!hasPriceAmountFields) {
+                    // Fetch fresh data from database to ensure we have price_amount_* fields
+                    try {
+                        const { data, error } = await window.supabase
+                            .from('products')
+                            .select('pricing_type, price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, trial_days, trial_requires_payment')
+                            .eq('id', productId)
+                            .single();
+                        
+                        if (!error && data) {
+                            // Update formData with fresh database values
+                            if (data.price_amount_chf !== undefined) window.productWizard.formData.price_amount_chf = data.price_amount_chf;
+                            if (data.price_amount_usd !== undefined) window.productWizard.formData.price_amount_usd = data.price_amount_usd;
+                            if (data.price_amount_eur !== undefined) window.productWizard.formData.price_amount_eur = data.price_amount_eur;
+                            if (data.price_amount_gbp !== undefined) window.productWizard.formData.price_amount_gbp = data.price_amount_gbp;
+                            if (data.pricing_type !== undefined) window.productWizard.formData.pricing_type = data.pricing_type;
+                            if (data.trial_days !== undefined) window.productWizard.formData.trial_days = data.trial_days;
+                            if (data.trial_requires_payment !== undefined) window.productWizard.formData.trial_requires_payment = data.trial_requires_payment;
+                            window.logger?.log('✅ Fetched fresh pricing data from database on init:', data);
+                        }
+                    } catch (error) {
+                        window.logger?.warn('⚠️ Error fetching pricing data on init:', error);
+                    }
+                }
+            }
+            
             this.setupDefaults();
             
             // Ensure pricing_type is set from radio buttons if not already set
+            // But only if a radio is actually checked (don't force a default)
             if (this.elements.pricingTypeRadios) {
                 const checkedRadio = Array.from(this.elements.pricingTypeRadios).find(radio => radio.checked);
-                if (checkedRadio && !this.formData.pricing_type) {
+                if (checkedRadio) {
                     this.formData.pricing_type = checkedRadio.value;
                 }
             }
@@ -33,7 +71,16 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 this.setFreemiumPricesToZero();
             }
             
-            this.togglePricingSections();
+            // Only toggle sections if we have a pricing_type (don't show any section if unselected)
+            if (this.formData.pricing_type) {
+                this.togglePricingSections();
+            } else {
+                // Hide all pricing sections if no type is selected
+                if (this.elements.freemiumSection) this.elements.freemiumSection.style.display = 'none';
+                if (this.elements.subscriptionSection) this.elements.subscriptionSection.style.display = 'none';
+                if (this.elements.oneTimeSection) this.elements.oneTimeSection.style.display = 'none';
+                if (this.elements.trialSection) this.elements.trialSection.style.display = 'none';
+            }
             
             // Populate form fields after everything is set up (only if not already populated)
             this.populateFormFields();
@@ -61,6 +108,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 trialRequiresPaymentCheckbox: document.getElementById('trial-requires-payment'),
                 trialSection: document.getElementById('trial-section') || document.getElementById('trial-days')?.closest('.step-stripe-creation__section'),
                 createStripeBtn: document.getElementById('create-stripe-btn'),
+                saveWithoutStripeBtn: document.getElementById('save-step-5-without-stripe-btn'),
                 stripeStatusSection: document.getElementById('stripe-status-section'),
                 stripeStatus: document.getElementById('stripe-status'),
                 stripeActions: document.getElementById('stripe-actions'),
@@ -76,8 +124,66 @@ if (typeof window.StepStripeCreation === 'undefined') {
         attachEventListeners() {
             if (this.elements.pricingTypeRadios) {
                 this.elements.pricingTypeRadios.forEach(radio => {
-                    radio.addEventListener('change', () => {
+                    radio.addEventListener('change', async () => {
                         this.formData.pricing_type = radio.value;
+                        
+                        // When switching pricing types, check if we need to convert price_amount_* fields
+                        // This handles the case where data was saved but not yet converted to pricing objects
+                        if (window.productWizard && window.productWizard.formData) {
+                            const basicInfo = window.productWizard.formData;
+                            const hasPriceAmountFields = basicInfo.price_amount_chf !== null && basicInfo.price_amount_chf !== undefined ||
+                                                        basicInfo.price_amount_usd !== null && basicInfo.price_amount_usd !== undefined ||
+                                                        basicInfo.price_amount_eur !== null && basicInfo.price_amount_eur !== undefined ||
+                                                        basicInfo.price_amount_gbp !== null && basicInfo.price_amount_gbp !== undefined;
+                            
+                            // If we have price_amount_* fields but not the corresponding pricing object, convert them
+                            if (hasPriceAmountFields) {
+                                if (this.formData.pricing_type === 'subscription') {
+                                    const hasSubscriptionPricing = this.formData.subscription_pricing && 
+                                        Object.values(this.formData.subscription_pricing).some(price => price > 0);
+                                    if (!hasSubscriptionPricing) {
+                                        // Convert price_amount_* to subscription_pricing
+                                        this.formData.subscription_pricing = this.formData.subscription_pricing || {};
+                                        if (basicInfo.price_amount_chf !== null && basicInfo.price_amount_chf !== undefined) {
+                                            this.formData.subscription_pricing.CHF = parseFloat(basicInfo.price_amount_chf) || 0;
+                                        }
+                                        if (basicInfo.price_amount_usd !== null && basicInfo.price_amount_usd !== undefined) {
+                                            this.formData.subscription_pricing.USD = parseFloat(basicInfo.price_amount_usd) || 0;
+                                        }
+                                        if (basicInfo.price_amount_eur !== null && basicInfo.price_amount_eur !== undefined) {
+                                            this.formData.subscription_pricing.EUR = parseFloat(basicInfo.price_amount_eur) || 0;
+                                        }
+                                        if (basicInfo.price_amount_gbp !== null && basicInfo.price_amount_gbp !== undefined) {
+                                            this.formData.subscription_pricing.GBP = parseFloat(basicInfo.price_amount_gbp) || 0;
+                                        }
+                                        // Populate form fields with the converted values
+                                        this.populateFormFields();
+                                    }
+                                } else if (this.formData.pricing_type === 'one_time') {
+                                    const hasOneTimePricing = this.formData.one_time_pricing && 
+                                        Object.values(this.formData.one_time_pricing).some(price => price > 0);
+                                    if (!hasOneTimePricing) {
+                                        // Convert price_amount_* to one_time_pricing
+                                        this.formData.one_time_pricing = this.formData.one_time_pricing || {};
+                                        if (basicInfo.price_amount_chf !== null && basicInfo.price_amount_chf !== undefined) {
+                                            this.formData.one_time_pricing.CHF = parseFloat(basicInfo.price_amount_chf) || 0;
+                                        }
+                                        if (basicInfo.price_amount_usd !== null && basicInfo.price_amount_usd !== undefined) {
+                                            this.formData.one_time_pricing.USD = parseFloat(basicInfo.price_amount_usd) || 0;
+                                        }
+                                        if (basicInfo.price_amount_eur !== null && basicInfo.price_amount_eur !== undefined) {
+                                            this.formData.one_time_pricing.EUR = parseFloat(basicInfo.price_amount_eur) || 0;
+                                        }
+                                        if (basicInfo.price_amount_gbp !== null && basicInfo.price_amount_gbp !== undefined) {
+                                            this.formData.one_time_pricing.GBP = parseFloat(basicInfo.price_amount_gbp) || 0;
+                                        }
+                                        // Populate form fields with the converted values
+                                        this.populateFormFields();
+                                    }
+                                }
+                            }
+                        }
+                        
                         // Ensure prices are set correctly when switching
                         if (this.formData.pricing_type === 'freemium') {
                             this.setFreemiumPricesToZero();
@@ -152,6 +258,13 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 });
             }
 
+            // TEMPORARY: Save data without creating Stripe product (for dev/testing)
+            if (this.elements.saveWithoutStripeBtn) {
+                this.elements.saveWithoutStripeBtn.addEventListener('click', async () => {
+                    await this.handleSaveWithoutStripe();
+                });
+            }
+
             if (this.elements.updateStripeBtn) {
                 this.elements.updateStripeBtn.addEventListener('click', () => {
                     this.handleUpdateStripeProduct();
@@ -168,39 +281,86 @@ if (typeof window.StepStripeCreation === 'undefined') {
             if (window.productWizard && window.productWizard.formData) {
                 const basicInfo = window.productWizard.formData;
                 
-                // Load pricing configuration - check for valid pricing_type values
-                // Valid values: 'freemium', 'one_time', 'subscription'
+                // FIRST: Check if there's saved data in the database (price_amount_* fields)
+                const hasPriceAmountFields = basicInfo.price_amount_chf !== null && basicInfo.price_amount_chf !== undefined ||
+                                            basicInfo.price_amount_usd !== null && basicInfo.price_amount_usd !== undefined ||
+                                            basicInfo.price_amount_eur !== null && basicInfo.price_amount_eur !== undefined ||
+                                            basicInfo.price_amount_gbp !== null && basicInfo.price_amount_gbp !== undefined;
+                
+                const hasSavedPricingData = hasPriceAmountFields || 
+                    (basicInfo.subscription_pricing && typeof basicInfo.subscription_pricing === 'object' && Object.keys(basicInfo.subscription_pricing).length > 0 && Object.values(basicInfo.subscription_pricing).some(price => price > 0)) ||
+                    (basicInfo.one_time_pricing && typeof basicInfo.one_time_pricing === 'object' && Object.keys(basicInfo.one_time_pricing).length > 0 && Object.values(basicInfo.one_time_pricing).some(price => price > 0)) ||
+                    (basicInfo.subscription_price && basicInfo.subscription_price > 0) ||
+                    (basicInfo.one_time_price && basicInfo.one_time_price > 0);
+                
+                // Load pricing configuration - ONLY use what's in the database, NO defaults
+                // If pricing_type exists in DB, use it
                 if (basicInfo.pricing_type && ['freemium', 'one_time', 'subscription'].includes(basicInfo.pricing_type)) {
+                    // Use saved pricing_type from database
                     this.formData.pricing_type = basicInfo.pricing_type;
                     if (this.elements.pricingTypeRadios) {
                         this.elements.pricingTypeRadios.forEach(radio => {
-                            if (radio.value === basicInfo.pricing_type) {
-                                radio.checked = true;
-                            } else {
-                                radio.checked = false;
-                            }
+                            radio.checked = (radio.value === basicInfo.pricing_type);
                         });
                     }
-                    window.logger?.log('✅ Loaded pricing_type from formData:', basicInfo.pricing_type);
+                    window.logger?.log('✅ Loaded pricing_type from database:', basicInfo.pricing_type);
+                } else if (hasSavedPricingData) {
+                    // There's saved pricing data but no pricing_type in DB - infer from data
+                    // Check which pricing object has data to determine type
+                    const hasSubscriptionData = (basicInfo.subscription_pricing && Object.values(basicInfo.subscription_pricing).some(price => price > 0)) || 
+                                               (basicInfo.subscription_price && basicInfo.subscription_price > 0);
+                    const hasOneTimeData = (basicInfo.one_time_pricing && Object.values(basicInfo.one_time_pricing).some(price => price > 0)) || 
+                                          (basicInfo.one_time_price && basicInfo.one_time_price > 0);
+                    
+                    // If we have price_amount_* fields, infer type based on which pricing object would have data
+                    // Since price_amount_* could be either, default to one_time if we can't determine
+                    let inferredPricingType = null;
+                    if (hasSubscriptionData) {
+                        inferredPricingType = 'subscription';
+                    } else if (hasOneTimeData) {
+                        inferredPricingType = 'one_time';
+                    } else if (hasPriceAmountFields) {
+                        // If we only have price_amount_* fields, check if any are > 0
+                        const hasNonZeroPrices = (basicInfo.price_amount_chf && basicInfo.price_amount_chf > 0) ||
+                                                (basicInfo.price_amount_usd && basicInfo.price_amount_usd > 0) ||
+                                                (basicInfo.price_amount_eur && basicInfo.price_amount_eur > 0) ||
+                                                (basicInfo.price_amount_gbp && basicInfo.price_amount_gbp > 0);
+                        if (hasNonZeroPrices) {
+                            inferredPricingType = 'one_time'; // Default inference for price_amount_* fields
+                        }
+                    }
+                    
+                    if (inferredPricingType) {
+                        this.formData.pricing_type = inferredPricingType;
+                        if (this.elements.pricingTypeRadios) {
+                            this.elements.pricingTypeRadios.forEach(radio => {
+                                radio.checked = (radio.value === inferredPricingType);
+                            });
+                        }
+                        // Also update the wizard's formData to keep it in sync
+                        if (window.productWizard && window.productWizard.formData) {
+                            window.productWizard.formData.pricing_type = inferredPricingType;
+                        }
+                        window.logger?.log('⚠️ Found saved pricing data but no pricing_type in DB, inferred:', inferredPricingType);
+                    } else {
+                        // No pricing type can be determined - leave unselected
+                        this.formData.pricing_type = null;
+                        if (this.elements.pricingTypeRadios) {
+                            this.elements.pricingTypeRadios.forEach(radio => {
+                                radio.checked = false;
+                            });
+                        }
+                        window.logger?.log('⚠️ Found pricing data but could not determine pricing_type, leaving unselected');
+                    }
                 } else {
-                    // No existing pricing_type or invalid value - default to freemium and ensure it's checked
-                    // But only if pricing_type is truly missing, not if it's a valid value
-                    const defaultPricingType = 'freemium';
-                    this.formData.pricing_type = defaultPricingType;
+                    // No saved data at all - leave unselected (NO default)
+                    this.formData.pricing_type = null;
                     if (this.elements.pricingTypeRadios) {
                         this.elements.pricingTypeRadios.forEach(radio => {
-                            if (radio.value === defaultPricingType) {
-                                radio.checked = true;
-                            } else {
-                                radio.checked = false;
-                            }
+                            radio.checked = false;
                         });
                     }
-                    // Also update the wizard's formData to keep it in sync
-                    if (window.productWizard && window.productWizard.formData) {
-                        window.productWizard.formData.pricing_type = defaultPricingType;
-                    }
-                    window.logger?.log('⚠️ No valid pricing_type found, defaulting to:', defaultPricingType);
+                    window.logger?.log('⚠️ No saved pricing data found, leaving pricing_type unselected (no default)');
                 }
 
                 // Load subscription pricing (multi-currency or single)
@@ -241,40 +401,77 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     }
                 }
 
-                // If pricing objects don't exist but price_amount_* fields do, convert them
-                // This handles the case where database has price_amount_* but not pricing objects
-                if ((!basicInfo.subscription_pricing || Object.keys(basicInfo.subscription_pricing).length === 0) && 
-                    (!basicInfo.one_time_pricing || Object.keys(basicInfo.one_time_pricing).length === 0)) {
-                    const pricingType = basicInfo.pricing_type || 'one_time';
+                // ALWAYS check price_amount_* fields from database and convert them to pricing objects
+                // This handles the case where data was saved using the temp button (which saves price_amount_* directly)
+                // Priority: Use price_amount_* fields if they exist, even if pricing objects exist (database is source of truth)
+                // Use the pricing_type we just set above (from database or inferred)
+                if (hasPriceAmountFields) {
+                    const pricingType = this.formData.pricing_type; // Use the pricing_type we just set above
                     
-                    if (pricingType === 'subscription' && (basicInfo.price_amount_chf || basicInfo.price_amount_usd || basicInfo.price_amount_eur || basicInfo.price_amount_gbp)) {
+                    // Check if pricing objects have meaningful data (non-zero values)
+                    const hasSubscriptionPricing = this.formData.subscription_pricing && 
+                        Object.values(this.formData.subscription_pricing).some(price => price > 0);
+                    const hasOneTimePricing = this.formData.one_time_pricing && 
+                        Object.values(this.formData.one_time_pricing).some(price => price > 0);
+                    
+                    // Convert price_amount_* to pricing objects based on pricing_type
+                    if (pricingType === 'subscription' && !hasSubscriptionPricing) {
                         // Build subscription_pricing from price_amount_* fields
-                        if (!this.formData.subscription_pricing || Object.keys(this.formData.subscription_pricing).length === 0) {
-                            this.formData.subscription_pricing = {};
-                            if (basicInfo.price_amount_chf) this.formData.subscription_pricing.CHF = parseFloat(basicInfo.price_amount_chf);
-                            if (basicInfo.price_amount_usd) this.formData.subscription_pricing.USD = parseFloat(basicInfo.price_amount_usd);
-                            if (basicInfo.price_amount_eur) this.formData.subscription_pricing.EUR = parseFloat(basicInfo.price_amount_eur);
-                            if (basicInfo.price_amount_gbp) this.formData.subscription_pricing.GBP = parseFloat(basicInfo.price_amount_gbp);
-                            
-                            if (this.formData.subscription_pricing.CHF) {
-                                this.formData.subscription_price = this.formData.subscription_pricing.CHF;
-                            }
-                            window.logger?.log('✅ Converted price_amount_* to subscription_pricing in setupDefaults:', this.formData.subscription_pricing);
+                        this.formData.subscription_pricing = this.formData.subscription_pricing || {};
+                        if (basicInfo.price_amount_chf !== null && basicInfo.price_amount_chf !== undefined) {
+                            this.formData.subscription_pricing.CHF = parseFloat(basicInfo.price_amount_chf) || 0;
                         }
-                    } else if (pricingType === 'one_time' && (basicInfo.price_amount_chf || basicInfo.price_amount_usd || basicInfo.price_amount_eur || basicInfo.price_amount_gbp)) {
+                        if (basicInfo.price_amount_usd !== null && basicInfo.price_amount_usd !== undefined) {
+                            this.formData.subscription_pricing.USD = parseFloat(basicInfo.price_amount_usd) || 0;
+                        }
+                        if (basicInfo.price_amount_eur !== null && basicInfo.price_amount_eur !== undefined) {
+                            this.formData.subscription_pricing.EUR = parseFloat(basicInfo.price_amount_eur) || 0;
+                        }
+                        if (basicInfo.price_amount_gbp !== null && basicInfo.price_amount_gbp !== undefined) {
+                            this.formData.subscription_pricing.GBP = parseFloat(basicInfo.price_amount_gbp) || 0;
+                        }
+                        
+                        // Set subscription_price to first non-zero value
+                        if (this.formData.subscription_pricing.CHF > 0) {
+                            this.formData.subscription_price = this.formData.subscription_pricing.CHF;
+                        } else if (this.formData.subscription_pricing.USD > 0) {
+                            this.formData.subscription_price = this.formData.subscription_pricing.USD;
+                        } else if (this.formData.subscription_pricing.EUR > 0) {
+                            this.formData.subscription_price = this.formData.subscription_pricing.EUR;
+                        } else if (this.formData.subscription_pricing.GBP > 0) {
+                            this.formData.subscription_price = this.formData.subscription_pricing.GBP;
+                        }
+                        window.logger?.log('✅ Converted price_amount_* to subscription_pricing in setupDefaults:', this.formData.subscription_pricing);
+                    } else if (pricingType === 'one_time' && !hasOneTimePricing) {
                         // Build one_time_pricing from price_amount_* fields
-                        if (!this.formData.one_time_pricing || Object.keys(this.formData.one_time_pricing).length === 0) {
-                            this.formData.one_time_pricing = {};
-                            if (basicInfo.price_amount_chf) this.formData.one_time_pricing.CHF = parseFloat(basicInfo.price_amount_chf);
-                            if (basicInfo.price_amount_usd) this.formData.one_time_pricing.USD = parseFloat(basicInfo.price_amount_usd);
-                            if (basicInfo.price_amount_eur) this.formData.one_time_pricing.EUR = parseFloat(basicInfo.price_amount_eur);
-                            if (basicInfo.price_amount_gbp) this.formData.one_time_pricing.GBP = parseFloat(basicInfo.price_amount_gbp);
-                            
-                            if (this.formData.one_time_pricing.CHF) {
-                                this.formData.one_time_price = this.formData.one_time_pricing.CHF;
-                            }
-                            window.logger?.log('✅ Converted price_amount_* to one_time_pricing in setupDefaults:', this.formData.one_time_pricing);
+                        this.formData.one_time_pricing = this.formData.one_time_pricing || {};
+                        if (basicInfo.price_amount_chf !== null && basicInfo.price_amount_chf !== undefined) {
+                            this.formData.one_time_pricing.CHF = parseFloat(basicInfo.price_amount_chf) || 0;
                         }
+                        if (basicInfo.price_amount_usd !== null && basicInfo.price_amount_usd !== undefined) {
+                            this.formData.one_time_pricing.USD = parseFloat(basicInfo.price_amount_usd) || 0;
+                        }
+                        if (basicInfo.price_amount_eur !== null && basicInfo.price_amount_eur !== undefined) {
+                            this.formData.one_time_pricing.EUR = parseFloat(basicInfo.price_amount_eur) || 0;
+                        }
+                        if (basicInfo.price_amount_gbp !== null && basicInfo.price_amount_gbp !== undefined) {
+                            this.formData.one_time_pricing.GBP = parseFloat(basicInfo.price_amount_gbp) || 0;
+                        }
+                        
+                        // Set one_time_price to first non-zero value
+                        if (this.formData.one_time_pricing.CHF > 0) {
+                            this.formData.one_time_price = this.formData.one_time_pricing.CHF;
+                        } else if (this.formData.one_time_pricing.USD > 0) {
+                            this.formData.one_time_price = this.formData.one_time_pricing.USD;
+                        } else if (this.formData.one_time_pricing.EUR > 0) {
+                            this.formData.one_time_price = this.formData.one_time_pricing.EUR;
+                        } else if (this.formData.one_time_pricing.GBP > 0) {
+                            this.formData.one_time_price = this.formData.one_time_pricing.GBP;
+                        }
+                        window.logger?.log('✅ Converted price_amount_* to one_time_pricing in setupDefaults:', this.formData.one_time_pricing);
+                    } else if (pricingType === 'freemium') {
+                        // For freemium, ensure all prices are 0
+                        this.setFreemiumPricesToZero();
                     }
                 }
 
@@ -296,14 +493,14 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 // But preserve pricing_type if we just set it above (don't overwrite with null/undefined)
                 // IMPORTANT: Don't overwrite with empty/null values from basicInfo
                 // Only merge non-empty values to preserve existing data
-                const currentPricingType = this.formData.pricing_type;
+                const currentPricingType = this.formData.pricing_type; // Save the pricing_type we set above
                 
                 // Merge basicInfo into formData, but only for fields that have actual values
                 // This prevents empty/null values from overwriting good data
-                // IMPORTANT: Skip subscription_pricing and one_time_pricing - we handle them separately above
+                // IMPORTANT: Skip subscription_pricing, one_time_pricing, and pricing_type - we handle them separately above
                 Object.keys(basicInfo).forEach(key => {
-                    // Skip pricing objects - we handle them separately to preserve converted data
-                    if (key === 'subscription_pricing' || key === 'one_time_pricing') {
+                    // Skip pricing objects and pricing_type - we handle them separately to preserve converted data
+                    if (key === 'subscription_pricing' || key === 'one_time_pricing' || key === 'pricing_type') {
                         return;
                     }
                     
@@ -329,10 +526,9 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     }
                 });
                 
-                // Restore pricing_type if basicInfo had a null/undefined value
-                if (!basicInfo.pricing_type || !['freemium', 'one_time', 'subscription'].includes(basicInfo.pricing_type)) {
-                    this.formData.pricing_type = currentPricingType;
-                }
+                // Ensure pricing_type is preserved (don't let the merge overwrite it with null/undefined)
+                // The pricing_type we set above (from database or inferred) should be kept
+                this.formData.pricing_type = currentPricingType;
                 
                 // Preserve pricing objects we just created from price_amount_* fields
                 // Don't let the merge overwrite them with empty objects from basicInfo
@@ -458,13 +654,13 @@ if (typeof window.StepStripeCreation === 'undefined') {
 
                     // Persist immediately to database (no manual Save Draft required)
                     try {
-                        if (window.productWizard && typeof window.productWizard.saveDraftToDatabase === 'function') {
+                        if (window.productWizard && typeof window.productWizard.saveStepToDatabase === 'function') {
                             window.logger?.log('💾 Saving Stripe IDs to database...');
-                            const saveResult = await window.productWizard.saveDraftToDatabase();
+                            const saveResult = await window.productWizard.saveStepToDatabase(5);
                             if (!saveResult?.success) {
                                 window.logger?.warn('⚠️ Failed to persist Stripe IDs automatically:', saveResult?.error);
                             } else {
-                                window.logger?.log('✅ Stripe IDs persisted to database');
+                                window.logger?.log('✅ Stripe IDs persisted to database, Step 5 marked as saved');
                             }
                         }
                     } catch (persistError) {
@@ -484,6 +680,53 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 this.elements.createStripeBtn.disabled = false;
                 this.elements.createStripeBtn.innerHTML = '<span class="btn-icon">💳</span><span>Create Stripe Product</span>';
                 alert('Failed to create Stripe product: ' + error.message);
+            }
+        }
+
+        /**
+         * TEMPORARY: Save pricing data without creating Stripe products (for dev/testing)
+         */
+        async handleSaveWithoutStripe() {
+            try {
+                if (!window.productWizard) {
+                    alert('ProductWizard not available');
+                    return;
+                }
+
+                // Read form field values
+                this.readFormFieldValues();
+
+                // Save form data to wizard's formData
+                this.saveFormData(window.productWizard.formData);
+
+                // Disable button and show saving state
+                if (this.elements.saveWithoutStripeBtn) {
+                    this.elements.saveWithoutStripeBtn.disabled = true;
+                    this.elements.saveWithoutStripeBtn.innerHTML = '<span class="btn-icon">⏳</span><span>Saving...</span>';
+                }
+
+                // Save to database using the per-step save function
+                const result = await window.productWizard.saveStepToDatabase(5);
+
+                if (result.success) {
+                    // Show success message
+                    alert('✅ Pricing data saved successfully (without Stripe product creation)');
+                    window.logger?.log('✅ Step 5 saved without Stripe product creation');
+                    
+                    // Update navigation buttons to re-enable Next
+                    await window.productWizard.updateNavigationButtons();
+                } else {
+                    throw new Error(result.error || 'Failed to save step');
+                }
+            } catch (error) {
+                window.logger?.error('❌ Error saving Step 5 without Stripe:', error);
+                alert('Failed to save: ' + (error.message || 'Unknown error'));
+            } finally {
+                // Re-enable button
+                if (this.elements.saveWithoutStripeBtn) {
+                    this.elements.saveWithoutStripeBtn.disabled = false;
+                    this.elements.saveWithoutStripeBtn.innerHTML = '<span class="btn-icon">💾</span><span>TEMPORARY: Save Data (No Stripe)</span>';
+                }
             }
         }
 
@@ -854,11 +1097,11 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 
                 // Update database to reflect the changes
                 window.logger?.log('💾 Saving updated Stripe status to database...');
-                const saveResult = await window.productWizard.saveDraftToDatabase();
+                const saveResult = await window.productWizard.saveStepToDatabase(5);
                 if (!saveResult.success) {
                     window.logger?.warn('⚠️ Stripe product updated but failed to save to database:', saveResult.error);
                 } else {
-                    window.logger?.log('✅ Database updated after Stripe update');
+                    window.logger?.log('✅ Database updated after Stripe update, Step 5 marked as saved');
                 }
                 
                 // Update UI status
@@ -916,7 +1159,7 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 
                 // Update database to reflect the deletion
                 window.logger?.log('💾 Saving deleted Stripe status to database...');
-                const saveResult = await window.productWizard.saveDraftToDatabase();
+                const saveResult = await window.productWizard.saveStepToDatabase(5);
                 if (!saveResult.success) {
                     window.logger?.error('❌ Failed to update database after Stripe deletion:', saveResult.error);
                     alert('Stripe product archived, but failed to update database. Please refresh the page.');
@@ -924,9 +1167,10 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     window.logger?.log('✅ Database updated after Stripe deletion');
                 }
 
-                // Mark step as incomplete (Stripe is Step 5)
+                // Mark step as incomplete (Stripe is Step 5) - deletion means step is no longer saved
                 if (window.productWizard) {
                     window.productWizard.markStepIncomplete(5);
+                    window.productWizard.savedSteps.delete(5);
                 }
                 
                 // Update UI
@@ -1074,55 +1318,97 @@ if (typeof window.StepStripeCreation === 'undefined') {
             // Read subscription prices from form fields (only if elements exist and are in DOM)
             if (this.elements.subscriptionPriceChf && document.contains(this.elements.subscriptionPriceChf)) {
                 const value = this.elements.subscriptionPriceChf.value;
-                this.formData.subscription_pricing.CHF = (value !== null && value !== undefined && value !== '') 
-                    ? parseFloat(value) || 0 
-                    : this.formData.subscription_pricing.CHF || 0;
-                this.formData.subscription_price = this.formData.subscription_pricing.CHF; // Keep for backward compatibility
+                const numValue = (value !== null && value !== undefined && value !== '' && value.trim() !== '') 
+                    ? parseFloat(value) 
+                    : null;
+                // Only set if we got a valid number, otherwise don't set (preserve existing or leave undefined)
+                if (numValue !== null && !isNaN(numValue)) {
+                    this.formData.subscription_pricing.CHF = numValue;
+                    this.formData.subscription_price = numValue; // Keep for backward compatibility
+                } else if (value === '' || value.trim() === '') {
+                    // Explicitly set to undefined (not empty string) if field is empty
+                    delete this.formData.subscription_pricing.CHF;
+                }
             }
             if (this.elements.subscriptionPriceUsd && document.contains(this.elements.subscriptionPriceUsd)) {
                 const value = this.elements.subscriptionPriceUsd.value;
-                this.formData.subscription_pricing.USD = (value !== null && value !== undefined && value !== '') 
-                    ? parseFloat(value) || 0 
-                    : this.formData.subscription_pricing.USD || 0;
+                const numValue = (value !== null && value !== undefined && value !== '' && value.trim() !== '') 
+                    ? parseFloat(value) 
+                    : null;
+                if (numValue !== null && !isNaN(numValue)) {
+                    this.formData.subscription_pricing.USD = numValue;
+                } else if (value === '' || value.trim() === '') {
+                    delete this.formData.subscription_pricing.USD;
+                }
             }
             if (this.elements.subscriptionPriceEur && document.contains(this.elements.subscriptionPriceEur)) {
                 const value = this.elements.subscriptionPriceEur.value;
-                this.formData.subscription_pricing.EUR = (value !== null && value !== undefined && value !== '') 
-                    ? parseFloat(value) || 0 
-                    : this.formData.subscription_pricing.EUR || 0;
+                const numValue = (value !== null && value !== undefined && value !== '' && value.trim() !== '') 
+                    ? parseFloat(value) 
+                    : null;
+                if (numValue !== null && !isNaN(numValue)) {
+                    this.formData.subscription_pricing.EUR = numValue;
+                } else if (value === '' || value.trim() === '') {
+                    delete this.formData.subscription_pricing.EUR;
+                }
             }
             if (this.elements.subscriptionPriceGbp && document.contains(this.elements.subscriptionPriceGbp)) {
                 const value = this.elements.subscriptionPriceGbp.value;
-                this.formData.subscription_pricing.GBP = (value !== null && value !== undefined && value !== '') 
-                    ? parseFloat(value) || 0 
-                    : this.formData.subscription_pricing.GBP || 0;
+                const numValue = (value !== null && value !== undefined && value !== '' && value.trim() !== '') 
+                    ? parseFloat(value) 
+                    : null;
+                if (numValue !== null && !isNaN(numValue)) {
+                    this.formData.subscription_pricing.GBP = numValue;
+                } else if (value === '' || value.trim() === '') {
+                    delete this.formData.subscription_pricing.GBP;
+                }
             }
             
             // Read one-time prices from form fields (only if elements exist and are in DOM)
             if (this.elements.oneTimePriceChf && document.contains(this.elements.oneTimePriceChf)) {
                 const value = this.elements.oneTimePriceChf.value;
-                this.formData.one_time_pricing.CHF = (value !== null && value !== undefined && value !== '') 
-                    ? parseFloat(value) || 0 
-                    : this.formData.one_time_pricing.CHF || 0;
-                this.formData.one_time_price = this.formData.one_time_pricing.CHF; // Keep for backward compatibility
+                const numValue = (value !== null && value !== undefined && value !== '' && value.trim() !== '') 
+                    ? parseFloat(value) 
+                    : null;
+                if (numValue !== null && !isNaN(numValue)) {
+                    this.formData.one_time_pricing.CHF = numValue;
+                    this.formData.one_time_price = numValue; // Keep for backward compatibility
+                } else if (value === '' || value.trim() === '') {
+                    delete this.formData.one_time_pricing.CHF;
+                }
             }
             if (this.elements.oneTimePriceUsd && document.contains(this.elements.oneTimePriceUsd)) {
                 const value = this.elements.oneTimePriceUsd.value;
-                this.formData.one_time_pricing.USD = (value !== null && value !== undefined && value !== '') 
-                    ? parseFloat(value) || 0 
-                    : this.formData.one_time_pricing.USD || 0;
+                const numValue = (value !== null && value !== undefined && value !== '' && value.trim() !== '') 
+                    ? parseFloat(value) 
+                    : null;
+                if (numValue !== null && !isNaN(numValue)) {
+                    this.formData.one_time_pricing.USD = numValue;
+                } else if (value === '' || value.trim() === '') {
+                    delete this.formData.one_time_pricing.USD;
+                }
             }
             if (this.elements.oneTimePriceEur && document.contains(this.elements.oneTimePriceEur)) {
                 const value = this.elements.oneTimePriceEur.value;
-                this.formData.one_time_pricing.EUR = (value !== null && value !== undefined && value !== '') 
-                    ? parseFloat(value) || 0 
-                    : this.formData.one_time_pricing.EUR || 0;
+                const numValue = (value !== null && value !== undefined && value !== '' && value.trim() !== '') 
+                    ? parseFloat(value) 
+                    : null;
+                if (numValue !== null && !isNaN(numValue)) {
+                    this.formData.one_time_pricing.EUR = numValue;
+                } else if (value === '' || value.trim() === '') {
+                    delete this.formData.one_time_pricing.EUR;
+                }
             }
             if (this.elements.oneTimePriceGbp && document.contains(this.elements.oneTimePriceGbp)) {
                 const value = this.elements.oneTimePriceGbp.value;
-                this.formData.one_time_pricing.GBP = (value !== null && value !== undefined && value !== '') 
-                    ? parseFloat(value) || 0 
-                    : this.formData.one_time_pricing.GBP || 0;
+                const numValue = (value !== null && value !== undefined && value !== '' && value.trim() !== '') 
+                    ? parseFloat(value) 
+                    : null;
+                if (numValue !== null && !isNaN(numValue)) {
+                    this.formData.one_time_pricing.GBP = numValue;
+                } else if (value === '' || value.trim() === '') {
+                    delete this.formData.one_time_pricing.GBP;
+                }
             }
             
             // Read trial settings (only if elements exist and are in DOM)
@@ -1168,66 +1454,133 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 }
             }
             
-            // Populate subscription price (multi-currency) - always use saved data from database
+            // Check if we need to convert price_amount_* fields to pricing objects
+            // This handles the case where data was saved directly to price_amount_* fields
+            const hasPriceAmountFields = sourceData.price_amount_chf !== null && sourceData.price_amount_chf !== undefined ||
+                                        sourceData.price_amount_usd !== null && sourceData.price_amount_usd !== undefined ||
+                                        sourceData.price_amount_eur !== null && sourceData.price_amount_eur !== undefined ||
+                                        sourceData.price_amount_gbp !== null && sourceData.price_amount_gbp !== undefined;
+            
+            // Populate subscription price (multi-currency) - check pricing object first, then price_amount_* fields
             const subscriptionPricing = sourceData.subscription_pricing || {};
+            const hasSubscriptionPricing = Object.keys(subscriptionPricing).length > 0 && 
+                Object.values(subscriptionPricing).some(price => price > 0);
+            
             if (this.elements.subscriptionPriceChf) {
-                const savedValue = subscriptionPricing.CHF || sourceData.subscription_price || '';
+                let savedValue = subscriptionPricing.CHF || sourceData.subscription_price;
+                // Fallback to price_amount_chf if pricing object doesn't have CHF
+                if ((!savedValue || savedValue === 0) && hasPriceAmountFields && sourceData.pricing_type === 'subscription' && sourceData.price_amount_chf !== null && sourceData.price_amount_chf !== undefined) {
+                    savedValue = sourceData.price_amount_chf;
+                    // Update pricing object
+                    if (!this.formData.subscription_pricing) this.formData.subscription_pricing = {};
+                    this.formData.subscription_pricing.CHF = parseFloat(savedValue) || 0;
+                }
                 // Always populate from saved data (database is source of truth)
                 if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.subscriptionPriceChf.value = savedValue;
                     // Update formData with saved value
+                    if (!this.formData.subscription_pricing) this.formData.subscription_pricing = {};
                     this.formData.subscription_pricing.CHF = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.subscriptionPriceUsd) {
-                const savedValue = subscriptionPricing.USD || '';
+                let savedValue = subscriptionPricing.USD;
+                if ((!savedValue || savedValue === 0) && hasPriceAmountFields && sourceData.pricing_type === 'subscription' && sourceData.price_amount_usd !== null && sourceData.price_amount_usd !== undefined) {
+                    savedValue = sourceData.price_amount_usd;
+                    if (!this.formData.subscription_pricing) this.formData.subscription_pricing = {};
+                    this.formData.subscription_pricing.USD = parseFloat(savedValue) || 0;
+                }
                 if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.subscriptionPriceUsd.value = savedValue;
+                    if (!this.formData.subscription_pricing) this.formData.subscription_pricing = {};
                     this.formData.subscription_pricing.USD = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.subscriptionPriceEur) {
-                const savedValue = subscriptionPricing.EUR || '';
+                let savedValue = subscriptionPricing.EUR;
+                if ((!savedValue || savedValue === 0) && hasPriceAmountFields && sourceData.pricing_type === 'subscription' && sourceData.price_amount_eur !== null && sourceData.price_amount_eur !== undefined) {
+                    savedValue = sourceData.price_amount_eur;
+                    if (!this.formData.subscription_pricing) this.formData.subscription_pricing = {};
+                    this.formData.subscription_pricing.EUR = parseFloat(savedValue) || 0;
+                }
                 if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.subscriptionPriceEur.value = savedValue;
+                    if (!this.formData.subscription_pricing) this.formData.subscription_pricing = {};
                     this.formData.subscription_pricing.EUR = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.subscriptionPriceGbp) {
-                const savedValue = subscriptionPricing.GBP || '';
+                let savedValue = subscriptionPricing.GBP;
+                if ((!savedValue || savedValue === 0) && hasPriceAmountFields && sourceData.pricing_type === 'subscription' && sourceData.price_amount_gbp !== null && sourceData.price_amount_gbp !== undefined) {
+                    savedValue = sourceData.price_amount_gbp;
+                    if (!this.formData.subscription_pricing) this.formData.subscription_pricing = {};
+                    this.formData.subscription_pricing.GBP = parseFloat(savedValue) || 0;
+                }
                 if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.subscriptionPriceGbp.value = savedValue;
+                    if (!this.formData.subscription_pricing) this.formData.subscription_pricing = {};
                     this.formData.subscription_pricing.GBP = parseFloat(savedValue) || 0;
                 }
             }
             
-            // Populate one-time price (multi-currency) - always use saved data from database
+            // Populate one-time price (multi-currency) - check pricing object first, then price_amount_* fields
             const oneTimePricing = sourceData.one_time_pricing || {};
+            const hasOneTimePricing = Object.keys(oneTimePricing).length > 0 && 
+                Object.values(oneTimePricing).some(price => price > 0);
+            
             if (this.elements.oneTimePriceChf) {
-                const savedValue = oneTimePricing.CHF || sourceData.one_time_price || '';
+                let savedValue = oneTimePricing.CHF || sourceData.one_time_price;
+                // Fallback to price_amount_chf if pricing object doesn't have CHF
+                if ((!savedValue || savedValue === 0) && hasPriceAmountFields && sourceData.pricing_type === 'one_time' && sourceData.price_amount_chf !== null && sourceData.price_amount_chf !== undefined) {
+                    savedValue = sourceData.price_amount_chf;
+                    // Update pricing object
+                    if (!this.formData.one_time_pricing) this.formData.one_time_pricing = {};
+                    this.formData.one_time_pricing.CHF = parseFloat(savedValue) || 0;
+                }
+                // Always populate from saved data (database is source of truth)
                 if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.oneTimePriceChf.value = savedValue;
+                    // Update formData with saved value
+                    if (!this.formData.one_time_pricing) this.formData.one_time_pricing = {};
                     this.formData.one_time_pricing.CHF = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.oneTimePriceUsd) {
-                const savedValue = oneTimePricing.USD || '';
+                let savedValue = oneTimePricing.USD;
+                if ((!savedValue || savedValue === 0) && hasPriceAmountFields && sourceData.pricing_type === 'one_time' && sourceData.price_amount_usd !== null && sourceData.price_amount_usd !== undefined) {
+                    savedValue = sourceData.price_amount_usd;
+                    if (!this.formData.one_time_pricing) this.formData.one_time_pricing = {};
+                    this.formData.one_time_pricing.USD = parseFloat(savedValue) || 0;
+                }
                 if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.oneTimePriceUsd.value = savedValue;
+                    if (!this.formData.one_time_pricing) this.formData.one_time_pricing = {};
                     this.formData.one_time_pricing.USD = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.oneTimePriceEur) {
-                const savedValue = oneTimePricing.EUR || '';
+                let savedValue = oneTimePricing.EUR;
+                if ((!savedValue || savedValue === 0) && hasPriceAmountFields && sourceData.pricing_type === 'one_time' && sourceData.price_amount_eur !== null && sourceData.price_amount_eur !== undefined) {
+                    savedValue = sourceData.price_amount_eur;
+                    if (!this.formData.one_time_pricing) this.formData.one_time_pricing = {};
+                    this.formData.one_time_pricing.EUR = parseFloat(savedValue) || 0;
+                }
                 if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.oneTimePriceEur.value = savedValue;
+                    if (!this.formData.one_time_pricing) this.formData.one_time_pricing = {};
                     this.formData.one_time_pricing.EUR = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.oneTimePriceGbp) {
-                const savedValue = oneTimePricing.GBP || '';
+                let savedValue = oneTimePricing.GBP;
+                if ((!savedValue || savedValue === 0) && hasPriceAmountFields && sourceData.pricing_type === 'one_time' && sourceData.price_amount_gbp !== null && sourceData.price_amount_gbp !== undefined) {
+                    savedValue = sourceData.price_amount_gbp;
+                    if (!this.formData.one_time_pricing) this.formData.one_time_pricing = {};
+                    this.formData.one_time_pricing.GBP = parseFloat(savedValue) || 0;
+                }
                 if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.oneTimePriceGbp.value = savedValue;
+                    if (!this.formData.one_time_pricing) this.formData.one_time_pricing = {};
                     this.formData.one_time_pricing.GBP = parseFloat(savedValue) || 0;
                 }
             }

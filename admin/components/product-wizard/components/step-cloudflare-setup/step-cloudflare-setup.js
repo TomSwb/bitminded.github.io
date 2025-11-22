@@ -318,8 +318,11 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                     // Override with the actual worker URL from response
                     window.productWizard.formData.cloudflare_worker_url = data.workerDevUrl;
                     
-                    // Save to database
-                    await window.productWizard.saveDraftToDatabase();
+                    // Save to database and mark step as saved
+                    const saveResult = await window.productWizard.saveStepToDatabase(6);
+                    if (saveResult?.success) {
+                        window.logger?.log('✅ Step 6 saved successfully after worker creation');
+                    }
 
                     // Mark step as completed
                     if (window.productWizard) {
