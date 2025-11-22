@@ -2058,15 +2058,54 @@ Description: ${product.description || 'No description'}
                 old_sale_yearly_price_id: product.stripe_price_yearly_sale_id
             };
 
-            // Get pricing data for calculation
-            if (product.pricing_type === 'one_time' && product.price_amount) {
-                body.pricing = {
-                    [product.price_currency || 'USD']: product.price_amount
-                };
+            // Get REGULAR pricing data for all currencies - Edge Function will calculate sale prices from these
+            // This ensures sale prices are created for ALL currencies, not just one
+            if (product.pricing_type === 'one_time') {
+                // Build pricing object with all currency-specific amounts
+                const regularPricing = {};
+                if (product.price_amount_chf !== null && product.price_amount_chf !== undefined && product.price_amount_chf > 0) {
+                    regularPricing.CHF = product.price_amount_chf;
+                }
+                if (product.price_amount_usd !== null && product.price_amount_usd !== undefined && product.price_amount_usd > 0) {
+                    regularPricing.USD = product.price_amount_usd;
+                }
+                if (product.price_amount_eur !== null && product.price_amount_eur !== undefined && product.price_amount_eur > 0) {
+                    regularPricing.EUR = product.price_amount_eur;
+                }
+                if (product.price_amount_gbp !== null && product.price_amount_gbp !== undefined && product.price_amount_gbp > 0) {
+                    regularPricing.GBP = product.price_amount_gbp;
+                }
+                
+                // Fallback to default price_amount/currency if no currency-specific amounts
+                if (Object.keys(regularPricing).length === 0 && product.price_amount) {
+                    regularPricing[product.price_currency || 'USD'] = product.price_amount;
+                }
+                
+                body.pricing = regularPricing;
+                window.logger?.log('💰 Passing regular pricing for sale calculation (one-time):', regularPricing);
             } else if (product.pricing_type === 'subscription') {
-                // For subscriptions, we'd need the full pricing structure
-                // This might need to be fetched separately or stored differently
-                body.pricing = salePricing || {};
+                // For subscriptions, build pricing object with monthly prices for all currencies
+                const regularPricing = {};
+                if (product.price_amount_chf !== null && product.price_amount_chf !== undefined && product.price_amount_chf > 0) {
+                    regularPricing.CHF = { monthly: product.price_amount_chf };
+                }
+                if (product.price_amount_usd !== null && product.price_amount_usd !== undefined && product.price_amount_usd > 0) {
+                    regularPricing.USD = { monthly: product.price_amount_usd };
+                }
+                if (product.price_amount_eur !== null && product.price_amount_eur !== undefined && product.price_amount_eur > 0) {
+                    regularPricing.EUR = { monthly: product.price_amount_eur };
+                }
+                if (product.price_amount_gbp !== null && product.price_amount_gbp !== undefined && product.price_amount_gbp > 0) {
+                    regularPricing.GBP = { monthly: product.price_amount_gbp };
+                }
+                
+                // Fallback to default price_amount/currency if no currency-specific amounts
+                if (Object.keys(regularPricing).length === 0 && product.price_amount) {
+                    regularPricing[product.price_currency || 'USD'] = { monthly: product.price_amount };
+                }
+                
+                body.pricing = regularPricing;
+                window.logger?.log('💰 Passing regular pricing for sale calculation (subscription):', regularPricing);
             }
 
             // Call update edge function

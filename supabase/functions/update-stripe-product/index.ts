@@ -706,10 +706,64 @@ serve(async (req) => {
     const newSaleOneTimePrices: Record<string, any> = {}
     const priceErrors: Record<string, string> = {}
 
-    if (is_on_sale && sale_discount_percentage !== null && pricing && typeof pricing === 'object' && Object.keys(pricing).length > 0) {
+    if (is_on_sale && sale_discount_percentage !== null) {
       console.log('💰 Creating sale prices with discount:', sale_discount_percentage + '%')
       
       const discountMultiplier = 1 - (sale_discount_percentage / 100)
+      
+      // Get current product data from database to use all currency prices
+      // This ensures we create sale prices for ALL currencies, not just what's in the pricing object
+      let dbProductForSale: any = null
+      try {
+        const { data: productData, error: productError } = await supabaseAdmin
+          .from('products')
+          .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, price_amount, price_currency, pricing_type')
+          .eq('stripe_product_id', productId)
+          .single()
+        
+        if (!productError && productData) {
+          dbProductForSale = productData
+          console.log('✅ Loaded product data for sale price calculation:', {
+            price_amount_chf: dbProductForSale.price_amount_chf,
+            price_amount_usd: dbProductForSale.price_amount_usd,
+            price_amount_eur: dbProductForSale.price_amount_eur,
+            price_amount_gbp: dbProductForSale.price_amount_gbp
+          })
+        }
+      } catch (error: any) {
+        console.warn('⚠️ Could not load product data for sale prices, using pricing object:', error.message)
+      }
+      
+      // Build pricing object from database if available, otherwise use passed pricing
+      let salePricingSource: any = pricing
+      if (dbProductForSale) {
+        if (dbProductForSale.pricing_type === 'one_time') {
+          salePricingSource = {}
+          if (dbProductForSale.price_amount_chf) salePricingSource.CHF = dbProductForSale.price_amount_chf
+          if (dbProductForSale.price_amount_usd) salePricingSource.USD = dbProductForSale.price_amount_usd
+          if (dbProductForSale.price_amount_eur) salePricingSource.EUR = dbProductForSale.price_amount_eur
+          if (dbProductForSale.price_amount_gbp) salePricingSource.GBP = dbProductForSale.price_amount_gbp
+          // Fallback to default if no currency-specific amounts
+          if (Object.keys(salePricingSource).length === 0 && dbProductForSale.price_amount) {
+            salePricingSource[dbProductForSale.price_currency || 'USD'] = dbProductForSale.price_amount
+          }
+        } else if (dbProductForSale.pricing_type === 'subscription') {
+          salePricingSource = {}
+          if (dbProductForSale.price_amount_chf) salePricingSource.CHF = { monthly: dbProductForSale.price_amount_chf }
+          if (dbProductForSale.price_amount_usd) salePricingSource.USD = { monthly: dbProductForSale.price_amount_usd }
+          if (dbProductForSale.price_amount_eur) salePricingSource.EUR = { monthly: dbProductForSale.price_amount_eur }
+          if (dbProductForSale.price_amount_gbp) salePricingSource.GBP = { monthly: dbProductForSale.price_amount_gbp }
+          // Fallback to default if no currency-specific amounts
+          if (Object.keys(salePricingSource).length === 0 && dbProductForSale.price_amount) {
+            salePricingSource[dbProductForSale.price_currency || 'USD'] = { monthly: dbProductForSale.price_amount }
+          }
+        }
+      }
+      
+      if (!salePricingSource || typeof salePricingSource !== 'object' || Object.keys(salePricingSource).length === 0) {
+        console.warn('⚠️ No pricing data available for sale price calculation')
+      } else {
+        console.log('💰 Using pricing source for sale calculation:', salePricingSource)
 
       // Determine if we need monthly/yearly prices
       let hasMonthly = false
@@ -1191,11 +1245,19 @@ serve(async (req) => {
           price_amount_eur: updateData.price_amount_eur || null,
           price_amount_gbp: updateData.price_amount_gbp || null
         })
+        if (is_on_sale) {
+          console.log('💰 Sale price amounts in updateData that were sent to database:', {
+            sale_price_amount_chf: updateData.sale_price_amount_chf || null,
+            sale_price_amount_usd: updateData.sale_price_amount_usd || null,
+            sale_price_amount_eur: updateData.sale_price_amount_eur || null,
+            sale_price_amount_gbp: updateData.sale_price_amount_gbp || null
+          })
+        }
         
         // Verify the update by reading back from database
         const { data: verifyData, error: verifyError } = await supabaseAdmin
           .from('products')
-          .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, price_amount, price_currency')
+          .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, sale_price_amount_chf, sale_price_amount_usd, sale_price_amount_eur, sale_price_amount_gbp, price_amount, price_currency')
           .eq('id', productData.id)
           .single()
         
@@ -1213,6 +1275,21 @@ serve(async (req) => {
           }
           if (updateData.price_amount_gbp && verifyData.price_amount_gbp === null) {
             console.error('❌ WARNING: price_amount_gbp was set in updateData (' + updateData.price_amount_gbp + ') but is null in database! Columns may not exist or update was overwritten.')
+          }
+          // Check sale price amounts if on sale
+          if (is_on_sale) {
+            if (updateData.sale_price_amount_chf && verifyData.sale_price_amount_chf === null) {
+              console.error('❌ WARNING: sale_price_amount_chf was set in updateData (' + updateData.sale_price_amount_chf + ') but is null in database! Columns may not exist or update was overwritten.')
+            }
+            if (updateData.sale_price_amount_usd && verifyData.sale_price_amount_usd === null) {
+              console.error('❌ WARNING: sale_price_amount_usd was set in updateData (' + updateData.sale_price_amount_usd + ') but is null in database! Columns may not exist or update was overwritten.')
+            }
+            if (updateData.sale_price_amount_eur && verifyData.sale_price_amount_eur === null) {
+              console.error('❌ WARNING: sale_price_amount_eur was set in updateData (' + updateData.sale_price_amount_eur + ') but is null in database! Columns may not exist or update was overwritten.')
+            }
+            if (updateData.sale_price_amount_gbp && verifyData.sale_price_amount_gbp === null) {
+              console.error('❌ WARNING: sale_price_amount_gbp was set in updateData (' + updateData.sale_price_amount_gbp + ') but is null in database! Columns may not exist or update was overwritten.')
+            }
           }
         } else if (verifyError) {
           console.warn('⚠️ Could not verify currency amounts (columns may not exist):', verifyError.message)
@@ -1293,6 +1370,14 @@ serve(async (req) => {
         if (typeof usdData === 'object' && usdData?.monthly && usdData.monthly > 0) responseData.price_amount_usd = usdData.monthly
         if (typeof eurData === 'object' && eurData?.monthly && eurData.monthly > 0) responseData.price_amount_eur = eurData.monthly
         if (typeof gbpData === 'object' && gbpData?.monthly && gbpData.monthly > 0) responseData.price_amount_gbp = gbpData.monthly
+      }
+      
+      // Add sale price amounts to response if product is on sale
+      if (is_on_sale && updateData) {
+        if (updateData.sale_price_amount_chf !== undefined) responseData.sale_price_amount_chf = updateData.sale_price_amount_chf
+        if (updateData.sale_price_amount_usd !== undefined) responseData.sale_price_amount_usd = updateData.sale_price_amount_usd
+        if (updateData.sale_price_amount_eur !== undefined) responseData.sale_price_amount_eur = updateData.sale_price_amount_eur
+        if (updateData.sale_price_amount_gbp !== undefined) responseData.sale_price_amount_gbp = updateData.sale_price_amount_gbp
       }
     }
 
