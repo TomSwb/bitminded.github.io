@@ -259,10 +259,22 @@ if (typeof window.StepStripeCreation === 'undefined') {
             }
 
             // TEMPORARY: Save data without creating Stripe product (for dev/testing)
+            // Hide this button in production - only show in dev/staging
             if (this.elements.saveWithoutStripeBtn) {
-                this.elements.saveWithoutStripeBtn.addEventListener('click', async () => {
-                    await this.handleSaveWithoutStripe();
-                });
+                if (window.ENV_CONFIG && window.ENV_CONFIG.isProduction) {
+                    // Hide the button and its container in production
+                    const container = this.elements.saveWithoutStripeBtn.closest('.step-stripe-creation__create-section');
+                    if (container) {
+                        container.style.display = 'none';
+                    } else {
+                        this.elements.saveWithoutStripeBtn.style.display = 'none';
+                    }
+                } else {
+                    // Only attach event listener in dev/staging
+                    this.elements.saveWithoutStripeBtn.addEventListener('click', async () => {
+                        await this.handleSaveWithoutStripe();
+                    });
+                }
             }
 
             if (this.elements.updateStripeBtn) {
