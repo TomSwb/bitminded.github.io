@@ -385,13 +385,24 @@ serve(async (req) => {
 
     // Update database to clear Stripe product ID and price IDs
     // Find product by stripe_product_id
+    console.log('🔍 Looking up product in database by stripe_product_id:', productId)
     const { data: dbProduct, error: dbProductError } = await supabaseAdmin
       .from('products')
-      .select('id')
+      .select('id, stripe_product_id, stripe_price_id, pricing_type')
       .eq('stripe_product_id', productId)
       .single()
 
+    console.log('🔍 Database lookup result:', {
+      found: !!dbProduct,
+      error: dbProductError?.message || null,
+      productId: dbProduct?.id || null,
+      current_stripe_product_id: dbProduct?.stripe_product_id || null,
+      current_stripe_price_id: dbProduct?.stripe_price_id || null,
+      current_pricing_type: dbProduct?.pricing_type || null
+    })
+
     if (!dbProductError && dbProduct) {
+      console.log('📝 Preparing to update database for product:', dbProduct.id)
       const updateData: Record<string, any> = {
         stripe_product_id: null,
         stripe_price_id: null,
@@ -424,10 +435,12 @@ serve(async (req) => {
         updated_at: new Date().toISOString()
     }
 
-      const { error: updateError } = await supabaseAdmin
+      console.log('💾 Executing database update with data:', JSON.stringify(updateData, null, 2))
+      const { data: updatedRows, error: updateError } = await supabaseAdmin
         .from('products')
         .update(updateData)
         .eq('id', dbProduct.id)
+        .select('id, stripe_product_id') // Select to verify update happened
 
       if (updateError) {
         console.error('⚠️ Failed to clear Stripe IDs from database:', updateError)
@@ -442,8 +455,218 @@ serve(async (req) => {
           ipAddress
         )
         throw new Error('Failed to clear Stripe product from database')
+      } else if (!updatedRows || updatedRows.length === 0) {
+        // No rows were updated - this is a problem
+        console.error('⚠️ Update query succeeded but no rows were updated. Product ID:', dbProduct.id)
+        console.error('⚠️ This could indicate RLS policy blocking the update or product not found')
+        await logError(
+          supabaseAdmin,
+          'delete-stripe-product',
+          'database',
+          'Update query succeeded but no rows were updated',
+          { 
+            productId: dbProduct.id, 
+            stripeProductId: productId,
+            updateData,
+            possibleCause: 'RLS policy or product not found'
+          },
+          user.id,
+          { productId, updateData },
+          ipAddress
+        )
+        throw new Error('Failed to clear Stripe product from database: no rows updated')
       } else {
+        // Verify the update actually cleared the stripe_product_id
+        const updatedProduct = updatedRows[0]
+        if (updatedProduct.stripe_product_id !== null) {
+          console.error('⚠️ Update succeeded but stripe_product_id was not cleared:', updatedProduct.stripe_product_id)
+          throw new Error('Failed to clear Stripe product ID from database')
+        }
         console.log('✅ Database cleared of Stripe product IDs for product:', dbProduct.id)
+        console.log('✅ Verified update - stripe_product_id is now null')
+        
+        // CRITICAL: Do a separate read query to verify the update actually persisted to the database
+        // The .select() on update might return the update payload, not the actual persisted data
+        const { data: verifyData, error: verifyError } = await supabaseAdmin
+          .from('products')
+          .select('id, stripe_product_id, stripe_price_id, pricing_type, price_amount, price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, price_currency')
+          .eq('id', dbProduct.id)
+          .single()
+        
+        if (verifyError) {
+          console.error('⚠️ Failed to verify database update:', verifyError)
+          await logError(
+            supabaseAdmin,
+            'delete-stripe-product',
+            'database',
+            'Failed to verify database update after clearing Stripe IDs',
+            { error: verifyError.message, productId: dbProduct.id },
+            user.id,
+            { productId, updateData },
+            ipAddress
+          )
+          throw new Error('Failed to verify database update')
+        }
+        
+        if (verifyData) {
+          console.log('🔍 Verification query result:', {
+            id: verifyData.id,
+            stripe_product_id: verifyData.stripe_product_id,
+            stripe_price_id: verifyData.stripe_price_id,
+            pricing_type: verifyData.pricing_type,
+            price_amount: verifyData.price_amount,
+            price_currency: verifyData.price_currency,
+            price_amount_chf: verifyData.price_amount_chf,
+            price_amount_usd: verifyData.price_amount_usd,
+            price_amount_eur: verifyData.price_amount_eur,
+            price_amount_gbp: verifyData.price_amount_gbp
+          })
+          
+          // Check if the Stripe IDs were actually cleared
+          if (verifyData.stripe_product_id !== null) {
+            console.error('❌ CRITICAL: Verification query shows stripe_product_id is NOT null:', verifyData.stripe_product_id)
+            console.error('❌ This indicates the update did not actually persist to the database')
+            console.error('❌ Possible causes: RLS policy blocking update, database trigger reverting changes, or transaction rollback')
+            await logError(
+              supabaseAdmin,
+              'delete-stripe-product',
+              'database',
+              'Update appeared to succeed but verification shows Stripe IDs were not cleared',
+              { 
+                productId: dbProduct.id,
+                stripeProductId: productId,
+                verified_stripe_product_id: verifyData.stripe_product_id,
+                verified_stripe_price_id: verifyData.stripe_price_id,
+                updateData
+              },
+              user.id,
+              { productId, updateData },
+              ipAddress
+            )
+            throw new Error('Database update did not persist - stripe_product_id is still set')
+          }
+          
+          // Check if pricing data was actually cleared
+          const pricingNotCleared = []
+          if (verifyData.pricing_type !== null) {
+            pricingNotCleared.push(`pricing_type: ${verifyData.pricing_type}`)
+          }
+          if (verifyData.price_amount !== null) {
+            pricingNotCleared.push(`price_amount: ${verifyData.price_amount}`)
+          }
+          if (verifyData.price_currency !== null) {
+            pricingNotCleared.push(`price_currency: ${verifyData.price_currency}`)
+          }
+          if (verifyData.price_amount_chf !== null) {
+            pricingNotCleared.push(`price_amount_chf: ${verifyData.price_amount_chf}`)
+          }
+          if (verifyData.price_amount_usd !== null) {
+            pricingNotCleared.push(`price_amount_usd: ${verifyData.price_amount_usd}`)
+          }
+          if (verifyData.price_amount_eur !== null) {
+            pricingNotCleared.push(`price_amount_eur: ${verifyData.price_amount_eur}`)
+          }
+          if (verifyData.price_amount_gbp !== null) {
+            pricingNotCleared.push(`price_amount_gbp: ${verifyData.price_amount_gbp}`)
+          }
+          
+          if (pricingNotCleared.length > 0) {
+            console.error('❌ CRITICAL: Verification query shows pricing data was NOT cleared:', pricingNotCleared.join(', '))
+            console.error('❌ This indicates the pricing fields update did not persist to the database')
+            console.error('❌ Possible causes: Database trigger reverting changes, column constraints, or update query issue')
+            
+            // Try to update again with explicit null values
+            console.log('🔄 Attempting to clear pricing data again with explicit update...')
+            const pricingUpdateData = {
+              pricing_type: null,
+              price_amount: null,
+              price_currency: null,
+              price_amount_chf: null,
+              price_amount_usd: null,
+              price_amount_eur: null,
+              price_amount_gbp: null,
+              updated_at: new Date().toISOString()
+            }
+            
+            const { data: retryUpdatedRows, error: retryError } = await supabaseAdmin
+              .from('products')
+              .update(pricingUpdateData)
+              .eq('id', dbProduct.id)
+              .select('id, pricing_type, price_amount_chf')
+            
+            if (retryError) {
+              console.error('❌ Retry update also failed:', retryError)
+              await logError(
+                supabaseAdmin,
+                'delete-stripe-product',
+                'database',
+                'Retry update to clear pricing data failed',
+                { 
+                  error: retryError.message,
+                  productId: dbProduct.id,
+                  pricingUpdateData
+                },
+                user.id,
+                { productId, pricingUpdateData },
+                ipAddress
+              )
+            } else if (retryUpdatedRows && retryUpdatedRows.length > 0) {
+              console.log('✅ Retry update succeeded, verifying again...')
+              // Verify the retry worked
+              const { data: retryVerifyData } = await supabaseAdmin
+                .from('products')
+                .select('pricing_type, price_amount_chf')
+                .eq('id', dbProduct.id)
+                .single()
+              
+              if (retryVerifyData && (retryVerifyData.pricing_type !== null || retryVerifyData.price_amount_chf !== null)) {
+                console.error('❌ Retry update still did not clear pricing data')
+                await logError(
+                  supabaseAdmin,
+                  'delete-stripe-product',
+                  'database',
+                  'Pricing data could not be cleared even after retry',
+                  { 
+                    productId: dbProduct.id,
+                    verified_pricing_type: retryVerifyData.pricing_type,
+                    verified_price_amount_chf: retryVerifyData.price_amount_chf,
+                    pricingUpdateData
+                  },
+                  user.id,
+                  { productId, pricingUpdateData },
+                  ipAddress
+                )
+              } else {
+                console.log('✅ Retry update successfully cleared pricing data')
+              }
+            }
+            
+            await logError(
+              supabaseAdmin,
+              'delete-stripe-product',
+              'database',
+              'Pricing data was not cleared in initial update',
+              { 
+                productId: dbProduct.id,
+                stripeProductId: productId,
+                verified_pricing_type: verifyData.pricing_type,
+                verified_price_amount: verifyData.price_amount,
+                verified_price_currency: verifyData.price_currency,
+                verified_price_amount_chf: verifyData.price_amount_chf,
+                verified_price_amount_usd: verifyData.price_amount_usd,
+                verified_price_amount_eur: verifyData.price_amount_eur,
+                verified_price_amount_gbp: verifyData.price_amount_gbp,
+                updateData
+              },
+              user.id,
+              { productId, updateData },
+              ipAddress
+            )
+            // Don't throw - Stripe IDs were cleared, pricing data issue is logged
+          } else {
+            console.log('✅ Verification confirmed: All data (Stripe IDs and pricing) is actually null in database')
+          }
+        }
       }
     } else if (dbProductError) {
       console.error('⚠️ Failed to find product in database:', dbProductError)
