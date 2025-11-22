@@ -1514,7 +1514,8 @@ class ProductWizard {
                     continue; // Skip since we handled it above
                 }
                 
-                // Only include field if it has an explicit value AND it's different
+                // Only include field if it has an explicit value (including null) AND it's different
+                // null is a valid value for clearing fields, so we need to include it
                 if (newValue !== undefined) {
                     // Special handling for numeric fields - convert empty strings to null
                     if (['price_amount', 'price_amount_chf', 'price_amount_usd', 'price_amount_eur', 'price_amount_gbp', 

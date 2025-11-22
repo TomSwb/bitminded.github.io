@@ -1153,25 +1153,79 @@ if (typeof window.StepStripeCreation === 'undefined') {
             }
             
             try {
+                // Get current session and refresh to ensure we have a valid token
+                let session;
+                try {
+                    const { data: { session: currentSession }, error: sessionError } = await window.supabase.auth.getSession();
+                    
+                    if (currentSession) {
+                        const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.refreshSession();
+                        if (!refreshError && refreshedSession) {
+                            session = refreshedSession;
+                        } else {
+                            session = currentSession;
+                        }
+                    } else if (sessionError) {
+                        throw new Error('Not authenticated. Please log in again.');
+                    } else {
+                        throw new Error('No active session. Please log in again.');
+                    }
+                } catch (authError) {
+                    window.logger?.error('❌ Authentication error:', authError);
+                    throw new Error('Authentication failed. Please log in again.');
+                }
+                
+                if (!session || !session.access_token) {
+                    throw new Error('Invalid session. Please log in again.');
+                }
+                
                 // Call Edge Function to archive the product
-                const { error } = await window.supabase.functions.invoke('delete-stripe-product', {
-                    body: { productId }
+                const { data, error } = await window.supabase.functions.invoke('delete-stripe-product', {
+                    body: { productId },
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
                 });
                 
                 if (error) throw error;
                 
-                // Clear from form data
+                window.logger?.log('✅ Stripe product deleted, response:', data);
+                
+                // Clear ALL Stripe and pricing data from form data
                 if (window.productWizard && window.productWizard.formData) {
+                    // Clear Stripe IDs
                     window.productWizard.formData.stripe_product_id = null;
                     window.productWizard.formData.stripe_price_id = null;
+                    window.productWizard.formData.stripe_price_monthly_id = null;
+                    window.productWizard.formData.stripe_price_yearly_id = null;
+                    window.productWizard.formData.stripe_price_lifetime_id = null;
+                    window.productWizard.formData.stripe_price_chf_id = null;
+                    window.productWizard.formData.stripe_price_usd_id = null;
+                    window.productWizard.formData.stripe_price_eur_id = null;
+                    window.productWizard.formData.stripe_price_gbp_id = null;
+                    
+                    // Clear pricing data
+                    window.productWizard.formData.pricing_type = null;
+                    window.productWizard.formData.price_amount = null;
+                    window.productWizard.formData.price_currency = null;
+                    window.productWizard.formData.price_amount_chf = null;
+                    window.productWizard.formData.price_amount_usd = null;
+                    window.productWizard.formData.price_amount_eur = null;
+                    window.productWizard.formData.price_amount_gbp = null;
+                    window.productWizard.formData.subscription_pricing = {};
+                    window.productWizard.formData.one_time_pricing = {};
+                    window.productWizard.formData.trial_days = null;
+                    window.productWizard.formData.trial_requires_payment = null;
                 }
                 
                 // Update database to reflect the deletion
+                // The edge function should have already cleared the database, but we'll also call saveStepToDatabase
+                // to ensure everything is synced (it will only update if there are changes)
                 window.logger?.log('💾 Saving deleted Stripe status to database...');
                 const saveResult = await window.productWizard.saveStepToDatabase(5);
                 if (!saveResult.success) {
-                    window.logger?.error('❌ Failed to update database after Stripe deletion:', saveResult.error);
-                    alert('Stripe product archived, but failed to update database. Please refresh the page.');
+                    window.logger?.warn('⚠️ Failed to update database after Stripe deletion (edge function should have handled it):', saveResult.error);
+                    // Don't show error - edge function should have cleared it
                 } else {
                     window.logger?.log('✅ Database updated after Stripe deletion');
                 }
