@@ -171,10 +171,19 @@
         const amount = typeof product.price_amount === 'number' ? product.price_amount : null;
         const currency = product.price_currency || 'USD';
 
+        // Include currency-specific price amounts
+        const currencyAmounts = {
+            CHF: typeof product.price_amount_chf === 'number' ? product.price_amount_chf : null,
+            USD: typeof product.price_amount_usd === 'number' ? product.price_amount_usd : null,
+            EUR: typeof product.price_amount_eur === 'number' ? product.price_amount_eur : null,
+            GBP: typeof product.price_amount_gbp === 'number' ? product.price_amount_gbp : null
+        };
+
         return {
             pricingType: product.pricing_type || 'one_time',
             amount,
             currency,
+            currencyAmounts, // New: currency-specific amounts
             individualPrice: product.individual_price,
             enterprisePrice: product.enterprise_price,
             subscriptionInterval: product.subscription_interval,
@@ -324,6 +333,10 @@
                 pricing_type,
                 price_amount,
                 price_currency,
+                price_amount_chf,
+                price_amount_usd,
+                price_amount_eur,
+                price_amount_gbp,
                 subscription_interval,
                 individual_price,
                 enterprise_price,

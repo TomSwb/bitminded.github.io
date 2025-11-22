@@ -1167,10 +1167,22 @@ class ProductWizard {
             productData.pricing_type = this.formData.pricing_type || 'one_time';
             productData.price_amount = this.formData.price_amount || null;
             productData.price_currency = this.formData.price_currency || 'USD';
-            productData.price_amount_chf = this.formData.price_amount_chf || null;
-            productData.price_amount_usd = this.formData.price_amount_usd || null;
-            productData.price_amount_eur = this.formData.price_amount_eur || null;
-            productData.price_amount_gbp = this.formData.price_amount_gbp || null;
+            
+            // Only update currency amounts if they exist in formData
+            // This prevents overwriting values that were saved by Edge Functions but not yet in formData
+            // Use !== undefined to distinguish between "not set" (undefined) and "explicitly null"
+            if (this.formData.price_amount_chf !== undefined) {
+                productData.price_amount_chf = this.formData.price_amount_chf;
+            }
+            if (this.formData.price_amount_usd !== undefined) {
+                productData.price_amount_usd = this.formData.price_amount_usd;
+            }
+            if (this.formData.price_amount_eur !== undefined) {
+                productData.price_amount_eur = this.formData.price_amount_eur;
+            }
+            if (this.formData.price_amount_gbp !== undefined) {
+                productData.price_amount_gbp = this.formData.price_amount_gbp;
+            }
             productData.individual_price = this.formData.individual_price || null;
             productData.enterprise_price = this.formData.enterprise_price || null;
             productData.subscription_interval = this.formData.subscription_interval || null;

@@ -243,6 +243,10 @@ class ProductManagement {
                     price_amount_usd,
                     price_amount_eur,
                     price_amount_gbp,
+                    sale_price_amount_chf,
+                    sale_price_amount_usd,
+                    sale_price_amount_eur,
+                    sale_price_amount_gbp,
                     individual_price,
                     enterprise_price,
                     subscription_interval,
@@ -596,7 +600,7 @@ class ProductManagement {
                 pricingText = prices.join(' | ');
             } else {
                 // Fallback to primary currency if no currency-specific amounts
-                pricingText = `${product.price_amount || 0} ${product.price_currency || 'USD'}`;
+            pricingText = `${product.price_amount || 0} ${product.price_currency || 'USD'}`;
             }
         } else if (product.pricing_type === 'subscription') {
             // Show subscription pricing (monthly/yearly if available, otherwise just the type)
@@ -611,7 +615,7 @@ class ProductManagement {
                 if (prices.length > 0) {
                     pricingText = prices.join(' | ');
                 } else {
-                    pricingText = 'Subscription';
+                pricingText = 'Subscription';
                 }
             } else {
                 // Fallback to primary currency if no currency-specific amounts
@@ -1905,6 +1909,11 @@ Description: ${product.description || 'No description'}
                 updateData.sale_discount_percentage = null;
                 updateData.sale_emoji_left = '✨';
                 updateData.sale_emoji_right = '✨';
+                // Clear currency-specific sale price amounts
+                updateData.sale_price_amount_chf = null;
+                updateData.sale_price_amount_usd = null;
+                updateData.sale_price_amount_eur = null;
+                updateData.sale_price_amount_gbp = null;
             }
 
             // Calculate sale pricing if discount percentage is provided
@@ -1965,16 +1974,48 @@ Description: ${product.description || 'No description'}
         const discountMultiplier = 1 - (discountPercentage / 100);
 
         // Handle different pricing types
-        if (product.pricing_type === 'one_time' && product.price_amount) {
-            // For one-time products, calculate sale price per currency
-            // We need to get the pricing from the product (might need to query for full pricing data)
-            // For now, use the price_amount as base
-            salePricing[product.price_currency || 'USD'] = Math.round(product.price_amount * discountMultiplier * 100) / 100;
+        if (product.pricing_type === 'one_time') {
+            // For one-time products, calculate sale price for all currencies
+            const currencies = [
+                { code: 'CHF', amount: product.price_amount_chf },
+                { code: 'USD', amount: product.price_amount_usd },
+                { code: 'EUR', amount: product.price_amount_eur },
+                { code: 'GBP', amount: product.price_amount_gbp }
+            ];
+
+            currencies.forEach(({ code, amount }) => {
+                if (amount !== null && amount !== undefined && amount > 0) {
+                    salePricing[code] = Math.round(amount * discountMultiplier * 100) / 100;
+                }
+            });
+
+            // Fallback to default price_amount/currency if no currency-specific amounts
+            if (Object.keys(salePricing).length === 0 && product.price_amount) {
+                salePricing[product.price_currency || 'USD'] = Math.round(product.price_amount * discountMultiplier * 100) / 100;
+            }
         } else if (product.pricing_type === 'subscription') {
-            // For subscriptions, we need monthly and yearly prices
-            // This would need to be calculated from the actual pricing structure
-            // For now, return empty object - will be handled by Stripe update
-            salePricing = {};
+            // For subscriptions, calculate monthly prices for all currencies
+            const currencies = [
+                { code: 'CHF', amount: product.price_amount_chf },
+                { code: 'USD', amount: product.price_amount_usd },
+                { code: 'EUR', amount: product.price_amount_eur },
+                { code: 'GBP', amount: product.price_amount_gbp }
+            ];
+
+            currencies.forEach(({ code, amount }) => {
+                if (amount !== null && amount !== undefined && amount > 0) {
+                    salePricing[code] = {
+                        monthly: Math.round(amount * discountMultiplier * 100) / 100
+                    };
+                }
+            });
+
+            // Fallback to default price_amount/currency if no currency-specific amounts
+            if (Object.keys(salePricing).length === 0 && product.price_amount) {
+                salePricing[product.price_currency || 'USD'] = {
+                    monthly: Math.round(product.price_amount * discountMultiplier * 100) / 100
+                };
+            }
         }
 
         return salePricing;
