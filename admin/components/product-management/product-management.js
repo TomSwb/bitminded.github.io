@@ -1176,8 +1176,8 @@ class ProductManagement {
                     </div>
                     <div class="product-overview__field">
                         <span class="product-overview__field-label">Available for Purchase</span>
-                        <span class="product-overview__field-value product-overview__field-value--badge ${product.is_available_for_purchase ? 'product-overview__field-value--badge-success' : ''}">
-                            ${product.is_available_for_purchase ? 'Yes' : 'No'}
+                        <span class="product-overview__field-value product-overview__field-value--badge ${product.status === 'active' ? 'product-overview__field-value--badge-success' : ''}">
+                            ${product.status === 'active' ? 'Yes' : 'No'}
                         </span>
                     </div>
                     <div class="product-overview__field">
