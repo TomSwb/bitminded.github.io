@@ -832,46 +832,27 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     };
                 }
                 
-                // Get current session and refresh to ensure we have a valid token
-                let session;
+                // Verify we have a valid session (Supabase client will automatically add Authorization header)
                 try {
-                    const { data: { session: currentSession }, error: sessionError } = await window.supabase.auth.getSession();
+                    const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
                     
-                    if (currentSession) {
-                        const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.refreshSession();
-                        if (!refreshError && refreshedSession) {
-                            session = refreshedSession;
-                        } else {
-                            session = currentSession;
-                        }
-                    } else if (sessionError) {
-                        window.logger?.error('❌ Session error:', sessionError);
+                    if (!session || sessionError) {
+                        window.logger?.error('❌ No active session:', sessionError);
                         throw new Error('Not authenticated. Please log in again.');
-                    } else {
-                        window.logger?.error('❌ No active session found');
-                        throw new Error('No active session. Please log in again.');
                     }
+                    
+                    window.logger?.log('🔐 Calling edge function (auth handled automatically by Supabase client):', { 
+                        functionName,
+                        hasSession: !!session
+                    });
                 } catch (authError) {
-                    window.logger?.error('❌ Authentication error:', authError);
+                    window.logger?.error('❌ Authentication check failed:', authError);
                     throw new Error('Authentication failed. Please log in again.');
                 }
                 
-                if (!session || !session.access_token) {
-                    window.logger?.error('❌ No access token in session:', { hasSession: !!session, hasToken: !!session?.access_token });
-                    throw new Error('Invalid session. Please log in again.');
-                }
-                
-                window.logger?.log('🔐 Calling edge function with auth token:', { 
-                    functionName, 
-                    hasToken: !!session.access_token,
-                    tokenLength: session.access_token?.length 
-                });
-                
+                // Let Supabase client automatically handle Authorization header from session
                 const { data, error } = await window.supabase.functions.invoke(functionName, {
-                    body,
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
+                    body
                 });
                 
                 if (error) {
