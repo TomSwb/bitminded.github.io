@@ -199,6 +199,51 @@
     border-color: var(--color-success);
 }
 
+.product-wizard__step--completed-saved .product-wizard__step-number {
+    background: var(--color-success);
+    color: var(--color-background-primary);
+    border-color: var(--color-success);
+}
+
+.product-wizard__step--completed-saved .product-wizard__step-number::after {
+    content: '✓';
+    position: absolute;
+    font-size: 14px;
+    color: var(--color-background-primary);
+}
+
+.product-wizard__step--completed-unsaved {
+    background: var(--color-warning-bg, #fff3cd);
+    color: var(--color-warning, #856404);
+    border-color: var(--color-warning, #ffc107);
+}
+
+.product-wizard__step--completed-unsaved .product-wizard__step-number {
+    background: var(--color-warning, #ffc107);
+    color: var(--color-background-primary);
+    border-color: var(--color-warning, #ffc107);
+}
+
+.product-wizard__step--unsaved .product-wizard__step-number {
+    position: relative;
+}
+
+.product-wizard__step-indicator {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-error, #dc3545);
+    border: 2px solid var(--color-background-primary);
+    font-size: 0;
+}
+
+.product-wizard__step-indicator--unsaved {
+    background: var(--color-warning, #ffc107);
+}
+
 .product-wizard__step-title {
     font-size: var(--font-size-xs);
     font-weight: 600;
@@ -564,6 +609,17 @@
     color: var(--color-background-primary);
 }
 
+.product-wizard__btn--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.product-wizard__btn--disabled:hover {
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+}
+
 /* ===== LOADING OVERLAY ===== */
 .product-wizard__loading-overlay {
     position: fixed;
@@ -575,7 +631,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 10000;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.product-wizard__loading-overlay.hidden {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
 }
 
 .product-wizard__loading-content {

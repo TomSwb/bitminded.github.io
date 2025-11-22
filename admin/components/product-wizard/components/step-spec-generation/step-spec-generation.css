@@ -1331,3 +1331,50 @@
     }
 }
 
+/* Save Section */
+.step-spec-generation__save-section {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    align-items: center;
+    min-height: 60px;
+}
+
+.step-spec-generation__save-section .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--color-primary);
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--color-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.step-spec-generation__save-section .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-primary);
+    color: var(--color-background-primary);
+}
+
+.step-spec-generation__save-section .btn-secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.step-spec-generation__save-section .save-status {
+    margin-left: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.step-spec-generation__save-section .save-status:not(:empty) {
+    color: var(--color-success);
+}
+

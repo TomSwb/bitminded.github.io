@@ -16,6 +16,7 @@ class ProductWizard {
         this.isEditMode = false;
         this.editProductId = null;
         this.completedSteps = new Set(); // Track which steps have been completed
+        this.savedSteps = new Set(); // Track which steps have been saved to DB
     }
 
     /**
@@ -27,12 +28,15 @@ class ProductWizard {
         }
 
         try {
+            // Show loading overlay immediately at the start
+            this.showLoading(this.isEditMode ? 'Loading product data...' : 'Initializing wizard...');
 
             // Check authentication first
             const isAuthenticated = await this.checkAuthentication();
             if (!isAuthenticated) {
                 window.logger?.error('❌ User not authenticated');
                 this.showError('Please log in to access the admin panel');
+                this.hideLoading();
                 return;
             }
 
@@ -46,33 +50,49 @@ class ProductWizard {
             this.setupEventListeners();
             
             // Initialize translations
+            this.showLoading('Loading translations...');
             await this.initializeTranslations();
             
             // Show translatable content
             this.showTranslatableContent();
             
             // Initialize components
+            this.showLoading('Initializing components...');
             await this.initializeComponents();
 
             // Load existing product data if in edit mode
             if (this.isEditMode) {
+                this.showLoading('Loading product data from database...');
                 await this.loadExistingProduct();
                 
                 // Mark steps as completed based on database data
                 this.checkCompletedStepsFromDatabase();
+                
+                // Initialize saved steps from database
+                await this.initializeSavedStepsFromDatabase();
             }
 
-            // Load Step 1
+            // Load Step 1 and ensure all data is parsed
+            this.showLoading('Loading step data...');
             await this.loadStep(1);
+
+            // Give a small delay to ensure all parsing is complete
+            // This allows any async operations in step initialization to finish
+            await new Promise(resolve => setTimeout(resolve, 200));
 
             // Update progress
             this.updateProgress();
 
             this.isInitialized = true;
 
+            // Hide loading overlay once everything is ready
+            this.hideLoading();
+
         } catch (error) {
             window.logger?.error('❌ Product Creation Wizard: Failed to initialize:', error);
             this.showError('Failed to initialize product wizard');
+            // Hide loading overlay even on error
+            this.hideLoading();
         }
     }
 
@@ -348,6 +368,22 @@ class ProductWizard {
         if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
             this.markStepCompleted(6);
             window.logger?.log('✅ Step 6 marked as completed (Cloudflare configured)');
+        }
+    }
+
+    /**
+     * Initialize saved steps from database
+     * Checks which steps have data saved in the database
+     */
+    async initializeSavedStepsFromDatabase() {
+        if (!this.formData.product_id) return;
+
+        // Check each step to see if it's saved in the database
+        for (let stepNumber = 1; stepNumber <= 6; stepNumber++) {
+            const isSaved = await this.checkStepSavedInDB(stepNumber);
+            if (isSaved) {
+                window.logger?.log(`✅ Step ${stepNumber} initialized as saved from database`);
+            }
         }
     }
 
@@ -636,10 +672,22 @@ class ProductWizard {
      * Load Step 5: Stripe Product Creation (moved before Cloudflare)
      */
     async loadStep5(stepContent) {
-        // If step is already initialized, just repopulate form fields from saved data
+        // If step is already initialized, refresh data from database and repopulate form fields
         if (this.steps[5] && this.steps[5].isInitialized) {
-            window.logger?.log('✅ Step 5 already initialized, repopulating form fields from saved data');
-            // Repopulate form fields from current formData to ensure they're up to date
+            window.logger?.log('✅ Step 5 already initialized, refreshing data from database and repopulating form fields');
+            // Refresh formData from database to ensure we have the latest saved values
+            if (this.formData.product_id) {
+                const currentState = await this.fetchCurrentProductState();
+                // Update formData with latest database values, especially price_amount_* fields
+                if (currentState.price_amount_chf !== undefined) this.formData.price_amount_chf = currentState.price_amount_chf;
+                if (currentState.price_amount_usd !== undefined) this.formData.price_amount_usd = currentState.price_amount_usd;
+                if (currentState.price_amount_eur !== undefined) this.formData.price_amount_eur = currentState.price_amount_eur;
+                if (currentState.price_amount_gbp !== undefined) this.formData.price_amount_gbp = currentState.price_amount_gbp;
+                if (currentState.pricing_type !== undefined) this.formData.pricing_type = currentState.pricing_type;
+                if (currentState.trial_days !== undefined) this.formData.trial_days = currentState.trial_days;
+                if (currentState.trial_requires_payment !== undefined) this.formData.trial_requires_payment = currentState.trial_requires_payment;
+            }
+            // Repopulate form fields from updated formData
             this.steps[5].populateFormFields();
             return;
         }
@@ -652,6 +700,19 @@ class ProductWizard {
             await this.steps[5].init();
             if (this.isEditMode && this.formData) {
                 this.steps[5].setFormData(this.formData);
+                // After setting form data, re-run setupDefaults to ensure pricing data is properly loaded
+                // This handles the case where data wasn't available during init()
+                if (typeof this.steps[5].setupDefaults === 'function') {
+                    this.steps[5].setupDefaults();
+                    // Re-populate form fields after re-running setupDefaults
+                    if (typeof this.steps[5].populateFormFields === 'function') {
+                        this.steps[5].populateFormFields();
+                    }
+                    // Re-toggle sections to show the correct one
+                    if (typeof this.steps[5].togglePricingSections === 'function') {
+                        this.steps[5].togglePricingSections();
+                    }
+                }
             }
         } else {
             window.logger?.error('❌ StepStripeCreation component not available');
@@ -702,15 +763,48 @@ class ProductWizard {
     }
 
     /**
-     * Go to specific step
+     * Go to specific step (with validation)
      */
     async goToStep(stepNumber) {
         if (stepNumber < 1 || stepNumber > this.totalSteps) {
             return;
         }
 
-        // Save current step data before moving and auto-persist
+        // Allow backward navigation always
+        if (stepNumber < this.currentStep) {
+            await this.navigateToStep(stepNumber);
+            return;
+        }
+        
+        // Forward navigation - check if current step is saved
+        if (stepNumber > this.currentStep) {
+            // TEMPORARY: Allow navigation from Step 4 to Step 5 without saving Step 4
+            const isStep4To5 = this.currentStep === 4 && stepNumber === 5;
+            
+            if (!isStep4To5) {
+                const isCurrentStepSaved = await this.checkStepSavedInDB(this.currentStep);
+                if (!isCurrentStepSaved) {
+                    this.showError(
+                        `Please save Step ${this.currentStep} before proceeding to Step ${stepNumber}. ` +
+                        `Click the "Save" button at the bottom of the current step.`
+                    );
+                    return; // Block navigation
+                }
+            }
+        }
+        
+        // Same step or forward navigation after validation - proceed
+        await this.navigateToStep(stepNumber);
+    }
+
+    /**
+     * Navigate to a specific step (internal navigation logic)
+     * @param {number} stepNumber - The step number to navigate to
+     */
+    async navigateToStep(stepNumber) {
+        // Save current step data before moving (in-memory only)
         const previousStep = this.currentStep;
+        
         // For Stripe step (step 5), ensure form fields are populated from DB before reading them
         if (previousStep === 5 && this.steps[5] && this.steps[5].isInitialized) {
             // Ensure form fields are populated from DB first (in case they weren't loaded yet)
@@ -722,22 +816,20 @@ class ProductWizard {
                 this.steps[5].readFormFieldValues();
             }
         }
+        
+        // Save current step data to in-memory formData only (no auto-save to DB)
         this.saveCurrentStepData(previousStep);
-        // Silent autosave; do not block navigation on failure
-        try {
-            await this.saveDraftToDatabase();
-        } catch (e) {
-            window.logger?.warn('⚠️ Autosave failed while navigating:', e);
-        } finally {
+        
             // Always reflect completion state based on in-memory data
             this.updateCompletionForStep(previousStep);
-        }
 
         // Update current step
         this.currentStep = stepNumber;
 
-        // Update step indicators
-        this.updateStepIndicators();
+        // Update step indicators (async, don't await)
+        this.updateStepIndicators().catch(err => {
+            window.logger?.warn('Error updating step indicators:', err);
+        });
 
         // Show/hide step content
         this.elements.stepContents.forEach((content, index) => {
@@ -750,6 +842,9 @@ class ProductWizard {
 
         // Load step content if not already loaded
         await this.loadStep(stepNumber);
+
+        // Show translatable content for the newly loaded step
+        this.showTranslatableContent();
 
         // Update navigation buttons
         this.updateNavigationButtons();
@@ -919,15 +1014,51 @@ class ProductWizard {
     /**
      * Update step indicators
      */
-    updateStepIndicators() {
-        this.elements.steps.forEach((step, index) => {
+    async updateStepIndicators() {
+        this.elements.steps.forEach(async (step, index) => {
             const stepNumber = index + 1;
-            step.classList.remove('product-wizard__step--active', 'product-wizard__step--completed');
+            step.classList.remove(
+                'product-wizard__step--active', 
+                'product-wizard__step--completed',
+                'product-wizard__step--completed-saved',
+                'product-wizard__step--completed-unsaved',
+                'product-wizard__step--unsaved'
+            );
+            
+            // Remove any existing indicator
+            const existingIndicator = step.querySelector('.product-wizard__step-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
             
             if (stepNumber === this.currentStep) {
                 step.classList.add('product-wizard__step--active');
             } else if (this.completedSteps.has(stepNumber)) {
-                step.classList.add('product-wizard__step--completed');
+                // Check if step is saved
+                const isSaved = await this.checkStepSavedInDB(stepNumber);
+                
+                if (isSaved) {
+                    step.classList.add('product-wizard__step--completed', 'product-wizard__step--completed-saved');
+                } else {
+                    step.classList.add('product-wizard__step--completed', 'product-wizard__step--completed-unsaved');
+                    // Add yellow warning indicator
+                    const indicator = document.createElement('span');
+                    indicator.className = 'product-wizard__step-indicator product-wizard__step-indicator--unsaved';
+                    indicator.textContent = '●';
+                    indicator.title = 'Step completed but not saved';
+                    step.querySelector('.product-wizard__step-number')?.appendChild(indicator);
+                }
+            } else if (stepNumber < this.currentStep) {
+                // Check if previous step has unsaved changes
+                const isSaved = await this.checkStepSavedInDB(stepNumber);
+                if (!isSaved && this.completedSteps.has(stepNumber)) {
+                    step.classList.add('product-wizard__step--unsaved');
+                    const indicator = document.createElement('span');
+                    indicator.className = 'product-wizard__step-indicator product-wizard__step-indicator--unsaved';
+                    indicator.textContent = '●';
+                    indicator.title = 'Step has unsaved changes';
+                    step.querySelector('.product-wizard__step-number')?.appendChild(indicator);
+                }
             }
         });
     }
@@ -935,7 +1066,7 @@ class ProductWizard {
     /**
      * Update navigation buttons
      */
-    updateNavigationButtons() {
+    async updateNavigationButtons() {
         if (this.elements.prevBtn) {
             this.elements.prevBtn.disabled = this.currentStep === 1;
         }
@@ -945,6 +1076,26 @@ class ProductWizard {
                 this.elements.nextBtn.textContent = 'Create Product';
             } else {
                 this.elements.nextBtn.textContent = 'Next';
+            }
+            
+            // Disable Next button if current step is not saved (except for Step 7 which is review)
+            if (this.currentStep < this.totalSteps) {
+                const isCurrentStepSaved = await this.checkStepSavedInDB(this.currentStep);
+                this.elements.nextBtn.disabled = !isCurrentStepSaved;
+                
+                // Add tooltip if disabled
+                if (!isCurrentStepSaved) {
+                    this.elements.nextBtn.title = `Please save Step ${this.currentStep} before proceeding. Click the "Save" button at the bottom of the current step.`;
+                    this.elements.nextBtn.classList.add('product-wizard__btn--disabled');
+                } else {
+                    this.elements.nextBtn.title = '';
+                    this.elements.nextBtn.classList.remove('product-wizard__btn--disabled');
+                }
+            } else {
+                // Step 7 (review) - always enabled
+                this.elements.nextBtn.disabled = false;
+                this.elements.nextBtn.title = '';
+                this.elements.nextBtn.classList.remove('product-wizard__btn--disabled');
             }
         }
     }
@@ -971,7 +1122,10 @@ class ProductWizard {
     markStepCompleted(stepNumber) {
         this.completedSteps.add(stepNumber);
         window.logger?.log(`✅ Marked step ${stepNumber} as completed`);
-        this.updateStepIndicators();
+        // Update indicators asynchronously
+        this.updateStepIndicators().catch(err => {
+            window.logger?.warn('Error updating step indicators:', err);
+        });
     }
 
     /**
@@ -980,36 +1134,482 @@ class ProductWizard {
      */
     markStepIncomplete(stepNumber) {
         this.completedSteps.delete(stepNumber);
+        // Also remove from saved steps if it was saved
+        this.savedSteps.delete(stepNumber);
         window.logger?.log(`❌ Marked step ${stepNumber} as incomplete`);
-        this.updateStepIndicators();
+        // Update indicators and navigation buttons asynchronously
+        this.updateStepIndicators().catch(err => {
+            window.logger?.warn('Error updating step indicators:', err);
+        });
+        this.updateNavigationButtons().catch(err => {
+            window.logger?.warn('Error updating navigation buttons:', err);
+        });
     }
 
     /**
-     * Save draft
+     * Mark a step as saved to database
+     * @param {number} stepNumber - The step number to mark as saved
+     */
+    markStepSaved(stepNumber) {
+        this.savedSteps.add(stepNumber);
+        window.logger?.log(`💾 Marked step ${stepNumber} as saved to DB`);
+        // Update indicators and navigation buttons asynchronously
+        this.updateStepIndicators().catch(err => {
+            window.logger?.warn('Error updating step indicators:', err);
+        });
+        this.updateNavigationButtons().catch(err => {
+            window.logger?.warn('Error updating navigation buttons:', err);
+        });
+    }
+
+    /**
+     * Get required fields for a specific step to check if it's saved
+     * @param {number} stepNumber - The step number
+     * @returns {Array} Array of field names required for that step
+     */
+    getStepRequiredFields(stepNumber) {
+        const stepFields = {
+            1: ['id', 'name', 'slug'],
+            2: ['id', 'technical_specification'],
+            3: ['id', 'icon_url', 'features'],
+            4: ['id', 'github_repo_created', 'github_repo_url'],
+            5: ['id', 'stripe_product_id'],
+            6: ['id', 'cloudflare_domain', 'cloudflare_worker_url']
+        };
+        return stepFields[stepNumber] || ['id'];
+    }
+
+    /**
+     * Validate if step data exists in the database result
+     * @param {number} stepNumber - The step number
+     * @param {Object} data - The data from database query
+     * @returns {boolean} True if step data exists
+     */
+    validateStepDataExists(stepNumber, data) {
+        if (!data) return false;
+
+        switch (stepNumber) {
+            case 1:
+                // Step 1 requires name and slug
+                return !!(data.name && data.slug && data.name.trim() && data.slug.trim());
+            case 2:
+                // Step 2 requires technical_specification
+                return !!(data.technical_specification && String(data.technical_specification).trim() !== '');
+            case 3:
+                // Step 3 requires icon_url and features
+                return !!(data.icon_url && data.features && Array.isArray(data.features) && data.features.length > 0);
+            case 4:
+                // Step 4 requires github_repo_created and github_repo_url
+                return !!(data.github_repo_created && data.github_repo_url);
+            case 5:
+                // Step 5 requires stripe_product_id
+                return !!data.stripe_product_id;
+            case 6:
+                // Step 6 requires cloudflare_domain or cloudflare_worker_url
+                return !!(data.cloudflare_domain || data.cloudflare_worker_url);
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Check if a step has been saved to the database
+     * @param {number} stepNumber - The step number to check
+     * @returns {Promise<boolean>} True if step is saved in DB
+     */
+    async checkStepSavedInDB(stepNumber) {
+        // If we already know it's saved, return true
+        if (this.savedSteps.has(stepNumber)) {
+            return true;
+        }
+
+        // If no product_id, step cannot be saved
+        if (!this.formData.product_id) {
+            return false;
+        }
+
+        try {
+            // Query DB to check if step data exists
+            const requiredFields = this.getStepRequiredFields(stepNumber);
+            const { data, error } = await window.supabase
+                .from('products')
+                .select(requiredFields.join(', '))
+                .eq('id', this.formData.product_id)
+                .single();
+
+            if (error) {
+                window.logger?.warn(`⚠️ Error checking step ${stepNumber} in DB:`, error);
+                return false;
+            }
+
+            const exists = this.validateStepDataExists(stepNumber, data);
+            
+            // If it exists, mark it as saved in our tracking
+            if (exists) {
+                this.markStepSaved(stepNumber);
+            }
+
+            return exists;
+        } catch (error) {
+            window.logger?.error(`❌ Error checking step ${stepNumber} saved state:`, error);
+            return false;
+        }
+    }
+
+    /**
+     * Get step-specific fields for a given step number
+     * @param {number} stepNumber - The step number
+     * @returns {Array} Array of field names for that step
+     */
+    getStepFields(stepNumber) {
+        const stepFields = {
+            1: ['name', 'slug', 'category_id', 'short_description', 'description', 'tags', 
+                'name_translations', 'summary_translations', 
+                'description_translations', 'tag_translations'],
+            2: ['technical_specification', 'ai_recommendations', 'ai_conversations', 
+                'ai_final_decisions'],
+            3: ['icon_url', 'screenshots', 'features', 'demo_video_url', 
+                'documentation_url', 'support_email'],
+            4: ['github_repo_created', 'github_repo_url', 'github_repo_name', 'github_branch'],
+            5: ['stripe_product_id', 'stripe_price_id', 'stripe_price_monthly_id', 
+                'stripe_price_yearly_id', 'stripe_price_lifetime_id', 'stripe_price_chf_id',
+                'stripe_price_usd_id', 'stripe_price_eur_id', 'stripe_price_gbp_id',
+                'pricing_type', 'price_amount', 'price_currency', 'price_amount_chf',
+                'price_amount_usd', 'price_amount_eur', 'price_amount_gbp',
+                'trial_days', 'trial_requires_payment'],
+            6: ['cloudflare_domain', 'cloudflare_worker_url']
+        };
+        return stepFields[stepNumber] || [];
+    }
+
+    /**
+     * Fetch current product state from database
+     * @returns {Promise<Object>} Current product data from database
+     */
+    async fetchCurrentProductState() {
+        if (!this.formData.product_id) {
+            // Return empty object if no product_id (new product)
+            return {};
+        }
+
+        try {
+            const { data, error } = await window.supabase
+                .from('products')
+                .select('*')
+                .eq('id', this.formData.product_id)
+                .single();
+
+            if (error) {
+                window.logger?.warn('⚠️ Error fetching current product state:', error);
+                return {};
+            }
+
+            return data || {};
+        } catch (error) {
+            window.logger?.error('❌ Error fetching current product state:', error);
+            return {};
+        }
+    }
+
+    /**
+     * Save a specific step's data to the database
+     * Only updates fields for that step, preserving other fields
+     * @param {number} stepNumber - The step number to save
+     * @returns {Promise<Object>} Result object with success status
+     */
+    async saveStepToDatabase(stepNumber) {
+        try {
+            // 1. Get step-specific fields
+            const stepFields = this.getStepFields(stepNumber);
+            
+            // 2. Save current step data to formData first
+            this.saveCurrentStepData(stepNumber);
+            
+            // 3. Handle Step 2 special case - need to get data from stepData
+            if (stepNumber === 2 && this.stepData && this.stepData[2]) {
+                const step2Data = this.stepData[2];
+                if (step2Data.technicalSpecification) {
+                    this.formData.technical_specification = step2Data.technicalSpecification;
+                }
+                if (step2Data.recommendations) {
+                    this.formData.ai_recommendations = step2Data.recommendations;
+                }
+                if (step2Data.conversationHistory) {
+                    this.formData.ai_conversations = step2Data.conversationHistory;
+                }
+                if (step2Data.finalDecisions) {
+                    this.formData.ai_final_decisions = step2Data.finalDecisions;
+                }
+            }
+            
+            // 4. Ensure translations are populated for Step 1
+            if (stepNumber === 1) {
+                await this.ensureTranslationsForFormData();
+            }
+            
+            // 5. Fetch current DB state
+            const currentState = await this.fetchCurrentProductState();
+            
+            // 6. If no product exists yet, create it first (for Step 1)
+            if (!this.formData.product_id && stepNumber === 1) {
+                // Create new product with basic info (pricing_type is set in Step 5, not Step 1)
+                const newProductData = {
+                    name: this.formData.name || '',
+                    slug: this.formData.slug || '',
+                    category_id: this.formData.category_id || null,
+                    short_description: this.formData.short_description || '',
+                    description: this.formData.description || '',
+                    tags: this.parseTags(this.formData.tags || ''),
+                    pricing_type: null, // Will be set in Step 5
+                    name_translations: this.formData.name_translations || null,
+                    summary_translations: this.formData.summary_translations || null,
+                    description_translations: this.formData.description_translations || null,
+                    tag_translations: this.formData.tag_translations || null,
+                    status: 'draft'
+                };
+
+                const { data: newProduct, error: createError } = await window.supabase
+                    .from('products')
+                    .insert(newProductData)
+                    .select()
+                    .single();
+
+                if (createError) {
+                    window.logger?.error('❌ Error creating new product:', createError);
+                    return { success: false, error: createError.message };
+                }
+
+                // Update formData with new product_id
+                this.formData.product_id = newProduct.id;
+                window.logger?.log('✅ Created new product with ID:', newProduct.id);
+                
+                // Mark step as saved
+                this.markStepSaved(stepNumber);
+                return { success: true, data: newProduct };
+            }
+            
+            // 7. Build update object with only step fields that have values
+            const updateData = {};
+            
+            // Special handling for Step 5: Convert pricing objects to individual price_amount_* columns
+            if (stepNumber === 5) {
+                // Helper function to convert value to number or null (handles empty strings, undefined, etc.)
+                // Note: 0 is a valid price (for freemium), so we only convert empty strings/undefined to null
+                const toNumericOrNull = (value) => {
+                    // Handle null, undefined, empty string
+                    if (value === undefined || value === null || value === '') {
+                        return null;
+                    }
+                    // Convert to string first to handle edge cases
+                    const strValue = String(value).trim();
+                    if (strValue === '' || strValue === 'null' || strValue === 'undefined') {
+                        return null;
+                    }
+                    // Allow 0 as a valid price (for freemium)
+                    if (value === 0 || strValue === '0') {
+                        return 0;
+                    }
+                    const num = parseFloat(strValue);
+                    if (isNaN(num)) {
+                        window.logger?.warn(`⚠️ Could not parse numeric value: "${value}" (type: ${typeof value}), converting to null`);
+                        return null;
+                    }
+                    return num;
+                };
+                
+                // Determine which pricing object to use based on pricing_type
+                const pricingType = this.formData.pricing_type;
+                
+                window.logger?.log('💾 Step 5 save - pricing_type:', pricingType);
+                window.logger?.log('💾 Step 5 save - subscription_pricing:', this.formData.subscription_pricing);
+                window.logger?.log('💾 Step 5 save - one_time_pricing:', this.formData.one_time_pricing);
+                
+                // Handle subscription_pricing object -> price_amount_* columns
+                if (pricingType === 'subscription' && this.formData.subscription_pricing && typeof this.formData.subscription_pricing === 'object') {
+                    const subPricing = this.formData.subscription_pricing;
+                    // Only set if the property exists (even if 0, which is valid for freemium)
+                    if ('CHF' in subPricing) {
+                        updateData.price_amount_chf = toNumericOrNull(subPricing.CHF);
+                        window.logger?.log('💾 Converting subscription_pricing.CHF:', subPricing.CHF, '->', updateData.price_amount_chf);
+                    }
+                    if ('USD' in subPricing) {
+                        updateData.price_amount_usd = toNumericOrNull(subPricing.USD);
+                        window.logger?.log('💾 Converting subscription_pricing.USD:', subPricing.USD, '->', updateData.price_amount_usd);
+                    }
+                    if ('EUR' in subPricing) {
+                        updateData.price_amount_eur = toNumericOrNull(subPricing.EUR);
+                        window.logger?.log('💾 Converting subscription_pricing.EUR:', subPricing.EUR, '->', updateData.price_amount_eur);
+                    }
+                    if ('GBP' in subPricing) {
+                        updateData.price_amount_gbp = toNumericOrNull(subPricing.GBP);
+                        window.logger?.log('💾 Converting subscription_pricing.GBP:', subPricing.GBP, '->', updateData.price_amount_gbp);
+                    }
+                }
+                
+                // Handle one_time_pricing object -> price_amount_* columns
+                if (pricingType === 'one_time' && this.formData.one_time_pricing && typeof this.formData.one_time_pricing === 'object') {
+                    const oneTimePricing = this.formData.one_time_pricing;
+                    // Only set if the property exists (even if 0, which is valid for freemium)
+                    if ('CHF' in oneTimePricing) {
+                        updateData.price_amount_chf = toNumericOrNull(oneTimePricing.CHF);
+                        window.logger?.log('💾 Converting one_time_pricing.CHF:', oneTimePricing.CHF, '->', updateData.price_amount_chf);
+                    }
+                    if ('USD' in oneTimePricing) {
+                        updateData.price_amount_usd = toNumericOrNull(oneTimePricing.USD);
+                        window.logger?.log('💾 Converting one_time_pricing.USD:', oneTimePricing.USD, '->', updateData.price_amount_usd);
+                    }
+                    if ('EUR' in oneTimePricing) {
+                        updateData.price_amount_eur = toNumericOrNull(oneTimePricing.EUR);
+                        window.logger?.log('💾 Converting one_time_pricing.EUR:', oneTimePricing.EUR, '->', updateData.price_amount_eur);
+                    }
+                    if ('GBP' in oneTimePricing) {
+                        updateData.price_amount_gbp = toNumericOrNull(oneTimePricing.GBP);
+                        window.logger?.log('💾 Converting one_time_pricing.GBP:', oneTimePricing.GBP, '->', updateData.price_amount_gbp);
+                    }
+                }
+                
+                // Handle freemium - set all prices to 0
+                if (pricingType === 'freemium') {
+                    updateData.price_amount_chf = 0;
+                    updateData.price_amount_usd = 0;
+                    updateData.price_amount_eur = 0;
+                    updateData.price_amount_gbp = 0;
+                }
+                
+                window.logger?.log('💾 Step 5 updateData after pricing conversion:', updateData);
+            }
+            
+            for (const field of stepFields) {
+                let newValue = this.formData[field];
+                const currentValue = currentState[field];
+                
+                // Special handling for tags - parse string to array
+                if (field === 'tags' && typeof newValue === 'string') {
+                    newValue = this.parseTags(newValue);
+                }
+                
+                // Special handling for pricing_type (Step 5 only) - ensure it's valid
+                if (field === 'pricing_type' && stepNumber === 5) {
+                    if (!newValue || newValue === '' || !['one_time', 'subscription', 'freemium'].includes(newValue)) {
+                        // Skip invalid pricing_type values - preserve existing DB value
+                        continue;
+                    }
+                }
+                
+                // Skip price_amount_* fields if we already set them from pricing objects
+                if (stepNumber === 5 && ['price_amount_chf', 'price_amount_usd', 'price_amount_eur', 'price_amount_gbp'].includes(field)) {
+                    // Only use direct values if pricing objects weren't set
+                    if (!(this.formData.subscription_pricing || this.formData.one_time_pricing)) {
+                        // Use direct value if no pricing objects - convert to number or null
+                        if (newValue !== undefined) {
+                            // Convert empty string to null for numeric fields
+                            const numericValue = (newValue === '' || newValue === null) ? null : parseFloat(newValue);
+                            if (!isNaN(numericValue) && numericValue !== currentValue) {
+                                updateData[field] = numericValue;
+                            } else if (numericValue === null && currentValue !== null) {
+                                updateData[field] = null;
+                            }
+                        }
+                    }
+                    continue; // Skip since we handled it above
+                }
+                
+                // Only include field if it has an explicit value AND it's different
+                if (newValue !== undefined) {
+                    // Special handling for numeric fields - convert empty strings to null
+                    if (['price_amount', 'price_amount_chf', 'price_amount_usd', 'price_amount_eur', 'price_amount_gbp', 
+                         'trial_days', 'individual_price', 'enterprise_price'].includes(field)) {
+                        // Convert empty strings to null for numeric fields
+                        if (newValue === '' || newValue === null) {
+                            newValue = null;
+                        } else if (typeof newValue === 'string') {
+                            const num = parseFloat(newValue);
+                            newValue = isNaN(num) ? null : num;
+                        }
+                    }
+                    
+                    // Check if it's a meaningful change
+                    if (JSON.stringify(newValue) !== JSON.stringify(currentValue)) {
+                        updateData[field] = newValue;
+                    }
+                }
+                // If undefined, skip - preserve existing DB value
+            }
+            
+            // 8. Final cleanup: Remove any empty strings from numeric fields before saving
+            for (const [key, value] of Object.entries(updateData)) {
+                // Check if this is a numeric field
+                if (['price_amount', 'price_amount_chf', 'price_amount_usd', 'price_amount_eur', 'price_amount_gbp',
+                     'trial_days', 'individual_price', 'enterprise_price'].includes(key)) {
+                    // Convert empty strings to null
+                    if (value === '' || value === 'null' || value === 'undefined') {
+                        updateData[key] = null;
+                        window.logger?.warn(`⚠️ Converted empty string to null for numeric field ${key}`);
+                    } else if (typeof value === 'string' && value.trim() === '') {
+                        updateData[key] = null;
+                        window.logger?.warn(`⚠️ Converted whitespace-only string to null for numeric field ${key}`);
+                    }
+                }
+            }
+            
+            window.logger?.log('💾 Final updateData before DB save:', updateData);
+            
+            // 9. If no changes, return early
+            if (Object.keys(updateData).length === 0) {
+                // Still mark as saved if product exists
+                if (this.formData.product_id) {
+                    this.markStepSaved(stepNumber);
+                }
+                return { success: true, noChanges: true };
+            }
+            
+            // 10. Perform selective update
+            const { data, error } = await window.supabase
+                .from('products')
+                .update(updateData)
+                .eq('id', this.formData.product_id || currentState.id)
+                .select()
+                .single();
+            
+            if (error) {
+                window.logger?.error(`❌ Error saving step ${stepNumber} to database:`, error);
+                return { success: false, error: error.message };
+            }
+            
+            // 10. Mark step as saved
+            this.markStepSaved(stepNumber);
+            
+            window.logger?.log(`✅ Step ${stepNumber} saved successfully`);
+            return { success: true, data };
+        } catch (error) {
+            window.logger?.error(`❌ Error in saveStepToDatabase for step ${stepNumber}:`, error);
+            return { success: false, error: error.message || 'Unknown error' };
+        }
+    }
+
+    /**
+     * Save draft (Update Data button - saves current step)
      */
     async saveDraft() {
         try {
-            this.showLoading('Saving draft...');
+            this.showLoading('Saving...');
 
-            // Save current step data only (since other steps aren't loaded yet)
-            this.saveCurrentStepData();
-
-            // Save to database
-            const result = await this.saveDraftToDatabase();
+            // Save current step data to database
+            const result = await this.saveStepToDatabase(this.currentStep);
             
             if (result.success) {
-                this.showSuccess('Draft saved successfully!');
-                window.logger?.log('💾 Draft saved:', this.formData);
+                this.showSuccess('Step saved successfully!');
+                window.logger?.log(`💾 Step ${this.currentStep} saved:`, this.formData);
                 
-                // Mark Step 1 as completed (basic info is saved)
-                this.markStepCompleted(1);
+                // Update navigation buttons to re-enable Next if needed
+                await this.updateNavigationButtons();
             } else {
-                throw new Error(result.error || 'Failed to save draft');
+                throw new Error(result.error || 'Failed to save step');
             }
 
         } catch (error) {
-            window.logger?.error('❌ Error saving draft:', error);
-            this.showError('Failed to save draft: ' + error.message);
+            window.logger?.error('❌ Error saving step:', error);
+            this.showError('Failed to save step: ' + error.message);
         } finally {
             this.hideLoading();
         }

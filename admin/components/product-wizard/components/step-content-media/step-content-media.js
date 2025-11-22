@@ -38,6 +38,10 @@ if (typeof window.StepContentMedia === 'undefined') {
 
             // Preview container
             this.elements.iconPreviewContainer = this.elements.iconPreview?.parentElement;
+            
+            // Save button elements
+            this.elements.saveBtn = document.getElementById('save-step-3-btn');
+            this.elements.saveStatus = document.getElementById('save-step-3-status');
         }
 
         setupEventListeners() {
@@ -61,6 +65,69 @@ if (typeof window.StepContentMedia === 'undefined') {
 
             // Initialize feature input listeners
             this.setupFeatureListeners();
+            
+            // Save button
+            if (this.elements.saveBtn) {
+                this.elements.saveBtn.addEventListener('click', async () => {
+                    await this.handleSave();
+                });
+            }
+        }
+
+        /**
+         * Handle save button click
+         */
+        async handleSave() {
+            if (!window.productWizard) {
+                window.logger?.error('❌ ProductWizard not available');
+                return;
+            }
+
+            const saveBtn = this.elements.saveBtn;
+            const saveStatus = this.elements.saveStatus;
+
+            if (!saveBtn || saveBtn.disabled) {
+                return;
+            }
+
+            try {
+                // Disable button and show saving state
+                saveBtn.disabled = true;
+                if (saveStatus) {
+                    saveStatus.textContent = window.productWizardTranslations?.getTranslation('Saving...') || 'Saving...';
+                }
+
+                // Save step data
+                const result = await window.productWizard.saveStepToDatabase(3);
+
+                if (result.success) {
+                    // Show success message
+                    if (saveStatus) {
+                        saveStatus.textContent = window.productWizardTranslations?.getTranslation('Saved') || 'Saved';
+                        setTimeout(() => {
+                            saveStatus.textContent = '';
+                        }, 2000);
+                    }
+                    
+                    // Update navigation buttons to re-enable Next
+                    await window.productWizard.updateNavigationButtons();
+                    
+                    window.logger?.log('✅ Step 3 saved successfully');
+                } else {
+                    throw new Error(result.error || 'Failed to save step');
+                }
+            } catch (error) {
+                window.logger?.error('❌ Error saving Step 3:', error);
+                if (saveStatus) {
+                    saveStatus.textContent = 'Error: ' + (error.message || 'Failed to save');
+                }
+                window.productWizard?.showError('Failed to save Step 3: ' + (error.message || 'Unknown error'));
+            } finally {
+                // Re-enable button
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                }
+            }
         }
 
         setupFeatureListeners() {
