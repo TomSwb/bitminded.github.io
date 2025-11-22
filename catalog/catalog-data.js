@@ -240,8 +240,31 @@
             : null;
 
         // Check if sale is active (is_on_sale is true and product is published/active)
-        const isSaleActive = Boolean(product.is_on_sale) && 
+        // Also validate dates if they are set
+        let isSaleActive = Boolean(product.is_on_sale) && 
                             (product.status === 'active' || product.status === 'published');
+        
+        // If sale dates are set, validate them
+        if (isSaleActive && (product.sale_start_date || product.sale_end_date)) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            if (product.sale_start_date) {
+                const startDate = new Date(product.sale_start_date);
+                const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                if (today < startDateOnly) {
+                    isSaleActive = false; // Sale hasn't started yet
+                }
+            }
+            
+            if (product.sale_end_date) {
+                const endDate = new Date(product.sale_end_date);
+                const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+                if (today > endDateOnly) {
+                    isSaleActive = false; // Sale has ended
+                }
+            }
+        }
 
         return {
             id: product.id,

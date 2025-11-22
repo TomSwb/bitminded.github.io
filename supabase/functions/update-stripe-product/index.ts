@@ -705,18 +705,85 @@ serve(async (req) => {
     const newSaleYearlyPrices: Record<string, any> = {}
     const newSaleOneTimePrices: Record<string, any> = {}
     const priceErrors: Record<string, string> = {}
+    // Store salePricingSource so we can use it later to calculate sale price amounts
+    let salePricingSource: any = null
 
-    if (is_on_sale && sale_discount_percentage !== null && pricing && typeof pricing === 'object' && Object.keys(pricing).length > 0) {
+    if (is_on_sale && sale_discount_percentage !== null) {
       console.log('💰 Creating sale prices with discount:', sale_discount_percentage + '%')
       
       const discountMultiplier = 1 - (sale_discount_percentage / 100)
-
-      // Determine if we need monthly/yearly prices
-      let hasMonthly = false
-      let hasYearly = false
       
-      if (pricing_type === 'subscription' && pricing) {
-        const firstCurrencyData = Object.values(pricing)[0]
+      // Get current product data from database to use all currency prices
+      // This ensures we create sale prices for ALL currencies, not just what's in the pricing object
+      let dbProductForSale: any = null
+      try {
+        const { data: productData, error: productError } = await supabaseAdmin
+          .from('products')
+          .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, price_amount, price_currency, pricing_type')
+          .eq('stripe_product_id', productId)
+          .single()
+        
+        if (!productError && productData) {
+          dbProductForSale = productData
+          console.log('✅ Loaded product data for sale price calculation:', {
+            price_amount_chf: dbProductForSale.price_amount_chf,
+            price_amount_usd: dbProductForSale.price_amount_usd,
+            price_amount_eur: dbProductForSale.price_amount_eur,
+            price_amount_gbp: dbProductForSale.price_amount_gbp
+          })
+        }
+      } catch (error: any) {
+        console.warn('⚠️ Could not load product data for sale prices, using pricing object:', error.message)
+      }
+      
+      // Build pricing object from database if available, otherwise use passed pricing
+      if (dbProductForSale) {
+        if (dbProductForSale.pricing_type === 'one_time') {
+          salePricingSource = {}
+          if (dbProductForSale.price_amount_chf) salePricingSource.CHF = dbProductForSale.price_amount_chf
+          if (dbProductForSale.price_amount_usd) salePricingSource.USD = dbProductForSale.price_amount_usd
+          if (dbProductForSale.price_amount_eur) salePricingSource.EUR = dbProductForSale.price_amount_eur
+          if (dbProductForSale.price_amount_gbp) salePricingSource.GBP = dbProductForSale.price_amount_gbp
+          // Fallback to default if no currency-specific amounts
+          if (Object.keys(salePricingSource).length === 0 && dbProductForSale.price_amount) {
+            salePricingSource[dbProductForSale.price_currency || 'USD'] = dbProductForSale.price_amount
+          }
+        } else if (dbProductForSale.pricing_type === 'subscription') {
+          salePricingSource = {}
+          if (dbProductForSale.price_amount_chf) salePricingSource.CHF = { monthly: dbProductForSale.price_amount_chf }
+          if (dbProductForSale.price_amount_usd) salePricingSource.USD = { monthly: dbProductForSale.price_amount_usd }
+          if (dbProductForSale.price_amount_eur) salePricingSource.EUR = { monthly: dbProductForSale.price_amount_eur }
+          if (dbProductForSale.price_amount_gbp) salePricingSource.GBP = { monthly: dbProductForSale.price_amount_gbp }
+          // Fallback to default if no currency-specific amounts
+          if (Object.keys(salePricingSource).length === 0 && dbProductForSale.price_amount) {
+            salePricingSource[dbProductForSale.price_currency || 'USD'] = { monthly: dbProductForSale.price_amount }
+          }
+        }
+      }
+      
+      // If we don't have pricing from database, use the pricing object from the request
+      if (!salePricingSource || typeof salePricingSource !== 'object' || Object.keys(salePricingSource).length === 0) {
+        if (pricing && typeof pricing === 'object' && Object.keys(pricing).length > 0) {
+          salePricingSource = pricing
+          console.log('💰 Using pricing from request for sale calculation (database had no pricing):', salePricingSource)
+        } else {
+          console.warn('⚠️ No pricing data available for sale price calculation')
+          // Skip sale price creation if we have no pricing data at all
+          salePricingSource = null
+        }
+      } else {
+        console.log('💰 Using pricing source from database for sale calculation:', salePricingSource)
+      }
+      
+      // Only create sale prices if we have pricing data
+      if (salePricingSource && typeof salePricingSource === 'object' && Object.keys(salePricingSource).length > 0) {
+
+        // Determine if we need monthly/yearly prices
+        let hasMonthly = false
+        let hasYearly = false
+        
+        if (pricing_type === 'subscription' && salePricingSource) {
+        const firstCurrencyData = Object.values(salePricingSource)[0]
         if (typeof firstCurrencyData === 'object' && firstCurrencyData !== null) {
           const priceObj = firstCurrencyData as { monthly?: number; yearly?: number; [key: string]: any }
           hasMonthly = priceObj.monthly !== undefined && priceObj.monthly > 0
@@ -724,10 +791,10 @@ serve(async (req) => {
         }
       }
 
-      const shouldCreateMonthly = pricing_type === 'subscription' && (hasMonthly || !hasYearly)
-      const shouldCreateYearly = pricing_type === 'subscription' && hasYearly
+        const shouldCreateMonthly = pricing_type === 'subscription' && (hasMonthly || !hasYearly)
+        const shouldCreateYearly = pricing_type === 'subscription' && hasYearly
 
-      for (const [currency, priceData] of Object.entries(pricing)) {
+        for (const [currency, priceData] of Object.entries(salePricingSource)) {
         const currencyUpper = currency.toUpperCase()
         
         if (typeof priceData === 'object' && priceData !== null) {
@@ -871,6 +938,7 @@ serve(async (req) => {
           }
         }
       }
+      }
     }
 
     // Get primary regular price IDs
@@ -900,9 +968,10 @@ serve(async (req) => {
 
     // Update database with new price IDs
     // Find the product in database by Stripe product ID
+    // Load price amounts so we can calculate sale prices for all currencies
     const { data: productData, error: productError } = await supabaseAdmin
       .from('products')
-      .select('id')
+      .select('id, price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, price_amount, price_currency, pricing_type')
       .eq('stripe_product_id', productId)
       .single()
 
@@ -1069,77 +1138,73 @@ serve(async (req) => {
       }
 
       // Update currency-specific sale price amounts
-      if (is_on_sale && sale_discount_percentage !== null && pricing && typeof pricing === 'object') {
+      // Use salePricingSource (the same source used to create Stripe sale prices) to ensure we save sale prices for ALL currencies
+      if (is_on_sale && sale_discount_percentage !== null && salePricingSource) {
         const discountMultiplier = 1 - (sale_discount_percentage / 100)
         
-        // Calculate sale prices for one-time products
+        // Calculate sale prices using salePricingSource (which was used to create Stripe sale prices)
         if (pricing_type === 'one_time') {
-          const chfAmount = pricing?.CHF ?? pricing?.chf
-          const usdAmount = pricing?.USD ?? pricing?.usd
-          const eurAmount = pricing?.EUR ?? pricing?.eur
-          const gbpAmount = pricing?.GBP ?? pricing?.gbp
-          
-          if (chfAmount !== undefined && chfAmount !== null) {
-            const numChf = typeof chfAmount === 'number' ? chfAmount : parseFloat(String(chfAmount))
-            if (!isNaN(numChf) && numChf > 0) {
-              updateData.sale_price_amount_chf = Math.round(numChf * discountMultiplier * 100) / 100
-              console.log('✅ Set sale_price_amount_chf:', updateData.sale_price_amount_chf)
+          // Iterate through all currencies in salePricingSource
+          for (const [currency, priceData] of Object.entries(salePricingSource)) {
+            const currencyUpper = currency.toUpperCase()
+            let originalAmount: number | null = null
+            
+            if (typeof priceData === 'number') {
+              originalAmount = priceData
+            } else if (typeof priceData === 'object' && priceData !== null) {
+              const priceObj = priceData as { amount?: number; [key: string]: any }
+              originalAmount = priceObj.amount || null
             }
-          }
-          if (usdAmount !== undefined && usdAmount !== null) {
-            const numUsd = typeof usdAmount === 'number' ? usdAmount : parseFloat(String(usdAmount))
-            if (!isNaN(numUsd) && numUsd > 0) {
-              updateData.sale_price_amount_usd = Math.round(numUsd * discountMultiplier * 100) / 100
-              console.log('✅ Set sale_price_amount_usd:', updateData.sale_price_amount_usd)
-            }
-          }
-          if (eurAmount !== undefined && eurAmount !== null) {
-            const numEur = typeof eurAmount === 'number' ? eurAmount : parseFloat(String(eurAmount))
-            if (!isNaN(numEur) && numEur > 0) {
-              updateData.sale_price_amount_eur = Math.round(numEur * discountMultiplier * 100) / 100
-              console.log('✅ Set sale_price_amount_eur:', updateData.sale_price_amount_eur)
-            }
-          }
-          if (gbpAmount !== undefined && gbpAmount !== null) {
-            const numGbp = typeof gbpAmount === 'number' ? gbpAmount : parseFloat(String(gbpAmount))
-            if (!isNaN(numGbp) && numGbp > 0) {
-              updateData.sale_price_amount_gbp = Math.round(numGbp * discountMultiplier * 100) / 100
-              console.log('✅ Set sale_price_amount_gbp:', updateData.sale_price_amount_gbp)
+            
+            if (originalAmount !== null && originalAmount > 0) {
+              const saleAmount = Math.round(originalAmount * discountMultiplier * 100) / 100
+              
+              // Map currency to database field
+              if (currencyUpper === 'CHF') {
+                updateData.sale_price_amount_chf = saleAmount
+                console.log('✅ Set sale_price_amount_chf:', saleAmount)
+              } else if (currencyUpper === 'USD') {
+                updateData.sale_price_amount_usd = saleAmount
+                console.log('✅ Set sale_price_amount_usd:', saleAmount)
+              } else if (currencyUpper === 'EUR') {
+                updateData.sale_price_amount_eur = saleAmount
+                console.log('✅ Set sale_price_amount_eur:', saleAmount)
+              } else if (currencyUpper === 'GBP') {
+                updateData.sale_price_amount_gbp = saleAmount
+                console.log('✅ Set sale_price_amount_gbp:', saleAmount)
+              }
             }
           }
         } else if (pricing_type === 'subscription') {
-          // For subscriptions, calculate monthly sale prices
-          const chfData = pricing?.CHF ?? pricing?.chf
-          const usdData = pricing?.USD ?? pricing?.usd
-          const eurData = pricing?.EUR ?? pricing?.eur
-          const gbpData = pricing?.GBP ?? pricing?.gbp
-          
-          if (chfData !== undefined && chfData !== null) {
-            const monthlyChf = typeof chfData === 'object' && chfData?.monthly ? chfData.monthly : (typeof chfData === 'number' ? chfData : null)
-            if (monthlyChf !== null && monthlyChf !== undefined && !isNaN(monthlyChf) && monthlyChf > 0) {
-              updateData.sale_price_amount_chf = Math.round(monthlyChf * discountMultiplier * 100) / 100
-              console.log('✅ Set sale_price_amount_chf (monthly):', updateData.sale_price_amount_chf)
+          // For subscriptions, use monthly prices from salePricingSource
+          for (const [currency, priceData] of Object.entries(salePricingSource)) {
+            const currencyUpper = currency.toUpperCase()
+            let originalAmount: number | null = null
+            
+            if (typeof priceData === 'object' && priceData !== null) {
+              const priceObj = priceData as { monthly?: number; amount?: number; [key: string]: any }
+              originalAmount = priceObj.monthly || priceObj.amount || null
+            } else if (typeof priceData === 'number') {
+              originalAmount = priceData
             }
-          }
-          if (usdData !== undefined && usdData !== null) {
-            const monthlyUsd = typeof usdData === 'object' && usdData?.monthly ? usdData.monthly : (typeof usdData === 'number' ? usdData : null)
-            if (monthlyUsd !== null && monthlyUsd !== undefined && !isNaN(monthlyUsd) && monthlyUsd > 0) {
-              updateData.sale_price_amount_usd = Math.round(monthlyUsd * discountMultiplier * 100) / 100
-              console.log('✅ Set sale_price_amount_usd (monthly):', updateData.sale_price_amount_usd)
-            }
-          }
-          if (eurData !== undefined && eurData !== null) {
-            const monthlyEur = typeof eurData === 'object' && eurData?.monthly ? eurData.monthly : (typeof eurData === 'number' ? eurData : null)
-            if (monthlyEur !== null && monthlyEur !== undefined && !isNaN(monthlyEur) && monthlyEur > 0) {
-              updateData.sale_price_amount_eur = Math.round(monthlyEur * discountMultiplier * 100) / 100
-              console.log('✅ Set sale_price_amount_eur (monthly):', updateData.sale_price_amount_eur)
-            }
-          }
-          if (gbpData !== undefined && gbpData !== null) {
-            const monthlyGbp = typeof gbpData === 'object' && gbpData?.monthly ? gbpData.monthly : (typeof gbpData === 'number' ? gbpData : null)
-            if (monthlyGbp !== null && monthlyGbp !== undefined && !isNaN(monthlyGbp) && monthlyGbp > 0) {
-              updateData.sale_price_amount_gbp = Math.round(monthlyGbp * discountMultiplier * 100) / 100
-              console.log('✅ Set sale_price_amount_gbp (monthly):', updateData.sale_price_amount_gbp)
+            
+            if (originalAmount !== null && originalAmount > 0) {
+              const saleAmount = Math.round(originalAmount * discountMultiplier * 100) / 100
+              
+              // Map currency to database field
+              if (currencyUpper === 'CHF') {
+                updateData.sale_price_amount_chf = saleAmount
+                console.log('✅ Set sale_price_amount_chf (monthly):', saleAmount)
+              } else if (currencyUpper === 'USD') {
+                updateData.sale_price_amount_usd = saleAmount
+                console.log('✅ Set sale_price_amount_usd (monthly):', saleAmount)
+              } else if (currencyUpper === 'EUR') {
+                updateData.sale_price_amount_eur = saleAmount
+                console.log('✅ Set sale_price_amount_eur (monthly):', saleAmount)
+              } else if (currencyUpper === 'GBP') {
+                updateData.sale_price_amount_gbp = saleAmount
+                console.log('✅ Set sale_price_amount_gbp (monthly):', saleAmount)
+              }
             }
           }
         }
@@ -1191,11 +1256,19 @@ serve(async (req) => {
           price_amount_eur: updateData.price_amount_eur || null,
           price_amount_gbp: updateData.price_amount_gbp || null
         })
+        if (is_on_sale) {
+          console.log('💰 Sale price amounts in updateData that were sent to database:', {
+            sale_price_amount_chf: updateData.sale_price_amount_chf || null,
+            sale_price_amount_usd: updateData.sale_price_amount_usd || null,
+            sale_price_amount_eur: updateData.sale_price_amount_eur || null,
+            sale_price_amount_gbp: updateData.sale_price_amount_gbp || null
+          })
+        }
         
         // Verify the update by reading back from database
         const { data: verifyData, error: verifyError } = await supabaseAdmin
           .from('products')
-          .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, price_amount, price_currency')
+          .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, sale_price_amount_chf, sale_price_amount_usd, sale_price_amount_eur, sale_price_amount_gbp, price_amount, price_currency')
           .eq('id', productData.id)
           .single()
         
@@ -1213,6 +1286,21 @@ serve(async (req) => {
           }
           if (updateData.price_amount_gbp && verifyData.price_amount_gbp === null) {
             console.error('❌ WARNING: price_amount_gbp was set in updateData (' + updateData.price_amount_gbp + ') but is null in database! Columns may not exist or update was overwritten.')
+          }
+          // Check sale price amounts if on sale
+          if (is_on_sale) {
+            if (updateData.sale_price_amount_chf && verifyData.sale_price_amount_chf === null) {
+              console.error('❌ WARNING: sale_price_amount_chf was set in updateData (' + updateData.sale_price_amount_chf + ') but is null in database! Columns may not exist or update was overwritten.')
+            }
+            if (updateData.sale_price_amount_usd && verifyData.sale_price_amount_usd === null) {
+              console.error('❌ WARNING: sale_price_amount_usd was set in updateData (' + updateData.sale_price_amount_usd + ') but is null in database! Columns may not exist or update was overwritten.')
+            }
+            if (updateData.sale_price_amount_eur && verifyData.sale_price_amount_eur === null) {
+              console.error('❌ WARNING: sale_price_amount_eur was set in updateData (' + updateData.sale_price_amount_eur + ') but is null in database! Columns may not exist or update was overwritten.')
+            }
+            if (updateData.sale_price_amount_gbp && verifyData.sale_price_amount_gbp === null) {
+              console.error('❌ WARNING: sale_price_amount_gbp was set in updateData (' + updateData.sale_price_amount_gbp + ') but is null in database! Columns may not exist or update was overwritten.')
+            }
           }
         } else if (verifyError) {
           console.warn('⚠️ Could not verify currency amounts (columns may not exist):', verifyError.message)
@@ -1293,6 +1381,73 @@ serve(async (req) => {
         if (typeof usdData === 'object' && usdData?.monthly && usdData.monthly > 0) responseData.price_amount_usd = usdData.monthly
         if (typeof eurData === 'object' && eurData?.monthly && eurData.monthly > 0) responseData.price_amount_eur = eurData.monthly
         if (typeof gbpData === 'object' && gbpData?.monthly && gbpData.monthly > 0) responseData.price_amount_gbp = gbpData.monthly
+      }
+      
+      // Add sale price amounts to response if product is on sale
+      if (is_on_sale && sale_discount_percentage !== null && pricing && typeof pricing === 'object') {
+        const discountMultiplier = 1 - (sale_discount_percentage / 100)
+        
+        if (pricing_type === 'one_time') {
+          const chfAmount = pricing?.CHF ?? pricing?.chf
+          const usdAmount = pricing?.USD ?? pricing?.usd
+          const eurAmount = pricing?.EUR ?? pricing?.eur
+          const gbpAmount = pricing?.GBP ?? pricing?.gbp
+          
+          if (chfAmount !== undefined && chfAmount !== null) {
+            const numChf = typeof chfAmount === 'number' ? chfAmount : parseFloat(String(chfAmount))
+            if (!isNaN(numChf) && numChf > 0) {
+              responseData.sale_price_amount_chf = Math.round(numChf * discountMultiplier * 100) / 100
+            }
+          }
+          if (usdAmount !== undefined && usdAmount !== null) {
+            const numUsd = typeof usdAmount === 'number' ? usdAmount : parseFloat(String(usdAmount))
+            if (!isNaN(numUsd) && numUsd > 0) {
+              responseData.sale_price_amount_usd = Math.round(numUsd * discountMultiplier * 100) / 100
+            }
+          }
+          if (eurAmount !== undefined && eurAmount !== null) {
+            const numEur = typeof eurAmount === 'number' ? eurAmount : parseFloat(String(eurAmount))
+            if (!isNaN(numEur) && numEur > 0) {
+              responseData.sale_price_amount_eur = Math.round(numEur * discountMultiplier * 100) / 100
+            }
+          }
+          if (gbpAmount !== undefined && gbpAmount !== null) {
+            const numGbp = typeof gbpAmount === 'number' ? gbpAmount : parseFloat(String(gbpAmount))
+            if (!isNaN(numGbp) && numGbp > 0) {
+              responseData.sale_price_amount_gbp = Math.round(numGbp * discountMultiplier * 100) / 100
+            }
+          }
+        } else if (pricing_type === 'subscription') {
+          const chfData = pricing?.CHF ?? pricing?.chf
+          const usdData = pricing?.USD ?? pricing?.usd
+          const eurData = pricing?.EUR ?? pricing?.eur
+          const gbpData = pricing?.GBP ?? pricing?.gbp
+          
+          if (chfData !== undefined && chfData !== null) {
+            const monthlyChf = typeof chfData === 'object' && chfData?.monthly ? chfData.monthly : (typeof chfData === 'number' ? chfData : null)
+            if (monthlyChf !== null && monthlyChf !== undefined && !isNaN(monthlyChf) && monthlyChf > 0) {
+              responseData.sale_price_amount_chf = Math.round(monthlyChf * discountMultiplier * 100) / 100
+            }
+          }
+          if (usdData !== undefined && usdData !== null) {
+            const monthlyUsd = typeof usdData === 'object' && usdData?.monthly ? usdData.monthly : (typeof usdData === 'number' ? usdData : null)
+            if (monthlyUsd !== null && monthlyUsd !== undefined && !isNaN(monthlyUsd) && monthlyUsd > 0) {
+              responseData.sale_price_amount_usd = Math.round(monthlyUsd * discountMultiplier * 100) / 100
+            }
+          }
+          if (eurData !== undefined && eurData !== null) {
+            const monthlyEur = typeof eurData === 'object' && eurData?.monthly ? eurData.monthly : (typeof eurData === 'number' ? eurData : null)
+            if (monthlyEur !== null && monthlyEur !== undefined && !isNaN(monthlyEur) && monthlyEur > 0) {
+              responseData.sale_price_amount_eur = Math.round(monthlyEur * discountMultiplier * 100) / 100
+            }
+          }
+          if (gbpData !== undefined && gbpData !== null) {
+            const monthlyGbp = typeof gbpData === 'object' && gbpData?.monthly ? gbpData.monthly : (typeof gbpData === 'number' ? gbpData : null)
+            if (monthlyGbp !== null && monthlyGbp !== undefined && !isNaN(monthlyGbp) && monthlyGbp > 0) {
+              responseData.sale_price_amount_gbp = Math.round(monthlyGbp * discountMultiplier * 100) / 100
+            }
+          }
+        }
       }
     }
 

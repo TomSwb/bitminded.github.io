@@ -590,6 +590,12 @@ class ProductWizard {
      * Load Step 5: Stripe Product Creation (moved before Cloudflare)
      */
     async loadStep5(stepContent) {
+        // If step is already initialized, don't reinitialize (preserve form values)
+        if (this.steps[5] && this.steps[5].isInitialized) {
+            window.logger?.log('✅ Step 5 already initialized, skipping reinitialization to preserve form values');
+            return;
+        }
+
         if (window.StepStripeCreation) {
             const response = await fetch('/admin/components/product-wizard/components/step-stripe-creation/step-stripe-creation.html');
             const html = await response.text();
@@ -657,6 +663,10 @@ class ProductWizard {
 
         // Save current step data before moving and auto-persist
         const previousStep = this.currentStep;
+        // For Stripe step (step 5), read form field values before saving to preserve user input
+        if (previousStep === 5 && this.steps[5] && typeof this.steps[5].readFormFieldValues === 'function') {
+            this.steps[5].readFormFieldValues();
+        }
         this.saveCurrentStepData(previousStep);
         // Silent autosave; do not block navigation on failure
         try {
