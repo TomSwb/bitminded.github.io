@@ -864,10 +864,10 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 window.logger?.log('🔐 Calling edge function with auth token:', { 
                     functionName, 
                     hasToken: !!session.access_token,
-                    tokenLength: session.access_token?.length 
+                    tokenLength: session.access_token?.length
                 });
                 
-                // Pass Authorization header explicitly (matching update/delete functions)
+                // Pass Authorization header explicitly (matching update/delete functions exactly)
                 const { data, error } = await window.supabase.functions.invoke(functionName, {
                     body,
                     headers: {
@@ -877,6 +877,29 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 
                 if (error) {
                     window.logger?.error('❌ Edge function error:', error);
+                    
+                    // Try to extract error details from the response
+                    let errorDetails = null;
+                    try {
+                        // Supabase FunctionsHttpError has the response in error.context
+                        if (error.context?.response) {
+                            const response = error.context.response;
+                            // Clone the response so we can read it multiple times
+                            const clonedResponse = response.clone();
+                            const responseText = await clonedResponse.text();
+                            window.logger?.error('❌ Error response text:', responseText);
+                            
+                            try {
+                                errorDetails = JSON.parse(responseText);
+                                window.logger?.error('❌ Error response parsed:', errorDetails);
+                            } catch (parseError) {
+                                errorDetails = { raw: responseText };
+                            }
+                        }
+                    } catch (extractError) {
+                        window.logger?.error('❌ Could not extract error details:', extractError);
+                    }
+                    
                     // Log more details about the error
                     if (error.message) {
                         window.logger?.error('❌ Error message:', error.message);
@@ -884,33 +907,60 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     if (error.context) {
                         window.logger?.error('❌ Error context:', error.context);
                     }
-                    // Try to extract error details from Supabase error
-                    let errorDetails = null;
+                    
+                    // Check if it's a 401 and provide more helpful message
+                    const isUnauthorized = error.message?.includes('401') || 
+                                         error.message?.includes('Unauthorized') ||
+                                         errorDetails?.error?.includes('Unauthorized') ||
+                                         error.context?.response?.status === 401;
+                    
+                    if (isUnauthorized) {
+                        const detailedMessage = errorDetails?.error || errorDetails?.details 
+                            ? `Authentication failed: ${errorDetails.error || JSON.stringify(errorDetails.details)}`
+                            : 'Authentication failed. Please make sure you are logged in and try refreshing the page. If the problem persists, please log out and log back in.';
+                        throw new Error(detailedMessage);
+                    }
+                    throw error;
+                }
+                
+                window.logger?.log('✅ Stripe product created:', data);
+                return { success: true, data };
+                    window.logger?.error('❌ Edge function error:', error);
+                    
+                    // Try to extract error details from the response
                     try {
-                        // Supabase errors sometimes have the response in error.context
+                        // Supabase FunctionsHttpError has the response in error.context
                         if (error.context?.response) {
                             const response = error.context.response;
-                            if (response.json) {
-                                errorDetails = await response.json();
-                                window.logger?.error('❌ Error response body:', errorDetails);
-                            } else if (response.text) {
-                                const text = await response.text();
-                                window.logger?.error('❌ Error response text:', text);
-                                try {
-                                    errorDetails = JSON.parse(text);
-                                } catch (e) {
-                                    errorDetails = { raw: text };
-                                }
+                            // Clone the response so we can read it multiple times
+                            const clonedResponse = response.clone();
+                            const responseText = await clonedResponse.text();
+                            window.logger?.error('❌ Error response text:', responseText);
+                            
+                            try {
+                                errorDetails = JSON.parse(responseText);
+                                window.logger?.error('❌ Error response parsed:', errorDetails);
+                            } catch (parseError) {
+                                errorDetails = { raw: responseText };
                             }
                         }
-                    } catch (e) {
-                        window.logger?.error('❌ Could not extract error details:', e);
+                    } catch (extractError) {
+                        window.logger?.error('❌ Could not extract error details:', extractError);
+                    }
+                    
+                    // Log more details about the error
+                    if (error.message) {
+                        window.logger?.error('❌ Error message:', error.message);
+                    }
+                    if (error.context) {
+                        window.logger?.error('❌ Error context:', error.context);
                     }
                     
                     // Check if it's a 401 and provide more helpful message
                     const isUnauthorized = error.message?.includes('401') || 
                                          error.message?.includes('Unauthorized') ||
-                                         errorDetails?.error?.includes('Unauthorized');
+                                         errorDetails?.error?.includes('Unauthorized') ||
+                                         error.context?.response?.status === 401;
                     
                     if (isUnauthorized) {
                         const detailedMessage = errorDetails?.error || errorDetails?.details 
