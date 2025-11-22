@@ -1015,8 +1015,9 @@ if (typeof window.StepStripeCreation === 'undefined') {
             
             window.logger?.log('📝 Populating form fields with saved values:', sourceData);
             
-            // First, read current form field values to preserve any user input
-            this.readFormFieldValues();
+            // DON'T read form field values here - they might be empty if HTML was just replaced
+            // This was causing database prices to be reset to empty values
+            // We'll populate from saved database values instead
             
             // Set pricing type radio buttons (only if not already set by user)
             if (sourceData.pricing_type && this.elements.pricingTypeRadios) {
@@ -1029,89 +1030,93 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 }
             }
             
-            // Populate subscription price (multi-currency) - only if field is empty or value matches saved data
+            // Populate subscription price (multi-currency) - always use saved data from database
             const subscriptionPricing = sourceData.subscription_pricing || {};
             if (this.elements.subscriptionPriceChf) {
-                const currentValue = this.elements.subscriptionPriceChf.value;
                 const savedValue = subscriptionPricing.CHF || sourceData.subscription_price || '';
-                // Only update if field is empty OR if current value doesn't match saved (to restore after HTML replacement)
-                if (!currentValue || (savedValue && currentValue !== String(savedValue))) {
+                // Always populate from saved data (database is source of truth)
+                if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.subscriptionPriceChf.value = savedValue;
+                    // Update formData with saved value
+                    this.formData.subscription_pricing.CHF = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.subscriptionPriceUsd) {
-                const currentValue = this.elements.subscriptionPriceUsd.value;
                 const savedValue = subscriptionPricing.USD || '';
-                if (!currentValue || (savedValue && currentValue !== String(savedValue))) {
+                if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.subscriptionPriceUsd.value = savedValue;
+                    this.formData.subscription_pricing.USD = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.subscriptionPriceEur) {
-                const currentValue = this.elements.subscriptionPriceEur.value;
                 const savedValue = subscriptionPricing.EUR || '';
-                if (!currentValue || (savedValue && currentValue !== String(savedValue))) {
+                if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.subscriptionPriceEur.value = savedValue;
+                    this.formData.subscription_pricing.EUR = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.subscriptionPriceGbp) {
-                const currentValue = this.elements.subscriptionPriceGbp.value;
                 const savedValue = subscriptionPricing.GBP || '';
-                if (!currentValue || (savedValue && currentValue !== String(savedValue))) {
+                if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.subscriptionPriceGbp.value = savedValue;
+                    this.formData.subscription_pricing.GBP = parseFloat(savedValue) || 0;
                 }
             }
             
-            // Populate one-time price (multi-currency) - only if field is empty or value matches saved data
+            // Populate one-time price (multi-currency) - always use saved data from database
             const oneTimePricing = sourceData.one_time_pricing || {};
             if (this.elements.oneTimePriceChf) {
-                const currentValue = this.elements.oneTimePriceChf.value;
                 const savedValue = oneTimePricing.CHF || sourceData.one_time_price || '';
-                if (!currentValue || (savedValue && currentValue !== String(savedValue))) {
+                if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.oneTimePriceChf.value = savedValue;
+                    this.formData.one_time_pricing.CHF = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.oneTimePriceUsd) {
-                const currentValue = this.elements.oneTimePriceUsd.value;
                 const savedValue = oneTimePricing.USD || '';
-                if (!currentValue || (savedValue && currentValue !== String(savedValue))) {
+                if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.oneTimePriceUsd.value = savedValue;
+                    this.formData.one_time_pricing.USD = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.oneTimePriceEur) {
-                const currentValue = this.elements.oneTimePriceEur.value;
                 const savedValue = oneTimePricing.EUR || '';
-                if (!currentValue || (savedValue && currentValue !== String(savedValue))) {
+                if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.oneTimePriceEur.value = savedValue;
+                    this.formData.one_time_pricing.EUR = parseFloat(savedValue) || 0;
                 }
             }
             if (this.elements.oneTimePriceGbp) {
-                const currentValue = this.elements.oneTimePriceGbp.value;
                 const savedValue = oneTimePricing.GBP || '';
-                if (!currentValue || (savedValue && currentValue !== String(savedValue))) {
+                if (savedValue !== '' && savedValue !== null && savedValue !== undefined) {
                     this.elements.oneTimePriceGbp.value = savedValue;
+                    this.formData.one_time_pricing.GBP = parseFloat(savedValue) || 0;
                 }
             }
             
-            // Populate trial days - only if field is empty or value matches saved data
+            // Populate trial days - always use saved data
             if (this.elements.trialDaysInput) {
-                const currentValue = this.elements.trialDaysInput.value;
                 const savedValue = sourceData.trial_days !== undefined ? sourceData.trial_days : 0;
-                if (!currentValue || currentValue !== String(savedValue)) {
-                    this.elements.trialDaysInput.value = savedValue;
-                }
+                this.elements.trialDaysInput.value = savedValue;
+                this.formData.trial_days = savedValue;
             }
             
             // Populate trial requires payment checkbox
             if (this.elements.trialRequiresPaymentCheckbox) {
                 const savedValue = sourceData.trial_requires_payment || false;
-                // Only update if checkbox state doesn't match saved value (to restore after HTML replacement)
-                if (this.elements.trialRequiresPaymentCheckbox.checked !== savedValue) {
-                    this.elements.trialRequiresPaymentCheckbox.checked = savedValue;
-                }
+                this.elements.trialRequiresPaymentCheckbox.checked = savedValue;
+                this.formData.trial_requires_payment = savedValue;
             }
             
-            // Sync this.formData with sourceData, but preserve any values we just read from form fields
-            this.formData = { ...sourceData, ...this.formData };
+            // Sync this.formData with sourceData, prioritizing saved database values
+            // Only merge non-pricing fields from sourceData to avoid overwriting the pricing we just set
+            this.formData = { 
+                ...this.formData, 
+                ...sourceData,
+                // Ensure pricing objects are preserved (they were set above from saved data)
+                subscription_pricing: this.formData.subscription_pricing,
+                one_time_pricing: this.formData.one_time_pricing
+            };
             
             window.logger?.log('✅ Form fields populated from:', sourceData.stripe_product_id ? 'wizard.formData' : 'this.formData');
         }
