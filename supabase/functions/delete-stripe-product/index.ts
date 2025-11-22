@@ -405,6 +405,22 @@ serve(async (req) => {
         stripe_price_sale_id: null,
         stripe_price_monthly_sale_id: null,
         stripe_price_yearly_sale_id: null,
+        // Clear pricing data so product can be recreated
+        pricing_type: null,
+        price_amount: null,
+        price_currency: null,
+        price_amount_chf: null,
+        price_amount_usd: null,
+        price_amount_eur: null,
+        price_amount_gbp: null,
+        sale_price_amount_chf: null,
+        sale_price_amount_usd: null,
+        sale_price_amount_eur: null,
+        sale_price_amount_gbp: null,
+        is_on_sale: false,
+        sale_discount_percentage: null,
+        trial_days: null,
+        trial_requires_payment: null,
         updated_at: new Date().toISOString()
     }
 
