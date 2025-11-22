@@ -344,7 +344,9 @@ serve(async (req) => {
       pricing, // JSONB pricing object: {"CHF": {"monthly": 10, "yearly": 100}, ...}
       trial_days = 0,
       trial_requires_payment = false,
-      entity_type = 'service' // 'service' or 'product'
+      entity_type = 'service', // 'service' or 'product'
+      productId = null, // Database product ID (optional)
+      slug = null // Product slug (optional)
     } = body
 
     // Validation
@@ -522,8 +524,157 @@ serve(async (req) => {
     const primaryMonthlyPriceId = monthlyPrices.CHF || monthlyPrices.USD || monthlyPrices.EUR || monthlyPrices.GBP || Object.values(monthlyPrices)[0] || null
     const primaryYearlyPriceId = yearlyPrices.CHF || yearlyPrices.USD || yearlyPrices.EUR || yearlyPrices.GBP || Object.values(yearlyPrices)[0] || null
 
-    return new Response(
-      JSON.stringify({
+    // Update database with Stripe product ID and price IDs
+    // Try multiple methods to find the product
+    let dbProduct: any = null
+    let dbProductError: any = null
+
+    // Method 1: Try by productId if provided
+    if (productId) {
+      const result = await supabaseAdmin
+        .from('products')
+        .select('id')
+        .eq('id', productId)
+        .maybeSingle()
+      dbProduct = result.data
+      dbProductError = result.error
+    }
+
+    // Method 2: Try by slug if productId didn't work
+    if (!dbProduct && slug) {
+      const result = await supabaseAdmin
+        .from('products')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle()
+      dbProduct = result.data
+      dbProductError = result.error
+    }
+
+    // Method 3: Fallback - try to find by stripe_product_id (in case product was already created)
+    if (!dbProduct) {
+      console.log('⚠️ Product not found by ID/slug, trying to find by stripe_product_id...')
+      const fallbackResult = await supabaseAdmin
+        .from('products')
+        .select('id')
+        .eq('stripe_product_id', stripeProduct.id)
+        .maybeSingle()
+      if (fallbackResult.data) {
+        dbProduct = fallbackResult.data
+        dbProductError = null
+        console.log('✅ Found product by stripe_product_id:', dbProduct.id)
+      } else {
+        console.log('⚠️ Product not found by any method. Database update skipped.')
+      }
+    }
+
+    if (dbProduct && !dbProductError) {
+      const updateData: Record<string, any> = {
+        stripe_product_id: stripeProduct.id,
+        pricing_type: 'subscription',
+        updated_at: new Date().toISOString()
+      }
+
+      // Update currency-specific monthly price IDs and amounts
+      if (Object.keys(monthlyPrices).length > 0) {
+        if (monthlyPrices.CHF) updateData.stripe_price_chf_id = monthlyPrices.CHF
+        if (monthlyPrices.USD) updateData.stripe_price_usd_id = monthlyPrices.USD
+        if (monthlyPrices.EUR) updateData.stripe_price_eur_id = monthlyPrices.EUR
+        if (monthlyPrices.GBP) updateData.stripe_price_gbp_id = monthlyPrices.GBP
+        
+        // Update primary monthly price_id
+        updateData.stripe_price_monthly_id = primaryMonthlyPriceId
+        updateData.stripe_price_id = primaryMonthlyPriceId // Backward compatibility
+        
+        // Set price amounts for all currencies (monthly subscription prices)
+        const chfData = pricing?.CHF ?? pricing?.chf
+        const usdData = pricing?.USD ?? pricing?.usd
+        const eurData = pricing?.EUR ?? pricing?.eur
+        const gbpData = pricing?.GBP ?? pricing?.gbp
+        
+        if (typeof chfData === 'object' && chfData?.monthly && chfData.monthly > 0) updateData.price_amount_chf = chfData.monthly
+        if (typeof usdData === 'object' && usdData?.monthly && usdData.monthly > 0) updateData.price_amount_usd = usdData.monthly
+        if (typeof eurData === 'object' && eurData?.monthly && eurData.monthly > 0) updateData.price_amount_eur = eurData.monthly
+        if (typeof gbpData === 'object' && gbpData?.monthly && gbpData.monthly > 0) updateData.price_amount_gbp = gbpData.monthly
+        
+        // Set price_amount and price_currency from primary monthly currency (for backward compatibility)
+        const primaryCurrency = monthlyPrices.CHF ? 'CHF' : (monthlyPrices.USD ? 'USD' : (monthlyPrices.EUR ? 'EUR' : (monthlyPrices.GBP ? 'GBP' : 'USD')))
+        // Try both uppercase and lowercase keys since pricing object might have either
+        const primaryPriceData = pricing?.[primaryCurrency] ?? pricing?.[primaryCurrency.toLowerCase()]
+        console.log(`💰 Setting subscription price_amount: currency=${primaryCurrency}, priceData=`, primaryPriceData)
+        if (typeof primaryPriceData === 'object' && primaryPriceData?.monthly) {
+          updateData.price_amount = primaryPriceData.monthly
+          updateData.price_currency = primaryCurrency
+          console.log(`✅ Subscription price amount set: ${primaryPriceData.monthly} ${primaryCurrency}/month`)
+        } else {
+          console.warn(`⚠️ Could not set subscription price_amount: primaryPriceData=`, primaryPriceData, 'pricing object:', pricing)
+        }
+        
+        console.log('💰 Currency amounts saved (monthly):', {
+          CHF: (typeof chfData === 'object' && chfData?.monthly) ? chfData.monthly : null,
+          USD: (typeof usdData === 'object' && usdData?.monthly) ? usdData.monthly : null,
+          EUR: (typeof eurData === 'object' && eurData?.monthly) ? eurData.monthly : null,
+          GBP: (typeof gbpData === 'object' && gbpData?.monthly) ? gbpData.monthly : null
+        })
+      }
+
+      // Update currency-specific yearly price IDs
+      if (Object.keys(yearlyPrices).length > 0) {
+        updateData.stripe_price_yearly_id = primaryYearlyPriceId
+      }
+
+      // Update trial days if provided
+      if (trial_days !== undefined) {
+        updateData.trial_days = trial_days
+      }
+      if (trial_requires_payment !== undefined) {
+        updateData.trial_requires_payment = trial_requires_payment
+      }
+
+      // Perform database update
+      const { error: updateError } = await supabaseAdmin
+        .from('products')
+        .update(updateData)
+        .eq('id', dbProduct.id)
+
+      if (updateError) {
+        console.error('⚠️ Failed to update database with Stripe product ID and price IDs:', updateError)
+        await logError(
+          supabaseAdmin,
+          'create-stripe-subscription-product',
+          'database',
+          'Failed to update database with Stripe product ID and price IDs',
+          { error: updateError.message, productId: dbProduct.id, updateData },
+          user.id,
+          { stripeProductId: stripeProduct.id, updateData, monthlyPrices, yearlyPrices },
+          ipAddress
+        )
+      } else {
+        console.log('✅ Database updated with Stripe subscription product ID and price IDs for product:', dbProduct.id)
+        console.log('📊 Monthly Price IDs saved:', { 
+          CHF: monthlyPrices.CHF || null, 
+          USD: monthlyPrices.USD || null, 
+          EUR: monthlyPrices.EUR || null, 
+          GBP: monthlyPrices.GBP || null 
+        })
+        console.log('📊 Yearly Price IDs saved:', { 
+          CHF: yearlyPrices.CHF || null, 
+          USD: yearlyPrices.USD || null, 
+          EUR: yearlyPrices.EUR || null, 
+          GBP: yearlyPrices.GBP || null 
+        })
+        console.log('💰 Subscription price amount saved:', {
+          amount: updateData.price_amount || null,
+          currency: updateData.price_currency || null,
+          interval: 'monthly'
+        })
+      }
+    } else {
+      console.warn('⚠️ Could not find product in database to update. ProductId:', productId, 'Slug:', slug, 'StripeProductId:', stripeProduct.id)
+    }
+
+    // Build response
+    const responseData: any = {
         success: true,
         productId: stripeProduct.id,
         monthlyPriceId: primaryMonthlyPriceId,
@@ -534,7 +685,31 @@ serve(async (req) => {
         product: stripeProduct,
         priceErrors: Object.keys(priceErrors).length > 0 ? priceErrors : undefined,
         message: 'Subscription product created successfully with recurring prices. Trial period info stored in metadata for use when creating subscriptions.'
-      }),
+    }
+
+    // Add price_amount and price_currency to response if we have them
+    if (dbProduct && !dbProductError) {
+      const primaryCurrency = monthlyPrices.CHF ? 'CHF' : (monthlyPrices.USD ? 'USD' : (monthlyPrices.EUR ? 'EUR' : (monthlyPrices.GBP ? 'GBP' : 'USD')))
+      const primaryPriceData = pricing?.[primaryCurrency] ?? pricing?.[primaryCurrency.toLowerCase()]
+      if (typeof primaryPriceData === 'object' && primaryPriceData?.monthly) {
+        responseData.price_amount = primaryPriceData.monthly
+        responseData.price_currency = primaryCurrency
+      }
+      
+      // Add currency-specific price amounts to response (monthly subscription prices)
+      const chfData = pricing?.CHF ?? pricing?.chf
+      const usdData = pricing?.USD ?? pricing?.usd
+      const eurData = pricing?.EUR ?? pricing?.eur
+      const gbpData = pricing?.GBP ?? pricing?.gbp
+      
+      if (typeof chfData === 'object' && chfData?.monthly && chfData.monthly > 0) responseData.price_amount_chf = chfData.monthly
+      if (typeof usdData === 'object' && usdData?.monthly && usdData.monthly > 0) responseData.price_amount_usd = usdData.monthly
+      if (typeof eurData === 'object' && eurData?.monthly && eurData.monthly > 0) responseData.price_amount_eur = eurData.monthly
+      if (typeof gbpData === 'object' && gbpData?.monthly && gbpData.monthly > 0) responseData.price_amount_gbp = gbpData.monthly
+    }
+
+    return new Response(
+      JSON.stringify(responseData),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 

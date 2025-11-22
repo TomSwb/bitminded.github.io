@@ -912,7 +912,7 @@ serve(async (req) => {
         updated_at: new Date().toISOString()
       }
 
-      // Update currency-specific one-time price IDs
+      // Update currency-specific one-time price IDs and amounts
       if (Object.keys(newOneTimePrices).length > 0) {
         if (newOneTimePrices.CHF) updateData.stripe_price_chf_id = newOneTimePrices.CHF
         if (newOneTimePrices.USD) updateData.stripe_price_usd_id = newOneTimePrices.USD
@@ -921,9 +921,21 @@ serve(async (req) => {
         
         // Update primary price_id and price_amount/currency for backward compatibility
         updateData.stripe_price_id = primaryOneTimePriceId
-        // Set price_amount and price_currency from primary currency (prefer CHF, then USD)
+        
+        // Set price amounts for all currencies
+        const chfAmount = pricing?.CHF ?? pricing?.chf
+        const usdAmount = pricing?.USD ?? pricing?.usd
+        const eurAmount = pricing?.EUR ?? pricing?.eur
+        const gbpAmount = pricing?.GBP ?? pricing?.gbp
+        
+        if (typeof chfAmount === 'number' && chfAmount > 0) updateData.price_amount_chf = chfAmount
+        if (typeof usdAmount === 'number' && usdAmount > 0) updateData.price_amount_usd = usdAmount
+        if (typeof eurAmount === 'number' && eurAmount > 0) updateData.price_amount_eur = eurAmount
+        if (typeof gbpAmount === 'number' && gbpAmount > 0) updateData.price_amount_gbp = gbpAmount
+        
+        // Set price_amount and price_currency from primary currency (for backward compatibility)
         const primaryCurrency = newOneTimePrices.CHF ? 'CHF' : (newOneTimePrices.USD ? 'USD' : (newOneTimePrices.EUR ? 'EUR' : (newOneTimePrices.GBP ? 'GBP' : 'USD')))
-        const primaryPriceData = pricing?.[primaryCurrency]
+        const primaryPriceData = pricing?.[primaryCurrency] ?? pricing?.[primaryCurrency.toLowerCase()]
         if (typeof primaryPriceData === 'number') {
           updateData.price_amount = primaryPriceData
           updateData.price_currency = primaryCurrency
@@ -933,7 +945,7 @@ serve(async (req) => {
         }
       }
 
-      // Update currency-specific monthly price IDs (for subscriptions)
+      // Update currency-specific monthly price IDs and amounts (for subscriptions)
       if (Object.keys(newMonthlyPrices).length > 0) {
         updateData.stripe_price_monthly_id = primaryMonthlyPriceId
         // For subscriptions, store monthly price in currency-specific fields
@@ -942,9 +954,20 @@ serve(async (req) => {
         if (newMonthlyPrices.EUR) updateData.stripe_price_eur_id = newMonthlyPrices.EUR
         if (newMonthlyPrices.GBP) updateData.stripe_price_gbp_id = newMonthlyPrices.GBP
         
-        // Set price_amount and price_currency from primary currency
+        // Set price amounts for all currencies (monthly subscription prices)
+        const chfData = pricing?.CHF ?? pricing?.chf
+        const usdData = pricing?.USD ?? pricing?.usd
+        const eurData = pricing?.EUR ?? pricing?.eur
+        const gbpData = pricing?.GBP ?? pricing?.gbp
+        
+        if (typeof chfData === 'object' && chfData?.monthly && chfData.monthly > 0) updateData.price_amount_chf = chfData.monthly
+        if (typeof usdData === 'object' && usdData?.monthly && usdData.monthly > 0) updateData.price_amount_usd = usdData.monthly
+        if (typeof eurData === 'object' && eurData?.monthly && eurData.monthly > 0) updateData.price_amount_eur = eurData.monthly
+        if (typeof gbpData === 'object' && gbpData?.monthly && gbpData.monthly > 0) updateData.price_amount_gbp = gbpData.monthly
+        
+        // Set price_amount and price_currency from primary currency (for backward compatibility)
         const primaryCurrency = newMonthlyPrices.CHF ? 'CHF' : (newMonthlyPrices.USD ? 'USD' : (newMonthlyPrices.EUR ? 'EUR' : (newMonthlyPrices.GBP ? 'GBP' : 'USD')))
-        const primaryPriceData = pricing?.[primaryCurrency]
+        const primaryPriceData = pricing?.[primaryCurrency] ?? pricing?.[primaryCurrency.toLowerCase()]
         if (typeof primaryPriceData === 'object' && primaryPriceData?.monthly) {
           updateData.price_amount = primaryPriceData.monthly
           updateData.price_currency = primaryCurrency
@@ -1001,31 +1024,78 @@ serve(async (req) => {
       // Don't fail the request - Stripe update was successful
     }
 
+    // Build response
+    const responseData: any = {
+      success: true,
+      productId: productId,
+      // Regular prices
+      priceId: primaryOneTimePriceId || null,
+      monthlyPriceId: primaryMonthlyPriceId || null,
+      yearlyPriceId: primaryYearlyPriceId || null,
+      monthlyPrices: Object.keys(newMonthlyPrices).length > 0 ? newMonthlyPrices : undefined,
+      yearlyPrices: Object.keys(newYearlyPrices).length > 0 ? newYearlyPrices : undefined,
+      oneTimePrices: Object.keys(newOneTimePrices).length > 0 ? newOneTimePrices : undefined,
+      // Sale prices
+      sale_monthly_price_id: primarySaleMonthlyPriceId || null,
+      sale_yearly_price_id: primarySaleYearlyPriceId || null,
+      sale_price_id: primarySaleOneTimePriceId || null,
+      saleMonthlyPrices: Object.keys(newSaleMonthlyPrices).length > 0 ? newSaleMonthlyPrices : undefined,
+      saleYearlyPrices: Object.keys(newSaleYearlyPrices).length > 0 ? newSaleYearlyPrices : undefined,
+      saleOneTimePrices: Object.keys(newSaleOneTimePrices).length > 0 ? newSaleOneTimePrices : undefined,
+      priceErrors: Object.keys(allPriceErrors).length > 0 ? allPriceErrors : undefined,
+      message: (Object.keys(newMonthlyPrices).length > 0 || Object.keys(newYearlyPrices).length > 0 || Object.keys(newOneTimePrices).length > 0)
+        ? 'Product and prices updated successfully.'
+        : (is_on_sale 
+        ? 'Sale prices created/updated successfully.' 
+          : 'Product updated successfully.')
+    }
+
+    // Add price_amount and price_currency to response if we updated them
+    if (productData && !productError) {
+      // Check if we have one-time prices (for one_time pricing type)
+      if (Object.keys(newOneTimePrices).length > 0) {
+        const primaryCurrency = newOneTimePrices.CHF ? 'CHF' : (newOneTimePrices.USD ? 'USD' : (newOneTimePrices.EUR ? 'EUR' : (newOneTimePrices.GBP ? 'GBP' : 'USD')))
+        const primaryPriceData = pricing?.[primaryCurrency] ?? pricing?.[primaryCurrency.toLowerCase()]
+        if (typeof primaryPriceData === 'number' && primaryPriceData > 0) {
+          responseData.price_amount = primaryPriceData
+          responseData.price_currency = primaryCurrency
+        }
+        
+        // Add currency-specific price amounts to response
+        const chfAmount = pricing?.CHF ?? pricing?.chf
+        const usdAmount = pricing?.USD ?? pricing?.usd
+        const eurAmount = pricing?.EUR ?? pricing?.eur
+        const gbpAmount = pricing?.GBP ?? pricing?.gbp
+        
+        if (typeof chfAmount === 'number' && chfAmount > 0) responseData.price_amount_chf = chfAmount
+        if (typeof usdAmount === 'number' && usdAmount > 0) responseData.price_amount_usd = usdAmount
+        if (typeof eurAmount === 'number' && eurAmount > 0) responseData.price_amount_eur = eurAmount
+        if (typeof gbpAmount === 'number' && gbpAmount > 0) responseData.price_amount_gbp = gbpAmount
+      }
+      // Check if we have monthly prices (for subscription pricing type)
+      else if (Object.keys(newMonthlyPrices).length > 0) {
+        const primaryCurrency = newMonthlyPrices.CHF ? 'CHF' : (newMonthlyPrices.USD ? 'USD' : (newMonthlyPrices.EUR ? 'EUR' : (newMonthlyPrices.GBP ? 'GBP' : 'USD')))
+        const primaryPriceData = pricing?.[primaryCurrency] ?? pricing?.[primaryCurrency.toLowerCase()]
+        if (typeof primaryPriceData === 'object' && primaryPriceData?.monthly) {
+          responseData.price_amount = primaryPriceData.monthly
+          responseData.price_currency = primaryCurrency
+        }
+        
+        // Add currency-specific price amounts to response (monthly subscription prices)
+        const chfData = pricing?.CHF ?? pricing?.chf
+        const usdData = pricing?.USD ?? pricing?.usd
+        const eurData = pricing?.EUR ?? pricing?.eur
+        const gbpData = pricing?.GBP ?? pricing?.gbp
+        
+        if (typeof chfData === 'object' && chfData?.monthly && chfData.monthly > 0) responseData.price_amount_chf = chfData.monthly
+        if (typeof usdData === 'object' && usdData?.monthly && usdData.monthly > 0) responseData.price_amount_usd = usdData.monthly
+        if (typeof eurData === 'object' && eurData?.monthly && eurData.monthly > 0) responseData.price_amount_eur = eurData.monthly
+        if (typeof gbpData === 'object' && gbpData?.monthly && gbpData.monthly > 0) responseData.price_amount_gbp = gbpData.monthly
+      }
+    }
+
     return new Response(
-      JSON.stringify({
-        success: true,
-        productId: productId,
-        // Regular prices
-        priceId: primaryOneTimePriceId || null,
-        monthlyPriceId: primaryMonthlyPriceId || null,
-        yearlyPriceId: primaryYearlyPriceId || null,
-        monthlyPrices: Object.keys(newMonthlyPrices).length > 0 ? newMonthlyPrices : undefined,
-        yearlyPrices: Object.keys(newYearlyPrices).length > 0 ? newYearlyPrices : undefined,
-        oneTimePrices: Object.keys(newOneTimePrices).length > 0 ? newOneTimePrices : undefined,
-        // Sale prices
-        sale_monthly_price_id: primarySaleMonthlyPriceId || null,
-        sale_yearly_price_id: primarySaleYearlyPriceId || null,
-        sale_price_id: primarySaleOneTimePriceId || null,
-        saleMonthlyPrices: Object.keys(newSaleMonthlyPrices).length > 0 ? newSaleMonthlyPrices : undefined,
-        saleYearlyPrices: Object.keys(newSaleYearlyPrices).length > 0 ? newSaleYearlyPrices : undefined,
-        saleOneTimePrices: Object.keys(newSaleOneTimePrices).length > 0 ? newSaleOneTimePrices : undefined,
-        priceErrors: Object.keys(allPriceErrors).length > 0 ? allPriceErrors : undefined,
-        message: (Object.keys(newMonthlyPrices).length > 0 || Object.keys(newYearlyPrices).length > 0 || Object.keys(newOneTimePrices).length > 0)
-          ? 'Product and prices updated successfully.'
-          : (is_on_sale 
-          ? 'Sale prices created/updated successfully.' 
-            : 'Product updated successfully.')
-      }),
+      JSON.stringify(responseData),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 

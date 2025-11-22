@@ -164,8 +164,9 @@ if (typeof window.StepStripeCreation === 'undefined') {
             if (window.productWizard && window.productWizard.formData) {
                 const basicInfo = window.productWizard.formData;
                 
-                // Load pricing configuration
-                if (basicInfo.pricing_type) {
+                // Load pricing configuration - check for valid pricing_type values
+                // Valid values: 'freemium', 'one_time', 'subscription'
+                if (basicInfo.pricing_type && ['freemium', 'one_time', 'subscription'].includes(basicInfo.pricing_type)) {
                     this.formData.pricing_type = basicInfo.pricing_type;
                     if (this.elements.pricingTypeRadios) {
                         this.elements.pricingTypeRadios.forEach(radio => {
@@ -176,18 +177,26 @@ if (typeof window.StepStripeCreation === 'undefined') {
                             }
                         });
                     }
+                    window.logger?.log('✅ Loaded pricing_type from formData:', basicInfo.pricing_type);
                 } else {
-                    // No existing pricing_type - default to freemium and ensure it's checked
-                    this.formData.pricing_type = 'freemium';
+                    // No existing pricing_type or invalid value - default to freemium and ensure it's checked
+                    // But only if pricing_type is truly missing, not if it's a valid value
+                    const defaultPricingType = 'freemium';
+                    this.formData.pricing_type = defaultPricingType;
                     if (this.elements.pricingTypeRadios) {
                         this.elements.pricingTypeRadios.forEach(radio => {
-                            if (radio.value === 'freemium') {
+                            if (radio.value === defaultPricingType) {
                                 radio.checked = true;
                             } else {
                                 radio.checked = false;
                             }
                         });
                     }
+                    // Also update the wizard's formData to keep it in sync
+                    if (window.productWizard && window.productWizard.formData) {
+                        window.productWizard.formData.pricing_type = defaultPricingType;
+                    }
+                    window.logger?.log('⚠️ No valid pricing_type found, defaulting to:', defaultPricingType);
                 }
 
                 // Load subscription pricing (multi-currency or single)
@@ -229,7 +238,13 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 }
 
                 // Sync this.formData with basicInfo to ensure consistency
+                // But preserve pricing_type if we just set it above (don't overwrite with null/undefined)
+                const currentPricingType = this.formData.pricing_type;
                 this.formData = { ...this.formData, ...basicInfo };
+                // Restore pricing_type if basicInfo had a null/undefined value
+                if (!basicInfo.pricing_type || !['freemium', 'one_time', 'subscription'].includes(basicInfo.pricing_type)) {
+                    this.formData.pricing_type = currentPricingType;
+                }
 
                 // Check if Stripe product was already created
                 if (basicInfo.stripe_product_id) {
@@ -490,6 +505,26 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 statusHTML += `<span class="step-stripe-creation__status-value">${data.productId}</span>`;
                 statusHTML += '</div>';
             }
+            
+            // Display prices for all currencies
+            const prices = [];
+            if (data.price_amount_chf) prices.push(`CHF ${data.price_amount_chf}`);
+            if (data.price_amount_usd) prices.push(`USD ${data.price_amount_usd}`);
+            if (data.price_amount_eur) prices.push(`EUR ${data.price_amount_eur}`);
+            if (data.price_amount_gbp) prices.push(`GBP ${data.price_amount_gbp}`);
+            
+            // Fallback to price_amount/price_currency if currency-specific amounts not available
+            if (prices.length === 0 && data.price_amount) {
+                prices.push(`${data.price_amount} ${data.price_currency || 'USD'}`);
+            }
+            
+            if (prices.length > 0) {
+                statusHTML += '<div class="step-stripe-creation__status-item">';
+                statusHTML += '<span class="step-stripe-creation__status-label">Prices:</span>';
+                statusHTML += `<span class="step-stripe-creation__status-value">${prices.join(' | ')}</span>`;
+                statusHTML += '</div>';
+            }
+            
             if (data.monthlyPriceId) {
                 statusHTML += '<div class="step-stripe-creation__status-item">';
                 statusHTML += '<span class="step-stripe-creation__status-label">Monthly Price ID:</span>';
@@ -689,6 +724,28 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     window.productWizard.formData.one_time_price = this.formData.one_time_price;
                     window.productWizard.formData.trial_days = this.formData.trial_days;
                     window.productWizard.formData.trial_requires_payment = this.formData.trial_requires_payment;
+                    
+                    // Save price_amount and price_currency from Edge Function response (if provided)
+                    if (data.price_amount !== undefined) {
+                        window.productWizard.formData.price_amount = data.price_amount;
+                    }
+                    if (data.price_currency) {
+                        window.productWizard.formData.price_currency = data.price_currency;
+                    }
+                    
+                    // Save currency-specific price amounts (if provided)
+                    if (data.price_amount_chf !== undefined) {
+                        window.productWizard.formData.price_amount_chf = data.price_amount_chf;
+                    }
+                    if (data.price_amount_usd !== undefined) {
+                        window.productWizard.formData.price_amount_usd = data.price_amount_usd;
+                    }
+                    if (data.price_amount_eur !== undefined) {
+                        window.productWizard.formData.price_amount_eur = data.price_amount_eur;
+                    }
+                    if (data.price_amount_gbp !== undefined) {
+                        window.productWizard.formData.price_amount_gbp = data.price_amount_gbp;
+                    }
                 }
                 
                 // Update database to reflect the changes
@@ -799,7 +856,13 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     productId: data.stripe_product_id, 
                     priceId: data.stripe_price_id,
                     monthlyPriceId: data.stripe_price_monthly_id,
-                    yearlyPriceId: data.stripe_price_yearly_id
+                    yearlyPriceId: data.stripe_price_yearly_id,
+                    price_amount: data.price_amount,
+                    price_currency: data.price_currency,
+                    price_amount_chf: data.price_amount_chf,
+                    price_amount_usd: data.price_amount_usd,
+                    price_amount_eur: data.price_amount_eur,
+                    price_amount_gbp: data.price_amount_gbp
                 });
             }
         }
@@ -848,7 +911,18 @@ if (typeof window.StepStripeCreation === 'undefined') {
             window.productWizard.formData.trial_days = this.formData.trial_days;
             window.productWizard.formData.trial_requires_payment = this.formData.trial_requires_payment;
             
-            window.logger?.log('✅ Saved Stripe data to formData');
+            // Save price_amount and price_currency from Edge Function response (if provided)
+            if (data.price_amount !== undefined) {
+                window.productWizard.formData.price_amount = data.price_amount;
+            }
+            if (data.price_currency) {
+                window.productWizard.formData.price_currency = data.price_currency;
+            }
+            
+            window.logger?.log('✅ Saved Stripe data to formData', {
+                price_amount: window.productWizard.formData.price_amount,
+                price_currency: window.productWizard.formData.price_currency
+            });
         }
         
         readFormFieldValues() {
