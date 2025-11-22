@@ -567,7 +567,7 @@
             const saleWithSuffix = suffix ? `${saleFormatted}${suffix}` : saleFormatted;
             return `<div class="catalog-price-wrapper" style="display: flex; flex-direction: column; line-height: 1.4;">
                 <div class="catalog-price-original" style="text-decoration: line-through; opacity: 0.6; font-size: 0.9em;">${regularWithSuffix}</div>
-                <div class="catalog-price-sale" style="font-weight: 600; color: #e74c3c;">${saleWithSuffix}</div>
+                <div class="catalog-price-sale" style="font-weight: 600;">${saleWithSuffix}</div>
             </div>`;
         };
 

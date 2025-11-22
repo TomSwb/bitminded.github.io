@@ -205,6 +205,41 @@ class ProductManagement {
 
         // Setup emoji pickers
         this.setupEmojiPickers();
+        
+        // Setup product overview modal
+        this.setupProductOverviewModal();
+    }
+    
+    /**
+     * Setup product overview modal event listeners
+     */
+    setupProductOverviewModal() {
+        const closeBtn = document.getElementById('product-overview-modal-close');
+        const overlay = document.getElementById('product-overview-modal-overlay');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.closeProductOverviewModal();
+            });
+        }
+        
+        if (overlay) {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    this.closeProductOverviewModal();
+                }
+            });
+        }
+        
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('product-overview-modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    this.closeProductOverviewModal();
+                }
+            }
+        });
     }
 
     /**
@@ -785,29 +820,426 @@ class ProductManagement {
      * View product detail
      * @param {string} productId - Product ID
      */
-    viewProduct(productId) {
-        // Find the product data
-        const product = this.products.find(p => p.id === productId);
-        if (!product) {
-            this.showError('Product not found');
-            return;
+    async viewProduct(productId) {
+        try {
+            // Show modal and loading state
+            const modal = document.getElementById('product-overview-modal');
+            const overlay = document.getElementById('product-overview-modal-overlay');
+            const modalBody = document.getElementById('product-overview-modal-body');
+            
+            if (!modal || !overlay || !modalBody) {
+                this.showError('Product overview modal not found');
+                return;
+            }
+            
+            // Show modal
+            modal.classList.remove('hidden');
+            overlay.classList.remove('hidden');
+            modalBody.innerHTML = `
+                <div class="product-overview__loading">
+                    <div class="product-management__spinner"></div>
+                    <p>Loading product details...</p>
+                </div>
+            `;
+            
+            // Fetch complete product data
+            const { data: product, error } = await window.supabase
+                .from('products')
+                .select(`
+                    *,
+                    product_categories (
+                        id,
+                        name,
+                        slug,
+                        description
+                    )
+                `)
+                .eq('id', productId)
+                .single();
+            
+            if (error) {
+                throw error;
+            }
+            
+            if (!product) {
+                throw new Error('Product not found');
+            }
+            
+            // Populate modal with product data
+            this.populateProductOverviewModal(product);
+            
+        } catch (error) {
+            window.logger?.error('❌ Error viewing product:', error);
+            this.showError('Failed to load product details');
+            this.closeProductOverviewModal();
         }
+    }
+    
+    /**
+     * Populate product overview modal with all product data
+     * @param {Object} product - Complete product data
+     */
+    populateProductOverviewModal(product) {
+        const modalBody = document.getElementById('product-overview-modal-body');
+        if (!modalBody) return;
         
-        // For now, show product info in an alert (can be enhanced later)
-        const productInfo = `
-Product: ${product.name}
-Slug: ${product.slug}
-Status: ${product.status}
-Category: ${product.category_name}
-Pricing: ${product.pricing_type}
-Created: ${this.formatDate(product.created_at)}
-Description: ${product.description || 'No description'}
-        `.trim();
+        const category = product.product_categories || {};
         
-        alert(productInfo);
+        // Format currency amounts
+        const formatCurrency = (amount, currency) => {
+            if (amount === null || amount === undefined || amount === 0) return '—';
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currency || 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }).format(amount);
+        };
         
-        // TODO: Create a proper product detail page or modal
-        // window.open(`/products/${product.slug}`, '_blank');
+        // Format date
+        const formatDate = (date) => {
+            if (!date) return '—';
+            return new Date(date).toLocaleString();
+        };
+        
+        // Format array/object
+        const formatArray = (arr) => {
+            if (!arr) return '—';
+            if (Array.isArray(arr)) return arr.length > 0 ? arr.join(', ') : '—';
+            if (typeof arr === 'object') return JSON.stringify(arr, null, 2);
+            return arr;
+        };
+        
+        // Build HTML
+        let html = `
+            <!-- Step 1: Basic Information -->
+            <div class="product-overview__section">
+                <h3 class="product-overview__section-title">Step 1: Basic Information</h3>
+                <div class="product-overview__grid">
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Product Name</span>
+                        <span class="product-overview__field-value">${product.name || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Slug</span>
+                        <span class="product-overview__field-value">${product.slug || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Category</span>
+                        <span class="product-overview__field-value">${category.name || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Status</span>
+                        <span class="product-overview__field-value product-overview__field-value--badge product-overview__field-value--badge-${product.status || 'draft'}">${product.status || 'draft'}</span>
+                    </div>
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Short Description</span>
+                        <span class="product-overview__field-value">${product.short_description || '—'}</span>
+                    </div>
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Description</span>
+                        <span class="product-overview__field-value">${product.description || '—'}</span>
+                    </div>
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Tags</span>
+                        <span class="product-overview__field-value">${formatArray(product.tags)}</span>
+                    </div>
+                    ${product.name_translations ? `
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Name Translations</span>
+                        <span class="product-overview__field-value"><pre>${JSON.stringify(product.name_translations, null, 2)}</pre></span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <!-- Step 2: Technical Specification -->
+            ${product.technical_specification ? `
+            <div class="product-overview__section">
+                <h3 class="product-overview__section-title">Step 2: Technical Specification</h3>
+                <div class="product-overview__field product-overview__field--full">
+                    <span class="product-overview__field-label">Technical Specification</span>
+                    <div class="product-overview__field-value product-overview__field-value--code">
+                        <pre>${product.technical_specification}</pre>
+                    </div>
+                </div>
+                ${product.ai_final_decisions ? `
+                <div class="product-overview__field product-overview__field--full">
+                    <span class="product-overview__field-label">AI Final Decisions</span>
+                    <div class="product-overview__field-value product-overview__field-value--code">
+                        <pre>${JSON.stringify(product.ai_final_decisions, null, 2)}</pre>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            ` : ''}
+            
+            <!-- Step 3: Content & Media -->
+            <div class="product-overview__section">
+                <h3 class="product-overview__section-title">Step 3: Content & Media</h3>
+                <div class="product-overview__grid">
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Icon URL</span>
+                        <span class="product-overview__field-value">
+                            ${product.icon_url ? `<a href="${product.icon_url}" target="_blank" class="product-overview__field-value--link">View Icon</a>` : '—'}
+                        </span>
+                    </div>
+                    ${product.icon_url ? `
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Icon Preview</span>
+                        <span class="product-overview__field-value">
+                            <img src="${product.icon_url}" alt="Product icon" style="max-width: 100px; max-height: 100px; border-radius: 8px;">
+                        </span>
+                    </div>
+                    ` : ''}
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Screenshots</span>
+                        <span class="product-overview__field-value">${formatArray(product.screenshots)}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Demo Video URL</span>
+                        <span class="product-overview__field-value">
+                            ${product.demo_video_url ? `<a href="${product.demo_video_url}" target="_blank" class="product-overview__field-value--link">View Video</a>` : '—'}
+                        </span>
+                    </div>
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Features</span>
+                        <span class="product-overview__field-value">${formatArray(product.features)}</span>
+                    </div>
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Target Audience</span>
+                        <span class="product-overview__field-value">${product.target_audience || '—'}</span>
+                    </div>
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Tech Stack</span>
+                        <span class="product-overview__field-value">${formatArray(product.tech_stack)}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 4: GitHub -->
+            <div class="product-overview__section">
+                <h3 class="product-overview__section-title">Step 4: GitHub</h3>
+                <div class="product-overview__grid">
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Repository Created</span>
+                        <span class="product-overview__field-value product-overview__field-value--badge ${product.github_repo_created ? 'product-overview__field-value--badge-success' : ''}">
+                            ${product.github_repo_created ? 'Yes' : 'No'}
+                        </span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Repository Name</span>
+                        <span class="product-overview__field-value">${product.github_repo_name || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Repository URL</span>
+                        <span class="product-overview__field-value">
+                            ${product.github_repo_url ? `<a href="${product.github_repo_url}" target="_blank" class="product-overview__field-value--link">${product.github_repo_url}</a>` : '—'}
+                        </span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Branch</span>
+                        <span class="product-overview__field-value">${product.github_branch || '—'}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 5: Stripe -->
+            <div class="product-overview__section">
+                <h3 class="product-overview__section-title">Step 5: Stripe</h3>
+                <div class="product-overview__grid">
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Pricing Type</span>
+                        <span class="product-overview__field-value product-overview__field-value--badge">${product.pricing_type || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Stripe Product ID</span>
+                        <span class="product-overview__field-value">
+                            ${product.stripe_product_id ? `<a href="https://dashboard.stripe.com/test/products/${product.stripe_product_id}" target="_blank" class="product-overview__field-value--link">${product.stripe_product_id}</a>` : '—'}
+                        </span>
+                    </div>
+                    ${product.pricing_type === 'one_time' ? `
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">One-Time Prices</span>
+                        <div class="product-overview__currency-grid">
+                            <div class="product-overview__currency-item">
+                                <div class="product-overview__currency-label">CHF</div>
+                                <div class="product-overview__currency-value">${formatCurrency(product.price_amount_chf, 'CHF')}</div>
+                            </div>
+                            <div class="product-overview__currency-item">
+                                <div class="product-overview__currency-label">USD</div>
+                                <div class="product-overview__currency-value">${formatCurrency(product.price_amount_usd, 'USD')}</div>
+                            </div>
+                            <div class="product-overview__currency-item">
+                                <div class="product-overview__currency-label">EUR</div>
+                                <div class="product-overview__currency-value">${formatCurrency(product.price_amount_eur, 'EUR')}</div>
+                            </div>
+                            <div class="product-overview__currency-item">
+                                <div class="product-overview__currency-label">GBP</div>
+                                <div class="product-overview__currency-value">${formatCurrency(product.price_amount_gbp, 'GBP')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Stripe Price ID</span>
+                        <span class="product-overview__field-value">${product.stripe_price_id || '—'}</span>
+                    </div>
+                    ` : ''}
+                    ${product.pricing_type === 'subscription' ? `
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Subscription Prices (Monthly)</span>
+                        <div class="product-overview__currency-grid">
+                            <div class="product-overview__currency-item">
+                                <div class="product-overview__currency-label">CHF</div>
+                                <div class="product-overview__currency-value">${formatCurrency(product.price_amount_chf, 'CHF')}</div>
+                            </div>
+                            <div class="product-overview__currency-item">
+                                <div class="product-overview__currency-label">USD</div>
+                                <div class="product-overview__currency-value">${formatCurrency(product.price_amount_usd, 'USD')}</div>
+                            </div>
+                            <div class="product-overview__currency-item">
+                                <div class="product-overview__currency-label">EUR</div>
+                                <div class="product-overview__currency-value">${formatCurrency(product.price_amount_eur, 'EUR')}</div>
+                            </div>
+                            <div class="product-overview__currency-item">
+                                <div class="product-overview__currency-label">GBP</div>
+                                <div class="product-overview__currency-value">${formatCurrency(product.price_amount_gbp, 'GBP')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Monthly Price ID</span>
+                        <span class="product-overview__field-value">${product.stripe_price_monthly_id || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Yearly Price ID</span>
+                        <span class="product-overview__field-value">${product.stripe_price_yearly_id || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Subscription Interval</span>
+                        <span class="product-overview__field-value">${product.subscription_interval || '—'}</span>
+                    </div>
+                    ` : ''}
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Trial Days</span>
+                        <span class="product-overview__field-value">${product.trial_days || 0}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Trial Requires Payment</span>
+                        <span class="product-overview__field-value product-overview__field-value--badge ${product.trial_requires_payment ? 'product-overview__field-value--badge-warning' : ''}">
+                            ${product.trial_requires_payment ? 'Yes' : 'No'}
+                        </span>
+                    </div>
+                    ${product.is_on_sale ? `
+                    <div class="product-overview__field product-overview__field--full">
+                        <span class="product-overview__field-label">Sale Information</span>
+                        <div class="product-overview__field-value">
+                            <div><strong>Discount:</strong> ${product.sale_discount_percentage || 0}%</div>
+                            <div><strong>Start:</strong> ${formatDate(product.sale_start_date)}</div>
+                            <div><strong>End:</strong> ${formatDate(product.sale_end_date)}</div>
+                            <div><strong>Description:</strong> ${product.sale_description || '—'}</div>
+                            <div><strong>Emojis:</strong> ${product.sale_emoji_left || '✨'} ... ${product.sale_emoji_right || '✨'}</div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <!-- Step 6: Cloudflare -->
+            <div class="product-overview__section">
+                <h3 class="product-overview__section-title">Step 6: Cloudflare</h3>
+                <div class="product-overview__grid">
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Domain</span>
+                        <span class="product-overview__field-value">
+                            ${product.cloudflare_domain ? `<a href="https://${product.cloudflare_domain}" target="_blank" class="product-overview__field-value--link">${product.cloudflare_domain}</a>` : '—'}
+                        </span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Worker URL</span>
+                        <span class="product-overview__field-value">
+                            ${product.cloudflare_worker_url ? `<a href="${product.cloudflare_worker_url}" target="_blank" class="product-overview__field-value--link">${product.cloudflare_worker_url}</a>` : '—'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Information -->
+            <div class="product-overview__section">
+                <h3 class="product-overview__section-title">Additional Information</h3>
+                <div class="product-overview__grid">
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Is Featured</span>
+                        <span class="product-overview__field-value product-overview__field-value--badge ${product.is_featured ? 'product-overview__field-value--badge-success' : ''}">
+                            ${product.is_featured ? 'Yes' : 'No'}
+                        </span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Available for Purchase</span>
+                        <span class="product-overview__field-value product-overview__field-value--badge ${product.is_available_for_purchase ? 'product-overview__field-value--badge-success' : ''}">
+                            ${product.is_available_for_purchase ? 'Yes' : 'No'}
+                        </span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Is Commissioned</span>
+                        <span class="product-overview__field-value product-overview__field-value--badge ${product.is_commissioned ? 'product-overview__field-value--badge-warning' : ''}">
+                            ${product.is_commissioned ? 'Yes' : 'No'}
+                        </span>
+                    </div>
+                    ${product.is_commissioned ? `
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Commissioned By</span>
+                        <span class="product-overview__field-value">${product.commissioned_by || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Client Name</span>
+                        <span class="product-overview__field-value">${product.commissioned_client_name || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Client Email</span>
+                        <span class="product-overview__field-value">${product.commissioned_client_email || '—'}</span>
+                    </div>
+                    ` : ''}
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Documentation URL</span>
+                        <span class="product-overview__field-value">
+                            ${product.documentation_url ? `<a href="${product.documentation_url}" target="_blank" class="product-overview__field-value--link">${product.documentation_url}</a>` : '—'}
+                        </span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Support Email</span>
+                        <span class="product-overview__field-value">${product.support_email || '—'}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Created At</span>
+                        <span class="product-overview__field-value">${formatDate(product.created_at)}</span>
+                    </div>
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Updated At</span>
+                        <span class="product-overview__field-value">${formatDate(product.updated_at)}</span>
+                    </div>
+                    ${product.published_at ? `
+                    <div class="product-overview__field">
+                        <span class="product-overview__field-label">Published At</span>
+                        <span class="product-overview__field-value">${formatDate(product.published_at)}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        modalBody.innerHTML = html;
+    }
+    
+    /**
+     * Close product overview modal
+     */
+    closeProductOverviewModal() {
+        const modal = document.getElementById('product-overview-modal');
+        const overlay = document.getElementById('product-overview-modal-overlay');
+        
+        if (modal) modal.classList.add('hidden');
+        if (overlay) overlay.classList.add('hidden');
     }
 
     /**
@@ -1909,11 +2341,6 @@ Description: ${product.description || 'No description'}
                 updateData.sale_discount_percentage = null;
                 updateData.sale_emoji_left = '✨';
                 updateData.sale_emoji_right = '✨';
-                // Clear currency-specific sale price amounts
-                updateData.sale_price_amount_chf = null;
-                updateData.sale_price_amount_usd = null;
-                updateData.sale_price_amount_eur = null;
-                updateData.sale_price_amount_gbp = null;
             }
 
             // Calculate sale pricing if discount percentage is provided
@@ -2058,54 +2485,15 @@ Description: ${product.description || 'No description'}
                 old_sale_yearly_price_id: product.stripe_price_yearly_sale_id
             };
 
-            // Get REGULAR pricing data for all currencies - Edge Function will calculate sale prices from these
-            // This ensures sale prices are created for ALL currencies, not just one
-            if (product.pricing_type === 'one_time') {
-                // Build pricing object with all currency-specific amounts
-                const regularPricing = {};
-                if (product.price_amount_chf !== null && product.price_amount_chf !== undefined && product.price_amount_chf > 0) {
-                    regularPricing.CHF = product.price_amount_chf;
-                }
-                if (product.price_amount_usd !== null && product.price_amount_usd !== undefined && product.price_amount_usd > 0) {
-                    regularPricing.USD = product.price_amount_usd;
-                }
-                if (product.price_amount_eur !== null && product.price_amount_eur !== undefined && product.price_amount_eur > 0) {
-                    regularPricing.EUR = product.price_amount_eur;
-                }
-                if (product.price_amount_gbp !== null && product.price_amount_gbp !== undefined && product.price_amount_gbp > 0) {
-                    regularPricing.GBP = product.price_amount_gbp;
-                }
-                
-                // Fallback to default price_amount/currency if no currency-specific amounts
-                if (Object.keys(regularPricing).length === 0 && product.price_amount) {
-                    regularPricing[product.price_currency || 'USD'] = product.price_amount;
-                }
-                
-                body.pricing = regularPricing;
-                window.logger?.log('💰 Passing regular pricing for sale calculation (one-time):', regularPricing);
+            // Get pricing data for calculation
+            if (product.pricing_type === 'one_time' && product.price_amount) {
+                body.pricing = {
+                    [product.price_currency || 'USD']: product.price_amount
+                };
             } else if (product.pricing_type === 'subscription') {
-                // For subscriptions, build pricing object with monthly prices for all currencies
-                const regularPricing = {};
-                if (product.price_amount_chf !== null && product.price_amount_chf !== undefined && product.price_amount_chf > 0) {
-                    regularPricing.CHF = { monthly: product.price_amount_chf };
-                }
-                if (product.price_amount_usd !== null && product.price_amount_usd !== undefined && product.price_amount_usd > 0) {
-                    regularPricing.USD = { monthly: product.price_amount_usd };
-                }
-                if (product.price_amount_eur !== null && product.price_amount_eur !== undefined && product.price_amount_eur > 0) {
-                    regularPricing.EUR = { monthly: product.price_amount_eur };
-                }
-                if (product.price_amount_gbp !== null && product.price_amount_gbp !== undefined && product.price_amount_gbp > 0) {
-                    regularPricing.GBP = { monthly: product.price_amount_gbp };
-                }
-                
-                // Fallback to default price_amount/currency if no currency-specific amounts
-                if (Object.keys(regularPricing).length === 0 && product.price_amount) {
-                    regularPricing[product.price_currency || 'USD'] = { monthly: product.price_amount };
-                }
-                
-                body.pricing = regularPricing;
-                window.logger?.log('💰 Passing regular pricing for sale calculation (subscription):', regularPricing);
+                // For subscriptions, we'd need the full pricing structure
+                // This might need to be fetched separately or stored differently
+                body.pricing = salePricing || {};
             }
 
             // Call update edge function
