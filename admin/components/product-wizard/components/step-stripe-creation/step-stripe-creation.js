@@ -919,9 +919,33 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 window.productWizard.formData.price_currency = data.price_currency;
             }
             
+            // CRITICAL: Save currency-specific price amounts from Edge Function response
+            // These are saved by the Edge Function to the database, so we MUST save them to formData
+            // to prevent saveDraftToDatabase from overwriting them with null
+            if (data.price_amount_chf !== undefined && data.price_amount_chf !== null) {
+                window.productWizard.formData.price_amount_chf = data.price_amount_chf;
+                window.logger?.log('✅ Saved price_amount_chf to formData:', data.price_amount_chf);
+            }
+            if (data.price_amount_usd !== undefined && data.price_amount_usd !== null) {
+                window.productWizard.formData.price_amount_usd = data.price_amount_usd;
+                window.logger?.log('✅ Saved price_amount_usd to formData:', data.price_amount_usd);
+            }
+            if (data.price_amount_eur !== undefined && data.price_amount_eur !== null) {
+                window.productWizard.formData.price_amount_eur = data.price_amount_eur;
+                window.logger?.log('✅ Saved price_amount_eur to formData:', data.price_amount_eur);
+            }
+            if (data.price_amount_gbp !== undefined && data.price_amount_gbp !== null) {
+                window.productWizard.formData.price_amount_gbp = data.price_amount_gbp;
+                window.logger?.log('✅ Saved price_amount_gbp to formData:', data.price_amount_gbp);
+            }
+            
             window.logger?.log('✅ Saved Stripe data to formData', {
                 price_amount: window.productWizard.formData.price_amount,
-                price_currency: window.productWizard.formData.price_currency
+                price_currency: window.productWizard.formData.price_currency,
+                price_amount_chf: window.productWizard.formData.price_amount_chf,
+                price_amount_usd: window.productWizard.formData.price_amount_usd,
+                price_amount_eur: window.productWizard.formData.price_amount_eur,
+                price_amount_gbp: window.productWizard.formData.price_amount_gbp
             });
         }
         

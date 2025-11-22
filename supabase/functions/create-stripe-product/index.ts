@@ -456,6 +456,10 @@ serve(async (req) => {
     const prices: Record<string, any> = {}
     const priceErrors: Record<string, string> = {}
 
+    console.log('🔍 Pricing object received:', JSON.stringify(pricing, null, 2))
+    console.log('🔍 Pricing object type:', typeof pricing)
+    console.log('🔍 Pricing object keys:', pricing ? Object.keys(pricing) : 'null/undefined')
+
     if (pricing && typeof pricing === 'object') {
       // Multi-currency pricing
       for (const [currency, amount] of Object.entries(pricing)) {
@@ -651,15 +655,66 @@ serve(async (req) => {
         updateData.stripe_price_id = primaryPriceId
         
         // Set price amounts for all currencies
+        // CRITICAL: pricing variable is from the request body, should still be available here
+        console.log('🔍 DEBUG: About to extract currency amounts. Pricing variable:', JSON.stringify(pricing, null, 2))
+        console.log('🔍 DEBUG: Pricing variable type:', typeof pricing)
+        console.log('🔍 DEBUG: Pricing variable is null?', pricing === null)
+        console.log('🔍 DEBUG: Pricing variable is undefined?', pricing === undefined)
+        
         const chfAmount = pricing?.CHF ?? pricing?.chf
         const usdAmount = pricing?.USD ?? pricing?.usd
         const eurAmount = pricing?.EUR ?? pricing?.eur
         const gbpAmount = pricing?.GBP ?? pricing?.gbp
         
-        if (typeof chfAmount === 'number' && chfAmount > 0) updateData.price_amount_chf = chfAmount
-        if (typeof usdAmount === 'number' && usdAmount > 0) updateData.price_amount_usd = usdAmount
-        if (typeof eurAmount === 'number' && eurAmount > 0) updateData.price_amount_eur = eurAmount
-        if (typeof gbpAmount === 'number' && gbpAmount > 0) updateData.price_amount_gbp = gbpAmount
+        console.log('🔍 Extracting currency amounts from pricing object:', {
+          pricingObject: pricing,
+          chfAmount: chfAmount,
+          usdAmount: usdAmount,
+          eurAmount: eurAmount,
+          gbpAmount: gbpAmount,
+          chfType: typeof chfAmount,
+          usdType: typeof usdAmount,
+          eurType: typeof eurAmount,
+          gbpType: typeof gbpAmount
+        })
+        
+        // Convert to numbers if needed and set in updateData
+        if (chfAmount !== undefined && chfAmount !== null) {
+          const numChf = typeof chfAmount === 'number' ? chfAmount : parseFloat(String(chfAmount))
+          if (!isNaN(numChf) && numChf > 0) {
+            updateData.price_amount_chf = numChf
+            console.log('✅ Set price_amount_chf:', numChf)
+          } else {
+            console.warn('⚠️ Skipping price_amount_chf - invalid value:', chfAmount, 'parsed:', numChf, 'type:', typeof chfAmount)
+          }
+        }
+        if (usdAmount !== undefined && usdAmount !== null) {
+          const numUsd = typeof usdAmount === 'number' ? usdAmount : parseFloat(String(usdAmount))
+          if (!isNaN(numUsd) && numUsd > 0) {
+            updateData.price_amount_usd = numUsd
+            console.log('✅ Set price_amount_usd:', numUsd)
+          } else {
+            console.warn('⚠️ Skipping price_amount_usd - invalid value:', usdAmount, 'parsed:', numUsd, 'type:', typeof usdAmount)
+          }
+        }
+        if (eurAmount !== undefined && eurAmount !== null) {
+          const numEur = typeof eurAmount === 'number' ? eurAmount : parseFloat(String(eurAmount))
+          if (!isNaN(numEur) && numEur > 0) {
+            updateData.price_amount_eur = numEur
+            console.log('✅ Set price_amount_eur:', numEur)
+          } else {
+            console.warn('⚠️ Skipping price_amount_eur - invalid value:', eurAmount, 'parsed:', numEur, 'type:', typeof eurAmount)
+          }
+        }
+        if (gbpAmount !== undefined && gbpAmount !== null) {
+          const numGbp = typeof gbpAmount === 'number' ? gbpAmount : parseFloat(String(gbpAmount))
+          if (!isNaN(numGbp) && numGbp > 0) {
+            updateData.price_amount_gbp = numGbp
+            console.log('✅ Set price_amount_gbp:', numGbp)
+          } else {
+            console.warn('⚠️ Skipping price_amount_gbp - invalid value:', gbpAmount, 'parsed:', numGbp, 'type:', typeof gbpAmount)
+          }
+        }
         
         // Set price_amount and price_currency from primary currency (for backward compatibility)
         const primaryCurrency = prices.CHF ? 'CHF' : (prices.USD ? 'USD' : (prices.EUR ? 'EUR' : (prices.GBP ? 'GBP' : 'USD')))
@@ -691,6 +746,14 @@ serve(async (req) => {
       }
 
       // Perform database update
+      console.log('📦 Full updateData being sent to database:', JSON.stringify(updateData, null, 2))
+      console.log('🔍 Checking if currency amount columns exist in updateData:', {
+        has_price_amount_chf: 'price_amount_chf' in updateData,
+        has_price_amount_usd: 'price_amount_usd' in updateData,
+        has_price_amount_eur: 'price_amount_eur' in updateData,
+        has_price_amount_gbp: 'price_amount_gbp' in updateData
+      })
+      
       const { error: updateError } = await supabaseAdmin
         .from('products')
         .update(updateData)
@@ -698,6 +761,12 @@ serve(async (req) => {
 
       if (updateError) {
         console.error('⚠️ Failed to update database with Stripe product ID and price IDs:', updateError)
+        console.error('⚠️ Update error details:', JSON.stringify(updateError, null, 2))
+        // Check if error is about missing columns
+        if (updateError.message && (updateError.message.includes('column') || updateError.message.includes('does not exist'))) {
+          console.error('❌ CRITICAL: Database columns may not exist! Please run migration: 20251122_add_currency_price_amounts.sql')
+          console.error('❌ Error message:', updateError.message)
+        }
         await logError(
           supabaseAdmin,
           'create-stripe-product',
@@ -720,6 +789,41 @@ serve(async (req) => {
           amount: updateData.price_amount || null,
           currency: updateData.price_currency || null
         })
+        console.log('💰 Currency amounts in updateData that were sent to database:', {
+          price_amount_chf: updateData.price_amount_chf || null,
+          price_amount_usd: updateData.price_amount_usd || null,
+          price_amount_eur: updateData.price_amount_eur || null,
+          price_amount_gbp: updateData.price_amount_gbp || null
+        })
+        
+        // Verify the update by reading back from database
+        const { data: verifyData, error: verifyError } = await supabaseAdmin
+          .from('products')
+          .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, price_amount, price_currency')
+          .eq('id', dbProduct.id)
+          .single()
+        
+        if (!verifyError && verifyData) {
+          console.log('✅ Verified currency amounts in database after update:', verifyData)
+          // Check if amounts were actually saved
+          if (verifyData.price_amount_chf === null && updateData.price_amount_chf) {
+            console.error('❌ WARNING: price_amount_chf was set in updateData but is null in database! Columns may not exist.')
+          }
+          if (verifyData.price_amount_usd === null && updateData.price_amount_usd) {
+            console.error('❌ WARNING: price_amount_usd was set in updateData but is null in database! Columns may not exist.')
+          }
+          if (verifyData.price_amount_eur === null && updateData.price_amount_eur) {
+            console.error('❌ WARNING: price_amount_eur was set in updateData but is null in database! Columns may not exist.')
+          }
+          if (verifyData.price_amount_gbp === null && updateData.price_amount_gbp) {
+            console.error('❌ WARNING: price_amount_gbp was set in updateData but is null in database! Columns may not exist.')
+          }
+        } else if (verifyError) {
+          console.warn('⚠️ Could not verify currency amounts (columns may not exist):', verifyError.message)
+          if (verifyError.message && verifyError.message.includes('column')) {
+            console.error('❌ CRITICAL: Database columns do not exist! Please run migration: 20251122_add_currency_price_amounts.sql')
+          }
+        }
       }
     } else {
       console.warn('⚠️ Could not find product in database to update. ProductId:', productId, 'Slug:', slug, 'StripeProductId:', productData.id)

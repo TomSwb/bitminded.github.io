@@ -592,10 +592,55 @@ serve(async (req) => {
         const eurData = pricing?.EUR ?? pricing?.eur
         const gbpData = pricing?.GBP ?? pricing?.gbp
         
-        if (typeof chfData === 'object' && chfData?.monthly && chfData.monthly > 0) updateData.price_amount_chf = chfData.monthly
-        if (typeof usdData === 'object' && usdData?.monthly && usdData.monthly > 0) updateData.price_amount_usd = usdData.monthly
-        if (typeof eurData === 'object' && eurData?.monthly && eurData.monthly > 0) updateData.price_amount_eur = eurData.monthly
-        if (typeof gbpData === 'object' && gbpData?.monthly && gbpData.monthly > 0) updateData.price_amount_gbp = gbpData.monthly
+        // Extract monthly amounts and convert to numbers if needed
+        if (chfData !== undefined && chfData !== null) {
+          const monthlyChf = typeof chfData === 'object' && chfData?.monthly ? chfData.monthly : (typeof chfData === 'number' ? chfData : null)
+          if (monthlyChf !== null && monthlyChf !== undefined) {
+            const numChf = typeof monthlyChf === 'number' ? monthlyChf : parseFloat(String(monthlyChf))
+            if (!isNaN(numChf) && numChf > 0) {
+              updateData.price_amount_chf = numChf
+              console.log('✅ Set price_amount_chf (monthly):', numChf)
+            } else {
+              console.warn('⚠️ Skipping price_amount_chf (monthly) - invalid value:', monthlyChf, 'parsed:', numChf)
+            }
+          }
+        }
+        if (usdData !== undefined && usdData !== null) {
+          const monthlyUsd = typeof usdData === 'object' && usdData?.monthly ? usdData.monthly : (typeof usdData === 'number' ? usdData : null)
+          if (monthlyUsd !== null && monthlyUsd !== undefined) {
+            const numUsd = typeof monthlyUsd === 'number' ? monthlyUsd : parseFloat(String(monthlyUsd))
+            if (!isNaN(numUsd) && numUsd > 0) {
+              updateData.price_amount_usd = numUsd
+              console.log('✅ Set price_amount_usd (monthly):', numUsd)
+            } else {
+              console.warn('⚠️ Skipping price_amount_usd (monthly) - invalid value:', monthlyUsd, 'parsed:', numUsd)
+            }
+          }
+        }
+        if (eurData !== undefined && eurData !== null) {
+          const monthlyEur = typeof eurData === 'object' && eurData?.monthly ? eurData.monthly : (typeof eurData === 'number' ? eurData : null)
+          if (monthlyEur !== null && monthlyEur !== undefined) {
+            const numEur = typeof monthlyEur === 'number' ? monthlyEur : parseFloat(String(monthlyEur))
+            if (!isNaN(numEur) && numEur > 0) {
+              updateData.price_amount_eur = numEur
+              console.log('✅ Set price_amount_eur (monthly):', numEur)
+            } else {
+              console.warn('⚠️ Skipping price_amount_eur (monthly) - invalid value:', monthlyEur, 'parsed:', numEur)
+            }
+          }
+        }
+        if (gbpData !== undefined && gbpData !== null) {
+          const monthlyGbp = typeof gbpData === 'object' && gbpData?.monthly ? gbpData.monthly : (typeof gbpData === 'number' ? gbpData : null)
+          if (monthlyGbp !== null && monthlyGbp !== undefined) {
+            const numGbp = typeof monthlyGbp === 'number' ? monthlyGbp : parseFloat(String(monthlyGbp))
+            if (!isNaN(numGbp) && numGbp > 0) {
+              updateData.price_amount_gbp = numGbp
+              console.log('✅ Set price_amount_gbp (monthly):', numGbp)
+            } else {
+              console.warn('⚠️ Skipping price_amount_gbp (monthly) - invalid value:', monthlyGbp, 'parsed:', numGbp)
+            }
+          }
+        }
         
         // Set price_amount and price_currency from primary monthly currency (for backward compatibility)
         const primaryCurrency = monthlyPrices.CHF ? 'CHF' : (monthlyPrices.USD ? 'USD' : (monthlyPrices.EUR ? 'EUR' : (monthlyPrices.GBP ? 'GBP' : 'USD')))
@@ -668,6 +713,41 @@ serve(async (req) => {
           currency: updateData.price_currency || null,
           interval: 'monthly'
         })
+        console.log('💰 Currency amounts in updateData that were sent to database:', {
+          price_amount_chf: updateData.price_amount_chf || null,
+          price_amount_usd: updateData.price_amount_usd || null,
+          price_amount_eur: updateData.price_amount_eur || null,
+          price_amount_gbp: updateData.price_amount_gbp || null
+        })
+        
+        // Verify the update by reading back from database
+        const { data: verifyData, error: verifyError } = await supabaseAdmin
+          .from('products')
+          .select('price_amount_chf, price_amount_usd, price_amount_eur, price_amount_gbp, price_amount, price_currency')
+          .eq('id', dbProduct.id)
+          .single()
+        
+        if (!verifyError && verifyData) {
+          console.log('✅ Verified currency amounts in database after update:', verifyData)
+          // Check if amounts were actually saved
+          if (updateData.price_amount_chf && verifyData.price_amount_chf === null) {
+            console.error('❌ WARNING: price_amount_chf was set in updateData (' + updateData.price_amount_chf + ') but is null in database! Columns may not exist or update was overwritten.')
+          }
+          if (updateData.price_amount_usd && verifyData.price_amount_usd === null) {
+            console.error('❌ WARNING: price_amount_usd was set in updateData (' + updateData.price_amount_usd + ') but is null in database! Columns may not exist or update was overwritten.')
+          }
+          if (updateData.price_amount_eur && verifyData.price_amount_eur === null) {
+            console.error('❌ WARNING: price_amount_eur was set in updateData (' + updateData.price_amount_eur + ') but is null in database! Columns may not exist or update was overwritten.')
+          }
+          if (updateData.price_amount_gbp && verifyData.price_amount_gbp === null) {
+            console.error('❌ WARNING: price_amount_gbp was set in updateData (' + updateData.price_amount_gbp + ') but is null in database! Columns may not exist or update was overwritten.')
+          }
+        } else if (verifyError) {
+          console.warn('⚠️ Could not verify currency amounts (columns may not exist):', verifyError.message)
+          if (verifyError.message && (verifyError.message.includes('column') || verifyError.message.includes('does not exist'))) {
+            console.error('❌ CRITICAL: Database columns do not exist! Please run migration: 20251122_add_currency_price_amounts.sql')
+          }
+        }
       }
     } else {
       console.warn('⚠️ Could not find product in database to update. ProductId:', productId, 'Slug:', slug, 'StripeProductId:', stripeProduct.id)

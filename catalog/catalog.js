@@ -100,6 +100,18 @@
         applyTranslationUpdates();
     });
 
+    // Listen for currency changes
+    window.addEventListener('currencyChanged', (event) => {
+        const newCurrency = event?.detail?.currency;
+        if (newCurrency && state.products.length > 0) {
+            // Re-render catalog with new currency
+            // Products don't need to be re-fetched, just re-rendered with new currency
+            renderFeaturedSection(state.featuredProducts);
+            renderProductGrid(state.filteredProducts);
+            applyTranslationUpdates();
+        }
+    });
+
     async function hydrateCatalog() {
         renderLoadingStates();
 
@@ -466,23 +478,47 @@
             return translateText('catalog-pricing-freemium', 'Freemium');
         }
 
-        const hasExplicitPrice = typeof pricing.amount === 'number';
-        const isFree = hasExplicitPrice && pricing.amount === 0;
+        // Get current currency from currency switcher or default to CHF
+        const currentCurrency = (window.currencySwitcher?.getCurrentCurrency()) || 'CHF';
+        
+        // Get price for current currency, fallback to default amount/currency
+        let priceAmount = null;
+        let priceCurrency = currentCurrency;
+        
+        if (pricing.currencyAmounts && pricing.currencyAmounts[currentCurrency] !== null && pricing.currencyAmounts[currentCurrency] !== undefined) {
+            priceAmount = pricing.currencyAmounts[currentCurrency];
+            priceCurrency = currentCurrency;
+        } else if (typeof pricing.amount === 'number') {
+            priceAmount = pricing.amount;
+            priceCurrency = pricing.currency || 'USD';
+        }
+
+        const hasExplicitPrice = priceAmount !== null && priceAmount !== undefined;
+        const isFree = hasExplicitPrice && priceAmount === 0;
 
         if (pricing.pricingType === 'subscription') {
             if (pricing.subscriptionInterval === 'monthly') {
                 if (isFree) {
                     return translateText('catalog-pricing-free', 'Free');
                 }
-                return translateText('catalog-pricing-subscription-monthly', 'Monthly subscription');
+                const formattedPrice = formatCurrency(priceAmount, priceCurrency);
+                return translateText('catalog-pricing-subscription-monthly', `${formattedPrice}/mo`, { price: formattedPrice });
             }
             if (pricing.subscriptionInterval === 'yearly') {
                 if (isFree) {
                     return translateText('catalog-pricing-free', 'Free');
                 }
-                return translateText('catalog-pricing-subscription-yearly', 'Yearly subscription');
+                const formattedPrice = formatCurrency(priceAmount, priceCurrency);
+                return translateText('catalog-pricing-subscription-yearly', `${formattedPrice}/yr`, { price: formattedPrice });
             }
             const intervalLabel = pricing.subscriptionInterval ? capitalize(pricing.subscriptionInterval) : 'Recurring';
+            if (hasExplicitPrice && !isFree) {
+                const formattedPrice = formatCurrency(priceAmount, priceCurrency);
+                return translateText('catalog-pricing-subscription-generic', `${formattedPrice} {{interval}}`, {
+                    price: formattedPrice,
+                    interval: intervalLabel.toLowerCase()
+                });
+            }
             return translateText('catalog-pricing-subscription-generic', '{{interval}} subscription', {
                 interval: intervalLabel
             });
@@ -492,23 +528,44 @@
             if (isFree) {
                 return translateText('catalog-pricing-free', 'Free');
             }
-            const formattedPrice = formatCurrency(pricing.amount, pricing.currency);
-            return translateText('catalog-pricing-one-time', `One-time ${formattedPrice}`, { price: formattedPrice });
+            const formattedPrice = formatCurrency(priceAmount, priceCurrency);
+            return translateText('catalog-pricing-one-time', formattedPrice, { price: formattedPrice });
         }
 
         return '';
     }
 
     function formatCurrency(amount, currency = 'USD') {
+        if (amount === null || amount === undefined || isNaN(amount)) {
+            return '';
+        }
+        
         try {
-            return new Intl.NumberFormat('en-US', {
+            // Use appropriate locale for currency formatting
+            const localeMap = {
+                'CHF': 'de-CH',
+                'USD': 'en-US',
+                'EUR': 'de-DE',
+                'GBP': 'en-GB'
+            };
+            const locale = localeMap[currency] || 'en-US';
+            
+            return new Intl.NumberFormat(locale, {
                 style: 'currency',
                 currency,
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
             }).format(amount);
         } catch (error) {
-            return `${amount} ${currency}`;
+            // Fallback formatting
+            const symbolMap = {
+                'CHF': 'CHF',
+                'USD': '$',
+                'EUR': '€',
+                'GBP': '£'
+            };
+            const symbol = symbolMap[currency] || currency;
+            return `${symbol}${amount.toFixed(2)}`;
         }
     }
 
