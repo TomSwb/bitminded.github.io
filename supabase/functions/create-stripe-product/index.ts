@@ -489,7 +489,7 @@ serve(async (req) => {
             currencyUpper.toLowerCase(),
             priceType,
             priceNickname,
-            priceInterval || undefined
+            priceInterval ?? undefined
           )
           prices[currencyUpper] = priceData.id
           console.log(`✅ Stripe price created for ${currencyUpper}:`, priceData.id)
@@ -539,7 +539,7 @@ serve(async (req) => {
             currency.toLowerCase(),
             priceType,
             priceNickname,
-            priceInterval || undefined
+            priceInterval ?? undefined
           )
           prices[currency.toUpperCase()] = priceData.id
           console.log(`✅ Stripe price created for ${currency.toUpperCase()}:`, priceData.id)
@@ -589,89 +589,140 @@ serve(async (req) => {
       hasPriceErrors: Object.keys(priceErrors).length > 0
     })
 
-    // Update database with Stripe product ID and price IDs if productId or slug is provided
-    if (productId || slug) {
-      let dbProduct: any = null
-      let dbProductError: any = null
-      
-      if (productId) {
-        const result = await supabaseAdmin
-          .from('products')
-          .select('id')
-          .eq('id', productId)
-          .single()
-        dbProduct = result.data
-        dbProductError = result.error
-      } else if (slug) {
-        const result = await supabaseAdmin
-          .from('products')
-          .select('id')
-          .eq('slug', slug)
-          .single()
-        dbProduct = result.data
-        dbProductError = result.error
+    // Update database with Stripe product ID and price IDs
+    // Try multiple methods to find the product
+    let dbProduct: any = null
+    let dbProductError: any = null
+
+    // Method 1: Try by productId if provided
+    if (productId) {
+      const result = await supabaseAdmin
+        .from('products')
+        .select('id')
+        .eq('id', productId)
+        .maybeSingle()
+      dbProduct = result.data
+      dbProductError = result.error
+    }
+
+    // Method 2: Try by slug if productId didn't work
+    if (!dbProduct && slug) {
+      const result = await supabaseAdmin
+        .from('products')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle()
+      dbProduct = result.data
+      dbProductError = result.error
+    }
+
+    // Method 3: Fallback - try to find by stripe_product_id (in case product was already created)
+    if (!dbProduct) {
+      console.log('⚠️ Product not found by ID/slug, trying to find by stripe_product_id...')
+      const fallbackResult = await supabaseAdmin
+        .from('products')
+        .select('id')
+        .eq('stripe_product_id', productData.id)
+        .maybeSingle()
+      if (fallbackResult.data) {
+        dbProduct = fallbackResult.data
+        dbProductError = null
+        console.log('✅ Found product by stripe_product_id:', dbProduct.id)
+      } else {
+        console.log('⚠️ Product not found by any method. Database update skipped.')
+      }
+    }
+
+    if (dbProduct && !dbProductError) {
+      const updateData: Record<string, any> = {
+        stripe_product_id: productData.id,
+        pricing_type: pricingType,
+        updated_at: new Date().toISOString()
       }
 
-      if (!dbProductError && dbProduct) {
-        const updateData: Record<string, any> = {
-          stripe_product_id: productData.id,
-          pricing_type: pricingType,
-          updated_at: new Date().toISOString()
-        }
-
-        // Update currency-specific price IDs
-        if (Object.keys(prices).length > 0) {
-          if (prices.CHF) updateData.stripe_price_chf_id = prices.CHF
-          if (prices.USD) updateData.stripe_price_usd_id = prices.USD
-          if (prices.EUR) updateData.stripe_price_eur_id = prices.EUR
-          if (prices.GBP) updateData.stripe_price_gbp_id = prices.GBP
-          
-          // Update primary price_id for backward compatibility
-          updateData.stripe_price_id = primaryPriceId
-          
-          // Set price_amount and price_currency from primary currency
-          const primaryCurrency = prices.CHF ? 'CHF' : (prices.USD ? 'USD' : (prices.EUR ? 'EUR' : (prices.GBP ? 'GBP' : 'USD')))
-          const primaryPriceAmount = pricing?.[primaryCurrency]
-          if (typeof primaryPriceAmount === 'number' && primaryPriceAmount > 0) {
-            updateData.price_amount = primaryPriceAmount
-            updateData.price_currency = primaryCurrency
-          }
-        }
-
-        // Update trial days if provided
-        if (trialDays !== undefined) {
-          updateData.trial_days = trialDays
-        }
-        if (trialRequiresPayment !== undefined) {
-          updateData.trial_requires_payment = trialRequiresPayment
-        }
-
-        // Perform database update
-        const { error: updateError } = await supabaseAdmin
-          .from('products')
-          .update(updateData)
-          .eq('id', dbProduct.id)
-
-        if (updateError) {
-          console.error('⚠️ Failed to update database with Stripe product ID and price IDs:', updateError)
-          await logError(
-            supabaseAdmin,
-            'create-stripe-product',
-            'database',
-            'Failed to update database with Stripe product ID and price IDs',
-            { error: updateError.message, productId: dbProduct.id },
-            user.id,
-            { stripeProductId: productData.id, updateData },
-            ipAddress
-          )
-          // Don't fail the request - Stripe product was created successfully
+      // Update currency-specific price IDs and amounts
+      if (Object.keys(prices).length > 0) {
+        if (prices.CHF) updateData.stripe_price_chf_id = prices.CHF
+        if (prices.USD) updateData.stripe_price_usd_id = prices.USD
+        if (prices.EUR) updateData.stripe_price_eur_id = prices.EUR
+        if (prices.GBP) updateData.stripe_price_gbp_id = prices.GBP
+        
+        // Update primary price_id for backward compatibility
+        updateData.stripe_price_id = primaryPriceId
+        
+        // Set price amounts for all currencies
+        const chfAmount = pricing?.CHF ?? pricing?.chf
+        const usdAmount = pricing?.USD ?? pricing?.usd
+        const eurAmount = pricing?.EUR ?? pricing?.eur
+        const gbpAmount = pricing?.GBP ?? pricing?.gbp
+        
+        if (typeof chfAmount === 'number' && chfAmount > 0) updateData.price_amount_chf = chfAmount
+        if (typeof usdAmount === 'number' && usdAmount > 0) updateData.price_amount_usd = usdAmount
+        if (typeof eurAmount === 'number' && eurAmount > 0) updateData.price_amount_eur = eurAmount
+        if (typeof gbpAmount === 'number' && gbpAmount > 0) updateData.price_amount_gbp = gbpAmount
+        
+        // Set price_amount and price_currency from primary currency (for backward compatibility)
+        const primaryCurrency = prices.CHF ? 'CHF' : (prices.USD ? 'USD' : (prices.EUR ? 'EUR' : (prices.GBP ? 'GBP' : 'USD')))
+        // Try both uppercase and lowercase keys since pricing object might have either
+        const primaryPriceAmount = pricing?.[primaryCurrency] ?? pricing?.[primaryCurrency.toLowerCase()]
+        console.log(`💰 Setting price_amount: currency=${primaryCurrency}, amount=${primaryPriceAmount}, type=${typeof primaryPriceAmount}`)
+        if (typeof primaryPriceAmount === 'number' && primaryPriceAmount > 0) {
+          updateData.price_amount = primaryPriceAmount
+          updateData.price_currency = primaryCurrency
+          console.log(`✅ Price amount set: ${primaryPriceAmount} ${primaryCurrency}`)
         } else {
-          console.log('✅ Database updated with Stripe product ID and price IDs for product:', dbProduct.id)
+          console.warn(`⚠️ Could not set price_amount: primaryPriceAmount=${primaryPriceAmount}, type=${typeof primaryPriceAmount}, pricing object:`, pricing)
         }
-      } else if (dbProductError) {
-        console.error('⚠️ Failed to find product in database:', dbProductError)
-        // Don't fail the request - Stripe product was created successfully
+        
+        console.log('💰 Currency amounts saved:', {
+          CHF: chfAmount || null,
+          USD: usdAmount || null,
+          EUR: eurAmount || null,
+          GBP: gbpAmount || null
+        })
       }
+
+      // Update trial days if provided
+      if (trialDays !== undefined) {
+        updateData.trial_days = trialDays
+      }
+      if (trialRequiresPayment !== undefined) {
+        updateData.trial_requires_payment = trialRequiresPayment
+      }
+
+      // Perform database update
+      const { error: updateError } = await supabaseAdmin
+        .from('products')
+        .update(updateData)
+        .eq('id', dbProduct.id)
+
+      if (updateError) {
+        console.error('⚠️ Failed to update database with Stripe product ID and price IDs:', updateError)
+        await logError(
+          supabaseAdmin,
+          'create-stripe-product',
+          'database',
+          'Failed to update database with Stripe product ID and price IDs',
+          { error: updateError.message, productId: dbProduct.id, updateData },
+          user.id,
+          { stripeProductId: productData.id, updateData, prices },
+          ipAddress
+        )
+      } else {
+        console.log('✅ Database updated with Stripe product ID and price IDs for product:', dbProduct.id)
+        console.log('📊 Price IDs saved:', { 
+          CHF: prices.CHF || null, 
+          USD: prices.USD || null, 
+          EUR: prices.EUR || null, 
+          GBP: prices.GBP || null 
+        })
+        console.log('💰 Price amount saved:', {
+          amount: updateData.price_amount || null,
+          currency: updateData.price_currency || null
+        })
+      }
+    } else {
+      console.warn('⚠️ Could not find product in database to update. ProductId:', productId, 'Slug:', slug, 'StripeProductId:', productData.id)
     }
 
     // Build response
@@ -681,6 +732,27 @@ serve(async (req) => {
       priceId: primaryPriceId, // Primary price ID for backward compatibility (null for freemium)
       prices: prices, // All price IDs by currency (empty object for freemium)
       product: productData
+    }
+
+    // Add price_amount and price_currency to response if we have them
+    if (dbProduct && !dbProductError) {
+      const primaryCurrency = prices.CHF ? 'CHF' : (prices.USD ? 'USD' : (prices.EUR ? 'EUR' : (prices.GBP ? 'GBP' : 'USD')))
+      const primaryPriceAmount = pricing?.[primaryCurrency] ?? pricing?.[primaryCurrency.toLowerCase()]
+      if (typeof primaryPriceAmount === 'number' && primaryPriceAmount > 0) {
+        responseData.price_amount = primaryPriceAmount
+        responseData.price_currency = primaryCurrency
+      }
+      
+      // Add currency-specific price amounts to response
+      const chfAmount = pricing?.CHF ?? pricing?.chf
+      const usdAmount = pricing?.USD ?? pricing?.usd
+      const eurAmount = pricing?.EUR ?? pricing?.eur
+      const gbpAmount = pricing?.GBP ?? pricing?.gbp
+      
+      if (typeof chfAmount === 'number' && chfAmount > 0) responseData.price_amount_chf = chfAmount
+      if (typeof usdAmount === 'number' && usdAmount > 0) responseData.price_amount_usd = usdAmount
+      if (typeof eurAmount === 'number' && eurAmount > 0) responseData.price_amount_eur = eurAmount
+      if (typeof gbpAmount === 'number' && gbpAmount > 0) responseData.price_amount_gbp = gbpAmount
     }
 
     // Only include priceErrors if there are any

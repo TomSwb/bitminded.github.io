@@ -221,6 +221,9 @@ async function createInitialFiles(
   // Create framework-specific configuration files
   await createFrameworkConfigFiles(token, repoFullName, productSlug || subdomain, deploymentInfo)
   
+  // Create framework setup guide
+  await createFrameworkSetupGuide(token, repoFullName, finalProductName, productSlug || subdomain, deploymentInfo)
+  
   // Create worker files
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
   const supabaseFunctionsUrl = supabaseUrl ? supabaseUrl.replace('.supabase.co', '.functions.supabase.co') : ''
@@ -1830,6 +1833,485 @@ Example:
       break
     }
   }
+}
+
+/**
+ * Create framework setup guide explaining files and how to modify them
+ */
+async function createFrameworkSetupGuide(
+  token: string,
+  repoFullName: string,
+  productName: string,
+  productSlug: string,
+  deploymentInfo: FrameworkInfo
+) {
+  const guide = generateFrameworkSetupGuide(productName, productSlug, deploymentInfo, repoFullName)
+  await createFile(token, repoFullName, 'FRAMEWORK_SETUP.md', guide)
+  console.log('✅ Framework setup guide created')
+}
+
+/**
+ * Generate framework setup guide
+ */
+function generateFrameworkSetupGuide(
+  productName: string,
+  productSlug: string,
+  deploymentInfo: FrameworkInfo,
+  repoFullName: string
+): string {
+  const [githubUsername] = repoFullName.split('/')
+  const githubPagesUrl = `https://${githubUsername}.github.io/${productSlug}`
+  const protectedUrl = `https://${productSlug}.bitminded.ch`
+  const basePath = `/${productSlug}`
+  
+  let frameworkSpecificSection = ''
+  let configFilesSection = ''
+  let buildInstructions = ''
+  
+  // Framework-specific instructions
+  switch (deploymentInfo.framework) {
+    case 'expo':
+      frameworkSpecificSection = `## Expo/React Native Specific Setup
+
+This project uses **Expo** for React Native development with web support.
+
+### Key Files:
+- **\`package.json\`**: Contains Expo scripts and dependencies
+- **\`scripts/post-build.js\`**: Post-build script that:
+  - Injects GitHub Pages redirect protection
+  - Copies auth files from \`web/auth/\` to \`dist/auth/\`
+  - Injects token checker script
+  - Fixes asset paths for GitHub Pages
+
+### Build & Deploy:
+\`\`\`bash
+npm run build:web        # Build for web
+npm run deploy           # Build and deploy to gh-pages
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`gh-pages\` branch for GitHub Pages deployment
+- **Auth Files**: Located in \`web/auth/\` (source) → copied to \`dist/auth/\` during build
+- **Build Output**: \`dist/\` directory`
+      buildInstructions = `### Post-Build Script:
+The \`scripts/post-build.js\` script runs automatically after building and:
+1. Injects GitHub Pages redirect protection
+2. Copies auth files to build output
+3. Injects token checker script
+4. Fixes asset paths for GitHub Pages compatibility`
+      break
+      
+    case 'nextjs':
+      frameworkSpecificSection = `## Next.js Specific Setup
+
+This project uses **Next.js** with static export for GitHub Pages.
+
+### Key Files:
+- **\`next.config.js\`**: Configured with:
+  - \`output: 'export'\` - Static export mode
+  - \`basePath: '${basePath}'\` - GitHub Pages project site path
+  - \`assetPrefix: '${basePath}'\` - Asset path prefix
+  - \`images.unoptimized: true\` - Required for static export
+
+### Build & Deploy:
+\`\`\`bash
+npm run build            # Build static export (outputs to 'out/')
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`main\` branch for GitHub Pages
+- **Build Output**: \`out/\` directory
+- **Base Path**: All routes are prefixed with \`${basePath}\``
+      configFilesSection = `### Configuration Files:
+- **\`next.config.js\`**: Next.js configuration with basePath for GitHub Pages`
+      break
+      
+    case 'vite':
+      frameworkSpecificSection = `## Vite Specific Setup
+
+This project uses **Vite** for fast development and optimized builds.
+
+### Key Files:
+- **\`vite.config.js\`**: Configured with:
+  - \`base: '${basePath}'\` - GitHub Pages project site path
+  - \`build.outDir: '${deploymentInfo.buildOutput}'\` - Build output directory
+
+### Build & Deploy:
+\`\`\`bash
+npm run build            # Build for production (outputs to '${deploymentInfo.buildOutput}/')
+npm run preview          # Preview production build locally
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`main\` branch for GitHub Pages
+- **Build Output**: \`${deploymentInfo.buildOutput}/\` directory
+- **Base Path**: All assets are prefixed with \`${basePath}\``
+      configFilesSection = `### Configuration Files:
+- **\`vite.config.js\`**: Vite configuration with base path for GitHub Pages`
+      break
+      
+    case 'vue':
+      frameworkSpecificSection = `## Vue.js Specific Setup
+
+This project uses **Vue.js** for reactive UI development.
+
+### Key Files:
+- **\`vue.config.js\`**: Configured with:
+  - \`publicPath: '${basePath}'\` - GitHub Pages project site path (production)
+  - \`outputDir: '${deploymentInfo.buildOutput}'\` - Build output directory
+
+### Build & Deploy:
+\`\`\`bash
+npm run build            # Build for production (outputs to '${deploymentInfo.buildOutput}/')
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`main\` branch for GitHub Pages
+- **Build Output**: \`${deploymentInfo.buildOutput}/\` directory
+- **Base Path**: All assets are prefixed with \`${basePath}\` in production`
+      configFilesSection = `### Configuration Files:
+- **\`vue.config.js\`**: Vue CLI configuration with publicPath for GitHub Pages`
+      break
+      
+    case 'gatsby':
+      frameworkSpecificSection = `## Gatsby Specific Setup
+
+This project uses **Gatsby** for static site generation.
+
+### Key Files:
+- **\`gatsby-config.js\`**: Configured with:
+  - \`pathPrefix: '${basePath}'\` - GitHub Pages project site path
+
+### Build & Deploy:
+\`\`\`bash
+npm run build            # Build static site (outputs to '${deploymentInfo.buildOutput}/')
+npm run serve            # Serve production build locally
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`main\` branch for GitHub Pages
+- **Build Output**: \`${deploymentInfo.buildOutput}/\` directory
+- **Path Prefix**: All routes are prefixed with \`${basePath}\``
+      configFilesSection = `### Configuration Files:
+- **\`gatsby-config.js\`**: Gatsby configuration with pathPrefix for GitHub Pages`
+      break
+      
+    case 'angular':
+      frameworkSpecificSection = `## Angular Specific Setup
+
+This project uses **Angular** for enterprise-scale applications.
+
+### Key Files:
+- **\`ANGULAR_GITHUB_PAGES_SETUP.md\`**: Contains instructions for configuring Angular
+
+### Build & Deploy:
+\`\`\`bash
+npm run build            # Build for production (outputs to '${deploymentInfo.buildOutput}/')
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`main\` branch for GitHub Pages
+- **Build Output**: \`${deploymentInfo.buildOutput}/\` directory
+- **Configuration**: Update \`angular.json\` with baseHref: '${basePath}'`
+      configFilesSection = `### Configuration Files:
+- **\`ANGULAR_GITHUB_PAGES_SETUP.md\`**: Instructions for configuring Angular for GitHub Pages
+- **\`angular.json\`**: Update manually with baseHref configuration`
+      break
+      
+    case 'svelte':
+      frameworkSpecificSection = `## Svelte/SvelteKit Specific Setup
+
+This project uses **Svelte** or **SvelteKit** for lightweight reactive applications.
+
+### Build & Deploy:
+\`\`\`bash
+npm run build            # Build for production (outputs to '${deploymentInfo.buildOutput}/')
+npm run preview          # Preview production build locally
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`main\` branch for GitHub Pages
+- **Build Output**: \`${deploymentInfo.buildOutput}/\` directory
+- **Base Path**: Configure in your SvelteKit config if needed`
+      break
+      
+    case 'create-react-app':
+      frameworkSpecificSection = `## Create React App Specific Setup
+
+This project uses **Create React App** for React development.
+
+### Key Files:
+- **\`package.json\`**: Contains \`homepage\` field for GitHub Pages
+
+### Build & Deploy:
+\`\`\`bash
+npm run build            # Build for production (outputs to '${deploymentInfo.buildOutput}/')
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`main\` branch for GitHub Pages
+- **Build Output**: \`${deploymentInfo.buildOutput}/\` directory
+- **Homepage**: Set in \`package.json\` for GitHub Pages`
+      break
+      
+    case 'plain':
+      frameworkSpecificSection = `## Plain HTML/CSS/JavaScript Setup
+
+This project uses **plain HTML, CSS, and JavaScript** (no framework).
+
+### Key Files:
+- **\`index.html\`**: Main HTML file with:
+  - Access protection script (redirects from GitHub Pages to protected subdomain)
+  - Token checker script (validates authentication)
+
+### Deploy:
+\`\`\`bash
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`main\` branch for GitHub Pages
+- **No Build Step**: Files are served directly`
+      break
+      
+    default:
+      frameworkSpecificSection = `## Framework Setup
+
+**Detected Framework**: ${deploymentInfo.framework === 'unknown' ? 'Unknown/Default' : deploymentInfo.framework}
+
+### Build & Deploy:
+\`\`\`bash
+npm run deploy:worker    # Deploy Cloudflare Worker
+\`\`\`
+
+### Important:
+- **Branch**: Use \`${deploymentInfo.branch}\` branch for GitHub Pages
+- **Build Output**: ${deploymentInfo.buildOutput ? `\`${deploymentInfo.buildOutput}/\` directory` : 'No build step required'}`
+  }
+  
+  return `# Framework Setup Guide - ${productName}
+
+This guide explains the files created for this project and how to modify them if you change frameworks or deployment options.
+
+---
+
+## 📁 Files Created & Their Purpose
+
+### Core Files (Always Created):
+
+#### 1. **\`worker-updated.js\`** - Cloudflare Worker
+**Purpose**: Enforces authentication and license validation before serving your app.
+
+**What it does**:
+- Checks for valid Supabase session token
+- Validates user license via \`validate-license\` Edge Function
+- Redirects unauthenticated users to \`/auth\`
+- Redirects users without license to subscription page
+- Proxies authenticated requests to GitHub Pages
+
+**If you change frameworks**: No changes needed - works with all frameworks.
+
+**Location**: Root directory
+
+---
+
+#### 2. **\`wrangler.toml\`** - Cloudflare Worker Configuration
+**Purpose**: Configures the Cloudflare Worker deployment.
+
+**What it contains**:
+- Worker name: \`${productSlug}-worker\`
+- Compatibility date
+- Main script: \`worker-updated.js\`
+- Node.js compatibility flag
+
+**If you change frameworks**: No changes needed - worker configuration is framework-agnostic.
+
+**Location**: Root directory
+
+---
+
+#### 3. **\`auth/\`** - Authentication Pages
+**Purpose**: Login page for your app's protected subdomain.
+
+**What it contains**:
+- \`index.html\` - Login form
+- \`auth.css\` - Styling
+- \`auth.js\` - Authentication logic
+- \`config.js\` - App-specific configuration
+
+**If you change frameworks**: 
+- For **Expo**: Auth files are in \`web/auth/\` (source) and copied to \`dist/auth/\` during build
+- For **other frameworks**: Auth files are in root \`auth/\` directory
+- You may need to update paths in your build process if switching frameworks
+
+**Location**: ${deploymentInfo.authFolder}
+
+---
+
+#### 4. **\`package.json\`** - Node.js Dependencies & Scripts
+**Purpose**: Defines project dependencies and build/deploy scripts.
+
+**What it contains**:
+- Framework-specific scripts (build, dev, deploy, etc.)
+- \`wrangler\` dependency for Cloudflare Worker deployment
+- ${deploymentInfo.framework === 'expo' ? '\`gh-pages\` dependency for GitHub Pages deployment' : 'Other framework-specific dependencies'}
+
+**If you change frameworks**: 
+- Update scripts to match your new framework
+- Update dependencies
+- May need to add/remove framework-specific packages
+
+**Location**: Root directory
+
+---
+
+${frameworkSpecificSection}
+
+${configFilesSection ? `\n${configFilesSection}\n` : ''}
+
+${buildInstructions ? `\n${buildInstructions}\n` : ''}
+
+---
+
+## 🔄 Changing Frameworks During Development
+
+If you decide to switch frameworks after initial setup, here's what to update:
+
+### Step 1: Update Configuration Files
+
+**Remove old framework config** (if exists):
+- \`next.config.js\` (Next.js)
+- \`vite.config.js\` (Vite)
+- \`vue.config.js\` (Vue)
+- \`gatsby-config.js\` (Gatsby)
+- \`angular.json\` modifications (Angular)
+
+**Add new framework config**:
+- Create appropriate config file for your new framework
+- Set base path to \`${basePath}\` for GitHub Pages
+- Configure build output directory
+
+### Step 2: Update package.json
+
+**Update scripts**:
+\`\`\`json
+{
+  "scripts": {
+    "build": "your-new-framework-build-command",
+    "dev": "your-new-framework-dev-command",
+    "deploy:worker": "npx wrangler deploy"
+  }
+}
+\`\`\`
+
+**Update dependencies**:
+- Remove old framework dependencies
+- Add new framework dependencies
+- Keep \`wrangler\` for Cloudflare Worker deployment
+
+### Step 3: Update Build Output Directory
+
+**In your new framework config**, set output directory to match what the worker expects:
+- Most frameworks: \`dist/\` or \`build/\`
+- Next.js static export: \`out/\`
+- Gatsby: \`public/\`
+
+**Update worker code** (if needed):
+The worker proxies to: \`${githubPagesUrl}\`
+Make sure your build outputs to a directory that GitHub Pages can serve.
+
+### Step 4: Update Auth Files Location
+
+**If switching to/from Expo**:
+- **To Expo**: Move \`auth/\` → \`web/auth/\`, update post-build script
+- **From Expo**: Move \`web/auth/\` → \`auth/\`, remove post-build script (or update it)
+
+**For other frameworks**: Auth files stay in root \`auth/\` directory.
+
+### Step 5: Update Post-Build Script (if needed)
+
+**If your new framework needs post-build processing**:
+- Create/update \`scripts/post-build.js\`
+- Update \`package.json\` deploy script to run post-build
+
+**If your new framework doesn't need post-build**:
+- Remove \`scripts/post-build.js\`
+- Update \`package.json\` deploy script
+
+### Step 6: Update GitHub Pages Branch
+
+**If switching to/from Expo**:
+- **To Expo**: Change GitHub Pages source to \`gh-pages\` branch
+- **From Expo**: Change GitHub Pages source to \`main\` branch
+
+**For other frameworks**: Usually use \`main\` branch.
+
+---
+
+## 🚀 Deployment Workflow
+
+### Standard Deployment:
+1. **Build your app**: \`npm run build\` (or framework-specific command)
+2. **Deploy to GitHub Pages**: Push build output to appropriate branch
+3. **Deploy Cloudflare Worker**: \`npm run deploy:worker\`
+
+### For Expo Apps:
+1. **Build**: \`npm run build:web\`
+2. **Post-build**: Automatically runs \`scripts/post-build.js\`
+3. **Deploy to GitHub Pages**: \`npm run deploy:gh-pages\` (pushes to \`gh-pages\` branch)
+4. **Deploy Cloudflare Worker**: \`npm run deploy:worker\`
+
+---
+
+## 🔧 Common Modifications
+
+### Changing Subdomain:
+1. Update \`wrangler.toml\` worker name (if needed)
+2. Update Cloudflare Worker route in Cloudflare Dashboard
+3. Update \`auth/config.js\` subdomain field
+4. Update any hardcoded URLs in your app
+
+### Changing GitHub Pages URL:
+1. Update \`worker-updated.js\` \`GITHUB_PAGES_URL\` constant
+2. Update any framework config files with base paths
+3. Redeploy worker
+
+### Adding/Removing Features:
+- **Auth**: Files in \`${deploymentInfo.authFolder}/\` - modify as needed
+- **Worker**: Modify \`worker-updated.js\` for custom logic
+- **Build**: Modify framework config files or \`package.json\` scripts
+
+---
+
+## 📚 Additional Resources
+
+- **Cloudflare Worker Docs**: https://developers.cloudflare.com/workers/
+- **GitHub Pages Docs**: https://docs.github.com/en/pages
+- **Framework-specific docs**: Check your framework's official documentation
+
+---
+
+## ❓ Need Help?
+
+If you encounter issues:
+1. Check this guide first
+2. Review framework-specific documentation
+3. Check Cloudflare Worker logs
+4. Verify GitHub Pages deployment status
+
+**Last Updated**: ${new Date().toISOString().split('T')[0]}
+**Detected Framework**: ${deploymentInfo.framework}
+**Build Output**: ${deploymentInfo.buildOutput || 'N/A'}
+**Deployment Branch**: ${deploymentInfo.branch}
+`
 }
 
 /**

@@ -201,6 +201,10 @@ class ProductWizard {
                 tag_translations: data.tag_translations || {},
                 price_amount: data.price_amount || '',
                 price_currency: data.price_currency || 'USD',
+                price_amount_chf: data.price_amount_chf || null,
+                price_amount_usd: data.price_amount_usd || null,
+                price_amount_eur: data.price_amount_eur || null,
+                price_amount_gbp: data.price_amount_gbp || null,
                 individual_price: data.individual_price || '',
                 enterprise_price: data.enterprise_price || '',
                 subscription_interval: data.subscription_interval || '',
@@ -1163,6 +1167,10 @@ class ProductWizard {
             productData.pricing_type = this.formData.pricing_type || 'one_time';
             productData.price_amount = this.formData.price_amount || null;
             productData.price_currency = this.formData.price_currency || 'USD';
+            productData.price_amount_chf = this.formData.price_amount_chf || null;
+            productData.price_amount_usd = this.formData.price_amount_usd || null;
+            productData.price_amount_eur = this.formData.price_amount_eur || null;
+            productData.price_amount_gbp = this.formData.price_amount_gbp || null;
             productData.individual_price = this.formData.individual_price || null;
             productData.enterprise_price = this.formData.enterprise_price || null;
             productData.subscription_interval = this.formData.subscription_interval || null;

@@ -239,6 +239,10 @@ class ProductManagement {
                     pricing_type,
                     price_amount,
                     price_currency,
+                    price_amount_chf,
+                    price_amount_usd,
+                    price_amount_eur,
+                    price_amount_gbp,
                     individual_price,
                     enterprise_price,
                     subscription_interval,
@@ -581,12 +585,36 @@ class ProductManagement {
         
         let pricingText = '';
         if (product.pricing_type === 'one_time') {
-            pricingText = `${product.price_amount || 0} ${product.price_currency || 'USD'}`;
+            // Build multi-currency display
+            const prices = [];
+            if (product.price_amount_chf) prices.push(`CHF ${product.price_amount_chf}`);
+            if (product.price_amount_usd) prices.push(`USD ${product.price_amount_usd}`);
+            if (product.price_amount_eur) prices.push(`EUR ${product.price_amount_eur}`);
+            if (product.price_amount_gbp) prices.push(`GBP ${product.price_amount_gbp}`);
+            
+            if (prices.length > 0) {
+                pricingText = prices.join(' | ');
+            } else {
+                // Fallback to primary currency if no currency-specific amounts
+                pricingText = `${product.price_amount || 0} ${product.price_currency || 'USD'}`;
+            }
         } else if (product.pricing_type === 'subscription') {
             // Show subscription pricing (monthly/yearly if available, otherwise just the type)
             if (product.stripe_price_monthly_id || product.stripe_price_yearly_id) {
-                pricingText = 'Subscription';
+                // Build multi-currency display for subscriptions
+                const prices = [];
+                if (product.price_amount_chf) prices.push(`CHF ${product.price_amount_chf}/mo`);
+                if (product.price_amount_usd) prices.push(`USD ${product.price_amount_usd}/mo`);
+                if (product.price_amount_eur) prices.push(`EUR ${product.price_amount_eur}/mo`);
+                if (product.price_amount_gbp) prices.push(`GBP ${product.price_amount_gbp}/mo`);
+                
+                if (prices.length > 0) {
+                    pricingText = prices.join(' | ');
+                } else {
+                    pricingText = 'Subscription';
+                }
             } else {
+                // Fallback to primary currency if no currency-specific amounts
                 pricingText = `${product.price_amount || 0} ${product.price_currency || 'USD'}/mo`;
             }
         } else if (product.pricing_type === 'freemium') {

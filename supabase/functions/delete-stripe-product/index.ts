@@ -338,7 +338,11 @@ serve(async (req) => {
 
     console.log('🗑️ Archiving Stripe product:', productId)
 
-    // Archive the Stripe product (Stripe doesn't allow permanent deletion)
+    // Try to archive the Stripe product (Stripe doesn't allow permanent deletion)
+    // If product doesn't exist in Stripe (already deleted), we'll still clear it from database
+    let stripeProductArchived = false
+    let stripeError: any = null
+    
     const response = await fetch(`https://api.stripe.com/v1/products/${productId}`, {
       method: 'POST',
       headers: {
@@ -351,30 +355,92 @@ serve(async (req) => {
       })
     })
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('❌ Error archiving Stripe product:', error)
+    if (response.ok) {
+      const productData = await response.json()
+      console.log('✅ Stripe product archived:', productData.id)
+      stripeProductArchived = true
+    } else {
+      const errorText = await response.text()
+      stripeError = { error: errorText, status: response.status }
+      
+      // If product not found (404), it's already deleted - that's okay
+      if (response.status === 404) {
+        console.log('ℹ️ Stripe product not found (already deleted):', productId)
+        stripeProductArchived = false // Not an error, just already gone
+      } else {
+        console.error('❌ Error archiving Stripe product:', errorText)
       await logError(
         supabaseAdmin,
         'delete-stripe-product',
         'stripe_api',
         'Failed to archive Stripe product',
-        { stripe_error: error, status: response.status, product_id: productId },
+          { stripe_error: errorText, status: response.status, product_id: productId },
         user.id,
         { productId },
         ipAddress
       )
-      throw new Error('Failed to archive Stripe product')
+        // Don't throw - we'll still try to clear from database
+      }
     }
 
-    const productData = await response.json()
-    console.log('✅ Stripe product archived:', productData.id)
+    // Update database to clear Stripe product ID and price IDs
+    // Find product by stripe_product_id
+    const { data: dbProduct, error: dbProductError } = await supabaseAdmin
+      .from('products')
+      .select('id')
+      .eq('stripe_product_id', productId)
+      .single()
+
+    if (!dbProductError && dbProduct) {
+      const updateData: Record<string, any> = {
+        stripe_product_id: null,
+        stripe_price_id: null,
+        stripe_price_monthly_id: null,
+        stripe_price_yearly_id: null,
+        stripe_price_lifetime_id: null,
+        stripe_price_chf_id: null,
+        stripe_price_usd_id: null,
+        stripe_price_eur_id: null,
+        stripe_price_gbp_id: null,
+        stripe_price_sale_id: null,
+        stripe_price_monthly_sale_id: null,
+        stripe_price_yearly_sale_id: null,
+        updated_at: new Date().toISOString()
+    }
+
+      const { error: updateError } = await supabaseAdmin
+        .from('products')
+        .update(updateData)
+        .eq('id', dbProduct.id)
+
+      if (updateError) {
+        console.error('⚠️ Failed to clear Stripe IDs from database:', updateError)
+        await logError(
+          supabaseAdmin,
+          'delete-stripe-product',
+          'database',
+          'Failed to clear Stripe IDs from database',
+          { error: updateError.message, productId: dbProduct.id },
+          user.id,
+          { productId, updateData },
+          ipAddress
+        )
+        throw new Error('Failed to clear Stripe product from database')
+      } else {
+        console.log('✅ Database cleared of Stripe product IDs for product:', dbProduct.id)
+      }
+    } else if (dbProductError) {
+      console.error('⚠️ Failed to find product in database:', dbProductError)
+      // Don't fail - Stripe product was handled (or already deleted)
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
-        productId: productData.id,
-        archived: true
+        productId: productId,
+        archived: stripeProductArchived,
+        alreadyDeleted: !stripeProductArchived && stripeError?.status === 404,
+        databaseCleared: !dbProductError && !!dbProduct
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
