@@ -204,25 +204,39 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 }
 
                 // Load subscription pricing (multi-currency or single)
-                if (basicInfo.subscription_pricing) {
-                    this.formData.subscription_pricing = { ...this.formData.subscription_pricing, ...basicInfo.subscription_pricing };
+                // Only load if basicInfo has actual pricing data (not empty/null)
+                if (basicInfo.subscription_pricing && typeof basicInfo.subscription_pricing === 'object' && Object.keys(basicInfo.subscription_pricing).length > 0) {
+                    // Merge subscription pricing, but only overwrite with non-zero values
+                    Object.keys(basicInfo.subscription_pricing).forEach(currency => {
+                        const price = basicInfo.subscription_pricing[currency];
+                        if (price !== null && price !== undefined && price !== '' && price > 0) {
+                            this.formData.subscription_pricing[currency] = price;
+                        }
+                    });
                 }
-                if (basicInfo.subscription_price !== undefined) {
+                if (basicInfo.subscription_price !== undefined && basicInfo.subscription_price !== null && basicInfo.subscription_price !== '' && basicInfo.subscription_price > 0) {
                     this.formData.subscription_price = basicInfo.subscription_price;
                     // If no multi-currency pricing, use single price for CHF
-                    if (!this.formData.subscription_pricing.CHF && basicInfo.subscription_price > 0) {
+                    if (!this.formData.subscription_pricing.CHF || this.formData.subscription_pricing.CHF === 0) {
                         this.formData.subscription_pricing.CHF = basicInfo.subscription_price;
                     }
                 }
 
                 // Load one-time pricing (multi-currency or single)
-                if (basicInfo.one_time_pricing) {
-                    this.formData.one_time_pricing = { ...this.formData.one_time_pricing, ...basicInfo.one_time_pricing };
+                // Only load if basicInfo has actual pricing data (not empty/null)
+                if (basicInfo.one_time_pricing && typeof basicInfo.one_time_pricing === 'object' && Object.keys(basicInfo.one_time_pricing).length > 0) {
+                    // Merge one-time pricing, but only overwrite with non-zero values
+                    Object.keys(basicInfo.one_time_pricing).forEach(currency => {
+                        const price = basicInfo.one_time_pricing[currency];
+                        if (price !== null && price !== undefined && price !== '' && price > 0) {
+                            this.formData.one_time_pricing[currency] = price;
+                        }
+                    });
                 }
-                if (basicInfo.one_time_price !== undefined) {
+                if (basicInfo.one_time_price !== undefined && basicInfo.one_time_price !== null && basicInfo.one_time_price !== '' && basicInfo.one_time_price > 0) {
                     this.formData.one_time_price = basicInfo.one_time_price;
                     // If no multi-currency pricing, use single price for CHF
-                    if (!this.formData.one_time_pricing.CHF && basicInfo.one_time_price > 0) {
+                    if (!this.formData.one_time_pricing.CHF || this.formData.one_time_pricing.CHF === 0) {
                         this.formData.one_time_pricing.CHF = basicInfo.one_time_price;
                     }
                 }
@@ -243,8 +257,35 @@ if (typeof window.StepStripeCreation === 'undefined') {
 
                 // Sync this.formData with basicInfo to ensure consistency
                 // But preserve pricing_type if we just set it above (don't overwrite with null/undefined)
+                // IMPORTANT: Don't overwrite with empty/null values from basicInfo
+                // Only merge non-empty values to preserve existing data
                 const currentPricingType = this.formData.pricing_type;
-                this.formData = { ...this.formData, ...basicInfo };
+                
+                // Merge basicInfo into formData, but only for fields that have actual values
+                // This prevents empty/null values from overwriting good data
+                Object.keys(basicInfo).forEach(key => {
+                    const value = basicInfo[key];
+                    // Only overwrite if value is not null, undefined, or empty object/array
+                    if (value !== null && value !== undefined) {
+                        if (typeof value === 'object' && !Array.isArray(value)) {
+                            // For objects, merge only if not empty
+                            if (Object.keys(value).length > 0) {
+                                this.formData[key] = { ...this.formData[key], ...value };
+                            }
+                        } else if (Array.isArray(value)) {
+                            // For arrays, only overwrite if not empty
+                            if (value.length > 0) {
+                                this.formData[key] = value;
+                            }
+                        } else {
+                            // For primitives, only overwrite if not empty string
+                            if (value !== '') {
+                                this.formData[key] = value;
+                            }
+                        }
+                    }
+                });
+                
                 // Restore pricing_type if basicInfo had a null/undefined value
                 if (!basicInfo.pricing_type || !['freemium', 'one_time', 'subscription'].includes(basicInfo.pricing_type)) {
                     this.formData.pricing_type = currentPricingType;
