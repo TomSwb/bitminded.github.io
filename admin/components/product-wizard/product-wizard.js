@@ -815,7 +815,15 @@ class ProductWizard {
      * @param {number} stepNumber - Optional step number, defaults to currentStep
      */
     saveCurrentStepData(stepNumber = this.currentStep) {
+        // Only save data for the current step being navigated away from
+        // Don't save data for steps that haven't been visited or initialized
         if (this.steps[stepNumber] && this.steps[stepNumber].saveFormData) {
+            // For Stripe step (step 5), check if it's initialized before saving
+            // This prevents saving default values when step hasn't been visited
+            if (stepNumber === 5 && this.steps[stepNumber].isInitialized === false) {
+                window.logger?.log('⚠️ Skipping save for step 5 - not initialized yet');
+                return;
+            }
             this.steps[stepNumber].saveFormData(this.formData);
         }
     }
