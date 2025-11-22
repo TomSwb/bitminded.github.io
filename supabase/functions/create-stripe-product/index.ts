@@ -212,10 +212,20 @@ serve(async (req) => {
   try {
     // Extract token from Authorization header first
     const authHeader = req.headers.get('Authorization')
+    console.log('🔐 Received Authorization header:', authHeader ? `${authHeader.substring(0, 20)}...` : 'MISSING')
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error('❌ Missing or invalid Authorization header')
+      console.error('❌ Missing or invalid Authorization header. Header value:', authHeader)
+      console.error('❌ All request headers:', Object.fromEntries(req.headers.entries()))
       return new Response(
-        JSON.stringify({ error: 'Unauthorized: Missing or invalid Authorization header' }),
+        JSON.stringify({ 
+          error: 'Unauthorized: Missing or invalid Authorization header',
+          details: {
+            hasHeader: !!authHeader,
+            headerValue: authHeader ? `${authHeader.substring(0, 20)}...` : null,
+            startsWithBearer: authHeader?.startsWith('Bearer ') || false
+          }
+        }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
