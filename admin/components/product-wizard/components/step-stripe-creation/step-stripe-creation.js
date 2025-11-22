@@ -832,7 +832,38 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     };
                 }
                 
-                const { data, error } = await window.supabase.functions.invoke(functionName, { body });
+                // Get current session and refresh to ensure we have a valid token
+                let session;
+                try {
+                    const { data: { session: currentSession }, error: sessionError } = await window.supabase.auth.getSession();
+                    
+                    if (currentSession) {
+                        const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.refreshSession();
+                        if (!refreshError && refreshedSession) {
+                            session = refreshedSession;
+                        } else {
+                            session = currentSession;
+                        }
+                    } else if (sessionError) {
+                        throw new Error('Not authenticated. Please log in again.');
+                    } else {
+                        throw new Error('No active session. Please log in again.');
+                    }
+                } catch (authError) {
+                    window.logger?.error('❌ Authentication error:', authError);
+                    throw new Error('Authentication failed. Please log in again.');
+                }
+                
+                if (!session || !session.access_token) {
+                    throw new Error('Invalid session. Please log in again.');
+                }
+                
+                const { data, error } = await window.supabase.functions.invoke(functionName, {
+                    body,
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
                 if (error) throw error;
                 window.logger?.log('✅ Stripe product created:', data);
                 return { success: true, data };
