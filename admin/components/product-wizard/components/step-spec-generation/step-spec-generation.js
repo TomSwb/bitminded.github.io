@@ -856,6 +856,17 @@ class StepSpecGeneration {
     }
     
     clearAllAiData() {
+        // Add stronger warning dialog
+        const confirmed = confirm(
+            '⚠️ WARNING: This will permanently delete all AI recommendations, conversations, and the technical specification.\n\n' +
+            'This action cannot be undone. Do you want to continue?'
+        );
+        
+        if (!confirmed) {
+            window.logger?.log('❌ Clear AI data cancelled by user');
+            return;
+        }
+        
         window.logger?.log('🗑️ Clearing all AI data...');
         
         // Reset all internal state
@@ -906,7 +917,29 @@ class StepSpecGeneration {
             delete window.productWizard.stepData[2];
         }
         
-        window.logger?.log('✅ All AI data cleared');
+        // Set flag to track that data was explicitly cleared
+        this.dataCleared = true;
+        
+        // Manually save null/empty values to DB immediately since user explicitly cleared
+        // This ensures the cleared state is persisted and won't be restored on navigation
+        if (window.productWizard && window.productWizard.formData && window.productWizard.formData.product_id) {
+            // Clear technical specification from formData as well
+            if (window.productWizard.stepData && window.productWizard.stepData[2]) {
+                delete window.productWizard.stepData[2].technicalSpecification;
+            }
+            
+            // User explicitly cleared, so save empty state to prevent auto-restore
+            window.productWizard.saveDraftToDatabase().catch(err => {
+                window.logger?.error('❌ Failed to save cleared AI data state:', err);
+            });
+        }
+        
+        // Mark step as incomplete since data was cleared
+        if (window.productWizard) {
+            window.productWizard.markStepIncomplete(2);
+        }
+        
+        window.logger?.log('✅ All AI data cleared and saved to database');
     }
     
     analyzeDiscrepancies(specification) {
