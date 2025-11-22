@@ -210,37 +210,40 @@ serve(async (req) => {
   }
 
   try {
+    // Extract token from Authorization header first
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('❌ Missing or invalid Authorization header')
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Missing or invalid Authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    const token = authHeader.replace('Bearer ', '')
+
     // Get authenticated user
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: authHeader },
         },
       }
     )
 
     const {
       data: { user },
+      error: userError
     } = await supabaseClient.auth.getUser()
 
-    if (!user) {
+    if (!user || userError) {
+      console.error('❌ getUser() failed:', userError)
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Unauthorized: Invalid or expired token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    // Extract token from Authorization header and verify session exists (prevent use of revoked tokens)
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-    const token = authHeader.replace('Bearer ', '')
 
     // Get IP address for rate limiting fallback
     const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
