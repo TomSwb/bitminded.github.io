@@ -543,8 +543,16 @@
         // Get sale price for current currency if product is on sale
         let salePriceAmount = null;
         const isOnSale = product && product.sale && product.sale.isOnSale;
-        if (isOnSale && pricing.saleCurrencyAmounts && pricing.saleCurrencyAmounts[currentCurrency] !== null && pricing.saleCurrencyAmounts[currentCurrency] !== undefined) {
-            salePriceAmount = pricing.saleCurrencyAmounts[currentCurrency];
+        if (isOnSale) {
+            // First try to get sale price from saleCurrencyAmounts
+            if (pricing.saleCurrencyAmounts && pricing.saleCurrencyAmounts[currentCurrency] !== null && pricing.saleCurrencyAmounts[currentCurrency] !== undefined) {
+                salePriceAmount = pricing.saleCurrencyAmounts[currentCurrency];
+            } 
+            // Fallback: calculate sale price from regular price and discount percentage
+            else if (regularPriceAmount !== null && regularPriceAmount !== undefined && product.sale && product.sale.discountPercentage) {
+                const discountMultiplier = 1 - (product.sale.discountPercentage / 100);
+                salePriceAmount = Math.round(regularPriceAmount * discountMultiplier * 100) / 100;
+            }
         }
 
         const hasExplicitPrice = regularPriceAmount !== null && regularPriceAmount !== undefined;
@@ -567,7 +575,7 @@
             const saleWithSuffix = suffix ? `${saleFormatted}${suffix}` : saleFormatted;
             return `<div class="catalog-price-wrapper" style="display: flex; flex-direction: column; line-height: 1.4;">
                 <div class="catalog-price-original" style="text-decoration: line-through; opacity: 0.6; font-size: 0.9em;">${regularWithSuffix}</div>
-                <div class="catalog-price-sale" style="font-weight: 600;">${saleWithSuffix}</div>
+                <div class="catalog-price-sale" style="font-weight: 600; color: #ef4444;">${saleWithSuffix}</div>
             </div>`;
         };
 
