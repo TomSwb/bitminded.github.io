@@ -210,6 +210,14 @@ class ComponentLoader {
                 } else if (componentName === 'theme-switcher' && window.themeSwitcher) {
                     // Special handling for theme-switcher component
                     window.themeSwitcher.init(config);
+                } else if (componentName === 'currency-switcher') {
+                    // Special handling for currency-switcher component
+                    if (window.CurrencySwitcher && !window.currencySwitcher) {
+                        window.currencySwitcher = new window.CurrencySwitcher();
+                    }
+                    if (window.currencySwitcher) {
+                        window.currencySwitcher.init(config);
+                    }
                 } else if (componentName === 'account-layout') {
                     // Special handling for account-layout component
                     if (window.AccountLayout && !window.accountLayout) {

@@ -77,6 +77,8 @@
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
+        // Wait a bit for currency switcher to initialize
+        await new Promise(resolve => setTimeout(resolve, 200));
         await hydrateCatalog();
     });
 
@@ -103,12 +105,46 @@
     // Listen for currency changes
     window.addEventListener('currencyChanged', (event) => {
         const newCurrency = event?.detail?.currency;
+        window.logger?.log('💰 Currency changed event received:', newCurrency);
         if (newCurrency && state.products.length > 0) {
             // Re-render catalog with new currency
             // Products don't need to be re-fetched, just re-rendered with new currency
+            window.logger?.log('🔄 Re-rendering catalog with currency:', newCurrency);
             renderFeaturedSection(state.featuredProducts);
             renderProductGrid(state.filteredProducts);
             applyTranslationUpdates();
+        }
+    });
+    
+    // Also check currency on initial load and periodically until currency switcher is ready
+    let currencyCheckAttempts = 0;
+    const maxCurrencyCheckAttempts = 20; // Check for up to 2 seconds (20 * 100ms)
+    
+    function checkAndUpdateCurrency() {
+        if (window.currencySwitcher && typeof window.currencySwitcher.getCurrentCurrency === 'function') {
+            const currentCurrency = window.currencySwitcher.getCurrentCurrency();
+            window.logger?.log('💰 Currency switcher found, current currency:', currentCurrency);
+            if (state.products.length > 0) {
+                // Re-render with correct currency
+                renderFeaturedSection(state.featuredProducts);
+                renderProductGrid(state.filteredProducts);
+                applyTranslationUpdates();
+            }
+            return true; // Currency switcher is ready
+        }
+        return false; // Not ready yet
+    }
+    
+    // Check currency on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!checkAndUpdateCurrency()) {
+            // If not ready, check periodically
+            const currencyCheckInterval = setInterval(() => {
+                currencyCheckAttempts++;
+                if (checkAndUpdateCurrency() || currencyCheckAttempts >= maxCurrencyCheckAttempts) {
+                    clearInterval(currencyCheckInterval);
+                }
+            }, 100);
         }
     });
 
@@ -125,7 +161,12 @@
             state.featuredProducts = deriveFeatured(products);
 
             setupFilterControls();
-            renderCatalog();
+            
+            // Wait a bit for currency switcher to initialize, then render
+            // This ensures we get the correct currency on initial load
+            setTimeout(() => {
+                renderCatalog();
+            }, 100);
         } catch (error) {
             window.logger?.error('Failed to load catalog products', error);
             renderErrorState(error);
@@ -455,7 +496,7 @@
         }
 
         if (product.status?.availability === 'available' && product.pricing) {
-            const pricingLabel = formatPricingLabel(product.pricing);
+            const pricingLabel = formatPricingLabel(product.pricing, product);
             if (pricingLabel) {
                 items.push(pricingLabel);
             }
@@ -467,11 +508,17 @@
 
         const meta = document.createElement('p');
         meta.className = 'catalog-card__meta';
-        meta.textContent = items.join(' • ');
+        // Use innerHTML if any item contains HTML (for sale price strikethrough)
+        const hasHTML = items.some(item => typeof item === 'string' && item.includes('<'));
+        if (hasHTML) {
+            meta.innerHTML = items.map(item => `<span>${item}</span>`).join(' • ');
+        } else {
+            meta.textContent = items.join(' • ');
+        }
         return meta;
     }
 
-    function formatPricingLabel(pricing) {
+    function formatPricingLabel(pricing, product = null) {
         if (!pricing) return '';
 
         if (pricing.pricingType === 'freemium') {
@@ -481,39 +528,76 @@
         // Get current currency from currency switcher or default to CHF
         const currentCurrency = (window.currencySwitcher?.getCurrentCurrency()) || 'CHF';
         
-        // Get price for current currency, fallback to default amount/currency
-        let priceAmount = null;
+        // Get regular price for current currency, fallback to default amount/currency
+        let regularPriceAmount = null;
         let priceCurrency = currentCurrency;
         
         if (pricing.currencyAmounts && pricing.currencyAmounts[currentCurrency] !== null && pricing.currencyAmounts[currentCurrency] !== undefined) {
-            priceAmount = pricing.currencyAmounts[currentCurrency];
+            regularPriceAmount = pricing.currencyAmounts[currentCurrency];
             priceCurrency = currentCurrency;
         } else if (typeof pricing.amount === 'number') {
-            priceAmount = pricing.amount;
+            regularPriceAmount = pricing.amount;
             priceCurrency = pricing.currency || 'USD';
         }
 
-        const hasExplicitPrice = priceAmount !== null && priceAmount !== undefined;
-        const isFree = hasExplicitPrice && priceAmount === 0;
+        // Get sale price for current currency if product is on sale
+        let salePriceAmount = null;
+        const isOnSale = product && product.sale && product.sale.isOnSale;
+        if (isOnSale && pricing.saleCurrencyAmounts && pricing.saleCurrencyAmounts[currentCurrency] !== null && pricing.saleCurrencyAmounts[currentCurrency] !== undefined) {
+            salePriceAmount = pricing.saleCurrencyAmounts[currentCurrency];
+        }
+
+        const hasExplicitPrice = regularPriceAmount !== null && regularPriceAmount !== undefined;
+        const isFree = hasExplicitPrice && regularPriceAmount === 0;
+
+        // Format regular price
+        const formatRegularPrice = (amount, currency, suffix = '') => {
+            if (isFree) {
+                return translateText('catalog-pricing-free', 'Free');
+            }
+            const formatted = formatCurrency(amount, currency);
+            return suffix ? `${formatted}${suffix}` : formatted;
+        };
+
+        // Format sale price display (strikethrough regular + sale on new line)
+        const formatSalePrice = (regularAmount, saleAmount, currency, suffix = '') => {
+            const regularFormatted = formatCurrency(regularAmount, currency);
+            const saleFormatted = formatCurrency(saleAmount, currency);
+            const regularWithSuffix = suffix ? `${regularFormatted}${suffix}` : regularFormatted;
+            const saleWithSuffix = suffix ? `${saleFormatted}${suffix}` : saleFormatted;
+            return `<div class="catalog-price-wrapper" style="display: flex; flex-direction: column; line-height: 1.4;">
+                <div class="catalog-price-original" style="text-decoration: line-through; opacity: 0.6; font-size: 0.9em;">${regularWithSuffix}</div>
+                <div class="catalog-price-sale" style="font-weight: 600; color: #e74c3c;">${saleWithSuffix}</div>
+            </div>`;
+        };
 
         if (pricing.pricingType === 'subscription') {
             if (pricing.subscriptionInterval === 'monthly') {
                 if (isFree) {
                     return translateText('catalog-pricing-free', 'Free');
                 }
-                const formattedPrice = formatCurrency(priceAmount, priceCurrency);
-                return translateText('catalog-pricing-subscription-monthly', `${formattedPrice}/mo`, { price: formattedPrice });
+                if (isOnSale && salePriceAmount !== null && regularPriceAmount !== null) {
+                    return formatSalePrice(regularPriceAmount, salePriceAmount, priceCurrency, '/mo');
+                }
+                const formattedPrice = formatRegularPrice(regularPriceAmount, priceCurrency, '/mo');
+                return translateText('catalog-pricing-subscription-monthly', formattedPrice, { price: formattedPrice });
             }
             if (pricing.subscriptionInterval === 'yearly') {
                 if (isFree) {
                     return translateText('catalog-pricing-free', 'Free');
                 }
-                const formattedPrice = formatCurrency(priceAmount, priceCurrency);
-                return translateText('catalog-pricing-subscription-yearly', `${formattedPrice}/yr`, { price: formattedPrice });
+                if (isOnSale && salePriceAmount !== null && regularPriceAmount !== null) {
+                    return formatSalePrice(regularPriceAmount, salePriceAmount, priceCurrency, '/yr');
+                }
+                const formattedPrice = formatRegularPrice(regularPriceAmount, priceCurrency, '/yr');
+                return translateText('catalog-pricing-subscription-yearly', formattedPrice, { price: formattedPrice });
             }
             const intervalLabel = pricing.subscriptionInterval ? capitalize(pricing.subscriptionInterval) : 'Recurring';
             if (hasExplicitPrice && !isFree) {
-                const formattedPrice = formatCurrency(priceAmount, priceCurrency);
+                if (isOnSale && salePriceAmount !== null && regularPriceAmount !== null) {
+                    return formatSalePrice(regularPriceAmount, salePriceAmount, priceCurrency, ` ${intervalLabel.toLowerCase()}`);
+                }
+                const formattedPrice = formatRegularPrice(regularPriceAmount, priceCurrency);
                 return translateText('catalog-pricing-subscription-generic', `${formattedPrice} {{interval}}`, {
                     price: formattedPrice,
                     interval: intervalLabel.toLowerCase()
@@ -528,7 +612,10 @@
             if (isFree) {
                 return translateText('catalog-pricing-free', 'Free');
             }
-            const formattedPrice = formatCurrency(priceAmount, priceCurrency);
+            if (isOnSale && salePriceAmount !== null && regularPriceAmount !== null) {
+                return formatSalePrice(regularPriceAmount, salePriceAmount, priceCurrency);
+            }
+            const formattedPrice = formatRegularPrice(regularPriceAmount, priceCurrency);
             return translateText('catalog-pricing-one-time', formattedPrice, { price: formattedPrice });
         }
 
@@ -550,14 +637,15 @@
             };
             const locale = localeMap[currency] || 'en-US';
             
+            // Use 0-2 decimal places to preserve original precision (3.9 shows as 3.9, 3.95 shows as 3.95)
             return new Intl.NumberFormat(locale, {
                 style: 'currency',
                 currency,
-                minimumFractionDigits: 2,
+                minimumFractionDigits: 0,
                 maximumFractionDigits: 2
             }).format(amount);
         } catch (error) {
-            // Fallback formatting
+            // Fallback formatting - preserve original decimal places
             const symbolMap = {
                 'CHF': 'CHF',
                 'USD': '$',
@@ -565,7 +653,9 @@
                 'GBP': '£'
             };
             const symbol = symbolMap[currency] || currency;
-            return `${symbol}${amount.toFixed(2)}`;
+            // Format with up to 2 decimal places, removing trailing zeros
+            const formatted = amount.toFixed(2).replace(/\.?0+$/, '');
+            return `${symbol}${formatted}`;
         }
     }
 
