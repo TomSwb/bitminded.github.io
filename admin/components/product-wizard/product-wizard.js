@@ -590,9 +590,11 @@ class ProductWizard {
      * Load Step 5: Stripe Product Creation (moved before Cloudflare)
      */
     async loadStep5(stepContent) {
-        // If step is already initialized, don't reinitialize (preserve form values)
+        // If step is already initialized, just repopulate form fields from saved data
         if (this.steps[5] && this.steps[5].isInitialized) {
-            window.logger?.log('✅ Step 5 already initialized, skipping reinitialization to preserve form values');
+            window.logger?.log('✅ Step 5 already initialized, repopulating form fields from saved data');
+            // Repopulate form fields from current formData to ensure they're up to date
+            this.steps[5].populateFormFields();
             return;
         }
 
