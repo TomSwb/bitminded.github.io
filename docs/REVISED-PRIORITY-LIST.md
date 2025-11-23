@@ -1105,6 +1105,89 @@
 
 **Note**: Verify that UI components properly display and handle currency selection/display.
 
+### 53. Content Optimization & Translation Refinement ⚠️ **HIGH PRIORITY - Based on User Feedback**
+**Status**: **MISSING** - Critical feedback received from multiple sources  
+**Priority**: **HIGH** - Impacts user understanding and engagement  
+**Action**: Improve content clarity, conciseness, translations, and messaging based on user feedback
+
+**Feedback Sources Integrated**:
+- Christina-1.md: French translation improvements, capitalization guidelines
+- Jean-Paul-1.md: French wording improvements, terminology refinement
+- Jean-Paul-2.md: Content redundancy reduction
+- Steve-1.md: Content conciseness, attention-grabbing messaging
+
+#### 53.1. French Translation & Copy Improvements ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: High - affects French-speaking users  
+**Action**:
+- **Replace problematic terms**:
+  - "intentionnels" → "dédiés", "déterminés", "bien ciblés", "précisément orientés"
+  - "sans jugement" → "avec bienveillance" (better connotation in French)
+  - "simple" → "clair" (avoids "simplet" connotation)
+  - "honnête" (pricing) → "juste" or "équitable" (more appropriate)
+  - "intention" → "dans un but clair", "dans un but précis"
+- **Capitalization guidelines**:
+  - Remove excessive capitalization
+  - Keep caps only for essential terms/actions
+  - Examples: "Nous Construisons" → "Nous construisons", "Un Langage Clair" → "Un langage clair"
+- **Specific improvements** (from feedback):
+  - "support technique patient" → "accompagnés patiemment et dans un langage clair d'un support technique"
+  - "notes annotées" → "rapports annotés"
+  - "stockage en nuage" → "cloud" (commonly used in French)
+  - "Nous pouvons aider avec" → "Possibilités d'aide" or "Nous aidons pour"
+- **Complete missing translations**:
+  - Ensure all terms like "Craftsmanship" and "Safety" are translated
+- **Review all French content** across:
+  - Homepage (`index.html`)
+  - About pages (`about/`)
+  - Services pages (`services/`)
+  - Vision/Mission page (`about/vision-mission/`)
+
+#### 53.2. Content Conciseness & Messaging ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: High - improves user engagement and clarity  
+**Action**:
+- **Reduce verbosity** (Steve's feedback):
+  - Make content more impactful and easier to scan
+  - Remove redundant explanations
+  - Keep key messages clear and concise
+- **Improve attention-grabbing messaging**:
+  - Make homepage more compelling to keep visitors
+  - Add clear value propositions early on pages
+  - Ensure messaging is more action-oriented
+- **Add concise advantages/solutions list**:
+  - Create clear, scannable list of benefits on homepage/services pages
+  - Make it easy for visitors to quickly understand value proposition
+  - Differentiate from competitors with specific advantages
+- **Reduce redundancy across pages**:
+  - Identify repeated content across different pages
+  - Consolidate where appropriate
+  - Ensure consistent messaging without unnecessary repetition
+  - Improve content flow and navigation
+
+#### 53.3. Color & Contrast Improvements ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: Medium - affects readability and accessibility  
+**Action**:
+- **Fix catalog page readability** (Jean-Paul-2 feedback):
+  - Address yellow-green and gray color contrast issue in cartouches
+  - Increase luminance difference for better readability
+  - Ensure text is clearly visible against backgrounds
+- **Fix about page navigation bar**:
+  - Improve yellow-green highlight readability
+  - Ensure active state is clearly visible
+  - Match contrast quality of other highlighted elements (e.g., "Vision et Mission → Explorer" button)
+- **Color palette considerations**:
+  - Review "old rose" color usage (Jean-Paul-1 suggestion)
+  - Consider alternative: turquoise #86d2bf (suggested as complementary color)
+  - Evaluate overall color harmony and accessibility
+  - Ensure WCAG contrast ratio compliance
+
+**Questions to Answer Before Implementation**:
+- Should color changes be applied site-wide or page-specific?
+- What's the minimum contrast ratio target? (WCAG AA: 4.5:1 for normal text, 3:1 for large text)
+- Should we maintain current brand colors or introduce new ones?
+
 ### 52. Notification Center Enhancements ⚠️ **EXISTS - Needs Enhancement**
 **Status**: Full implementation exists (`account/components/notifications-preferences/`)  
 **Priority**: Medium - improve user engagement and communication  
@@ -1211,10 +1294,18 @@
 - Notification spam (too many notifications = users disable all)
 - Performance (real-time updates may impact performance)
 
-### 54. Stories & Review System ⚠️ **MISSING**
+### 54. Stories & Review System ⚠️ **HIGH PRIORITY - Enhanced Based on User Feedback**
 **Status**: Database schema exists (`product_reviews` table)  
-**Priority**: Medium - important for social proof and user engagement  
+**Priority**: **HIGH** - Critical feedback: missing practical examples and success stories  
 **Action**: Complete review system with public stories page, user account integration, admin moderation, and home page display
+
+**Feedback Source Integrated**: Andrew-1.md
+**Key Requirements from Feedback**:
+- Standalone "Stories" page in main navigation (upper right corner with other pages)
+- Practical examples, not just theoretical descriptions
+- Rich story format: "What was the need → How requirements were gathered → What the app does → How it helped"
+- Video support for stories (not just written content)
+- Initial example stories: Rytmo app (wife's workout need), Andrew's project
 
 #### 54.1. Main Navigation Menu Integration ⚠️ **MISSING**
 **Status**: **MISSING**  
@@ -1230,23 +1321,31 @@
 **Priority**: High - main public-facing page  
 **Action**:
 - Create `/stories/index.html` page
+- **Navigation placement**: Standalone page accessible from main navigation (upper right corner), not sub-page under About
+- **Rich story format support** (from Andrew's feedback):
+  - Story template structure: "What was the need → How requirements were gathered → What the app does → How it helped"
+  - Support for detailed narrative stories, not just short reviews
+  - Video support: Allow video uploads/embeds for stories
+  - Rich text formatting for story content
+  - Multiple media types: text, images, video
 - Display approved reviews/stories with rich formatting
 - Filtering options (by product, rating, date, featured)
 - Sorting options (newest, highest rated, most helpful)
 - Pagination or infinite scroll
 - Featured stories section at top
-- Review cards with: user avatar, name, rating, product, date, comment
+- Story/review cards with: user avatar, name, rating, product, date, comment/story, video (if available)
 - "Verified Purchase" badges
 - Link to product pages from reviews
 - Responsive design (mobile, tablet, desktop)
 - SEO optimization (meta tags, structured data for reviews)
 
 **Questions to Answer Before Implementation**:
-- How many reviews per page? (10, 20, 50?)
-- Should we show review excerpts or full text?
-- Should users be able to mark reviews as "helpful"?
+- How many reviews/stories per page? (10, 20, 50?)
+- Should we show story excerpts or full text?
+- Should users be able to mark stories/reviews as "helpful"?
 - Should we allow replies to reviews?
-- Review display format? (cards, list, grid?)
+- Display format? (cards, list, grid?)
+- Video hosting: self-hosted or YouTube/Vimeo embeds?
 
 #### 54.3. Example Stories Creation (Admin) ⚠️ **MISSING**
 **Status**: **MISSING**  
@@ -1255,14 +1354,20 @@
 - Admin UI to create example/review stories
 - Allow admin to create reviews on behalf of users (or as "BitMinded Team")
 - Mark example stories appropriately (maybe `is_featured = true` and special flag)
-- Create initial set of example stories for launch
-- Support rich text formatting in review comments
-- Upload images/media for stories (optional)
+- **Create initial set of example stories** (from Andrew's feedback):
+  - **Rytmo app story**: Wife's workout need → how requirements were gathered → what the app does → how it helped with workouts
+  - **Andrew's project story**: Work done for Andrew → requirements gathering → solution → impact
+  - Both should follow story format: "What was the need → How requirements were gathered → What the app does → How it helped"
+- Support rich text formatting in review comments/stories
+- Upload images/media for stories
+- **Video upload/embed support**: Allow videos to be added to stories
+- Story template form that guides through the story format structure
 
 **Questions to Answer Before Implementation**:
 - Should example stories be clearly marked as "Example" or "Featured"?
 - Should admin-created stories require a user_id or can they be anonymous?
 - Should we allow admin to create reviews for products that don't exist yet?
+- How to structure video content in database? (URL, embed code, or file storage?)
 
 #### 54.4. Review Submission from Multiple Places ⚠️ **MISSING**
 **Status**: **MISSING**  
@@ -1713,10 +1818,11 @@
 27. Admin Bulk Operations verification (#49)
 28. Admin Subscription Management UI (#50)
 29. Multi-currency UI verification (#51)
-30. Notification Center Enhancements (#52) - Additional notification types, push notifications, UI improvements, email integration
-31. Stories & Review System (#54) - Main nav, stories page, user account integration, admin moderation, home page display
-32. Marketing & Social Media Integration (#55) - Social profiles, automated posting, Trustpilot, QR codes, content automation
-33. Marketing Analytics Planning & Setup (#56) - Attribution tracking, event tracking, conversion funnels, ROI calculation (must be ready before Phase 8)
+30. Content Optimization & Translation Refinement (#53) - French copy improvements, content conciseness, redundancy reduction, color/contrast fixes
+31. Notification Center Enhancements (#52) - Additional notification types, push notifications, UI improvements, email integration
+32. Stories & Review System (#54) - Main nav, stories page with rich format & video support, user account integration, admin moderation, home page display, example stories
+33. Marketing & Social Media Integration (#55) - Social profiles, automated posting, Trustpilot, QR codes, content automation
+34. Marketing Analytics Planning & Setup (#56) - Attribution tracking, event tracking, conversion funnels, ROI calculation (must be ready before Phase 8)
 
 
 ### ⚪ **LAST (Needs All Data)**
@@ -1809,8 +1915,9 @@
 - [ ] Admin Communication Center (#48)
 - [ ] Verify bulk operations (#49)
 - [ ] Admin Subscription Management UI (#50)
+- [ ] Content Optimization & Translation Refinement (#53) - French copy improvements, content conciseness, color/contrast fixes (HIGH PRIORITY - based on user feedback)
 - [ ] Notification Center Enhancements (#52) - Additional notification types, push notifications, UI improvements
-- [ ] Stories & Review System (#54) - Main nav, stories page, user account integration, admin moderation, home page display
+- [ ] Stories & Review System (#54) - Main nav, stories page with rich format & video support, user account integration, admin moderation, home page display, example stories (HIGH PRIORITY - based on user feedback)
 
 ### Week 17-18: Marketing Integration & Analytics Setup
 - [ ] Marketing & Social Media Integration (#55) - Social profiles, automated posting, Trustpilot, QR codes
