@@ -56,10 +56,29 @@
 - ✅ CLI Tools Available: Stripe CLI (v1.32.0) and Supabase CLI (v2.58.5) installed, authenticated, and ready for testing/deployment
 
 ### 🛠️ **Development Tools Available**
-- ✅ **Stripe CLI**: Installed and authenticated (v1.32.0) - Use for webhook testing (`stripe listen --forward-to`, `stripe trigger`)
-- ✅ **Supabase CLI**: Installed and linked to project (v2.58.5) - Use for function deployment (`supabase functions deploy`) and project management
+- ✅ **Stripe CLI**: Installed and authenticated (v1.32.0) - Use for webhook testing (`stripe listen --forward-to`, `stripe trigger`). Can switch between test/live modes with `stripe config --set test_mode true/false`
+- ✅ **Supabase CLI**: Installed and linked to both projects (v2.58.5) - Use for function deployment (`supabase functions deploy`) and project management. Linked to DEV (eygpejbljuqpxwwoawkn) and PROD (dynxqnrkmjcvgzsugxtm)
+- ✅ **Docker**: Installed (v29.0.2) - Required for Supabase local development and schema comparisons. Note: May need `sudo` or docker group membership for some operations
 - ✅ **Cloudflare Wrangler CLI**: Installed as dev dependency (v4.50.0) - Use for Cloudflare Workers testing/deployment (`npx wrangler deploy`, `npx wrangler dev`)
 - 📝 See `/supabase/functions/stripe-webhook/TESTING-GUIDE.md` for complete CLI command reference and testing workflows
+
+### 🔧 **Automation Scripts Available** (in `supabase/scripts/`)
+- ✅ **`compare-databases.sh`** - Compare dev and prod database schemas automatically
+- ✅ **`compare-table-structures.sh`** - Compare specific table structures between environments
+- ✅ **`sync-functions.sh`** - Deploy Edge Functions to both DEV and PROD environments
+- ✅ **`install-docker.sh`** - Docker installation helper script
+- ✅ **`update-secrets.sh`** - Bulk update Supabase secrets from `.env-dev` and `.env-prod` files
+- ✅ **`create-stripe-webhook.sh`** - Programmatically create Stripe webhook endpoints via API (supports both test and live modes)
+- ✅ **`extract-secrets.sh`** - Helper script to extract secrets from Supabase projects using Management API
+
+### 📚 **Documentation Available** (in `supabase/docs/`)
+- ✅ **`AUTOMATION-GUIDE.md`** - Guide for using automation scripts
+- ✅ **`SYNC-DATABASES.md`** - Database synchronization workflow
+- ✅ **`ENV-SETUP.md`** - Environment variable setup guide
+- ✅ **`DOCKER-SETUP.md`** - Docker installation and setup
+- ✅ **`EXTRACT-SECRETS-GUIDE.md`** - How to extract secrets from Supabase Dashboard
+- ✅ **`GET-CLOUDFLARE-API-TOKEN.md`** - Guide for obtaining/rotating Cloudflare API tokens
+- ✅ **`WORKFLOW.md`** - General development workflow documentation
 
 ---
 
@@ -84,8 +103,8 @@
 
 **Note**: Stripe integration is Step 5 in the Product Wizard (not Step 4). Step order: 1) Basic Info, 2) Technical Spec, 3) Content & Media, 4) GitHub, 5) Stripe, 6) Cloudflare, 7) Review & Publish.
 
-### 14. Stripe Webhook Handler ✅ **COMPLETED**
-**Status**: ✅ **COMPLETED** - Fully implemented, deployed, and tested  
+### 14. Stripe Webhook Handler ⚠️ **IMPLEMENTED - PARTIALLY TESTED**
+**Status**: ⚠️ **IMPLEMENTED & DEPLOYED** - Code complete, but only 6 of 29 events tested  
 **Priority**: Critical for subscription automation  
 **Completed Actions**:
 - ✅ Created `/functions/stripe-webhook` edge function handling 29 events
@@ -95,7 +114,50 @@
 - ✅ Error logging and idempotency checks
 - ✅ Deployed to production (version 23)
 - ✅ Testing guide created with CLI workflows
-- ⏳ Testing in progress (Phase 1 & 2.1-2.2 complete, remaining events pending)
+- ✅ **Test Mode Webhook**: Configured in DEV and PROD (whsec_9XuaCqZ5EKCUFOtbsID3ZEVNVIRuGWFl)
+- ✅ **Live Mode Webhook**: Created in PROD only (we_1SWeS4PBAwkcNEBloBQg67bc, whsec_ntkk0iTh2adifXM8YK95MqBP9n6NxfcZ)
+- ✅ Both webhooks subscribed to all 29 events
+- ✅ Environment variables properly configured: `STRIPE_SECRET_KEY_TEST`, `STRIPE_SECRET_KEY_LIVE`, `STRIPE_WEBHOOK_SECRET_TEST`, `STRIPE_WEBHOOK_SECRET_LIVE`
+
+**Testing Status**:
+- ✅ **Tested (6 events)**: `checkout.session.completed`, `charge.succeeded`, `customer.subscription.created`, `invoice.paid`, `invoice.created`, `invoice.finalized`
+- ⏳ **Pending Testing (23 events)**:
+  - Subscription lifecycle: `updated`, `deleted`, `paused`, `resumed`
+  - Invoice events: `updated`, `voided`, `marked_uncollectible`, `payment_action_required`, `upcoming`, `payment_failed`
+  - Refund events: `created`, `failed`, `updated`, `charge.refunded`
+  - Dispute events: `charge.dispute.created`, `updated`, `closed`, `funds_withdrawn`, `funds_reinstated`
+  - Trial/Update events: `trial_will_end`, `pending_update_applied`, `pending_update_expired`
+  - Payment events: `charge.failed`
+
+**Next Steps**: Complete testing of remaining 23 events per `/supabase/functions/stripe-webhook/TESTING-GUIDE.md`
+
+### 14.1. Stripe Test/Live Mode Handling ⚠️ **CRITICAL - ACTION REQUIRED**
+**Status**: ⚠️ **NEEDS IMPLEMENTATION** - Code doesn't properly handle test vs live mode  
+**Priority**: **CRITICAL** - Must fix before accepting live payments  
+**Issue**: 
+- Webhook handler doesn't check `event.livemode` to use correct webhook secret
+- In PROD, `STRIPE_SECRET_KEY` is set to LIVE key, but webhook uses TEST secret
+- All Stripe functions use single `STRIPE_SECRET_KEY` without mode detection
+- No way to control test vs live mode in production
+
+**Required Actions**:
+- [ ] **Fix webhook handler** to check `event.livemode` and use `STRIPE_WEBHOOK_SECRET_LIVE` or `STRIPE_WEBHOOK_SECRET_TEST` accordingly
+- [ ] **Update all Stripe Edge Functions** (6 functions) to detect mode and use appropriate secret key
+- [ ] **Add helper function** to determine which Stripe key to use based on environment and mode
+- [ ] **Add `STRIPE_MODE` environment variable** (optional) for PROD control (test/live/auto)
+- [ ] **Test webhook** with both test and live events to verify signature verification works
+- [ ] **Document** the process for switching between test/live mode in production
+
+**Current State**:
+- ✅ Environment variables set: `STRIPE_SECRET_KEY_TEST`, `STRIPE_SECRET_KEY_LIVE`, `STRIPE_WEBHOOK_SECRET_TEST`, `STRIPE_WEBHOOK_SECRET_LIVE`
+- ⚠️ PROD: `STRIPE_SECRET_KEY` = LIVE key (from backward compatibility)
+- ⚠️ PROD: `STRIPE_WEBHOOK_SECRET` = TEST secret (will fail for live events)
+- ⚠️ Code doesn't check `event.livemode` to determine which secrets to use
+
+**Recommendation**: 
+- Keep PROD on TEST mode until webhook handler is fixed and all events are tested
+- Switch to LIVE mode only when ready to accept real payments
+- See `/supabase/docs/STRIPE-TEST-LIVE-MODE-ANALYSIS.md` for detailed analysis and implementation plan
 
 ### 15. Stripe Products/Prices Setup ✅ **COMPLETED**
 **Status**: ✅ **COMPLETED** - Fully implemented, tested, and integrated into Product Wizard Step 5  
@@ -1592,8 +1654,9 @@
 ### 🔴 **CRITICAL (Do First)**
 1. ~~Externalize Supabase keys~~ ✅ **FIXED - Confirmed not an issue**
 2. ~~Fix localhost fallback~~ ✅ **FIXED - Edge Function implemented**
-3. Stripe webhook handler (#14) - **REMAINING CRITICAL ITEM**
-4. Stripe Checkout Integration (#16) - **CRITICAL - Needed for purchases**
+3. Stripe webhook handler (#14) - ⚠️ **IMPLEMENTED - Only 6/29 events tested, 23 events pending testing**
+4. **Stripe Test/Live Mode Handling (#14.1)** - ⚠️ **CRITICAL - Must fix before accepting live payments** (webhook handler doesn't check livemode)
+5. Stripe Checkout Integration (#16) - **CRITICAL - Needed for purchases**
 5. Purchase Confirmation & Entitlements (#16.5) - **CRITICAL - Needed after checkout**
 6. Cloudflare Worker Subdomain Protection (#16.6) - **CRITICAL - Must protect paid tools immediately**
 7. Receipt System (#16.7) - **CRITICAL - Needed for all Stripe purchases**
@@ -1647,7 +1710,9 @@
 
 ### Week 2: Stripe & Payment Foundation
 - [x] ~~Verify Stripe setup (#13)~~ ✅ **COMPLETED - Full Stripe integration implemented**
-- [ ] Create Stripe webhook handler (#14)
+- [x] ~~Create Stripe webhook handler (#14)~~ ⚠️ **IMPLEMENTED & DEPLOYED - Code complete, webhooks configured, but only 6/29 events tested**
+- [ ] **Fix Stripe Test/Live Mode Handling (#14.1)** - ⚠️ **CRITICAL - Must fix webhook handler to check event.livemode and use correct secrets**
+- [ ] **Complete Stripe webhook testing (#14)** - ⏳ **CRITICAL - Test remaining 23 events** (subscription lifecycle, invoices, refunds, disputes, trials)
 - [x] ~~Test product creation flow (#15)~~ ✅ **COMPLETED - Multi-currency, subscription, sale prices implemented**
 - [x] ~~Verify Product Wizard Steps 1-7 (#15.5)~~ ✅ **COMPLETED - All 7 steps fully implemented and tested**
   - [x] ~~Step 1 (Basic Information)~~ ✅ **COMPLETED**

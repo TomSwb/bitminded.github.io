@@ -6,6 +6,26 @@ This folder contains all Supabase-related configurations, migrations, and Edge F
 
 ```
 supabase/
+├── scripts/                # Automation scripts
+│   ├── compare-databases.sh
+│   ├── compare-table-structures.sh
+│   ├── sync-functions.sh
+│   └── install-docker.sh
+│
+├── exports/                # Generated exports (gitignored)
+│   ├── schema-dev.sql
+│   ├── schema-prod.sql
+│   ├── schema-diff.txt
+│   └── *.json              # Function/trigger/policy exports
+│
+├── docs/                   # Documentation
+│   ├── AUTOMATION-GUIDE.md
+│   ├── SYNC-DATABASES.md
+│   ├── ENV-SETUP.md
+│   ├── DOCKER-SETUP.md
+│   ├── WORKFLOW.md
+│   └── comparison reports
+│
 ├── dev/                    # Dev environment tracking & config
 │   ├── deployed-functions.md
 │   ├── pending-migrations.md
@@ -22,7 +42,9 @@ supabase/
 ├── schema/                 # Reference docs (don't run)
 ├── debug/                  # Debug queries (dev only)
 ├── fixes/                  # Historical fixes (reference)
-└── tools/                  # Utility tools (both envs)
+├── tools/                  # Utility tools (both envs)
+├── .env-dev                # Dev environment variables (gitignored)
+└── .env-prod               # Prod environment variables (gitignored)
 ```
 
 ## Development vs Production
@@ -87,6 +109,13 @@ The app automatically detects which environment to use based on hostname:
 See `/js/env-config.js` for implementation.
 
 ## Quick Links
+
+### Automation & Scripts
+- Automation guide: `docs/AUTOMATION-GUIDE.md`
+- Database sync: `docs/SYNC-DATABASES.md`
+- Environment setup: `docs/ENV-SETUP.md`
+- Docker setup: `docs/DOCKER-SETUP.md`
+- Workflow: `docs/WORKFLOW.md`
 
 ### Dev Setup
 - Setup guide: `/supabase/dev/SETUP.md`
