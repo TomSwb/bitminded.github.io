@@ -296,25 +296,32 @@ serve(async (req) => {
       )
     }
 
-    // Get Stripe secret key from environment
-    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
+    // Get Stripe secret key based on mode (STRIPE_MODE env var, defaults to test)
+    const isLiveMode = getStripeMode()
+    const stripeSecretKey = getStripeSecretKey()
     if (!stripeSecretKey) {
-      console.error('❌ STRIPE_SECRET_KEY not found in environment')
+      console.error(`❌ Stripe secret key not found in environment for ${isLiveMode ? 'LIVE' : 'TEST'} mode`)
       await logError(
         supabaseAdmin,
         'delete-stripe-product',
         'validation',
-        'STRIPE_SECRET_KEY not found in environment',
-        { missing_secret: 'STRIPE_SECRET_KEY' },
+        `Stripe secret key not configured for ${isLiveMode ? 'LIVE' : 'TEST'} mode`,
+        { 
+          missing_secret: isLiveMode ? 'STRIPE_SECRET_KEY_LIVE' : 'STRIPE_SECRET_KEY_TEST',
+          stripe_mode: isLiveMode ? 'live' : 'test',
+          has_legacy_key: !!Deno.env.get('STRIPE_SECRET_KEY')
+        },
         user.id,
         { has_auth: true },
         ipAddress
       )
       return new Response(
-        JSON.stringify({ error: 'Stripe configuration missing' }),
+        JSON.stringify({ error: `Stripe configuration missing for ${isLiveMode ? 'LIVE' : 'TEST'} mode` }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    
+    console.log(`💳 Using Stripe ${isLiveMode ? 'LIVE' : 'TEST'} mode for product deletion`)
 
     // Parse request body
     let body: any

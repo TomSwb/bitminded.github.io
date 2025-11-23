@@ -1,40 +1,33 @@
-# Dev Environment - Quick Reference
+# Development Tools & Scripts
 
-**Project**: eygpejbljuqpxwwoawkn  
-**URL**: https://eygpejbljuqpxwwoawkn.supabase.co  
-**Dashboard**: https://supabase.com/dashboard/project/eygpejbljuqpxwwoawkn
+This directory contains development utilities, test data setup scripts, and debugging tools.
 
-## Status: ✅ Fully Configured
+## Directory Structure
 
-## What's Here
-
-- `SETUP_COMPLETE.md` - Full setup documentation
-- `SETUP_CRON_JOBS.sql` - Cron jobs configuration
-- `ENVIRONMENT_VARIABLES.md` - Edge Function env vars guide
-- `deployed-functions.md` - Track deployed Edge Functions
-- `pending-migrations.md` - SQL migrations not yet in prod
-
-## Quick Actions
-
-### Deploy Edge Function to Dev
-```bash
-supabase functions deploy <function-name> --project-ref eygpejbljuqpxwwoawkn
+```
+dev/
+├── webhook-testing/      # Webhook test queries and verification scripts
+├── archive/              # Archived documentation and setup files
+├── utils/                # Utility scripts for database operations
+└── README.md            # This file
 ```
 
-### Run SQL Migration in Dev
-1. Go to: https://supabase.com/dashboard/project/eygpejbljuqpxwwoawkn/sql
-2. Run your SQL
-3. Add to `pending-migrations.md`
+## Quick Links
 
-### Make Yourself Admin in Dev
-```sql
-INSERT INTO public.user_roles (user_id, role)
-VALUES ('your-user-id', 'admin');
-```
+### Test Products
+- **`INSERT-TEST-PRODUCTS-FINAL.sql`** - Final test products for webhook testing
+  - 3 test products: One-time, Monthly subscription, Yearly subscription
+  - All marked as `status='draft'` to prevent showing on catalog
+  - Use this when setting up webhook test environment
 
-## Environment Detection
+### Webhook Testing
+See `webhook-testing/README.md` for webhook-specific test queries and utilities.
 
-When running on **localhost**, the app automatically connects to this dev database.
+### Utilities
+See `utils/README.md` for database utility scripts.
 
-See `/js/env-config.js` for configuration.
+## Important Notes
 
+- All test products are marked as `status='draft'` - they won't appear on the catalog page
+- Test user: `dev@bitminded.ch` (customer ID: `cus_TTLy3ineN51ZEh`)
+- All webhook testing should be done in Stripe Test Mode
