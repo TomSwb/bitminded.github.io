@@ -198,6 +198,32 @@ async function logError(
 }
 
 /**
+ * Determine if we should use live mode based on STRIPE_MODE environment variable
+ * Defaults to test mode for safety
+ */
+function getStripeMode(): boolean {
+  const mode = Deno.env.get('STRIPE_MODE')?.toLowerCase()
+  return mode === 'live' || mode === 'production'
+}
+
+/**
+ * Get the correct Stripe secret key based on mode (test or live)
+ */
+function getStripeSecretKey(isLiveMode?: boolean): string {
+  const liveMode = isLiveMode !== undefined ? isLiveMode : getStripeMode()
+  
+  if (liveMode) {
+    return Deno.env.get('STRIPE_SECRET_KEY_LIVE') || 
+           Deno.env.get('STRIPE_SECRET_KEY') || 
+           ''
+  } else {
+    return Deno.env.get('STRIPE_SECRET_KEY_TEST') || 
+           Deno.env.get('STRIPE_SECRET_KEY') || 
+           ''
+  }
+}
+
+/**
  * Main handler
  */
 serve(async (req) => {
@@ -360,25 +386,32 @@ serve(async (req) => {
       )
     }
 
-    // Get Stripe secret key from environment
-    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
+    // Get Stripe secret key based on mode (STRIPE_MODE env var, defaults to test)
+    const isLiveMode = getStripeMode()
+    const stripeSecretKey = getStripeSecretKey()
     if (!stripeSecretKey) {
-      console.error('❌ STRIPE_SECRET_KEY not found in environment')
+      console.error(`❌ Stripe secret key not found in environment for ${isLiveMode ? 'LIVE' : 'TEST'} mode`)
       await logError(
         supabaseAdmin,
         'create-stripe-product',
         'validation',
-        'STRIPE_SECRET_KEY not found in environment',
-        { missing_secret: 'STRIPE_SECRET_KEY' },
+        `Stripe secret key not configured for ${isLiveMode ? 'LIVE' : 'TEST'} mode`,
+        { 
+          missing_secret: isLiveMode ? 'STRIPE_SECRET_KEY_LIVE' : 'STRIPE_SECRET_KEY_TEST',
+          stripe_mode: isLiveMode ? 'live' : 'test',
+          has_legacy_key: !!Deno.env.get('STRIPE_SECRET_KEY')
+        },
         user.id,
         { has_auth: true },
         ipAddress
       )
       return new Response(
-        JSON.stringify({ error: 'Stripe configuration missing' }),
+        JSON.stringify({ error: `Stripe configuration missing for ${isLiveMode ? 'LIVE' : 'TEST'} mode` }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    
+    console.log(`💳 Using Stripe ${isLiveMode ? 'LIVE' : 'TEST'} mode for product creation`)
 
     // Parse request body
     let body: any
@@ -652,6 +685,33 @@ serve(async (req) => {
     // Get primary price ID (first currency or CHF if available)
     // For freemium products, this will be null since no prices are created
     const primaryPriceId = prices.CHF || prices.USD || prices.EUR || prices.GBP || Object.values(prices)[0] || null
+
+    // Set default_price on the product for Stripe Dashboard UX
+    // This doesn't affect payment links - they can be created from any price directly
+    if (primaryPriceId) {
+      try {
+        const updateResponse = await fetch(`https://api.stripe.com/v1/products/${productData.id}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${stripeSecretKey}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Stripe-Version': '2024-11-20.acacia'
+          },
+          body: new URLSearchParams({ default_price: primaryPriceId })
+        })
+
+        if (!updateResponse.ok) {
+          const error = await updateResponse.text()
+          console.warn('⚠️ Failed to set default_price on product (non-critical):', error)
+          // Don't fail the whole operation - default_price is optional for Dashboard UX
+        } else {
+          console.log('✅ Set default_price on product:', primaryPriceId)
+        }
+      } catch (error) {
+        console.warn('⚠️ Error setting default_price on product (non-critical):', error)
+        // Don't fail the whole operation
+      }
+    }
 
     console.log('✅ Product creation complete:', {
       productId: productData.id,

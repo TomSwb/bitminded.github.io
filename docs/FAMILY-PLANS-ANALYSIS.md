@@ -1280,8 +1280,323 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ---
 
-**Last Updated:** January 2025  
+## 🔧 Webhook Handler Implementation Requirements
+
+### Overview
+
+Family plan purchases need special handling in the Stripe webhook handler to:
+- Create or link to family groups
+- Grant access to all family members (not just the purchaser)
+- Track family subscriptions separately from individual purchases
+- Handle family member additions/removals
+
+### Current Status
+
+**Webhook Handler:** ✅ Implemented (handles 29 events)
+- Currently processes individual purchases only
+- Creates `product_purchases` records for single users
+- **Family plan support:** ❌ Not yet implemented
+
+### Implementation Approach
+
+Family plan logic can be added directly to the existing webhook handler using conditional routing:
+
+```typescript
+// In handleCheckoutSessionCompleted:
+// 1. Detect if purchase is a family plan
+const isFamilyPlan = session.metadata?.is_family_plan === 'true' 
+  || productName.includes('Family')
+  || productName.includes('family')
+
+// 2. Route to appropriate handler
+if (isFamilyPlan) {
+  await handleFamilyPlanPurchase(supabaseAdmin, session, lineItems, userId, isLiveMode)
+} else {
+  // Existing individual purchase logic (already implemented)
+  await handleIndividualPurchase(...)
+}
+```
+
+### Prerequisites
+
+**1. Database Tables (MUST EXIST FIRST)**
+- ✅ `family_groups` table
+- ✅ `family_members` table
+- ✅ `family_subscriptions` table
+- ✅ RLS policies for all tables
+- ✅ Helper functions (see below)
+
+**2. Helper Functions Required**
+- `findOrCreateFamilyGroup(userId, familyName?)` - Find existing or create new family group
+- `getActiveFamilyMembers(familyGroupId)` - Get all active family members
+- `grantFamilyAccess(familyGroupId, productId, subscriptionId)` - Grant access to all members
+- `revokeFamilyAccess(familyGroupId, productId)` - Revoke access from all members
+- `isFamilyPlanProduct(stripeProductId)` - Check if product is a family plan
+
+**3. Stripe Integration**
+- Family plan products must have metadata: `{ is_family_plan: 'true' }`
+- OR product name must contain "Family" or "family"
+- Checkout session metadata can include: `{ family_group_id: '...' }` (if family already exists)
+
+### Webhook Events to Handle
+
+**For Family Plans, update these event handlers:**
+
+1. **`checkout.session.completed`**
+   - Detect family plan purchase
+   - Create/find family group
+   - Create `family_subscriptions` record
+   - Grant access to all family members
+   - Create individual `product_purchases` records for each member (for tracking)
+
+2. **`customer.subscription.created`**
+   - Link subscription to `family_subscriptions` table
+   - Update family group with subscription ID
+
+3. **`customer.subscription.updated`**
+   - Update `family_subscriptions` status
+   - Handle member count changes (if subscription quantity changed)
+   - Update access for all members
+
+4. **`customer.subscription.deleted`**
+   - Mark `family_subscriptions` as cancelled
+   - Revoke access from all family members
+
+5. **`invoice.paid`**
+   - Update `family_subscriptions` billing period
+   - Renew access for all members
+   - Handle subscription quantity changes
+
+### Implementation Details
+
+#### 1. Detection Logic
+
+```typescript
+function isFamilyPlanPurchase(session: any, lineItems: any[]): boolean {
+  // Check checkout session metadata
+  if (session.metadata?.is_family_plan === 'true') {
+    return true
+  }
+  
+  // Check product names
+  for (const item of lineItems) {
+    const productName = typeof item.price?.product === 'string'
+      ? null  // Would need to fetch product
+      : item.price?.product?.name || ''
+    
+    if (productName?.toLowerCase().includes('family')) {
+      return true
+    }
+  }
+  
+  // Check database product metadata
+  // (if products table has is_family_plan flag)
+  
+  return false
+}
+```
+
+#### 2. Family Group Creation/Linking
+
+```typescript
+async function findOrCreateFamilyGroup(
+  supabaseAdmin: any,
+  userId: string,
+  familyName?: string
+): Promise<string> {
+  // Check if user is already a family admin
+  const { data: existingFamily } = await supabaseAdmin
+    .from('family_groups')
+    .select('id')
+    .eq('admin_user_id', userId)
+    .maybeSingle()
+  
+  if (existingFamily) {
+    return existingFamily.id
+  }
+  
+  // Check if user is already a member
+  const { data: memberFamily } = await supabaseAdmin
+    .from('family_members')
+    .select('family_group_id')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .maybeSingle()
+  
+  if (memberFamily) {
+    return memberFamily.family_group_id
+  }
+  
+  // Create new family group
+  const { data: newFamily, error } = await supabaseAdmin
+    .from('family_groups')
+    .insert({
+      admin_user_id: userId,
+      family_name: familyName || 'My Family',
+      family_type: 'household',
+      max_members: 6
+    })
+    .select('id')
+    .single()
+  
+  if (error) throw error
+  
+  // Add creator as admin member
+  await supabaseAdmin
+    .from('family_members')
+    .insert({
+      family_group_id: newFamily.id,
+      user_id: userId,
+      role: 'admin',
+      relationship: 'admin',
+      status: 'active',
+      is_verified: true,
+      joined_at: new Date().toISOString()
+    })
+  
+  return newFamily.id
+}
+```
+
+#### 3. Grant Access to All Members
+
+```typescript
+async function grantFamilyAccess(
+  supabaseAdmin: any,
+  familyGroupId: string,
+  productId: string,
+  subscriptionId: string | null,
+  stripeCustomerId: string,
+  amount: number,
+  currency: string,
+  interval: string | null
+): Promise<void> {
+  // Get all active family members
+  const { data: members } = await supabaseAdmin
+    .from('family_members')
+    .select('user_id')
+    .eq('family_group_id', familyGroupId)
+    .eq('status', 'active')
+  
+  if (!members || members.length === 0) {
+    throw new Error('No active family members found')
+  }
+  
+  // Create purchase record for each member
+  for (const member of members) {
+    await supabaseAdmin
+      .from('product_purchases')
+      .insert({
+        user_id: member.user_id,
+        product_id: productId,
+        purchase_type: subscriptionId ? 'subscription' : 'one_time',
+        amount_paid: amount / members.length, // Per-member amount
+        currency: currency,
+        stripe_subscription_id: subscriptionId,
+        stripe_customer_id: stripeCustomerId,
+        user_type: 'individual', // Family members are still individuals
+        subscription_interval: interval,
+        status: 'active',
+        payment_status: 'succeeded'
+      })
+  }
+  
+  // Create/update family subscription record
+  const { data: existingSub } = await supabaseAdmin
+    .from('family_subscriptions')
+    .select('id')
+    .eq('family_group_id', familyGroupId)
+    .eq('plan_name', productId) // Or use plan name from product
+    .maybeSingle()
+  
+  if (existingSub) {
+    // Update existing subscription
+    await supabaseAdmin
+      .from('family_subscriptions')
+      .update({
+        stripe_subscription_id: subscriptionId,
+        stripe_customer_id: stripeCustomerId,
+        status: 'active',
+        current_period_start: new Date().toISOString(),
+        // Update period_end based on interval
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingSub.id)
+  } else {
+    // Create new family subscription
+    await supabaseAdmin
+      .from('family_subscriptions')
+      .insert({
+        family_group_id: familyGroupId,
+        stripe_subscription_id: subscriptionId,
+        stripe_customer_id: stripeCustomerId,
+        plan_name: productId, // Or plan name
+        status: 'active',
+        current_period_start: new Date().toISOString()
+        // Set period_end based on interval
+      })
+  }
+  
+  // Update family group with subscription reference
+  await supabaseAdmin
+    .from('family_groups')
+    .update({ 
+      subscription_id: existingSub?.id || /* new subscription id */,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', familyGroupId)
+}
+```
+
+#### 4. Handle Member Changes
+
+When family members are added/removed:
+- **Member added:** Create `product_purchase` record for new member
+- **Member removed:** Mark their `product_purchase` as expired/cancelled
+- **Subscription quantity changed:** Update member count in `family_subscriptions`
+
+### Testing Requirements
+
+**Test Scenarios:**
+1. ✅ New family plan purchase (creates family group)
+2. ✅ Existing family member purchases (links to existing group)
+3. ✅ Subscription renewal (updates all members)
+4. ✅ Member added mid-subscription (grants access)
+5. ✅ Member removed (revokes access)
+6. ✅ Subscription cancelled (revokes all access)
+
+### Migration Path
+
+**Phase 1: Database Setup**
+1. Create `family_groups` table
+2. Create `family_members` table
+3. Create `family_subscriptions` table
+4. Add RLS policies
+5. Create helper functions
+
+**Phase 2: Webhook Updates**
+1. Add detection logic
+2. Implement `handleFamilyPlanPurchase` function
+3. Update existing handlers to support family plans
+4. Test with Stripe CLI
+
+**Phase 3: Frontend Integration**
+1. Family management UI
+2. Family member invitations
+3. Link purchases to family groups
+
+### Notes
+
+- Family plan purchases still create individual `product_purchases` records for each member (for tracking and access control)
+- Family subscriptions are tracked separately in `family_subscriptions` table
+- The purchaser becomes the family admin automatically
+- Access is granted immediately upon purchase to all existing family members
+- New members added later get access automatically (if subscription is active)
+
+---
+
+**Last Updated:** November 23, 2025  
 **Next Review:** After full implementation is complete
 
-**Status:** 🚧 Partial Implementation - Pricing UI Complete
+**Status:** 🚧 Partial Implementation - Pricing UI Complete, Webhook Implementation Pending
 

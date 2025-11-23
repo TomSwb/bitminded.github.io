@@ -88,6 +88,34 @@ async function logError(
 }
 
 /**
+ * Get the correct Stripe secret key based on mode (test or live)
+ */
+function getStripeSecretKey(isLiveMode: boolean): string {
+  if (isLiveMode) {
+    return Deno.env.get('STRIPE_SECRET_KEY_LIVE') || 
+           Deno.env.get('STRIPE_SECRET_KEY') || 
+           ''
+  } else {
+    return Deno.env.get('STRIPE_SECRET_KEY_TEST') || 
+           Deno.env.get('STRIPE_SECRET_KEY') || 
+           ''
+  }
+}
+
+/**
+ * Get a Stripe instance configured with the correct secret key for the given mode
+ */
+function getStripeInstance(isLiveMode: boolean): Stripe {
+  const secretKey = getStripeSecretKey(isLiveMode)
+  if (!secretKey) {
+    throw new Error(`Stripe secret key not configured for ${isLiveMode ? 'LIVE' : 'TEST'} mode`)
+  }
+  return new Stripe(secretKey, {
+    apiVersion: '2024-11-20.acacia',
+  })
+}
+
+/**
  * Verify Stripe webhook signature using Stripe SDK
  * This uses Stripe's official verification method which handles all edge cases
  */
@@ -143,7 +171,8 @@ async function verifyWebhookSignature(
 async function findUser(
   supabaseAdmin: any,
   email?: string,
-  stripeCustomerId?: string
+  stripeCustomerId?: string,
+  isLiveMode: boolean = false
 ): Promise<string | null> {
   // First, try to find by email if provided
   if (email) {
@@ -161,11 +190,8 @@ async function findUser(
   // If customer ID provided but no email, fetch customer from Stripe
   if (stripeCustomerId && !email) {
     try {
-      const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
-      if (stripeSecretKey) {
-        const stripe = new Stripe(stripeSecretKey, {
-          apiVersion: '2024-11-20.acacia',
-        })
+      // Use the correct Stripe key based on mode
+      const stripe = getStripeInstance(isLiveMode)
         
         const customer = await stripe.customers.retrieve(stripeCustomerId)
         if (customer && !customer.deleted && customer.email) {
@@ -178,7 +204,6 @@ async function findUser(
           
           if (userProfile) {
             return userProfile.id
-          }
         }
       }
     } catch (error: any) {
@@ -204,15 +229,16 @@ async function findUser(
 }
 
 /**
- * Find product by Stripe product ID and optionally price ID
- * If multiple products have the same stripe_product_id, prefer matching by price_id
+ * Find product or service by Stripe product ID and optionally price ID
+ * Returns object with id and type ('product' or 'service')
+ * If multiple items have the same stripe_product_id, prefer matching by price_id
  */
-async function findProduct(
+async function findProductOrService(
   supabaseAdmin: any,
   stripeProductId: string,
   stripePriceId?: string
-): Promise<string | null> {
-  // If price ID provided, try to match by both product and price
+): Promise<{ id: string; type: 'product' | 'service' } | null> {
+  // First, try to find in products table
   if (stripePriceId) {
     const { data: product } = await supabaseAdmin
       .from('products')
@@ -222,36 +248,77 @@ async function findProduct(
       .maybeSingle()
 
     if (product) {
-      return product.id
+      return { id: product.id, type: 'product' }
     }
   }
 
-  // Fall back to matching by product ID only
-  // If multiple matches, prefer active products, then by created_at (newest first)
+  // Try products by product ID only
   const { data: products } = await supabaseAdmin
     .from('products')
     .select('id, status, created_at')
     .eq('stripe_product_id', stripeProductId)
-    .order('status', { ascending: false }) // 'active' comes before other statuses alphabetically
-    .order('created_at', { ascending: false }) // Newest first
+    .order('status', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(1)
 
   if (products && products.length > 0) {
-    return products[0].id
+    return { id: products[0].id, type: 'product' }
+  }
+
+  // If not found in products, try services table
+  if (stripePriceId) {
+    const { data: service } = await supabaseAdmin
+      .from('services')
+      .select('id')
+      .eq('stripe_product_id', stripeProductId)
+      .eq('stripe_price_id', stripePriceId)
+      .maybeSingle()
+
+    if (service) {
+      return { id: service.id, type: 'service' }
+    }
+  }
+
+  // Try services by product ID only
+  const { data: services } = await supabaseAdmin
+    .from('services')
+    .select('id, status, created_at')
+    .eq('stripe_product_id', stripeProductId)
+    .order('status', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (services && services.length > 0) {
+    return { id: services[0].id, type: 'service' }
   }
 
   return null
 }
 
 /**
+ * Find product by Stripe product ID and optionally price ID
+ * @deprecated Use findProductOrService instead
+ */
+async function findProduct(
+  supabaseAdmin: any,
+  stripeProductId: string,
+  stripePriceId?: string
+): Promise<string | null> {
+  const result = await findProductOrService(supabaseAdmin, stripeProductId, stripePriceId)
+  return result && result.type === 'product' ? result.id : null
+}
+
+/**
  * Check if purchase already exists (idempotency check)
+ * Returns purchase ID and table name ('product_purchases' or 'service_purchases')
  */
 async function findExistingPurchase(
   supabaseAdmin: any,
   stripeSubscriptionId?: string,
   stripePaymentIntentId?: string,
   stripeInvoiceId?: string
-): Promise<string | null> {
+): Promise<{ id: string; table: 'product_purchases' | 'service_purchases' } | null> {
+  // Check product_purchases first
   if (stripeSubscriptionId) {
     const { data: purchase } = await supabaseAdmin
       .from('product_purchases')
@@ -259,7 +326,7 @@ async function findExistingPurchase(
       .eq('stripe_subscription_id', stripeSubscriptionId)
       .maybeSingle()
     
-    if (purchase) return purchase.id
+    if (purchase) return { id: purchase.id, table: 'product_purchases' }
   }
 
   if (stripePaymentIntentId) {
@@ -269,7 +336,7 @@ async function findExistingPurchase(
       .eq('stripe_payment_intent_id', stripePaymentIntentId)
       .maybeSingle()
     
-    if (purchase) return purchase.id
+    if (purchase) return { id: purchase.id, table: 'product_purchases' }
   }
 
   if (stripeInvoiceId) {
@@ -279,10 +346,68 @@ async function findExistingPurchase(
       .eq('stripe_invoice_id', stripeInvoiceId)
       .maybeSingle()
     
-    if (purchase) return purchase.id
+    if (purchase) return { id: purchase.id, table: 'product_purchases' }
+  }
+
+  // Check service_purchases
+  if (stripeSubscriptionId) {
+    const { data: purchase } = await supabaseAdmin
+      .from('service_purchases')
+      .select('id')
+      .eq('stripe_subscription_id', stripeSubscriptionId)
+      .maybeSingle()
+    
+    if (purchase) return { id: purchase.id, table: 'service_purchases' }
+  }
+
+  if (stripePaymentIntentId) {
+    const { data: purchase } = await supabaseAdmin
+      .from('service_purchases')
+      .select('id')
+      .eq('stripe_payment_intent_id', stripePaymentIntentId)
+      .maybeSingle()
+    
+    if (purchase) return { id: purchase.id, table: 'service_purchases' }
+  }
+
+  if (stripeInvoiceId) {
+    const { data: purchase } = await supabaseAdmin
+      .from('service_purchases')
+      .select('id')
+      .eq('stripe_invoice_id', stripeInvoiceId)
+      .maybeSingle()
+    
+    if (purchase) return { id: purchase.id, table: 'service_purchases' }
   }
 
   return null
+}
+
+/**
+ * Find existing active purchase by user_id and product_id or service_id
+ * Used to handle cases where a user creates a new subscription for the same product/service
+ * Returns purchase ID and table name
+ */
+async function findExistingPurchaseByUserProduct(
+  supabaseAdmin: any,
+  userId: string,
+  itemId: string,
+  type: 'product' | 'service'
+): Promise<{ id: string; table: 'product_purchases' | 'service_purchases' } | null> {
+  const table = type === 'product' ? 'product_purchases' : 'service_purchases'
+  const idColumn = type === 'product' ? 'product_id' : 'service_id'
+  
+  const { data: purchase } = await supabaseAdmin
+    .from(table)
+    .select('id')
+    .eq('user_id', userId)
+    .eq(idColumn, itemId)
+    .eq('status', 'active')
+    .order('purchased_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
+  return purchase ? { id: purchase.id, table } : null
 }
 
 // ============================================================================
@@ -295,7 +420,8 @@ async function findExistingPurchase(
  */
 async function handleCheckoutSessionCompleted(
   supabaseAdmin: any,
-  session: any
+  session: any,
+  isLiveMode: boolean = false
 ): Promise<void> {
   console.log('🛒 Processing checkout.session.completed:', session.id)
 
@@ -304,8 +430,8 @@ async function handleCheckoutSessionCompleted(
   const subscriptionId = session.subscription as string | null
   const paymentIntentId = session.payment_intent as string | null
 
-  // Find user
-  const userId = await findUser(supabaseAdmin, customerEmail, stripeCustomerId)
+  // Find user (pass isLiveMode to use correct Stripe key)
+  const userId = await findUser(supabaseAdmin, customerEmail, stripeCustomerId, isLiveMode)
   if (!userId) {
     console.warn('⚠️ User not found for checkout session:', { email: customerEmail, customerId: stripeCustomerId })
     await logError(
@@ -321,14 +447,14 @@ async function handleCheckoutSessionCompleted(
   }
 
   // Check idempotency
-  const existingPurchaseId = await findExistingPurchase(
+  const existingPurchase = await findExistingPurchase(
     supabaseAdmin,
     subscriptionId || undefined,
     paymentIntentId || undefined
   )
 
-  if (existingPurchaseId) {
-    console.log('✅ Purchase already exists, skipping:', existingPurchaseId)
+  if (existingPurchase) {
+    console.log('✅ Purchase already exists, skipping:', existingPurchase.id)
     return
   }
 
@@ -351,68 +477,242 @@ async function handleCheckoutSessionCompleted(
     lineItems = expandedSession.line_items?.data || []
     console.log(`📦 Retrieved ${lineItems.length} line item(s) from Stripe`)
   } catch (error: any) {
-    console.error('❌ Error fetching line items from Stripe:', error.message)
-    await logError(
-      supabaseAdmin,
-      'stripe-webhook',
-      'stripe_api',
-      'Failed to fetch checkout session line items',
-      { sessionId: session.id, error: error.message },
-      userId,
-      { event: 'checkout.session.completed', session }
-    )
-    return
+    console.warn('⚠️ Could not retrieve checkout session (this is normal for payment links):', error.message)
+    // Don't return - continue to fallback logic below for payment links
+    // Payment links often don't have retrievable checkout sessions after completion
   }
 
-  // If no line items, try to get product info from payment intent (for payment links)
-  if (lineItems.length === 0 && paymentIntentId) {
-    console.log('⚠️ No line items in checkout session, trying payment intent...')
+  // If no line items, try to get product info from payment link or payment intent (for payment links)
+  // This fallback is critical for payment links where checkout sessions aren't retrievable
+  if (lineItems.length === 0) {
+    console.log('⚠️ No line items in checkout session, trying payment link and payment intent...')
     try {
       const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
       if (!stripeSecretKey) {
         throw new Error('STRIPE_SECRET_KEY not found')
       }
-      const stripe = new Stripe(stripeSecretKey, {
-        apiVersion: '2024-11-20.acacia',
-      })
+      const stripe = getStripeInstance(isLiveMode)
       
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, {
-        expand: ['invoice', 'invoice.lines.data.price.product']
-      })
-      
-      // Try to get product from payment intent metadata or invoice
-      if (paymentIntent.metadata?.product_id) {
-        const productId = await findProduct(supabaseAdmin, paymentIntent.metadata.product_id, paymentIntent.metadata.price_id)
-        if (productId) {
-          // Create a synthetic line item
-          lineItems = [{
-            price: {
-              id: paymentIntent.metadata.price_id || null,
-              product: paymentIntent.metadata.product_id,
-              recurring: null
-            },
-            quantity: parseInt(paymentIntent.metadata.quantity || '1', 10)
-          }]
-          console.log('✅ Found product from payment intent metadata')
+      // First, try to get product info from payment link if session has one
+      if (session.payment_link) {
+        try {
+          const paymentLinkId = typeof session.payment_link === 'string' 
+            ? session.payment_link 
+            : session.payment_link.id || session.payment_link
+          
+          console.log(`🔍 Retrieving payment link: ${paymentLinkId}`)
+          const paymentLink = await stripe.paymentLinks.retrieve(paymentLinkId)
+          
+          console.log('🔍 Payment link retrieved:', {
+            id: paymentLink.id,
+            hasLineItems: !!paymentLink.line_items,
+            lineItemsCount: paymentLink.line_items?.data?.length || 0
+          })
+          
+          // Payment links can have line items with product/price info
+          if (paymentLink.line_items?.data && paymentLink.line_items.data.length > 0) {
+            lineItems = paymentLink.line_items.data.map((item: any) => ({
+              price: item.price,
+              quantity: item.quantity || 1
+            }))
+            console.log(`✅ Found ${lineItems.length} line item(s) from payment link`)
+          } else if (paymentLink.line_items) {
+            // Payment link might have line_items as a list endpoint - retrieve separately
+            try {
+              const lineItemsList = await stripe.paymentLinks.listLineItems(paymentLinkId, { limit: 10 })
+              if (lineItemsList.data && lineItemsList.data.length > 0) {
+                lineItems = lineItemsList.data.map((item: any) => ({
+                  price: item.price,
+                  quantity: item.quantity || 1
+                }))
+                console.log(`✅ Found ${lineItems.length} line item(s) from payment link list endpoint`)
+              }
+            } catch (listError: any) {
+              console.warn('⚠️ Could not list payment link line items:', listError.message)
+            }
+          }
+        } catch (plError: any) {
+          console.warn('⚠️ Could not retrieve payment link:', plError.message)
         }
       }
       
-      // If still no line items, try invoice
-      if (lineItems.length === 0 && paymentIntent.invoice) {
-        const invoice = typeof paymentIntent.invoice === 'string' 
-          ? await stripe.invoices.retrieve(paymentIntent.invoice, { expand: ['lines.data.price.product'] })
-          : paymentIntent.invoice
+      // If still no line items and we have a payment intent, try that
+      if (lineItems.length === 0 && paymentIntentId) {
+        // Retrieve with minimal expand (Stripe only allows 4 levels max)
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, {
+          expand: ['invoice', 'latest_charge']
+        })
         
-        if (invoice.lines?.data && invoice.lines.data.length > 0) {
-          lineItems = invoice.lines.data.map((line: any) => ({
-            price: line.price,
-            quantity: line.quantity || 1
-          }))
-          console.log(`✅ Found ${lineItems.length} line item(s) from invoice`)
+        console.log('🔍 Payment intent retrieved:', {
+          id: paymentIntent.id,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+          hasMetadata: !!paymentIntent.metadata,
+          metadataKeys: paymentIntent.metadata ? Object.keys(paymentIntent.metadata) : [],
+          hasInvoice: !!paymentIntent.invoice,
+          hasLatestCharge: !!paymentIntent.latest_charge
+        })
+      
+        // Try to get product or service from payment intent metadata or invoice
+        if (paymentIntent.metadata?.product_id) {
+          const item = await findProductOrService(supabaseAdmin, paymentIntent.metadata.product_id, paymentIntent.metadata.price_id)
+          if (item) {
+            // Create a synthetic line item
+            lineItems = [{
+              price: {
+                id: paymentIntent.metadata.price_id || null,
+                product: paymentIntent.metadata.product_id,
+                recurring: null
+              },
+              quantity: parseInt(paymentIntent.metadata.quantity || '1', 10)
+            }]
+            console.log(`✅ Found ${item.type} from payment intent metadata`)
+          }
+        }
+        
+        // If still no line items, try invoice (retrieve separately to avoid expand depth limit)
+        if (lineItems.length === 0 && paymentIntent.invoice) {
+          try {
+            const invoiceId = typeof paymentIntent.invoice === 'string' 
+              ? paymentIntent.invoice 
+              : paymentIntent.invoice.id || paymentIntent.invoice
+            
+            const invoice = await stripe.invoices.retrieve(invoiceId, { 
+              expand: ['lines.data.price'] // Only 3 levels: lines -> data -> price
+            })
+            
+            if (invoice.lines?.data && invoice.lines.data.length > 0) {
+              // Get product ID from price if expanded, otherwise fetch it
+              for (const line of invoice.lines.data) {
+                if (line.price) {
+                  const priceId = typeof line.price === 'string' ? line.price : line.price.id
+                  const priceObj = typeof line.price === 'object' ? line.price : await stripe.prices.retrieve(priceId, { expand: ['product'] })
+                  const productId = typeof priceObj.product === 'string' ? priceObj.product : priceObj.product?.id
+                  
+                  if (productId) {
+                    lineItems.push({
+                      price: {
+                        id: priceId,
+                        product: productId,
+                        recurring: priceObj.recurring || null
+                      },
+                      quantity: line.quantity || 1
+                    })
+                  }
+                }
+              }
+              if (lineItems.length > 0) {
+                console.log(`✅ Found ${lineItems.length} line item(s) from invoice`)
+              }
+            }
+          } catch (invoiceError: any) {
+            console.warn('⚠️ Error retrieving invoice:', invoiceError.message)
+          }
+        }
+        
+        // If still no line items, try to get product from charge (for payment links)
+        if (lineItems.length === 0 && paymentIntent.latest_charge) {
+          try {
+            const chargeId = typeof paymentIntent.latest_charge === 'string' 
+              ? paymentIntent.latest_charge 
+              : paymentIntent.latest_charge.id
+            
+            // Retrieve charge with minimal expand to avoid depth limit
+            const charge = await stripe.charges.retrieve(chargeId, {
+              expand: ['payment_intent', 'invoice']
+            })
+            
+            console.log('🔍 Charge retrieved:', {
+              id: charge.id,
+              payment_intent: typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id,
+              invoice: typeof charge.invoice === 'string' ? charge.invoice : charge.invoice?.id
+            })
+            
+            // Check if charge has product info in its payment_intent metadata
+            if (charge.payment_intent && typeof charge.payment_intent === 'object') {
+              const pi = charge.payment_intent as any
+              if (pi.metadata?.product_id) {
+                const item = await findProductOrService(supabaseAdmin, pi.metadata.product_id, pi.metadata.price_id)
+                if (item) {
+                  lineItems = [{
+                    price: {
+                      id: pi.metadata.price_id || null,
+                      product: pi.metadata.product_id,
+                      recurring: null
+                    },
+                    quantity: parseInt(pi.metadata.quantity || '1', 10)
+                  }]
+                  console.log(`✅ Found ${item.type} from charge payment intent metadata`)
+                }
+              }
+            }
+            
+            // Also check if charge invoice has line items
+            if (lineItems.length === 0 && charge.invoice && typeof charge.invoice === 'object') {
+              const invoice = charge.invoice as any
+              if (invoice.lines?.data && invoice.lines.data.length > 0) {
+                lineItems = invoice.lines.data.map((line: any) => ({
+                  price: line.price,
+                  quantity: line.quantity || 1
+                }))
+                console.log(`✅ Found ${lineItems.length} line item(s) from charge invoice`)
+              }
+            }
+          } catch (chargeError: any) {
+            console.warn('⚠️ Could not retrieve charge details:', chargeError.message)
+          }
+        }
+        
+        // Last resort: try to get product from payment intent's price if available
+        // For payment links created from prices, the payment intent might have the price ID in metadata
+        if (lineItems.length === 0 && paymentIntent.amount && paymentIntent.currency) {
+          console.log('⚠️ Attempting to find product from payment intent amount...')
+          // Try to find products/services by matching the price amount in our database
+          // This is a fallback for payment links where we can't get line items
+          try {
+            const amountInCents = paymentIntent.amount
+            const currency = paymentIntent.currency.toUpperCase()
+            
+            // Query services table for matching price
+            const { data: services } = await supabaseAdmin
+              .from('services')
+              .select('id, name, stripe_product_id, stripe_price_id')
+              .not('stripe_price_id', 'is', null)
+              .eq('status', 'available')
+              .limit(10)
+            
+            if (services && services.length > 0) {
+              // Try to match by retrieving price from Stripe and comparing amount
+              for (const service of services) {
+                if (service.stripe_price_id) {
+                  try {
+                    const price = await stripe.prices.retrieve(service.stripe_price_id)
+                    if (price.unit_amount === amountInCents && price.currency === currency.toLowerCase()) {
+                      console.log(`✅ Found matching service by price amount: ${service.name}`)
+                      lineItems = [{
+                        price: {
+                          id: service.stripe_price_id,
+                          product: service.stripe_product_id,
+                          recurring: price.recurring || null
+                        },
+                        quantity: 1
+                      }]
+                      break
+                    }
+                  } catch (priceError) {
+                    // Continue to next service
+                    continue
+                  }
+                }
+              }
+            }
+          } catch (amountError: any) {
+            console.warn('⚠️ Error trying to match by amount:', amountError.message)
+          }
         }
       }
     } catch (error: any) {
-      console.error('❌ Error fetching payment intent:', error.message)
+      console.error('❌ Error fetching payment link or payment intent:', error.message)
     }
   }
 
@@ -430,16 +730,32 @@ async function handleCheckoutSessionCompleted(
     return
   }
 
+  // Get amount from session or payment intent (for payment links, session might not have amount_total)
+  let amountTotal = (session.amount_total || 0) / 100 // Convert from cents
+  const currency = (session.currency || 'usd').toUpperCase()
+  
+  // If amount is 0 or missing from session, try to get it from payment intent
+  if ((!amountTotal || amountTotal === 0) && paymentIntentId) {
+    try {
+      const stripe = getStripeInstance(isLiveMode)
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+      if (paymentIntent.amount) {
+        amountTotal = paymentIntent.amount / 100 // Convert from cents
+        console.log(`✅ Using amount from payment intent: ${amountTotal} ${paymentIntent.currency.toUpperCase()}`)
+      }
+    } catch (piError: any) {
+      console.warn('⚠️ Could not retrieve payment intent for amount:', piError.message)
+    }
+  }
+
   // Process each line item (support for multiple products in one checkout)
-  for (const item of lineItems) {
-    const stripePriceId = item.price?.id
+  for (const lineItem of lineItems) {
+    const stripePriceId = lineItem.price?.id
     // Handle both expanded product object and product ID string
-    const stripeProductId = typeof item.price?.product === 'string' 
-      ? item.price.product 
-      : item.price?.product?.id
-    const amountTotal = (session.amount_total || 0) / 100 // Convert from cents
-    const currency = (session.currency || 'usd').toUpperCase()
-    const quantity = item.quantity || 1
+    const stripeProductId = typeof lineItem.price?.product === 'string' 
+      ? lineItem.price.product 
+      : lineItem.price?.product?.id
+    const quantity = lineItem.quantity || 1
 
     if (!stripeProductId) {
       console.warn('⚠️ No product ID found in line item')
@@ -448,33 +764,38 @@ async function handleCheckoutSessionCompleted(
         'stripe-webhook',
         'validation',
         'No product ID in line item',
-        { sessionId: session.id, lineItem: item },
+        { sessionId: session.id, lineItem: lineItem },
         userId,
         { event: 'checkout.session.completed', session }
       )
       continue
     }
 
-    // Find product (pass price ID for more precise matching)
-    const productId = await findProduct(supabaseAdmin, stripeProductId, stripePriceId)
-    if (!productId) {
-      console.warn(`⚠️ Product not found in database. Stripe Product ID: ${stripeProductId}, Price ID: ${stripePriceId}`)
-      console.warn(`   Please ensure the product exists in your products table with stripe_product_id = '${stripeProductId}' and stripe_price_id = '${stripePriceId}'`)
+    // Find product or service (pass price ID for more precise matching)
+    const item = await findProductOrService(supabaseAdmin, stripeProductId, stripePriceId)
+    if (!item) {
+      console.warn(`⚠️ Product or service not found in database. Stripe Product ID: ${stripeProductId}, Price ID: ${stripePriceId}`)
+      console.warn(`   Please ensure the product/service exists in your products or services table with stripe_product_id = '${stripeProductId}' and stripe_price_id = '${stripePriceId}'`)
       await logError(
         supabaseAdmin,
         'stripe-webhook',
         'validation',
-        'Product not found for checkout session',
+        'Product or service not found for checkout session',
         { 
           sessionId: session.id, 
           stripeProductId,
-          message: `Product with stripe_product_id '${stripeProductId}' not found in database. Please create the product first.`
+          message: `Product/service with stripe_product_id '${stripeProductId}' not found in database. Please create the product/service first.`
         },
         userId,
         { event: 'checkout.session.completed', session }
       )
       continue
     }
+
+    const itemId = item.id
+    const itemType = item.type
+    const purchaseTable = itemType === 'product' ? 'product_purchases' : 'service_purchases'
+    const idColumn = itemType === 'product' ? 'product_id' : 'service_id'
 
     // Determine purchase type
     const isSubscription = !!subscriptionId
@@ -483,14 +804,39 @@ async function handleCheckoutSessionCompleted(
 
     // Determine subscription interval
     let subscriptionInterval: string | null = null
-    if (isSubscription && item.price?.recurring) {
-      subscriptionInterval = item.price.recurring.interval === 'month' ? 'monthly' : 'yearly'
+    if (isSubscription) {
+      // Try to get interval from price object first
+      if (lineItem.price?.recurring) {
+      subscriptionInterval = lineItem.price.recurring.interval === 'month' ? 'monthly' : 'yearly'
+      } else if (subscriptionId) {
+        // If price doesn't have recurring info, fetch subscription to get interval
+        try {
+          const stripe = getStripeInstance(isLiveMode)
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+            expand: ['items.data.price']
+          })
+          if (subscription.items?.data?.[0]?.price?.recurring) {
+            subscriptionInterval = subscription.items.data[0].price.recurring.interval === 'month' ? 'monthly' : 'yearly'
+            console.log('✅ Fetched subscription interval from subscription object:', subscriptionInterval)
+          }
+        } catch (error: any) {
+          console.warn('⚠️ Error fetching subscription for interval:', error.message)
+        }
+      }
     }
+
+    // Check for existing purchase first
+    const existingPurchase = await findExistingPurchaseByUserProduct(
+      supabaseAdmin,
+      userId,
+      itemId,
+      itemType
+    )
 
     // Prepare purchase data
     const purchaseData: any = {
       user_id: userId,
-      product_id: productId,
+      [idColumn]: itemId, // Use product_id or service_id based on type
       purchase_type: purchaseType,
       amount_paid: amountTotal / quantity, // Per item
       currency: currency,
@@ -511,26 +857,67 @@ async function handleCheckoutSessionCompleted(
       purchaseData.trial_end = new Date(session.subscription_details.trial_end * 1000).toISOString()
     }
 
-    // Create purchase record
-    const { data: purchase, error } = await supabaseAdmin
-      .from('product_purchases')
-      .insert(purchaseData)
-      .select()
-      .single()
+    // Update existing purchase or create new one
+    if (existingPurchase) {
+      console.log(`⚠️ Existing active ${itemType} purchase found, updating instead of creating:`, existingPurchase.id)
+      const { error: updateError } = await supabaseAdmin
+        .from(existingPurchase.table)
+        .update(purchaseData)
+        .eq('id', existingPurchase.id)
 
-    if (error) {
-      console.error('❌ Error creating purchase:', error)
-      await logError(
-        supabaseAdmin,
-        'stripe-webhook',
-        'database',
-        'Failed to create purchase record',
-        { error: error.message, purchaseData },
-        userId,
-        { event: 'checkout.session.completed', session }
-      )
+      if (updateError) {
+        console.error('❌ Error updating purchase:', updateError)
+        await logError(
+          supabaseAdmin,
+          'stripe-webhook',
+          'database',
+          'Failed to update purchase record',
+          { error: updateError.message, purchaseData, existingPurchase },
+          userId,
+          { event: 'checkout.session.completed', session }
+        )
+      } else {
+        console.log(`✅ ${itemType} purchase updated:`, existingPurchase.id)
+      }
     } else {
-      console.log('✅ Purchase created:', purchase.id)
+      // Create new purchase record
+      const { data: purchase, error } = await supabaseAdmin
+        .from(purchaseTable)
+        .insert(purchaseData)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('❌ Error creating purchase:', error)
+        // If duplicate key error, try to find and update existing purchase
+        if (error.code === '23505') {
+          const existingId = await findExistingPurchaseByUserProduct(
+            supabaseAdmin,
+            userId,
+            itemId,
+            itemType
+          )
+          if (existingId) {
+            console.log('✅ Found existing purchase after duplicate error, updating:', existingId.id)
+            await supabaseAdmin
+              .from(existingId.table)
+              .update(purchaseData)
+              .eq('id', existingId.id)
+          }
+        } else {
+          await logError(
+            supabaseAdmin,
+            'stripe-webhook',
+            'database',
+            'Failed to create purchase record',
+            { error: error.message, purchaseData },
+            userId,
+            { event: 'checkout.session.completed', session }
+          )
+        }
+      } else {
+        console.log(`✅ ${itemType} purchase created:`, purchase.id)
+      }
     }
   }
 }
@@ -541,12 +928,13 @@ async function handleCheckoutSessionCompleted(
  */
 async function handleSubscriptionCreated(
   supabaseAdmin: any,
-  subscription: any
+  subscription: any,
+  isLiveMode: boolean = false
 ): Promise<void> {
   console.log('📅 Processing subscription.created:', subscription.id)
 
   const stripeCustomerId = subscription.customer as string
-  const userId = await findUser(supabaseAdmin, undefined, stripeCustomerId)
+  const userId = await findUser(supabaseAdmin, undefined, stripeCustomerId, isLiveMode)
 
   if (!userId) {
     console.warn('⚠️ User not found for subscription:', stripeCustomerId)
@@ -554,10 +942,10 @@ async function handleSubscriptionCreated(
   }
 
   // Check if purchase already exists
-  const existingPurchaseId = await findExistingPurchase(supabaseAdmin, subscription.id)
-  if (existingPurchaseId) {
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
+  if (existingPurchase) {
     // Update existing purchase with subscription details
-    await updatePurchaseFromSubscription(supabaseAdmin, existingPurchaseId, subscription)
+    await updatePurchaseFromSubscription(supabaseAdmin, existingPurchase.id, subscription, existingPurchase.table)
     return
   }
 
@@ -576,13 +964,13 @@ async function handleSubscriptionUpdated(
 ): Promise<void> {
   console.log('🔄 Processing subscription.updated:', subscription.id)
 
-  const purchaseId = await findExistingPurchase(supabaseAdmin, subscription.id)
-  if (!purchaseId) {
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
+  if (!existingPurchase) {
     console.warn('⚠️ Purchase not found for subscription:', subscription.id)
     return
   }
 
-  await updatePurchaseFromSubscription(supabaseAdmin, purchaseId, subscription)
+  await updatePurchaseFromSubscription(supabaseAdmin, existingPurchase.id, subscription, existingPurchase.table)
 }
 
 /**
@@ -595,11 +983,14 @@ async function handleSubscriptionDeleted(
 ): Promise<void> {
   console.log('🗑️ Processing subscription.deleted:', subscription.id)
 
-  const purchaseId = await findExistingPurchase(supabaseAdmin, subscription.id)
-  if (!purchaseId) {
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
+  if (!existingPurchase) {
     console.warn('⚠️ Purchase not found for subscription:', subscription.id)
     return
   }
+
+  const purchaseId = existingPurchase.id
+  const purchaseTable = existingPurchase.table
 
   const updateData: any = {
     status: 'cancelled',
@@ -617,7 +1008,7 @@ async function handleSubscriptionDeleted(
   }
 
   const { error } = await supabaseAdmin
-    .from('product_purchases')
+    .from(purchaseTable)
     .update(updateData)
     .eq('id', purchaseId)
 
@@ -647,23 +1038,23 @@ async function handleSubscriptionPaused(
 ): Promise<void> {
   console.log('⏸️ Processing subscription.paused:', subscription.id)
 
-  const purchaseId = await findExistingPurchase(supabaseAdmin, subscription.id)
-  if (!purchaseId) {
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
+  if (!existingPurchase) {
     return
   }
 
   const { error } = await supabaseAdmin
-    .from('product_purchases')
+    .from(existingPurchase.table)
     .update({
       status: 'suspended',
       updated_at: new Date().toISOString()
     })
-    .eq('id', purchaseId)
+    .eq('id', existingPurchase.id)
 
   if (error) {
     console.error('❌ Error updating purchase:', error)
   } else {
-    console.log('✅ Purchase marked as suspended:', purchaseId)
+    console.log('✅ Purchase marked as suspended:', existingPurchase.id)
   }
 }
 
@@ -677,12 +1068,12 @@ async function handleSubscriptionResumed(
 ): Promise<void> {
   console.log('▶️ Processing subscription.resumed:', subscription.id)
 
-  const purchaseId = await findExistingPurchase(supabaseAdmin, subscription.id)
-  if (!purchaseId) {
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
+  if (!existingPurchase) {
     return
   }
 
-  await updatePurchaseFromSubscription(supabaseAdmin, purchaseId, subscription)
+  await updatePurchaseFromSubscription(supabaseAdmin, existingPurchase.id, subscription, existingPurchase.table)
 }
 
 /**
@@ -691,7 +1082,8 @@ async function handleSubscriptionResumed(
  */
 async function handleInvoicePaid(
   supabaseAdmin: any,
-  invoice: any
+  invoice: any,
+  isLiveMode: boolean = false
 ): Promise<void> {
   console.log('💰 Processing invoice.paid:', invoice.id)
 
@@ -707,17 +1099,20 @@ async function handleInvoicePaid(
   }
 
   // Find purchase by subscription or invoice ID
-  let purchaseId = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
+  let existingPurchase = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
   
-  if (!purchaseId && subscriptionId) {
-    purchaseId = await findExistingPurchase(supabaseAdmin, subscriptionId)
+  if (!existingPurchase && subscriptionId) {
+    existingPurchase = await findExistingPurchase(supabaseAdmin, subscriptionId)
   }
+
+  let purchaseId: string | null = existingPurchase ? existingPurchase.id : null
+  let purchaseTableToUse: 'product_purchases' | 'service_purchases' | null = existingPurchase ? existingPurchase.table : null
 
   if (!purchaseId) {
     // Try to create purchase from invoice if it doesn't exist
     // Try to get email from invoice first, then fall back to customer lookup
     const customerEmail = invoice.customer_email || invoice.customer_details?.email
-    const userId = await findUser(supabaseAdmin, customerEmail, customerId)
+    const userId = await findUser(supabaseAdmin, customerEmail, customerId, isLiveMode)
     
     if (!userId) {
       console.warn('⚠️ User not found for invoice, cannot create purchase:', { customerEmail, customerId })
@@ -729,11 +1124,7 @@ async function handleInvoicePaid(
     if (lineItems.length === 0) {
       console.log('⚠️ Invoice has no line items in webhook, fetching from Stripe...')
       try {
-        const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
-        if (stripeSecretKey) {
-          const stripe = new Stripe(stripeSecretKey, {
-            apiVersion: '2024-11-20.acacia',
-          })
+        const stripe = getStripeInstance(isLiveMode)
           const expandedInvoice = await stripe.invoices.retrieve(invoice.id, {
             expand: ['lines.data.price.product', 'subscription', 'lines.data.parent']
           })
@@ -748,7 +1139,6 @@ async function handleInvoicePaid(
           }
           lineItems = expandedInvoice.lines?.data || []
           console.log(`📦 Retrieved ${lineItems.length} line item(s) from Stripe`)
-        }
       } catch (error: any) {
         console.error('❌ Error fetching invoice from Stripe:', error.message)
         return
@@ -800,11 +1190,7 @@ async function handleInvoicePaid(
       if (!stripeProductId && lineItem.parent && subscriptionId) {
         console.log('🔍 Debug: No price in line item, fetching from subscription item...')
         try {
-          const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
-          if (stripeSecretKey) {
-            const stripe = new Stripe(stripeSecretKey, {
-              apiVersion: '2024-11-20.acacia',
-            })
+          const stripe = getStripeInstance(isLiveMode)
             // Fetch subscription to get items
             const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
               expand: ['items.data.price.product']
@@ -818,7 +1204,6 @@ async function handleInvoicePaid(
                 console.log('🔍 Debug: Found product from subscription item:', subProductId)
                 stripeProductId = subProductId
                 stripePriceId = subPrice.id
-              }
             }
           }
         } catch (error: any) {
@@ -838,12 +1223,17 @@ async function handleInvoicePaid(
         return
       }
       
-      const productId = await findProduct(supabaseAdmin, stripeProductId, stripePriceId)
+      const item = await findProductOrService(supabaseAdmin, stripeProductId, stripePriceId)
       
-      if (!productId) {
-        console.warn('⚠️ Product not found in database:', stripeProductId, stripePriceId)
+      if (!item) {
+        console.warn('⚠️ Product or service not found in database:', stripeProductId, stripePriceId)
         return
       }
+
+      const itemId = item.id
+      const itemType = item.type
+      const purchaseTable = itemType === 'product' ? 'product_purchases' : 'service_purchases'
+      const idColumn = itemType === 'product' ? 'product_id' : 'service_id'
       
       // Calculate amount - use amount_due or amount_paid, whichever is available
       // Also check line items for amount if invoice total is 0
@@ -882,7 +1272,7 @@ async function handleInvoicePaid(
       
       const purchaseData: any = {
         user_id: userId,
-        product_id: productId,
+        [idColumn]: itemId, // Use product_id or service_id based on type
         purchase_type: isSubscription ? 'subscription' : 'one_time',
         amount_paid: amountTotal,
         currency: currency,
@@ -908,12 +1298,10 @@ async function handleInvoicePaid(
       let subscription: any = null
       if (isSubscription && subscriptionId) {
         try {
-          const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
-          if (stripeSecretKey) {
-            const stripe = new Stripe(stripeSecretKey, {
-              apiVersion: '2024-11-20.acacia',
-            })
-            subscription = await stripe.subscriptions.retrieve(subscriptionId)
+          const stripe = getStripeInstance(isLiveMode)
+          subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+            expand: ['items.data.price']
+          })
             
             // Debug: Log subscription trial info
             console.log('🔍 Debug: Subscription trial info:', {
@@ -958,7 +1346,6 @@ async function handleInvoicePaid(
             if (subscription.items?.data?.[0]?.price?.recurring) {
               const interval = subscription.items.data[0].price.recurring.interval
               purchaseData.subscription_interval = interval === 'month' ? 'monthly' : 'yearly'
-            }
           }
         } catch (error: any) {
           console.warn('⚠️ Error fetching subscription for trial info:', error.message)
@@ -982,7 +1369,9 @@ async function handleInvoicePaid(
           start: purchaseData.current_period_start,
           end: purchaseData.current_period_end
         })
-      } else if (subscriptionId && invoice.period_start && invoice.period_end) {
+      }
+      
+      if (!purchaseData.current_period_start && subscriptionId && invoice.period_start && invoice.period_end) {
         // Fallback to invoice dates if subscription not fetched or dates missing
         purchaseData.current_period_start = new Date(invoice.period_start * 1000).toISOString()
         let periodEnd = new Date(invoice.period_end * 1000).toISOString()
@@ -995,24 +1384,61 @@ async function handleInvoicePaid(
         
         purchaseData.current_period_end = periodEnd
         console.log('⚠️ Using invoice period dates (subscription dates not available)')
-      } else if (subscriptionId) {
+      }
+      
+      if (!purchaseData.current_period_start && subscriptionId) {
         console.log('⚠️ No period dates available, will be set by subscription.updated event')
       }
 
-      const { data: purchase, error } = await supabaseAdmin
-        .from('product_purchases')
-        .insert(purchaseData)
-        .select()
-        .single()
+      // Before inserting, check if there's an existing active purchase for this user+item
+      // This handles cases where a user creates a new subscription for the same product/service
+      const existingPurchase = await findExistingPurchaseByUserProduct(
+        supabaseAdmin,
+        userId,
+        itemId,
+        itemType
+      )
 
-      if (error) {
-        console.error('❌ Error creating purchase from invoice:', error)
+      let purchaseTableToUse = purchaseTable // Default to the table we determined
+      if (existingPurchase) {
+        console.log(`⚠️ Existing active ${itemType} purchase found, will update instead of creating new one:`, existingPurchase.id)
+        purchaseId = existingPurchase.id
+        purchaseTableToUse = existingPurchase.table // Use the table from existing purchase
+        // We'll update this purchase below instead of creating a new one
       } else {
-        console.log('✅ Purchase created from invoice:', purchase.id)
-        purchaseId = purchase.id
+        // Try to create new purchase
+        const { data: purchase, error } = await supabaseAdmin
+          .from(purchaseTable)
+          .insert(purchaseData)
+          .select()
+          .single()
+
+        if (error) {
+          // If duplicate key error, try to find and update existing purchase
+          if (error.code === '23505' && error.details?.includes('already exists')) {
+            console.log('⚠️ Duplicate key error detected, finding existing purchase to update...')
+            const existingId = await findExistingPurchaseByUserProduct(
+              supabaseAdmin,
+              userId,
+              itemId,
+              itemType
+            )
+            if (existingId) {
+              console.log('✅ Found existing purchase, will update:', existingId.id)
+              purchaseId = existingId.id
+              purchaseTableToUse = existingId.table
+            } else {
+              console.error('❌ Error creating purchase from invoice and could not find existing:', error)
+            }
+          } else {
+            console.error('❌ Error creating purchase from invoice:', error)
+          }
+        } else {
+          console.log(`✅ ${itemType} purchase created from invoice:`, purchase.id)
+          purchaseId = purchase.id
+          purchaseTableToUse = purchaseTable
+        }
       }
-    } else {
-      console.warn('⚠️ Invoice has no line items, cannot create purchase')
     }
   }
 
@@ -1045,12 +1471,17 @@ async function handleInvoicePaid(
     // Prefer fetching subscription for accurate period dates
     if (subscriptionId) {
       try {
-        const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
-        if (stripeSecretKey) {
-          const stripe = new Stripe(stripeSecretKey, {
-            apiVersion: '2024-11-20.acacia',
-          })
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+        const stripe = getStripeInstance(isLiveMode)
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+          expand: ['items.data.price']
+        })
+        
+        // Update subscription interval
+        if (subscription.items?.data?.[0]?.price?.recurring) {
+          const interval = subscription.items.data[0].price.recurring.interval
+          updateData.subscription_interval = interval === 'month' ? 'monthly' : 'yearly'
+          console.log('✅ Updated subscription_interval from subscription:', updateData.subscription_interval)
+        }
           
           if (subscription.current_period_start && subscription.current_period_end) {
             updateData.current_period_start = new Date(subscription.current_period_start * 1000).toISOString()
@@ -1062,7 +1493,6 @@ async function handleInvoicePaid(
             }
             
             updateData.current_period_end = periodEnd
-          }
         }
       } catch (error: any) {
         console.warn('⚠️ Error fetching subscription for period dates in update:', error.message)
@@ -1072,14 +1502,26 @@ async function handleInvoicePaid(
           updateData.current_period_end = new Date(invoice.period_end * 1000).toISOString()
         }
       }
-    } else if (invoice.period_start && invoice.period_end) {
+    }
+    
+    if (!updateData.current_period_start && invoice.period_start && invoice.period_end) {
       // Fallback to invoice dates if no subscription
       updateData.current_period_start = new Date(invoice.period_start * 1000).toISOString()
       updateData.current_period_end = new Date(invoice.period_end * 1000).toISOString()
     }
 
+    // Determine which table to update - check if purchaseId exists in either table
+    let tableToUpdate = purchaseTableToUse || 'product_purchases' // Default fallback
+    if (!purchaseTableToUse && purchaseId) {
+      // Try to find which table contains this purchase
+      const existing = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, paymentIntentId || undefined, invoice.id || undefined)
+      if (existing) {
+        tableToUpdate = existing.table
+      }
+    }
+
     const { error } = await supabaseAdmin
-      .from('product_purchases')
+      .from(tableToUpdate)
       .update(updateData)
       .eq('id', purchaseId)
 
@@ -1102,15 +1544,18 @@ async function handleInvoicePaymentFailed(
   console.log('❌ Processing invoice.payment_failed:', invoice.id)
 
   const subscriptionId = invoice.subscription as string | null
-  const purchaseId = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
 
-  if (!purchaseId) {
+  if (!existingPurchase) {
     return
   }
 
+  const purchaseId = existingPurchase.id
+  const purchaseTable = existingPurchase.table
+
   // Get current purchase to check failure count
   const { data: purchase } = await supabaseAdmin
-    .from('product_purchases')
+    .from(purchaseTable)
     .select('*')
     .eq('id', purchaseId)
     .single()
@@ -1140,10 +1585,10 @@ async function handleInvoicePaymentFailed(
     }
   }
 
-  const { error } = await supabaseAdmin
-    .from('product_purchases')
-    .update(updateData)
-    .eq('id', purchaseId)
+    const { error } = await supabaseAdmin
+      .from(purchaseTable)
+      .update(updateData)
+      .eq('id', purchaseId)
 
   if (error) {
     console.error('❌ Error updating purchase:', error)
@@ -1163,18 +1608,18 @@ async function handleInvoicePaymentActionRequired(
   console.log('🔐 Processing invoice.payment_action_required:', invoice.id)
 
   const subscriptionId = invoice.subscription as string | null
-  const purchaseId = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
 
-  if (purchaseId) {
+  if (existingPurchase) {
     // Update to pending status while waiting for authentication
     await supabaseAdmin
-      .from('product_purchases')
+      .from(existingPurchase.table)
       .update({
         payment_status: 'pending',
         status: 'pending',
         updated_at: new Date().toISOString()
       })
-      .eq('id', purchaseId)
+      .eq('id', existingPurchase.id)
   }
 
   // Note: User notification should be sent separately via notification system
@@ -1204,9 +1649,9 @@ async function handleInvoiceLifecycle(
   console.log(`📄 Processing ${eventType}:`, invoice.id)
 
   const subscriptionId = invoice.subscription as string | null
-  const purchaseId = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
 
-  if (purchaseId) {
+  if (existingPurchase) {
     const updateData: any = {
       stripe_invoice_id: invoice.id,
       updated_at: new Date().toISOString()
@@ -1219,9 +1664,9 @@ async function handleInvoiceLifecycle(
     }
 
     await supabaseAdmin
-      .from('product_purchases')
+      .from(existingPurchase.table)
       .update(updateData)
-      .eq('id', purchaseId)
+      .eq('id', existingPurchase.id)
   }
 }
 
@@ -1249,17 +1694,17 @@ async function handleInvoiceMarkedUncollectible(
   console.log('💸 Processing invoice.marked_uncollectible:', invoice.id)
 
   const subscriptionId = invoice.subscription as string | null
-  const purchaseId = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscriptionId || undefined, undefined, invoice.id)
 
-  if (purchaseId) {
+  if (existingPurchase) {
     await supabaseAdmin
-      .from('product_purchases')
+      .from(existingPurchase.table)
       .update({
         payment_status: 'failed',
         status: 'suspended',
         updated_at: new Date().toISOString()
       })
-      .eq('id', purchaseId)
+      .eq('id', existingPurchase.id)
   }
 }
 
@@ -1274,17 +1719,17 @@ async function handleChargeSucceeded(
   console.log('✅ Processing charge.succeeded:', charge.id)
 
   const paymentIntentId = charge.payment_intent as string
-  const purchaseId = await findExistingPurchase(supabaseAdmin, undefined, paymentIntentId)
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, undefined, paymentIntentId)
 
-  if (purchaseId) {
+  if (existingPurchase) {
     await supabaseAdmin
-      .from('product_purchases')
+      .from(existingPurchase.table)
       .update({
         payment_status: 'succeeded',
         status: 'active',
         updated_at: new Date().toISOString()
       })
-      .eq('id', purchaseId)
+      .eq('id', existingPurchase.id)
   }
 }
 
@@ -1299,17 +1744,17 @@ async function handleChargeFailed(
   console.log('❌ Processing charge.failed:', charge.id)
 
   const paymentIntentId = charge.payment_intent as string
-  const purchaseId = await findExistingPurchase(supabaseAdmin, undefined, paymentIntentId)
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, undefined, paymentIntentId)
 
-  if (purchaseId) {
+  if (existingPurchase) {
     await supabaseAdmin
-      .from('product_purchases')
+      .from(existingPurchase.table)
       .update({
         payment_status: 'failed',
         status: 'failed',
         updated_at: new Date().toISOString()
       })
-      .eq('id', purchaseId)
+      .eq('id', existingPurchase.id)
   }
 }
 
@@ -1319,14 +1764,56 @@ async function handleChargeFailed(
  */
 async function handleChargeRefunded(
   supabaseAdmin: any,
-  charge: any
+  charge: any,
+  isLiveMode: boolean
 ): Promise<void> {
   console.log('↩️ Processing charge.refunded:', charge.id)
 
-  const paymentIntentId = charge.payment_intent as string
-  const purchaseId = await findExistingPurchase(supabaseAdmin, undefined, paymentIntentId)
+  const paymentIntentId = charge.payment_intent as string | null
+  let invoiceId = charge.invoice as string | null
+  
+  // Try to find purchase by payment_intent_id first (for one-time purchases)
+  let existingPurchase = paymentIntentId 
+    ? await findExistingPurchase(supabaseAdmin, undefined, paymentIntentId)
+    : null
 
-  if (purchaseId) {
+  // If not found and we have payment_intent_id, fetch payment intent to get invoice_id
+  if (!existingPurchase && paymentIntentId && !invoiceId) {
+    try {
+      const stripe = getStripeInstance(isLiveMode)
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+      invoiceId = paymentIntent.invoice as string | null
+      console.log('🔍 Fetched invoice_id from payment intent:', invoiceId)
+    } catch (error) {
+      console.error('❌ Error fetching payment intent for refund:', error)
+    }
+  }
+
+  // If we have an invoice, try to find by invoice_id
+  if (!existingPurchase && invoiceId) {
+    existingPurchase = await findExistingPurchase(supabaseAdmin, undefined, undefined, invoiceId)
+    console.log('🔍 Searched by invoice_id:', invoiceId, existingPurchase ? '✅ Found' : '❌ Not found')
+  }
+
+  // If still not found and we have an invoice, fetch invoice to get subscription_id
+  if (!existingPurchase && invoiceId) {
+    try {
+      const stripe = getStripeInstance(isLiveMode)
+      const invoice = await stripe.invoices.retrieve(invoiceId)
+      const subscriptionId = invoice.subscription as string | null
+      
+      if (subscriptionId) {
+        existingPurchase = await findExistingPurchase(supabaseAdmin, subscriptionId)
+        console.log('🔍 Searched by subscription_id from invoice:', subscriptionId, existingPurchase ? '✅ Found' : '❌ Not found')
+      }
+    } catch (error) {
+      console.error('❌ Error fetching invoice for refund:', error)
+    }
+  }
+
+  if (existingPurchase) {
+    const purchaseId = existingPurchase.id
+    const purchaseTable = existingPurchase.table
     const amountRefunded = (charge.amount_refunded || 0) / 100
     const amountTotal = (charge.amount || 0) / 100
     const isFullRefund = amountRefunded >= amountTotal
@@ -1343,9 +1830,19 @@ async function handleChargeRefunded(
     }
 
     await supabaseAdmin
-      .from('product_purchases')
+      .from(purchaseTable)
       .update(updateData)
       .eq('id', purchaseId)
+    
+    console.log(`✅ Updated ${existingPurchase.table === 'product_purchases' ? 'product' : 'service'} purchase ${purchaseId} for refund: ${isFullRefund ? 'full' : 'partial'}`)
+  } else {
+    console.warn('⚠️ Purchase not found for refunded charge:', {
+      chargeId: charge.id,
+      paymentIntentId,
+      invoiceId,
+      chargeInvoice: charge.invoice,
+      chargePaymentIntent: charge.payment_intent
+    })
   }
 }
 
@@ -1509,7 +2006,10 @@ async function handleSubscriptionPendingUpdateApplied(
   subscription: any
 ): Promise<void> {
   console.log('🔄 Processing subscription.pending_update_applied:', subscription.id)
-  await updatePurchaseFromSubscription(supabaseAdmin, await findExistingPurchase(supabaseAdmin, subscription.id) || '', subscription)
+  const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
+  if (existingPurchase) {
+    await updatePurchaseFromSubscription(supabaseAdmin, existingPurchase.id, subscription, existingPurchase.table)
+  }
 }
 
 /**
@@ -1530,7 +2030,8 @@ async function handleSubscriptionPendingUpdateExpired(
 async function updatePurchaseFromSubscription(
   supabaseAdmin: any,
   purchaseId: string,
-  subscription: any
+  subscription: any,
+  table: 'product_purchases' | 'service_purchases' = 'product_purchases'
 ): Promise<void> {
   if (!purchaseId) return
 
@@ -1539,9 +2040,15 @@ async function updatePurchaseFromSubscription(
     updated_at: new Date().toISOString()
   }
 
+  // Check if subscription is paused (via pause_collection field)
+  // Stripe sets pause_collection when paused, but status may still be 'active'
+  const isPaused = subscription.pause_collection && 
+                   subscription.pause_collection.behavior && 
+                   subscription.status === 'active'
+
   // Update status based on subscription status
   const statusMap: Record<string, string> = {
-    'active': 'active',
+    'active': isPaused ? 'suspended' : 'active', // Override if paused
     'canceled': 'cancelled',
     'past_due': 'active', // Keep access during past_due
     'unpaid': 'suspended',
@@ -1585,7 +2092,7 @@ async function updatePurchaseFromSubscription(
   }
 
   const { error } = await supabaseAdmin
-    .from('product_purchases')
+    .from(table)
     .update(updateData)
     .eq('id', purchaseId)
 
@@ -1599,16 +2106,26 @@ async function updatePurchaseFromSubscription(
 // ============================================================================
 
 serve(async (req) => {
+  // Log immediately when request arrives
+  console.log('🔔 Webhook request received:', {
+    method: req.method,
+    url: req.url,
+    timestamp: new Date().toISOString(),
+    hasSignature: !!req.headers.get('stripe-signature')
+  })
+
   const origin = req.headers.get('Origin')
   const corsHeaders = getCorsHeaders(origin)
 
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS preflight request - returning OK')
     return new Response('ok', { headers: corsHeaders })
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
+    console.log(`❌ Invalid method: ${req.method} - expected POST`)
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
       { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -1621,6 +2138,8 @@ serve(async (req) => {
                       req.headers.get('cf-connecting-ip') ||
                       req.headers.get('x-real-ip') ||
                       'unknown'
+    
+    console.log('🔍 Processing webhook request:', { ipAddress })
 
     // Create Supabase admin client
     const supabaseAdmin = createClient(
@@ -1629,20 +2148,19 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // Get webhook secret
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
-    if (!webhookSecret) {
-      console.error('❌ STRIPE_WEBHOOK_SECRET not configured')
+    // Get webhook secrets for both test and live modes, plus CLI secret for testing
+    const webhookSecretTest = Deno.env.get('STRIPE_WEBHOOK_SECRET_TEST')
+    const webhookSecretLive = Deno.env.get('STRIPE_WEBHOOK_SECRET_LIVE')
+    const webhookSecretLegacy = Deno.env.get('STRIPE_WEBHOOK_SECRET') // Backward compatibility
+    const webhookSecretCLI = Deno.env.get('STRIPE_WEBHOOK_SECRET_CLI') // For Stripe CLI testing
+    
+    if (!webhookSecretTest && !webhookSecretLive && !webhookSecretLegacy && !webhookSecretCLI) {
+      console.error('❌ No webhook secrets configured (STRIPE_WEBHOOK_SECRET_TEST, STRIPE_WEBHOOK_SECRET_LIVE, STRIPE_WEBHOOK_SECRET, or STRIPE_WEBHOOK_SECRET_CLI)')
       return new Response(
         JSON.stringify({ error: 'Webhook secret not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-    
-    // Debug: Verify secret format (first 10 and last 5 chars only for security)
-    console.log('🔍 Debug: Webhook secret from env (first 15 chars):', webhookSecret.substring(0, 15))
-    console.log('🔍 Debug: Webhook secret from env (last 5 chars):', webhookSecret.substring(Math.max(0, webhookSecret.length - 5)))
-    console.log('🔍 Debug: Webhook secret from env (full length):', webhookSecret.length)
 
     // Get signature from headers
     const signature = req.headers.get('stripe-signature')
@@ -1656,27 +2174,327 @@ serve(async (req) => {
 
     // Get raw body for signature verification
     // Critical: Must get the exact raw body string that Stripe signed
+    console.log('📥 Reading webhook request body...')
     const rawBody = await req.text()
+    console.log(`📦 Request body size: ${rawBody.length} characters`)
 
     // Verify webhook signature using Stripe SDK (which also parses the event)
+    console.log('🔐 Starting signature verification...')
+    // Try TEST secret first, then LIVE secret if that fails
     let event: any
-    try {
-      const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || 'sk_test_dummy'
-      const stripe = new Stripe(stripeSecretKey, {
-        apiVersion: '2024-11-20.acacia',
-      })
+    let webhookSecretUsed: string | null = null
+    let isLiveMode = false
+    
+    // Initialize Stripe SDK (we'll update the key after we know the mode)
+    const stripeSecretKeyTest = Deno.env.get('STRIPE_SECRET_KEY_TEST')
+    const stripeSecretKeyLive = Deno.env.get('STRIPE_SECRET_KEY_LIVE')
+    const stripeSecretKeyLegacy = Deno.env.get('STRIPE_SECRET_KEY') // Backward compatibility
+    
+    const stripe = new Stripe(
+      stripeSecretKeyTest || stripeSecretKeyLegacy || 'sk_test_dummy',
+      { apiVersion: '2024-11-20.acacia' }
+    )
       const cryptoProvider = Stripe.createSubtleCryptoProvider()
 
-      // This verifies the signature AND parses the event
+    // Try TEST secret first (most common case)
+    if (webhookSecretTest || webhookSecretLegacy) {
+      const testSecret = webhookSecretTest || webhookSecretLegacy
+      try {
       event = await stripe.webhooks.constructEventAsync(
         rawBody,
         signature,
-        webhookSecret,
+          testSecret!,
         undefined,
         cryptoProvider
       )
-      console.log('✅ Webhook signature verified successfully')
+        webhookSecretUsed = 'TEST'
+        isLiveMode = event.livemode === true
+        
+        // Validate: If event is live mode but we used test secret, that's wrong
+        if (isLiveMode && webhookSecretTest) {
+          console.warn('⚠️ Warning: Live mode event detected but TEST secret was used. Retrying with LIVE secret...')
+          throw new Error('Mode mismatch - event is live but test secret was used')
+        }
+        
+        console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode)`)
     } catch (err: any) {
+        // If TEST secret failed, try LIVE secret
+        if (webhookSecretLive) {
+          try {
+            event = await stripe.webhooks.constructEventAsync(
+              rawBody,
+              signature,
+              webhookSecretLive,
+              undefined,
+              cryptoProvider
+            )
+            webhookSecretUsed = 'LIVE'
+            isLiveMode = event.livemode === true
+            
+            // Validate: If event is test mode but we used live secret, that's wrong
+            if (!isLiveMode && webhookSecretTest) {
+              console.warn('⚠️ Warning: Test mode event detected but LIVE secret was used. This should not happen.')
+            }
+            
+            console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode)`)
+          } catch (liveErr: any) {
+            // TEST and LIVE secrets failed, try CLI secret if available
+            if (webhookSecretCLI) {
+              try {
+                event = await stripe.webhooks.constructEventAsync(
+                  rawBody,
+                  signature,
+                  webhookSecretCLI,
+                  undefined,
+                  cryptoProvider
+                )
+                webhookSecretUsed = 'CLI'
+                isLiveMode = event.livemode === true
+                console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Stripe CLI)`)
+              } catch (cliErr: any) {
+                // TEST, LIVE, and CLI all failed, try legacy secret if available
+                if (webhookSecretLegacy && webhookSecretLegacy !== webhookSecretTest) {
+                  try {
+                    event = await stripe.webhooks.constructEventAsync(
+                      rawBody,
+                      signature,
+                      webhookSecretLegacy,
+                      undefined,
+                      cryptoProvider
+                    )
+                    webhookSecretUsed = 'LEGACY'
+                    isLiveMode = event.livemode === true
+                    console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Legacy secret)`)
+                  } catch (legacyErr: any) {
+                    // All secrets failed
+                    console.error('❌ Invalid webhook signature with all secrets (TEST, LIVE, CLI, LEGACY)')
+                    console.error('❌ TEST secret error:', err.message)
+                    console.error('❌ LIVE secret error:', liveErr.message)
+                    console.error('❌ CLI secret error:', cliErr.message)
+                    console.error('❌ LEGACY secret error:', legacyErr.message)
+                    await logError(
+                      supabaseAdmin,
+                      'stripe-webhook',
+                      'auth',
+                      'Invalid webhook signature (all secrets failed)',
+                      { 
+                        testError: err.message,
+                        liveError: liveErr.message,
+                        cliError: cliErr.message,
+                        legacyError: legacyErr.message,
+                        signature: signature.substring(0, 20) + '...'
+                      },
+                      null,
+                      { ipAddress },
+                      ipAddress
+                    )
+                    return new Response(
+                      JSON.stringify({ error: 'Invalid signature' }),
+                      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                    )
+                  }
+                } else {
+                  // All secrets failed (no legacy to try)
+                  console.error('❌ Invalid webhook signature with TEST, LIVE, and CLI secrets')
+                  console.error('❌ TEST secret error:', err.message)
+                  console.error('❌ LIVE secret error:', liveErr.message)
+                  console.error('❌ CLI secret error:', cliErr.message)
+                  await logError(
+                    supabaseAdmin,
+                    'stripe-webhook',
+                    'auth',
+                    'Invalid webhook signature (TEST, LIVE, CLI secrets failed)',
+                    { 
+                      testError: err.message,
+                      liveError: liveErr.message,
+                      cliError: cliErr.message,
+                      signature: signature.substring(0, 20) + '...'
+                    },
+                    null,
+                    { ipAddress },
+                    ipAddress
+                  )
+                  return new Response(
+                    JSON.stringify({ error: 'Invalid signature' }),
+                    { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                  )
+                }
+              }
+            } else if (webhookSecretLegacy && webhookSecretLegacy !== webhookSecretTest) {
+              // TEST and LIVE failed, try legacy secret
+              try {
+                event = await stripe.webhooks.constructEventAsync(
+                  rawBody,
+                  signature,
+                  webhookSecretLegacy,
+                  undefined,
+                  cryptoProvider
+                )
+                webhookSecretUsed = 'LEGACY'
+                isLiveMode = event.livemode === true
+                console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Legacy secret)`)
+              } catch (legacyErr: any) {
+                // All secrets failed
+                console.error('❌ Invalid webhook signature with TEST, LIVE, and LEGACY secrets')
+                console.error('❌ TEST secret error:', err.message)
+                console.error('❌ LIVE secret error:', liveErr.message)
+                console.error('❌ LEGACY secret error:', legacyErr.message)
+                await logError(
+                  supabaseAdmin,
+                  'stripe-webhook',
+                  'auth',
+                  'Invalid webhook signature (TEST, LIVE, LEGACY secrets failed)',
+                  { 
+                    testError: err.message,
+                    liveError: liveErr.message,
+                    legacyError: legacyErr.message,
+                    signature: signature.substring(0, 20) + '...'
+                  },
+                  null,
+                  { ipAddress },
+                  ipAddress
+                )
+                return new Response(
+                  JSON.stringify({ error: 'Invalid signature' }),
+                  { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+              }
+            } else {
+              // Both TEST and LIVE failed, no CLI or LEGACY to try
+              console.error('❌ Invalid webhook signature with both TEST and LIVE secrets')
+              console.error('❌ TEST secret error:', err.message)
+              console.error('❌ LIVE secret error:', liveErr.message)
+              await logError(
+                supabaseAdmin,
+                'stripe-webhook',
+                'auth',
+                'Invalid webhook signature (both TEST and LIVE secrets failed)',
+                { 
+                  testError: err.message,
+                  liveError: liveErr.message,
+                  signature: signature.substring(0, 20) + '...'
+                },
+                null,
+                { ipAddress },
+                ipAddress
+              )
+              return new Response(
+                JSON.stringify({ error: 'Invalid signature' }),
+                { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              )
+            }
+          }
+        } else {
+          // Only TEST secret available and it failed, try CLI or LEGACY if available
+          if (webhookSecretCLI) {
+            try {
+              event = await stripe.webhooks.constructEventAsync(
+                rawBody,
+                signature,
+                webhookSecretCLI,
+                undefined,
+                cryptoProvider
+              )
+              webhookSecretUsed = 'CLI'
+              isLiveMode = event.livemode === true
+              console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Stripe CLI)`)
+            } catch (cliErr: any) {
+              // TEST and CLI failed, try LEGACY if available
+              if (webhookSecretLegacy && webhookSecretLegacy !== webhookSecretTest) {
+                try {
+                  event = await stripe.webhooks.constructEventAsync(
+                    rawBody,
+                    signature,
+                    webhookSecretLegacy,
+                    undefined,
+                    cryptoProvider
+                  )
+                  webhookSecretUsed = 'LEGACY'
+                  isLiveMode = event.livemode === true
+                  console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Legacy secret)`)
+                } catch (legacyErr: any) {
+                  // All secrets failed
+                  console.error('❌ Invalid webhook signature with TEST, CLI, and LEGACY secrets')
+                  await logError(
+                    supabaseAdmin,
+                    'stripe-webhook',
+                    'auth',
+                    'Invalid webhook signature (all available secrets failed)',
+                    { 
+                      testError: err.message,
+                      cliError: cliErr.message,
+                      legacyError: legacyErr.message,
+                      signature: signature.substring(0, 20) + '...'
+                    },
+                    null,
+                    { ipAddress },
+                    ipAddress
+                  )
+                  return new Response(
+                    JSON.stringify({ error: 'Invalid signature' }),
+                    { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                  )
+                }
+              } else {
+                // TEST and CLI failed, no LEGACY to try
+                console.error('❌ Invalid webhook signature with TEST and CLI secrets')
+                await logError(
+                  supabaseAdmin,
+                  'stripe-webhook',
+                  'auth',
+                  'Invalid webhook signature',
+                  { 
+                    testError: err.message,
+                    cliError: cliErr.message,
+                    signature: signature.substring(0, 20) + '...'
+                  },
+                  null,
+                  { ipAddress },
+                  ipAddress
+                )
+                return new Response(
+                  JSON.stringify({ error: 'Invalid signature' }),
+                  { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+              }
+            }
+          } else if (webhookSecretLegacy && webhookSecretLegacy !== webhookSecretTest) {
+            // TEST failed, try LEGACY
+            try {
+              event = await stripe.webhooks.constructEventAsync(
+                rawBody,
+                signature,
+                webhookSecretLegacy,
+                undefined,
+                cryptoProvider
+              )
+              webhookSecretUsed = 'LEGACY'
+              isLiveMode = event.livemode === true
+              console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Legacy secret)`)
+            } catch (legacyErr: any) {
+              // TEST and LEGACY both failed
+              console.error('❌ Invalid webhook signature with TEST and LEGACY secrets')
+              await logError(
+                supabaseAdmin,
+                'stripe-webhook',
+                'auth',
+                'Invalid webhook signature',
+                { 
+                  testError: err.message,
+                  legacyError: legacyErr.message,
+                  signature: signature.substring(0, 20) + '...'
+                },
+                null,
+                { ipAddress },
+                ipAddress
+              )
+              return new Response(
+                JSON.stringify({ error: 'Invalid signature' }),
+                { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              )
+            }
+          } else {
+            // Only TEST secret available and it failed, no fallback
       console.error('❌ Invalid webhook signature:', err.message)
       await logError(
         supabaseAdmin,
@@ -1693,19 +2511,164 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+        }
+      }
+    } else if (webhookSecretLive) {
+      // Only LIVE secret available
+      try {
+        event = await stripe.webhooks.constructEventAsync(
+          rawBody,
+          signature,
+          webhookSecretLive,
+          undefined,
+          cryptoProvider
+        )
+        webhookSecretUsed = 'LIVE'
+        isLiveMode = event.livemode === true
+        console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode)`)
+      } catch (err: any) {
+        // LIVE failed, try CLI or LEGACY if available
+        if (webhookSecretCLI) {
+          try {
+            event = await stripe.webhooks.constructEventAsync(
+              rawBody,
+              signature,
+              webhookSecretCLI,
+              undefined,
+              cryptoProvider
+            )
+            webhookSecretUsed = 'CLI'
+            isLiveMode = event.livemode === true
+            console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Stripe CLI)`)
+          } catch (cliErr: any) {
+            // LIVE and CLI failed, try LEGACY if available
+            if (webhookSecretLegacy && webhookSecretLegacy !== webhookSecretLive) {
+              try {
+                event = await stripe.webhooks.constructEventAsync(
+                  rawBody,
+                  signature,
+                  webhookSecretLegacy,
+                  undefined,
+                  cryptoProvider
+                )
+                webhookSecretUsed = 'LEGACY'
+                isLiveMode = event.livemode === true
+                console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Legacy secret)`)
+              } catch (legacyErr: any) {
+                // All secrets failed
+                console.error('❌ Invalid webhook signature with LIVE, CLI, and LEGACY secrets')
+                await logError(
+                  supabaseAdmin,
+                  'stripe-webhook',
+                  'auth',
+                  'Invalid webhook signature',
+                  { 
+                    liveError: err.message,
+                    cliError: cliErr.message,
+                    legacyError: legacyErr.message,
+                    signature: signature.substring(0, 20) + '...'
+                  },
+                  null,
+                  { ipAddress },
+                  ipAddress
+                )
+                return new Response(
+                  JSON.stringify({ error: 'Invalid signature' }),
+                  { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+              }
+            } else {
+              // LIVE and CLI failed, no LEGACY to try
+              console.error('❌ Invalid webhook signature with LIVE and CLI secrets')
+              await logError(
+                supabaseAdmin,
+                'stripe-webhook',
+                'auth',
+                'Invalid webhook signature',
+                { 
+                  liveError: err.message,
+                  cliError: cliErr.message,
+                  signature: signature.substring(0, 20) + '...'
+                },
+                null,
+                { ipAddress },
+                ipAddress
+              )
+              return new Response(
+                JSON.stringify({ error: 'Invalid signature' }),
+                { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              )
+            }
+          }
+        } else if (webhookSecretLegacy && webhookSecretLegacy !== webhookSecretLive) {
+          // LIVE failed, try LEGACY
+          try {
+            event = await stripe.webhooks.constructEventAsync(
+              rawBody,
+              signature,
+              webhookSecretLegacy,
+              undefined,
+              cryptoProvider
+            )
+            webhookSecretUsed = 'LEGACY'
+            isLiveMode = event.livemode === true
+            console.log(`✅ Webhook signature verified successfully (${webhookSecretUsed} mode - Legacy secret)`)
+          } catch (legacyErr: any) {
+            // LIVE and LEGACY both failed
+            console.error('❌ Invalid webhook signature with LIVE and LEGACY secrets')
+            await logError(
+              supabaseAdmin,
+              'stripe-webhook',
+              'auth',
+              'Invalid webhook signature',
+              { 
+                liveError: err.message,
+                legacyError: legacyErr.message,
+                signature: signature.substring(0, 20) + '...'
+              },
+              null,
+              { ipAddress },
+              ipAddress
+            )
+            return new Response(
+              JSON.stringify({ error: 'Invalid signature' }),
+              { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+        } else {
+          // Only LIVE secret available and it failed, no fallback
+          console.error('❌ Invalid webhook signature:', err.message)
+          await logError(
+            supabaseAdmin,
+            'stripe-webhook',
+            'auth',
+            'Invalid webhook signature',
+            { signature: signature.substring(0, 20) + '...', error: err.message },
+            null,
+            { ipAddress },
+            ipAddress
+          )
+          return new Response(
+            JSON.stringify({ error: 'Invalid signature' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+    }
 
-    console.log(`📨 Received Stripe event: ${event.type} (${event.id})`)
+    console.log(`📨 Received Stripe event: ${event.type} (${event.id}) [${isLiveMode ? 'LIVE' : 'TEST'} mode]`)
 
     // Route to appropriate handler
+    // Pass isLiveMode to handlers so they can use the correct Stripe key
     try {
       switch (event.type) {
         // Core purchase/subscription events
         case 'checkout.session.completed':
-          await handleCheckoutSessionCompleted(supabaseAdmin, event.data.object)
+          await handleCheckoutSessionCompleted(supabaseAdmin, event.data.object, isLiveMode)
           break
 
         case 'customer.subscription.created':
-          await handleSubscriptionCreated(supabaseAdmin, event.data.object)
+          await handleSubscriptionCreated(supabaseAdmin, event.data.object, isLiveMode)
           break
 
         case 'customer.subscription.updated':
@@ -1765,7 +2728,7 @@ serve(async (req) => {
           break
 
         case 'charge.refunded':
-          await handleChargeRefunded(supabaseAdmin, event.data.object)
+          await handleChargeRefunded(supabaseAdmin, event.data.object, isLiveMode)
           break
 
         // Refund events
@@ -1834,8 +2797,9 @@ serve(async (req) => {
     }
 
     // Always return 200 to acknowledge receipt
+    console.log('✅ Webhook processed successfully, returning 200 OK')
     return new Response(
-      JSON.stringify({ received: true }),
+      JSON.stringify({ received: true, eventType: event?.type || 'unknown' }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 

@@ -1,0 +1,151 @@
+-- Apply service_purchases migration to dev
+-- This is the migration from 2025-11-23
+-- Source: migrations/20250123_120000_create_service_purchases.sql
+
+-- Migration: Create Service Purchases Table
+-- Purpose: Track all service purchases and subscriptions
+-- Dependencies: services table, user_profiles table
+-- Created: 2025-01-23
+
+-- Create service purchases table
+CREATE TABLE IF NOT EXISTS service_purchases (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+    service_id UUID NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+    purchase_type VARCHAR(50) NOT NULL, -- one_time, subscription, trial
+    amount_paid DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(3) NOT NULL,
+    
+    -- Stripe Integration
+    stripe_payment_intent_id VARCHAR(255),
+    stripe_subscription_id VARCHAR(255),
+    stripe_customer_id VARCHAR(255),
+    stripe_invoice_id VARCHAR(255),
+    
+    -- User Type and Pricing
+    user_type VARCHAR(50) NOT NULL, -- individual, enterprise
+    discount_code VARCHAR(100),
+    discount_amount DECIMAL(10,2) DEFAULT 0,
+    original_price DECIMAL(10,2),
+    
+    -- Subscription Details
+    subscription_interval VARCHAR(50), -- monthly, yearly
+    current_period_start TIMESTAMP WITH TIME ZONE,
+    current_period_end TIMESTAMP WITH TIME ZONE,
+    
+    -- Status and Lifecycle
+    status VARCHAR(50) DEFAULT 'active', -- active, cancelled, expired, suspended, pending, failed
+    payment_status VARCHAR(50) DEFAULT 'succeeded', -- succeeded, pending, failed, refunded
+    
+    -- Trial Information
+    trial_start TIMESTAMP WITH TIME ZONE,
+    trial_end TIMESTAMP WITH TIME ZONE,
+    is_trial BOOLEAN DEFAULT false,
+    
+    -- Grace Period
+    grace_period_ends_at TIMESTAMP WITH TIME ZONE,
+    
+    -- Timestamps
+    purchased_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE, -- For subscriptions
+    cancelled_at TIMESTAMP WITH TIME ZONE,
+    refunded_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- Admin Notes
+    admin_notes TEXT,
+    cancelled_reason TEXT
+);
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_service_purchases_user_id ON service_purchases(user_id);
+CREATE INDEX IF NOT EXISTS idx_service_purchases_service_id ON service_purchases(service_id);
+CREATE INDEX IF NOT EXISTS idx_service_purchases_status ON service_purchases(status);
+CREATE INDEX IF NOT EXISTS idx_service_purchases_purchase_type ON service_purchases(purchase_type);
+CREATE INDEX IF NOT EXISTS idx_service_purchases_stripe_subscription_id ON service_purchases(stripe_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_service_purchases_stripe_payment_intent_id ON service_purchases(stripe_payment_intent_id);
+CREATE INDEX IF NOT EXISTS idx_service_purchases_stripe_invoice_id ON service_purchases(stripe_invoice_id);
+CREATE INDEX IF NOT EXISTS idx_service_purchases_expires_at ON service_purchases(expires_at);
+CREATE INDEX IF NOT EXISTS idx_service_purchases_purchased_at ON service_purchases(purchased_at);
+
+-- Add updated_at trigger (if function exists)
+DO $$ 
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'update_updated_at_column') THEN
+        DROP TRIGGER IF EXISTS update_service_purchases_updated_at ON service_purchases;
+        CREATE TRIGGER update_service_purchases_updated_at 
+            BEFORE UPDATE ON service_purchases 
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
+
+-- Enable RLS
+ALTER TABLE service_purchases ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies (drop and recreate to ensure they're correct)
+DROP POLICY IF EXISTS "Users can view own service purchases" ON service_purchases;
+CREATE POLICY "Users can view own service purchases" ON service_purchases
+    FOR SELECT USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Admins can view all service purchases" ON service_purchases;
+CREATE POLICY "Admins can view all service purchases" ON service_purchases
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM user_roles 
+            WHERE user_id = auth.uid() 
+            AND role = 'admin'
+        )
+    );
+
+DROP POLICY IF EXISTS "Admins can manage all service purchases" ON service_purchases;
+CREATE POLICY "Admins can manage all service purchases" ON service_purchases
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM user_roles 
+            WHERE user_id = auth.uid() 
+            AND role = 'admin'
+        )
+    );
+
+-- Add constraints (drop first to avoid conflicts)
+ALTER TABLE service_purchases DROP CONSTRAINT IF EXISTS check_service_purchase_type;
+ALTER TABLE service_purchases ADD CONSTRAINT check_service_purchase_type 
+    CHECK (purchase_type IN ('one_time', 'subscription', 'trial'));
+
+ALTER TABLE service_purchases DROP CONSTRAINT IF EXISTS check_service_user_type;
+ALTER TABLE service_purchases ADD CONSTRAINT check_service_user_type 
+    CHECK (user_type IN ('individual', 'enterprise'));
+
+ALTER TABLE service_purchases DROP CONSTRAINT IF EXISTS check_service_status;
+ALTER TABLE service_purchases ADD CONSTRAINT check_service_status 
+    CHECK (status IN ('active', 'cancelled', 'expired', 'suspended', 'pending', 'failed'));
+
+ALTER TABLE service_purchases DROP CONSTRAINT IF EXISTS check_service_payment_status;
+ALTER TABLE service_purchases ADD CONSTRAINT check_service_payment_status 
+    CHECK (payment_status IN ('succeeded', 'pending', 'failed', 'refunded'));
+
+ALTER TABLE service_purchases DROP CONSTRAINT IF EXISTS check_service_subscription_interval;
+ALTER TABLE service_purchases ADD CONSTRAINT check_service_subscription_interval 
+    CHECK (subscription_interval IS NULL OR subscription_interval IN ('monthly', 'yearly'));
+
+ALTER TABLE service_purchases DROP CONSTRAINT IF EXISTS check_service_currency;
+ALTER TABLE service_purchases ADD CONSTRAINT check_service_currency 
+    CHECK (currency IN ('USD', 'EUR', 'CHF', 'GBP'));
+
+-- Add unique constraint for active subscriptions per user per service
+DROP INDEX IF EXISTS idx_unique_active_service_subscription;
+CREATE UNIQUE INDEX idx_unique_active_service_subscription 
+    ON service_purchases(user_id, service_id) 
+    WHERE status = 'active' AND purchase_type = 'subscription';
+
+-- Add comments
+COMMENT ON TABLE service_purchases IS 'Tracks all service purchases and subscriptions for users';
+COMMENT ON COLUMN service_purchases.purchase_type IS 'Type of purchase: one_time, subscription, trial';
+COMMENT ON COLUMN service_purchases.user_type IS 'User type for pricing: individual, enterprise';
+COMMENT ON COLUMN service_purchases.status IS 'Purchase status: active, cancelled, expired, suspended, pending, failed';
+COMMENT ON COLUMN service_purchases.payment_status IS 'Payment processing status: succeeded, pending, failed, refunded';
+COMMENT ON COLUMN service_purchases.is_trial IS 'Whether this is a trial purchase';
+COMMENT ON COLUMN service_purchases.grace_period_ends_at IS 'End of grace period for expired subscriptions';
+COMMENT ON COLUMN service_purchases.admin_notes IS 'Internal admin notes about this purchase';
+COMMENT ON COLUMN service_purchases.cancelled_reason IS 'Reason for cancellation if applicable';
+
