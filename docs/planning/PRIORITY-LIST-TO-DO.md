@@ -44,41 +44,7 @@
 
 ## 💳 **Phase 2: Stripe & Payment Foundation**
 
-> **Note**: Items 13, 14, 14.1, 15, 15.5, 15.5.1, 15.5.2, 15.6, and 15.7 are completed. See [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md) for details.
-
-### 15.8. Stripe API Integration Planning & Setup ⚠️ **MISSING**
-**Status**: **MISSING**  
-**Priority**: Foundation - document all Stripe API integrations needed across all phases  
-**Action**:
-- Document all Stripe API endpoints needed for later phases:
-  - **Payment Method Management** (Phase 4, #17.3): Setup Intents API, Payment Methods API (attach/detach/update)
-  - **Subscription Management** (Phase 4, #17.2): Subscriptions API (cancel, update, pause/resume)
-  - **Refund Processing** (Phase 6, #43): Refunds API (`stripe.refunds.create`)
-  - **Admin Subscription Management** (Phase 7, #50): Full Subscriptions API access
-- Document additional webhook events to handle:
-  - `customer.subscription.trial_will_end` (for trial reminders)
-  - `payment_method.attached` (for payment method updates)
-  - `payment_method.detached` (for payment method removal)
-  - `invoice.upcoming` (for renewal reminders)
-- Create reusable Stripe API wrapper functions/edge functions:
-  - `create-setup-intent` (for payment method collection)
-  - `update-payment-method` (for payment method updates)
-  - `cancel-subscription` (for subscription cancellations)
-  - `update-subscription` (for plan upgrades/downgrades)
-  - `create-refund` (for refund processing)
-- Note: Using **custom UI** (not Stripe Customer Portal) - all subscription management will be built in-house
-
-**Questions to Answer Before Implementation**:
-- Should we create separate edge functions for each Stripe API operation, or one unified Stripe API handler?
-- How to handle Stripe API errors consistently across all operations?
-- Should we cache Stripe customer/subscription data or always fetch fresh?
-- How to handle rate limiting from Stripe API?
-
-**Potential Issues**:
-- Stripe API rate limits (100 requests/second for most endpoints)
-- Need to handle webhook idempotency (avoid duplicate processing)
-- Stripe API versioning (need to pin API version)
-- Error handling for various Stripe error types (card declined, insufficient funds, etc.)
+> **Note**: Items 13, 14, 14.1, 15, 15.5, 15.5.1, 15.5.2, 15.6, 15.7, and 15.8 are completed. See [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md) for details.
 
 ### 15.9. Family Plan Payment Setup & Stripe Integration ⚠️ **MISSING**
 **Status**: **MISSING** - Family plan pricing UI complete, but payment flow and webhook handling not implemented  
@@ -1596,8 +1562,7 @@
 7. Receipt System (#16.7) - **CRITICAL - Needed for all Stripe purchases**
 
 ### 🟡 **HIGH PRIORITY (Before Launch)**
-1. Stripe API Integration Planning & Setup (#15.8) - **HIGH PRIORITY - Document all Stripe API integrations needed**
-2. Family Plan Payment Setup & Stripe Integration (#15.9) - **HIGH PRIORITY - Family plans are key differentiator, pricing UI complete**
+1. Family Plan Payment Setup & Stripe Integration (#15.9) - **HIGH PRIORITY - Family plans are key differentiator, pricing UI complete**
 3. Account subscription management (#17) - **HIGH PRIORITY - User-facing subscription management**
 4. User Subscription Cancellation & Management (#17.2) - **HIGH PRIORITY - Users need to manage subscriptions**
 5. Payment Method Management (#17.3) - **HIGH PRIORITY - Users need to manage payment methods**
@@ -1636,8 +1601,6 @@
 > **Note**: Week 1 (Production Readiness) and Week 2 (Stripe & Payment Foundation - completed items) are complete. See [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md) for details.
 
 ### Week 2 (Remaining): Stripe & Payment Foundation
-- [ ] Document all Stripe API integrations needed (#15.8) - Setup Intents, Payment Methods, Subscriptions, Refunds APIs
-- [ ] Create reusable Stripe API wrapper functions/edge functions (#15.8)
 - [ ] Family Plan Payment Setup & Stripe Integration (#15.9) - Database schema, webhook handler updates, checkout integration
 
 ### Week 3: Purchase & Checkout Flow

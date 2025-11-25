@@ -1,6 +1,6 @@
 # ✅ Priority List - Completed Items
 
-**Last Updated**: November 21, 2025  
+**Last Updated**: November 25, 2025  
 **Based on**: Actual codebase investigation (not just READMEs)
 
 > **Note**: This document contains all completed items from the priority list. For active/incomplete items, see [PRIORITY-LIST-TO-DO.md](./PRIORITY-LIST-TO-DO.md).
@@ -493,6 +493,65 @@
 - ✅ **PostFinance QR-bills**: Commissioning services, in-person tech support (variable pricing, includes international)
 - ✅ **Currency**: CHF primary, EUR secondary (supported in QR-bills)
 - ✅ **Refunds**: Manual bank transfer process documented
+
+### 15.8. Stripe API Integration Planning & Setup ✅ **FULLY COMPLETED**
+**Status**: ✅ **FULLY COMPLETED** - All Stripe API edge functions created and deployed  
+**Priority**: Foundation - document all Stripe API integrations needed across all phases  
+**Completed Actions**:
+- ✅ **Documented all Stripe API endpoints** needed for later phases:
+  - Payment Method Management (Phase 4, #17.3): Setup Intents API, Payment Methods API (attach/detach/update)
+  - Subscription Management (Phase 4, #17.2): Subscriptions API (cancel, update, pause/resume)
+  - Refund Processing (Phase 6, #43): Refunds API (`stripe.refunds.create`)
+  - Admin Subscription Management (Phase 7, #50): Full Subscriptions API access
+- ✅ **Documented and implemented additional webhook events**:
+  - `customer.subscription.trial_will_end` - ✅ Handled in webhook
+  - `payment_method.attached` - ✅ Handled in webhook
+  - `payment_method.detached` - ✅ Handled in webhook
+  - `invoice.upcoming` - ✅ Handled in webhook
+- ✅ **Created all required edge functions** (9 total):
+  - `create-setup-intent` - ✅ Created and deployed (payment method collection)
+  - `update-payment-method` - ✅ Created and deployed (payment method updates)
+  - `cancel-subscription` - ✅ Created and deployed (subscription cancellations)
+  - `update-subscription` - ✅ Created and deployed (plan upgrades/downgrades)
+  - `create-refund` - ✅ Created and deployed (refund processing)
+  - `pause-subscription` - ✅ Created and deployed (subscription pausing)
+  - `resume-subscription` - ✅ Created and deployed (subscription resuming)
+  - `extend-subscription` - ✅ Created and deployed (admin-only, extend expiration)
+  - `apply-discount` - ✅ Created and deployed (apply coupon/discount codes)
+- ✅ **All functions deployed** to both dev (`eygpejbljuqpxwwoawkn`) and production (`dynxqnrkmjcvgzsugxtm`)
+- ✅ **Deployed with `--no-verify-jwt`** (functions handle authentication in code)
+- ✅ **Using custom UI approach** (not Stripe Customer Portal) - all subscription management built in-house
+
+**Questions Answered**:
+- ✅ **Separate edge functions vs unified handler**: Created separate edge functions for each operation (9 functions total) - better separation of concerns, easier to maintain
+- ✅ **Stripe API error handling**: Consistent error handling using `logError()` function across all operations
+- ✅ **Caching strategy**: Always fetch fresh from Stripe (no caching) - ensures accuracy for financial operations, database kept up-to-date via webhooks
+- ✅ **Rate limiting**: Implemented in all functions:
+  - User-facing functions: 10 requests/minute, 100 requests/hour per user
+  - Admin functions: 60 requests/minute, 2000 requests/hour per user
+  - Well below Stripe's 100 requests/second limit
+
+**Implementation Details**:
+- ✅ All functions include authentication (JWT token verification)
+- ✅ All functions include rate limiting
+- ✅ All functions include error logging to `error_logs` table
+- ✅ All functions support both test and live Stripe modes via `STRIPE_MODE` env var
+- ✅ All functions use Stripe API version `2024-11-20.acacia`
+- ✅ User-facing functions verify subscription ownership before operations
+- ✅ Admin functions verify admin role via `user_roles` table
+- ✅ Consistent CORS handling across all functions
+- ✅ All functions return structured JSON responses
+
+**Testing Status**:
+- ✅ All functions deployed and accessible
+- ✅ Platform JWT verification disabled (functions handle auth in code)
+- ✅ Functions correctly return 401 without authentication (expected behavior)
+- ✅ Ready for integration testing when UI components are built (Phase 4, 6, 7)
+
+**Next Steps**: Functions are production-ready. Will be tested when UI components are implemented:
+- Phase 4 (#17.2, #17.3): User subscription management UI
+- Phase 6 (#43): Refund processing UI
+- Phase 7 (#50): Admin subscription management UI
 
 ---
 

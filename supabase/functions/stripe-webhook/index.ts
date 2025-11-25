@@ -4,11 +4,12 @@
  * Handles all Stripe webhook events for product purchases and subscriptions.
  * Processes checkout completions, subscription lifecycle, invoices, refunds, and disputes.
  * 
- * Events handled (29 total):
+ * Events handled (31 total):
  * - Core: checkout.session.completed, subscription.*, invoice.*, charge.*
  * - Refunds: refund.created, refund.failed, refund.updated
  * - Disputes: charge.dispute.*
  * - Payment: charge.succeeded, charge.failed, invoice.payment_action_required
+ * - Payment Methods: payment_method.attached, payment_method.detached
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -2025,6 +2026,80 @@ async function handleSubscriptionPendingUpdateExpired(
 }
 
 /**
+ * Handle payment_method.attached
+ * Payment method attached to customer
+ */
+async function handlePaymentMethodAttached(
+  supabaseAdmin: any,
+  paymentMethod: any
+): Promise<void> {
+  console.log('💳 Processing payment_method.attached:', paymentMethod.id)
+  
+  const customerId = paymentMethod.customer as string | null
+  if (!customerId) {
+    console.warn('⚠️ Payment method attached but no customer ID:', paymentMethod.id)
+    return
+  }
+
+  // Log for audit trail
+  await logError(
+    supabaseAdmin,
+    'stripe-webhook',
+    'other',
+    'Payment method attached to customer',
+    {
+      paymentMethodId: paymentMethod.id,
+      customerId,
+      type: paymentMethod.type,
+      cardLast4: paymentMethod.card?.last4 || null,
+      cardBrand: paymentMethod.card?.brand || null
+    },
+    null,
+    { event: 'payment_method.attached', paymentMethod }
+  )
+
+  // Note: Payment methods are managed by Stripe, we just log for audit purposes
+  // If needed, we could check for subscriptions that might benefit from this update
+}
+
+/**
+ * Handle payment_method.detached
+ * Payment method removed from customer
+ */
+async function handlePaymentMethodDetached(
+  supabaseAdmin: any,
+  paymentMethod: any
+): Promise<void> {
+  console.log('💳 Processing payment_method.detached:', paymentMethod.id)
+  
+  const customerId = paymentMethod.customer as string | null
+  if (!customerId) {
+    console.warn('⚠️ Payment method detached but no customer ID:', paymentMethod.id)
+    return
+  }
+
+  // Log for audit trail and admin visibility
+  await logError(
+    supabaseAdmin,
+    'stripe-webhook',
+    'other',
+    'Payment method detached from customer - check subscriptions',
+    {
+      paymentMethodId: paymentMethod.id,
+      customerId,
+      type: paymentMethod.type,
+      cardLast4: paymentMethod.card?.last4 || null,
+      cardBrand: paymentMethod.card?.brand || null
+    },
+    null,
+    { event: 'payment_method.detached', paymentMethod }
+  )
+
+  // Note: If this was the default payment method, subscriptions may need attention
+  // Stripe will handle retrying with other payment methods if available
+}
+
+/**
  * Helper: Update purchase from subscription object
  */
 async function updatePurchaseFromSubscription(
@@ -2776,6 +2851,15 @@ serve(async (req) => {
 
         case 'customer.subscription.pending_update_expired':
           await handleSubscriptionPendingUpdateExpired(supabaseAdmin, event.data.object)
+          break
+
+        // Payment method events
+        case 'payment_method.attached':
+          await handlePaymentMethodAttached(supabaseAdmin, event.data.object)
+          break
+
+        case 'payment_method.detached':
+          await handlePaymentMethodDetached(supabaseAdmin, event.data.object)
           break
 
         default:
