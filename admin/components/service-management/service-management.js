@@ -281,6 +281,9 @@ class ServiceManagement {
         const categorySelect = document.getElementById('service-category');
         if (categorySelect) {
             categorySelect.addEventListener('change', () => {
+                // Auto-select payment_method based on category
+                this.autoSelectPaymentMethod();
+                
                 // Only re-initialize if modal is open and editors exist
                 if (this.elements.modal && !this.elements.modal.classList.contains('hidden')) {
                     if (this.elements.currencyPricingEditor) {
@@ -296,6 +299,14 @@ class ServiceManagement {
                         this.updateSalePricePreview();
                     }
                 }
+            });
+        }
+        
+        // Additional costs change - update payment_method if travel costs added
+        const additionalCostsInput = document.getElementById('additional-costs');
+        if (additionalCostsInput) {
+            additionalCostsInput.addEventListener('change', () => {
+                this.autoSelectPaymentMethod();
             });
         }
 
@@ -402,6 +413,10 @@ class ServiceManagement {
             }
 
             this.services = data || [];
+            // Debug: Log first service to check payment_method
+            if (this.services.length > 0) {
+                window.logger?.log('First service payment_method:', this.services[0].payment_method, 'Full service:', this.services[0]);
+            }
             this.filteredServices = [...this.services];
 
             this.hideLoading();
@@ -488,6 +503,69 @@ class ServiceManagement {
         categoryCell.setAttribute('data-label', 'Category');
         categoryCell.textContent = service.service_category || '';
 
+        // Payment Method
+        const paymentMethodCell = document.createElement('td');
+        paymentMethodCell.setAttribute('data-label', 'Payment Method');
+        // Ensure we always have a payment_method value (fallback to 'stripe' if missing)
+        // Handle null, undefined, or empty string
+        let paymentMethod = service.payment_method;
+        if (!paymentMethod || (typeof paymentMethod === 'string' && paymentMethod.trim() === '')) {
+            // Auto-determine based on category if not set
+            if (service.service_category === 'commissioning') {
+                paymentMethod = 'bank_transfer';
+            } else if (service.service_category === 'tech-support') {
+                // Check if has travel costs
+                const hasTravel = service.additional_costs && 
+                    (service.additional_costs.toLowerCase().includes('travel') || 
+                     service.additional_costs.toLowerCase().includes('device cost'));
+                paymentMethod = hasTravel ? 'bank_transfer' : 'stripe';
+            } else if (service.service_category === 'catalog-access') {
+                paymentMethod = 'stripe';
+            } else {
+                paymentMethod = 'stripe'; // Default fallback
+            }
+        }
+        
+        // Check if service supports both formats (can be in-person AND remote)
+        // Tech support services with travel costs can be offered both ways
+        const supportsBothFormats = service.service_category === 'tech-support' && 
+                                    service.additional_costs && 
+                                    (service.additional_costs.toLowerCase().includes('travel') || 
+                                     service.additional_costs.toLowerCase().includes('device cost')) &&
+                                    !service.additional_costs.toLowerCase().includes('only in-person') &&
+                                    !service.additional_costs.toLowerCase().includes('in-person only');
+        
+        // Render payment method badges
+        if (supportsBothFormats) {
+            // Service supports both formats - show both badges
+            paymentMethodCell.innerHTML = `
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <span class="service-management__badge service-management__badge--stripe" title="Remote: Stripe payment">
+                        Stripe
+                    </span>
+                    <span class="service-management__badge service-management__badge--bank-transfer" title="In-person: Bank transfer">
+                        Bank Transfer
+                    </span>
+                </div>
+                <small style="display: block; margin-top: 0.25rem; opacity: 0.7; font-size: 0.75em;">
+                    Both (format determines payment)
+                </small>
+            `;
+        } else {
+            // Single payment method
+            const paymentMethodBadgeClass = paymentMethod === 'bank_transfer' 
+                ? 'service-management__badge--bank-transfer' 
+                : 'service-management__badge--stripe';
+            const paymentMethodLabel = paymentMethod === 'bank_transfer' 
+                ? 'Bank Transfer' 
+                : 'Stripe';
+            paymentMethodCell.innerHTML = `
+                <span class="service-management__badge ${paymentMethodBadgeClass}">
+                    ${paymentMethodLabel}
+                </span>
+            `;
+        }
+
         // Status
         const statusCell = document.createElement('td');
         statusCell.setAttribute('data-label', 'Status');
@@ -561,6 +639,7 @@ class ServiceManagement {
         tr.appendChild(checkboxCell);
         tr.appendChild(nameCell);
         tr.appendChild(categoryCell);
+        tr.appendChild(paymentMethodCell);
         tr.appendChild(statusCell);
         tr.appendChild(pricingCell);
         tr.appendChild(saleCell);
@@ -999,6 +1078,7 @@ class ServiceManagement {
             'service-name': service.name,
             'service-slug': service.slug,
             'service-category': service.service_category,
+            'service-payment-method': service.payment_method || 'stripe',
             'service-status': service.status,
             'service-short-description': service.short_description || '',
             'service-description': service.description || '',
@@ -1434,6 +1514,7 @@ class ServiceManagement {
                 name: formData.get('name'),
                 slug: formData.get('slug'),
                 service_category: formData.get('service_category'),
+                payment_method: formData.get('payment_method') || 'stripe',
                 status: formData.get('status'),
                 short_description: formData.get('short_description') || null,
                 description: formData.get('description') || null,
@@ -2687,6 +2768,41 @@ class ServiceManagement {
         } else if (btnText && (!btnText.textContent || btnText.textContent.trim() === '')) {
             // Fallback: ensure text is always there
             btnText.textContent = 'Create Stripe Product';
+        }
+    }
+
+    /**
+     * Auto-select payment_method based on service category and additional costs
+     */
+    autoSelectPaymentMethod() {
+        const categorySelect = document.getElementById('service-category');
+        const paymentMethodSelect = document.getElementById('service-payment-method');
+        const additionalCostsInput = document.getElementById('additional-costs');
+        
+        if (!categorySelect || !paymentMethodSelect) {
+            return;
+        }
+        
+        const category = categorySelect.value;
+        const additionalCosts = additionalCostsInput ? additionalCostsInput.value : '';
+        const hasTravelCosts = additionalCosts.toLowerCase().includes('travel');
+        
+        let suggestedPaymentMethod = 'stripe'; // Default
+        
+        // Auto-select based on finalized payment strategy
+        if (category === 'catalog-access') {
+            suggestedPaymentMethod = 'stripe';
+        } else if (category === 'tech-support') {
+            suggestedPaymentMethod = hasTravelCosts ? 'bank_transfer' : 'stripe';
+        } else if (category === 'commissioning') {
+            suggestedPaymentMethod = 'bank_transfer';
+        }
+        
+        // Only auto-select if payment_method is not manually set or is empty
+        // Allow user to override
+        if (paymentMethodSelect.value === '' || paymentMethodSelect.value === 'stripe') {
+            paymentMethodSelect.value = suggestedPaymentMethod;
+            window.logger?.log(`Auto-selected payment method: ${suggestedPaymentMethod} for category: ${category}`);
         }
     }
 }

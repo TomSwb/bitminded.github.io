@@ -1280,6 +1280,17 @@
     opacity: 0.6;
 }
 
+.service-management__badge--stripe {
+    background-color: #635bff;
+    color: white;
+}
+
+.service-management__badge--bank-transfer {
+    background-color: #ffcc00;
+    color: #000000;
+    border: 1px solid #e6b800;
+}
+
 /* Sale Badge */
 .service-management__sale-badge {
     display: inline-block;

@@ -1448,3 +1448,49 @@ td[data-i18n="tech-support-policies-travel-details"] {
   }
 }
 
+/* Payment Method Badge Styles (for services that support both formats) */
+.service-payment-method-badge {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0.5rem 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.payment-method-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    white-space: nowrap;
+}
+
+.payment-method-badge--stripe {
+    background-color: #635bff;
+    color: white;
+}
+
+.payment-method-badge--bank-transfer {
+    background-color: #ffcc00;
+    color: #000000;
+    border: 1px solid #e6b800;
+}
+
+/* Payment Method Info Styles */
+.service-payment-method-info {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.service-payment-method-info small {
+    display: block;
+    opacity: 0.7;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+

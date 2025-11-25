@@ -26,9 +26,9 @@
 
 | Service | Current Price | Status |
 |---------|--------------|--------|
-| **Single Tool License** | CHF 25-60 (one-time) | ✅ Implemented |
-| **All-Tools Membership** | CHF 18/month or CHF 180/year | ⚠️ Under Review |
-| **Supporter Tier** | CHF 35/month | ⚠️ Under Review |
+| **Single Tool License** | CHF 2-25 (one-time, varies by tool) | ✅ Implemented |
+| **All-Tools Membership** | CHF 5/month or CHF 55/year (Family: CHF 3.50/month or CHF 38.50/year) | ✅ Implemented |
+| **Supporter Tier** | CHF 8/month or CHF 88/year (Family: CHF 5/month or CHF 55/year) | ✅ Implemented |
 
 ### Commissioning Services
 
@@ -42,16 +42,17 @@
 
 ### Tech Support Services
 
-| Service | Current Price | Duration | Status |
-|---------|--------------|----------|--------|
-| **Friendly Tech Drop-In** | CHF 45 | 30 minutes | ✅ Implemented |
-| **Confidence Session** | CHF 70 | 1 hour | ✅ Implemented |
-| **Quick Tech Help** | CHF 90 | 45 minutes | ✅ Implemented |
-| **Family Tech Tune-Up** | CHF 140 | 90 minutes | ✅ Implemented |
-| **Home Visit Essentials** | CHF 120 + travel | 90 minutes | ✅ Implemented |
-| **Guided Learning Bundle** | CHF 180 | 3 sessions | ✅ Implemented |
-| **Confidence Series** | CHF 320 | 4 sessions | ✅ Implemented |
-| **Onsite Visit** | CHF 180 + travel | Variable | ✅ Implemented |
+| Service | Current Price | Reduced Fare | Duration | Additional Costs | Status |
+|---------|--------------|--------------|----------|------------------|--------|
+| **Confidence Session** | CHF 50 | CHF 35 | 1 hour | + travel | ✅ Implemented |
+| **Guided Learning Bundle** | CHF 135 | CHF 95 | 3 sessions | + travel | ✅ Implemented |
+| **Parent & Home Tech Session** | CHF 75 | CHF 50 | 90 minutes | + travel | ✅ Implemented |
+| **Quick Tech Help** | CHF 30 | CHF 25 | 45 minutes | None (remote) | ✅ Implemented |
+| **Friendly Tech Drop-In** | CHF 35 | CHF 30 | 1 hour | + travel + coffee 😉 | ✅ Implemented |
+| **Home Visit Essentials** | CHF 90 | CHF 65 | 90 minutes | + travel | ✅ Implemented |
+| **Device Procurement** | CHF 30/hour | CHF 20/hour | Variable | + device cost + travel | ✅ Implemented |
+
+**Note:** Reduced fares available for seniors, students, and unemployed. Travel is CHF 0.50/km (min CHF 5, max CHF 40).
 
 ---
 
@@ -65,24 +66,22 @@
 
 | Price Point | Subscribers Needed | Monthly Revenue | Annual Revenue (after tax ~25%) |
 |-------------|-------------------|-----------------|--------------------------------|
-| CHF 5/month | 1,000 | CHF 5,000 | CHF 45,000 |
-| **CHF 8/month** | **625** | **CHF 5,000** | **CHF 45,000** |
+| **CHF 5/month** | **1,000** | **CHF 5,000** | **CHF 45,000** |
+| CHF 8/month | 625 | CHF 5,000 | CHF 45,000 |
 | CHF 10/month | 500 | CHF 5,000 | CHF 45,000 |
-| CHF 18/month (current) | 278 | CHF 5,000 | CHF 45,000 |
+| CHF 18/month | 278 | CHF 5,000 | CHF 45,000 |
 
-### Recommended: CHF 8/month
+### Current Implementation: CHF 5/month (All-Tools Membership)
 
 **Rationale:**
-- ✅ Accessible to "petite gens" (price of a coffee)
-- ✅ Achievable volume (625 subscribers is realistic)
-- ✅ Better economics than CHF 5/month
-- ✅ Lower barrier than CHF 18/month
-- ✅ Sustainable for Vaud living costs
+- ✅ Most accessible to "petite gens" (very affordable)
+- ✅ Lower barrier to entry
+- ✅ Sustainable for Vaud living costs when combined with commissions and tech support
 
-### Calculations (CHF 8/month)
+### Calculations (CHF 5/month - Current Implementation)
 
 **Gross Revenue:**
-- 625 subscribers × CHF 8 = CHF 5,000/month
+- 1,000 subscribers × CHF 5 = CHF 5,000/month
 
 **After Stripe Fees (3%):**
 - CHF 5,000 - CHF 150 = CHF 4,850/month
@@ -90,7 +89,7 @@
 **After Tax (~25%):**
 - CHF 4,850 × 0.75 = CHF 3,638/month = CHF 43,650/year
 
-**Verdict:** Sustainable for one person in Vaud, especially with commissions and tech support services.
+**Verdict:** Sustainable for one person in Vaud, especially with commissions and tech support services. Note: Requires higher subscriber volume (1,000 vs 625) compared to CHF 8/month.
 
 ---
 
@@ -161,11 +160,11 @@
    - ✅ Complements commissioning services
    - ✅ Builds relationships and trust
 
-3. **Catalog Access (Current: CHF 18/month, Proposed: CHF 8/month):**
-   - ⚠️ Current price may be too high for volume strategy
-   - ✅ Proposed CHF 8/month makes it accessible
-   - ✅ Volume strategy aligns with "petite gens" market
+3. **Catalog Access (Current: CHF 5/month - Implemented):**
+   - ✅ Very accessible price for "petite gens" market
+   - ✅ Volume strategy implemented (requires 1,000 subscribers for CHF 5k/month revenue)
    - ✅ Lower barrier = more subscribers
+   - ✅ Family plans available at discounted rates (CHF 3.50/month)
 
 ### Capacity Analysis (35-45 hours/week)
 
@@ -178,9 +177,9 @@
 
 **Revenue Potential:**
 - 2 commissions/month: CHF 1.3k-2.0k (simple + standard)
-- 5-8 guidance sessions: CHF 350-1,440
-- Catalog subscriptions: CHF 1.6k-5.0k (200-625 subscribers)
-- **Total: CHF 3.3k-8.4k/month** = CHF 39.6k-100.8k/year
+- 5-8 guidance sessions: CHF 150-1,440 (CHF 30-180 per session)
+- Catalog subscriptions: CHF 1.0k-5.0k (200-1,000 subscribers at CHF 5/month)
+- **Total: CHF 2.5k-8.4k/month** = CHF 30k-100.8k/year
 
 ---
 
@@ -205,7 +204,8 @@
 - Focus on quantity over price-per-subscriber
 - Make it accessible to "petite gens"
 - Lower barrier to entry = more subscribers
-- 625 subscribers at CHF 8/month = CHF 5,000/month (same revenue as 278 at CHF 18/month)
+- 1,000 subscribers at CHF 5/month = CHF 5,000/month
+- Family plans available at discounted rates (CHF 3.50/month for All-Tools, CHF 5/month for Supporter)
 
 ### 3. Project-Based Pricing for Commissioning
 
@@ -247,56 +247,49 @@
 ### Scenario A: Simple Apps Focus
 
 **Monthly:**
-- 2-3 simple app commissions: CHF 900-2,250
-- 5-8 guidance sessions: CHF 350-1,440
-- Catalog (200 subscribers at CHF 8): CHF 1,600
-- **Total: CHF 2.9k-5.3k/month** = CHF 34.8k-63.6k/year
+- 2-3 simple app commissions: CHF 700-2,250 (CHF 350-750 each)
+- 5-8 guidance sessions: CHF 150-1,440 (CHF 30-180 per session)
+- Catalog (200 subscribers at CHF 5): CHF 1,000
+- **Total: CHF 1.85k-4.7k/month** = CHF 22.2k-56.4k/year
 
 ### Scenario B: Mixed Portfolio
 
 **Monthly:**
-- 1 standard + 1 simple commission: CHF 1.3k-2.0k
-- 5-8 guidance sessions: CHF 350-1,440
-- Catalog (500 subscribers at CHF 8): CHF 4,000
-- **Total: CHF 5.7k-7.4k/month** = CHF 68.4k-88.8k/year
+- 1 standard + 1 simple commission: CHF 1.2k-2.0k
+- 5-8 guidance sessions: CHF 150-1,440 (CHF 30-180 per session)
+- Catalog (500 subscribers at CHF 5): CHF 2,500
+- **Total: CHF 3.85k-4.9k/month** = CHF 46.2k-58.8k/year
 
 ### Scenario C: Tech Support-Heavy
 
 **Monthly:**
 - 1 simple commission: CHF 350-750
-- 10-15 guidance sessions: CHF 700-2,700
-- Catalog (300 subscribers at CHF 8): CHF 2,400
-- **Total: CHF 3.6k-5.9k/month** = CHF 43.2k-70.8k/year
+- 10-15 guidance sessions: CHF 300-2,700 (CHF 30-180 per session)
+- Catalog (300 subscribers at CHF 5): CHF 1,500
+- **Total: CHF 2.15k-4.95k/month** = CHF 25.8k-59.4k/year
 
 ### Scenario D: Volume Strategy Success
 
 **Monthly:**
 - 1 simple commission: CHF 350-750
-- 5 guidance sessions: CHF 350-700
-- Catalog (1,000 subscribers at CHF 8): CHF 8,000
-- **Total: CHF 8.8k-9.5k/month** = CHF 105.6k-114k/year
+- 5 guidance sessions: CHF 150-900 (CHF 30-180 per session)
+- Catalog (1,000 subscribers at CHF 5): CHF 5,000
+- **Total: CHF 5.5k-6.65k/month** = CHF 66k-79.8k/year
 
 ---
 
 ## 🛠️ Implementation Notes
 
-### Proposed Pricing Changes
+### Current Pricing Implementation Status
 
-#### Catalog Access (To Be Implemented)
+#### Catalog Access (✅ Implemented)
 
-**Current:**
-- All-Tools Membership: CHF 18/month or CHF 180/year
-- Supporter Tier: CHF 35/month
+**Current Prices (as of database seed):**
+- All-Tools Membership: CHF 5/month or CHF 55/year (Family: CHF 3.50/month or CHF 38.50/year)
+- Supporter Tier: CHF 8/month or CHF 88/year (Family: CHF 5/month or CHF 55/year)
+- Single Tool License: CHF 2-25 (one-time, varies by tool)
 
-**Proposed:**
-- All-Tools Membership: CHF 8/month or CHF 80/year
-- Supporter Tier: CHF 15/month
-
-**Rationale:**
-- Lower barrier to entry
-- Volume strategy (625 subscribers = CHF 5,000/month)
-- Accessible to "petite gens"
-- Still sustainable with commissions and tech support
+**Note:** These prices reflect the volume strategy approach - lower barrier to entry, accessible to "petite gens", sustainable with commissions and tech support.
 
 #### Commissioning (Simplified Structure)
 
@@ -327,11 +320,11 @@
    - ✅ Customization replaced by "Commission a Feature"
 
 2. **Catalog Access Page:**
-   - Update pricing to CHF 8/month (from CHF 18/month)
-   - Update yearly pricing to CHF 80/year (from CHF 180/year)
-   - Update Supporter Tier to CHF 15/month (from CHF 35/month)
-   - Update comparison table
-   - Update FAQ with new pricing
+   - ✅ Pricing already implemented in database (CHF 5/month or CHF 55/year for All-Tools)
+   - ✅ Supporter Tier: CHF 8/month or CHF 88/year
+   - ✅ Family plans available at discounted rates
+   - Ensure frontend displays match database values
+   - Update FAQ if needed
 
 3. **Business Model Document:**
    - Update catalog pricing section

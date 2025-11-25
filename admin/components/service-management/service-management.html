@@ -145,6 +145,7 @@
                         <span class="service-management__sort-indicator"></span>
                     </th>
                     <th class="translatable-content" data-translation-key="Category">Category</th>
+                    <th class="translatable-content" data-translation-key="Payment Method">Payment Method</th>
                     <th class="translatable-content" data-translation-key="Status">Status</th>
                     <th class="translatable-content" data-translation-key="Pricing">Pricing</th>
                     <th class="translatable-content" data-translation-key="Sale">Sale</th>
@@ -235,6 +236,20 @@
                                 <option value="tech-support">Tech Support</option>
                                 <option value="catalog-access">Catalog Access</option>
                             </select>
+                        </div>
+
+                        <div class="service-management__form-group">
+                            <label for="service-payment-method" class="service-management__form-label">
+                                <span class="translatable-content" data-translation-key="Payment Method">Payment Method</span>
+                                <span class="service-management__required">*</span>
+                            </label>
+                            <select id="service-payment-method" name="payment_method" class="service-management__form-select" required>
+                                <option value="stripe">Stripe (Secure Card Payment)</option>
+                                <option value="bank_transfer">Bank Transfer (PostFinance QR-bill)</option>
+                            </select>
+                            <small class="service-management__form-help">
+                                <span class="translatable-content" data-translation-key="payment_method_help">Payment method for this service. Commissioning and in-person services use bank transfer. Catalog access and remote services use Stripe.</span>
+                            </small>
                         </div>
 
                         <div class="service-management__form-group">
