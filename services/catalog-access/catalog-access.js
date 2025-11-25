@@ -507,7 +507,7 @@ class CatalogAccessPageLoader {
                     this.serviceRenderer.updateSaleInfo(card, originalService);
                     this.serviceRenderer.updateStatus(card, originalService);
                     this.serviceRenderer.updateFeaturedBadge(card, originalService);
-                }
+            }
             }
         });
 
