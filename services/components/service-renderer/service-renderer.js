@@ -43,6 +43,8 @@ class ServiceRenderer {
             this.updateSaleBadge(elements.card, service);
             this.updateSaleInfo(elements.card, service);
             this.updateFeaturedBadge(elements.card, service);
+            this.updatePaymentMethodBadge(elements.card, service);
+            this.updatePaymentMethodInfo(elements.card, service);
         }
     }
 
@@ -342,6 +344,185 @@ class ServiceRenderer {
     }
 
     /**
+     * Update payment method badge
+     */
+    updatePaymentMethodBadge(cardElement, service) {
+        if (!cardElement || !service) {
+            return;
+        }
+
+        // Determine payment method (with fallback logic)
+        let paymentMethod = service.payment_method;
+        if (!paymentMethod || (typeof paymentMethod === 'string' && paymentMethod.trim() === '')) {
+            // Auto-determine based on category if not set
+            if (service.service_category === 'commissioning') {
+                paymentMethod = 'bank_transfer';
+            } else if (service.service_category === 'tech-support') {
+                // Check if has travel costs
+                const hasTravel = service.additional_costs && 
+                    (service.additional_costs.toLowerCase().includes('travel') || 
+                     service.additional_costs.toLowerCase().includes('device cost'));
+                paymentMethod = hasTravel ? 'bank_transfer' : 'stripe';
+            } else if (service.service_category === 'catalog-access') {
+                paymentMethod = 'stripe';
+            } else {
+                paymentMethod = 'stripe'; // Default fallback
+            }
+        }
+        
+        // Find or create payment method badge container
+        let badgeContainer = cardElement.querySelector('.service-payment-method-badge');
+        if (!badgeContainer) {
+            badgeContainer = document.createElement('div');
+            badgeContainer.className = 'service-payment-method-badge';
+            badgeContainer.style.display = 'flex';
+            
+            // Insert after title or at the beginning of the card
+            const title = cardElement.querySelector('.tech-support-service-card__title') || 
+                         cardElement.querySelector('.commissioning-pricing-card__title') ||
+                         cardElement.querySelector('.catalog-access-pricing-comparison-card__title');
+            
+            if (title) {
+                title.insertAdjacentElement('afterend', badgeContainer);
+            } else {
+                cardElement.insertBefore(badgeContainer, cardElement.firstChild);
+            }
+        }
+
+        // Ensure container is visible and has correct display
+        badgeContainer.style.display = 'flex';
+        
+        // Clear existing badge
+        badgeContainer.innerHTML = '';
+
+        // Check if service supports both formats (can be in-person AND remote)
+        // Tech support services with travel costs typically support both formats
+        const supportsBothFormats = service.service_category === 'tech-support' && 
+                                    service.additional_costs && 
+                                    (service.additional_costs.toLowerCase().includes('travel') || 
+                                     service.additional_costs.toLowerCase().includes('device cost'));
+
+        if (supportsBothFormats) {
+            // Service supports both formats - show both badges
+            const onlineBadge = document.createElement('span');
+            onlineBadge.className = 'payment-method-badge payment-method-badge--stripe translatable-content';
+            onlineBadge.setAttribute('data-i18n', 'payment-method-online');
+            onlineBadge.textContent = 'Online';
+            onlineBadge.setAttribute('title', '');
+            onlineBadge.setAttribute('data-i18n-title', 'payment-method-online-remote-tooltip');
+            
+            const bankBadge = document.createElement('span');
+            bankBadge.className = 'payment-method-badge payment-method-badge--bank-transfer translatable-content';
+            bankBadge.setAttribute('data-i18n', 'payment-method-invoice');
+            bankBadge.textContent = 'Invoice';
+            bankBadge.setAttribute('title', '');
+            bankBadge.setAttribute('data-i18n-title', 'payment-method-invoice-inperson-tooltip');
+            
+            badgeContainer.style.display = 'flex';
+            badgeContainer.style.gap = '0.5rem';
+            badgeContainer.style.flexWrap = 'wrap';
+            badgeContainer.appendChild(onlineBadge);
+            badgeContainer.appendChild(bankBadge);
+            
+            // Make badges visible immediately
+            onlineBadge.classList.add('loaded');
+            bankBadge.classList.add('loaded');
+            onlineBadge.style.display = 'inline-block';
+            bankBadge.style.display = 'inline-block';
+            badgeContainer.style.display = 'flex';
+            
+            // Apply translations immediately
+            this.applyBadgeTranslations(onlineBadge);
+            this.applyBadgeTranslations(bankBadge);
+            
+            // Listen for translation events and update badges
+            const updateBadges = () => {
+                setTimeout(() => {
+                    this.applyBadgeTranslations(onlineBadge);
+                    this.applyBadgeTranslations(bankBadge);
+                }, 50);
+            };
+            
+            // Listen to all possible translation events
+            document.addEventListener('techSupportTranslationsApplied', updateBadges);
+            document.addEventListener('commissioningTranslationsApplied', updateBadges);
+            document.addEventListener('catalogAccessTranslationsApplied', updateBadges);
+            document.addEventListener('languageChanged', updateBadges);
+            
+            // Also listen to i18next language changes directly if available
+            if (window.i18next && typeof window.i18next.on === 'function') {
+                window.i18next.on('languageChanged', updateBadges);
+            }
+            
+            // Force update after delays to catch translations
+            setTimeout(updateBadges, 100);
+            setTimeout(updateBadges, 500);
+        } else {
+            // Single payment method
+            const badge = document.createElement('span');
+            badge.className = `payment-method-badge payment-method-badge--${paymentMethod} translatable-content`;
+            
+            if (paymentMethod === 'bank_transfer') {
+                badge.setAttribute('data-i18n', 'payment-method-invoice');
+                badge.textContent = 'Invoice';
+                badge.setAttribute('title', '');
+                badge.setAttribute('data-i18n-title', 'payment-method-invoice-tooltip');
+            } else {
+                badge.setAttribute('data-i18n', 'payment-method-online');
+                badge.textContent = 'Online';
+                badge.setAttribute('title', '');
+                badge.setAttribute('data-i18n-title', 'payment-method-online-tooltip');
+            }
+            
+            badgeContainer.appendChild(badge);
+            
+            // Make badge visible immediately
+            badge.classList.add('loaded');
+            badge.style.display = 'inline-block';
+            badgeContainer.style.display = 'flex';
+            
+            // Apply translations immediately
+            this.applyBadgeTranslations(badge);
+            
+            // Listen for translation events to update badge when language changes
+            const updateBadge = () => {
+                setTimeout(() => {
+                    this.applyBadgeTranslations(badge);
+                }, 50);
+            };
+            
+            // Listen to multiple translation events
+            document.addEventListener('techSupportTranslationsApplied', updateBadge);
+            document.addEventListener('commissioningTranslationsApplied', updateBadge);
+            document.addEventListener('catalogAccessTranslationsApplied', updateBadge);
+            document.addEventListener('languageChanged', updateBadge);
+            
+            // Also listen to i18next language changes directly if available
+            if (window.i18next && typeof window.i18next.on === 'function') {
+                window.i18next.on('languageChanged', updateBadge);
+            }
+            
+            // Force update after delays to catch translations
+            setTimeout(updateBadge, 100);
+            setTimeout(updateBadge, 500);
+        }
+    }
+
+    /**
+     * Update payment method info text
+     * NOTE: Info text removed per user request - payment method details will be handled in checkout workflow
+     */
+    updatePaymentMethodInfo(cardElement, service) {
+        // Remove any existing info containers
+        const existingInfo = cardElement.querySelector('.service-payment-method-info');
+        if (existingInfo) {
+            existingInfo.remove();
+        }
+        // No longer creating info text - removed per user request
+        return;
+    }
+
+    /**
      * Handle status (hide/disable/badge)
      */
     updateStatus(cardElement, service) {
@@ -511,6 +692,76 @@ class ServiceRenderer {
 
             this.renderService(service, elements, currency, options);
         });
+    }
+
+    /**
+     * Apply translations to a badge element
+     */
+    applyBadgeTranslations(badgeElement) {
+        if (!badgeElement) return;
+
+        // Make sure badge is visible immediately
+        badgeElement.classList.add('loaded');
+        if (badgeElement.style) {
+            badgeElement.style.display = badgeElement.style.display || 'inline-block';
+        }
+
+        // Apply translations - i18next might be available globally
+        if (window.i18next && typeof window.i18next.t === 'function') {
+            const key = badgeElement.getAttribute('data-i18n');
+            const titleKey = badgeElement.getAttribute('data-i18n-title');
+            
+            if (key) {
+                try {
+                    // Try translation with current language
+                    const translation = window.i18next.t(key);
+                    // Check if translation exists and is different from key
+                    if (translation && translation !== key && translation.trim() !== '' && translation.trim() !== key.trim()) {
+                        badgeElement.textContent = translation;
+                    }
+                } catch (e) {
+                    // Translation failed, keep default text
+                }
+            }
+            
+            if (titleKey) {
+                try {
+                    const titleTranslation = window.i18next.t(titleKey);
+                    if (titleTranslation && titleTranslation !== titleKey && titleTranslation.trim() !== '' && titleTranslation.trim() !== titleKey.trim()) {
+                        badgeElement.title = titleTranslation;
+                    }
+                } catch (e) {
+                    // Translation failed, keep default title
+                }
+            }
+        }
+    }
+
+    /**
+     * Apply translations to info text element
+     */
+    applyInfoTextTranslations(infoElement) {
+        if (!infoElement) return;
+
+        // Make sure info is visible immediately
+        infoElement.classList.add('loaded');
+        infoElement.style.display = ''; // Ensure it's not hidden
+
+        // Apply translations if i18next is available
+        if (window.i18next && window.i18next.isInitialized) {
+            const key = infoElement.getAttribute('data-i18n');
+            if (key) {
+                // Try to translate even if exists check fails
+                try {
+                    const translation = window.i18next.t(key);
+                    if (translation && translation !== key) {
+                        infoElement.textContent = translation;
+                    }
+                } catch (e) {
+                    // Translation failed, keep default text
+                }
+            }
+        }
     }
 }
 

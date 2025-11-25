@@ -287,51 +287,171 @@
   - Security enforcement documentation
   - Deployment command instructions
 
-### 15.6. PostFinance Account Management Learning ⚠️ **MISSING**
-**Status**: **MISSING**  
+### 15.6. PostFinance Account Management Learning ✅ **RESEARCHED & PLANNED**
+**Status**: **RESEARCHED** - Implementation plan created  
 **Priority**: Foundation - must understand capabilities before building invoice system  
-**Action**:
-- Learn PostFinance e-banking interface
-- Understand QR-bill generation process
-- Learn how to track incoming bank transfers
-- Understand payment reference field usage
-- Learn how to export transaction data
-- Document manual payment matching workflow
-- Research if PostFinance offers any API access (unlikely for private accounts)
+**Documentation**: See [POSTFINANCE-INTEGRATION-PLAN.md](./POSTFINANCE-INTEGRATION-PLAN.md)
 
-**Questions to Answer**:
-- How to generate QR-bills from PostFinance e-banking?
-- Can we generate QR-bills programmatically or only manually?
-- How to track which payments correspond to which invoices? (invoice number in reference field)
-- What information is available in PostFinance transaction exports?
-- How often should we check for new payments? (daily, weekly?)
+**Completed Actions**:
+- ✅ Documented current state: Private PostFinance account, manual QR-bill generation
+- ✅ Documented future state: Business account with API access (when revenue threshold reached)
+- ✅ Designed Phase 1: Manual workflow (invoice generation, QR-bill creation, payment entry)
+- ✅ Designed Phase 2: Automated workflow (API integration, automated payment matching)
+- ✅ Created database schema for invoices and bank transfer payments
+- ✅ Designed admin panel UI components for manual payment entry
+- ✅ Planned integration with Revenue Reports component
+- ✅ Documented two-phase implementation approach
+
+**Current Understanding**:
+- ✅ **QR-Bill Generation**: Manual via PostFinance e-banking dashboard (Phase 1)
+- ✅ **Payment Tracking**: Manual review and entry in admin panel (Phase 1)
+- ✅ **Payment Matching**: Invoice number in reference field for matching
+- ✅ **Business Account**: Available for CHF 5/month without commerce registration (can open when revenue starts)
+- ✅ **API Access**: Available immediately with business account, but integration deferred to Phase 2 (enhancement)
+- ✅ **Integration Strategy**: Manual workflow first (personal account), automated later (business account)
+- ✅ **Account Status**: All payments initially go to personal accounts (Stripe → personal, PostFinance → personal)
+
+**Questions Answered**:
+- ✅ How to generate QR-bills: Manual via e-banking dashboard (documented process)
+- ✅ Payment tracking: Invoice number in reference field, manual entry in admin panel
+- ✅ Implementation approach: Two-phase (manual → automated)
+- ✅ Database schema: Designed for both payment methods (Stripe + Bank Transfer)
+- ✅ Admin panel integration: Manual payment entry form in Revenue Reports component
+
+**Questions Answered**:
+- ✅ Business account requirements: CHF 5/month, available without commerce registration, account in personal name initially
+- ✅ Payment checking frequency: Weekly manual (Phase 1), Daily automated (Phase 2)
+- ✅ Business account timing: Open when revenue starts (not before, to protect chômage status)
+
+**Questions Answered** (Research Complete):
+- ✅ **International QR-Bill Payments**: YES - International customers CAN pay PostFinance QR-bills
+  - Automatic: If QR-bill includes IBAN + SCOR (Structured Creditor Reference), foreign banks can process automatically
+  - Manual: If only IBAN, customer may need to manually initiate international payment in their banking
+  - **Impact**: Commissioning services can use PostFinance QR-bills for international customers
+- ✅ **Transaction Export Format**: PostFinance offers multiple export formats
+  - **camt.053**: ISO 20022 standard format (for accounting software like BEXIO)
+  - **CSV**: Simple format for Excel/Google Sheets (max 100 transactions per export)
+  - **Location**: E-banking → "Documents" → "Extraits de compte"
+  - **Note**: For >100 transactions, export multiple files by date range
+- ✅ **Currency Support**: QR-bills support CHF and EUR
+  - International payments possible in EUR (with currency conversion by banks)
+  - Currency code (CHF or EUR) must be printed on QR-bill
+  - Recommendation: Accept CHF primarily, EUR as secondary option
+
+**Questions Still Open** (Future Research):
+- ⏳ **PostFinance API Capabilities**: To be researched when business account opened
+  - QR-bill generation programmatically
+  - Payment notifications (webhooks vs polling)
+  - Transaction export API
+
+**Financial Declaration Strategy**:
+- ✅ **ORP (Unemployment)**: Check monthly before declaring; small amounts (2 subs = CHF 10/month) = "pocket money" (not declared)
+- ✅ **AVS (Social Security)**: Declare when revenue is "significant" (~CHF 2,300/year threshold)
+- ✅ **Business Account Timing**: Open when revenue starts (CHF 5/month, personal name initially)
+- ✅ **Revenue Tracking**: Admin panel tracks all revenue to monitor declaration thresholds
+- ✅ **Personal Account Phase**: All payments (Stripe + PostFinance) go to personal accounts initially
+
+**Implementation Plan**:
+- **Phase 0 (Months 1-3)**: Build website, use personal accounts, no business account (protects chômage status)
+- **Phase 1 (When Revenue Starts)**: Manual workflow with invoice generation, QR-bill upload, manual payment entry
+  - Open PostFinance business account (CHF 5/month) when first revenue approaches
+  - Account in personal name initially
+  - All payments tracked in admin panel (both Stripe + PostFinance)
+- **Phase 2 (Month 4-5, Enhancement)**: Automated API integration (after revenue established)
+  - Build PostFinance API integration (enhancement, not critical for launch)
+  - Automate payment checking and matching
+- See [POSTFINANCE-INTEGRATION-PLAN.md](./POSTFINANCE-INTEGRATION-PLAN.md) for full details
 
 **Potential Issues**:
-- No API access for private accounts (manual matching required)
-- QR-bill generation may be manual only
-- Payment matching will require manual work
-- Need to establish clear workflow for payment reconciliation
+- ✅ Addressed: No API access for private accounts → Manual workflow designed
+- ✅ Addressed: QR-bill generation manual only → Process documented, automation planned for Phase 2
+- ✅ Addressed: Payment matching requires manual work → Manual entry form designed, automation planned
+- ✅ Addressed: Payment reconciliation → Reconciliation dashboard designed
 
-### 15.7. Payment Strategy Decision ⚠️ **MISSING**
-**Status**: **MISSING**  
+### 15.7. Payment Strategy Decision ✅ **RESEARCHED & DECIDED**
+**Status**: **RESEARCHED** - All questions answered, strategy finalized  
 **Priority**: Foundation - must decide what uses Stripe vs bank transfer  
-**Action**:
-- Document decision matrix: Stripe vs Bank Transfer
-- Define thresholds (e.g., < CHF 200 = Stripe, > CHF 500 = Bank Transfer)
-- Document payment plan requirements
-- Decide on currency handling (CHF only, or EUR/USD too?)
-- Document refund policies for each payment method
+**Documentation**: See [PRICING-STRATEGY.md](../services/PRICING-STRATEGY.md) for current pricing
 
-**Decision Matrix**:
-- **Stripe**: Catalog items (CHF 25-60), Subscriptions (CHF 18/month, CHF 180/year), Tech support (CHF 45-90), Any purchase < CHF 200
-- **Bank Transfer**: Commissioning (CHF 600-6,000+), Build sprints (CHF 1,200-1,500), Payment plans, Enterprise contracts, Any purchase > CHF 500
+**Completed Actions**:
+- ✅ Documented current pricing structure (matching database seed data)
+- ✅ Analyzed pricing discrepancies and resolved
+- ✅ Identified payment method decision criteria (type-based vs threshold-based)
+- ✅ Designed database schema to support both payment methods
+- ✅ Documented PostFinance integration plan (see 15.6)
 
-**Questions to Answer**:
-- What's the exact threshold for Stripe vs bank transfer? (CHF 200? CHF 500?)
-- Should payment plans always use bank transfer?
-- Do we accept EUR/USD or CHF only?
-- How to handle refunds for bank transfers? (manual process)
-- What about international customers? (Stripe only, or bank transfer too?)
+**Current Pricing** (from database):
+- ✅ **Catalog Access**: CHF 2-25 (one-time), CHF 5/month (All-Tools), CHF 8/month (Supporter)
+- ✅ **Tech Support**: CHF 30-90 with reduced fares, travel costs separate
+- ✅ **Commissioning**: CHF 20-1,950 (range pricing for variable services)
+
+**Recommended Decision Matrix** (Based on service characteristics):
+- **Stripe**: 
+  - Catalog products (fixed pricing, CHF 2-25)
+  - Subscriptions (recurring, CHF 5-8/month)
+  - Remote tech support (fixed pricing, no travel, CHF 30-90)
+  - Any service with fixed, predictable pricing
+- **Bank Transfer (PostFinance QR-bills)**:
+  - Commissioning services (variable/range pricing, CHF 350-1,950)
+  - In-person tech support (with travel costs, CHF 50-90 + travel)
+  - Services requiring custom quotes
+  - Any service with variable pricing or additional costs
+
+**Questions Answered**:
+- ✅ Payment method selection: Type-based (service characteristics) rather than threshold-based
+- ✅ Stripe price flexibility: Yes, prices can be changed but better to create new prices for one-time purchases
+- ✅ Travel costs: Keep separate ("+ travel") for in-person services, use bank transfer for those
+- ✅ Payment plans: Not currently implemented; if needed, use bank transfer (more flexible)
+
+**Financial Considerations**:
+- ✅ All payments (Stripe + PostFinance) initially go to personal accounts
+- ✅ Stripe payments → Personal Stripe account → Personal bank account
+- ✅ PostFinance payments → Personal PostFinance account
+- ✅ Track revenue in admin panel to monitor declaration thresholds (ORP monthly check, AVS ~CHF 2,300/year)
+- ✅ PostFinance business account (CHF 5/month) available without commerce registration
+- ✅ Open business account when revenue starts (not before, to protect chômage status)
+
+**Questions Answered** (Research Complete):
+- ✅ **International QR-Bill Payments**: YES - International customers CAN pay PostFinance QR-bills (see 15.6)
+- ✅ **Currency Acceptance**: CHF and EUR supported for QR-bills
+  - Primary: CHF (Swiss Francs)
+  - Secondary: EUR (Euros) - available for international customers
+  - Recommendation: Use CHF primarily, offer EUR for international customers if needed
+- ✅ **International Customers Strategy**: Both Stripe AND PostFinance QR-bills work for international customers
+  - PostFinance QR-bills: Use for commissioning services (with IBAN + SCOR for best compatibility)
+  - Stripe: Use for catalog products, subscriptions, and remote tech support
+  - Decision: Type-based payment method assignment (not geography-based)
+- ✅ **Refund Policies**: Manual bank transfer refund process
+  - Process: Admin initiates refund → Manual bank transfer to customer IBAN via PostFinance e-banking
+  - Reference: Include original invoice number and "REFUND" notation
+  - Admin panel: Refund workflow UI to be implemented in Revenue Reports component (Item #59)
+
+**Implementation Status** ✅ (2025-01-31):
+- ✅ Database schema: `payment_method` column added to `services` table (migration: `20250131_add_payment_method_to_services.sql`)
+- ✅ Existing services updated with correct `payment_method` values based on category (migration: `20250131_update_services_payment_method.sql`)
+- ✅ Products table currency default changed from USD to CHF (migration: `20250131_update_products_currency_default.sql`)
+- ✅ Invoices table created for PostFinance bank transfer workflow (migration: `20250131_create_invoices_table.sql`)
+- ✅ Booking-level payment method: `service_format` and `payment_method` added to `service_purchases` table (migration: `20250131_add_booking_format_and_payment_method.sql`)
+- ✅ Invoices linked to bookings: `service_purchase_id` added to `invoices` table
+- ✅ Admin panel: Payment method dropdown added to service creation/editing modal with auto-selection logic
+- ✅ Admin panel: Payment method badges displayed in service management list (Stripe = purple, Bank Transfer = PostFinance yellow)
+- ✅ User-facing: Payment method badges added to service cards on service pages
+- ✅ User-facing: Payment method info text added (Stripe: "Secure card payment • Instant access", Bank Transfer: "Invoice with QR-bill • 1-3 business days")
+- ✅ Documentation: Item #16 updated with dual payment flow requirements (Stripe checkout + bank transfer booking forms)
+- ✅ Documentation: PostFinance Integration Plan updated with booking-level payment method logic
+
+**Booking-Level Payment Method Logic**:
+- Service-level `payment_method` = default/suggestion for UI
+- Booking-level `payment_method` = determined by `service_format`:
+  - `service_format = 'in_person'` → `payment_method = 'bank_transfer'`
+  - `service_format = 'remote'` → `payment_method = 'stripe'`
+- Allows same service to use different payment methods based on delivery format
+
+**Payment Strategy Finalized**:
+- ✅ **Stripe**: Catalog products, subscriptions, remote tech support (fixed pricing)
+- ✅ **PostFinance QR-bills**: Commissioning services, in-person tech support (variable pricing, includes international)
+- ✅ **Currency**: CHF primary, EUR secondary (supported in QR-bills)
+- ✅ **Refunds**: Manual bank transfer process documented
 
 ### 15.8. Stripe API Integration Planning & Setup ⚠️ **MISSING**
 **Status**: **MISSING**  
@@ -367,19 +487,93 @@
 - Stripe API versioning (need to pin API version)
 - Error handling for various Stripe error types (card declined, insufficient funds, etc.)
 
+### 15.9. Family Plan Payment Setup & Stripe Integration ⚠️ **MISSING**
+**Status**: **MISSING** - Family plan pricing UI complete, but payment flow and webhook handling not implemented  
+**Priority**: High - Family plans are a key differentiator and revenue driver  
+**Reference**: See `docs/FAMILY-PLANS-ANALYSIS.md` for complete implementation details (section "Webhook Handler Implementation Requirements")
+
+**Prerequisites** (MUST COMPLETE FIRST):
+- ✅ Family plan pricing UI implemented (per-member pricing: CHF 3.50/member for All-Tools, CHF 5/member for Supporter)
+- ⚠️ Database schema: `family_groups`, `family_members`, `family_subscriptions` tables (see FAMILY-PLANS-ANALYSIS.md)
+- ✅ Stripe webhook handler exists (#14) but needs family plan support
+
+**Action**:
+- **Database Setup**:
+  - Create `family_groups` table (id, family_name, admin_user_id, family_type, max_members, subscription_id)
+  - Create `family_members` table (id, family_group_id, user_id, role, relationship, status, etc.)
+  - Create `family_subscriptions` table (id, family_group_id, stripe_customer_id, stripe_subscription_id, plan_name, status, etc.)
+  - Implement RLS policies for all family tables
+  - Create helper functions: `is_family_member()`, `is_family_admin()`, `has_family_subscription_access()`
+
+- **Stripe Checkout Integration** (depends on #16):
+  - Add family plan support to Stripe Checkout session creation
+  - Include family plan metadata in checkout sessions: `{ is_family_plan: 'true', family_group_id: '...' }`
+  - Handle per-member pricing calculation (CHF 3.50/member for All-Tools, CHF 5/member for Supporter)
+  - Support yearly family plans (CHF 38.50/member/year for All-Tools, CHF 55/member/year for Supporter)
+  - Allow family member count selection in checkout flow
+
+- **Webhook Handler Updates** (update existing #14):
+  - Add family plan detection logic in `checkout.session.completed` handler
+  - Implement `handleFamilyPlanPurchase()` function:
+    - Detect family plan purchase (check metadata or product name)
+    - Create or link to existing family group
+    - Create `family_subscriptions` record
+    - Grant access to all active family members
+    - Create individual `product_purchases` records for each member (for tracking)
+  - Update `customer.subscription.created/updated/deleted` handlers for family subscriptions
+  - Update `invoice.paid` handler to renew access for all family members
+  - Handle member count changes (subscription quantity updates)
+
+- **Family Management UI**:
+  - Family group creation/management interface
+  - Family member invitation system (email/username invitations)
+  - Family member role management (admin, parent, member, child)
+  - Family subscription management (view status, cancel, update)
+
+**Implementation Details** (from FAMILY-PLANS-ANALYSIS.md):
+- Family plan detection: Check `session.metadata.is_family_plan === 'true'` or product name contains "Family"
+- Family group creation: `findOrCreateFamilyGroup()` - checks if user is already admin/member, creates new group if needed
+- Access granting: `grantFamilyAccess()` - creates `product_purchases` for each active member, creates/updates `family_subscriptions`
+- Member changes: Handle additions/removals mid-subscription (grant/revoke access accordingly)
+
+**Questions to Answer Before Implementation**:
+- Should family groups be created before checkout or during checkout?
+- How to handle family member invitations before payment? (pre-create group with pending members?)
+- Should family plan checkout allow adding members during purchase, or require pre-setup?
+- How to handle subscription quantity changes (member count changes)?
+- Prorated billing for member additions/removals?
+
+**Related Items**:
+- Depends on: #16 (Stripe Checkout Integration), #14 (Stripe Webhook Handler - needs updates)
+- Blocks: Family plan purchases, family subscription management
+- See also: `docs/FAMILY-PLANS-ANALYSIS.md` for complete technical specifications
+
 ---
 
 ## 🛒 **Phase 3: Purchase & Checkout Flow**
 
-### 16. Stripe Checkout Integration ⚠️ **MISSING**
+### 16. Payment Integration (Stripe + Bank Transfer) ⚠️ **MISSING**
 **Status**: **MISSING** - No checkout flow exists  
-**Priority**: Critical - needed for catalog access purchases  
+**Priority**: Critical - needed for catalog access purchases and service bookings  
 **Action**: 
-- Create edge function to create Stripe Checkout sessions
-- Build checkout flow component
-- Create success/cancel redirect pages
-- Wire up to catalog access "Buy Now" buttons
-- Handle different pricing types (one-time, subscription, freemium)
+- **Stripe Checkout Flow** (for services with `payment_method = 'stripe'`):
+  - Create edge function to create Stripe Checkout sessions
+  - Build checkout flow component
+  - Create success/cancel redirect pages
+  - Wire up to catalog access "Buy Now" buttons and Stripe service buttons
+  - Handle different pricing types (one-time, subscription, freemium)
+- **Bank Transfer / Invoice Flow** (for services with `payment_method = 'bank_transfer'`):
+  - Build service booking/invoice request form component
+  - Generate QR-bill invoices for PostFinance bank transfers
+  - Create invoice generation edge function
+  - Email invoice with QR-bill to customer
+  - Handle booking confirmation and payment tracking
+  - Wire up "Request Quote" / "Book Service" buttons for commissioning and in-person tech support
+- **Dual Payment System**:
+  - Different CTAs based on service `payment_method` field
+  - Stripe services: "Subscribe Now" / "Buy Now" buttons
+  - Bank transfer services: "Request Quote" / "Book Service" buttons
+  - Payment method badges already implemented in service cards
 
 ### 16.5. Purchase Confirmation & Entitlements ⚠️ **MISSING**
 **Status**: **MISSING**  
@@ -1772,10 +1966,29 @@
 **Priority**: **LAST** - needs all data sources  
 **Action**: Build analytics with real-time charts, user metrics, conversion funnels (includes marketing analytics from #56)
 
-### 59. Admin Revenue Reports Module
-**Status**: Only SPEC.md exists  
-**Priority**: Depends on Stripe data flowing  
-**Action**: Build revenue reports with gross revenue, refunds, lifecycle events, CSV exports
+### 59. Admin Revenue Reports Module ✅ **SPEC UPDATED**
+**Status**: SPEC.md updated with PostFinance integration requirements  
+**Priority**: HIGH - Essential for financial management and compliance  
+**Dependencies**: Stripe data flowing + PostFinance manual payment workflow  
+**Documentation**: See [Revenue Reports SPEC](../../admin/components/revenue-reports/SPEC.md)
+
+**Updated Requirements** (Based on Sections 15.6 & 15.7 Research):
+- ✅ **Dual Payment Method Support**: Stripe payments + PostFinance bank transfers
+- ✅ **Manual Payment Entry**: Form for entering PostFinance bank transfer payments
+- ✅ **Invoice Reconciliation**: Pending invoices, unmatched payments dashboard
+- ✅ **Financial Declaration Tracking**: 
+  - Annual revenue total (monitor AVS threshold ~CHF 2,300/year)
+  - Monthly revenue totals (for ORP monthly checks)
+  - Threshold warnings (warning at CHF 1,500, alert at CHF 2,300)
+  - ORP notes field (track monthly conversations)
+- ✅ **Refund Processing**: 
+  - Stripe refunds (automated via API)
+  - Bank transfer refunds (manual workflow)
+- ✅ **Multi-Currency Support**: CHF (primary), EUR (secondary)
+- ✅ **Export Formats**: CSV, PDF, JSON, camt.053 (ISO 20022 for accounting software)
+- ✅ **Transaction Export**: Support PostFinance transaction export formats
+
+**Action**: Build revenue reports component with all above features
 
 
 ---
@@ -1798,7 +2011,8 @@
 9. PostFinance Account Management Learning (#15.6) - **HIGH PRIORITY - Foundation for invoice system**
 10. Payment Strategy Decision (#15.7) - **HIGH PRIORITY - Must decide Stripe vs bank transfer**
 11. Stripe API Integration Planning & Setup (#15.8) - **HIGH PRIORITY - Document all Stripe API integrations needed**
-12. Product Wizard Steps 4-7 Verification (#15.5) - **HIGH PRIORITY - Complete all wizard steps**
+12. Family Plan Payment Setup & Stripe Integration (#15.9) - **HIGH PRIORITY - Family plans are key differentiator, pricing UI complete**
+13. Product Wizard Steps 4-7 Verification (#15.5) - **HIGH PRIORITY - Complete all wizard steps**
 13. Account subscription management (#17) - **HIGH PRIORITY - User-facing subscription management**
 14. User Subscription Cancellation & Management (#17.2) - **HIGH PRIORITY - Users need to manage subscriptions**
 15. Payment Method Management (#17.3) - **HIGH PRIORITY - Users need to manage payment methods**
@@ -1858,10 +2072,11 @@
 - [ ] Document payment strategy decision matrix (#15.7)
 - [ ] Document all Stripe API integrations needed (#15.8) - Setup Intents, Payment Methods, Subscriptions, Refunds APIs
 - [ ] Create reusable Stripe API wrapper functions/edge functions (#15.8)
+- [ ] Family Plan Payment Setup & Stripe Integration (#15.9) - Database schema, webhook handler updates, checkout integration
 - [ ] Research QR-bill libraries and invoice requirements
 
 ### Week 3: Purchase & Checkout Flow
-- [ ] Stripe Checkout Integration (#16)
+- [ ] Stripe Checkout Integration (#16) - Must support family plans (per #15.9)
 - [ ] Purchase Confirmation & Entitlements (#16.5)
 - [ ] Cloudflare Worker Subdomain Protection (#16.6) - **CRITICAL - Must protect paid tools immediately**
 - [ ] Receipt System implementation (#16.7)
