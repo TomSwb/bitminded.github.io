@@ -930,6 +930,7 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
 }
 
@@ -1243,6 +1244,56 @@
     border-color: var(--color-primary);
 }
 
+/* Stripe IDs Display */
+.service-management__stripe-ids-display {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--color-background-primary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color-secondary);
+}
+
+.service-management__stripe-ids-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.service-management__stripe-id-item {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-sm);
+    background: var(--color-background-primary);
+    border: 1px solid var(--border-color-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.service-management__stripe-id-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.service-management__stripe-id-value {
+    font-size: var(--font-size-sm);
+    font-family: monospace;
+    color: var(--color-text-primary);
+    word-break: break-all;
+    padding: var(--spacing-xs);
+    background: var(--color-background-primary);
+    border-radius: var(--radius-xs);
+}
+
+.service-management__stripe-id-value:empty::before {
+    content: '—';
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
 /* Status Badges */
 .service-management__badge--available {
     background-color: var(--color-success-bg);
@@ -1326,5 +1377,9 @@
 
     .service-management__currency-label {
         font-size: var(--font-size-xs);
+    }
+
+    .service-management__stripe-ids-grid {
+        grid-template-columns: 1fr;
     }
 }

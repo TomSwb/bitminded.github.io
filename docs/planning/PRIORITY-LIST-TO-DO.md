@@ -57,50 +57,10 @@
 - ✅ Stripe webhook handler exists (#14) but needs family plan support
 
 **Implementation Order** (must be completed in sequence):
-1. ✅ Database Setup (15.9.1) - Foundation (Phase 2) - **COMPLETED**
+1. ✅ Database Setup (15.9.1) - Foundation (Phase 2) - **COMPLETED** (see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md))
 2. Webhook Handler Updates (15.9.3) - Depends on 15.9.1 (Phase 2, but needs 15.9.2 for full functionality)
 3. Stripe Checkout Integration (15.9.2) - Depends on #16 (Phase 3, after #16)
 4. Family Management UI (15.9.4) - Depends on 15.9.1, 15.9.2, 15.9.3 (Phase 4, Account Management)
-
----
-
-#### 15.9.1. Family Plan Database Schema ✅ **COMPLETED**
-**Status**: **COMPLETED** - Migration created and applied successfully  
-**Priority**: Foundation - Must be completed first  
-**Action**:
-- Create `family_groups` table:
-  - Fields: id, family_name, admin_user_id, family_type, max_members, subscription_id, created_at, updated_at
-  - Foreign keys: admin_user_id → auth.users(id), subscription_id → family_subscriptions(id)
-  - Indexes: admin_user_id, subscription_id
-- Create `family_members` table:
-  - Fields: id, family_group_id, user_id, role, relationship, age, is_verified, invited_by, invited_at, joined_at, status, created_at, updated_at
-  - Foreign keys: family_group_id → family_groups(id), user_id → auth.users(id), invited_by → auth.users(id)
-  - Unique constraint: (family_group_id, user_id)
-  - Indexes: family_group_id, user_id, role, status
-- Create `family_subscriptions` table:
-  - Fields: id, family_group_id, stripe_customer_id, stripe_subscription_id, plan_name, status, current_period_start, current_period_end, created_at, updated_at
-  - Foreign keys: family_group_id → family_groups(id)
-  - Indexes: family_group_id, stripe_subscription_id, status
-  - **CRITICAL CONSTRAINT**: `plan_name` CHECK constraint restricts to only 'family_all_tools' or 'family_supporter' (prevents individual tools/services from being family plans)
-- Implement RLS policies for all family tables:
-  - Family members can view their family group
-  - Family admin can update/delete family group
-  - Family members can view other family members
-  - Family admin can manage family members
-  - Family members can update own membership
-  - Family members can leave family group
-  - Family members can view family subscription
-  - Family admin can manage family subscription
-- Create helper functions:
-  - `is_family_member(family_group_uuid, user_uuid)` - Check if user is active family member
-  - `is_family_admin(family_group_uuid, user_uuid)` - Check if user is family admin
-  - `has_family_subscription_access(user_uuid)` - Check if user has active family subscription access
-  - `findOrCreateFamilyGroup(userId, familyName?)` - Find existing or create new family group
-  - `getActiveFamilyMembers(familyGroupId)` - Get all active family members
-  - `grantFamilyAccess(familyGroupId, productId, subscriptionId)` - Grant access to all members
-  - `revokeFamilyAccess(familyGroupId, productId)` - Revoke access from all members
-
-**Reference**: See `../payment-financial/FAMILY-PLANS-ANALYSIS.md` lines 210-756 for complete SQL schema
 
 ---
 
@@ -547,6 +507,68 @@
 **Action**:
 - Create `account/components/receipts/` component
 - List all receipts (Stripe purchases)
+
+### 17.5. Upgrade Path: One-Time Purchase to Subscription ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: High - Users need ability to upgrade from single product purchase to full subscription  
+**Action**:
+- **New Edge Function**: `convert-purchase-to-subscription`
+  - Accept parameters: `one_time_purchase_id`, `target_subscription_plan` (e.g., 'all-tools-membership'), `subscription_interval` ('monthly' or 'yearly')
+  - Verify user owns the one-time purchase
+  - Calculate credit/refund for one-time purchase (business logic decision needed)
+  - Create new Stripe subscription via Stripe API
+  - Update database:
+    - Mark one-time purchase as `status = 'converted'` in `product_purchases` table
+    - Add `converted_to_subscription_id` field to link to new subscription
+    - Create new `product_purchases` record with `purchase_type = 'subscription'`
+    - Link to new Stripe subscription ID
+  - Handle refunds/credits (if applicable - business decision needed)
+  - Return new subscription details
+  - Include authentication, rate limiting, error logging (following existing pattern)
+- **Webhook Handler Updates** (minor):
+  - Update existing webhook handler to detect conversion scenarios
+  - When `checkout.session.completed` or `customer.subscription.created` fires for converted subscription:
+    - Check if metadata indicates conversion or check database for linked one-time purchase
+    - Update one-time purchase status if not already updated
+    - Handle any edge cases specific to conversions
+- **Database Schema Updates**:
+  - Add `converted_to_subscription_id` field to `product_purchases` table (UUID, references `product_purchases.id` where `purchase_type = 'subscription'`)
+  - Add `converted_from_purchase_id` field to `product_purchases` table (UUID, references `product_purchases.id` where `purchase_type = 'one_time'`)
+  - Add index on `converted_to_subscription_id` and `converted_from_purchase_id` for efficient lookups
+  - Consider adding `conversion_credit_amount` and `conversion_credit_currency` fields to track credit applied
+- **UI/UX Implementation**:
+  - Detect when user has one-time purchase and show upgrade option in account subscription management
+  - Display upgrade CTA: "Upgrade to All-Tools Membership" with pricing difference
+  - Show credit/refund calculation (if applicable)
+  - Confirmation dialog explaining what happens to one-time purchase
+  - Success message after conversion
+  - Update subscription management UI to show converted status
+- **Business Logic Decisions Needed**:
+  - Should one-time purchase be fully refunded, partially credited, or no credit?
+  - If credited, how to calculate credit amount? (full purchase price, prorated, percentage?)
+  - Should conversion be immediate or require new payment?
+  - Can users convert back? (subscription to one-time - probably not, but document decision)
+  - What happens to access during conversion? (immediate access to subscription, or wait for payment confirmation?)
+
+**Questions to Answer Before Implementation**:
+- Credit/refund policy: Full refund, partial credit, or no credit for one-time purchase?
+- Credit calculation: How to determine credit amount? (full price, prorated, percentage of subscription cost?)
+- Payment flow: Does user pay full subscription price, or subscription price minus credit?
+- Access during conversion: Immediate access to subscription, or wait for payment confirmation?
+- Conversion restrictions: Can users convert multiple one-time purchases? Can they convert if they already have a subscription?
+- Edge cases: What if one-time purchase was on sale? What if subscription price changed?
+
+**Dependencies**:
+- Requires #16 (Stripe Checkout Integration) for subscription creation
+- Requires 17.2 (User Subscription Cancellation & Management) for subscription management UI
+- Requires database schema updates (can be done in parallel)
+
+**Integration Points**:
+- Account Subscription Management UI (17) - Show upgrade option
+- Receipts View (17.1) - Show conversion history
+- Webhook Handler (#14) - Handle conversion subscription events
+
+---
 
 ### 15.9.4. Family Management UI (Account Page Component) ⚠️ **MISSING**
 **Status**: **MISSING**  
@@ -1957,6 +1979,7 @@
 4. User Subscription Cancellation & Management (#17.2) - **HIGH PRIORITY - Users need to manage subscriptions**
 5. Payment Method Management (#17.3) - **HIGH PRIORITY - Users need to manage payment methods**
 6. User Account Receipts View (#17.1) - **HIGH PRIORITY - User needs access to receipts**
+7. Upgrade Path: One-Time Purchase to Subscription (#17.5) - **HIGH PRIORITY - Users need ability to upgrade from single product to full subscription**
 7. Service Workflows (#18-28) - **HIGH PRIORITY - Tech Support + Commissioning + Service Delivery Helper**
 8. Contract System (#29-33) - **HIGH PRIORITY - Needed for commissioning agreements**
 9. Invoice System (#34-42) - **HIGH PRIORITY - Needed for commissioning and large purchases**
@@ -2008,6 +2031,7 @@
 - [ ] User subscription cancellation & management (#17.2) - Includes family plan cancellation
 - [ ] Payment method management (#17.3) - Includes family plan payment methods
 - [ ] User Account: Receipts View (#17.1)
+- [ ] Upgrade Path: One-Time Purchase to Subscription (#17.5) - Convert single product purchases to subscriptions
 - [ ] Subscription renewal reminders (#17.4) - Includes family plan reminders
 - [ ] Family Management UI (#15.9.4) - Account page family management component
 - [ ] Wire up to existing data structures

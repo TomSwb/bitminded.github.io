@@ -1133,7 +1133,11 @@ class ServiceManagement {
                         priceId: service.stripe_price_id,
                         monthlyPriceId: service.stripe_price_monthly_id,
                         yearlyPriceId: service.stripe_price_yearly_id,
-                        reducedPriceId: service.stripe_price_reduced_id
+                        reducedPriceId: service.stripe_price_reduced_id,
+                        salePriceId: service.stripe_price_sale_id,
+                        monthlySalePriceId: service.stripe_price_monthly_sale_id,
+                        yearlySalePriceId: service.stripe_price_yearly_sale_id,
+                        stripePrices: service.stripe_prices
                     });
                 }
                 // Show action buttons
@@ -1538,7 +1542,11 @@ class ServiceManagement {
                 stripe_price_id: formData.get('stripe_price_id') || this.currentEditingService?.stripe_price_id || null,
                 stripe_price_monthly_id: formData.get('stripe_price_monthly_id') || this.currentEditingService?.stripe_price_monthly_id || null,
                 stripe_price_yearly_id: formData.get('stripe_price_yearly_id') || this.currentEditingService?.stripe_price_yearly_id || null,
-                stripe_price_reduced_id: formData.get('stripe_price_reduced_id') || this.currentEditingService?.stripe_price_reduced_id || null
+                stripe_price_reduced_id: formData.get('stripe_price_reduced_id') || this.currentEditingService?.stripe_price_reduced_id || null,
+                stripe_price_sale_id: formData.get('stripe_price_sale_id') || this.currentEditingService?.stripe_price_sale_id || null,
+                stripe_price_monthly_sale_id: formData.get('stripe_price_monthly_sale_id') || this.currentEditingService?.stripe_price_monthly_sale_id || null,
+                stripe_price_yearly_sale_id: formData.get('stripe_price_yearly_sale_id') || this.currentEditingService?.stripe_price_yearly_sale_id || null,
+                stripe_prices: this.currentEditingService?.stripe_prices || null
             };
 
             if (!window.supabase) {
@@ -2256,8 +2264,11 @@ class ServiceManagement {
                 window.logger?.warn('⚠️ Could not auto-save service after Stripe creation:', saveError);
             }
 
-            // Show status
-            this.updateStripeStatus(data);
+            // Show status - merge with current service data to include stripe_prices
+            this.updateStripeStatus({
+                ...data,
+                stripePrices: this.currentEditingService?.stripe_prices || data.stripePrices || null
+            });
 
             // Hide create button, show status
             if (this.elements.stripeCreateSection) {
@@ -2604,8 +2615,11 @@ class ServiceManagement {
                 window.logger?.warn('⚠️ Could not auto-save service after Stripe update:', saveError);
             }
 
-            // Show status
-            this.updateStripeStatus(data);
+            // Show status - merge with current service data to include stripe_prices
+            this.updateStripeStatus({
+                ...data,
+                stripePrices: this.currentEditingService?.stripe_prices || data.stripePrices || null
+            });
 
             // Reset button state
             this.elements.updateStripeBtn.disabled = false;
@@ -2632,38 +2646,7 @@ class ServiceManagement {
         if (!this.elements.stripeStatus) return;
 
         // Status display removed - it's obvious the product is created
-        let statusHTML = '';
-
-        // For subscription services, show monthly and yearly price IDs
-        if (data.monthlyPriceId || data.yearlyPriceId) {
-            if (data.monthlyPriceId) {
-                statusHTML += '<div class="service-management__status-item">';
-                statusHTML += '<span class="service-management__status-label">Monthly Price ID:</span>';
-                statusHTML += `<span class="service-management__status-value">${data.monthlyPriceId}</span>`;
-                statusHTML += '</div>';
-            }
-            if (data.yearlyPriceId) {
-                statusHTML += '<div class="service-management__status-item">';
-                statusHTML += '<span class="service-management__status-label">Yearly Price ID:</span>';
-                statusHTML += `<span class="service-management__status-value">${data.yearlyPriceId}</span>`;
-                statusHTML += '</div>';
-            }
-        } else if (data.priceId) {
-            // For one-time payments, show regular price ID
-            statusHTML += '<div class="service-management__status-item">';
-            statusHTML += '<span class="service-management__status-label">Price ID:</span>';
-            statusHTML += `<span class="service-management__status-value">${data.priceId}</span>`;
-            statusHTML += '</div>';
-        }
-
-        if (data.reducedPriceId) {
-            statusHTML += '<div class="service-management__status-item">';
-            statusHTML += '<span class="service-management__status-label">Reduced Price ID:</span>';
-            statusHTML += `<span class="service-management__status-value">${data.reducedPriceId}</span>`;
-            statusHTML += '</div>';
-        }
-
-        this.elements.stripeStatus.innerHTML = statusHTML;
+        this.elements.stripeStatus.innerHTML = '';
 
         // Show action buttons and set up links
         if (data.productId && this.elements.stripeActions) {
@@ -2673,6 +2656,89 @@ class ServiceManagement {
             }
         } else if (this.elements.stripeActions) {
             this.elements.stripeActions.style.display = 'none';
+        }
+
+        // Update Stripe IDs display
+        this.updateStripeIdsDisplay(data);
+    }
+
+    /**
+     * Update Stripe IDs display in 2-column grid
+     */
+    updateStripeIdsDisplay(data) {
+        const displayContainer = document.getElementById('stripe-ids-display');
+        const gridContainer = document.getElementById('stripe-ids-grid');
+        
+        if (!displayContainer || !gridContainer) return;
+
+        // Collect all Stripe IDs
+        const ids = [];
+
+        if (data.productId) {
+            ids.push({ label: 'Product ID', value: data.productId });
+        }
+
+        if (data.priceId) {
+            ids.push({ label: 'Price ID (Primary)', value: data.priceId });
+        }
+
+        if (data.monthlyPriceId) {
+            ids.push({ label: 'Monthly Price ID', value: data.monthlyPriceId });
+        }
+
+        if (data.yearlyPriceId) {
+            ids.push({ label: 'Yearly Price ID', value: data.yearlyPriceId });
+        }
+
+        if (data.reducedPriceId) {
+            ids.push({ label: 'Reduced Price ID', value: data.reducedPriceId });
+        }
+
+        // Handle both naming conventions (salePriceId vs salePriceId, saleMonthlyPriceId vs monthlySalePriceId)
+        const salePriceId = data.salePriceId || data.sale_price_id;
+        const monthlySalePriceId = data.monthlySalePriceId || data.saleMonthlyPriceId || data.monthly_sale_price_id;
+        const yearlySalePriceId = data.yearlySalePriceId || data.saleYearlyPriceId || data.yearly_sale_price_id;
+
+        if (salePriceId) {
+            ids.push({ label: 'Sale Price ID', value: salePriceId });
+        }
+
+        if (monthlySalePriceId) {
+            ids.push({ label: 'Monthly Sale Price ID', value: monthlySalePriceId });
+        }
+
+        if (yearlySalePriceId) {
+            ids.push({ label: 'Yearly Sale Price ID', value: yearlySalePriceId });
+        }
+
+        // Add multi-currency prices from stripe_prices JSONB if available
+        if (data.stripePrices && typeof data.stripePrices === 'object') {
+            const currencies = Object.keys(data.stripePrices);
+            currencies.forEach(currency => {
+                const currencyPrices = data.stripePrices[currency];
+                if (typeof currencyPrices === 'object') {
+                    Object.keys(currencyPrices).forEach(priceType => {
+                        const priceId = currencyPrices[priceType];
+                        if (priceId) {
+                            const label = `${currency} ${priceType.charAt(0).toUpperCase() + priceType.slice(1)}`;
+                            ids.push({ label, value: priceId });
+                        }
+                    });
+                }
+            });
+        }
+
+        // Build HTML
+        if (ids.length > 0) {
+            gridContainer.innerHTML = ids.map(id => `
+                <div class="service-management__stripe-id-item">
+                    <div class="service-management__stripe-id-label">${id.label}</div>
+                    <div class="service-management__stripe-id-value">${id.value || '—'}</div>
+                </div>
+            `).join('');
+            displayContainer.style.display = 'block';
+        } else {
+            displayContainer.style.display = 'none';
         }
     }
 
