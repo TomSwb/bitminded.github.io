@@ -201,8 +201,9 @@ class CatalogAccessPageLoader {
                 this.serviceRenderer.updateSaleInfo(card, service);
                 this.serviceRenderer.updateStatus(card, service);
                 this.serviceRenderer.updateFeaturedBadge(card, service);
-                this.serviceRenderer.updatePaymentMethodBadge(card, service);
-                this.serviceRenderer.updatePaymentMethodInfo(card, service);
+                // Payment method badges removed - will be handled in checkout flow (see Item #16 in priority list)
+                // this.serviceRenderer.updatePaymentMethodBadge(card, service);
+                // this.serviceRenderer.updatePaymentMethodInfo(card, service);
             } else {
                 // For single tool license, render it fully
                 if (priceElement && durationElement) {

@@ -43,8 +43,9 @@ class ServiceRenderer {
             this.updateSaleBadge(elements.card, service);
             this.updateSaleInfo(elements.card, service);
             this.updateFeaturedBadge(elements.card, service);
-            this.updatePaymentMethodBadge(elements.card, service);
-            this.updatePaymentMethodInfo(elements.card, service);
+            // Payment method badges removed - will be handled in checkout flow (see Item #16 in priority list)
+            // this.updatePaymentMethodBadge(elements.card, service);
+            // this.updatePaymentMethodInfo(elements.card, service);
         }
     }
 
@@ -371,10 +372,10 @@ class ServiceRenderer {
         }
         
         // Find or create payment method badge container
-        let badgeContainer = cardElement.querySelector('.service-payment-method-badge');
+        let badgeContainer = cardElement.querySelector('.service-payment-method-badge-container');
         if (!badgeContainer) {
             badgeContainer = document.createElement('div');
-            badgeContainer.className = 'service-payment-method-badge';
+            badgeContainer.className = 'service-payment-method-badge-container';
             badgeContainer.style.display = 'flex';
             
             // Insert after title or at the beginning of the card
@@ -412,13 +413,9 @@ class ServiceRenderer {
         badgesRow.style.flexWrap = 'wrap';
         badgesRow.style.justifyContent = 'center';
         badgesRow.style.alignItems = 'center';
-
-        // Check if service supports both formats (can be in-person AND remote)
-        // Tech support services with travel costs typically support both formats
-        const supportsBothFormats = service.service_category === 'tech-support' && 
-                                    service.additional_costs && 
-                                    (service.additional_costs.toLowerCase().includes('travel') || 
-                                     service.additional_costs.toLowerCase().includes('device cost'));
+        
+        // Check if service supports both formats - only if explicitly set to 'both' in database
+        const supportsBothFormats = paymentMethod === 'both';
 
         // Determine label color based on payment method(s)
         let labelColor = '#635bff'; // Default to stripe/online color

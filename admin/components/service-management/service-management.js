@@ -526,14 +526,8 @@ class ServiceManagement {
             }
         }
         
-        // Check if service supports both formats (can be in-person AND remote)
-        // Tech support services with travel costs can be offered both ways
-        const supportsBothFormats = service.service_category === 'tech-support' && 
-                                    service.additional_costs && 
-                                    (service.additional_costs.toLowerCase().includes('travel') || 
-                                     service.additional_costs.toLowerCase().includes('device cost')) &&
-                                    !service.additional_costs.toLowerCase().includes('only in-person') &&
-                                    !service.additional_costs.toLowerCase().includes('in-person only');
+        // Check if service supports both formats - only if explicitly set to 'both' in database
+        const supportsBothFormats = paymentMethod === 'both';
         
         // Render payment method badges
         if (supportsBothFormats) {
@@ -2785,7 +2779,10 @@ class ServiceManagement {
         
         const category = categorySelect.value;
         const additionalCosts = additionalCostsInput ? additionalCostsInput.value : '';
-        const hasTravelCosts = additionalCosts.toLowerCase().includes('travel');
+        const hasTravelCosts = additionalCosts.toLowerCase().includes('travel') || 
+                              additionalCosts.toLowerCase().includes('device cost');
+        const isInPersonOnly = additionalCosts.toLowerCase().includes('only in-person') ||
+                              additionalCosts.toLowerCase().includes('in-person only');
         
         let suggestedPaymentMethod = 'stripe'; // Default
         
@@ -2793,12 +2790,21 @@ class ServiceManagement {
         if (category === 'catalog-access') {
             suggestedPaymentMethod = 'stripe';
         } else if (category === 'tech-support') {
-            suggestedPaymentMethod = hasTravelCosts ? 'bank_transfer' : 'stripe';
+            // If has travel costs but not in-person only, suggest 'both'
+            // If in-person only, use bank_transfer
+            // Otherwise use stripe (remote only)
+            if (hasTravelCosts && !isInPersonOnly) {
+                suggestedPaymentMethod = 'both';
+            } else if (hasTravelCosts || isInPersonOnly) {
+                suggestedPaymentMethod = 'bank_transfer';
+            } else {
+                suggestedPaymentMethod = 'stripe';
+            }
         } else if (category === 'commissioning') {
             suggestedPaymentMethod = 'bank_transfer';
         }
         
-        // Only auto-select if payment_method is not manually set or is empty
+        // Only auto-select if payment_method is not manually set or is empty/default
         // Allow user to override
         if (paymentMethodSelect.value === '' || paymentMethodSelect.value === 'stripe') {
             paymentMethodSelect.value = suggestedPaymentMethod;
