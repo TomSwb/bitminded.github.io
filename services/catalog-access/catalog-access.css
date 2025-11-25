@@ -982,7 +982,7 @@
 }
 
 /* Payment Method Badge Styles (for services that support both formats) */
-.service-payment-method-badge {
+.service-payment-method-badge-container {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;

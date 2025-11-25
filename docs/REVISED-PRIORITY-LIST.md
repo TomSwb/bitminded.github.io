@@ -556,13 +556,15 @@
 **Status**: **MISSING** - No checkout flow exists  
 **Priority**: Critical - needed for catalog access purchases and service bookings  
 **Action**: 
-- **Stripe Checkout Flow** (for services with `payment_method = 'stripe'`):
+- **Payment Method Selection/Display**: Payment method selection and display will be handled in the checkout flow, not on service cards (payment method badges removed from user-facing pages)
+- **Stripe Checkout Flow** (for services with `payment_method = 'stripe'` or `payment_method = 'both'`):
   - Create edge function to create Stripe Checkout sessions
   - Build checkout flow component
   - Create success/cancel redirect pages
   - Wire up to catalog access "Buy Now" buttons and Stripe service buttons
   - Handle different pricing types (one-time, subscription, freemium)
-- **Bank Transfer / Invoice Flow** (for services with `payment_method = 'bank_transfer'`):
+  - Display payment method options in checkout (if service supports both)
+- **Bank Transfer / Invoice Flow** (for services with `payment_method = 'bank_transfer'` or `payment_method = 'both'`):
   - Build service booking/invoice request form component
   - Generate QR-bill invoices for PostFinance bank transfers
   - Create invoice generation edge function
@@ -573,7 +575,8 @@
   - Different CTAs based on service `payment_method` field
   - Stripe services: "Subscribe Now" / "Buy Now" buttons
   - Bank transfer services: "Request Quote" / "Book Service" buttons
-  - Payment method badges already implemented in service cards
+  - Services with `payment_method = 'both'`: Show payment method selector in checkout flow
+  - Payment method selection and display handled in checkout, not on service cards (badges removed from user-facing pages)
 
 ### 16.5. Purchase Confirmation & Entitlements ⚠️ **MISSING**
 **Status**: **MISSING**  
