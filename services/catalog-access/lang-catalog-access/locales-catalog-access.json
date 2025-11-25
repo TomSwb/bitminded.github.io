@@ -28,6 +28,7 @@
       "catalog-access-supporter-feature-5": "Direct feedback channel",
       "catalog-access-popular-badge": "Popular",
       "catalog-access-month": "/month",
+      "payment-option-label": "Payment option",
       "payment-method-online": "Online",
       "payment-method-invoice": "Invoice",
       "payment-method-invoice-qr": "Invoice (QR-bill)",
