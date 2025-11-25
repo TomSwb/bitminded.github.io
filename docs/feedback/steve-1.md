@@ -3,7 +3,7 @@
 **Priority List Items Updated**: 
 - Item #53 (Content Optimization & Translation Refinement) - Section 53.2 (Content Conciseness & Messaging)
 - All feedback about content length, clarity, value propositions, and attention-grabbing messaging has been documented
-- See `/docs/REVISED-PRIORITY-LIST.md` for full details
+- See `../planning/PRIORITY-LIST-TO-DO.md` Item #53.2 (Content Conciseness & Messaging) for full details
 
 ---
 

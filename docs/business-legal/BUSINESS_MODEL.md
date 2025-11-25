@@ -162,3 +162,20 @@ Treat the homepage like a calm studio tour where visitors can feel both the craf
 - **Catalog Showcase:** Grid of apps such as Rythmo and Measure Mate with short stories about their origins
 - **How We Support You:** Services like Tech Confidence Coaching, Quick Tech Help, and Family Tech Connection
 - **How It Works:** Simple steps to reach out, get support, and keep confidence growing
+
+---
+
+## 🔗 Related Documentation
+
+### Planning & Implementation
+- [Priority List - Active Items](../planning/PRIORITY-LIST-TO-DO.md) - Implementation plan for all business model features
+- [Priority List - Completed Items](../planning/PRIORITY-LIST-COMPLETED-ITEMS.md) - Completed features and infrastructure
+
+### Feature-Specific Planning
+- [Family Plans Analysis](../payment-financial/FAMILY-PLANS-ANALYSIS.md) - Family plan pricing and implementation strategy
+- [Point-of-Sale Readiness Plan](../payment-financial/POINT-OF-SALE-READINESS.md) - Invoicing, contracts, and payment workflows
+- [PostFinance Integration Plan](../payment-financial/POSTFINANCE-INTEGRATION-PLAN.md) - Bank transfer payment integration
+
+### Legal & Compliance
+- [Legal Compliance Checklist](./LEGAL_COMPLIANCE_CHECKLIST.md) - Swiss legal requirements for business operations
+- [AHV Registration Guide](./AHV-REGISTRATION-GUIDE.md) - Self-employment registration process

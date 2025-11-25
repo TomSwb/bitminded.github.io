@@ -1,8 +1,9 @@
 # 🚀 BitMinded Implementation Roadmap
 
 > ⚠️ **OUTDATED DOCUMENT**  
-> **This document has been superseded by `REVISED-PRIORITY-LIST.md`**  
-> **See `../REVISED-PRIORITY-LIST.md` for the current master plan and TODO list**  
+> **This document has been superseded by `../planning/PRIORITY-LIST-TO-DO.md`**  
+> **See `../planning/PRIORITY-LIST-TO-DO.md` for the current master plan and TODO list**  
+> **See `../planning/PRIORITY-LIST-COMPLETED-ITEMS.md` for completed items**  
 > **Archived**: January 2025
 
 ---
@@ -384,7 +385,7 @@ admin/
 ### Strategy Documents
 - `docs/AUTHENTICATION-USER-MANAGEMENT-STRATEGY.md` - Complete architecture
 - `docs/SUBDOMAIN-PROTECTION-STRATEGY.md` - Subscription integration
-- `docs/BUSINESS_MODEL.md` - Business model canvas
+- `../business-legal/BUSINESS_MODEL.md` - Business model canvas
 
 ### Implementation Guides
 - `docs/AUTHENTICATION-IMPLEMENTATION-ORDER.md` - Detailed phases

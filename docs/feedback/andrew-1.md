@@ -2,7 +2,7 @@
 **Integrated Date**: 2025-01-27  
 **Priority List Items Updated**: 
 - Item #54 (Stories & Review System) - Enhanced with story format requirements, video support, example stories (Rytmo, Andrew's project), standalone navigation placement
-- See `/docs/REVISED-PRIORITY-LIST.md` for full details
+- See `../planning/PRIORITY-LIST-TO-DO.md` Item #54 (Stories & Review System) for full details
 
 ---
 

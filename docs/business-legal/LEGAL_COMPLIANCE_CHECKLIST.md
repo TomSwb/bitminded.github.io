@@ -168,3 +168,21 @@ Comprehensive reference for operating BitMinded as a Swiss sole proprietorship, 
 
 **Next steps suggestion:** When you book your first paid engagement, update this checklist with actual dates (AHV registration submitted, invoice numbers, etc.) to keep a living compliance log.
 
+---
+
+## 🔗 Related Documentation
+
+### Registration & Setup
+- [AHV Registration Guide](./AHV-REGISTRATION-GUIDE.md) - Step-by-step self-employment registration process
+
+### Implementation Planning
+- [Priority List - Active Items](../planning/PRIORITY-LIST-TO-DO.md) - See Phase 6 for invoice/contract implementation tasks
+- [Priority List - Completed Items](../planning/PRIORITY-LIST-COMPLETED-ITEMS.md) - See Phase 0 for completed production readiness items
+
+### Financial & Payment Systems
+- [Point-of-Sale Readiness Plan](../payment-financial/POINT-OF-SALE-READINESS.md) - Invoice numbering, contract templates, bookkeeping compliance
+- [PostFinance Integration Plan](../payment-financial/POSTFINANCE-INTEGRATION-PLAN.md) - QR-bill invoices, bank transfer workflows
+
+### Business Context
+- [Business Model](./BUSINESS_MODEL.md) - Revenue streams and pricing structure
+

@@ -209,5 +209,20 @@ Indexes, RLS, and migrations will be refined during implementation.
 
 ---
 
+## 🔗 Related Documentation
+
+### Planning & Implementation
+- [Priority List - Active Items](../planning/PRIORITY-LIST-TO-DO.md) - See Phase 6 (Financial Documents: Contracts + Invoices) for implementation tasks
+- [Priority List - Completed Items](../planning/PRIORITY-LIST-COMPLETED-ITEMS.md) - See completed payment infrastructure items
+
+### Related Payment & Financial Docs
+- [PostFinance Integration Plan](./POSTFINANCE-INTEGRATION-PLAN.md) - Payment method logic, QR-bill generation, bank transfer workflows
+- [Family Plans Analysis](./FAMILY-PLANS-ANALYSIS.md) - Family plan payment integration
+
+### Business & Legal
+- [Legal Compliance Checklist](../business-legal/LEGAL_COMPLIANCE_CHECKLIST.md) - Swiss invoice numbering, tax requirements, contract templates
+
+---
+
 Keep this document updated as decisions are made or scope shifts. Once implementation starts, link commits, migrations, and UI specs back here for traceability.
 

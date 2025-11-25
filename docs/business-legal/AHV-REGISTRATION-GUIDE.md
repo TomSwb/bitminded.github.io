@@ -97,11 +97,23 @@ Rule of thumb: file as soon as the activity is intended to continue and generate
 
 ## 9. Reminders for BitMinded
 
-- Log every invoice/contract in the bookkeeping system described in `POINT-OF-SALE-READINESS.md`.
+- Log every invoice/contract in the bookkeeping system described in `../payment-financial/POINT-OF-SALE-READINESS.md`.
 - Update `LEGAL_COMPLIANCE_CHECKLIST.md` once the registration is submitted and accepted.
 - Store copies of the AHV registration form, confirmation letters, and contribution invoices in the financial records archive.
 
 ---
 
 Keep this guide with your compliance documentation and revise as thresholds or regulations change. When in doubt, contact the compensation office or a fiduciary for clarification before revenue scales up.
+
+---
+
+## 🔗 Related Documentation
+
+### Legal & Compliance
+- [Legal Compliance Checklist](./LEGAL_COMPLIANCE_CHECKLIST.md) - Comprehensive Swiss legal requirements checklist
+- [Business Model](./BUSINESS_MODEL.md) - Business model and revenue streams context
+
+### Planning & Implementation
+- [Priority List - Active Items](../planning/PRIORITY-LIST-TO-DO.md) - Implementation plan for business features
+- [Priority List - Completed Items](../planning/PRIORITY-LIST-COMPLETED-ITEMS.md) - Completed infrastructure and features
 
