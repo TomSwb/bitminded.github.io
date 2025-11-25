@@ -1257,7 +1257,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 - [Services Pricing Strategy](./services/PRICING-STRATEGY.md)
 - [Community Page Planning](./community/README.md)
-- [Business Model](./docs/BUSINESS_MODEL.md)
+- [Business Model](../business-legal/BUSINESS_MODEL.md)
 - [Database Schema](./supabase/schema/database-schema.sql)
 - [Catalog Access](./services/catalog-access/index.html)
 - [Tech Support](./services/tech-support/index.html)
@@ -1592,6 +1592,21 @@ When family members are added/removed:
 - The purchaser becomes the family admin automatically
 - Access is granted immediately upon purchase to all existing family members
 - New members added later get access automatically (if subscription is active)
+
+---
+
+## 🔗 Related Documentation
+
+### Planning & Implementation
+- [Priority List - Active Items](../planning/PRIORITY-LIST-TO-DO.md) - See Phase 2, Item #15.9 (Family Plan Payment Setup & Stripe Integration) for implementation status and tasks
+- [Priority List - Completed Items](../planning/PRIORITY-LIST-COMPLETED-ITEMS.md) - See completed payment infrastructure that family plans depend on
+
+### Related Payment & Financial Docs
+- [PostFinance Integration Plan](./POSTFINANCE-INTEGRATION-PLAN.md) - Payment method logic (may affect family plan in-person services)
+- [Point-of-Sale Readiness Plan](./POINT-OF-SALE-READINESS.md) - Invoice/contract workflows for family services
+
+### Business Context
+- [Business Model](../business-legal/BUSINESS_MODEL.md) - Family plans align with "petite gens" market strategy
 
 ---
 

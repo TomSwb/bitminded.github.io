@@ -3,7 +3,7 @@
 **Priority List Items Updated**: 
 - Item #53 (Content Optimization & Translation Refinement) - Sections 53.1 (French Translation & Copy Improvements) and 53.3 (Color & Contrast Improvements)
 - All French wording improvements, terminology refinements, and color palette suggestions have been documented
-- See `/docs/REVISED-PRIORITY-LIST.md` for full details
+- See `../planning/PRIORITY-LIST-TO-DO.md` Item #53.1 (French Translation & Copy Improvements) for full details
 
 ---
 

@@ -714,10 +714,18 @@ CREATE TABLE unmatched_payments (
 
 ## 🔗 Related Documentation
 
+### Planning & Implementation
+- [Priority List - Active Items](../planning/PRIORITY-LIST-TO-DO.md) - See Phase 2 (#15.8) and Phase 6 (#35, #36, #37) for PostFinance-related tasks
+- [Priority List - Completed Items](../planning/PRIORITY-LIST-COMPLETED-ITEMS.md#156-postfinance-account-management-learning--researched--planned) - Section 15.6 (PostFinance Account Management Learning)
+
+### Related Payment & Financial Docs
+- [Point-of-Sale Readiness Plan](./POINT-OF-SALE-READINESS.md) - Invoice/contract workflows, QR-bill generation, POS system planning
+- [Family Plans Analysis](./FAMILY-PLANS-ANALYSIS.md) - Family plan payment integration (may use PostFinance for in-person family services)
+
+### Technical Documentation
 - [Revenue Reports Component Spec](../../admin/components/revenue-reports/SPEC.md)
 - [Admin Panel Master Plan](../../admin/ADMIN-PANEL-MASTER-PLAN.md)
 - [Payment Strategy](../../services/PRICING-STRATEGY.md)
-- [Priority List - Section 15.6](./REVISED-PRIORITY-LIST.md#156-postfinance-account-management-learning)
 
 ---
 

@@ -2,8 +2,8 @@
 
 > ⚠️ **HISTORICAL DOCUMENT**  
 > **This is a snapshot from January 2025**  
-> **For current production readiness status, see `REVISED-PRIORITY-LIST.md`**  
-> **Many issues mentioned here have been fixed (see Phase 0 in REVISED-PRIORITY-LIST.md)**
+> **For current production readiness status, see `../planning/PRIORITY-LIST-TO-DO.md`**  
+> **Many issues mentioned here have been fixed (see Phase 0 in `../planning/PRIORITY-LIST-COMPLETED-ITEMS.md`)**
 
 ---
 
@@ -219,3 +219,14 @@ console.log('🔄 User not authenticated, redirecting to auth page...');
 **Report Generated**: January 2025  
 **Scan Coverage**: Complete codebase analysis  
 **Tools Used**: grep, file analysis, configuration review
+
+---
+
+## 🔗 Related Documentation
+
+### Current Status
+- [Priority List - Completed Items](../planning/PRIORITY-LIST-COMPLETED-ITEMS.md) - See Phase 0 for current production readiness status (many issues mentioned here have been fixed)
+- [Priority List - Active Items](../planning/PRIORITY-LIST-TO-DO.md) - See remaining production readiness tasks
+
+### Analysis & Reports
+- [SEO Analysis Report](./SEO-ANALYSIS-REPORT.md) - SEO recommendations and content strategy
