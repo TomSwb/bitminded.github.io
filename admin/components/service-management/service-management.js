@@ -44,6 +44,11 @@ class ServiceManagement {
             this.applyFilters();
 
             this.isInitialized = true;
+            
+            // Final translation update after everything is loaded
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 200);
         } catch (error) {
             window.logger?.error('❌ Service Management: Failed to initialize:', error);
             this.showError('Failed to initialize service management');
@@ -421,6 +426,11 @@ class ServiceManagement {
 
             this.hideLoading();
             this.renderServices();
+            
+            // Reapply translations after loading services
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 150);
 
         } catch (error) {
             window.logger?.error('❌ Failed to load services:', error);
@@ -454,6 +464,11 @@ class ServiceManagement {
 
         // Update bulk actions visibility after rendering
         this.updateBulkActionsVisibility();
+        
+        // Reapply translations after rendering (in case DOM was reset)
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     /**
@@ -1868,6 +1883,11 @@ class ServiceManagement {
 
         this.renderServices();
         this.updateSummary();
+        
+        // Reapply translations after filtering (in case DOM was reset)
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     /**
@@ -2829,6 +2849,61 @@ class ServiceManagement {
             // Fallback: ensure text is always there
             btnText.textContent = 'Create Stripe Product';
         }
+        
+        // Update table headers and filter labels
+        setTimeout(() => {
+            this.updateTableHeaders();
+            this.updateFilterLabels();
+        }, 50);
+    }
+
+    /**
+     * Update table headers when language changes
+     */
+    updateTableHeaders() {
+        if (!window.ServiceManagementTranslations || !window.ServiceManagementTranslations.isInitialized) {
+            return;
+        }
+
+        const headerMap = {
+            'Service Name': 'Service Name',
+            'Category': 'Category',
+            'Payment Method': 'Payment Method',
+            'Status': 'Status',
+            'Pricing': 'Pricing',
+            'Sale': 'Sale',
+            'Featured': 'Featured',
+            'Created': 'Created',
+            'Actions': 'Actions'
+        };
+
+        // Update table headers
+        const tableHeaders = document.querySelectorAll('#services-table th.translatable-content, #services-table th .translatable-content');
+        const currentLanguage = window.ServiceManagementTranslations.getCurrentLanguage();
+        
+        tableHeaders.forEach(header => {
+            const translationKey = header.getAttribute('data-translation-key');
+            if (translationKey && headerMap[translationKey]) {
+                const newText = window.ServiceManagementTranslations.getTranslation(translationKey, currentLanguage);
+                if (header.tagName === 'SPAN') {
+                    header.textContent = newText;
+                } else {
+                    header.textContent = newText;
+                }
+            }
+        });
+    }
+
+    /**
+     * Update filter labels when language changes
+     */
+    updateFilterLabels() {
+        if (!window.ServiceManagementTranslations || !window.ServiceManagementTranslations.isInitialized) {
+            return;
+        }
+
+        // Filter labels are already handled by the translation system via data-translation-key
+        // This method can be extended if needed for dynamic filter labels
     }
 
     /**

@@ -40,6 +40,11 @@ class BulkOperations {
             });
 
             this.isInitialized = true;
+            
+            // Final translation update after everything is loaded
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 200);
         } catch (error) {
             window.logger?.error('❌ BulkOperations: failed to load initial tab', error);
             if (!translationsReady) {
@@ -93,6 +98,11 @@ class BulkOperations {
         if (tabName === 'maintenance') {
             await this.ensureMaintenanceTabLoaded();
         }
+        
+        // Reapply translations after tab activation
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     async ensureMaintenanceTabLoaded() {
@@ -129,6 +139,11 @@ class BulkOperations {
             }
 
             this.loadedTabs.add('maintenance');
+            
+            // Reapply translations after maintenance tab loads
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 150);
         } catch (error) {
             window.logger?.error('❌ Failed to load maintenance mode component:', error);
             this.showError(this.translate('Failed to load maintenance controls.', 'Failed to load maintenance controls.'));

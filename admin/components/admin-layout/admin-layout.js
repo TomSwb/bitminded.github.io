@@ -220,6 +220,30 @@ class AdminLayout {
             // Load section content if not already loaded
             if (!this.loadedComponents.has(sectionName)) {
                 await this.loadSectionContent(sectionName);
+            } else {
+                // Section already loaded - reapply translations when switching back
+                const componentMap = {
+                    'dashboard': 'dashboard',
+                    'users': 'user-management',
+                    'access-control': 'access-control',
+                    'subscriptions': 'subscription-management',
+                    'products': 'product-management',
+                    'services': 'service-management',
+                    'revenue': 'revenue-reports',
+                    'analytics': 'analytics-dashboard',
+                    'support': 'support-desk',
+                    'communications': 'communication-center',
+                    'bulk-operations': 'bulk-operations'
+                };
+                const componentName = componentMap[sectionName];
+                if (componentName) {
+                    const componentInstance = window[`${sectionName}Component`];
+                    if (componentInstance && typeof componentInstance.updateTranslations === 'function') {
+                        setTimeout(() => {
+                            componentInstance.updateTranslations();
+                        }, 100);
+                    }
+                }
             }
 
             // Update URL
@@ -392,6 +416,7 @@ class AdminLayout {
                 'access-control': 'AccessControl',
                 'subscription-management': 'SubscriptionManagement',
                 'product-management': 'ProductManagement',
+                'service-management': 'ServiceManagement',
                 'revenue-reports': 'RevenueReports',
                 'analytics-dashboard': 'AnalyticsDashboard',
                 'support-desk': 'SupportDesk',
