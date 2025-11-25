@@ -42,6 +42,11 @@ class SupportDesk {
             this.applyFilters();
 
             this.isInitialized = true;
+            
+            // Final translation update after everything is loaded
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 200);
         } catch (error) {
             window.logger?.error('❌ Support Desk: failed to initialize', error);
             this.showError(this.translate('Failed to load support tickets.', 'Failed to load support tickets.'));
@@ -290,6 +295,11 @@ class SupportDesk {
 
             this.elements.tableBody.appendChild(row);
         });
+        
+        // Reapply translations after rendering (in case DOM was reset)
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     renderEmptyState() {
@@ -390,6 +400,11 @@ class SupportDesk {
 
         this.renderTicketContext(ticket);
         this.renderTicketUpdates(ticket);
+        
+        // Reapply translations after rendering ticket detail
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     clearDetail() {

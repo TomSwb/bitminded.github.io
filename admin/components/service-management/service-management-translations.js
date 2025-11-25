@@ -64,18 +64,35 @@ if (typeof window.ServiceManagementTranslations === 'undefined') {
 
         /**
          * Get current language
+         * Prioritize localStorage as source of truth to avoid race conditions
          */
         getCurrentLanguage() {
+            // Always check localStorage first (source of truth, updated synchronously)
+            const storedLang = localStorage.getItem('language');
+            if (storedLang) {
+                return storedLang;
+            }
+            // Fallback to i18next if localStorage not set
             if (window.i18next && window.i18next.language) {
                 return window.i18next.language;
             }
-            return localStorage.getItem('language') || 'en';
+            return 'en';
         },
 
         /**
          * Update all translatable content
          */
         updateTranslations() {
+            // Add small delay to ensure language is fully synced across all systems
+            setTimeout(() => {
+                this._doUpdateTranslations();
+            }, 50);
+        },
+
+        /**
+         * Internal method to actually update translations
+         */
+        _doUpdateTranslations() {
             // If not initialized, just use fallback text (don't fail silently)
             if (!this.isInitialized) {
                 // Try to initialize if not done yet

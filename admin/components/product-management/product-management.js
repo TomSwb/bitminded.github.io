@@ -60,6 +60,11 @@ class ProductManagement {
             this.applyFilters();
 
             this.isInitialized = true;
+            
+            // Final translation update after everything is loaded
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 200);
 
         } catch (error) {
             window.logger?.error('❌ Product Management: Failed to initialize:', error);
@@ -335,6 +340,11 @@ class ProductManagement {
             // Apply initial filters and render
             this.applyFilters();
             this.hideLoading();
+            
+            // Reapply translations after loading products
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 150);
 
         } catch (error) {
             window.logger?.error('❌ Failed to load products:', error);
@@ -425,6 +435,11 @@ class ProductManagement {
         
         // Render filtered results
         this.renderProducts();
+        
+        // Reapply translations after filtering (in case DOM was reset)
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     /**
@@ -523,6 +538,11 @@ class ProductManagement {
             const row = this.createProductRow(product);
             tbody.appendChild(row);
         });
+        
+        // Reapply translations after rendering (in case DOM was reset)
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     /**

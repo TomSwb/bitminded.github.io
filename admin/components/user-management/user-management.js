@@ -104,6 +104,11 @@ class UserManagement {
             this.applyFilters();
 
             this.isInitialized = true;
+            
+            // Final translation update after everything is loaded
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 200);
 
         } catch (error) {
             window.logger?.error('❌ User Management: Failed to initialize:', error);
@@ -556,6 +561,11 @@ class UserManagement {
             const row = this.createUserRow(user);
             tbody.appendChild(row);
         });
+        
+        // Reapply translations after rendering (in case DOM was reset)
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     /**

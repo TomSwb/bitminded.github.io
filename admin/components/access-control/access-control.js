@@ -45,6 +45,12 @@ class AccessControl {
             // Setup event listeners
             this.setupEventListeners();
             
+            // Initialize translations FIRST (before loading data)
+            await this.initializeTranslations();
+            
+            // Show translatable content
+            this.showTranslatableContent();
+            
             // Load products (could be from database in future)
             await this.loadProducts();
 
@@ -57,13 +63,12 @@ class AccessControl {
             // Apply initial filters
             this.applyFilters();
 
-            // Initialize translations
-            await this.initializeTranslations();
-            
-            // Show translatable content
-            this.showTranslatableContent();
-
             this.isInitialized = true;
+            
+            // Final translation update after everything is loaded
+            setTimeout(() => {
+                this.updateTranslations();
+            }, 200);
 
         } catch (error) {
             window.logger?.error('❌ Access Control: Failed to initialize:', error);
@@ -717,6 +722,11 @@ class AccessControl {
                 this.elements.grantedByOptions.appendChild(label);
             });
         }
+        
+        // Reapply translations after populating filter options
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
 
         // Product search is handled by handleProductSearch() - no need to populate dropdown
     }
@@ -832,6 +842,11 @@ class AccessControl {
         }
 
         this.renderGrants();
+        
+        // Reapply translations after rendering (in case DOM was reset)
+        setTimeout(() => {
+            this.updateTranslations();
+        }, 100);
     }
 
     /**

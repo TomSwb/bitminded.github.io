@@ -73,44 +73,54 @@ if (typeof window.adminLayoutTranslations === 'undefined') {
 
         /**
          * Get current language
+         * Prioritize localStorage as source of truth to avoid race conditions
          * @returns {string} Current language code
          */
         getCurrentLanguage() {
+            // Always check localStorage first (source of truth, updated synchronously)
+            const storedLang = localStorage.getItem('language');
+            if (storedLang) {
+                return storedLang;
+            }
+            // Fallback to i18next if localStorage not set
             if (window.i18next && window.i18next.language) {
                 return window.i18next.language;
             }
-            return localStorage.getItem('language') || 'en';
+            return 'en';
         },
 
         /**
          * Update all translatable content
          */
         updateTranslations() {
-            if (!this.isInitialized) {
-                // Silently return if not initialized yet
-                return;
-            }
-
-            const currentLanguage = this.getCurrentLanguage();
-
-            // Update all translatable elements
-            const elements = document.querySelectorAll('#admin-layout .translatable-content[data-translation-key]');
-            
-            elements.forEach(element => {
-                const key = element.getAttribute('data-translation-key');
-                if (key) {
-                    const translation = this.getTranslation(key, currentLanguage);
-                    
-                    // Update text content
-                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                        element.placeholder = translation;
-                    } else {
-                        element.textContent = translation;
-                    }
+            // Add small delay to ensure language is fully synced across all systems
+            setTimeout(() => {
+                if (!this.isInitialized) {
+                    // Silently return if not initialized yet
+                    return;
                 }
-            });
 
-            window.logger?.log('✅ Admin layout translations updated');
+                const currentLanguage = this.getCurrentLanguage();
+
+                // Update all translatable elements
+                const elements = document.querySelectorAll('#admin-layout .translatable-content[data-translation-key]');
+                
+                elements.forEach(element => {
+                    const key = element.getAttribute('data-translation-key');
+                    if (key) {
+                        const translation = this.getTranslation(key, currentLanguage);
+                        
+                        // Update text content
+                        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                            element.placeholder = translation;
+                        } else {
+                            element.textContent = translation;
+                        }
+                    }
+                });
+
+                window.logger?.log('✅ Admin layout translations updated');
+            }, 50);
         }
     };
 }
