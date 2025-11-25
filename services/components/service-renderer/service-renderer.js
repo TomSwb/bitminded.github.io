@@ -389,11 +389,29 @@ class ServiceRenderer {
             }
         }
 
-        // Ensure container is visible and has correct display
+        // Ensure container is visible and has correct display (flex column)
         badgeContainer.style.display = 'flex';
+        badgeContainer.style.flexDirection = 'column';
+        badgeContainer.style.alignItems = 'center';
+        badgeContainer.style.gap = '0.25rem';
         
-        // Clear existing badge
+        // Clear existing content
         badgeContainer.innerHTML = '';
+
+        // Create "Payment option" label
+        const label = document.createElement('span');
+        label.className = 'payment-method-label translatable-content';
+        label.setAttribute('data-i18n', 'payment-option-label');
+        label.textContent = 'Payment option';
+        
+        // Create container for badges (flex row)
+        const badgesRow = document.createElement('div');
+        badgesRow.className = 'payment-method-badges-row';
+        badgesRow.style.display = 'flex';
+        badgesRow.style.gap = '0.5rem';
+        badgesRow.style.flexWrap = 'wrap';
+        badgesRow.style.justifyContent = 'center';
+        badgesRow.style.alignItems = 'center';
 
         // Check if service supports both formats (can be in-person AND remote)
         // Tech support services with travel costs typically support both formats
@@ -402,6 +420,9 @@ class ServiceRenderer {
                                     (service.additional_costs.toLowerCase().includes('travel') || 
                                      service.additional_costs.toLowerCase().includes('device cost'));
 
+        // Determine label color based on payment method(s)
+        let labelColor = '#635bff'; // Default to stripe/online color
+        
         if (supportsBothFormats) {
             // Service supports both formats - show both badges
             const onlineBadge = document.createElement('span');
@@ -417,19 +438,21 @@ class ServiceRenderer {
             bankBadge.textContent = 'Invoice';
             bankBadge.setAttribute('title', '');
             bankBadge.setAttribute('data-i18n-title', 'payment-method-invoice-inperson-tooltip');
+            // Ensure invoice badge has yellow background and black text
+            bankBadge.style.backgroundColor = '#ffcc00';
+            bankBadge.style.color = '#000000';
             
-            badgeContainer.style.display = 'flex';
-            badgeContainer.style.gap = '0.5rem';
-            badgeContainer.style.flexWrap = 'wrap';
-            badgeContainer.appendChild(onlineBadge);
-            badgeContainer.appendChild(bankBadge);
+            badgesRow.appendChild(onlineBadge);
+            badgesRow.appendChild(bankBadge);
             
             // Make badges visible immediately
             onlineBadge.classList.add('loaded');
             bankBadge.classList.add('loaded');
             onlineBadge.style.display = 'inline-block';
             bankBadge.style.display = 'inline-block';
-            badgeContainer.style.display = 'flex';
+            
+            // Label color for both: use primary stripe color
+            labelColor = '#635bff';
             
             // Apply translations immediately
             this.applyBadgeTranslations(onlineBadge);
@@ -440,6 +463,7 @@ class ServiceRenderer {
                 setTimeout(() => {
                     this.applyBadgeTranslations(onlineBadge);
                     this.applyBadgeTranslations(bankBadge);
+                    this.applyLabelTranslation(label);
                 }, 50);
             };
             
@@ -467,19 +491,25 @@ class ServiceRenderer {
                 badge.textContent = 'Invoice';
                 badge.setAttribute('title', '');
                 badge.setAttribute('data-i18n-title', 'payment-method-invoice-tooltip');
+                // Ensure invoice badge has yellow background and black text
+                badge.style.backgroundColor = '#ffcc00';
+                badge.style.color = '#000000';
+                labelColor = '#ffcc00'; // Bank transfer/invoice yellow
             } else {
                 badge.setAttribute('data-i18n', 'payment-method-online');
                 badge.textContent = 'Online';
                 badge.setAttribute('title', '');
                 badge.setAttribute('data-i18n-title', 'payment-method-online-tooltip');
+                // Ensure online badge has white text
+                badge.style.color = '#ffffff';
+                labelColor = '#635bff'; // Stripe/online purple
             }
             
-            badgeContainer.appendChild(badge);
+            badgesRow.appendChild(badge);
             
             // Make badge visible immediately
             badge.classList.add('loaded');
             badge.style.display = 'inline-block';
-            badgeContainer.style.display = 'flex';
             
             // Apply translations immediately
             this.applyBadgeTranslations(badge);
@@ -488,6 +518,7 @@ class ServiceRenderer {
             const updateBadge = () => {
                 setTimeout(() => {
                     this.applyBadgeTranslations(badge);
+                    this.applyLabelTranslation(label);
                 }, 50);
             };
             
@@ -506,6 +537,17 @@ class ServiceRenderer {
             setTimeout(updateBadge, 100);
             setTimeout(updateBadge, 500);
         }
+        
+        // Set label color and store it as data attribute for later reference
+        label.style.color = labelColor;
+        label.setAttribute('data-label-color', labelColor);
+        
+        // Apply label translation
+        this.applyLabelTranslation(label);
+        
+        // Add label and badges row to container
+        badgeContainer.appendChild(label);
+        badgeContainer.appendChild(badgesRow);
     }
 
     /**
@@ -734,6 +776,43 @@ class ServiceRenderer {
                     // Translation failed, keep default title
                 }
             }
+        }
+    }
+
+    /**
+     * Apply translations to label element
+     */
+    applyLabelTranslation(labelElement) {
+        if (!labelElement) return;
+
+        // Make sure label is visible immediately
+        labelElement.classList.add('loaded');
+        labelElement.style.display = 'block';
+        
+        // Restore label color from data attribute if it exists
+        const savedColor = labelElement.getAttribute('data-label-color');
+        if (savedColor) {
+            labelElement.style.color = savedColor;
+        }
+
+        // Apply translations if i18next is available
+        if (window.i18next && typeof window.i18next.t === 'function') {
+            const key = labelElement.getAttribute('data-i18n');
+            if (key) {
+                try {
+                    const translation = window.i18next.t(key);
+                    if (translation && translation !== key && translation.trim() !== '' && translation.trim() !== key.trim()) {
+                        labelElement.textContent = translation;
+                    }
+                } catch (e) {
+                    // Translation failed, keep default text
+                }
+            }
+        }
+        
+        // Ensure color is still applied after translation
+        if (savedColor) {
+            labelElement.style.color = savedColor;
         }
     }
 
