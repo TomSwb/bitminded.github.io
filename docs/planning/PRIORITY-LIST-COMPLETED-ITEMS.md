@@ -555,6 +555,68 @@
 
 ---
 
+### 15.9.1. Family Plan Database Schema ✅ **COMPLETED**
+**Status**: **✅ COMPLETED** - Migration created and applied successfully  
+**Priority**: Foundation - Must be completed first  
+**Completed**: November 25, 2025
+
+**Completed Actions**:
+- ✅ **Created migration file**: `supabase/migrations/20251125_create_family_plans_schema.sql`
+- ✅ **Created `family_groups` table**:
+  - Fields: id, family_name, admin_user_id, family_type, max_members, primary_region, subscription_id, age_verification_override fields, created_at, updated_at
+  - Foreign keys: admin_user_id → auth.users(id)
+  - Constraints: max_members fixed at 6, family_type validation
+  - Indexes: admin_user_id, subscription_id
+- ✅ **Created `family_members` table**:
+  - Fields: id, family_group_id, user_id, role, relationship, age, is_verified, invited_by, invited_at, joined_at, status, created_at, updated_at
+  - Foreign keys: family_group_id → family_groups(id), user_id → auth.users(id), invited_by → auth.users(id)
+  - Unique constraint: (family_group_id, user_id)
+  - Unique index: One active family per user (prevents users from joining multiple families)
+  - Indexes: family_group_id, user_id, role, status
+- ✅ **Created `family_subscriptions` table**:
+  - Fields: id, family_group_id, stripe_customer_id, stripe_subscription_id, plan_name, status, current_period_start, current_period_end, created_at, updated_at
+  - Foreign keys: family_group_id → family_groups(id)
+  - **CRITICAL CONSTRAINT**: `plan_name` CHECK constraint restricts to only 'family_all_tools' or 'family_supporter' (prevents individual tools/services from being family plans)
+  - Indexes: family_group_id, stripe_subscription_id, status
+- ✅ **Implemented RLS policies** for all family tables:
+  - Family members can view their family group
+  - Family admin can update/delete family group
+  - Family members can view other family members
+  - Family admin can manage family members
+  - Family members can update own membership
+  - Family members can leave family group
+  - Family members can view family subscription
+  - Family admin can manage family subscription
+  - Admins have full access to all family tables
+- ✅ **Created helper functions**:
+  - `is_family_member(family_group_uuid, user_uuid)` - Check if user is active family member
+  - `is_family_admin(family_group_uuid, user_uuid)` - Check if user is family admin
+  - `has_family_subscription_access(user_uuid)` - Check if user has active family subscription access
+  - `get_active_family_members(family_group_uuid)` - Get all active members for a family group
+  - `validate_family_has_adult(family_group_uuid)` - Validate that family has at least one adult (age >= 18), respects age override
+  - `validate_family_region_consistency(family_group_uuid)` - Soft validation for region consistency (warns but doesn't block)
+  - `grant_age_verification_override(family_group_uuid, reason)` - Admin function to grant age verification override
+  - `revoke_age_verification_override(family_group_uuid)` - Admin function to revoke age verification override
+- ✅ **Created validation triggers**:
+  - `validate_family_member_constraints_trigger` - Validates adult requirement and region consistency when members are activated
+- ✅ **Added constraints and validations**:
+  - Max members: Fixed at 6 members per family (enforced by CHECK constraint)
+  - One family per user: Unique index prevents users from being in multiple active families
+  - Adult requirement: Family must have at least one adult (age >= 18), admin must be adult (enforced by trigger, can be overridden by admin)
+  - Region check: Soft validation - warns if members are from different regions (flexible for international families)
+  - Plan restriction: Only 'family_all_tools' and 'family_supporter' plans allowed (enforced by CHECK constraint)
+  - Age verification override: Admin can grant override for special cases (friend groups without adults)
+
+**Migration File**: `supabase/migrations/20251125_create_family_plans_schema.sql`
+
+**Next Steps**: 
+- 15.9.3: Family Plan Webhook Handler Updates (can be done after 15.9.1, but full functionality requires 15.9.2)
+- 15.9.2: Family Plan Stripe Checkout Integration (depends on #16)
+- 15.9.4: Family Management UI (Account Page Component)
+- 15.9.5: Admin Family Management UI (Phase 7)
+
+---
+
 ## 🛠️ **Phase 7: User Experience & Admin Tooling**
 
 ### 51. Multi-Currency Support ✅ **IMPLEMENTED**

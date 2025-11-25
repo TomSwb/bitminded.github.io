@@ -67,6 +67,7 @@ class ServiceLoader {
                 .select('*')
                 .eq('service_category', category)
                 .eq('is_active', true)
+                .eq('display_in_catalog', true) // Filter out family variants and other hidden services
                 .order('display_order', { ascending: true })
                 .order('created_at', { ascending: false });
 
@@ -97,6 +98,50 @@ class ServiceLoader {
      */
     getServiceBySlug(slug) {
         return this.servicesBySlug.get(slug) || null;
+    }
+
+    /**
+     * Get family variant service by parent service slug
+     * This loads the family service from the database if not already cached
+     */
+    async getFamilyServiceByParentSlug(parentSlug) {
+        try {
+            // Check cache first (family services might be loaded separately)
+            const familySlug = `${parentSlug}-family`;
+            if (this.servicesBySlug.has(familySlug)) {
+                return this.servicesBySlug.get(familySlug);
+            }
+
+            // Load from database
+            if (!window.supabase) {
+                window.logger?.error('Supabase not available');
+                return null;
+            }
+
+            const { data, error } = await window.supabase
+                .from('services')
+                .select('*')
+                .eq('parent_service_slug', parentSlug)
+                .eq('is_family_variant', true)
+                .eq('is_active', true)
+                .maybeSingle();
+
+            if (error) {
+                window.logger?.error('Error loading family service:', error);
+                return null;
+            }
+
+            if (data) {
+                // Cache it
+                this.servicesBySlug.set(data.slug, data);
+                return data;
+            }
+
+            return null;
+        } catch (error) {
+            window.logger?.error('Failed to load family service:', error);
+            return null;
+        }
     }
 
     /**

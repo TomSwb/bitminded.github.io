@@ -391,7 +391,7 @@ class CatalogAccessPageLoader {
         this.updatePricing();
     }
 
-    updatePricing() {
+    async updatePricing() {
         // Ensure i18next is available
         if (typeof i18next === 'undefined') {
             return;
@@ -454,12 +454,21 @@ class CatalogAccessPageLoader {
         const serviceLoader = window.ServiceLoader;
         const currency = serviceLoader ? serviceLoader.currentCurrency : 'CHF';
 
-        cards.forEach(card => {
+        // Process cards - load family services if needed
+        const cardPromises = Array.from(cards).map(async (card) => {
             const slug = card.getAttribute('data-service-slug');
             if (!slug) return;
 
-            const service = this.servicesBySlug && this.servicesBySlug[slug];
+            let service = this.servicesBySlug && this.servicesBySlug[slug];
             if (!service) return;
+
+            // If family toggle is on, try to load the family variant service
+            if (this.pricingState.isFamily && serviceLoader) {
+                const familyService = await serviceLoader.getFamilyServiceByParentSlug(slug);
+                if (familyService) {
+                    service = familyService; // Use family service for pricing
+                }
+            }
 
             const priceElement = card.querySelector('.catalog-access-pricing-comparison-card__price');
             const durationElement = card.querySelector('.catalog-access-pricing-comparison-card__duration');
@@ -491,12 +500,19 @@ class CatalogAccessPageLoader {
                 }
 
                 // Update sale badge, sale info, status, and featured badge
-                this.serviceRenderer.updateSaleBadge(card, service);
-                this.serviceRenderer.updateSaleInfo(card, service);
-                this.serviceRenderer.updateStatus(card, service);
-                this.serviceRenderer.updateFeaturedBadge(card, service);
+                // Use original service (not family variant) for badges/status
+                const originalService = this.servicesBySlug && this.servicesBySlug[slug];
+                if (originalService) {
+                    this.serviceRenderer.updateSaleBadge(card, originalService);
+                    this.serviceRenderer.updateSaleInfo(card, originalService);
+                    this.serviceRenderer.updateStatus(card, originalService);
+                    this.serviceRenderer.updateFeaturedBadge(card, originalService);
+                }
             }
         });
+
+        // Wait for all family services to load
+        await Promise.all(cardPromises);
 
         // Update feature indicator aria-labels
         const featureIndicators = document.querySelectorAll('[data-i18n-aria-label]');
