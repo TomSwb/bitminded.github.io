@@ -31,7 +31,8 @@
 - ❌ Notification Center Enhancements (now in Phase 7, #52)
 - ❌ Stories & Review System (now planned in Phase 7, #54)
 - ❌ Marketing & Social Media Integration (now planned in Phase 7, #55)
-- ❌ Marketing Analytics Planning & Setup (now planned in Phase 7, #56 - must be ready before Phase 8)
+- ❌ Community Page & Features (now planned in Phase 7, #55 - major feature for engagement and revenue)
+- ❌ Marketing Analytics Planning & Setup (now planned in Phase 7, #57 - must be ready before Phase 8)
 
 ### ⚠️ **Partially Implemented / Needs Enhancement**
 - ⚠️ FAQ system (exists but may need expansion)
@@ -1676,12 +1677,392 @@
 - Database performance with many reviews (pagination, indexing)
 - Image uploads for reviews (storage costs, moderation)
 
-### 55. Marketing & Social Media Integration ⚠️ **MISSING**
+### 55. Community Page & Features ⚠️ **MISSING**
+**Status**: **MISSING** - Planning complete, ready for implementation  
+**Priority**: **HIGH** - Major feature for user engagement, retention, and revenue (1000+ subscribers strategy)  
+**Reference**: See `../../community/README.md` for complete planning documentation (690 lines)
+
+**Vision**: Build a thriving community that sustains BitMinded through volume, engagement, and shared values. The community page is the foundation of BitMinded's sustainability model with a volume strategy targeting 1000+ subscribers at CHF 5-8/month.
+
+**Prerequisites** (MUST COMPLETE FIRST):
+- ✅ Review system (#54) - Community includes reviews as a core feature
+- ✅ User authentication and profiles (Supabase Auth)
+- ✅ Subscription system (Stripe integration for Supporter Tier)
+- ✅ Account page structure (for member profile integration)
+
+**Implementation Order** (14-week phased approach):
+1. Phase 1: Foundation (Weeks 1-2) - Community structure and navigation
+2. Phase 2: Reviews System (Weeks 3-4) - Tool and service reviews (builds on #54)
+3. Phase 3: Discussion Forums (Weeks 5-6) - Community discussions and knowledge sharing
+4. Phase 4: Member Profiles (Weeks 7-8) - User profiles and activity tracking
+5. Phase 5: Supporter Tier Integration (Weeks 9-10) - Exclusive benefits and features
+6. Phase 6: Community Guidelines & Moderation (Weeks 11-12) - Guidelines and moderation system
+7. Phase 7: Polish & Launch (Weeks 13-14) - Final polish and launch preparation
+
+---
+
+#### 55.1. Community Page Foundation ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: Foundation - needs to be accessible  
+**Phase**: Phase 1 (Weeks 1-2)  
+**Action**:
+- Create `/community/` directory structure
+- Set up community page HTML/CSS/JS (`community/index.html`, `community.css`, `community.js`)
+- Create community page loader (`community/community-page-loader.js`)
+- Add "Community" link to main navigation menu (`components/navigation-menu/`)
+- Create basic community hub layout with:
+  - Community stats display (members, active users, reviews, discussions)
+  - Featured content section (popular reviews, active discussions, new members)
+  - Quick links to reviews, discussions, member profiles
+  - Community guidelines and values section
+  - Recent activity feed
+- Set up translation system (`community/lang-community/` with locales)
+- Add community link to footer (optional)
+- Responsive design (mobile, tablet, desktop)
+- SEO optimization (meta tags, structured data)
+
+**Questions to Answer Before Implementation**:
+- Should community page be accessible to non-logged-in users? (probably yes, but some features require login)
+- What community stats to display? (member count, active users, total reviews, recent discussions)
+- How to handle community page when no content exists yet? (placeholder content, example data?)
+
+---
+
+#### 55.2. Community Reviews System Integration ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: High - builds on #54 review system  
+**Phase**: Phase 2 (Weeks 3-4)  
+**Depends on**: #54 (Stories & Review System)  
+**Action**:
+- Integrate review system from #54 into community page
+- Create community reviews section:
+  - Display tool reviews (from `product_reviews` table)
+  - Display service reviews (commissioning, guidance services)
+  - Review filtering (by rating, date, helpfulness, product/service)
+  - Review sorting (newest, highest rated, most helpful)
+  - Review pagination or infinite scroll
+- Add review submission from community page
+- Link reviews to member profiles
+- Display review statistics (total reviews, average ratings, review distribution)
+- Add "Helpful" voting system for reviews
+- Review moderation integration (admin approval workflow)
+- Review reporting/flagging system
+
+**Integration Points**:
+- Use existing `product_reviews` table from #54
+- Extend review system to support service reviews (commissioning, guidance)
+- Link reviews to community member profiles
+- Display reviews in community hub and dedicated reviews section
+
+**Questions to Answer Before Implementation**:
+- Should service reviews use same table as product reviews or separate table?
+- How to handle review moderation workflow? (admin approval, auto-approve verified purchases?)
+- Should reviews be editable by users after submission?
+- Review spam prevention strategy? (rate limiting, captcha, moderation queue)
+
+---
+
+#### 55.3. Discussion Forums System ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: High - core community engagement feature  
+**Phase**: Phase 3 (Weeks 5-6)  
+**Action**:
+- Create database schema for discussions:
+  - `community_discussions` table (threads)
+  - `community_discussion_comments` table (replies/comments)
+  - Discussion categories, tags, upvotes/downvotes
+- Create discussion forum UI:
+  - Discussion categories (Tool Discussions, Feature Requests, Tips & Tricks, Digital Wellbeing, General Discussion, Support & Help)
+  - Thread-based discussions with replies
+  - Comment threading and nested replies
+  - Upvote/downvote system
+  - Mark as solved/helpful functionality
+  - Search and filtering (by category, tag, date, popularity)
+  - Tag system for discussions
+  - Discussion pagination
+- Discussion creation form:
+  - Category selection
+  - Title and content (rich text editor)
+  - Tag selection/creation
+  - Mark as question/feature request/discussion
+- Discussion moderation:
+  - Admin approval for new discussions (optional)
+  - Edit/delete discussions (author and admin)
+  - Report/flag inappropriate content
+  - Spam detection and filtering
+- Discussion display:
+  - Discussion list with previews
+  - Full discussion view with all comments
+  - Comment sorting (newest, oldest, most upvoted)
+  - Comment pagination
+  - User avatars and names
+  - Discussion metadata (views, replies, upvotes, solved status)
+
+**Database Schema Requirements**:
+- `community_discussions` table: id, user_id, category, title, content, tags, status, views, upvotes, downvotes, is_solved, solved_by, created_at, updated_at
+- `community_discussion_comments` table: id, discussion_id, user_id, parent_comment_id, content, upvotes, downvotes, is_solution, created_at, updated_at
+- `community_discussion_tags` table: id, name, slug, description
+- `community_discussion_votes` table: id, discussion_id/comment_id, user_id, vote_type (upvote/downvote), created_at
+
+**Questions to Answer Before Implementation**:
+- Should discussions require admin approval? (probably not for logged-in users, but need moderation)
+- How to handle discussion spam? (rate limiting, moderation queue, automated detection)
+- Should users be able to edit/delete their own discussions? (yes, within time limit?)
+- Discussion notification system? (notify on replies, mentions, etc.)
+- Should discussions be searchable? (full-text search, tag search, category filter)
+
+---
+
+#### 55.4. Member Profiles & Activity Tracking ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: Medium - important for community engagement  
+**Phase**: Phase 4 (Weeks 7-8)  
+**Action**:
+- Create member profile pages (`/community/members/[user_id]/`):
+  - User profile information (avatar, name, bio, member since date)
+  - Activity history (reviews written, discussions created, comments made)
+  - Badges and achievements system
+  - Tool subscriptions display
+  - Review history (all reviews by user)
+  - Discussion contributions (discussions created, comments made)
+  - Community stats (helpful votes received, contributions count)
+- Activity tracking system:
+  - Track user activity (reviews, discussions, comments, votes)
+  - Activity feed on profile page
+  - Recent activity on community hub
+- Badges and achievements:
+  - Badge system (First Review, Helpful Reviewer, Active Member, Supporter, etc.)
+  - Achievement tracking and display
+  - Badge icons and descriptions
+- Member search and discovery:
+  - Member directory/list
+  - Search members by name, activity, badges
+  - Filter by activity level, member since date
+  - Sort by activity, contributions, member since
+- Link member profiles to:
+  - Account page (link to community profile)
+  - Reviews (show reviewer profile)
+  - Discussions (show author profile)
+  - Comments (show commenter profile)
+
+**Database Schema Requirements**:
+- Extend `user_profiles` table or create `community_member_profiles`:
+  - bio, avatar_url, badges, achievements, activity_stats
+- `community_badges` table: id, name, description, icon, criteria
+- `community_member_badges` table: id, user_id, badge_id, earned_at
+- `community_activity_log` table: id, user_id, activity_type, activity_id, created_at
+
+**Questions to Answer Before Implementation**:
+- Should member profiles be public or private? (probably public for community members)
+- What information to display on public profiles? (name, avatar, activity, but not email/private info)
+- How to calculate activity stats? (reviews count, discussions count, helpful votes, etc.)
+- Badge criteria? (automatic based on activity, or manual assignment?)
+- Should users be able to customize their profile? (bio, avatar, preferences)
+
+---
+
+#### 55.5. Supporter Tier Community Benefits ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: High - key revenue driver and value proposition  
+**Phase**: Phase 5 (Weeks 9-10)  
+**Depends on**: Subscription system, Supporter Tier pricing  
+**Action**:
+- Create Supporter Tier benefits page/section:
+  - Display all Supporter Tier benefits
+  - Exclusive content access indicators
+  - Supporter badge on profiles
+- Quarterly Behind-the-Scenes Sessions:
+  - Session scheduling system
+  - Live Q&A session interface (or recorded sessions)
+  - Upcoming features preview section
+  - Development insights content
+  - Community feedback collection
+  - Session recording/archive (for supporters who miss live session)
+- 30-Minute Guidance Calls:
+  - Guidance call booking system (calendar integration)
+  - One-on-one session scheduling
+  - Session notes and follow-up
+  - Call history tracking
+  - Quarterly limit enforcement (1 call per quarter)
+- Exclusive Access Features:
+  - Early access to new tools (beta access)
+  - Beta testing opportunities
+  - Private discussion forums (Supporter-only)
+  - Direct feedback channel to developer
+  - Supporter-only content section
+- Supporter Recognition:
+  - Supporter badge on profile
+  - Supporter-only member list
+  - Recognition in community hub
+  - Special Supporter forum access
+
+**Integration Points**:
+- Stripe subscription check (verify Supporter Tier subscription)
+- Account page integration (show Supporter benefits)
+- Community page integration (Supporter-only sections)
+- Calendar/scheduling system for guidance calls
+- Video/streaming platform for quarterly sessions (or simple video uploads)
+
+**Questions to Answer Before Implementation**:
+- How to schedule quarterly sessions? (fixed dates, user voting, admin selection?)
+- Guidance call booking: Use existing calendar system or build new?
+- How to handle session recordings? (video hosting, access control)
+- Early access: How to grant beta access to tools? (special product access, beta flag)
+- Private forums: Separate forum section or just access control on existing forums?
+
+---
+
+#### 55.6. Community Guidelines & Moderation System ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: High - essential for community health  
+**Phase**: Phase 6 (Weeks 11-12)  
+**Action**:
+- Create community guidelines page:
+  - Community values (respect, kindness, patience)
+  - Code of conduct
+  - Review guidelines and policies
+  - Discussion rules and etiquette
+  - Moderation policies
+  - Reporting process
+  - Consequences for violations
+- Content moderation system:
+  - Review moderation (approval, editing, deletion) - integrates with #54
+  - Discussion moderation (approval, editing, deletion, locking)
+  - Comment moderation (approval, editing, deletion)
+  - Spam detection and filtering
+  - Automated moderation rules (keyword filtering, rate limiting)
+- Reporting and flagging system:
+  - Report inappropriate content (reviews, discussions, comments)
+  - Flag spam or abuse
+  - Report user behavior
+  - Admin moderation queue
+  - Report resolution workflow
+- Moderation tools (Admin):
+  - Moderation dashboard
+  - Pending content queue
+  - Reported content queue
+  - User moderation actions (warnings, temporary bans, permanent bans)
+  - Moderation history and logs
+  - Bulk moderation actions
+
+**Database Schema Requirements**:
+- `community_reports` table: id, reporter_id, reported_content_type, reported_content_id, reason, status, resolved_by, resolved_at, created_at
+- `community_moderation_actions` table: id, moderator_id, target_user_id, action_type, reason, duration, created_at
+- `community_moderation_log` table: id, moderator_id, action_type, target_type, target_id, details, created_at
+
+**Questions to Answer Before Implementation**:
+- Moderation workflow? (admin-only, or community moderators?)
+- Automated moderation rules? (keyword filtering, spam detection, rate limiting)
+- User ban system? (temporary bans, permanent bans, appeal process)
+- How to handle false reports? (report abuse tracking)
+- Moderation transparency? (show moderation actions, or keep private?)
+
+---
+
+#### 55.7. Community Page Integration & Navigation ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: Foundation - needs to be accessible  
+**Phase**: Phase 1 (but can be enhanced throughout)  
+**Action**:
+- Navigation menu integration:
+  - Add "Community" link to main navigation (alongside Services, Catalog, Support)
+  - Make accessible to all users (logged in and logged out, with different features)
+  - Show community stats in navigation (optional: member count, activity indicator)
+- Catalog integration:
+  - Add reviews section to tool pages (link to community reviews)
+  - Display review ratings and counts on tool cards
+  - Link to community reviews from tool pages
+- Service pages integration:
+  - Add reviews section to service pages (commissioning, guidance)
+  - Display service reviews on service pages
+  - Link to community reviews from service pages
+- Account page integration:
+  - Link to community profile from account page
+  - Show community activity on account page
+  - Display reviews and discussions on account page
+  - Show Supporter Tier benefits on account page
+- Homepage integration:
+  - Display featured reviews on homepage
+  - Show community stats on homepage (members, activity)
+  - Link to community page from homepage
+  - Highlight Supporter Tier benefits on homepage
+
+**Questions to Answer Before Implementation**:
+- Where to place community link in navigation? (main nav, footer, both?)
+- Should community stats be visible to non-members? (probably yes for social proof)
+- How to handle community features for non-logged-in users? (read-only access, login prompts)
+
+---
+
+#### 55.8. Community Analytics & Success Metrics ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: Medium - important for measuring success  
+**Phase**: Phase 7 (Weeks 13-14) or Phase 8 (Analytics Dashboard)  
+**Action**:
+- Community growth metrics:
+  - Number of community members (total, active, new per month)
+  - Active users (daily, weekly, monthly active)
+  - Community engagement (reviews, discussions, contributions)
+  - Community retention (monthly, quarterly, yearly)
+  - Community growth rate (new members per month)
+- Engagement metrics:
+  - Reviews written (per tool, per service, total)
+  - Discussions created (per category, per topic, total)
+  - Comments and replies (per discussion, per review, total)
+  - Helpful votes (per review, per discussion, total)
+  - Member activity (reviews, discussions, contributions per user)
+- Revenue metrics:
+  - Subscription conversions (free to paid, All-Tools to Supporter)
+  - Subscription retention (monthly, quarterly, yearly)
+  - Revenue per subscriber (monthly, yearly)
+  - Lifetime value (per subscriber)
+  - Supporter Tier conversion rate
+- Community health metrics:
+  - Community satisfaction (surveys, feedback)
+  - Community moderation (reports, flags, bans, resolution time)
+  - Community guidelines compliance (violations, warnings)
+  - Community diversity (members, contributions, perspectives)
+  - Community advocacy (word-of-mouth, referrals)
+
+**Integration Points**:
+- Phase 8 Analytics Dashboard (feed community metrics to dashboard)
+- Admin dashboard (community stats widget)
+- Community hub (public stats display)
+
+**Questions to Answer Before Implementation**:
+- What metrics are most important to track? (prioritize based on business goals)
+- How to measure community satisfaction? (surveys, NPS, feedback forms)
+- How to track word-of-mouth and referrals? (referral codes, tracking links)
+- Analytics dashboard integration? (separate community analytics or part of main dashboard)
+
+---
+
+**Success Metrics** (from planning document):
+- **Volume Strategy**: 1000+ subscribers at CHF 5-8/month = CHF 5,000-8,000/month revenue
+- **Community Growth**: Active, engaged community members
+- **Engagement**: High review and discussion participation
+- **Retention**: Low churn, high lifetime value
+- **Advocacy**: Word-of-mouth growth and referrals
+
+**Potential Issues**:
+- Moderation workload (as one person, need efficient moderation tools)
+- Spam and abuse prevention (automated detection, clear guidelines)
+- Community growth strategy (how to attract initial members)
+- Content quality control (ensure valuable discussions and reviews)
+- Scaling considerations (plan for 1000+ members, performance optimization)
+
+**Related Items**:
+- #54 (Stories & Review System) - Community includes reviews
+- #17 (Account Subscription Management) - Supporter Tier integration
+- #52 (Notification Center Enhancements) - Community notifications
+- Phase 8 Analytics Dashboard - Community metrics integration
+
+### 56. Marketing & Social Media Integration ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: Medium - important for growth but low-maintenance approach  
 **Action**: Integrate marketing tools into website for easy, automated social media presence without daily manual posting
 
-#### 55.1. Social Media Profile Setup & Website Integration ⚠️ **MISSING**
+#### 56.1. Social Media Profile Setup & Website Integration ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: Foundation - needs to be accessible  
 **Action**:
@@ -1697,7 +2078,7 @@
 - Should social links open in new tab?
 - Where should social links appear? (footer, header, dedicated page?)
 
-#### 55.2. Automated Content Publishing System ⚠️ **MISSING**
+#### 56.2. Automated Content Publishing System ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - enables low-maintenance social media presence  
 **Action**:
@@ -1726,7 +2107,7 @@
 - How far in advance should posts be scheduled? (1 week, 1 month?)
 - Should we support different content for different platforms?
 
-#### 55.3. Trustpilot Integration ⚠️ **MISSING**
+#### 56.3. Trustpilot Integration ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - social proof is critical  
 **Action**:
@@ -1742,7 +2123,7 @@
 - Should review requests be automated or manual?
 - How many review requests per customer? (one-time, or multiple?)
 
-#### 55.4. QR Code System for Offline Marketing ⚠️ **MISSING**
+#### 56.4. QR Code System for Offline Marketing ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: Medium - connects offline to online  
 **Action**:
@@ -1765,7 +2146,7 @@
 - Should QR codes expire or be permanent?
 - What information should landing pages show? (special offer, service info, contact form?)
 
-#### 55.5. Social Media Content Automation ⚠️ **MISSING**
+#### 56.5. Social Media Content Automation ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: Medium - reduces manual work  
 **Action**:
@@ -1784,7 +2165,7 @@
 - How often should auto-posts be created? (daily, weekly, on events?)
 - Should we support different post styles/formats per platform?
 
-#### 55.6. Email-to-Social Integration ⚠️ **MISSING**
+#### 56.6. Email-to-Social Integration ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: Low - nice to have  
 **Action**:
@@ -1803,12 +2184,12 @@
 - Cost of social media scheduling tools
 - GDPR compliance for social media data
 
-### 56. Marketing Analytics Planning & Setup ⚠️ **MISSING**
+### 57. Marketing Analytics Planning & Setup ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - must be ready before Phase 8 Analytics Dashboard  
 **Action**: Plan and implement marketing analytics tracking to feed into Phase 8 Analytics Dashboard
 
-#### 56.1. Marketing Attribution & Source Tracking ⚠️ **MISSING**
+#### 57.1. Marketing Attribution & Source Tracking ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - foundation for marketing analytics  
 **Action**:
@@ -1830,7 +2211,7 @@
 - Should we track multiple sources per user (first touch, last touch, multi-touch)?
 - Should we track offline sources (QR codes, business cards) differently?
 
-#### 56.2. Marketing Event Tracking ⚠️ **MISSING**
+#### 57.2. Marketing Event Tracking ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - needed for analytics  
 **Action**:
@@ -1854,7 +2235,7 @@
 - How detailed should event tracking be? (every click, or just conversions?)
 - Should we track anonymous events or only authenticated user events?
 
-#### 56.3. Conversion Funnel Tracking ⚠️ **MISSING**
+#### 57.3. Conversion Funnel Tracking ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - needed for marketing ROI  
 **Action**:
@@ -1875,7 +2256,7 @@
 - How to handle multi-session conversions? (cookie tracking, user accounts)
 - Should we track time-to-conversion?
 
-#### 56.4. Social Media Analytics Integration ⚠️ **MISSING**
+#### 57.4. Social Media Analytics Integration ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: Medium - nice to have  
 **Action**:
@@ -1894,7 +2275,7 @@
 - Should we use third-party analytics tools or build custom?
 - How often should we sync social media data? (daily, weekly?)
 
-#### 56.5. Marketing ROI Calculation ⚠️ **MISSING**
+#### 57.5. Marketing ROI Calculation ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: Medium - needed for decision making  
 **Action**:
@@ -1928,17 +2309,17 @@
 
 ## 📊 **Phase 8: Analytics & Dashboard (LAST)**
 
-### 57. Dashboard Implementation
+### 58. Dashboard Implementation
 **Status**: Only SPEC.md exists  
 **Priority**: **LAST** - needs all data sources  
 **Action**: Build dashboard with KPIs, recent activity, quick actions
 
-### 58. Analytics Dashboard Implementation
+### 59. Analytics Dashboard Implementation
 **Status**: Only SPEC.md exists  
 **Priority**: **LAST** - needs all data sources  
-**Action**: Build analytics with real-time charts, user metrics, conversion funnels (includes marketing analytics from #56)
+**Action**: Build analytics with real-time charts, user metrics, conversion funnels (includes marketing analytics from #57)
 
-### 59. Admin Revenue Reports Module ✅ **SPEC UPDATED**
+### 60. Admin Revenue Reports Module ✅ **SPEC UPDATED**
 **Status**: SPEC.md updated with PostFinance integration requirements  
 **Priority**: HIGH - Essential for financial management and compliance  
 **Dependencies**: Stripe data flowing + PostFinance manual payment workflow  
@@ -2000,13 +2381,14 @@
 11. Notification Center Enhancements (#52) - Additional notification types, push notifications, UI improvements, email integration
 12. Stories & Review System (#54) - Main nav, stories page with rich format & video support, user account integration, admin moderation, home page display, example stories
 13. Marketing & Social Media Integration (#55) - Social profiles, automated posting, Trustpilot, QR codes, content automation
-14. Marketing Analytics Planning & Setup (#56) - Attribution tracking, event tracking, conversion funnels, ROI calculation (must be ready before Phase 8)
+14. Community Page & Features (#55) - Reviews, discussions, member profiles, Supporter Tier integration (14-week implementation)
+15. Marketing Analytics Planning & Setup (#57) - Attribution tracking, event tracking, conversion funnels, ROI calculation (must be ready before Phase 8)
 
 
 ### ⚪ **LAST (Needs All Data)**
-1. Dashboard (#57)
-2. Analytics Dashboard (#58) - Includes marketing analytics from #56
-3. Revenue Reports (#59)
+1. Dashboard (#58)
+2. Analytics Dashboard (#59) - Includes marketing analytics from #57
+3. Revenue Reports (#60)
 
 ---
 
@@ -2083,13 +2465,14 @@
 
 ### Week 17-18: Marketing Integration & Analytics Setup
 - [ ] Marketing & Social Media Integration (#55) - Social profiles, automated posting, Trustpilot, QR codes
-- [ ] Marketing Analytics Planning & Setup (#56) - Attribution tracking, event tracking, conversion funnels, ROI calculation
+- [ ] Community Page & Features (#55) - Reviews, discussions, member profiles, Supporter Tier integration
+- [ ] Marketing Analytics Planning & Setup (#57) - Attribution tracking, event tracking, conversion funnels, ROI calculation
 - [ ] **CRITICAL**: Marketing analytics must be ready before Phase 8 Analytics Dashboard
 
 ### Week 19+: Analytics & Dashboard (LAST)
-- [ ] Dashboard (#57)
-- [ ] Analytics Dashboard (#58) - Includes marketing analytics from #56
-- [ ] Admin Revenue Reports (#59)
+- [ ] Dashboard (#58)
+- [ ] Analytics Dashboard (#59) - Includes marketing analytics from #57
+- [ ] Admin Revenue Reports (#60)
 
 ---
 
