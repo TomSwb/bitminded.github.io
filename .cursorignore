@@ -1,0 +1,32 @@
+# Dependencies (large, rarely need indexing)
+node_modules/
+
+# Generated Supabase exports (change frequently, not source code)
+supabase/exports/
+supabase/.supabase/
+
+# Large asset directories (keep in git, exclude from indexing)
+images/
+icons/
+
+# Supabase reference/historical files (not active code)
+supabase/debug/
+supabase/fixes/
+supabase/schema/archive/
+
+# Documentation archives (reference only)
+docs/archives/
+
+# Logs and temp files
+*.log
+*.tmp
+*.temp
+
+# Environment files (sensitive, not code)
+.env
+.env-*
+
+# Build outputs (if any)
+dist/
+build/
+
