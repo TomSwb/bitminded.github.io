@@ -4,7 +4,7 @@
 
 ## Status: ✅ All Deployed
 
-Last updated: 2025-01-15
+Last updated: 2025-01-29
 
 ## Deployed Functions
 
@@ -20,6 +20,7 @@ Last updated: 2025-01-15
 - ✅ cancel-account-deletion
 - ✅ send-deletion-email
 - ✅ delete-user
+- ✅ create-github-repository
 
 ## Environment Variables Set
 
@@ -29,12 +30,21 @@ All functions have required environment variables configured:
 - `TURNSTILE_SECRET_KEY` (verify-captcha)
 - `RESEND_API_KEY` (email functions)
 - `FROM_EMAIL` (email functions)
+- `GITHUB_TOKEN` (create-github-repository)
+- `OPENAI_API_KEY` (create-github-repository - optional, falls back to templates if not set)
 
 ## Deploy Command
 
 ```bash
 supabase functions deploy <function-name> --project-ref eygpejbljuqpxwwoawkn
 ```
+
+## Deployment Log
+
+### 2025-01-29 - Added Repository Setup Best Practices
+- ✅ Deployed `create-github-repository` with enhanced file generation
+- Now generates: README.md (enhanced), CHANGELOG.md, .editorconfig, .cursorrules, .cursorignore, CONTRIBUTING.md, LICENSE
+- Uses hybrid template+AI approach for .cursorrules generation
 
 ## Next Function to Deploy
 

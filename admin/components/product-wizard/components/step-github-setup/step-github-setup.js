@@ -165,8 +165,8 @@ if (typeof window.StepGithubSetup === 'undefined') {
             let structure = `
                 <div class="step-github-setup__structure">
                     <div class="step-github-setup__structure-item">
-                        <span class="step-github-setup__structure-icon">📋</span>
-                        <span class="step-github-setup__structure-name">README.md (Technical Specification)</span>
+                        <span class="step-github-setup__structure-icon">📝</span>
+                        <span class="step-github-setup__structure-name">README.md (Enhanced)</span>
                     </div>
             `;
 
@@ -184,6 +184,30 @@ if (typeof window.StepGithubSetup === 'undefined') {
                     <div class="step-github-setup__structure-item">
                         <span class="step-github-setup__structure-icon">🚫</span>
                         <span class="step-github-setup__structure-name">.gitignore</span>
+                    </div>
+                    <div class="step-github-setup__structure-item">
+                        <span class="step-github-setup__structure-icon">📋</span>
+                        <span class="step-github-setup__structure-name">CHANGELOG.md</span>
+                    </div>
+                    <div class="step-github-setup__structure-item">
+                        <span class="step-github-setup__structure-icon">⚙️</span>
+                        <span class="step-github-setup__structure-name">.editorconfig</span>
+                    </div>
+                    <div class="step-github-setup__structure-item">
+                        <span class="step-github-setup__structure-icon">🤖</span>
+                        <span class="step-github-setup__structure-name">.cursorrules</span>
+                    </div>
+                    <div class="step-github-setup__structure-item">
+                        <span class="step-github-setup__structure-icon">🚫</span>
+                        <span class="step-github-setup__structure-name">.cursorignore</span>
+                    </div>
+                    <div class="step-github-setup__structure-item">
+                        <span class="step-github-setup__structure-icon">👥</span>
+                        <span class="step-github-setup__structure-name">CONTRIBUTING.md</span>
+                    </div>
+                    <div class="step-github-setup__structure-item">
+                        <span class="step-github-setup__structure-icon">📜</span>
+                        <span class="step-github-setup__structure-name">LICENSE</span>
                     </div>
                 </div>
             `;
