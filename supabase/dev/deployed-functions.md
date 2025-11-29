@@ -4,7 +4,7 @@
 
 ## Status: ✅ All Deployed
 
-Last updated: 2025-01-29
+Last updated: 2025-11-29
 
 ## Deployed Functions
 
@@ -40,6 +40,10 @@ supabase functions deploy <function-name> --project-ref eygpejbljuqpxwwoawkn
 ```
 
 ## Deployment Log
+
+### 2025-11-29 - Fixed License Generation
+- ✅ Updated `create-github-repository` to use BitMinded as copyright holder in LICENSE generation
+- Fixed license template to use BitMinded instead of product name for proper legal attribution
 
 ### 2025-01-29 - Added Repository Setup Best Practices
 - ✅ Deployed `create-github-repository` with enhanced file generation

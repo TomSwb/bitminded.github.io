@@ -4,7 +4,7 @@
 
 ## Status: ✅ All Deployed
 
-Last updated: 2025-01-15
+Last updated: 2025-11-29
 
 ## Deployed Functions
 
@@ -20,6 +20,7 @@ Last updated: 2025-01-15
 - ✅ cancel-account-deletion
 - ✅ send-deletion-email
 - ✅ delete-user
+- ✅ create-github-repository
 - ❌ **validate-license** - NOT YET DEPLOYED (required for subdomain protection)
 - ❌ **create-cloudflare-worker** - NOT YET DEPLOYED (required for Worker creation)
 
@@ -31,6 +32,8 @@ All functions have required environment variables configured:
 - `TURNSTILE_SECRET_KEY` (verify-captcha)
 - `RESEND_API_KEY` (email functions)
 - `FROM_EMAIL` (email functions)
+- `GITHUB_TOKEN` (create-github-repository)
+- `OPENAI_API_KEY` (create-github-repository - optional, falls back to templates if not set)
 
 ## Deploy Command
 
@@ -40,6 +43,11 @@ supabase functions deploy <function-name> --project-ref dynxqnrkmjcvgzsugxtm
 ```
 
 ## Deployment Log
+
+### 2025-11-29 - Deployed Product Wizard Function
+- ✅ Deployed `create-github-repository` to production
+- Updated license generation to use BitMinded as copyright holder
+- Configured environment variables (GITHUB_TOKEN, OPENAI_API_KEY)
 
 ### 2025-01-15 - Initial Deployment
 - Deployed all 12 Edge Functions
