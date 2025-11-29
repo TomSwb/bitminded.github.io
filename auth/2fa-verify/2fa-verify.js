@@ -422,21 +422,21 @@ class TwoFactorVerify {
             const deviceInfo = this.parseUserAgent(userAgent);
 
             // Call Edge Function to log (captures IP address server-side)
-            const { data, error } = await supabase.functions.invoke('log-login', {
-                body: {
-                    user_id: userId,
-                    success: success,
-                    failure_reason: failureReason,
-                    user_agent: userAgent,
-                    device_type: deviceInfo.deviceType,
-                    browser: deviceInfo.browser,
-                    os: deviceInfo.os,
-                    used_2fa: used2FA,
-                    session_id: sessionId
-                }
-            });
-
-            if (error) {
+            try {
+                await window.invokeEdgeFunction('log-login', {
+                    body: {
+                        user_id: userId,
+                        success: success,
+                        failure_reason: failureReason,
+                        user_agent: userAgent,
+                        device_type: deviceInfo.deviceType,
+                        browser: deviceInfo.browser,
+                        os: deviceInfo.os,
+                        used_2fa: used2FA,
+                        session_id: sessionId
+                    }
+                });
+            } catch (error) {
                 window.logger?.error('❌ Error logging login attempt:', error);
                 return;
             }

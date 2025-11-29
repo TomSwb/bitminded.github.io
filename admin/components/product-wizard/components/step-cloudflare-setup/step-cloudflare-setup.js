@@ -302,11 +302,9 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
             window.logger?.log('☁️ Creating Cloudflare Worker:', workerData);
 
             try {
-                const { data, error } = await window.supabase.functions.invoke('create-cloudflare-worker', {
+                const data = await window.invokeEdgeFunction('create-cloudflare-worker', {
                     body: workerData
                 });
-
-                if (error) throw error;
 
                 if (data && data.success) {
                     // Update input fields first

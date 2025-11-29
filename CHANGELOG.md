@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.5] - 2025-11-29
+
+### Fixed
+- Fixed authentication token expiration check on page load - expired tokens now show logged out state immediately instead of false "logged in" state
+- Fixed 401 errors on first Edge Function call after page load by ensuring fresh tokens are always used
+- Added automatic token refresh and retry logic for Edge Function calls on 401 errors
+
+### Added
+- Added `window.invokeEdgeFunction()` helper function that ensures fresh authentication tokens before all Edge Function calls
+- Added automatic session refresh before Edge Function invocations to prevent expired token errors
+- Added 401 error retry logic with automatic token refresh in Edge Function helper
+
+### Changed
+- Updated all 54 Edge Function invocations across 26 files to use new `invokeEdgeFunction()` helper
+- Updated `checkAuthState()` to validate token expiration before showing logged in state
+- Simplified Edge Function calls by removing manual session checks and Authorization header management
+
+---
+
 ## [1.0.4] - 2025-11-29
 
 ### Fixed

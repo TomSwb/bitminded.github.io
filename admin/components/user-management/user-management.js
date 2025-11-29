@@ -812,15 +812,12 @@ class UserManagement {
             }
             
             
-            // Call the delete-user Edge Function with explicit headers
-            const response = await window.supabase.functions.invoke('delete-user', {
+            // Call the delete-user Edge Function
+            const response = await window.invokeEdgeFunction('delete-user', {
                 body: {
                     user_id: userId,
                     username: username,
                     reason: 'Deleted by admin from user management'
-                },
-                headers: {
-                    Authorization: `Bearer ${session.access_token}`
                 }
             });
             

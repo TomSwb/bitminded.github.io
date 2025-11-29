@@ -50,4 +50,70 @@ syncAuthToCookies();
 // Export for use in other scripts
 window.supabase = supabaseClient;
 
+/**
+ * Helper function to invoke Edge Functions with automatic session refresh
+ * Ensures fresh tokens are used and retries on 401 errors
+ * 
+ * @param {string} functionName - Name of the Edge Function to invoke
+ * @param {object} options - Options object (body, headers, etc.)
+ * @returns {Promise<any>} - Response data from the Edge Function
+ */
+window.invokeEdgeFunction = async function(functionName, options = {}) {
+    if (!window.supabase) {
+        throw new Error('Supabase client not available');
+    }
+
+    // Get fresh session - this triggers auto-refresh if token is expired/expiring
+    const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
+    
+    if (sessionError || !session) {
+        throw new Error('Not authenticated. Please log in again.');
+    }
+
+    // Ensure Authorization header is set with fresh token
+    const headers = {
+        'Authorization': `Bearer ${session.access_token}`,
+        ...(options.headers || {})
+    };
+
+    // Call the function with fresh token
+    const { data, error } = await window.supabase.functions.invoke(functionName, {
+        ...options,
+        headers
+    });
+
+    if (error) {
+        // If we get a 401, try refreshing once more
+        if (error.status === 401 || error.message?.includes('401')) {
+            window.logger?.log('🔄 Got 401, refreshing session and retrying...');
+            const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.getSession();
+            
+            if (refreshError || !refreshedSession) {
+                throw new Error('Session expired. Please log in again.');
+            }
+
+            // Retry with refreshed token
+            const retryHeaders = {
+                'Authorization': `Bearer ${refreshedSession.access_token}`,
+                ...(options.headers || {})
+            };
+
+            const { data: retryData, error: retryError } = await window.supabase.functions.invoke(functionName, {
+                ...options,
+                headers: retryHeaders
+            });
+
+            if (retryError) {
+                throw retryError;
+            }
+
+            return retryData;
+        }
+        
+        throw error;
+    }
+
+    return data;
+};
+
 // Supabase connected silently (reduce console noise)

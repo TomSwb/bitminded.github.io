@@ -76,13 +76,9 @@ class SessionManagement {
             // Fetching sessions
             
             // Call Edge Function to get sessions (uses service role to query auth.sessions)
-            const { data, error } = await window.supabase.functions.invoke('get-user-sessions', {
+            const data = await window.invokeEdgeFunction('get-user-sessions', {
                 body: { user_id: this.currentUserId }
             });
-            
-            if (error) {
-                throw error;
-            }
             
             // Edge Function response
             // Sessions received
@@ -322,14 +318,12 @@ class SessionManagement {
             }
             
             // Use Edge Function to revoke session (bypasses RLS with service role)
-            const { data, error } = await window.supabase.functions.invoke('revoke-session', {
+            const data = await window.invokeEdgeFunction('revoke-session', {
                 body: { 
                     session_id: sessionId,
                     target_user_id: this.currentUserId  // Admin revoking for another user
                 }
             });
-            
-            if (error) {
                 window.logger?.error('❌ Edge Function error:', error);
                 throw error;
             }

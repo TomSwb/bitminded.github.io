@@ -2225,14 +2225,9 @@ class ServiceManagement {
             }
 
             // Call edge function to create Stripe product (subscription or regular)
-            const { data, error } = await window.supabase.functions.invoke(functionName, {
-                body: serviceData,
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`
-                }
+            const data = await window.invokeEdgeFunction(functionName, {
+                body: serviceData
             });
-
-            if (error) throw error;
 
             // Update form fields with Stripe IDs
             if (data.productId) {
@@ -2369,14 +2364,9 @@ class ServiceManagement {
             }
 
             // Call edge function to archive the product
-            const { data, error } = await window.supabase.functions.invoke('delete-stripe-product', {
-                body: { productId: this.currentEditingService.stripe_product_id },
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`
-                }
+            const data = await window.invokeEdgeFunction('delete-stripe-product', {
+                body: { productId: this.currentEditingService.stripe_product_id }
             });
-
-            if (error) throw error;
 
             // Clear Stripe IDs from current editing service
             this.currentEditingService.stripe_product_id = null;
@@ -2574,14 +2564,9 @@ class ServiceManagement {
             }
 
             // Call edge function to update Stripe product
-            const { data, error } = await window.supabase.functions.invoke('update-stripe-service-product', {
-                body: serviceData,
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`
-                }
+            const data = await window.invokeEdgeFunction('update-stripe-service-product', {
+                body: serviceData
             });
-
-            if (error) throw error;
 
             // Update form fields with new Stripe IDs (if new prices were created)
             if (data.monthlyPriceId) {

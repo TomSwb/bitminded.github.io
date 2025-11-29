@@ -232,17 +232,13 @@ class StepBasicInfo {
         this.updateTranslationsStatus('Translating with OpenAI…', 'info');
 
         try {
-            const { data, error } = await window.supabase.functions.invoke('translate-product-content', {
+            const data = await window.invokeEdgeFunction('translate-product-content', {
                 body: {
                     sourceLanguage: 'en',
                     targetLanguages: SUPPORTED_LANGUAGES.filter(lang => lang !== 'en'),
                     fields: englishContent
                 }
             });
-
-            if (error) {
-                throw error;
-            }
 
             if (data?.translations) {
                 this.applyTranslations(data.translations);

@@ -505,28 +505,10 @@ class ContactUserPage {
     }
 
     async callEdgeFunction(functionName, data) {
-        if (!window.supabase) {
-            throw new Error('Supabase client not available');
-        }
-
-        // Get the current session to ensure we have proper authentication
-        const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
-        if (sessionError || !session) {
-            throw new Error('Not authenticated. Please log in again.');
-        }
-
-        const { data: response, error } = await window.supabase.functions.invoke(functionName, {
-            body: data,
-            headers: {
-                'Authorization': `Bearer ${session.access_token}`
-            }
+        // Use global helper function which handles session refresh and 401 retries
+        return await window.invokeEdgeFunction(functionName, {
+            body: data
         });
-
-        if (error) {
-            throw new Error(`Edge function error: ${error.message}`);
-        }
-
-        return response;
     }
 
     showSuccess(message) {

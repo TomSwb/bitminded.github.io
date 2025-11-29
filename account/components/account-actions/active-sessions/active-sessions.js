@@ -194,14 +194,9 @@ class ActiveSessions {
 
         // Use get-user-sessions Edge Function (same as admin panel - validates against auth.sessions)
         try {
-            const { data: sessionsData, error } = await window.supabase.functions.invoke('get-user-sessions', {
+            const sessionsData = await window.invokeEdgeFunction('get-user-sessions', {
                 body: { user_id: userId }
             });
-            
-            if (error) {
-                window.logger?.error('Failed to load active sessions:', error);
-                throw error;
-            }
             
             const deviceInfo = this.getDeviceInfo();
             const currentToken = currentSession.access_token;
@@ -553,15 +548,11 @@ class ActiveSessions {
             window.logger?.log('🔐 Revoking session:', session.id);
             
             // Call edge function to revoke the session
-            const { data, error } = await window.supabase.functions.invoke('revoke-session', {
+            const data = await window.invokeEdgeFunction('revoke-session', {
                 body: { 
                     session_id: session.id 
                 }
             });
-
-            if (error) {
-                throw error;
-            }
 
             window.logger?.log('✅ Session revoked successfully');
             
@@ -601,15 +592,11 @@ class ActiveSessions {
             window.logger?.log('🔐 Revoking all other sessions');
             
             // Call edge function to revoke all sessions
-            const { data, error } = await window.supabase.functions.invoke('revoke-session', {
+            const data = await window.invokeEdgeFunction('revoke-session', {
                 body: { 
                     revoke_all: true 
                 }
             });
-
-            if (error) {
-                throw error;
-            }
 
             window.logger?.log('✅ All other sessions revoked:', data);
 

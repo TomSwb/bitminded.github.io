@@ -1533,14 +1533,9 @@ class UserDetailPage {
             
             // Call get-user-sessions Edge Function to get accurate count
             // (it also cleans up stale sessions, ensuring accurate count)
-            const { data: sessionsData, error } = await window.supabase.functions.invoke('get-user-sessions', {
+            const sessionsData = await window.invokeEdgeFunction('get-user-sessions', {
                 body: { user_id: this.currentUser.id }
             });
-            
-            if (error) {
-                window.logger?.error('❌ Error fetching sessions:', error);
-                throw error;
-            }
             
             // Sessions data received
             
@@ -1737,14 +1732,12 @@ class UserDetailPage {
 
             // Send suspension email notification
             try {
-                const { data: emailResult, error: emailError } = await window.supabase.functions.invoke('send-suspension-email', {
+                const emailResult = await window.invokeEdgeFunction('send-suspension-email', {
                     body: {
                         user_id: this.currentUser.id,
                         suspension_reason: confirmed.reason
                     }
                 });
-
-                if (emailError) {
                     window.logger?.error('❌ Failed to send suspension email:', emailError);
                 } else {
                     window.logger?.log('✅ Suspension email sent:', emailResult);
@@ -1812,14 +1805,12 @@ class UserDetailPage {
 
             // Send reactivation email notification
             try {
-                const { data: emailResult, error: emailError } = await window.supabase.functions.invoke('send-reactivation-email', {
+                const emailResult = await window.invokeEdgeFunction('send-reactivation-email', {
                     body: {
                         user_id: this.currentUser.id,
                         reactivation_reason: confirmed.reason
                     }
                 });
-
-                if (emailError) {
                     window.logger?.error('❌ Failed to send reactivation email:', emailError);
                 } else {
                     window.logger?.log('✅ Reactivation email sent:', emailResult);
@@ -2229,19 +2220,13 @@ class UserDetailPage {
             window.logger?.log('🔑 Calling delete-user Edge Function with auth...');
             
             // Call the delete-user Edge Function
-            const { data, error } = await window.supabase.functions.invoke('delete-user', {
+            const data = await window.invokeEdgeFunction('delete-user', {
                 body: {
                     user_id: this.currentUser.id,
                     username: this.currentUser.username,
                     reason: 'Deleted by admin from user detail page'
                 }
             });
-            
-            if (error) {
-                window.logger?.error('❌ Failed to delete user:', error);
-                this.showError(`Failed to delete user: ${error.message || 'Unknown error'}`);
-                return;
-            }
             
             window.logger?.log('✅ User permanently deleted:', data);
             alert(`User "${this.currentUser.username}" has been permanently deleted.\n\nYou will now be redirected to the user management page.`);

@@ -165,7 +165,7 @@ class NotificationHelper {
             // Send both email and in-app notification in parallel
             const [emailResult, inAppResult] = await Promise.all([
                 // Send email notification
-                supabase.functions.invoke('send-notification-email', {
+                window.invokeEdgeFunction('send-notification-email', {
                     body: {
                         userId: user.id,
                         type: type,
@@ -174,18 +174,18 @@ class NotificationHelper {
                             timestamp: formattedTimestamp
                         }
                     }
-                }),
+                }).catch(error => ({ error })),
                 
                 // Create in-app notification directly in database
                 this.createInAppNotification(user.id, type, data, userLanguage, inappPrefs)
             ]);
 
             // Check email result
-            if (emailResult.error) {
+            if (emailResult && emailResult.error) {
                 window.logger?.error('❌ Failed to send email:', emailResult.error);
-            } else if (emailResult.data?.skipped) {
-                window.logger?.log(`⏭️ Email skipped: ${emailResult.data.reason}`);
-            } else {
+            } else if (emailResult?.skipped) {
+                window.logger?.log(`⏭️ Email skipped: ${emailResult.reason}`);
+            } else if (emailResult) {
                 window.logger?.log(`✅ Email sent: ${type}`);
             }
 

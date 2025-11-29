@@ -715,17 +715,17 @@ class SignupForm {
             ];
             
             for (const consent of consents) {
-                const { error } = await window.supabase.functions.invoke('record-signup-consent', {
-                    body: {
-                        user_id: userId,
-                        consent_type: consent.type,
-                        version: consent.version,
-                        user_agent: userAgent
-                        // IP address is captured server-side from request headers
-                    }
-                });
-                
-                if (error) {
+                try {
+                    await window.invokeEdgeFunction('record-signup-consent', {
+                        body: {
+                            user_id: userId,
+                            consent_type: consent.type,
+                            version: consent.version,
+                            user_agent: userAgent
+                            // IP address is captured server-side from request headers
+                        }
+                    });
+                } catch (error) {
                     window.logger?.error(`❌ Failed to record ${consent.type} consent:`, error);
                     // Continue with other consents even if one fails
                     continue;

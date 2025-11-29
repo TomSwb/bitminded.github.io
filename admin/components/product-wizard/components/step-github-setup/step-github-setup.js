@@ -346,7 +346,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
                 const screenshots = basicInfo.screenshots || null;
                 
                 // Call Edge Function to create repository
-                const { data, error } = await window.supabase.functions.invoke('create-github-repository', {
+                const data = await window.invokeEdgeFunction('create-github-repository', {
                     body: {
                         repoName: this.formData.github_repo_name,
                         description: this.formData.github_description,
@@ -359,8 +359,6 @@ if (typeof window.StepGithubSetup === 'undefined') {
                         screenshots: screenshots // Pass screenshots array if available
                     }
                 });
-
-                if (error) throw error;
 
                 if (data && data.success) {
                     this.repositoryCreated = true;
@@ -558,11 +556,9 @@ cd ${repoName}`;
             window.logger?.log('🖼️ Updating repository with media:', mediaData);
 
             try {
-                const { data, error } = await window.supabase.functions.invoke('update-github-repo-media', {
+                const data = await window.invokeEdgeFunction('update-github-repo-media', {
                     body: mediaData
                 });
-
-                if (error) throw error;
 
                 if (data && data.success) {
                     alert(`✅ Successfully uploaded ${data.uploadedFiles?.length || 0} media file(s) to GitHub repository!`);

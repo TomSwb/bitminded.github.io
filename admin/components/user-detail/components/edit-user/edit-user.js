@@ -688,17 +688,13 @@ class EditUser {
         }
 
         // Call Edge Function to send email change verification
-        const { data, error } = await window.supabase.functions.invoke('admin-send-email-change', {
+        const data = await window.invokeEdgeFunction('admin-send-email-change', {
             body: {
                 userId: this.currentUser.id,
                 newEmail: newEmail,
                 adminId: adminUser.id
             }
         });
-
-        if (error) {
-            throw new Error(error.message || 'Failed to send email change verification');
-        }
 
         if (!data.success) {
             throw new Error(data.error || 'Failed to send email change verification');
@@ -720,16 +716,12 @@ class EditUser {
         }
 
         // Call Edge Function to send password reset
-        const { data, error } = await window.supabase.functions.invoke('admin-send-password-reset', {
+        const data = await window.invokeEdgeFunction('admin-send-password-reset', {
             body: {
                 userId: this.currentUser.id,
                 adminId: adminUser.id
             }
         });
-
-        if (error) {
-            throw new Error(error.message || 'Failed to send password reset email');
-        }
 
         if (!data.success) {
             throw new Error(data.error || 'Failed to send password reset email');

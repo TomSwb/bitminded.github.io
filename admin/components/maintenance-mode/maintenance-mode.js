@@ -394,7 +394,7 @@ class MaintenanceMode {
             throw new Error('Supabase client not available');
         }
 
-        return await window.supabase.functions.invoke('maintenance-settings', { body });
+        return await window.invokeEdgeFunction('maintenance-settings', { body });
     }
 
     isValidIpOrCidr(value) {
