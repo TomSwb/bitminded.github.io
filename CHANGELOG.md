@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.0.4] - 2025-11-29
+
 ### Fixed
 - Fixed LICENSE generation to use BitMinded as copyright holder instead of product name
 - Updated existing repository licenses (rythmo, measure-mate) to use BitMinded proprietary license
