@@ -2088,15 +2088,15 @@ function generateLicense(productName: string, year?: number): string {
   
   return `PROPRIETARY LICENSE
 
-Copyright (c) ${currentYear} ${productName}
+Copyright (c) ${currentYear} BitMinded
 
 All rights reserved.
 
 This software and associated documentation files (the "Software") are the 
-proprietary and confidential information of ${productName}.
+proprietary and confidential information of BitMinded.
 
 The Software may not be copied, modified, distributed, or used except as 
-expressly permitted by the owner of ${productName}.
+expressly permitted by the owner of BitMinded.
 
 Unauthorized use, copying, or distribution of this Software, via any medium, 
 is strictly prohibited without the express written permission of the owner.
