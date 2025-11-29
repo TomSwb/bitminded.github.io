@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.2] - 2025-11-29
+
+### Added
+- .cursorrules for optimized Cursor AI assistance (~500 tokens)
+- .cursorignore for improved Cursor indexing performance
+- CONTRIBUTING.md with required tools and development workflow guide
+- Repository setup summary documentation (docs/REPOSITORY-SETUP-SUMMARY.md)
+- Git aliases for faster workflow (st, cod, com, pod, pom, lg, etc.)
+
+### Changed
+- Enhanced repository documentation structure
+
+---
+
 ## [1.0.1] - 2025-11-29
 
 ### Added
@@ -264,7 +278,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/bitminded/bitminded.github.io/releases/tag/v1.0.0
 [0.9.0]: https://github.com/bitminded/bitminded.github.io/releases/tag/v0.9.0

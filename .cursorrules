@@ -1,0 +1,72 @@
+# BitMinded Project Rules
+
+## Project Context
+Swiss software studio - static HTML/CSS/JS, component-based architecture, Supabase backend, i18next (EN/FR/DE/ES), Cloudflare Pages.
+
+## Code Style
+- JS: 4 spaces | CSS: 2 spaces (main), 4 spaces (components) | HTML: 4 spaces
+- Follow `.editorconfig`
+
+## Component Patterns
+Structure: `component-name.html/css/js` + optional `component-name-translations.js` + `locales/`
+- Class pattern: `constructor()` → `async init(config)` → `cacheElements()` → `bindEvents()` → `loadTranslations()`
+- Always: `this.isInitialized` flag, `this.elements = {}` for DOM cache, `if (typeof window.ClassName === 'undefined')` wrapper
+- Use `ComponentLoader.load()` for dynamic loading
+- Paths: `components/` (shared), `[page]/components/` (page-specific)
+
+## Critical Patterns
+
+### Logging (MUST)
+```javascript
+window.logger?.log('message');    // Dev only
+window.logger?.error('❌ error'); // Always logs
+// NEVER: console.log() directly
+```
+
+### Translations
+- HTML: `<span class="translatable-content" data-translate="key">Default</span>`
+- Load: Fetch JSON → add to i18next if available → fallback to component translations
+- Get: `window.i18next.t(key)` or component fallback
+
+### Supabase
+- Client: `window.supabase` (check if available)
+- Edge Functions: `window.supabase.functions.invoke(name, { body, headers: { Authorization: Bearer ${token} } })`
+- Always get session: `await window.supabase.auth.getSession()` before operations
+- Env: Auto-detected via `env-config.js` (dev: eygpejbljuqpxwwoawkn, prod: dynxqnrkmjcvgzsugxtm)
+
+### Error Handling
+- Try/catch → `window.logger?.error()` → `showError(message)` or `showFieldError(field, message)`
+- Edge Functions: Check `error`, then `data.success`, throw user-friendly messages
+
+### CSS
+- ALWAYS use variables: `var(--color-text-primary)`, `var(--spacing-md)`, `var(--font-size-base)`
+- See `css/variables.css` for complete list
+- Mobile-first, responsive with `clamp()`
+
+### Security
+- Never hardcode service role keys (Edge Functions only)
+- Anon keys are public (safe)
+- Always validate server-side
+- Check authentication before operations
+
+## File Organization
+- Components: `components/` or `[page]/components/`
+- CSS: `css/` (variables, base, components, layout, utilities)
+- Translations: `lang-*/` or `[component]/locales/`
+- Edge Functions: `supabase/functions/` (TypeScript)
+
+## When Adding Features
+1. Check existing similar components first
+2. Use CSS variables (never hardcode)
+3. Add translations for all text
+4. Use `window.logger` (never console.log)
+5. Handle errors gracefully
+6. Test mobile responsiveness
+7. Validate client + server
+
+## Key References
+- Components: `components/shared/README.md`
+- CSS: `css/README.md`
+- Admin: `admin/README.md`
+- Supabase: `supabase/README.md`
+
