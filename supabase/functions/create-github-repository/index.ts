@@ -190,16 +190,30 @@ async function createInitialFiles(
   // Detect deployment type (Expo/React Native vs standard)
   const deploymentInfo = detectDeploymentType(spec)
   
-  // Create README.md using spec as content
-  await createFile(token, repoFullName, 'README.md', spec)
+  // Create enhanced README.md using AI generation
+  const enhancedReadme = await generateReadmeWithAI(finalProductName, spec)
+  await createFile(token, repoFullName, 'README.md', enhancedReadme)
   
   // Create .gitignore based on tech stack
   const gitignore = generateGitignore(techStack)
   await createFile(token, repoFullName, '.gitignore', gitignore)
   
   // Create package.json if it's a Node.js project
-  if (techStack.includes('Node.js') || techStack.includes('React') || techStack.includes('Next.js') || techStack.includes('Expo') || 
-      techStack.includes('Vue') || techStack.includes('Angular') || techStack.includes('Svelte') || techStack.includes('Vite')) {
+  // Check both techStack array and spec directly for better detection
+  const techStackStr = techStack.join(' ').toLowerCase()
+  const specLower = spec.toLowerCase()
+  const hasNodeJs = techStackStr.includes('node.js') || techStackStr.includes('nodejs') || specLower.includes('node.js') || specLower.includes('nodejs')
+  const hasReact = techStackStr.includes('react') || specLower.includes('react')
+  const hasNextJs = techStackStr.includes('next.js') || techStackStr.includes('nextjs') || specLower.includes('next.js')
+  const hasExpo = techStackStr.includes('expo') || specLower.includes('expo')
+  const hasVue = techStackStr.includes('vue') || specLower.includes('vue')
+  const hasAngular = techStackStr.includes('angular') || specLower.includes('angular')
+  const hasSvelte = techStackStr.includes('svelte') || specLower.includes('svelte')
+  const hasVite = techStackStr.includes('vite') || specLower.includes('vite')
+  const hasExpress = specLower.includes('express')
+  const hasBackend = hasNodeJs || hasExpress || specLower.includes('backend') || specLower.includes('restful api') || specLower.includes('api')
+  
+  if (hasNodeJs || hasReact || hasNextJs || hasExpo || hasVue || hasAngular || hasSvelte || hasVite || hasBackend) {
     const packageJson = generatePackageJson(finalProductName, techStack, deploymentInfo)
     await createFile(token, repoFullName, 'package.json', packageJson)
   }
@@ -229,6 +243,16 @@ async function createInitialFiles(
   const supabaseFunctionsUrl = supabaseUrl ? supabaseUrl.replace('.supabase.co', '.functions.supabase.co') : ''
   const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5bnhxbnJrbWpjdmd6c3VneHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjgzNDMsImV4cCI6MjA3NDE0NDM0M30.-HAyQJV9SjJa0DrT-n3dCkHR44BQrdMTP-8qX3SADDY'
   await createWorkerFiles(token, repoFullName, finalProductName, productSlug || subdomain, supabaseFunctionsUrl, supabaseAnonKey, deploymentInfo)
+  
+  // Create repository setup best practices files
+  await createRepositorySetupFiles(
+    token,
+    repoFullName,
+    finalProductName,
+    spec,
+    techStack,
+    deploymentInfo
+  )
   
   // Upload media files if provided
   const uploadedFiles: string[] = []
@@ -410,6 +434,7 @@ function extractProductName(spec: string): string {
  */
 function extractTechStack(spec: string): string[] {
   const stack: string[] = []
+  const specLower = spec.toLowerCase()
   
   // Look for platform
   if (spec.includes('Progressive Web App') || spec.includes('PWA')) {
@@ -422,13 +447,18 @@ function extractTechStack(spec: string): string[] {
   }
   
   // Look for backend
-  if (spec.match(/Node\.js/i)) {
+  if (spec.match(/Node\.js/i) || specLower.includes('node.js') || specLower.includes('nodejs')) {
     stack.push('Backend: Node.js')
   }
   
   // Look for database
   if (spec.match(/MongoDB/i)) {
     stack.push('Database: MongoDB')
+  }
+  
+  // Look for TypeScript
+  if (spec.match(/TypeScript/i) || specLower.includes('typescript') || specLower.includes('tsx') || specLower.includes('.ts')) {
+    stack.push('TypeScript')
   }
   
   if (stack.length === 0) {
@@ -1518,6 +1548,567 @@ async function createWorkerFiles(
   await createFile(token, repoFullName, 'wrangler.toml', wranglerConfig)
   
   console.log('✅ Worker files created successfully')
+}
+
+/**
+ * Create repository setup best practices files
+ */
+async function createRepositorySetupFiles(
+  token: string,
+  repoFullName: string,
+  productName: string,
+  spec: string,
+  techStack: string[],
+  deploymentInfo: FrameworkInfo
+): Promise<void> {
+  try {
+    // Generate CHANGELOG.md
+    try {
+      const changelog = generateChangelog(productName)
+      await createFile(token, repoFullName, 'CHANGELOG.md', changelog)
+      console.log('✅ CHANGELOG.md created successfully')
+    } catch (error) {
+      console.warn('⚠️ Failed to create CHANGELOG.md:', error)
+    }
+
+    // Generate .editorconfig
+    try {
+      const editorConfig = generateEditorConfig(deploymentInfo, techStack, spec)
+      await createFile(token, repoFullName, '.editorconfig', editorConfig)
+      console.log('✅ .editorconfig created successfully')
+    } catch (error) {
+      console.warn('⚠️ Failed to create .editorconfig:', error)
+    }
+
+    // Generate .cursorrules (hybrid approach)
+    try {
+      const cursorRules = await generateCursorRules(productName, spec, techStack, deploymentInfo)
+      await createFile(token, repoFullName, '.cursorrules', cursorRules)
+      console.log('✅ .cursorrules created successfully')
+    } catch (error) {
+      console.warn('⚠️ Failed to create .cursorrules:', error)
+    }
+
+    // Generate .cursorignore
+    try {
+      const cursorIgnore = generateCursorIgnore(deploymentInfo, techStack)
+      await createFile(token, repoFullName, '.cursorignore', cursorIgnore)
+      console.log('✅ .cursorignore created successfully')
+    } catch (error) {
+      console.warn('⚠️ Failed to create .cursorignore:', error)
+    }
+
+    // Generate CONTRIBUTING.md
+    try {
+      const contributing = generateContributing(productName, deploymentInfo)
+      await createFile(token, repoFullName, 'CONTRIBUTING.md', contributing)
+      console.log('✅ CONTRIBUTING.md created successfully')
+    } catch (error) {
+      console.warn('⚠️ Failed to create CONTRIBUTING.md:', error)
+    }
+
+    // Generate LICENSE
+    try {
+      const license = generateLicense(productName)
+      await createFile(token, repoFullName, 'LICENSE', license)
+      console.log('✅ LICENSE created successfully')
+    } catch (error) {
+      console.warn('⚠️ Failed to create LICENSE:', error)
+    }
+
+  } catch (error) {
+    console.error('❌ Error creating repository setup files:', error)
+    // Don't throw - allow repository creation to continue
+  }
+}
+
+/**
+ * Generate CHANGELOG.md following Keep a Changelog format
+ */
+function generateChangelog(productName: string): string {
+  const currentDate = new Date().toISOString().split('T')[0]
+  
+  return `# Changelog
+
+All notable changes to ${productName} will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+---
+
+## [0.1.0] - ${currentDate}
+
+### Added
+- Initial release
+`
+}
+
+/**
+ * Generate .editorconfig with framework-aware settings
+ */
+function generateEditorConfig(deploymentInfo: FrameworkInfo, techStack: string[], spec?: string): string {
+  // Check techStack array first
+  let hasTypeScript = techStack.some(tech => 
+    tech.toLowerCase().includes('typescript') || 
+    tech.toLowerCase().includes('ts')
+  )
+  
+  // Also check spec directly as fallback (more reliable)
+  if (!hasTypeScript && spec) {
+    const specLower = spec.toLowerCase()
+    hasTypeScript = specLower.includes('typescript') || 
+                    specLower.includes('tsx') || 
+                    specLower.includes('.ts') ||
+                    specLower.includes('tsconfig')
+  }
+  
+  const config = `# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# JavaScript files
+[*.{js,jsx${hasTypeScript ? ',ts,tsx' : ''}}]
+indent_style = space
+indent_size = 4
+
+# CSS files
+[*.css]
+indent_style = space
+indent_size = 2
+
+# HTML files
+[*.html]
+indent_style = space
+indent_size = 4
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 2
+
+# SQL files
+[*.sql]
+indent_style = space
+indent_size = 2
+
+# YAML files
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+`
+  
+  return config
+}
+
+/**
+ * Generate .cursorrules using hybrid template+AI approach
+ */
+async function generateCursorRules(
+  productName: string,
+  spec: string,
+  techStack: string[],
+  deploymentInfo: FrameworkInfo
+): Promise<string> {
+  // Start with base template
+  let baseTemplate = getCursorRulesTemplate(deploymentInfo, techStack)
+  
+  // Try to enhance with OpenAI if available
+  try {
+    const enhanced = await generateCursorRulesWithAI(baseTemplate, productName, spec, techStack)
+    return enhanced
+  } catch (error) {
+    console.warn('⚠️ OpenAI enhancement failed, using template:', error)
+    // Fallback to template
+    return baseTemplate
+  }
+}
+
+/**
+ * Get base .cursorrules template based on framework
+ */
+function getCursorRulesTemplate(
+  deploymentInfo: FrameworkInfo,
+  techStack: string[]
+): string {
+  const framework = deploymentInfo.framework
+  const hasReact = techStack.some(tech => tech.toLowerCase().includes('react'))
+  const hasVue = techStack.some(tech => tech.toLowerCase().includes('vue'))
+  const hasTypeScript = techStack.some(tech => 
+    tech.toLowerCase().includes('typescript') || 
+    tech.toLowerCase().includes('ts')
+  )
+  
+  // React/Next.js template
+  if (framework === 'nextjs' || framework === 'create-react-app' || hasReact) {
+    return `# ${deploymentInfo.framework === 'nextjs' ? 'Next.js' : 'React'} Project Rules
+
+## Project Context
+${deploymentInfo.framework === 'nextjs' ? 'Next.js' : 'React'} application${hasTypeScript ? ' with TypeScript' : ''}.
+
+## Code Style
+- ${hasTypeScript ? 'TypeScript' : 'JavaScript'}: 4 spaces
+- CSS: 2 spaces
+- Follow \`.editorconfig\`
+
+## Component Patterns
+${deploymentInfo.framework === 'nextjs' ? '- Use Next.js App Router or Pages Router patterns\n- Server Components by default, Client Components when needed\n- Use \`use client\` directive for client-side interactivity' : '- Functional components with hooks\n- Use \`useState\`, \`useEffect\` appropriately\n- Extract reusable logic into custom hooks'}
+
+## File Organization
+- Components: \`components/\` or \`src/components/\`
+- Styles: \`styles/\` or component-scoped CSS modules
+- Utils: \`utils/\` or \`lib/\`
+${deploymentInfo.framework === 'nextjs' ? '- Pages: \`app/\` (App Router) or \`pages/\` (Pages Router)' : ''}
+
+## Best Practices
+- Use meaningful component and variable names
+- Keep components small and focused
+- Extract constants and configuration
+- Handle errors gracefully
+- Use proper TypeScript types${hasTypeScript ? '' : ' (if using TypeScript)'}
+`
+  }
+  
+  // Vue/Nuxt template
+  if (framework === 'nuxt' || hasVue) {
+    return `# ${framework === 'nuxt' ? 'Nuxt' : 'Vue.js'} Project Rules
+
+## Project Context
+${framework === 'nuxt' ? 'Nuxt' : 'Vue.js'} application${hasTypeScript ? ' with TypeScript' : ''}.
+
+## Code Style
+- ${hasTypeScript ? 'TypeScript' : 'JavaScript'}: 4 spaces
+- CSS: 2 spaces
+- Follow \`.editorconfig\`
+
+## Component Patterns
+- Single File Components (SFC) with \`<template>\`, \`<script>\`, \`<style>\`
+- Use Composition API with \`<script setup>\`
+- Props validation and emit definitions
+${framework === 'nuxt' ? '- Use Nuxt auto-imports\n- Leverage Nuxt composables' : ''}
+
+## File Organization
+- Components: \`components/\`
+- Pages: ${framework === 'nuxt' ? '\`pages/\`' : '\`views/\` or \`pages/\`'}
+- Composables: \`composables/\` or \`src/composables/\`
+- Utils: \`utils/\` or \`lib/\`
+
+## Best Practices
+- Use Composition API for new code
+- Keep components focused and reusable
+- Use TypeScript${hasTypeScript ? '' : ' when possible'}
+- Follow Vue style guide
+`
+  }
+  
+  // Expo/React Native template
+  if (framework === 'expo') {
+    return `# Expo/React Native Project Rules
+
+## Project Context
+Expo/React Native application with web support.
+
+## Code Style
+- JavaScript/TypeScript: 4 spaces
+- Follow \`.editorconfig\`
+
+## Component Patterns
+- React Native components: \`View\`, \`Text\`, \`ScrollView\`, etc.
+- Use Expo APIs for native functionality
+- Platform-specific code with \`Platform.OS\`
+- Responsive design for multiple screen sizes
+
+## File Organization
+- Components: \`components/\`
+- Screens: \`screens/\` or \`app/\`
+- Utils: \`utils/\`
+- Assets: \`assets/\`
+
+## Best Practices
+- Test on both iOS and Android
+- Use Expo managed workflow features
+- Handle platform differences gracefully
+- Optimize for mobile performance
+`
+  }
+  
+  // Plain HTML/CSS/JS template
+  if (framework === 'plain') {
+    return `# Plain HTML/CSS/JavaScript Project Rules
+
+## Project Context
+Static HTML/CSS/JavaScript application.
+
+## Code Style
+- JavaScript: 4 spaces
+- CSS: 2 spaces
+- HTML: 4 spaces
+- Follow \`.editorconfig\`
+
+## File Organization
+- HTML: root or \`pages/\`
+- CSS: \`css/\` or \`styles/\`
+- JavaScript: \`js/\` or \`scripts/\`
+- Assets: \`images/\`, \`icons/\`, etc.
+
+## Best Practices
+- Separate concerns (HTML structure, CSS styling, JS behavior)
+- Use semantic HTML
+- Mobile-first responsive design
+- Progressive enhancement
+- Keep JavaScript modular
+`
+  }
+  
+  // Generic template (fallback)
+  return `# Project Rules
+
+## Project Context
+${deploymentInfo.framework !== 'unknown' ? `${deploymentInfo.framework} application` : 'Web application'}.
+
+## Code Style
+- Follow \`.editorconfig\`
+- Use consistent indentation
+- Meaningful variable and function names
+
+## File Organization
+- Organize files by feature or type
+- Keep related files together
+- Use clear directory structure
+
+## Best Practices
+- Write clean, maintainable code
+- Handle errors gracefully
+- Document complex logic
+- Follow framework conventions
+`
+}
+
+/**
+ * Generate .cursorrules with OpenAI enhancement
+ */
+async function generateCursorRulesWithAI(
+  baseTemplate: string,
+  productName: string,
+  spec: string,
+  techStack: string[]
+): Promise<string> {
+  try {
+    const openaiKey = Deno.env.get('OPENAI_API_KEY')
+    
+    if (!openaiKey) {
+      console.warn('No OpenAI API key found, using base template')
+      return baseTemplate
+    }
+
+    // Extract relevant spec excerpt (first 1000 chars for context)
+    const specExcerpt = spec.substring(0, 1000)
+    const techStackStr = techStack.join(', ')
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert at creating .cursorrules files for AI coding assistants. Enhance the provided template with project-specific patterns and best practices based on the technical specification.'
+          },
+          {
+            role: 'user',
+            content: `Enhance this .cursorrules template for "${productName}" using tech stack: ${techStackStr}.
+
+Base Template:
+${baseTemplate}
+
+Technical Specification Excerpt:
+${specExcerpt}
+
+Add project-specific patterns, coding conventions, and best practices. Keep the structure but enhance with relevant details from the specification. Return only the enhanced .cursorrules content without markdown code blocks.`
+          }
+        ],
+        temperature: 0.5,
+        max_tokens: 2000
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const enhanced = data.choices[0].message.content.trim()
+    
+    // Remove markdown code blocks if present
+    return enhanced.replace(/^```[\w]*\n?/gm, '').replace(/\n?```$/gm, '').trim()
+
+  } catch (error) {
+    console.error('Error generating .cursorrules with AI:', error)
+    // Fallback to base template
+    throw error
+  }
+}
+
+/**
+ * Generate .cursorignore with framework-specific exclusions
+ */
+function generateCursorIgnore(
+  deploymentInfo: FrameworkInfo,
+  techStack: string[]
+): string {
+  const ignore: string[] = [
+    '# Dependencies',
+    'node_modules/',
+    ''
+  ]
+  
+  // Build outputs
+  if (deploymentInfo.buildOutput) {
+    ignore.push(`# Build outputs`, `${deploymentInfo.buildOutput}/`)
+  } else {
+    ignore.push('# Build outputs', 'dist/', 'build/')
+  }
+  
+  ignore.push('')
+  
+  // Framework-specific patterns
+  if (deploymentInfo.framework === 'nextjs') {
+    ignore.push('# Next.js', '.next/', 'out/')
+  } else if (deploymentInfo.framework === 'expo') {
+    ignore.push('# Expo', '.expo/', 'web-build/')
+  } else if (deploymentInfo.framework === 'gatsby') {
+    ignore.push('# Gatsby', '.cache/', 'public/')
+  }
+  
+  ignore.push('')
+  
+  // Common exclusions
+  ignore.push(
+    '# Large asset directories',
+    'images/',
+    'icons/',
+    '',
+    '# Logs and temp files',
+    '*.log',
+    '*.tmp',
+    '*.temp',
+    '',
+    '# Environment files',
+    '.env',
+    '.env.*',
+    '',
+    '# IDE files',
+    '.vscode/',
+    '.idea/',
+    '*.swp',
+    '*.swo'
+  )
+  
+  return ignore.join('\n')
+}
+
+/**
+ * Generate CONTRIBUTING.md with simplified generic template
+ */
+function generateContributing(
+  productName: string,
+  deploymentInfo: FrameworkInfo
+): string {
+  const frameworkGuide = deploymentInfo.framework !== 'unknown' && deploymentInfo.framework !== 'plain'
+    ? `\n## Framework Setup\n\nSee \`FRAMEWORK_SETUP.md\` for detailed framework-specific setup instructions.\n`
+    : ''
+  
+  return `# Contributing to ${productName}
+
+Thank you for your interest in contributing!
+
+## Getting Started
+
+1. Fork the repository
+2. Clone your fork: \`git clone https://github.com/yourusername/${productName.toLowerCase().replace(/\s+/g, '-')}.git\`
+3. Create a feature branch: \`git checkout -b feature/your-feature-name\`
+4. Make your changes
+5. Commit your changes: \`git commit -m 'Add some feature'\`
+6. Push to your branch: \`git push origin feature/your-feature-name\`
+7. Open a Pull Request
+
+## Development Workflow
+
+1. Always work on a feature branch, never directly on \`main\`
+2. Write clear commit messages
+3. Test your changes thoroughly
+4. Update documentation if needed
+5. Ensure code follows project style guidelines${frameworkGuide}
+## Code Standards
+
+- Follow the project's code style (see \`.editorconfig\`)
+- Write meaningful variable and function names
+- Add comments for complex logic
+- Keep functions focused and small
+- Handle errors gracefully
+
+## Pull Request Process
+
+1. Ensure your code follows the project standards
+2. Update documentation if you've changed functionality
+3. Test your changes
+4. Submit a clear PR description explaining your changes
+5. Be responsive to feedback
+
+## Questions?
+
+If you have questions, please open an issue for discussion.
+`
+}
+
+/**
+ * Generate LICENSE with proprietary license template
+ */
+function generateLicense(productName: string, year?: number): string {
+  const currentYear = year || new Date().getFullYear()
+  
+  return `PROPRIETARY LICENSE
+
+Copyright (c) ${currentYear} ${productName}
+
+All rights reserved.
+
+This software and associated documentation files (the "Software") are the 
+proprietary and confidential information of ${productName}.
+
+The Software may not be copied, modified, distributed, or used except as 
+expressly permitted by the owner of ${productName}.
+
+Unauthorized use, copying, or distribution of this Software, via any medium, 
+is strictly prohibited without the express written permission of the owner.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+SOFTWARE.
+`
 }
 
 /**

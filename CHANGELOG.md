@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.3] - 2025-01-29
+
+### Added
+- Repository setup best practices integration in Product Wizard GitHub repository creation
+- Automatic generation of CHANGELOG.md (Keep a Changelog format) for new repositories
+- Automatic generation of .editorconfig with framework-aware settings (TypeScript support detection)
+- Automatic generation of .cursorrules with hybrid template+AI approach (framework-specific templates with optional OpenAI enhancement)
+- Automatic generation of .cursorignore with framework-specific exclusions
+- Automatic generation of CONTRIBUTING.md with simplified generic template
+- Automatic generation of LICENSE with proprietary license template
+- Enhanced README.md generation using OpenAI API (professional formatting instead of raw spec)
+- Framework-specific .cursorrules templates (React, Vue, Next.js, Expo, plain HTML, generic)
+- TypeScript detection in .editorconfig generation (checks spec for TypeScript/TSX usage)
+- Improved package.json detection logic (checks both techStack array and spec directly)
+
+### Changed
+- Updated GitHub repository creation to generate 7 additional best practices files
+- Enhanced README.md generation to use AI enhancement instead of raw specification
+- Improved tech stack detection for better framework-specific file generation
+- Updated Product Wizard GitHub setup step preview to show all new files
+
+### Fixed
+- Fixed package.json creation detection (now properly detects Node.js/React projects from spec)
+- Fixed TypeScript detection in .editorconfig (now checks spec directly as fallback)
+
+---
+
 ## [1.0.2] - 2025-11-29
 
 ### Added
