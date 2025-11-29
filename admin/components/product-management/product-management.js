@@ -2517,14 +2517,9 @@ class ProductManagement {
             }
 
             // Call update edge function
-            const { data, error } = await window.supabase.functions.invoke('update-stripe-product', {
-                body: body,
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`
-                }
+            const data = await window.invokeEdgeFunction('update-stripe-product', {
+                body: body
             });
-
-            if (error) {
                 throw error;
             }
 

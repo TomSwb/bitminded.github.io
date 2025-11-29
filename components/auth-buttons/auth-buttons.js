@@ -268,8 +268,23 @@ class AuthButtons {
                 throw error;
             }
 
+            // Check if session exists AND token is not expired
             if (session && session.user) {
-                // User is logged in
+                // Validate token expiration
+                if (session.expires_at) {
+                    const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
+                    
+                    // If token is expired, clear it and show logged out
+                    if (expiresIn < 0) {
+                        window.logger?.warn('⚠️ Token is expired, clearing session...');
+                        await window.supabase.auth.signOut();
+                        this.currentUser = null;
+                        this.showLoggedOutState();
+                        return;
+                    }
+                }
+                
+                // User is logged in with valid token
                 this.currentUser = session.user;
                 await this.showLoggedInState();
             } else {
@@ -564,7 +579,7 @@ class AuthButtons {
             // Clean up user_sessions table BEFORE signing out (need auth context)
             if (sessionToken) {
                 try {
-                    await window.supabase.functions.invoke('revoke-session', {
+                    await window.invokeEdgeFunction('revoke-session', {
                         body: { 
                             session_id: sessionToken,
                             allow_current_session: true  // Allow revoking current session during logout

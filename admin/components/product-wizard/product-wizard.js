@@ -1667,7 +1667,7 @@ class ProductWizard {
 
         if (missingLanguages.length > 0 && window.supabase?.functions) {
             try {
-                const { data, error } = await window.supabase.functions.invoke('translate-product-content', {
+                const data = await window.invokeEdgeFunction('translate-product-content', {
                     body: {
                         sourceLanguage: 'en',
                         targetLanguages: missingLanguages,
@@ -1679,10 +1679,6 @@ class ProductWizard {
                         }
                     }
                 });
-
-                if (error) {
-                    throw error;
-                }
 
                 if (data?.translations) {
                     missingLanguages.forEach(lang => {

@@ -873,21 +873,13 @@ if (typeof window.StepStripeCreation === 'undefined') {
                     throw new Error('Invalid session. Please log in again.');
                 }
                 
-                window.logger?.log('🔐 Calling edge function with auth token:', { 
-                    functionName, 
-                    hasToken: !!session.access_token,
-                    tokenLength: session.access_token?.length
-                });
+                window.logger?.log('🔐 Calling edge function:', { functionName });
                 
-                // Pass Authorization header explicitly (matching update/delete functions exactly)
-                const { data, error } = await window.supabase.functions.invoke(functionName, {
-                    body,
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
-                });
-                
-                if (error) {
+                // Use helper function which handles session refresh and 401 retries
+                let data;
+                try {
+                    data = await window.invokeEdgeFunction(functionName, { body });
+                } catch (error) {
                     window.logger?.error('❌ Edge function error:', error);
                     
                     // Try to extract error details from the response
@@ -1135,14 +1127,9 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 };
                 
                 // Call edge function to update Stripe product
-                const { data, error } = await window.supabase.functions.invoke('update-stripe-product', {
-                    body: updateData,
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
+                const data = await window.invokeEdgeFunction('update-stripe-product', {
+                    body: updateData
                 });
-                
-                if (error) throw error;
                 
                 // Update form data with new Stripe IDs
                 if (window.productWizard && window.productWizard.formData) {
@@ -1294,14 +1281,9 @@ if (typeof window.StepStripeCreation === 'undefined') {
                 }
                 
                 // Call Edge Function to archive the product
-                const { data, error } = await window.supabase.functions.invoke('delete-stripe-product', {
-                    body: { productId },
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
+                const data = await window.invokeEdgeFunction('delete-stripe-product', {
+                    body: { productId }
                 });
-                
-                if (error) throw error;
                 
                 window.logger?.log('✅ Stripe product deleted, response:', data);
                 

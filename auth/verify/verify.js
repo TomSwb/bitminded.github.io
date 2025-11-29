@@ -141,17 +141,13 @@ class EmailVerification {
                 window.logger?.log('🔄 Type:', urlParams.type);
                 
                 // Verify the custom token with our Edge Function
-                const { data, error } = await window.supabase.functions.invoke('verify-email-change', {
+                const data = await window.invokeEdgeFunction('verify-email-change', {
                     body: {
                         token: urlParams.token
                     }
                 });
                 
-                window.logger?.log('📧 Email change verification response:', { data, error });
-                
-                if (error) {
-                    throw new Error(error.message || 'Failed to verify email change token');
-                }
+                window.logger?.log('📧 Email change verification response:', { data });
                 
                 if (!data.success) {
                     throw new Error(data.error || 'Email change verification failed');
@@ -182,14 +178,13 @@ class EmailVerification {
                     
                     // Log the login activity if this is their first verified session
                     try {
-                        const { error: logError } = await window.supabase.functions.invoke('log-login', {
-                            body: { user_id: sessionData.session.user.id }
-                        });
-                        
-                        if (logError) {
-                            window.logger?.warn('⚠️ Failed to log login activity:', logError);
-                        } else {
+                        try {
+                            await window.invokeEdgeFunction('log-login', {
+                                body: { user_id: sessionData.session.user.id }
+                            });
                             window.logger?.log('✅ Login activity logged');
+                        } catch (logError) {
+                            window.logger?.warn('⚠️ Failed to log login activity:', logError);
                         }
                     } catch (logErr) {
                         window.logger?.warn('⚠️ Error logging login activity:', logErr);
@@ -219,14 +214,10 @@ class EmailVerification {
                 
                 // Log the login activity for first-time login after email verification
                 try {
-                    const { error: logError } = await window.supabase.functions.invoke('log-login', {
-                        body: { user_id: data.user.id }
-                    });
-                    
-                    if (logError) {
-                        window.logger?.warn('⚠️ Failed to log login activity:', logError);
-                        // Don't throw error - login activity logging is not critical
-                    } else {
+                    try {
+                        await window.invokeEdgeFunction('log-login', {
+                            body: { user_id: data.user.id }
+                        });
                         window.logger?.log('✅ Login activity logged');
                     }
                 } catch (logErr) {

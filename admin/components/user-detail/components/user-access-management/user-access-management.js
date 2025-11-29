@@ -624,7 +624,7 @@ class UserAccessManagement {
             }
 
             // Call Edge Function
-            const { data, error } = await window.supabase.functions.invoke('admin-grant-access', {
+            const data = await window.invokeEdgeFunction('admin-grant-access', {
                 body: {
                     userId: this.currentUserId,
                     productId: productId,
@@ -634,10 +634,6 @@ class UserAccessManagement {
                     sendNotification: sendNotification
                 }
             });
-
-            if (error) {
-                throw error;
-            }
 
             if (!data?.success) {
                 throw new Error(data?.error || 'Failed to grant access');
@@ -736,17 +732,13 @@ class UserAccessManagement {
                 return;
             }
 
-            const { data, error } = await window.supabase.functions.invoke('admin-revoke-access', {
+            const data = await window.invokeEdgeFunction('admin-revoke-access', {
                 body: {
                     entitlementId: this.currentGrantId,
                     reason: reason,
                     sendNotification: sendNotification
                 }
             });
-
-            if (error) {
-                throw error;
-            }
 
             if (!data?.success) {
                 throw new Error(data?.error || 'Failed to revoke access');
@@ -771,17 +763,13 @@ class UserAccessManagement {
         }
 
         try {
-            const { data, error } = await window.supabase.functions.invoke('admin-regrant-access', {
+            const data = await window.invokeEdgeFunction('admin-regrant-access', {
                 body: {
                     entitlementId: entitlement.id,
                     reason: 'Access restored by admin',
                     sendNotification: true
                 }
             });
-
-            if (error) {
-                throw error;
-            }
 
             if (!data?.success) {
                 throw new Error(data?.error || 'Failed to regrant access');
@@ -809,16 +797,12 @@ class UserAccessManagement {
         }
 
         try {
-            const { data, error } = await window.supabase.functions.invoke('admin-delete-entitlement', {
+            const data = await window.invokeEdgeFunction('admin-delete-entitlement', {
                 body: {
                     entitlementId: entitlement.id,
                     reason: 'Deleted by admin'
                 }
             });
-
-            if (error) {
-                throw error;
-            }
 
             if (!data?.success) {
                 throw new Error(data?.error || 'Failed to delete entitlement');

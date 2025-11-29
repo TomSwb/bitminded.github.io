@@ -300,7 +300,7 @@ class StepSpecGeneration {
             const productContext = this.getProductContext();
             window.logger?.log(`🤖 Getting AI recommendation for ${fieldName}:`, productContext);
             
-            const response = await window.supabase.functions.invoke('conversational-tech-guidance', {
+            const response = await window.invokeEdgeFunction('conversational-tech-guidance', {
                 body: {
                     ...productContext,
                     fieldName: fieldName,
@@ -469,7 +469,7 @@ class StepSpecGeneration {
             const productContext = this.getProductContext();
             const conversationHistory = this.conversationHistory[fieldName] || '';
             
-            const response = await window.supabase.functions.invoke('conversational-tech-guidance', {
+            const response = await window.invokeEdgeFunction('conversational-tech-guidance', {
                 body: {
                     ...productContext,
                     fieldName: fieldName,
@@ -554,7 +554,7 @@ class StepSpecGeneration {
         try {
             const productContext = this.getProductContext();
             
-            const response = await window.supabase.functions.invoke('generate-field-suggestion', {
+            const response = await window.invokeEdgeFunction('generate-field-suggestion', {
                 body: {
                     ...productContext,
                     fieldName: fieldName,
@@ -591,13 +591,9 @@ class StepSpecGeneration {
 
             const specData = this.collectSpecificationData();
             
-            const response = await window.supabase.functions.invoke('generate-product-spec', {
+            const response = await window.invokeEdgeFunction('generate-product-spec', {
                 body: specData
             });
-
-            if (response.error) {
-                throw new Error(response.error.message);
-            }
 
             const specification = response.data.specification;
             
