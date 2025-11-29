@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.0.1] - 2025-11-26
+
 ### Added
 - Main README.md for repository documentation
 - .editorconfig for consistent code formatting
@@ -260,7 +264,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/bitminded/bitminded.github.io/releases/tag/v1.0.0
 [0.9.0]: https://github.com/bitminded/bitminded.github.io/releases/tag/v0.9.0
 [0.8.0]: https://github.com/bitminded/bitminded.github.io/releases/tag/v0.8.0
