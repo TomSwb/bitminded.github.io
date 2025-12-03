@@ -2520,8 +2520,6 @@ class ProductManagement {
             const data = await window.invokeEdgeFunction('update-stripe-product', {
                 body: body
             });
-                throw error;
-            }
 
             // Update product with new sale price IDs
             if (data && (data.sale_price_id || data.sale_monthly_price_id || data.sale_yearly_price_id)) {

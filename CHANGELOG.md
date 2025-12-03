@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed syntax error in product-management.js - removed orphaned `throw error;` statement that broke try-catch structure
+
 ---
 
 ## [1.0.5] - 2025-11-29
