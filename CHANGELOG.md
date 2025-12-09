@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.10] - 2025-12-09
+
+### Added
+- Added comprehensive family plan webhook testing execution checklist (`TEST-EXECUTION-CHECKLIST.md`)
+- Added file creation guidelines to `.cursorrules` to prevent redundant documentation files
+
+### Changed
+- Deployed stripe-webhook Edge Function to DEV environment with family plan support
+- Updated deployment tracking documentation (`supabase/dev/deployed-functions.md`)
+- Verified database schema and family plan services configuration in DEV
+
+---
+
 ## [1.0.9] - 2025-12-09
 
 ### Fixed

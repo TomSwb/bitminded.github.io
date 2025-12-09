@@ -241,6 +241,7 @@ async function findProductOrService(
 ): Promise<{ id: string; type: 'product' | 'service'; slug?: string } | null> {
   // First, try to find in products table
   if (stripePriceId) {
+    // Try matching by stripe_price_id
     const { data: product } = await supabaseAdmin
       .from('products')
       .select('id')
@@ -251,9 +252,33 @@ async function findProductOrService(
     if (product) {
       return { id: product.id, type: 'product' }
     }
+
+    // Try matching by stripe_price_monthly_id
+    const { data: productMonthly } = await supabaseAdmin
+      .from('products')
+      .select('id')
+      .eq('stripe_product_id', stripeProductId)
+      .eq('stripe_price_monthly_id', stripePriceId)
+      .maybeSingle()
+
+    if (productMonthly) {
+      return { id: productMonthly.id, type: 'product' }
+    }
+
+    // Try matching by stripe_price_yearly_id
+    const { data: productYearly } = await supabaseAdmin
+      .from('products')
+      .select('id')
+      .eq('stripe_product_id', stripeProductId)
+      .eq('stripe_price_yearly_id', stripePriceId)
+      .maybeSingle()
+
+    if (productYearly) {
+      return { id: productYearly.id, type: 'product' }
+    }
   }
 
-  // Try products by product ID only
+  // Try products by product ID only (fallback)
   const { data: products } = await supabaseAdmin
     .from('products')
     .select('id, status, created_at')
@@ -268,6 +293,7 @@ async function findProductOrService(
 
   // If not found in products, try services table
   if (stripePriceId) {
+    // Try matching by stripe_price_id
     const { data: service } = await supabaseAdmin
       .from('services')
       .select('id, slug')
@@ -278,9 +304,46 @@ async function findProductOrService(
     if (service) {
       return { id: service.id, type: 'service', slug: service.slug }
     }
+
+    // Try matching by stripe_price_monthly_id
+    const { data: serviceMonthly } = await supabaseAdmin
+      .from('services')
+      .select('id, slug')
+      .eq('stripe_product_id', stripeProductId)
+      .eq('stripe_price_monthly_id', stripePriceId)
+      .maybeSingle()
+
+    if (serviceMonthly) {
+      return { id: serviceMonthly.id, type: 'service', slug: serviceMonthly.slug }
+    }
+
+    // Try matching by stripe_price_yearly_id
+    const { data: serviceYearly } = await supabaseAdmin
+      .from('services')
+      .select('id, slug')
+      .eq('stripe_product_id', stripeProductId)
+      .eq('stripe_price_yearly_id', stripePriceId)
+      .maybeSingle()
+
+    if (serviceYearly) {
+      return { id: serviceYearly.id, type: 'service', slug: serviceYearly.slug }
+    }
+
+    // Try matching in stripe_prices JSONB field (multi-currency)
+    // Check all currencies (CHF, USD, EUR, GBP) and both monthly/yearly keys
+    const { data: servicesJsonb } = await supabaseAdmin
+      .from('services')
+      .select('id, slug')
+      .eq('stripe_product_id', stripeProductId)
+      .or(`stripe_prices->CHF->>monthly.eq.${stripePriceId},stripe_prices->CHF->>yearly.eq.${stripePriceId},stripe_prices->USD->>monthly.eq.${stripePriceId},stripe_prices->USD->>yearly.eq.${stripePriceId},stripe_prices->EUR->>monthly.eq.${stripePriceId},stripe_prices->EUR->>yearly.eq.${stripePriceId},stripe_prices->GBP->>monthly.eq.${stripePriceId},stripe_prices->GBP->>yearly.eq.${stripePriceId}`)
+      .maybeSingle()
+
+    if (servicesJsonb) {
+      return { id: servicesJsonb.id, type: 'service', slug: servicesJsonb.slug }
+    }
   }
 
-  // Try services by product ID only
+  // Try services by product ID only (fallback)
   const { data: services } = await supabaseAdmin
     .from('services')
     .select('id, slug, status, created_at')
