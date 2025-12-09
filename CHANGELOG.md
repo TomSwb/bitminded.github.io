@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.9] - 2025-12-09
+
+### Fixed
+- Fixed syntax error in email verification page - removed redundant nested try-catch blocks that caused "Missing catch or finally after try" error, preventing email verification from completing
+
+---
+
 ## [1.0.8] - 2025-12-09
 
 ### Fixed
@@ -371,7 +378,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.8...HEAD
+[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.9...HEAD
+[1.0.9]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.5...v1.0.6
