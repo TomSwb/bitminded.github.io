@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.8] - 2025-12-09
+
+### Fixed
+- Fixed family services pricing structure in production database - added migration to include missing `family_monthly` and `family_yearly` keys in pricing JSONB for both `all-tools-membership-family` and `supporter-tier-family` services
+
+### Changed
+- Repositioned currency switcher component to be below language switcher instead of to the right
+- Increased language switcher z-index to be highest among header components (currency switcher, notification center, language switcher)
+
+---
+
 ## [1.0.7] - 2025-12-09
 
 ### Fixed
@@ -360,7 +371,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.7...HEAD
+[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.8...HEAD
+[1.0.8]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.4...v1.0.5
