@@ -178,16 +178,12 @@ class EmailVerification {
                     
                     // Log the login activity if this is their first verified session
                     try {
-                        try {
-                            await window.invokeEdgeFunction('log-login', {
-                                body: { user_id: sessionData.session.user.id }
-                            });
-                            window.logger?.log('✅ Login activity logged');
-                        } catch (logError) {
-                            window.logger?.warn('⚠️ Failed to log login activity:', logError);
-                        }
-                    } catch (logErr) {
-                        window.logger?.warn('⚠️ Error logging login activity:', logErr);
+                        await window.invokeEdgeFunction('log-login', {
+                            body: { user_id: sessionData.session.user.id }
+                        });
+                        window.logger?.log('✅ Login activity logged');
+                    } catch (logError) {
+                        window.logger?.warn('⚠️ Failed to log login activity:', logError);
                     }
                     
                     this.showSuccess();
@@ -214,12 +210,10 @@ class EmailVerification {
                 
                 // Log the login activity for first-time login after email verification
                 try {
-                    try {
-                        await window.invokeEdgeFunction('log-login', {
-                            body: { user_id: data.user.id }
-                        });
-                        window.logger?.log('✅ Login activity logged');
-                    }
+                    await window.invokeEdgeFunction('log-login', {
+                        body: { user_id: data.user.id }
+                    });
+                    window.logger?.log('✅ Login activity logged');
                 } catch (logErr) {
                     window.logger?.warn('⚠️ Error logging login activity:', logErr);
                     // Continue anyway - this is not critical
