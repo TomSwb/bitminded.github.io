@@ -59,62 +59,13 @@
 
 **Implementation Order** (must be completed in sequence):
 1. ✅ Database Setup (15.9.1) - Foundation (Phase 2) - **COMPLETED** (see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md))
-2. Webhook Handler Updates (15.9.3) - Depends on 15.9.1 (Phase 2, but needs 15.9.2 for full functionality)
+2. ✅ Webhook Handler Updates (15.9.3) - Depends on 15.9.1 (Phase 2) - **COMPLETED** (see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md))
 3. Stripe Checkout Integration (15.9.2) - Depends on #16 (Phase 3, after #16)
 4. Family Management UI (15.9.4) - Depends on 15.9.1, 15.9.2, 15.9.3 (Phase 4, Account Management)
 
 ---
 
-#### 15.9.3. Family Plan Webhook Handler Updates ⚠️ **MISSING**
-**Status**: **MISSING**  
-**Priority**: High - Depends on 15.9.1 (Database Schema)  
-**Action**:
-- Update existing webhook handler (`supabase/functions/stripe-webhook/index.ts`):
-  - Add family plan detection logic in `checkout.session.completed` handler:
-    - Check `session.metadata.is_family_plan === 'true'`
-    - Check product name contains "Family" or "family"
-    - Route to `handleFamilyPlanPurchase()` if detected
-  - Implement `handleFamilyPlanPurchase()` function:
-    - **Validate plan_name**: Ensure plan_name is either 'family_all_tools' or 'family_supporter' (database constraint will also enforce this, but validate early for better error messages)
-    - Detect family plan purchase (check metadata or product name)
-    - Verify product is All-Tools or Supporter (not individual tools or services)
-    - Call `findOrCreateFamilyGroup()` to create or link to existing family group
-    - Create `family_subscriptions` record with subscription details (plan_name must be 'family_all_tools' or 'family_supporter')
-    - Call `grantFamilyAccess()` to grant access to all active family members
-    - Create individual `product_purchases` records for each member (for tracking)
-    - Link purchaser as family admin (if new group)
-  - Update `customer.subscription.created` handler:
-    - Detect if subscription is family plan
-    - Link subscription to `family_subscriptions` table
-    - Update family group with subscription ID
-  - Update `customer.subscription.updated` handler:
-    - Update `family_subscriptions` status
-    - Handle member count changes (if subscription quantity changed)
-    - Update access for all members (grant/revoke as needed)
-  - Update `customer.subscription.deleted` handler:
-    - Mark `family_subscriptions` as cancelled
-    - Call `revokeFamilyAccess()` to revoke access from all family members
-  - Update `invoice.paid` handler:
-    - Update `family_subscriptions` billing period
-    - Renew access for all active family members
-    - Handle subscription quantity changes (member count updates)
-
-**Implementation Details** (from FAMILY-PLANS-ANALYSIS.md):
-- Family plan detection: Check `session.metadata.is_family_plan === 'true'` or product name contains "Family"
-- **CRITICAL**: Validate that only All-Tools or Supporter products can be family plans (database constraint enforces this, but validate in code for better UX)
-- Family group creation: `findOrCreateFamilyGroup()` - checks if user is already admin/member, creates new group if needed
-- Access granting: `grantFamilyAccess()` - creates `product_purchases` for each active member, creates/updates `family_subscriptions`
-- Member changes: Handle additions/removals mid-subscription (grant/revoke access accordingly)
-
-**Questions to Answer Before Implementation**:
-- How to handle subscription quantity changes (member count changes)?
-- Prorated billing for member additions/removals?
-- Should member removals immediately revoke access or wait until period end?
-
-**Depends on**: 15.9.1 (Database Schema), #14 (Stripe Webhook Handler)
-**Note**: Can be implemented after 15.9.1, but full functionality requires 15.9.2 (Stripe Checkout) to be completed first
-
----
+#### 15.9.4. Family Management UI (Account Page Component) ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - Depends on 15.9.1, 15.9.2, 15.9.3  
 **Action**:
@@ -2398,7 +2349,7 @@
 
 ### Week 2 (Remaining): Stripe & Payment Foundation
 - [x] Family Plan Database Schema (#15.9.1) - ✅ COMPLETED - Foundation for family plans
-- [ ] Family Plan Webhook Handler Updates (#15.9.3) - Can be done after 15.9.1 (full functionality requires 15.9.2)
+- [x] Family Plan Webhook Handler Updates (#15.9.3) - ✅ COMPLETED - See [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md)
 
 ### Week 3: Purchase & Checkout Flow
 - [ ] Stripe Checkout Integration (#16) - Core checkout flow

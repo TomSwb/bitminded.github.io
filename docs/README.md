@@ -39,6 +39,9 @@ docs/
 │   ├── LEGAL_COMPLIANCE_CHECKLIST.md
 │   └── AHV-REGISTRATION-GUIDE.md
 │
+├── content/                     # Content creation & media guides
+│   └── VIDEO-PRODUCTION-GUIDE.md
+│
 ├── analysis-reports/            # Analysis & historical reports
 │   ├── PRODUCTION-READINESS-SCAN-REPORT.md
 │   └── SEO-ANALYSIS-REPORT.md
@@ -92,6 +95,12 @@ docs/
 |----------|---------|--------|
 | **`analysis-reports/PRODUCTION-READINESS-SCAN-REPORT.md`** | Historical production readiness scan (January 2025 snapshot) | ⚠️ Historical - See `planning/PRIORITY-LIST-COMPLETED-ITEMS.md` Phase 0 for current status |
 | **`analysis-reports/SEO-ANALYSIS-REPORT.md`** | SEO analysis and recommendations | Reference for Phase 7 (#53, #54) |
+
+### 🎬 **Content Creation**
+
+| Document | Purpose | Related Priority List Items |
+|----------|---------|----------------------------|
+| **`content/VIDEO-PRODUCTION-GUIDE.md`** | Complete guide for filming, editing, and hosting videos | Content creation and media integration |
 
 ### 💬 **User Feedback**
 
@@ -155,10 +164,20 @@ planning/PRIORITY-LIST-TO-DO.md (what to build)
 - **User Account**: See `planning/PRIORITY-LIST-TO-DO.md` Phase 4 + `../account/` folder
 - **Admin Panel**: See `../admin/README.md` + `planning/PRIORITY-LIST-TO-DO.md` Phase 7
 
+#### Content & Media
+- **Video Production**: See `content/VIDEO-PRODUCTION-GUIDE.md` for filming specs, storage strategy, and implementation
+
 ### For Business Context
 1. **Read** `business-legal/BUSINESS_MODEL.md` for business model and revenue streams
 2. **Check** `business-legal/LEGAL_COMPLIANCE_CHECKLIST.md` for legal requirements
 3. **Review** `business-legal/AHV-REGISTRATION-GUIDE.md` for Swiss registration process
+
+### For Content Creation
+1. **Video Production**: See `content/VIDEO-PRODUCTION-GUIDE.md` for complete guide on:
+   - Filming specifications (iPhone/Camera)
+   - Post-production and compression
+   - Storage strategy (Supabase Storage vs GitHub)
+   - Technical implementation
 
 ---
 
