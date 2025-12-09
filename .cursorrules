@@ -70,3 +70,11 @@ window.logger?.error('❌ error'); // Always logs
 - Admin: `admin/README.md`
 - Supabase: `supabase/README.md`
 
+## File Creation Guidelines (CRITICAL)
+- **DO NOT create redundant or unnecessary files**
+- Before creating a new file, check if existing files already cover the same purpose
+- Prefer updating existing documentation over creating new files
+- Only create new files when absolutely necessary and no existing file serves the purpose
+- Avoid creating "status", "summary", or "quick reference" files if the information can be added to existing documentation
+- When documenting test plans or checklists, use ONE comprehensive file rather than splitting into multiple files
+
