@@ -3,7 +3,7 @@
     position: fixed;
     top: var(--spacing-lg);
     left: var(--spacing-md);
-    z-index: var(--z-popover);
+    z-index: calc(var(--z-popover) + 2); /* Highest z-index among header components */
 }
 
 /* Globe toggle button */

@@ -1,8 +1,8 @@
 /* Currency Switcher Component Styles - Based on language-switcher design system */
 .currency-switcher {
     position: fixed;
-    top: var(--spacing-lg);
-    left: calc(var(--spacing-md) + 7rem); /* Position after language switcher + notification center */
+    top: calc(var(--spacing-lg) + 3.5rem); /* Position below language switcher */
+    left: var(--spacing-md); /* Same left position as language switcher */
     z-index: var(--z-popover);
 }
 
@@ -137,8 +137,8 @@
 
 @media (max-width: 480px) {
     .currency-switcher {
-        top: var(--spacing-sm);
-        left: calc(var(--spacing-sm) + 7rem);
+        top: calc(var(--spacing-sm) + 3.5rem);
+        left: var(--spacing-sm);
     }
     
     .currency-switcher__toggle {
