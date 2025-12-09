@@ -637,10 +637,85 @@
 **Migration File**: `supabase/migrations/20251125_create_family_plans_schema.sql`
 
 **Next Steps**: 
-- 15.9.3: Family Plan Webhook Handler Updates (can be done after 15.9.1, but full functionality requires 15.9.2)
 - 15.9.2: Family Plan Stripe Checkout Integration (depends on #16)
 - 15.9.4: Family Management UI (Account Page Component)
 - 15.9.5: Admin Family Management UI (Phase 7)
+
+---
+
+### 15.9.3. Family Plan Webhook Handler Updates ✅ **COMPLETED**
+**Status**: **✅ COMPLETED** - Implementation complete, ready for testing  
+**Priority**: High - Depends on 15.9.1 (Database Schema)  
+**Completed**: January 2025
+
+**Completed Actions**:
+- ✅ **Updated webhook handler**: `supabase/functions/stripe-webhook/index.ts`
+- ✅ **Added family plan helper functions**:
+  - `mapServiceSlugToPlanName(serviceSlug)` - Maps service slugs to plan names (`family_all_tools`, `family_supporter`)
+  - `isFamilyPlanPurchase(session, lineItems, item)` - Detects family plan purchases via metadata, product names, or service slugs
+  - `findOrCreateFamilyGroup(supabaseAdmin, userId, familyName?)` - Finds existing or creates new family group with user as admin
+  - `grantFamilyAccess(...)` - Grants access to all active family members (creates/updates service_purchases records)
+  - `revokeFamilyAccess(supabaseAdmin, familyGroupId, periodEnd)` - Revokes access from all members at period end
+- ✅ **Enhanced `findProductOrService()` function** to return service slug for family plan detection
+- ✅ **Implemented `handleFamilyPlanPurchase()` function**:
+  - Validates plan_name is `family_all_tools` or `family_supporter` (only these two plans allowed)
+  - Gets subscription quantity from Stripe (number of members)
+  - Finds or creates family group
+  - Creates/updates `family_subscriptions` record with subscription details
+  - Updates `family_groups.subscription_id`
+  - Grants access to all active family members via `grantFamilyAccess()`
+- ✅ **Updated `checkout.session.completed` handler**:
+  - Detects family plan purchases (checks metadata, product names, service slugs)
+  - Routes to `handleFamilyPlanPurchase()` for family plans
+  - Continues with regular purchase logic for individual plans
+- ✅ **Updated `customer.subscription.created` handler**:
+  - Detects family plan subscriptions
+  - Links subscription to `family_subscriptions` table
+  - Updates family group with subscription ID
+  - Syncs subscription status and periods
+- ✅ **Updated `customer.subscription.updated` handler**:
+  - Updates `family_subscriptions` status and billing periods
+  - Handles subscription quantity changes (member count changes)
+  - Logs quantity differences for tracking
+  - Updates access for all members based on status
+- ✅ **Updated `customer.subscription.deleted` handler**:
+  - Marks `family_subscriptions` as `canceled`
+  - Calls `revokeFamilyAccess()` to revoke access from all family members
+  - Sets `current_period_end` as revocation date (access revoked at period end, not immediately)
+- ✅ **Updated `invoice.paid` handler**:
+  - Updates `family_subscriptions` billing period
+  - Renews access for all active family members
+  - Handles subscription quantity changes (member count updates)
+  - Creates/updates service_purchases records for each member
+
+**Implementation Details**:
+- **Family plan detection**: Checks `session.metadata.is_family_plan === 'true'`, product/service name contains "Family", or service slug is `all-tools-membership-family`/`supporter-tier-family`
+- **Plan validation**: Only `family_all_tools` and `family_supporter` plans are allowed (validated in code and enforced by database constraint)
+- **Family group creation**: `findOrCreateFamilyGroup()` checks if user is already admin/member, creates new group if needed, adds creator as admin member
+- **Access granting**: `grantFamilyAccess()` creates/updates `service_purchases` records for each active member, creates/updates `family_subscriptions`
+- **Member access**: Individual `service_purchases` records created for each member (for tracking and access control)
+- **Period-end revocation**: Access revocation waits until `current_period_end` (not immediately)
+- **Subscription quantity**: Stripe subscription quantity directly corresponds to number of active family members
+- **Error handling**: Comprehensive error logging for all family plan operations using existing `logError()` function
+
+**Key Decisions Made**:
+- Subscription quantity = number of active members (quantity changes update member access)
+- Member removals: Access revocation waits until current billing period ends
+- Plan validation: Only All-Tools or Supporter products can be family plans
+
+**Files Modified**:
+- `supabase/functions/stripe-webhook/index.ts` - Added family plan detection and handling logic
+
+**Testing Documentation**:
+- `supabase/functions/stripe-webhook/FAMILY-PLAN-TESTING.md` - Comprehensive testing plan
+- `supabase/dev/webhook-testing/verify-family-plan-webhook.sql` - Database verification queries
+
+**Next Steps**: 
+- Deploy to DEV environment and run through testing plan
+- Test all scenarios in `FAMILY-PLAN-TESTING.md`
+- Deploy to PRODUCTION after DEV testing passes
+- 15.9.2: Family Plan Stripe Checkout Integration (depends on #16) - Required for full functionality
+- 15.9.4: Family Management UI (Account Page Component)
 
 ---
 

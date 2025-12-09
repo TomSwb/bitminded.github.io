@@ -392,19 +392,14 @@ class CatalogAccessPageLoader {
     }
 
     async updatePricing() {
-        // Ensure i18next is available
-        if (typeof i18next === 'undefined') {
-            return;
-        }
-
         const pricingToggleButton = document.getElementById('pricing-toggle');
         const familyToggleButton = document.getElementById('family-toggle');
         const pricingToggleText = pricingToggleButton?.querySelector('.catalog-access-pricing-toggle__text');
         const familyToggleText = familyToggleButton?.querySelector('.catalog-access-pricing-toggle__text');
         const cards = document.querySelectorAll('[data-pricing-toggle="true"]');
 
-        // Update pricing toggle button text using i18next
-        if (pricingToggleText) {
+        // Update pricing toggle button text using i18next (if available)
+        if (pricingToggleText && typeof i18next !== 'undefined') {
             const key = this.pricingState.isMonthly 
                 ? pricingToggleText.getAttribute('data-i18n-text-monthly')
                 : pricingToggleText.getAttribute('data-i18n-text-yearly');
@@ -416,8 +411,8 @@ class CatalogAccessPageLoader {
             }
         }
 
-        // Update family toggle button text using i18next
-        if (familyToggleText) {
+        // Update family toggle button text using i18next (if available)
+        if (familyToggleText && typeof i18next !== 'undefined') {
             const key = this.pricingState.isFamily 
                 ? familyToggleText.getAttribute('data-i18n-text-family')
                 : familyToggleText.getAttribute('data-i18n-text-individual');
@@ -429,8 +424,8 @@ class CatalogAccessPageLoader {
             }
         }
 
-        // Update aria-labels for toggle buttons
-        if (pricingToggleButton) {
+        // Update aria-labels for toggle buttons (if i18next is available)
+        if (pricingToggleButton && typeof i18next !== 'undefined') {
             const ariaKey = pricingToggleButton.getAttribute('data-i18n-aria-label');
             if (ariaKey) {
                 const translation = i18next.t(ariaKey);
@@ -440,7 +435,7 @@ class CatalogAccessPageLoader {
             }
         }
 
-        if (familyToggleButton) {
+        if (familyToggleButton && typeof i18next !== 'undefined') {
             const ariaKey = familyToggleButton.getAttribute('data-i18n-aria-label');
             if (ariaKey) {
                 const translation = i18next.t(ariaKey);
@@ -514,17 +509,19 @@ class CatalogAccessPageLoader {
         // Wait for all family services to load
         await Promise.all(cardPromises);
 
-        // Update feature indicator aria-labels
-        const featureIndicators = document.querySelectorAll('[data-i18n-aria-label]');
-        featureIndicators.forEach(indicator => {
-            const key = indicator.getAttribute('data-i18n-aria-label');
-            if (key) {
-                const translation = i18next.t(key);
-                if (translation && translation !== key) {
-                    indicator.setAttribute('aria-label', translation);
+        // Update feature indicator aria-labels (if i18next is available)
+        if (typeof i18next !== 'undefined') {
+            const featureIndicators = document.querySelectorAll('[data-i18n-aria-label]');
+            featureIndicators.forEach(indicator => {
+                const key = indicator.getAttribute('data-i18n-aria-label');
+                if (key) {
+                    const translation = i18next.t(key);
+                    if (translation && translation !== key) {
+                        indicator.setAttribute('aria-label', translation);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     initFeatureRowAlignment() {

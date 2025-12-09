@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.7] - 2025-12-09
+
+### Fixed
+- Fixed family prices switch on catalog access page not working in production - removed early return that blocked price updates when i18next wasn't loaded yet, making price updates work independently of translation system initialization
+
+### Added
+- Added family plan webhook handler functionality to Stripe webhook processor
+  - Family plan purchase detection via session metadata, service slug, and product name
+  - Automatic family group creation and management
+  - Family subscription lifecycle management (create, update, cancel, renew)
+  - Access granting/revoking for family members
+  - Support for `all-tools-membership-family` and `supporter-tier-family` services
+- Added comprehensive family plan webhook testing documentation (`FAMILY-PLAN-TESTING.md`)
+- Added database verification queries for family plan webhook testing
+
+### Changed
+- Updated `findProductOrService()` function to return service slug for family plan detection
+- Enhanced Stripe webhook handler to process family plan-specific events and metadata
+
+---
+
 ## [1.0.6] - 2025-12-03
 
 ### Fixed
@@ -339,7 +360,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.6...HEAD
+[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.7...HEAD
+[1.0.7]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.3...v1.0.4

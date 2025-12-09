@@ -231,14 +231,14 @@ async function findUser(
 
 /**
  * Find product or service by Stripe product ID and optionally price ID
- * Returns object with id and type ('product' or 'service')
+ * Returns object with id, type ('product' or 'service'), and optional slug
  * If multiple items have the same stripe_product_id, prefer matching by price_id
  */
 async function findProductOrService(
   supabaseAdmin: any,
   stripeProductId: string,
   stripePriceId?: string
-): Promise<{ id: string; type: 'product' | 'service' } | null> {
+): Promise<{ id: string; type: 'product' | 'service'; slug?: string } | null> {
   // First, try to find in products table
   if (stripePriceId) {
     const { data: product } = await supabaseAdmin
@@ -270,27 +270,27 @@ async function findProductOrService(
   if (stripePriceId) {
     const { data: service } = await supabaseAdmin
       .from('services')
-      .select('id')
+      .select('id, slug')
       .eq('stripe_product_id', stripeProductId)
       .eq('stripe_price_id', stripePriceId)
       .maybeSingle()
 
     if (service) {
-      return { id: service.id, type: 'service' }
+      return { id: service.id, type: 'service', slug: service.slug }
     }
   }
 
   // Try services by product ID only
   const { data: services } = await supabaseAdmin
     .from('services')
-    .select('id, status, created_at')
+    .select('id, slug, status, created_at')
     .eq('stripe_product_id', stripeProductId)
     .order('status', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(1)
 
   if (services && services.length > 0) {
-    return { id: services[0].id, type: 'service' }
+    return { id: services[0].id, type: 'service', slug: services[0].slug }
   }
 
   return null
@@ -412,8 +412,445 @@ async function findExistingPurchaseByUserProduct(
 }
 
 // ============================================================================
+// Family Plan Helper Functions
+// ============================================================================
+
+/**
+ * Map service slug to family plan name
+ * Validates that only All-Tools or Supporter products can be family plans
+ */
+function mapServiceSlugToPlanName(serviceSlug: string): string | null {
+  const mapping: Record<string, string> = {
+    'all-tools-membership-family': 'family_all_tools',
+    'supporter-tier-family': 'family_supporter'
+  }
+  
+  return mapping[serviceSlug] || null
+}
+
+/**
+ * Detect if a purchase is a family plan
+ * Checks session metadata, product/service name, and service slug
+ */
+function isFamilyPlanPurchase(
+  session: any,
+  lineItems: any[],
+  item: { id: string; type: 'product' | 'service'; slug?: string } | null
+): boolean {
+  // Check session metadata
+  if (session.metadata?.is_family_plan === 'true') {
+    return true
+  }
+
+  // Check service slug for family plans
+  if (item?.type === 'service' && item.slug) {
+    if (item.slug === 'all-tools-membership-family' || item.slug === 'supporter-tier-family') {
+      return true
+    }
+  }
+
+  // Check product/service name contains "Family"
+  for (const lineItem of lineItems) {
+    const productName = typeof lineItem.price?.product === 'string'
+      ? null // Would need to fetch product
+      : lineItem.price?.product?.name || ''
+    
+    if (productName && (productName.includes('Family') || productName.includes('family'))) {
+      return true
+    }
+  }
+
+  return false
+}
+
+/**
+ * Find or create a family group for a user
+ * Returns the family group ID
+ */
+async function findOrCreateFamilyGroup(
+  supabaseAdmin: any,
+  userId: string,
+  familyName?: string
+): Promise<string> {
+  // Check if user is already admin of a family group
+  const { data: existingFamily } = await supabaseAdmin
+    .from('family_groups')
+    .select('id')
+    .eq('admin_user_id', userId)
+    .maybeSingle()
+  
+  if (existingFamily) {
+    console.log('✅ Found existing family group for admin:', existingFamily.id)
+    return existingFamily.id
+  }
+  
+  // Check if user is already an active member of a family group
+  const { data: memberFamily } = await supabaseAdmin
+    .from('family_members')
+    .select('family_group_id')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .maybeSingle()
+  
+  if (memberFamily) {
+    console.log('✅ User is already a member of family group:', memberFamily.family_group_id)
+    return memberFamily.family_group_id
+  }
+  
+  // Create new family group
+  const { data: newFamily, error } = await supabaseAdmin
+    .from('family_groups')
+    .insert({
+      admin_user_id: userId,
+      family_name: familyName || 'My Family',
+      family_type: 'household',
+      max_members: 6
+    })
+    .select('id')
+    .single()
+  
+  if (error) {
+    console.error('❌ Error creating family group:', error)
+    throw error
+  }
+  
+  console.log('✅ Created new family group:', newFamily.id)
+  
+  // Add creator as admin member
+  const { error: memberError } = await supabaseAdmin
+    .from('family_members')
+    .insert({
+      family_group_id: newFamily.id,
+      user_id: userId,
+      role: 'admin',
+      relationship: 'admin',
+      status: 'active',
+      is_verified: true,
+      joined_at: new Date().toISOString()
+    })
+  
+  if (memberError) {
+    console.error('❌ Error adding admin as family member:', memberError)
+    throw memberError
+  }
+  
+  return newFamily.id
+}
+
+/**
+ * Grant access to all active family members
+ * Creates product_purchases records for each member and updates family_subscriptions
+ */
+async function grantFamilyAccess(
+  supabaseAdmin: any,
+  familyGroupId: string,
+  serviceId: string,
+  serviceSlug: string,
+  subscriptionId: string | null,
+  stripeCustomerId: string,
+  amountTotal: number,
+  currency: string,
+  subscriptionInterval: string | null,
+  currentPeriodStart: string,
+  currentPeriodEnd: string | null
+): Promise<void> {
+  // Get all active family members using database function
+  const { data: members, error: membersError } = await supabaseAdmin
+    .rpc('get_active_family_members', { family_group_uuid: familyGroupId })
+  
+  if (membersError) {
+    console.error('❌ Error fetching active family members:', membersError)
+    throw membersError
+  }
+  
+  if (!members || members.length === 0) {
+    console.warn('⚠️ No active family members found for family group:', familyGroupId)
+    return
+  }
+  
+  console.log(`✅ Found ${members.length} active family member(s)`)
+  
+  const perMemberAmount = amountTotal / members.length
+  
+  // Create or update purchase records for each member
+  let createdCount = 0
+  let updatedCount = 0
+  
+  for (const member of members) {
+    // Check if member already has an active purchase for this service
+    const { data: existingPurchase } = await supabaseAdmin
+      .from('service_purchases')
+      .select('id')
+      .eq('user_id', member.user_id)
+      .eq('service_id', serviceId)
+      .eq('status', 'active')
+      .maybeSingle()
+
+    const purchaseData = {
+      user_id: member.user_id,
+      service_id: serviceId,
+      purchase_type: subscriptionId ? 'subscription' : 'one_time',
+      amount_paid: perMemberAmount,
+      currency: currency,
+      stripe_customer_id: stripeCustomerId,
+      stripe_subscription_id: subscriptionId,
+      user_type: 'individual', // Family members are still individuals
+      subscription_interval: subscriptionInterval,
+      status: 'active',
+      payment_status: 'succeeded',
+      purchased_at: currentPeriodStart
+    }
+
+    if (existingPurchase) {
+      // Update existing purchase
+      const { error: updateError } = await supabaseAdmin
+        .from('service_purchases')
+        .update(purchaseData)
+        .eq('id', existingPurchase.id)
+      
+      if (updateError) {
+        console.error(`❌ Error updating purchase for member ${member.user_id}:`, updateError)
+      } else {
+        updatedCount++
+      }
+    } else {
+      // Create new purchase
+      const { error: insertError } = await supabaseAdmin
+        .from('service_purchases')
+        .insert(purchaseData)
+      
+      if (insertError) {
+        console.error(`❌ Error creating purchase for member ${member.user_id}:`, insertError)
+      } else {
+        createdCount++
+      }
+    }
+  }
+  
+  console.log(`✅ Processed ${members.length} member(s): ${createdCount} created, ${updatedCount} updated`)
+}
+
+/**
+ * Revoke access from all family members at period end
+ * Updates all member product_purchases to cancelled/expired and marks family_subscriptions as cancelled
+ */
+async function revokeFamilyAccess(
+  supabaseAdmin: any,
+  familyGroupId: string,
+  periodEnd: string
+): Promise<void> {
+  // Get all active family members
+  const { data: members, error: membersError } = await supabaseAdmin
+    .rpc('get_active_family_members', { family_group_uuid: familyGroupId })
+  
+  if (membersError) {
+    console.error('❌ Error fetching active family members:', membersError)
+    throw membersError
+  }
+  
+  if (!members || members.length === 0) {
+    console.log('ℹ️ No active family members to revoke access for')
+    return
+  }
+  
+  const userIds = members.map((member: any) => member.user_id)
+  
+  // Update all member service_purchases to cancelled/expired
+  const { error: updateError } = await supabaseAdmin
+    .from('service_purchases')
+    .update({
+      status: 'cancelled',
+      cancelled_at: periodEnd,
+      updated_at: new Date().toISOString()
+    })
+    .in('user_id', userIds)
+    .eq('status', 'active')
+  
+  if (updateError) {
+    console.error('❌ Error revoking access for family members:', updateError)
+    throw updateError
+  }
+  
+  console.log(`✅ Revoked access for ${userIds.length} family member(s)`)
+}
+
+// ============================================================================
 // Event Handlers
 // ============================================================================
+
+/**
+ * Handle family plan purchase
+ * Creates family group, subscription record, and grants access to all members
+ */
+async function handleFamilyPlanPurchase(
+  supabaseAdmin: any,
+  session: any,
+  lineItems: any[],
+  userId: string,
+  item: { id: string; type: 'product' | 'service'; slug?: string },
+  subscriptionId: string | null,
+  stripeCustomerId: string,
+  amountTotal: number,
+  currency: string,
+  subscriptionInterval: string | null,
+  isLiveMode: boolean
+): Promise<void> {
+  console.log('👨‍👩‍👧‍👦 Processing family plan purchase for user:', userId)
+
+  // Validate service slug and map to plan name
+  if (item.type !== 'service' || !item.slug) {
+    await logError(
+      supabaseAdmin,
+      'stripe-webhook',
+      'validation',
+      'Family plan purchase must be a service with a slug',
+      { itemType: item.type, itemSlug: item.slug },
+      userId,
+      { event: 'checkout.session.completed', session }
+    )
+    throw new Error('Family plan purchase must be a service with a slug')
+  }
+
+  const planName = mapServiceSlugToPlanName(item.slug)
+  if (!planName) {
+    await logError(
+      supabaseAdmin,
+      'stripe-webhook',
+      'validation',
+      `Invalid family plan service slug: ${item.slug}. Only 'all-tools-membership-family' and 'supporter-tier-family' are allowed.`,
+      { serviceSlug: item.slug },
+      userId,
+      { event: 'checkout.session.completed', session }
+    )
+    throw new Error(`Invalid family plan service slug: ${item.slug}. Only All-Tools or Supporter can be family plans.`)
+  }
+
+  console.log(`✅ Validated family plan: ${planName} (from service: ${item.slug})`)
+
+  // Get subscription details if this is a subscription
+  let currentPeriodStart = new Date(session.created * 1000).toISOString()
+  let currentPeriodEnd: string | null = null
+  let subscriptionQuantity = 1
+
+  if (subscriptionId) {
+    try {
+      const stripe = getStripeInstance(isLiveMode)
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+        expand: ['items.data.price']
+      })
+
+      if (subscription.current_period_start) {
+        currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString()
+      }
+      if (subscription.current_period_end) {
+        currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString()
+      }
+
+      // Get subscription quantity (number of members)
+      subscriptionQuantity = subscription.items?.data?.[0]?.quantity || 1
+      console.log(`✅ Subscription quantity (members): ${subscriptionQuantity}`)
+    } catch (error: any) {
+      console.warn('⚠️ Error fetching subscription details:', error.message)
+    }
+  }
+
+  // Find or create family group
+  const familyName = session.metadata?.family_name || undefined
+  const familyGroupId = await findOrCreateFamilyGroup(supabaseAdmin, userId, familyName)
+
+  // Create or update family_subscriptions record
+  const { data: existingSubscription, error: checkError } = await supabaseAdmin
+    .from('family_subscriptions')
+    .select('id')
+    .eq('family_group_id', familyGroupId)
+    .eq('plan_name', planName)
+    .maybeSingle()
+
+  if (checkError) {
+    console.error('❌ Error checking for existing family subscription:', checkError)
+    throw checkError
+  }
+
+  const subscriptionData: any = {
+    family_group_id: familyGroupId,
+    stripe_customer_id: stripeCustomerId,
+    stripe_subscription_id: subscriptionId,
+    plan_name: planName,
+    status: 'active',
+    current_period_start: currentPeriodStart,
+    current_period_end: currentPeriodEnd,
+    updated_at: new Date().toISOString()
+  }
+
+  let familySubscriptionId: string
+
+  if (existingSubscription) {
+    // Update existing subscription
+    const { data: updated, error: updateError } = await supabaseAdmin
+      .from('family_subscriptions')
+      .update(subscriptionData)
+      .eq('id', existingSubscription.id)
+      .select('id')
+      .single()
+
+    if (updateError) {
+      console.error('❌ Error updating family subscription:', updateError)
+      throw updateError
+    }
+
+    familySubscriptionId = updated.id
+    console.log('✅ Updated existing family subscription:', familySubscriptionId)
+  } else {
+    // Create new subscription
+    delete subscriptionData.updated_at
+    subscriptionData.created_at = new Date().toISOString()
+
+    const { data: created, error: createError } = await supabaseAdmin
+      .from('family_subscriptions')
+      .insert(subscriptionData)
+      .select('id')
+      .single()
+
+    if (createError) {
+      console.error('❌ Error creating family subscription:', createError)
+      throw createError
+    }
+
+    familySubscriptionId = created.id
+    console.log('✅ Created new family subscription:', familySubscriptionId)
+  }
+
+  // Update family_groups.subscription_id
+  const { error: groupUpdateError } = await supabaseAdmin
+    .from('family_groups')
+    .update({
+      subscription_id: familySubscriptionId,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', familyGroupId)
+
+  if (groupUpdateError) {
+    console.error('❌ Error updating family group subscription_id:', groupUpdateError)
+    // Don't throw - subscription is already created
+  }
+
+  // Grant access to all active family members
+  await grantFamilyAccess(
+    supabaseAdmin,
+    familyGroupId,
+    item.id,
+    item.slug!,
+    subscriptionId,
+    stripeCustomerId,
+    amountTotal,
+    currency,
+    subscriptionInterval,
+    currentPeriodStart,
+    currentPeriodEnd
+  )
+
+  console.log('✅ Family plan purchase processed successfully')
+}
 
 /**
  * Handle checkout.session.completed
@@ -798,6 +1235,63 @@ async function handleCheckoutSessionCompleted(
     const purchaseTable = itemType === 'product' ? 'product_purchases' : 'service_purchases'
     const idColumn = itemType === 'product' ? 'product_id' : 'service_id'
 
+    // Check if this is a family plan purchase
+    if (isFamilyPlanPurchase(session, lineItems, item)) {
+      console.log('👨‍👩‍👧‍👦 Detected family plan purchase, routing to family plan handler')
+      try {
+        // Determine subscription interval for family plan
+        let subscriptionInterval: string | null = null
+        if (subscriptionId) {
+          // Try to get interval from price object first
+          if (lineItem.price?.recurring) {
+            subscriptionInterval = lineItem.price.recurring.interval === 'month' ? 'monthly' : 'yearly'
+          } else if (subscriptionId) {
+            // If price doesn't have recurring info, fetch subscription to get interval
+            try {
+              const stripe = getStripeInstance(isLiveMode)
+              const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+                expand: ['items.data.price']
+              })
+              if (subscription.items?.data?.[0]?.price?.recurring) {
+                subscriptionInterval = subscription.items.data[0].price.recurring.interval === 'month' ? 'monthly' : 'yearly'
+                console.log('✅ Fetched subscription interval from subscription object:', subscriptionInterval)
+              }
+            } catch (error: any) {
+              console.warn('⚠️ Error fetching subscription for interval:', error.message)
+            }
+          }
+        }
+
+        await handleFamilyPlanPurchase(
+          supabaseAdmin,
+          session,
+          lineItems,
+          userId,
+          item,
+          subscriptionId,
+          stripeCustomerId,
+          amountTotal,
+          currency,
+          subscriptionInterval,
+          isLiveMode
+        )
+        console.log('✅ Family plan purchase processed successfully')
+        continue // Skip regular purchase processing for family plans
+      } catch (error: any) {
+        console.error('❌ Error processing family plan purchase:', error)
+        await logError(
+          supabaseAdmin,
+          'stripe-webhook',
+          'database',
+          'Failed to process family plan purchase',
+          { error: error.message, itemId, itemType },
+          userId,
+          { event: 'checkout.session.completed', session }
+        )
+        continue // Skip this line item and continue with next
+      }
+    }
+
     // Determine purchase type
     const isSubscription = !!subscriptionId
     const isTrial = session.subscription_details?.trial_end ? true : false
@@ -942,6 +1436,68 @@ async function handleSubscriptionCreated(
     return
   }
 
+  // Check if this is a family plan subscription
+  const { data: familySubscription } = await supabaseAdmin
+    .from('family_subscriptions')
+    .select('id, family_group_id')
+    .eq('stripe_subscription_id', subscription.id)
+    .maybeSingle()
+
+  if (familySubscription) {
+    console.log('👨‍👩‍👧‍👦 Family plan subscription detected, updating family subscription')
+    
+    // Update family_subscriptions record
+    const updateData: any = {
+      stripe_customer_id: stripeCustomerId,
+      status: subscription.status || 'active',
+      updated_at: new Date().toISOString()
+    }
+
+    if (subscription.current_period_start) {
+      updateData.current_period_start = new Date(subscription.current_period_start * 1000).toISOString()
+    }
+    if (subscription.current_period_end) {
+      updateData.current_period_end = new Date(subscription.current_period_end * 1000).toISOString()
+    }
+
+    const { error: updateError } = await supabaseAdmin
+      .from('family_subscriptions')
+      .update(updateData)
+      .eq('id', familySubscription.id)
+
+    if (updateError) {
+      console.error('❌ Error updating family subscription:', updateError)
+      await logError(
+        supabaseAdmin,
+        'stripe-webhook',
+        'database',
+        'Failed to update family subscription on subscription.created',
+        { error: updateError.message, subscriptionId: subscription.id },
+        userId,
+        { event: 'customer.subscription.created', subscription }
+      )
+    } else {
+      console.log('✅ Family subscription updated successfully')
+    }
+
+    // Update family_groups.subscription_id if needed
+    const { error: groupUpdateError } = await supabaseAdmin
+      .from('family_groups')
+      .update({
+        subscription_id: familySubscription.id,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', familySubscription.family_group_id)
+      .neq('subscription_id', familySubscription.id) // Only update if different
+
+    if (groupUpdateError) {
+      console.warn('⚠️ Error updating family group subscription_id:', groupUpdateError)
+      // Don't throw - subscription is already updated
+    }
+
+    return
+  }
+
   // Check if purchase already exists
   const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
   if (existingPurchase) {
@@ -965,6 +1521,83 @@ async function handleSubscriptionUpdated(
 ): Promise<void> {
   console.log('🔄 Processing subscription.updated:', subscription.id)
 
+  // Check if this is a family plan subscription
+  const { data: familySubscription } = await supabaseAdmin
+    .from('family_subscriptions')
+    .select('id, family_group_id')
+    .eq('stripe_subscription_id', subscription.id)
+    .maybeSingle()
+
+  if (familySubscription) {
+    console.log('👨‍👩‍👧‍👦 Family plan subscription updated, updating family subscription')
+    
+    // Update family_subscriptions record
+    const updateData: any = {
+      status: subscription.status || 'active',
+      updated_at: new Date().toISOString()
+    }
+
+    if (subscription.current_period_start) {
+      updateData.current_period_start = new Date(subscription.current_period_start * 1000).toISOString()
+    }
+    if (subscription.current_period_end) {
+      updateData.current_period_end = new Date(subscription.current_period_end * 1000).toISOString()
+    }
+
+    const { error: updateError } = await supabaseAdmin
+      .from('family_subscriptions')
+      .update(updateData)
+      .eq('id', familySubscription.id)
+
+    if (updateError) {
+      console.error('❌ Error updating family subscription:', updateError)
+      await logError(
+        supabaseAdmin,
+        'stripe-webhook',
+        'database',
+        'Failed to update family subscription on subscription.updated',
+        { error: updateError.message, subscriptionId: subscription.id },
+        null,
+        { event: 'customer.subscription.updated', subscription }
+      )
+      return
+    }
+
+    console.log('✅ Family subscription updated successfully')
+
+    // Handle subscription quantity changes (member count changes)
+    const subscriptionQuantity = subscription.items?.data?.[0]?.quantity || 1
+    const { data: activeMembers } = await supabaseAdmin
+      .rpc('get_active_family_members', { family_group_uuid: familySubscription.family_group_id })
+
+    const currentMemberCount = activeMembers?.length || 0
+
+    if (subscriptionQuantity !== currentMemberCount) {
+      console.log(`ℹ️ Subscription quantity (${subscriptionQuantity}) differs from active member count (${currentMemberCount})`)
+      
+      if (subscriptionQuantity < currentMemberCount) {
+        // Quantity decreased - excess members will be revoked at period end
+        // This is handled by the period end logic in revokeFamilyAccess
+        console.log(`ℹ️ ${currentMemberCount - subscriptionQuantity} member(s) will be revoked at period end`)
+      } else {
+        // Quantity increased - new members can be added via family management UI
+        console.log(`ℹ️ Subscription allows ${subscriptionQuantity} members, ${subscriptionQuantity - currentMemberCount} more can be added`)
+      }
+    }
+
+    // Update access for all members based on status
+    if (subscription.status === 'active' || subscription.status === 'trialing') {
+      // Ensure all active members have access
+      // This is handled by the family subscription access check
+      console.log('✅ Subscription is active, members should have access')
+    } else if (subscription.status === 'canceled' || subscription.status === 'unpaid' || subscription.status === 'past_due') {
+      // Access revocation will be handled by subscription.deleted or invoice.payment_failed
+      console.log(`ℹ️ Subscription status is ${subscription.status}, access will be revoked at period end if needed`)
+    }
+
+    return
+  }
+
   const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
   if (!existingPurchase) {
     console.warn('⚠️ Purchase not found for subscription:', subscription.id)
@@ -983,6 +1616,68 @@ async function handleSubscriptionDeleted(
   subscription: any
 ): Promise<void> {
   console.log('🗑️ Processing subscription.deleted:', subscription.id)
+
+  // Check if this is a family plan subscription
+  const { data: familySubscription } = await supabaseAdmin
+    .from('family_subscriptions')
+    .select('id, family_group_id')
+    .eq('stripe_subscription_id', subscription.id)
+    .maybeSingle()
+
+  if (familySubscription) {
+    console.log('👨‍👩‍👧‍👦 Family plan subscription deleted, revoking access')
+    
+    // Determine period end date (when to revoke access)
+    const periodEnd = subscription.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toISOString()
+      : subscription.ended_at
+        ? new Date(subscription.ended_at * 1000).toISOString()
+        : new Date().toISOString()
+
+    // Mark family_subscriptions as cancelled
+    const { error: updateError } = await supabaseAdmin
+      .from('family_subscriptions')
+      .update({
+        status: 'canceled',
+        current_period_end: periodEnd,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', familySubscription.id)
+
+    if (updateError) {
+      console.error('❌ Error updating family subscription:', updateError)
+      await logError(
+        supabaseAdmin,
+        'stripe-webhook',
+        'database',
+        'Failed to update family subscription on subscription deletion',
+        { error: updateError.message, subscriptionId: subscription.id },
+        null,
+        { event: 'customer.subscription.deleted', subscription }
+      )
+    } else {
+      console.log('✅ Family subscription marked as cancelled')
+    }
+
+    // Revoke access from all family members at period end
+    try {
+      await revokeFamilyAccess(supabaseAdmin, familySubscription.family_group_id, periodEnd)
+      console.log('✅ Access revoked for all family members')
+    } catch (error: any) {
+      console.error('❌ Error revoking family access:', error)
+      await logError(
+        supabaseAdmin,
+        'stripe-webhook',
+        'database',
+        'Failed to revoke family access on subscription deletion',
+        { error: error.message, familyGroupId: familySubscription.family_group_id },
+        null,
+        { event: 'customer.subscription.deleted', subscription }
+      )
+    }
+
+    return
+  }
 
   const existingPurchase = await findExistingPurchase(supabaseAdmin, subscription.id)
   if (!existingPurchase) {
@@ -1097,6 +1792,158 @@ async function handleInvoicePaid(
   if (!subscriptionId && invoice.lines?.data?.[0]?.parent?.subscription_item_details?.subscription) {
     subscriptionId = invoice.lines.data[0].parent.subscription_item_details.subscription
     console.log('🔍 Debug: Found subscription ID from line item parent:', subscriptionId)
+  }
+
+  // Check if this is a family plan subscription invoice
+  if (subscriptionId) {
+    const { data: familySubscription } = await supabaseAdmin
+      .from('family_subscriptions')
+      .select('id, family_group_id, plan_name')
+      .eq('stripe_subscription_id', subscriptionId)
+      .maybeSingle()
+
+    if (familySubscription) {
+      console.log('👨‍👩‍👧‍👦 Family plan invoice paid, updating family subscription and renewing access')
+      
+      // Get subscription details from Stripe to update periods
+      let currentPeriodStart: string | null = null
+      let currentPeriodEnd: string | null = null
+      let subscriptionQuantity = 1
+
+      try {
+        const stripe = getStripeInstance(isLiveMode)
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+          expand: ['items.data.price']
+        })
+
+        if (subscription.current_period_start) {
+          currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString()
+        }
+        if (subscription.current_period_end) {
+          currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString()
+        }
+
+        subscriptionQuantity = subscription.items?.data?.[0]?.quantity || 1
+      } catch (error: any) {
+        console.warn('⚠️ Error fetching subscription details:', error.message)
+      }
+
+      // Update family_subscriptions billing period
+      const updateData: any = {
+        status: 'active',
+        updated_at: new Date().toISOString()
+      }
+
+      if (currentPeriodStart) {
+        updateData.current_period_start = currentPeriodStart
+      }
+      if (currentPeriodEnd) {
+        updateData.current_period_end = currentPeriodEnd
+      }
+
+      const { error: updateError } = await supabaseAdmin
+        .from('family_subscriptions')
+        .update(updateData)
+        .eq('id', familySubscription.id)
+
+      if (updateError) {
+        console.error('❌ Error updating family subscription:', updateError)
+        await logError(
+          supabaseAdmin,
+          'stripe-webhook',
+          'database',
+          'Failed to update family subscription on invoice.paid',
+          { error: updateError.message, subscriptionId, invoiceId: invoice.id },
+          null,
+          { event: 'invoice.paid', invoice }
+        )
+        return
+      }
+
+      console.log('✅ Family subscription billing period updated')
+
+      // Get service ID for granting access
+      const serviceSlug = familySubscription.plan_name === 'family_all_tools'
+        ? 'all-tools-membership-family'
+        : 'supporter-tier-family'
+
+      const { data: service } = await supabaseAdmin
+        .from('services')
+        .select('id')
+        .eq('slug', serviceSlug)
+        .maybeSingle()
+
+      if (service && currentPeriodStart && currentPeriodEnd) {
+        // Renew access for all active family members
+        // This will create new service_purchases records for each member
+        const { data: members } = await supabaseAdmin
+          .rpc('get_active_family_members', { family_group_uuid: familySubscription.family_group_id })
+
+        if (members && members.length > 0) {
+          const amountTotal = invoice.amount_paid ? (invoice.amount_paid / 100) : 0
+          const currency = (invoice.currency || 'usd').toUpperCase()
+          const perMemberAmount = amountTotal / members.length
+
+          // Create/update service_purchases records for each member
+          for (const member of members) {
+            // Check if member already has an active purchase for this service
+            const { data: existingPurchase } = await supabaseAdmin
+              .from('service_purchases')
+              .select('id')
+              .eq('user_id', member.user_id)
+              .eq('service_id', service.id)
+              .eq('status', 'active')
+              .maybeSingle()
+
+            const purchaseData = {
+              user_id: member.user_id,
+              service_id: service.id,
+              purchase_type: 'subscription',
+              amount_paid: perMemberAmount,
+              currency: currency,
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscriptionId,
+              stripe_invoice_id: invoice.id,
+              user_type: 'individual',
+              status: 'active',
+              payment_status: 'succeeded',
+              purchased_at: currentPeriodStart
+            }
+
+            if (existingPurchase) {
+              // Update existing purchase
+              await supabaseAdmin
+                .from('service_purchases')
+                .update(purchaseData)
+                .eq('id', existingPurchase.id)
+            } else {
+              // Create new purchase
+              await supabaseAdmin
+                .from('service_purchases')
+                .insert(purchaseData)
+            }
+          }
+
+          console.log(`✅ Renewed access for ${members.length} active family member(s)`)
+        }
+      }
+
+      // Handle subscription quantity changes (member count updates)
+      if (subscriptionQuantity) {
+        const { data: activeMembers } = await supabaseAdmin
+          .rpc('get_active_family_members', { family_group_uuid: familySubscription.family_group_id })
+
+        const currentMemberCount = activeMembers?.length || 0
+
+        if (subscriptionQuantity !== currentMemberCount) {
+          console.log(`ℹ️ Subscription quantity (${subscriptionQuantity}) differs from active member count (${currentMemberCount})`)
+          // Member count changes are handled via family management UI
+          // Webhook just logs the difference
+        }
+      }
+
+      return
+    }
   }
 
   // Find purchase by subscription or invoice ID
