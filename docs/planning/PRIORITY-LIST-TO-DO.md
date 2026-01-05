@@ -66,49 +66,6 @@
 
 ---
 
-#### 15.9.3.1. Family Management API (Edge Function) ⚠️ **MISSING**
-**Status**: **MISSING**  
-**Priority**: High - Required for Family Management UI (15.9.4) to provide immediate member access  
-**Phase**: Phase 4 - Account Management  
-**Action**:
-- Create new Edge Function: `supabase/functions/family-management/`
-  - **Purpose**: Provide API endpoints for family member management with immediate access granting
-  - **Key Feature**: Grant immediate access to new members (not just on renewal)
-- **Endpoints**:
-  - `POST /add-member` - Add new family member and grant immediate access
-    - Check if subscription quantity allows new member
-    - If yes: Immediately call `grantFamilyAccess` to grant access
-    - If no: Update Stripe subscription quantity (with proration), then grant access
-    - Update family subscription billing if quantity changed
-  - `POST /remove-member` - Remove family member and revoke access
-  - `POST /update-member-role` - Update member role (admin only)
-  - `GET /family-status` - Get family group status, members, and subscription details
-- **Integration with Webhook Handler**:
-  - Reuse `grantFamilyAccess` function from `stripe-webhook/index.ts`
-  - Get subscription details from Stripe API
-  - Update Stripe subscription quantity if needed (with proration)
-  - Immediately grant access to new members
-- **Business Logic**:
-  - If subscription quantity >= active member count: Grant immediate access
-  - If subscription quantity < active member count: Update Stripe subscription (with proration), then grant access
-  - Calculate per-member pricing correctly
-  - Handle subscription billing cycle updates
-- **Error Handling**:
-  - Validate user permissions (admin only for add/remove)
-  - Validate subscription status
-  - Handle Stripe API errors gracefully
-  - Log all operations for audit trail
-
-**Depends on**: 15.9.1 (Database Schema), 15.9.3 (Webhook Handler)  
-**Required for**: 15.9.4 (Family Management UI)  
-**Priority**: High - UX improvement for immediate member access
-
-**Reference**: 
-- Test execution identified this as enhancement opportunity (see `supabase/functions/stripe-webhook/TEST-EXECUTION-CHECKLIST.md` Phase 6)
-- Current behavior: New members only get access on renewal
-- Expected behavior: New members should get immediate access if subscription allows
-
----
 
 #### 15.9.4. Family Management UI (Account Page Component) ⚠️ **MISSING**
 **Status**: **MISSING**  
