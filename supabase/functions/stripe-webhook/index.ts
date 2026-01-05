@@ -544,6 +544,98 @@ async function findOrCreateFamilyGroup(
   
   if (existingFamily) {
     console.log('✅ Found existing family group for admin:', existingFamily.id)
+    
+    // Ensure admin is a member of the family group (in case member wasn't created previously)
+    const { data: existingMember } = await supabaseAdmin
+      .from('family_members')
+      .select('id, age')
+      .eq('family_group_id', existingFamily.id)
+      .eq('user_id', userId)
+      .maybeSingle()
+    
+    if (!existingMember) {
+      console.log('⚠️ Admin is not a member of existing family group, adding now...')
+      
+      // Get user's date_of_birth to calculate age for validation
+      const { data: userProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('date_of_birth')
+        .eq('id', userId)
+        .maybeSingle()
+      
+      // Calculate age from date_of_birth
+      let userAge: number | null = null
+      if (userProfile?.date_of_birth) {
+        const birthDate = new Date(userProfile.date_of_birth)
+        const today = new Date()
+        userAge = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          userAge--
+        }
+        console.log(`✅ Calculated user age: ${userAge} (from date_of_birth: ${userProfile.date_of_birth})`)
+      } else {
+        // If no date_of_birth, default to 18 for test users
+        console.warn('⚠️ No date_of_birth found for user, defaulting age to 18 for family member validation')
+        userAge = 18
+      }
+      
+      // Add admin as family member
+      const { error: memberError } = await supabaseAdmin
+        .from('family_members')
+        .insert({
+          family_group_id: existingFamily.id,
+          user_id: userId,
+          role: 'admin',
+          relationship: 'admin',
+          status: 'active',
+          is_verified: true,
+          age: userAge,
+          joined_at: new Date().toISOString()
+        })
+      
+      if (memberError) {
+        console.error('❌ Error adding admin as family member to existing group:', memberError)
+        throw memberError
+      }
+      
+      console.log('✅ Added admin as family member to existing group with age:', userAge)
+    } else if (!existingMember.age) {
+      // If member exists but age is missing, update it
+      console.log('⚠️ Family member exists but age is missing, updating...')
+      
+      // Get user's date_of_birth to calculate age
+      const { data: userProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('date_of_birth')
+        .eq('id', userId)
+        .maybeSingle()
+      
+      let userAge: number | null = null
+      if (userProfile?.date_of_birth) {
+        const birthDate = new Date(userProfile.date_of_birth)
+        const today = new Date()
+        userAge = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          userAge--
+        }
+      } else {
+        userAge = 18 // Default for test users
+      }
+      
+      const { error: updateError } = await supabaseAdmin
+        .from('family_members')
+        .update({ age: userAge, updated_at: new Date().toISOString() })
+        .eq('id', existingMember.id)
+      
+      if (updateError) {
+        console.warn('⚠️ Error updating member age:', updateError)
+      } else {
+        console.log('✅ Updated family member age to:', userAge)
+      }
+    }
+    
     return existingFamily.id
   }
   
@@ -579,6 +671,31 @@ async function findOrCreateFamilyGroup(
   
   console.log('✅ Created new family group:', newFamily.id)
   
+  // Get user's date_of_birth to calculate age for validation
+  const { data: userProfile } = await supabaseAdmin
+    .from('user_profiles')
+    .select('date_of_birth')
+    .eq('id', userId)
+    .maybeSingle()
+  
+  // Calculate age from date_of_birth
+  let userAge: number | null = null
+  if (userProfile?.date_of_birth) {
+    const birthDate = new Date(userProfile.date_of_birth)
+    const today = new Date()
+    userAge = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      userAge--
+    }
+    console.log(`✅ Calculated user age: ${userAge} (from date_of_birth: ${userProfile.date_of_birth})`)
+  } else {
+    // If no date_of_birth, default to 18 for test users (or use override)
+    // For production, this should be handled differently, but for now we'll default to adult
+    console.warn('⚠️ No date_of_birth found for user, defaulting age to 18 for family member validation')
+    userAge = 18
+  }
+  
   // Add creator as admin member
   const { error: memberError } = await supabaseAdmin
     .from('family_members')
@@ -589,6 +706,7 @@ async function findOrCreateFamilyGroup(
       relationship: 'admin',
       status: 'active',
       is_verified: true,
+      age: userAge,
       joined_at: new Date().toISOString()
     })
   
@@ -597,6 +715,7 @@ async function findOrCreateFamilyGroup(
     throw memberError
   }
   
+  console.log('✅ Added admin as family member with age:', userAge)
   return newFamily.id
 }
 
@@ -1217,14 +1336,212 @@ async function handleCheckoutSessionCompleted(
     }
   }
 
+  // Check if this is a family plan purchase BEFORE returning early
+  // This handles cases where checkout session retrieval fails but metadata indicates family plan
+  const isFamilyPlanFromMetadata = session.metadata?.is_family_plan === 'true'
+  const familyServiceSlug = session.metadata?.service_slug
+  
   if (lineItems.length === 0) {
+    // If it's a family plan, try to get service info from subscription or metadata
+    if (isFamilyPlanFromMetadata && subscriptionId) {
+      console.log('👨‍👩‍👧‍👦 Family plan detected via metadata, fetching service from subscription...')
+      try {
+        const stripe = getStripeInstance(isLiveMode)
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+          expand: ['items.data.price.product']
+        })
+        
+        if (subscription.items?.data?.[0]) {
+          const subscriptionItem = subscription.items.data[0]
+          const price = subscriptionItem.price
+          const product = typeof price?.product === 'string' 
+            ? await stripe.products.retrieve(price.product)
+            : price?.product
+          
+          if (product && price) {
+            const stripeProductId = product.id
+            const stripePriceId = price.id
+            
+            // Find the service in database
+            const item = await findProductOrService(supabaseAdmin, stripeProductId, stripePriceId)
+            
+            // Use service from lookup if it's a family plan service, otherwise use metadata slug
+            let serviceItem = item
+            if (item?.type === 'service' && item.slug) {
+              // Verify it's a family plan service
+              if (item.slug === 'all-tools-membership-family' || item.slug === 'supporter-tier-family') {
+                console.log(`✅ Found family plan service via product lookup: ${item.slug}`)
+                serviceItem = item
+              } else {
+                console.warn(`⚠️ Service found (${item.slug}) but not a family plan service, will use metadata slug`)
+                serviceItem = null // Will use metadata slug fallback
+              }
+            } else if (item?.type === 'service' && !item.slug) {
+              console.warn(`⚠️ Service found but missing slug, will use metadata slug`)
+              serviceItem = null // Will use metadata slug fallback
+            } else if (!item) {
+              console.warn(`⚠️ Service not found via product lookup, will use metadata slug`)
+              serviceItem = null // Will use metadata slug fallback
+            }
+            
+            // If we have a valid service item, process it
+            if (serviceItem && serviceItem.type === 'service' && serviceItem.slug) {
+              // Get amount and currency
+              let amountTotal = (session.amount_total || 0) / 100
+              const currency = (session.currency || 'chf').toUpperCase()
+              
+              // If amount is 0, get from subscription
+              if (!amountTotal || amountTotal === 0) {
+                amountTotal = (subscriptionItem.price.unit_amount || 0) / 100 * (subscriptionItem.quantity || 1)
+              }
+              
+              // Determine subscription interval
+              let subscriptionInterval: string | null = null
+              if (price.recurring) {
+                subscriptionInterval = price.recurring.interval === 'month' ? 'monthly' : 'yearly'
+              }
+              
+              // Process as family plan
+              await handleFamilyPlanPurchase(
+                supabaseAdmin,
+                session,
+                [], // Empty lineItems, but we have the service info
+                userId,
+                serviceItem,
+                subscriptionId,
+                stripeCustomerId,
+                amountTotal,
+                currency,
+                subscriptionInterval,
+                isLiveMode
+              )
+              console.log('✅ Family plan purchase processed successfully (from subscription)')
+              return // Successfully processed, exit early
+            }
+          }
+        }
+        
+        // Fallback: If we have service_slug in metadata, try to find service by slug
+        // This is the most reliable method when product lookup fails
+        if (familyServiceSlug && (familyServiceSlug === 'all-tools-membership-family' || familyServiceSlug === 'supporter-tier-family')) {
+          console.log(`🔍 Trying to find service by slug from metadata: ${familyServiceSlug}`)
+          const { data: service, error: serviceError } = await supabaseAdmin
+            .from('services')
+            .select('id, slug')
+            .eq('slug', familyServiceSlug)
+            .maybeSingle()
+          
+          if (serviceError) {
+            console.error('❌ Error finding service by slug:', serviceError)
+            await logError(
+              supabaseAdmin,
+              'stripe-webhook',
+              'database',
+              'Failed to find service by slug for family plan',
+              { error: serviceError.message, serviceSlug: familyServiceSlug },
+              userId,
+              { event: 'checkout.session.completed', session }
+            )
+          } else if (service) {
+            console.log(`✅ Found family plan service by slug: ${familyServiceSlug}`)
+            
+            // Get amount and currency
+            let amountTotal = (session.amount_total || 0) / 100
+            const currency = (session.currency || 'chf').toUpperCase()
+            
+            // Determine subscription interval from subscription if available
+            let subscriptionInterval: string | null = null
+            if (subscriptionId) {
+              try {
+                const stripe = getStripeInstance(isLiveMode)
+                const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+                  expand: ['items.data.price']
+                })
+                if (subscription.items?.data?.[0]?.price?.recurring) {
+                  subscriptionInterval = subscription.items.data[0].price.recurring.interval === 'month' ? 'monthly' : 'yearly'
+                }
+                // Get amount from subscription if not in session
+                if (!amountTotal || amountTotal === 0) {
+                  const item = subscription.items.data[0]
+                  amountTotal = (item.price.unit_amount || 0) / 100 * (item.quantity || 1)
+                }
+              } catch (subError: any) {
+                console.warn('⚠️ Error fetching subscription for family plan:', subError.message)
+              }
+            }
+            
+            // Process as family plan
+            try {
+              await handleFamilyPlanPurchase(
+                supabaseAdmin,
+                session,
+                [], // Empty lineItems, but we have the service info
+                userId,
+                { id: service.id, type: 'service', slug: service.slug },
+                subscriptionId,
+                stripeCustomerId,
+                amountTotal,
+                currency,
+                subscriptionInterval,
+                isLiveMode
+              )
+              console.log('✅ Family plan purchase processed successfully (from metadata slug)')
+              return // Successfully processed, exit early
+            } catch (familyPlanError: any) {
+              console.error('❌ Error in handleFamilyPlanPurchase:', familyPlanError)
+              // Error is already logged in handleFamilyPlanPurchase, but log additional context
+              await logError(
+                supabaseAdmin,
+                'stripe-webhook',
+                'database',
+                'Failed to process family plan purchase from metadata slug',
+                { 
+                  error: familyPlanError.message, 
+                  serviceId: service.id,
+                  serviceSlug: service.slug,
+                  subscriptionId,
+                  stack: familyPlanError.stack
+                },
+                userId,
+                { event: 'checkout.session.completed', session }
+              )
+              throw familyPlanError // Re-throw to be caught by outer catch
+            }
+          } else {
+            console.warn(`⚠️ Service not found by slug: ${familyServiceSlug}`)
+            await logError(
+              supabaseAdmin,
+              'stripe-webhook',
+              'validation',
+              'Family plan service not found in database by slug',
+              { serviceSlug: familyServiceSlug },
+              userId,
+              { event: 'checkout.session.completed', session }
+            )
+          }
+        }
+      } catch (error: any) {
+        console.error('❌ Error processing family plan from subscription:', error.message)
+        await logError(
+          supabaseAdmin,
+          'stripe-webhook',
+          'database',
+          'Failed to process family plan purchase from subscription',
+          { error: error.message, subscriptionId, sessionId: session.id, serviceSlug: familyServiceSlug },
+          userId,
+          { event: 'checkout.session.completed', session }
+        )
+      }
+    }
+    
+    // If we get here, it's not a family plan or family plan processing failed
     console.warn('⚠️ No line items found in checkout session or payment intent')
     await logError(
       supabaseAdmin,
       'stripe-webhook',
       'validation',
       'No line items in checkout session or payment intent',
-      { sessionId: session.id, paymentIntentId },
+      { sessionId: session.id, paymentIntentId, isFamilyPlan: isFamilyPlanFromMetadata },
       userId,
       { event: 'checkout.session.completed', session }
     )
@@ -1691,13 +2008,59 @@ async function handleSubscriptionDeleted(
     console.log('👨‍👩‍👧‍👦 Family plan subscription deleted, revoking access')
     
     // Determine period end date (when to revoke access)
-    const periodEnd = subscription.current_period_end
-      ? new Date(subscription.current_period_end * 1000).toISOString()
-      : subscription.ended_at
-        ? new Date(subscription.ended_at * 1000).toISOString()
-        : new Date().toISOString()
+    // Priority: Use subscription.current_period_end if it's in the future (subscription canceled before period end)
+    // This ensures access remains until the end of the paid period, not until cancellation time
+    let periodEnd: string
+    const now = new Date()
+    
+    // First, check if subscription has current_period_end and it's in the future
+    if (subscription.current_period_end) {
+      const subscriptionPeriodEnd = new Date(subscription.current_period_end * 1000)
+      if (subscriptionPeriodEnd > now) {
+        // Subscription was canceled before period end - use the actual period end date
+        periodEnd = subscriptionPeriodEnd.toISOString()
+        console.log(`✅ Using subscription.current_period_end (subscription canceled before period end): ${periodEnd}`)
+      } else {
+        // Period end is in the past, subscription ended at period end
+        periodEnd = subscriptionPeriodEnd.toISOString()
+        console.log(`✅ Using subscription.current_period_end (subscription ended at period end): ${periodEnd}`)
+      }
+    } else {
+      // No current_period_end in subscription, try to get from existing database record
+      const { data: existingSub } = await supabaseAdmin
+        .from('family_subscriptions')
+        .select('current_period_end')
+        .eq('id', familySubscription.id)
+        .single()
+      
+      if (existingSub?.current_period_end) {
+        const existingPeriodEnd = new Date(existingSub.current_period_end)
+        if (existingPeriodEnd > now) {
+          // Use existing period end (subscription canceled before period end)
+          periodEnd = existingSub.current_period_end
+          console.log(`✅ Using existing current_period_end from database: ${periodEnd}`)
+        } else {
+          // Existing period end is in the past, use ended_at or existing value
+          if (subscription.ended_at) {
+            periodEnd = new Date(subscription.ended_at * 1000).toISOString()
+            console.log(`⚠️ Using subscription.ended_at (period end in past): ${periodEnd}`)
+          } else {
+            periodEnd = existingSub.current_period_end
+            console.log(`⚠️ Using existing current_period_end (fallback): ${periodEnd}`)
+          }
+        }
+      } else if (subscription.ended_at) {
+        // No period end available, use ended_at
+        periodEnd = new Date(subscription.ended_at * 1000).toISOString()
+        console.log(`⚠️ Using subscription.ended_at (no period end available): ${periodEnd}`)
+      } else {
+        periodEnd = new Date().toISOString()
+        console.warn(`⚠️ No period end available, using current time: ${periodEnd}`)
+      }
+    }
 
     // Mark family_subscriptions as cancelled
+    // Preserve the actual period end date (when access should be revoked)
     const { error: updateError } = await supabaseAdmin
       .from('family_subscriptions')
       .update({
