@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.0.11] - 2026-01-05
+
 ### Fixed
 - **Family Plan Webhook Handler**: Fixed multiple critical bugs in family plan processing
   - Fixed family plan detection when checkout session retrieval fails - handler now checks `session.metadata.is_family_plan` before returning early, allowing family plans to be processed even when line items can't be retrieved
