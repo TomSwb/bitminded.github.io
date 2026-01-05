@@ -1,6 +1,6 @@
 # 🎯 Priority List - To Do
 
-**Last Updated**: November 21, 2025 (Reorganized for logical workflow grouping)  
+**Last Updated**: January 5, 2026 (Added Family Management API requirement, updated webhook handler testing status)  
 **Based on**: Actual codebase investigation (not just READMEs)
 
 > **Note**: This document contains only active/incomplete items. For completed items, see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md) (same folder).
@@ -61,13 +61,58 @@
 1. ✅ Database Setup (15.9.1) - Foundation (Phase 2) - **COMPLETED** (see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md))
 2. ✅ Webhook Handler Updates (15.9.3) - Depends on 15.9.1 (Phase 2) - **COMPLETED** (see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md))
 3. Stripe Checkout Integration (15.9.2) - Depends on #16 (Phase 3, after #16)
-4. Family Management UI (15.9.4) - Depends on 15.9.1, 15.9.2, 15.9.3 (Phase 4, Account Management)
+4. Family Management API (15.9.3.1) - Depends on 15.9.1, 15.9.3 (Phase 4, Account Management) - **NEW REQUIREMENT**
+5. Family Management UI (15.9.4) - Depends on 15.9.1, 15.9.2, 15.9.3, 15.9.3.1 (Phase 4, Account Management)
+
+---
+
+#### 15.9.3.1. Family Management API (Edge Function) ⚠️ **MISSING**
+**Status**: **MISSING**  
+**Priority**: High - Required for Family Management UI (15.9.4) to provide immediate member access  
+**Phase**: Phase 4 - Account Management  
+**Action**:
+- Create new Edge Function: `supabase/functions/family-management/`
+  - **Purpose**: Provide API endpoints for family member management with immediate access granting
+  - **Key Feature**: Grant immediate access to new members (not just on renewal)
+- **Endpoints**:
+  - `POST /add-member` - Add new family member and grant immediate access
+    - Check if subscription quantity allows new member
+    - If yes: Immediately call `grantFamilyAccess` to grant access
+    - If no: Update Stripe subscription quantity (with proration), then grant access
+    - Update family subscription billing if quantity changed
+  - `POST /remove-member` - Remove family member and revoke access
+  - `POST /update-member-role` - Update member role (admin only)
+  - `GET /family-status` - Get family group status, members, and subscription details
+- **Integration with Webhook Handler**:
+  - Reuse `grantFamilyAccess` function from `stripe-webhook/index.ts`
+  - Get subscription details from Stripe API
+  - Update Stripe subscription quantity if needed (with proration)
+  - Immediately grant access to new members
+- **Business Logic**:
+  - If subscription quantity >= active member count: Grant immediate access
+  - If subscription quantity < active member count: Update Stripe subscription (with proration), then grant access
+  - Calculate per-member pricing correctly
+  - Handle subscription billing cycle updates
+- **Error Handling**:
+  - Validate user permissions (admin only for add/remove)
+  - Validate subscription status
+  - Handle Stripe API errors gracefully
+  - Log all operations for audit trail
+
+**Depends on**: 15.9.1 (Database Schema), 15.9.3 (Webhook Handler)  
+**Required for**: 15.9.4 (Family Management UI)  
+**Priority**: High - UX improvement for immediate member access
+
+**Reference**: 
+- Test execution identified this as enhancement opportunity (see `supabase/functions/stripe-webhook/TEST-EXECUTION-CHECKLIST.md` Phase 6)
+- Current behavior: New members only get access on renewal
+- Expected behavior: New members should get immediate access if subscription allows
 
 ---
 
 #### 15.9.4. Family Management UI (Account Page Component) ⚠️ **MISSING**
 **Status**: **MISSING**  
-**Priority**: High - Depends on 15.9.1, 15.9.2, 15.9.3  
+**Priority**: High - Depends on 15.9.1, 15.9.2, 15.9.3, 15.9.3.1  
 **Action**:
 - Create new account page section: `account/components/family-management/`
   - Component files:
@@ -140,7 +185,7 @@
 - Show subscription status clearly
 - Make member management intuitive and safe (confirmations for destructive actions)
 
-**Depends on**: 15.9.1 (Database Schema), 15.9.2 (Stripe Checkout), 15.9.3 (Webhook Handler)
+**Depends on**: 15.9.1 (Database Schema), 15.9.2 (Stripe Checkout), 15.9.3 (Webhook Handler), 15.9.3.1 (Family Management API)
 
 **Related Items**:
 - See also: `../payment-financial/FAMILY-PLANS-ANALYSIS.md` lines 760-787 for UI component specifications
@@ -636,7 +681,7 @@
 - Show subscription status clearly
 - Make member management intuitive and safe (confirmations for destructive actions)
 
-**Depends on**: 15.9.1 (Database Schema), 15.9.2 (Stripe Checkout), 15.9.3 (Webhook Handler)
+**Depends on**: 15.9.1 (Database Schema), 15.9.2 (Stripe Checkout), 15.9.3 (Webhook Handler), 15.9.3.1 (Family Management API)
 
 **Related Items**:
 - See also: `../payment-financial/FAMILY-PLANS-ANALYSIS.md` lines 760-787 for UI component specifications
@@ -2388,7 +2433,10 @@
 
 ### Week 2 (Remaining): Stripe & Payment Foundation
 - [x] Family Plan Database Schema (#15.9.1) - ✅ COMPLETED - Foundation for family plans
-- [x] Family Plan Webhook Handler Updates (#15.9.3) - ✅ COMPLETED - See [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md)
+- [x] Family Plan Webhook Handler Updates (#15.9.3) - ✅ COMPLETED & TESTED - See [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md)
+  - ✅ All 10 tests passed (2026-01-05)
+  - ✅ Deployed to DEV and PROD
+  - ✅ Production ready
 
 ### Week 3: Purchase & Checkout Flow
 - [ ] Stripe Checkout Integration (#16) - Core checkout flow
@@ -2405,8 +2453,10 @@
 - [ ] User Account: Receipts View (#17.1)
 - [ ] Upgrade Path: One-Time Purchase to Subscription (#17.5) - Convert single product purchases to subscriptions
 - [ ] Subscription renewal reminders (#17.4) - Includes family plan reminders
+- [ ] Family Management API (#15.9.3.1) - Edge function for immediate member access granting
 - [ ] Family Management UI (#15.9.4) - Account page family management component
 - [ ] Wire up to existing data structures
+- [ ] Integrate with Family Management API (#15.9.3.1)
 
 ### Week 5-7: Service Workflows (Tech Support + Commissioning)
 - [ ] Tech Support Booking Database Schema (#18)
