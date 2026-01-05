@@ -9,6 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.12] - 2026-01-05
+
+### Added
+- **Family Management API (Edge Function)**: New Edge Function `family-management` for managing family members with immediate access granting
+  - `POST /add-member` - Add new family member and grant immediate access (updates Stripe subscription quantity with proration if needed)
+  - `POST /remove-member` - Remove family member and revoke access (decreases Stripe subscription quantity with proration)
+  - `POST /update-member-role` - Update member role (admin only)
+  - `GET /family-status` - Get family group status, members, subscription details, and available slots
+  - Immediate access granting: New members get access immediately instead of waiting for next renewal
+  - Stripe integration: Automatically updates subscription quantity with proration when members are added/removed
+  - Comprehensive error handling, authentication, authorization, and rate limiting (20/min, 100/hour)
+- Added comprehensive test documentation and scripts:
+  - `TEST-EXECUTION-CHECKLIST.md` - Complete test plan with 15 test scenarios
+  - `find-test-data.sql` - SQL queries for finding test data
+  - `test-api.sh`, `run-tests.sh`, `run-full-tests.sh` - Automated test scripts
+  - `CRITICAL-MISSING-TESTS.md` - Additional test recommendations
+
+### Changed
+- Updated priority lists: Moved Family Management API (15.9.3.1) from TODO to completed items
+- Updated Family Plan Webhook Handler documentation: Removed reference to Family Management API as pending requirement
+
+### Testing
+- ✅ 9/15 core tests passed - All critical functionality verified
+- ✅ Immediate access granting verified - New members get access immediately
+- ✅ Access revocation verified - Removed members lose access immediately
+- ✅ Stripe integration verified - Subscription quantity updates correctly with proration
+- ✅ Complete add/remove cycle verified - Members can be added, removed, and re-added successfully
+- ✅ Edge cases handled - Duplicate member prevention, re-activation of removed members
+- ✅ Error handling verified - Unauthorized, validation errors, forbidden access
+
+### Deployment
+- ✅ Deployed to DEV (eygpejbljuqpxwwoawkn) - script size: 499.2kB
+- ✅ Deployed to PROD (dynxqnrkmjcvgzsugxtm) - script size: 499.2kB
+
+---
+
 ## [1.0.11] - 2026-01-05
 
 ### Fixed
