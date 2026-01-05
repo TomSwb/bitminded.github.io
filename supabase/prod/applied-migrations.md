@@ -4,7 +4,7 @@ These SQL migrations have been successfully applied to **PRODUCTION**.
 
 ## Database Status: ✅ 17 tables, all functions, triggers, and RLS policies in place
 
-Last updated: 2025-01-15
+Last updated: 2025-01-05
 
 ---
 
@@ -44,6 +44,27 @@ Last updated: 2025-01-15
 17. (plus auth system tables)
 
 **Status**: ✅ Applied and tested
+
+---
+
+### Migration: Fix Family Member Age Validation Trigger
+**Date**: 2025-01-05  
+**File**: `migrations/20251205_fix_family_member_age_validation.sql`  
+**Description**: Fixes the `validate_family_member_constraints()` trigger function to correctly validate the age of the NEW record being inserted during an `INSERT` operation, rather than only relying on existing records. This ensures the first family member (admin) can be added without age validation errors.
+
+**Issue**: When inserting the first family member (admin), the validation function only checked existing records in the table, but the NEW record hadn't been inserted yet, causing validation to fail with "Family must have at least one adult member (age >= 18). The admin must be an adult."
+
+**Solution**: Modified the trigger function to explicitly check the NEW record's `age` and `user_id` (admin) when `existing_member_count` is 0 (i.e., during the first member insert), allowing the admin to be added if their age is valid.
+
+**SQL**:
+```sql
+-- Updates validate_family_member_constraints() function
+-- See: supabase/migrations/20251205_fix_family_member_age_validation.sql
+```
+
+**Rollback**: Revert to previous version of `validate_family_member_constraints()` function from `20251125_create_family_plans_schema.sql`
+
+**Status**: ✅ Applied successfully to both DEV and PROD (2025-01-05)
 
 ---
 
