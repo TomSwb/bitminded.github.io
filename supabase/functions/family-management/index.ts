@@ -1239,6 +1239,108 @@ async function handleFamilyStatus(
   }
 }
 
+/**
+ * GET /my-family-group - Get current user's family group information
+ * Returns family_group_id and basic info if user is a member, null otherwise
+ */
+async function handleMyFamilyGroup(
+  supabaseAdmin: any,
+  userId: string,
+  ipAddress: string,
+  origin: string | null
+): Promise<Response> {
+  const corsHeaders = getCorsHeaders(origin)
+  
+  try {
+    // Query family_members to find user's active family group
+    // Using supabaseAdmin bypasses RLS, so no recursion issues
+    const { data: member, error: memberError } = await supabaseAdmin
+      .from('family_members')
+      .select('family_group_id, role, status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle()
+    
+    if (memberError) {
+      console.error('❌ Error fetching user family membership:', memberError)
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'database',
+        'Failed to fetch user family membership',
+        { error: memberError.message },
+        userId,
+        {},
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch family membership' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    if (!member) {
+      // User is not in any family group
+      return new Response(
+        JSON.stringify({
+          is_member: false,
+          family_group_id: null,
+          role: null
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Get family group basic info
+    const { data: familyGroup, error: groupError } = await supabaseAdmin
+      .from('family_groups')
+      .select('id, family_name, admin_user_id')
+      .eq('id', member.family_group_id)
+      .single()
+    
+    if (groupError || !familyGroup) {
+      console.error('❌ Error fetching family group:', groupError)
+      // Return member info even if group fetch fails
+      return new Response(
+        JSON.stringify({
+          is_member: true,
+          family_group_id: member.family_group_id,
+          role: member.role,
+          family_name: null
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    return new Response(
+      JSON.stringify({
+        is_member: true,
+        family_group_id: member.family_group_id,
+        role: member.role,
+        family_name: familyGroup.family_name,
+        is_admin: familyGroup.admin_user_id === userId
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  } catch (error: any) {
+    console.error('❌ Error in handleMyFamilyGroup:', error)
+    await logError(
+      supabaseAdmin,
+      'family-management',
+      'other',
+      'Unexpected error in handleMyFamilyGroup',
+      { error: error.message, stack: error.stack },
+      userId,
+      {},
+      ipAddress
+    )
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+}
+
 // ============================================================================
 // Main Handler
 // ============================================================================
@@ -1345,6 +1447,8 @@ serve(async (req) => {
     } else if (method === 'POST' && path.endsWith('/update-member-role')) {
       const body = await req.json() as UpdateMemberRoleRequest
       return await handleUpdateMemberRole(supabaseAdmin, user.id, body, ipAddress)
+    } else if (method === 'GET' && path.endsWith('/my-family-group')) {
+      return await handleMyFamilyGroup(supabaseAdmin, user.id, ipAddress, origin)
     } else if (method === 'GET' && path.endsWith('/family-status')) {
       const familyGroupId = url.searchParams.get('family_group_id')
       return await handleFamilyStatus(supabaseAdmin, user.id, familyGroupId || '', ipAddress)

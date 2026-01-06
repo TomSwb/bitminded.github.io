@@ -7,7 +7,7 @@ class AccountLayout {
     constructor() {
         this.currentSection = 'profile';
         this.isInitialized = false;
-        this.sections = ['profile', 'security', 'payment', 'apps', 'support', 'notifications', 'actions'];
+        this.sections = ['profile', 'security', 'payment', 'apps', 'support', 'notifications', 'family', 'actions'];
         this.loadedComponents = new Set();
     }
 
@@ -248,6 +248,7 @@ class AccountLayout {
             'apps': 'app-entitlements',
             'support': 'support-tickets',
             'notifications': 'notifications-preferences',
+            'family': 'family-management',
             'actions': 'account-actions'
         };
 
@@ -361,6 +362,7 @@ class AccountLayout {
             'apps': 'App Entitlements',
             'support': 'Support',
             'notifications': 'Notifications & Preferences',
+            'family': 'Family Management',
             'actions': 'Account Actions'
         };
         return titles[sectionName] || sectionName;
