@@ -8,7 +8,7 @@ class AccountPageLoader {
         this.isInitialized = false;
         this.loadedComponents = new Map();
         this.currentSection = 'profile';
-        this.sections = ['profile', 'security', 'payment', 'apps', 'support', 'notifications', 'actions'];
+        this.sections = ['profile', 'security', 'payment', 'apps', 'support', 'notifications', 'family', 'actions'];
     }
 
     /**
@@ -125,6 +125,7 @@ class AccountPageLoader {
                 'apps': 'app-entitlements',
                 'support': 'support-tickets',
                 'notifications': 'notifications-preferences',
+                'family': 'family-management',
                 'actions': 'account-actions'
             };
 
@@ -248,6 +249,7 @@ class AccountPageLoader {
             'apps': 'App Entitlements',
             'support': 'Support',
             'notifications': 'Notifications & Preferences',
+            'family': 'Family Management',
             'actions': 'Account Actions'
         };
         return titles[sectionName] || sectionName;
