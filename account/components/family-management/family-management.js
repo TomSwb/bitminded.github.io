@@ -29,25 +29,30 @@ class FamilyManagement {
         }
 
         try {
-            // Cache DOM elements
+            // Get current user first
+            await this.getCurrentUser();
+            
+            // Load translations early (needed for empty state)
+            await this.loadTranslations();
+            
+            // Cache DOM elements (after translations, ensuring DOM is ready)
             this.cacheElements();
             
-            // Get current user
-            await this.getCurrentUser();
+            // Verify critical elements exist, retry if needed
+            if (!this.elements.emptyState) {
+                // Wait a bit and retry
+                await new Promise(resolve => setTimeout(resolve, 100));
+                this.cacheElements();
+            }
             
             // Check if user is a family member
             const isMember = await this.checkFamilyMembership();
             
             if (!isMember) {
-                // Load translations first so empty state text is available
-                await this.loadTranslations();
-                // Show empty state first
+                // Show empty state
                 this.showEmptyState();
-                // Make translatable content visible (after empty state is shown)
-                // Use setTimeout to ensure DOM is updated
-                setTimeout(() => {
-                    this.showTranslatableContent();
-                }, 10);
+                // Make translatable content visible
+                this.showTranslatableContent();
                 this.isInitialized = true;
                 return;
             }
@@ -58,11 +63,11 @@ class FamilyManagement {
             // Set up event listeners
             this.bindEvents();
             
-            // Load translations
-            await this.loadTranslations();
-            
             // Update UI
             this.updateUI();
+            
+            // Make translatable content visible
+            this.showTranslatableContent();
             
             this.isInitialized = true;
             window.logger?.log('✅ Family management component initialized');
@@ -947,13 +952,21 @@ class FamilyManagement {
      * Show translatable content (make it visible)
      */
     showTranslatableContent() {
-        const translatableElements = document.querySelectorAll('.family-management .translatable-content');
+        const container = document.getElementById('family-management');
+        if (!container) {
+            window.logger?.warn('⚠️ Family Management: Container not found for showTranslatableContent');
+            return;
+        }
+
+        // Get ALL translatable content, not just those with data-translation-key
+        const translatableElements = container.querySelectorAll('.translatable-content');
         window.logger?.log(`🔍 Found ${translatableElements.length} translatable elements`);
-        translatableElements.forEach((element, index) => {
+        
+        translatableElements.forEach((element) => {
             element.classList.add('loaded');
-            // Force visibility as fallback
-            element.style.opacity = '1';
-            window.logger?.log(`✅ Made element ${index + 1} visible:`, element.textContent?.substring(0, 50));
+            // Force visibility as fallback with !important
+            element.style.setProperty('opacity', '1', 'important');
+            element.style.setProperty('visibility', 'visible', 'important');
         });
     }
 
@@ -962,28 +975,90 @@ class FamilyManagement {
      */
     showEmptyState() {
         window.logger?.log('🔍 Attempting to show empty state...');
-        window.logger?.log('Empty state element:', this.elements.emptyState);
         
-        // Ensure we have the element
+        // Ensure parent section is active and visible FIRST
+        const section = document.getElementById('section-family');
+        if (section) {
+            section.classList.add('active');
+            section.style.setProperty('display', 'block', 'important');
+            section.style.setProperty('visibility', 'visible', 'important');
+            section.style.setProperty('opacity', '1', 'important');
+            section.style.setProperty('height', 'auto', 'important');
+            section.style.setProperty('min-height', '200px', 'important');
+            window.logger?.log('✅ Section made active');
+        } else {
+            window.logger?.error('❌ Section element not found! Retrying...');
+            // Retry after delay
+            setTimeout(() => this.showEmptyState(), 200);
+            return;
+        }
+        
+        // Ensure parent content container is visible
+        const contentContainer = document.getElementById('family-content');
+        if (contentContainer) {
+            contentContainer.style.setProperty('display', 'block', 'important');
+            contentContainer.style.setProperty('visibility', 'visible', 'important');
+            contentContainer.style.setProperty('opacity', '1', 'important');
+            contentContainer.style.setProperty('height', 'auto', 'important');
+            contentContainer.style.setProperty('min-height', '100px', 'important');
+        }
+        
+        // Ensure the main container is visible
+        const mainContainer = document.getElementById('family-management');
+        if (!mainContainer) {
+            window.logger?.error('❌ Main container not found! Retrying...');
+            setTimeout(() => this.showEmptyState(), 200);
+            return;
+        }
+        mainContainer.style.setProperty('display', 'block', 'important');
+        mainContainer.style.setProperty('visibility', 'visible', 'important');
+        mainContainer.style.setProperty('opacity', '1', 'important');
+        mainContainer.style.setProperty('height', 'auto', 'important');
+        mainContainer.style.setProperty('min-height', '200px', 'important');
+        
+        // Find empty state element - retry if needed
         let emptyStateElement = this.elements.emptyState;
         if (!emptyStateElement) {
-            // Try to find it directly
             emptyStateElement = document.getElementById('family-empty-state');
             if (emptyStateElement) {
-                window.logger?.log('✅ Found element directly');
-                this.elements.emptyState = emptyStateElement; // Cache it for future use
-            } else {
-                window.logger?.error('❌ Empty state element not found in DOM!');
-                return;
+                this.elements.emptyState = emptyStateElement;
             }
         }
         
-        // Remove hidden class
-        emptyStateElement.classList.remove('hidden');
-        window.logger?.log('✅ Removed hidden class from empty state');
+        if (!emptyStateElement) {
+            window.logger?.error('❌ Empty state element not found! Retrying...');
+            setTimeout(() => this.showEmptyState(), 200);
+            return;
+        }
         
-        // Ensure the element is visible
-        emptyStateElement.style.display = 'block';
+        // Remove hidden class and force visibility with !important override
+        emptyStateElement.classList.remove('hidden');
+        emptyStateElement.style.setProperty('display', 'block', 'important');
+        emptyStateElement.style.setProperty('visibility', 'visible', 'important');
+        emptyStateElement.style.setProperty('opacity', '1', 'important');
+        emptyStateElement.style.setProperty('height', 'auto', 'important');
+        emptyStateElement.style.setProperty('min-height', '200px', 'important');
+        emptyStateElement.style.setProperty('position', 'relative', 'important');
+        emptyStateElement.style.setProperty('z-index', '1', 'important');
+        window.logger?.log('✅ Empty state made visible');
+        
+        // Make ALL translatable content inside visible immediately
+        const translatableElements = emptyStateElement.querySelectorAll('.translatable-content');
+        translatableElements.forEach((element) => {
+            element.classList.add('loaded');
+            element.style.setProperty('opacity', '1', 'important');
+            element.style.setProperty('visibility', 'visible', 'important');
+            element.style.setProperty('display', 'block', 'important');
+        });
+        window.logger?.log(`✅ Made ${translatableElements.length} translatable elements visible`);
+        
+        // Also make the icon visible
+        const icon = emptyStateElement.querySelector('.family-management__empty-icon');
+        if (icon) {
+            icon.style.setProperty('display', 'block', 'important');
+            icon.style.setProperty('visibility', 'visible', 'important');
+            icon.style.setProperty('opacity', '1', 'important');
+        }
         
         // Hide other sections
         if (this.elements.content) {
@@ -993,30 +1068,12 @@ class FamilyManagement {
             this.elements.loading.classList.add('hidden');
         }
         
-        // Ensure the main container is visible
-        const mainContainer = document.getElementById('family-management');
-        if (mainContainer) {
-            mainContainer.style.display = 'block';
-        }
+        // Force a reflow to ensure browser renders
+        void emptyStateElement.offsetHeight;
     }
 }
 
 // Make available globally
 window.FamilyManagement = FamilyManagement;
-}
-
-// Auto-initialize when component is loaded
-const initFamilyManagement = () => {
-    const container = document.getElementById('family-management');
-    if (container && !window.familyManagement) {
-        window.familyManagement = new FamilyManagement();
-        window.familyManagement.init();
-    }
-};
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFamilyManagement);
-} else {
-    initFamilyManagement();
 }
 

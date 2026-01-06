@@ -111,6 +111,16 @@ class ComponentLoader {
             throw new Error(`Container not found: ${options.container}`);
         }
 
+        // For family-management, ensure section is active BEFORE injecting HTML
+        if (componentName === 'family-management') {
+            const section = document.getElementById('section-family');
+            if (section) {
+                section.classList.add('active');
+                section.style.display = 'block';
+                section.style.visibility = 'visible';
+            }
+        }
+
         // Create temporary element to parse HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
@@ -387,6 +397,46 @@ class ComponentLoader {
                         setTimeout(initAccountActions, 50);
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'family-management') {
+                    // Wait for DOM to be ready and section to be active before initializing family management
+                    const initFamilyManagement = () => {
+                        // Ensure section is active first (double-check)
+                        const section = document.getElementById('section-family');
+                        if (section) {
+                            section.classList.add('active');
+                            section.style.display = 'block';
+                            section.style.visibility = 'visible';
+                        }
+                        
+                        // Ensure container is visible
+                        const container = document.querySelector('#family-content');
+                        if (container) {
+                            container.style.display = 'block';
+                            container.style.visibility = 'visible';
+                        }
+                        
+                        // Verify the component HTML is actually in the DOM
+                        const componentElement = document.getElementById('family-management');
+                        if (!componentElement) {
+                            window.logger?.error('❌ Family management component not found in DOM, retrying...');
+                            // Retry after a longer delay
+                            setTimeout(initFamilyManagement, 200);
+                            return;
+                        }
+                        
+                        // Create instance and initialize
+                        if (window.FamilyManagement && !window.familyManagement) {
+                            window.familyManagement = new window.FamilyManagement();
+                        }
+                        if (window.familyManagement) {
+                            window.familyManagement.init(config);
+                        } else {
+                            window.logger?.error('❌ FamilyManagement class not available');
+                        }
+                    };
+                    
+                    // Use longer timeout to ensure HTML is fully parsed and section is ready
+                    setTimeout(initFamilyManagement, 150);
                 }
                 resolve();
             };
