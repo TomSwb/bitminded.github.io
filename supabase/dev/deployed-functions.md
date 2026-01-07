@@ -21,6 +21,7 @@ Last updated: 2025-11-29
 - ✅ send-deletion-email
 - ✅ delete-user
 - ✅ create-github-repository
+- ✅ family-management
 
 ## Environment Variables Set
 
@@ -40,6 +41,11 @@ supabase functions deploy <function-name> --project-ref eygpejbljuqpxwwoawkn
 ```
 
 ## Deployment Log
+
+### 2025-01-XX - Added Family Creation Feature
+- ✅ Deployed `family-management` with new `POST /create-family` endpoint
+- Enables users to manually create family groups before purchasing subscriptions
+- Includes age validation (18+), duplicate family prevention, and full error handling
 
 ### 2025-11-29 - Fixed License Generation
 - ✅ Updated `create-github-repository` to use BitMinded as copyright holder in LICENSE generation

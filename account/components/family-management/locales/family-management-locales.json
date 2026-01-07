@@ -46,7 +46,21 @@
       "User ID is required": "User ID is required",
       "Role is required": "Role is required",
       "Are you sure you want to leave this family group? This action cannot be undone.": "Are you sure you want to leave this family group? This action cannot be undone.",
-      "Leave family functionality is not yet implemented in the API": "Leave family functionality is not yet implemented in the API"
+      "Leave family functionality is not yet implemented in the API": "Leave family functionality is not yet implemented in the API",
+      "Create Family Group": "Create Family Group",
+      "Create Family": "Create Family",
+      "Family Type (Optional)": "Family Type (Optional)",
+      "Household": "Household",
+      "Parent-Child": "Parent-Child",
+      "Custom": "Custom",
+      "Enter a name for your family group (1-100 characters).": "Enter a name for your family group (1-100 characters).",
+      "Select the type of family group (optional, defaults to Household).": "Select the type of family group (optional, defaults to Household).",
+      "Family name is required": "Family name is required",
+      "Family name must be between 1 and 100 characters": "Family name must be between 1 and 100 characters",
+      "Family created successfully": "Family created successfully",
+      "Failed to create family": "Failed to create family",
+      "You must be 18 or older to create a family group": "You must be 18 or older to create a family group",
+      "You are already a member of a family group": "You are already a member of a family group"
     }
   },
   "fr": {
@@ -96,7 +110,21 @@
       "User ID is required": "L'ID utilisateur est requis",
       "Role is required": "Le rôle est requis",
       "Are you sure you want to leave this family group? This action cannot be undone.": "Êtes-vous sûr de vouloir quitter ce groupe familial ? Cette action est irréversible.",
-      "Leave family functionality is not yet implemented in the API": "La fonctionnalité de quitter la famille n'est pas encore implémentée dans l'API"
+      "Leave family functionality is not yet implemented in the API": "La fonctionnalité de quitter la famille n'est pas encore implémentée dans l'API",
+      "Create Family Group": "Créer un groupe familial",
+      "Create Family": "Créer la famille",
+      "Family Type (Optional)": "Type de famille (optionnel)",
+      "Household": "Ménage",
+      "Parent-Child": "Parent-Enfant",
+      "Custom": "Personnalisé",
+      "Enter a name for your family group (1-100 characters).": "Entrez un nom pour votre groupe familial (1-100 caractères).",
+      "Select the type of family group (optional, defaults to Household).": "Sélectionnez le type de groupe familial (optionnel, par défaut Ménage).",
+      "Family name is required": "Le nom de la famille est requis",
+      "Family name must be between 1 and 100 characters": "Le nom de la famille doit contenir entre 1 et 100 caractères",
+      "Family created successfully": "Famille créée avec succès",
+      "Failed to create family": "Échec de la création de la famille",
+      "You must be 18 or older to create a family group": "Vous devez avoir 18 ans ou plus pour créer un groupe familial",
+      "You are already a member of a family group": "Vous êtes déjà membre d'un groupe familial"
     }
   },
   "de": {
@@ -146,7 +174,21 @@
       "User ID is required": "Benutzer-ID ist erforderlich",
       "Role is required": "Rolle ist erforderlich",
       "Are you sure you want to leave this family group? This action cannot be undone.": "Sind Sie sicher, dass Sie diese Familiengruppe verlassen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-      "Leave family functionality is not yet implemented in the API": "Die Funktion zum Verlassen der Familie ist in der API noch nicht implementiert"
+      "Leave family functionality is not yet implemented in the API": "Die Funktion zum Verlassen der Familie ist in der API noch nicht implementiert",
+      "Create Family Group": "Familiengruppe erstellen",
+      "Create Family": "Familie erstellen",
+      "Family Type (Optional)": "Familientyp (optional)",
+      "Household": "Haushalt",
+      "Parent-Child": "Eltern-Kind",
+      "Custom": "Benutzerdefiniert",
+      "Enter a name for your family group (1-100 characters).": "Geben Sie einen Namen für Ihre Familiengruppe ein (1-100 Zeichen).",
+      "Select the type of family group (optional, defaults to Household).": "Wählen Sie den Typ der Familiengruppe (optional, Standard: Haushalt).",
+      "Family name is required": "Familienname ist erforderlich",
+      "Family name must be between 1 and 100 characters": "Der Familienname muss zwischen 1 und 100 Zeichen lang sein",
+      "Family created successfully": "Familie erfolgreich erstellt",
+      "Failed to create family": "Fehler beim Erstellen der Familie",
+      "You must be 18 or older to create a family group": "Sie müssen 18 Jahre oder älter sein, um eine Familiengruppe zu erstellen",
+      "You are already a member of a family group": "Sie sind bereits Mitglied einer Familiengruppe"
     }
   },
   "es": {
@@ -196,7 +238,21 @@
       "User ID is required": "El ID de usuario es requerido",
       "Role is required": "El rol es requerido",
       "Are you sure you want to leave this family group? This action cannot be undone.": "¿Estás seguro de que deseas abandonar este grupo familiar? Esta acción no se puede deshacer.",
-      "Leave family functionality is not yet implemented in the API": "La funcionalidad de abandonar la familia aún no está implementada en la API"
+      "Leave family functionality is not yet implemented in the API": "La funcionalidad de abandonar la familia aún no está implementada en la API",
+      "Create Family Group": "Crear grupo familiar",
+      "Create Family": "Crear familia",
+      "Family Type (Optional)": "Tipo de familia (opcional)",
+      "Household": "Hogar",
+      "Parent-Child": "Padre-Hijo",
+      "Custom": "Personalizado",
+      "Enter a name for your family group (1-100 characters).": "Ingresa un nombre para tu grupo familiar (1-100 caracteres).",
+      "Select the type of family group (optional, defaults to Household).": "Selecciona el tipo de grupo familiar (opcional, por defecto Hogar).",
+      "Family name is required": "El nombre de la familia es requerido",
+      "Family name must be between 1 and 100 characters": "El nombre de la familia debe tener entre 1 y 100 caracteres",
+      "Family created successfully": "Familia creada exitosamente",
+      "Failed to create family": "Error al crear la familia",
+      "You must be 18 or older to create a family group": "Debes tener 18 años o más para crear un grupo familiar",
+      "You are already a member of a family group": "Ya eres miembro de un grupo familiar"
     }
   }
 }

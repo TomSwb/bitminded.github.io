@@ -62,6 +62,7 @@
 
 /* Empty State */
 .family-management__empty-state {
+    display: block;
     text-align: center;
     padding: var(--spacing-2xl);
 }
@@ -81,6 +82,25 @@
     color: var(--color-text-primary);
     font-size: var(--font-size-base);
     opacity: 0.8;
+}
+
+/* Create Family Button (Empty State) */
+.family-management__create-family-btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--color-primary);
+    color: var(--color-text-dark);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-top: var(--spacing-lg);
+}
+
+.family-management__create-family-btn:hover {
+    background-color: var(--color-secondary);
+    transform: translateY(-1px);
 }
 
 /* Family Content */
@@ -559,9 +579,48 @@
     transform: translateY(-1px);
 }
 
-/* Utility Classes */
-.hidden {
-    display: none !important;
+/* Override hidden class for visible states */
+/* Note: .hidden is defined globally in css/utilities.css */
+.family-management__empty-state.visible {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.family-management__content.visible {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.family-management__loading.visible {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure empty state children are visible when parent is visible */
+.family-management__empty-state.visible .family-management__empty-icon,
+.family-management__empty-state.visible .family-management__empty-title,
+.family-management__empty-state.visible .family-management__empty-description,
+.family-management__empty-state.visible .family-management__create-family-btn {
+    display: block;
+}
+
+.family-management__empty-state.visible .family-management__create-family-btn {
+    display: inline-block;
+}
+
+/* Translatable content visibility */
+.family-management__empty-state.visible .translatable-content.loaded {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+.family-management__content.visible .translatable-content.loaded {
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 /* Responsive Design */

@@ -21,6 +21,7 @@ Last updated: 2025-11-29
 - ✅ send-deletion-email
 - ✅ delete-user
 - ✅ create-github-repository
+- ✅ family-management
 - ❌ **validate-license** - NOT YET DEPLOYED (required for subdomain protection)
 - ❌ **create-cloudflare-worker** - NOT YET DEPLOYED (required for Worker creation)
 
@@ -43,6 +44,11 @@ supabase functions deploy <function-name> --project-ref dynxqnrkmjcvgzsugxtm
 ```
 
 ## Deployment Log
+
+### 2025-01-XX - Added Family Creation Feature
+- ✅ Deployed `family-management` with new `POST /create-family` endpoint
+- Enables users to manually create family groups before purchasing subscriptions
+- Includes age validation (18+), duplicate family prevention, and full error handling
 
 ### 2025-11-29 - Deployed Product Wizard Function
 - ✅ Deployed `create-github-repository` to production
