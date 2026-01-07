@@ -43,6 +43,11 @@ interface UpdateMemberRoleRequest {
   new_role: string
 }
 
+interface CreateFamilyRequest {
+  family_name: string
+  family_type?: 'household' | 'parent-child' | 'custom'
+}
+
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -496,9 +501,10 @@ async function handleAddMember(
   supabaseAdmin: any,
   userId: string,
   body: AddMemberRequest,
-  ipAddress: string
+  ipAddress: string,
+  origin: string | null
 ): Promise<Response> {
-  const corsHeaders = getCorsHeaders(null)
+  const corsHeaders = getCorsHeaders(origin)
   
   try {
     // Validate input
@@ -801,9 +807,10 @@ async function handleRemoveMember(
   supabaseAdmin: any,
   userId: string,
   body: RemoveMemberRequest,
-  ipAddress: string
+  ipAddress: string,
+  origin: string | null
 ): Promise<Response> {
-  const corsHeaders = getCorsHeaders(null)
+  const corsHeaders = getCorsHeaders(origin)
   
   try {
     // Validate input
@@ -998,9 +1005,10 @@ async function handleUpdateMemberRole(
   supabaseAdmin: any,
   userId: string,
   body: UpdateMemberRoleRequest,
-  ipAddress: string
+  ipAddress: string,
+  origin: string | null
 ): Promise<Response> {
-  const corsHeaders = getCorsHeaders(null)
+  const corsHeaders = getCorsHeaders(origin)
   
   try {
     // Validate input
@@ -1115,9 +1123,10 @@ async function handleFamilyStatus(
   supabaseAdmin: any,
   userId: string,
   familyGroupId: string,
-  ipAddress: string
+  ipAddress: string,
+  origin: string | null
 ): Promise<Response> {
-  const corsHeaders = getCorsHeaders(null)
+  const corsHeaders = getCorsHeaders(origin)
   
   try {
     if (!familyGroupId) {
@@ -1341,6 +1350,245 @@ async function handleMyFamilyGroup(
   }
 }
 
+/**
+ * POST /create-family - Create a new family group
+ */
+async function handleCreateFamily(
+  supabaseAdmin: any,
+  userId: string,
+  body: CreateFamilyRequest,
+  ipAddress: string,
+  origin: string | null
+): Promise<Response> {
+  const corsHeaders = getCorsHeaders(origin)
+  
+  try {
+    // Validate input
+    if (!body.family_name || typeof body.family_name !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Family name is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    const familyName = body.family_name.trim()
+    if (familyName.length < 1 || familyName.length > 100) {
+      return new Response(
+        JSON.stringify({ error: 'Family name must be between 1 and 100 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Validate family_type if provided
+    if (body.family_type && !['household', 'parent-child', 'custom'].includes(body.family_type)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid family_type. Must be one of: household, parent-child, custom' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Check if user is already admin of a family group
+    const { data: existingFamily } = await supabaseAdmin
+      .from('family_groups')
+      .select('id')
+      .eq('admin_user_id', userId)
+      .maybeSingle()
+    
+    if (existingFamily) {
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'validation',
+        'User already has a family group as admin',
+        { userId, existingFamilyId: existingFamily.id },
+        userId,
+        body,
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'You are already the admin of a family group' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Check if user is already an active member of any family group
+    const { data: memberFamily } = await supabaseAdmin
+      .from('family_members')
+      .select('family_group_id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle()
+    
+    if (memberFamily) {
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'validation',
+        'User already a member of a family group',
+        { userId, familyGroupId: memberFamily.family_group_id },
+        userId,
+        body,
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'You are already a member of a family group' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Get user's date_of_birth to calculate age for validation
+    const { data: userProfile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('date_of_birth')
+      .eq('id', userId)
+      .maybeSingle()
+    
+    // Calculate age from date_of_birth
+    let userAge: number | null = null
+    if (userProfile?.date_of_birth) {
+      const birthDate = new Date(userProfile.date_of_birth)
+      const today = new Date()
+      userAge = today.getFullYear() - birthDate.getFullYear()
+      const monthDiff = today.getMonth() - birthDate.getMonth()
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        userAge--
+      }
+      console.log(`✅ Calculated user age: ${userAge} (from date_of_birth: ${userProfile.date_of_birth})`)
+    } else {
+      // If no date_of_birth, we cannot verify age - reject the request
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'validation',
+        'User has no date_of_birth set',
+        { userId },
+        userId,
+        body,
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'Unable to verify your age. Please ensure your date of birth is set in your profile.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Validate user is 18+
+    if (userAge < 18) {
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'validation',
+        'User is under 18, cannot create family',
+        { userId, userAge },
+        userId,
+        body,
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'You must be 18 or older to create a family group' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Create new family group
+    const { data: newFamily, error: familyError } = await supabaseAdmin
+      .from('family_groups')
+      .insert({
+        admin_user_id: userId,
+        family_name: familyName,
+        family_type: body.family_type || 'household',
+        max_members: 6
+      })
+      .select('id')
+      .single()
+    
+    if (familyError) {
+      console.error('❌ Error creating family group:', familyError)
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'database',
+        'Failed to create family group',
+        { error: familyError.message },
+        userId,
+        body,
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'Failed to create family group' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    console.log('✅ Created new family group:', newFamily.id)
+    
+    // Add creator as admin member
+    const { error: memberError } = await supabaseAdmin
+      .from('family_members')
+      .insert({
+        family_group_id: newFamily.id,
+        user_id: userId,
+        role: 'admin',
+        relationship: 'admin',
+        status: 'active',
+        is_verified: true,
+        age: userAge,
+        joined_at: new Date().toISOString()
+      })
+    
+    if (memberError) {
+      console.error('❌ Error adding admin as family member:', memberError)
+      // Try to clean up the family group if member creation fails
+      await supabaseAdmin
+        .from('family_groups')
+        .delete()
+        .eq('id', newFamily.id)
+      
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'database',
+        'Failed to add admin as family member',
+        { error: memberError.message, familyGroupId: newFamily.id },
+        userId,
+        body,
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'Failed to add you as family member' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    console.log('✅ Added admin as family member with age:', userAge)
+    
+    return new Response(
+      JSON.stringify({
+        success: true,
+        family_group_id: newFamily.id,
+        family_name: familyName
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  } catch (error: any) {
+    console.error('❌ Error in handleCreateFamily:', error)
+    await logError(
+      supabaseAdmin,
+      'family-management',
+      'other',
+      'Unexpected error in handleCreateFamily',
+      { error: error.message, stack: error.stack },
+      userId,
+      body,
+      ipAddress
+    )
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+}
+
 // ============================================================================
 // Main Handler
 // ============================================================================
@@ -1438,20 +1686,23 @@ serve(async (req) => {
     const path = url.pathname
     const method = req.method
 
-    if (method === 'POST' && path.endsWith('/add-member')) {
+    if (method === 'POST' && path.endsWith('/create-family')) {
+      const body = await req.json() as CreateFamilyRequest
+      return await handleCreateFamily(supabaseAdmin, user.id, body, ipAddress, origin)
+    } else if (method === 'POST' && path.endsWith('/add-member')) {
       const body = await req.json() as AddMemberRequest
-      return await handleAddMember(supabaseAdmin, user.id, body, ipAddress)
+      return await handleAddMember(supabaseAdmin, user.id, body, ipAddress, origin)
     } else if (method === 'POST' && path.endsWith('/remove-member')) {
       const body = await req.json() as RemoveMemberRequest
-      return await handleRemoveMember(supabaseAdmin, user.id, body, ipAddress)
+      return await handleRemoveMember(supabaseAdmin, user.id, body, ipAddress, origin)
     } else if (method === 'POST' && path.endsWith('/update-member-role')) {
       const body = await req.json() as UpdateMemberRoleRequest
-      return await handleUpdateMemberRole(supabaseAdmin, user.id, body, ipAddress)
+      return await handleUpdateMemberRole(supabaseAdmin, user.id, body, ipAddress, origin)
     } else if (method === 'GET' && path.endsWith('/my-family-group')) {
       return await handleMyFamilyGroup(supabaseAdmin, user.id, ipAddress, origin)
     } else if (method === 'GET' && path.endsWith('/family-status')) {
       const familyGroupId = url.searchParams.get('family_group_id')
-      return await handleFamilyStatus(supabaseAdmin, user.id, familyGroupId || '', ipAddress)
+      return await handleFamilyStatus(supabaseAdmin, user.id, familyGroupId || '', ipAddress, origin)
     } else {
       return new Response(
         JSON.stringify({ error: 'Not found' }),

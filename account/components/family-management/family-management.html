@@ -21,10 +21,13 @@
         <div class="family-management__empty-icon">👨‍👩‍👧‍👦</div>
         <h3 class="family-management__empty-title translatable-content" data-translation-key="No Family Group">No Family Group</h3>
         <p class="family-management__empty-description translatable-content" data-translation-key="You are not currently a member of any family group.">You are not currently a member of any family group.</p>
+        <button id="create-family-btn" class="family-management__create-family-btn" type="button">
+            <span class="translatable-content" data-translation-key="Create Family Group">Create Family Group</span>
+        </button>
     </div>
 
     <!-- Family Content (shown when family exists) -->
-    <div id="family-content" class="family-management__content hidden">
+    <div id="family-management-content" class="family-management__content hidden">
         <!-- Family Group Overview -->
         <section class="family-management__overview">
             <div class="family-management__overview-header">
@@ -179,6 +182,30 @@
                 <div class="family-management__form-actions">
                     <button type="button" id="cancel-update-role" class="family-management__btn family-management__btn--secondary translatable-content" data-translation-key="Cancel">Cancel</button>
                     <button type="submit" class="family-management__btn family-management__btn--primary translatable-content" data-translation-key="Update Role">Update Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Family Modal -->
+    <div id="create-family-modal" class="family-management__modal hidden">
+        <div class="family-management__modal-overlay"></div>
+        <div class="family-management__modal-content">
+            <div class="family-management__modal-header">
+                <h3 class="family-management__modal-title translatable-content" data-translation-key="Create Family Group">Create Family Group</h3>
+                <button id="close-create-family-modal" class="family-management__modal-close" type="button" aria-label="Close">
+                    <span>×</span>
+                </button>
+            </div>
+            <form id="create-family-form" class="family-management__form">
+                <div class="family-management__form-group">
+                    <label for="create-family-name" class="family-management__form-label translatable-content" data-translation-key="Family Name">Family Name:</label>
+                    <input type="text" id="create-family-name" class="family-management__form-input" required maxlength="100" placeholder="e.g., Smith Family">
+                    <p class="family-management__form-help translatable-content" data-translation-key="Enter a name for your family group (1-100 characters).">Enter a name for your family group (1-100 characters).</p>
+                </div>
+                <div class="family-management__form-actions">
+                    <button type="button" id="cancel-create-family" class="family-management__btn family-management__btn--secondary translatable-content" data-translation-key="Cancel">Cancel</button>
+                    <button type="submit" class="family-management__btn family-management__btn--primary translatable-content" data-translation-key="Create Family">Create Family</button>
                 </div>
             </form>
         </div>

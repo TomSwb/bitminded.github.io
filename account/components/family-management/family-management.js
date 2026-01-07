@@ -29,18 +29,21 @@ class FamilyManagement {
         }
 
         try {
+            // Show loading state immediately to prevent flash
+            this.cacheElements();
+            this.showLoading();
+            
             // Get current user first
             await this.getCurrentUser();
             
             // Load translations early (needed for empty state)
             await this.loadTranslations();
             
-            // Cache DOM elements (after translations, ensuring DOM is ready)
+            // Re-cache elements after translations (DOM might have changed)
             this.cacheElements();
             
             // Verify critical elements exist, retry if needed
-            if (!this.elements.emptyState) {
-                // Wait a bit and retry
+            if (!this.elements.emptyState || !this.elements.content) {
                 await new Promise(resolve => setTimeout(resolve, 100));
                 this.cacheElements();
             }
@@ -49,21 +52,22 @@ class FamilyManagement {
             const isMember = await this.checkFamilyMembership();
             
             if (!isMember) {
-                // Show empty state
+                // Hide loading, show empty state
+                this.hideLoading();
                 this.showEmptyState();
-                // Make translatable content visible
                 this.showTranslatableContent();
+                this.bindEvents();
                 this.isInitialized = true;
                 return;
             }
             
-            // Load family data
+            // Load family data (this will show loading again, then hide it)
             await this.loadFamilyData();
             
             // Set up event listeners
             this.bindEvents();
             
-            // Update UI
+            // Update UI (this will hide loading and show content)
             this.updateUI();
             
             // Make translatable content visible
@@ -74,6 +78,7 @@ class FamilyManagement {
             
         } catch (error) {
             window.logger?.error('❌ Failed to initialize family management component:', error);
+            this.hideLoading();
             this.showError('Failed to load family information');
         }
     }
@@ -89,7 +94,7 @@ class FamilyManagement {
             success: document.getElementById('family-success'),
             successMessage: document.getElementById('family-success-message'),
             emptyState: document.getElementById('family-empty-state'),
-            content: document.getElementById('family-content'),
+            content: document.getElementById('family-management-content'),
             
             // Overview elements
             familyName: document.getElementById('family-name'),
@@ -133,7 +138,15 @@ class FamilyManagement {
             updateRoleSelect: document.getElementById('update-role-select'),
             updateRoleMemberInfo: document.getElementById('update-role-member-info'),
             closeUpdateRoleModal: document.getElementById('close-update-role-modal'),
-            cancelUpdateRole: document.getElementById('cancel-update-role')
+            cancelUpdateRole: document.getElementById('cancel-update-role'),
+            
+            // Create family elements
+            createFamilyBtn: document.getElementById('create-family-btn'),
+            createFamilyModal: document.getElementById('create-family-modal'),
+            createFamilyForm: document.getElementById('create-family-form'),
+            createFamilyName: document.getElementById('create-family-name'),
+            closeCreateFamilyModal: document.getElementById('close-create-family-modal'),
+            cancelCreateFamily: document.getElementById('cancel-create-family')
         };
     }
 
@@ -324,6 +337,24 @@ class FamilyManagement {
             this.elements.leaveFamilyBtn.addEventListener('click', this.handleLeaveFamily);
         }
         
+        // Create family button
+        if (this.elements.createFamilyBtn) {
+            this.elements.createFamilyBtn.addEventListener('click', () => this.openCreateFamilyModal());
+        }
+        
+        // Create family form
+        if (this.elements.createFamilyForm) {
+            this.elements.createFamilyForm.addEventListener('submit', this.handleCreateFamily.bind(this));
+        }
+        
+        // Close create family modal
+        if (this.elements.closeCreateFamilyModal) {
+            this.elements.closeCreateFamilyModal.addEventListener('click', () => this.closeCreateFamilyModal());
+        }
+        if (this.elements.cancelCreateFamily) {
+            this.elements.cancelCreateFamily.addEventListener('click', () => this.closeCreateFamilyModal());
+        }
+        
         // Close modals on overlay click
         if (this.elements.addMemberModal) {
             this.elements.addMemberModal.addEventListener('click', (e) => {
@@ -343,6 +374,13 @@ class FamilyManagement {
             this.elements.updateRoleModal.addEventListener('click', (e) => {
                 if (e.target.classList.contains('family-management__modal-overlay')) {
                     this.closeUpdateRoleModal();
+                }
+            });
+        }
+        if (this.elements.createFamilyModal) {
+            this.elements.createFamilyModal.addEventListener('click', (e) => {
+                if (e.target.classList.contains('family-management__modal-overlay')) {
+                    this.closeCreateFamilyModal();
                 }
             });
         }
@@ -484,13 +522,22 @@ class FamilyManagement {
             }
         }
 
-        // Show content
+        // Show content, hide empty state and loading using CSS classes
         if (this.elements.content) {
             this.elements.content.classList.remove('hidden');
+            this.elements.content.classList.add('visible');
         }
         if (this.elements.emptyState) {
+            this.elements.emptyState.classList.remove('visible');
             this.elements.emptyState.classList.add('hidden');
         }
+        if (this.elements.loading) {
+            this.elements.loading.classList.remove('visible');
+            this.elements.loading.classList.add('hidden');
+        }
+        
+        // Make translatable content visible
+        this.showTranslatableContent();
     }
 
     /**
@@ -632,6 +679,27 @@ class FamilyManagement {
     }
 
     /**
+     * Open create family modal
+     */
+    openCreateFamilyModal() {
+        if (this.elements.createFamilyModal) {
+            this.elements.createFamilyModal.classList.remove('hidden');
+        }
+        if (this.elements.createFamilyForm) {
+            this.elements.createFamilyForm.reset();
+        }
+    }
+
+    /**
+     * Close create family modal
+     */
+    closeCreateFamilyModal() {
+        if (this.elements.createFamilyModal) {
+            this.elements.createFamilyModal.classList.add('hidden');
+        }
+    }
+
+    /**
      * Handle add member form submission
      */
     async handleAddMember(e) {
@@ -694,6 +762,87 @@ class FamilyManagement {
             window.logger?.error('❌ Failed to add member:', error);
             this.hideLoading();
             this.showError(error.message || 'Failed to add member');
+        }
+    }
+
+    /**
+     * Handle create family form submission
+     */
+    async handleCreateFamily(e) {
+        e.preventDefault();
+        
+        try {
+            const familyName = this.elements.createFamilyName?.value?.trim();
+
+            // Client-side validation
+            if (!familyName) {
+                this.showError(this.t('Family name is required'));
+                return;
+            }
+            
+            if (familyName.length < 1 || familyName.length > 100) {
+                this.showError(this.t('Family name must be between 1 and 100 characters'));
+                return;
+            }
+
+            this.showLoading();
+
+            // Get session for Authorization header
+            const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
+            
+            if (sessionError || !session) {
+                throw new Error('Not authenticated');
+            }
+
+            // Get Supabase URL
+            let supabaseUrl = 'https://dynxqnrkmjcvgzsugxtm.supabase.co'; // Default to prod
+            if (window.supabase && window.supabase.supabaseUrl) {
+                supabaseUrl = window.supabase.supabaseUrl;
+            } else if (typeof envConfig !== 'undefined' && envConfig.supabaseUrl) {
+                supabaseUrl = envConfig.supabaseUrl;
+            }
+            
+            // Call POST /create-family endpoint
+            const response = await fetch(`${supabaseUrl}/functions/v1/family-management/create-family`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    family_name: familyName
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            if (!data.success) {
+                throw new Error('Failed to create family');
+            }
+
+            this.hideLoading();
+            this.closeCreateFamilyModal();
+            this.showSuccess(this.t('Family created successfully'));
+            
+            // Reload family data and update UI
+            this.familyGroupId = data.family_group_id;
+            this.isAdmin = true;
+            await this.loadFamilyData();
+            this.updateUI();
+
+        } catch (error) {
+            window.logger?.error('❌ Failed to create family:', error);
+            this.hideLoading();
+            this.showError(error.message || this.t('Failed to create family'));
         }
     }
 
@@ -893,9 +1042,15 @@ class FamilyManagement {
     showLoading() {
         if (this.elements.loading) {
             this.elements.loading.classList.remove('hidden');
+            this.elements.loading.classList.add('visible');
         }
         if (this.elements.content) {
+            this.elements.content.classList.remove('visible');
             this.elements.content.classList.add('hidden');
+        }
+        if (this.elements.emptyState) {
+            this.elements.emptyState.classList.remove('visible');
+            this.elements.emptyState.classList.add('hidden');
         }
     }
 
@@ -904,6 +1059,7 @@ class FamilyManagement {
      */
     hideLoading() {
         if (this.elements.loading) {
+            this.elements.loading.classList.remove('visible');
             this.elements.loading.classList.add('hidden');
         }
     }
@@ -964,57 +1120,15 @@ class FamilyManagement {
         
         translatableElements.forEach((element) => {
             element.classList.add('loaded');
-            // Force visibility as fallback with !important
-            element.style.setProperty('opacity', '1', 'important');
-            element.style.setProperty('visibility', 'visible', 'important');
         });
     }
+
 
     /**
      * Show empty state
      */
     showEmptyState() {
         window.logger?.log('🔍 Attempting to show empty state...');
-        
-        // Ensure parent section is active and visible FIRST
-        const section = document.getElementById('section-family');
-        if (section) {
-            section.classList.add('active');
-            section.style.setProperty('display', 'block', 'important');
-            section.style.setProperty('visibility', 'visible', 'important');
-            section.style.setProperty('opacity', '1', 'important');
-            section.style.setProperty('height', 'auto', 'important');
-            section.style.setProperty('min-height', '200px', 'important');
-            window.logger?.log('✅ Section made active');
-        } else {
-            window.logger?.error('❌ Section element not found! Retrying...');
-            // Retry after delay
-            setTimeout(() => this.showEmptyState(), 200);
-            return;
-        }
-        
-        // Ensure parent content container is visible
-        const contentContainer = document.getElementById('family-content');
-        if (contentContainer) {
-            contentContainer.style.setProperty('display', 'block', 'important');
-            contentContainer.style.setProperty('visibility', 'visible', 'important');
-            contentContainer.style.setProperty('opacity', '1', 'important');
-            contentContainer.style.setProperty('height', 'auto', 'important');
-            contentContainer.style.setProperty('min-height', '100px', 'important');
-        }
-        
-        // Ensure the main container is visible
-        const mainContainer = document.getElementById('family-management');
-        if (!mainContainer) {
-            window.logger?.error('❌ Main container not found! Retrying...');
-            setTimeout(() => this.showEmptyState(), 200);
-            return;
-        }
-        mainContainer.style.setProperty('display', 'block', 'important');
-        mainContainer.style.setProperty('visibility', 'visible', 'important');
-        mainContainer.style.setProperty('opacity', '1', 'important');
-        mainContainer.style.setProperty('height', 'auto', 'important');
-        mainContainer.style.setProperty('min-height', '200px', 'important');
         
         // Find empty state element - retry if needed
         let emptyStateElement = this.elements.emptyState;
@@ -1031,45 +1145,27 @@ class FamilyManagement {
             return;
         }
         
-        // Remove hidden class and force visibility with !important override
+        // Remove hidden, add visible class
         emptyStateElement.classList.remove('hidden');
-        emptyStateElement.style.setProperty('display', 'block', 'important');
-        emptyStateElement.style.setProperty('visibility', 'visible', 'important');
-        emptyStateElement.style.setProperty('opacity', '1', 'important');
-        emptyStateElement.style.setProperty('height', 'auto', 'important');
-        emptyStateElement.style.setProperty('min-height', '200px', 'important');
-        emptyStateElement.style.setProperty('position', 'relative', 'important');
-        emptyStateElement.style.setProperty('z-index', '1', 'important');
+        emptyStateElement.classList.add('visible');
         window.logger?.log('✅ Empty state made visible');
         
-        // Make ALL translatable content inside visible immediately
+        // Make translatable content visible
         const translatableElements = emptyStateElement.querySelectorAll('.translatable-content');
         translatableElements.forEach((element) => {
             element.classList.add('loaded');
-            element.style.setProperty('opacity', '1', 'important');
-            element.style.setProperty('visibility', 'visible', 'important');
-            element.style.setProperty('display', 'block', 'important');
         });
         window.logger?.log(`✅ Made ${translatableElements.length} translatable elements visible`);
         
-        // Also make the icon visible
-        const icon = emptyStateElement.querySelector('.family-management__empty-icon');
-        if (icon) {
-            icon.style.setProperty('display', 'block', 'important');
-            icon.style.setProperty('visibility', 'visible', 'important');
-            icon.style.setProperty('opacity', '1', 'important');
-        }
-        
         // Hide other sections
         if (this.elements.content) {
+            this.elements.content.classList.remove('visible');
             this.elements.content.classList.add('hidden');
         }
         if (this.elements.loading) {
+            this.elements.loading.classList.remove('visible');
             this.elements.loading.classList.add('hidden');
         }
-        
-        // Force a reflow to ensure browser renders
-        void emptyStateElement.offsetHeight;
     }
 }
 
