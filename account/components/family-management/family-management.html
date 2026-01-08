@@ -112,26 +112,13 @@
             </div>
             <form id="add-member-form" class="family-management__form">
                 <div class="family-management__form-group">
-                    <label for="add-member-user-id" class="family-management__form-label translatable-content" data-translation-key="User ID">User ID:</label>
-                    <input type="text" id="add-member-user-id" class="family-management__form-input" required>
-                    <p class="family-management__form-help translatable-content" data-translation-key="Enter the user ID of the person you want to add to your family group.">Enter the user ID of the person you want to add to your family group.</p>
-                </div>
-                <div class="family-management__form-group">
-                    <label for="add-member-role" class="family-management__form-label translatable-content" data-translation-key="Role">Role:</label>
-                    <select id="add-member-role" class="family-management__form-select" required>
-                        <option value="member" class="translatable-content" data-translation-key="Member">Member</option>
-                        <option value="parent" class="translatable-content" data-translation-key="Parent">Parent</option>
-                        <option value="guardian" class="translatable-content" data-translation-key="Guardian">Guardian</option>
-                        <option value="child" class="translatable-content" data-translation-key="Child">Child</option>
-                    </select>
-                </div>
-                <div class="family-management__form-group">
-                    <label for="add-member-relationship" class="family-management__form-label translatable-content" data-translation-key="Relationship (Optional)">Relationship (Optional):</label>
-                    <input type="text" id="add-member-relationship" class="family-management__form-input" placeholder="e.g., parent, child, partner">
+                    <label for="add-member-email" class="family-management__form-label translatable-content" data-translation-key="Email Address">Email Address:</label>
+                    <input type="email" id="add-member-email" class="family-management__form-input" required>
+                    <p class="family-management__form-help translatable-content" data-translation-key="Enter the email address of the person you want to invite to your family group.">Enter the email address of the person you want to invite to your family group.</p>
                 </div>
                 <div class="family-management__form-actions">
                     <button type="button" id="cancel-add-member" class="family-management__btn family-management__btn--secondary translatable-content" data-translation-key="Cancel">Cancel</button>
-                    <button type="submit" class="family-management__btn family-management__btn--primary translatable-content" data-translation-key="Add Member">Add Member</button>
+                    <button type="submit" class="family-management__btn family-management__btn--primary translatable-content" data-translation-key="Send Invitation">Send Invitation</button>
                 </div>
             </form>
         </div>
