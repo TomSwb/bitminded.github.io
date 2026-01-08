@@ -512,8 +512,34 @@ class FamilyManagement {
             if (this.elements.addMemberBtn) {
                 this.elements.addMemberBtn.classList.remove('hidden');
             }
+            // Admin can leave if there are other admins, otherwise show delete
+            const adminCount = this.familyData?.admin_count || 0;
             if (this.elements.leaveFamilySection) {
-                this.elements.leaveFamilySection.classList.add('hidden');
+                this.elements.leaveFamilySection.classList.remove('hidden');
+                const leaveBtn = this.elements.leaveFamilyBtn;
+                const warningText = this.elements.leaveFamilySection.querySelector('.family-management__leave-warning');
+                
+                if (adminCount > 1) {
+                    // Other admins exist - show "Leave" button
+                    if (leaveBtn) {
+                        leaveBtn.textContent = this.t('Leave Family Group');
+                        leaveBtn.classList.remove('family-management__leave-btn--danger');
+                        leaveBtn.dataset.action = 'leave';
+                    }
+                    if (warningText) {
+                        warningText.textContent = this.t('Warning: Leaving the family group will revoke your access to family subscription benefits.');
+                    }
+                } else {
+                    // Only admin - show "Delete Family Group" button
+                    if (leaveBtn) {
+                        leaveBtn.textContent = this.t('Delete Family Group');
+                        leaveBtn.classList.add('family-management__leave-btn--danger');
+                        leaveBtn.dataset.action = 'delete';
+                    }
+                    if (warningText) {
+                        warningText.textContent = this.t('Warning: Deleting the family group will permanently remove all members and cancel any active subscriptions.');
+                    }
+                }
             }
         } else {
             if (this.elements.addMemberBtn) {
@@ -521,6 +547,12 @@ class FamilyManagement {
             }
             if (this.elements.leaveFamilySection) {
                 this.elements.leaveFamilySection.classList.remove('hidden');
+                const leaveBtn = this.elements.leaveFamilyBtn;
+                if (leaveBtn) {
+                    leaveBtn.textContent = this.t('Leave Family Group');
+                    leaveBtn.classList.remove('family-management__leave-btn--danger');
+                    leaveBtn.dataset.action = 'leave';
+                }
             }
         }
 
@@ -1055,19 +1087,84 @@ class FamilyManagement {
     }
 
     /**
-     * Handle leave family
+     * Handle leave family or delete family
      */
     async handleLeaveFamily() {
-        if (!confirm(this.t('Are you sure you want to leave this family group? This action cannot be undone.'))) {
+        const action = this.elements.leaveFamilyBtn?.dataset.action || 'leave';
+        const isDelete = action === 'delete';
+        
+        const confirmMessage = isDelete 
+            ? this.t('Are you sure you want to delete this family group? This action cannot be undone and will remove all members and cancel any active subscriptions.')
+            : this.t('Are you sure you want to leave this family group? This action cannot be undone.');
+        
+        if (!confirm(confirmMessage)) {
             return;
         }
 
         try {
-            this.showError('Leave family functionality is not yet implemented in the API');
-            // TODO: Implement when API endpoint is available
+            this.showLoading();
+
+            // Get session for Authorization header
+            const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
+            
+            if (sessionError || !session) {
+                throw new Error('Not authenticated');
+            }
+
+            // Get Supabase URL
+            let supabaseUrl = 'https://dynxqnrkmjcvgzsugxtm.supabase.co'; // Default to prod
+            if (window.supabase && window.supabase.supabaseUrl) {
+                supabaseUrl = window.supabase.supabaseUrl;
+            } else if (typeof envConfig !== 'undefined' && envConfig.supabaseUrl) {
+                supabaseUrl = envConfig.supabaseUrl;
+            }
+            
+            // Call appropriate endpoint
+            const endpoint = isDelete ? 'delete-family' : 'leave-family';
+            const response = await fetch(`${supabaseUrl}/functions/v1/family-management/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    family_group_id: this.familyGroupId
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            if (!data.success) {
+                throw new Error(isDelete ? 'Failed to delete family group' : 'Failed to leave family group');
+            }
+
+            this.hideLoading();
+            const successMessage = isDelete 
+                ? this.t('Successfully deleted family group')
+                : this.t('Successfully left family group');
+            this.showSuccess(successMessage);
+            
+            // Reload the page to show empty state
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+
         } catch (error) {
-            window.logger?.error('❌ Failed to leave family:', error);
-            this.showError(error.message || 'Failed to leave family');
+            window.logger?.error(`❌ Failed to ${isDelete ? 'delete' : 'leave'} family:`, error);
+            this.hideLoading();
+            const errorMessage = isDelete 
+                ? this.t('Failed to delete family group')
+                : this.t('Failed to leave family group');
+            this.showError(error.message || errorMessage);
         }
     }
 
