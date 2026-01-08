@@ -585,7 +585,7 @@ async function handleAddMember(
     const subscriptionDetails = await getFamilySubscriptionDetails(supabaseAdmin, body.family_group_id)
     const hasSubscription = !!subscriptionDetails
     
-    // Check if user is already a member
+    // Check if user is already a member of this family
     const { data: existingMember } = await supabaseAdmin
       .from('family_members')
       .select('id, status')
@@ -595,7 +595,22 @@ async function handleAddMember(
     
     if (existingMember && existingMember.status === 'active') {
       return new Response(
-        JSON.stringify({ error: 'User is already an active member of this family' }),
+        JSON.stringify({ error: 'This user is already an active member of this family group.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Check if user is already a member of another family group
+    const { data: otherFamilyMember } = await supabaseAdmin
+      .from('family_members')
+      .select('family_group_id, status')
+      .eq('user_id', targetUserId)
+      .eq('status', 'active')
+      .maybeSingle()
+    
+    if (otherFamilyMember) {
+      return new Response(
+        JSON.stringify({ error: 'This user is already a member of another family group. A user can only be a member of one family group at a time.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -755,18 +770,37 @@ async function handleAddMember(
       
       if (createError) {
         console.error('❌ Error creating family member:', createError)
+        
+        // Check if error is due to unique constraint (user already in another family)
+        if (createError.code === '23505' || createError.message?.includes('unique') || createError.message?.includes('duplicate')) {
+          // Check if user is in another family
+          const { data: otherFamilyMember } = await supabaseAdmin
+            .from('family_members')
+            .select('family_group_id, status')
+            .eq('user_id', targetUserId)
+            .eq('status', 'active')
+            .maybeSingle()
+          
+          if (otherFamilyMember) {
+            return new Response(
+              JSON.stringify({ error: 'This user is already a member of another family group. A user can only be a member of one family group at a time.' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+        }
+        
         await logError(
           supabaseAdmin,
           'family-management',
           'database',
           'Failed to create family member',
-          { error: createError.message },
+          { error: createError.message, errorCode: createError.code },
           userId,
           body,
           ipAddress
         )
         return new Response(
-          JSON.stringify({ error: 'Failed to create family member' }),
+          JSON.stringify({ error: `Failed to add member: ${createError.message || 'Database error occurred'}` }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }

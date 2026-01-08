@@ -122,6 +122,8 @@ class FamilyManagement {
             addMemberModal: document.getElementById('add-member-modal'),
             addMemberForm: document.getElementById('add-member-form'),
             addMemberEmail: document.getElementById('add-member-email'),
+            addMemberError: document.getElementById('add-member-error'),
+            addMemberErrorMessage: document.getElementById('add-member-error-message'),
             closeAddMemberModal: document.getElementById('close-add-member-modal'),
             cancelAddMember: document.getElementById('cancel-add-member'),
             
@@ -708,6 +710,10 @@ class FamilyManagement {
         if (this.elements.addMemberForm) {
             this.elements.addMemberForm.reset();
         }
+        // Hide any previous errors
+        if (this.elements.addMemberError) {
+            this.elements.addMemberError.classList.add('hidden');
+        }
     }
 
     /**
@@ -820,7 +826,15 @@ class FamilyManagement {
         } catch (error) {
             window.logger?.error('❌ Failed to send invitation:', error);
             this.hideLoading();
-            this.showError(error.message || this.t('Failed to send invitation'));
+            // Show error inside the modal
+            this.showModalError(error.message || this.t('Failed to send invitation'));
+            // Reload family data to ensure UI is in sync
+            try {
+                await this.loadFamilyData();
+                this.updateUI();
+            } catch (reloadError) {
+                window.logger?.error('❌ Failed to reload family data after error:', reloadError);
+            }
         }
     }
 
@@ -1214,6 +1228,18 @@ class FamilyManagement {
         if (this.elements.error) {
             this.elements.error.classList.add('hidden');
         }
+    }
+
+    /**
+     * Show error message in modal
+     */
+    showModalError(message) {
+        if (this.elements.addMemberError && this.elements.addMemberErrorMessage) {
+            this.elements.addMemberErrorMessage.textContent = message;
+            this.elements.addMemberError.classList.remove('hidden');
+        }
+        // Also show in main error area as fallback
+        this.showError(message);
     }
 
     /**
