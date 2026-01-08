@@ -121,9 +121,7 @@ class FamilyManagement {
             // Modals
             addMemberModal: document.getElementById('add-member-modal'),
             addMemberForm: document.getElementById('add-member-form'),
-            addMemberUserId: document.getElementById('add-member-user-id'),
-            addMemberRole: document.getElementById('add-member-role'),
-            addMemberRelationship: document.getElementById('add-member-relationship'),
+            addMemberEmail: document.getElementById('add-member-email'),
             closeAddMemberModal: document.getElementById('close-add-member-modal'),
             cancelAddMember: document.getElementById('cancel-add-member'),
             
@@ -451,8 +449,12 @@ class FamilyManagement {
         }
         
         if (this.elements.familyAdmin) {
-            // Show admin user ID (could be enhanced to show name/email)
-            this.elements.familyAdmin.textContent = family_group?.admin_user_id || 'N/A';
+            // Show admin username, fallback to email, then user ID
+            const adminDisplay = family_group?.admin_profile?.username 
+                || family_group?.admin_profile?.email 
+                || family_group?.admin_user_id 
+                || 'N/A';
+            this.elements.familyAdmin.textContent = adminDisplay;
         }
         
         if (this.elements.familyMemberCount) {
@@ -570,18 +572,25 @@ class FamilyManagement {
         const isCurrentUser = member.user_id === this.currentUserId;
         const isAdminMember = member.role === 'admin';
 
-        // Get user initial for avatar
-        const initial = member.user_id ? member.user_id.charAt(0).toUpperCase() : '?';
+        // Get display name: username > email > user_id
+        const displayName = member.profile?.username 
+            || member.profile?.email 
+            || member.user_id 
+            || 'N/A';
+        
+        // Get user initial for avatar (from display name)
+        const initial = displayName && displayName !== 'N/A' 
+            ? displayName.charAt(0).toUpperCase() 
+            : '?';
 
         card.innerHTML = `
             <div class="family-management__member-header">
                 <div class="family-management__member-avatar">${initial}</div>
                 <div class="family-management__member-info">
-                    <div class="family-management__member-id">${member.user_id || 'N/A'}</div>
+                    <div class="family-management__member-id">${displayName}</div>
                     <span class="family-management__member-role ${member.role || 'member'}">${this.formatRole(member.role || 'member')}</span>
                 </div>
             </div>
-            ${member.relationship ? `<div class="family-management__member-details">${this.t('Relationship')}: ${member.relationship}</div>` : ''}
             ${member.joined_at ? `<div class="family-management__member-details">${this.t('Joined')}: ${new Date(member.joined_at).toLocaleDateString()}</div>` : ''}
             ${this.isAdmin && !isCurrentUser && !isAdminMember ? `
                 <div class="family-management__member-actions">
@@ -676,6 +685,9 @@ class FamilyManagement {
         if (this.elements.addMemberModal) {
             this.elements.addMemberModal.classList.add('hidden');
         }
+        if (this.elements.addMemberForm) {
+            this.elements.addMemberForm.reset();
+        }
     }
 
     /**
@@ -706,21 +718,38 @@ class FamilyManagement {
         e.preventDefault();
         
         try {
-            const userId = this.elements.addMemberUserId?.value?.trim();
-            const role = this.elements.addMemberRole?.value;
-            const relationship = this.elements.addMemberRelationship?.value?.trim() || null;
+            const email = this.elements.addMemberEmail?.value?.trim();
 
-            if (!userId) {
-                this.showError('User ID is required');
+            if (!email) {
+                this.showError(this.t('Email address is required'));
+                return;
+            }
+
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                this.showError(this.t('Please enter a valid email address'));
                 return;
             }
 
             this.showLoading();
 
-            // Use fetch directly since invokeEdgeFunction doesn't support custom paths
-            const { data: { session } } = await window.supabase.auth.getSession();
-            const supabaseUrl = window.supabase.supabaseUrl || 'https://dynxqnrkmjcvgzsugxtm.supabase.co';
+            // Get session for Authorization header
+            const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
             
+            if (sessionError || !session) {
+                throw new Error('Not authenticated');
+            }
+
+            // Get Supabase URL
+            let supabaseUrl = 'https://dynxqnrkmjcvgzsugxtm.supabase.co'; // Default to prod
+            if (window.supabase && window.supabase.supabaseUrl) {
+                supabaseUrl = window.supabase.supabaseUrl;
+            } else if (typeof envConfig !== 'undefined' && envConfig.supabaseUrl) {
+                supabaseUrl = envConfig.supabaseUrl;
+            }
+            
+            // Call POST /add-member endpoint
             const response = await fetch(`${supabaseUrl}/functions/v1/family-management/add-member`, {
                 method: 'POST',
                 headers: {
@@ -729,9 +758,7 @@ class FamilyManagement {
                 },
                 body: JSON.stringify({
                     family_group_id: this.familyGroupId,
-                    user_id: userId,
-                    role: role || 'member',
-                    relationship: relationship
+                    email: email
                 })
             });
             
@@ -747,21 +774,21 @@ class FamilyManagement {
             }
 
             if (!data.success) {
-                throw new Error('Failed to add member');
+                throw new Error('Failed to send invitation');
             }
 
             this.hideLoading();
             this.closeAddMemberModal();
-            this.showSuccess('Member added successfully');
+            this.showSuccess(this.t('Invitation sent successfully'));
             
             // Reload family data
             await this.loadFamilyData();
             this.updateUI();
 
         } catch (error) {
-            window.logger?.error('❌ Failed to add member:', error);
+            window.logger?.error('❌ Failed to send invitation:', error);
             this.hideLoading();
-            this.showError(error.message || 'Failed to add member');
+            this.showError(error.message || this.t('Failed to send invitation'));
         }
     }
 
@@ -854,7 +881,11 @@ class FamilyManagement {
             this.elements.removeMemberModal.classList.remove('hidden');
         }
         if (this.elements.removeMemberInfo) {
-            this.elements.removeMemberInfo.textContent = `${this.t('User ID')}: ${member.user_id} | ${this.t('Role')}: ${this.formatRole(member.role)}`;
+            const displayName = member.profile?.username 
+                || member.profile?.email 
+                || member.user_id 
+                || 'N/A';
+            this.elements.removeMemberInfo.textContent = `${this.t('User')}: ${displayName} | ${this.t('Role')}: ${this.formatRole(member.role)}`;
         }
         this.currentRemoveMemberId = member.user_id;
     }
@@ -937,7 +968,11 @@ class FamilyManagement {
             this.elements.updateRoleSelect.value = member.role || 'member';
         }
         if (this.elements.updateRoleMemberInfo) {
-            this.elements.updateRoleMemberInfo.textContent = `${this.t('User ID')}: ${member.user_id}`;
+            const displayName = member.profile?.username 
+                || member.profile?.email 
+                || member.user_id 
+                || 'N/A';
+            this.elements.updateRoleMemberInfo.textContent = `${this.t('User')}: ${displayName}`;
         }
         this.currentUpdateRoleMemberId = member.user_id;
     }

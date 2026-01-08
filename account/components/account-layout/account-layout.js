@@ -7,7 +7,7 @@ class AccountLayout {
     constructor() {
         this.currentSection = 'profile';
         this.isInitialized = false;
-        this.sections = ['profile', 'security', 'payment', 'apps', 'support', 'notifications', 'family', 'actions'];
+        this.sections = ['profile', 'family', 'security', 'payment', 'apps', 'support', 'notifications', 'actions'];
         this.loadedComponents = new Set();
     }
 

@@ -8,7 +8,7 @@ class AccountPageLoader {
         this.isInitialized = false;
         this.loadedComponents = new Map();
         this.currentSection = 'profile';
-        this.sections = ['profile', 'security', 'payment', 'apps', 'support', 'notifications', 'family', 'actions'];
+        this.sections = ['profile', 'family', 'security', 'payment', 'apps', 'support', 'notifications', 'actions'];
     }
 
     /**

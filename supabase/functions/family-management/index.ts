@@ -27,9 +27,7 @@ interface RateLimitConfig {
 
 interface AddMemberRequest {
   family_group_id: string
-  user_id: string
-  role?: string
-  relationship?: string
+  email: string
 }
 
 interface RemoveMemberRequest {
@@ -508,9 +506,18 @@ async function handleAddMember(
   
   try {
     // Validate input
-    if (!body.family_group_id || !body.user_id) {
+    if (!body.family_group_id || !body.email) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: family_group_id, user_id' }),
+        JSON.stringify({ error: 'Missing required fields: family_group_id, email' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(body.email)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email address format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -534,23 +541,48 @@ async function handleAddMember(
       )
     }
     
-    // Get family subscription details
-    const subscriptionDetails = await getFamilySubscriptionDetails(supabaseAdmin, body.family_group_id)
-    if (!subscriptionDetails) {
+    // Look up user by email
+    // Try user_profiles first (most reliable)
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('id')
+      .eq('email', body.email.toLowerCase())
+      .maybeSingle()
+    
+    let targetUserId: string | null = null
+    
+    if (!profileError && profile) {
+      targetUserId = profile.id
+    } else {
+      // If not found in user_profiles, try auth.users with filter
+      const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers({
+        page: 1,
+        perPage: 1,
+        filter: { email: body.email.toLowerCase() }
+      })
+      
+      if (!authError && authUsers?.users && authUsers.users.length > 0) {
+        targetUserId = authUsers.users[0].id
+      }
+    }
+    
+    if (!targetUserId) {
       return new Response(
-        JSON.stringify({ error: 'Family subscription not found or inactive' }),
+        JSON.stringify({ error: 'User with this email address not found. Invitation system coming soon.' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
     
-    const { familySubscription, service, serviceSlug } = subscriptionDetails
+    // Get family subscription details (optional - family can invite members before purchasing subscription)
+    const subscriptionDetails = await getFamilySubscriptionDetails(supabaseAdmin, body.family_group_id)
+    const hasSubscription = !!subscriptionDetails
     
     // Check if user is already a member
     const { data: existingMember } = await supabaseAdmin
       .from('family_members')
       .select('id, status')
       .eq('family_group_id', body.family_group_id)
-      .eq('user_id', body.user_id)
+      .eq('user_id', targetUserId)
       .maybeSingle()
     
     if (existingMember && existingMember.status === 'active') {
@@ -585,86 +617,93 @@ async function handleAddMember(
     const currentMemberCount = activeMembers?.length || 0
     const newMemberCount = currentMemberCount + 1
     
-    // Get Stripe subscription details
-    if (!familySubscription.stripe_subscription_id) {
-      return new Response(
-        JSON.stringify({ error: 'Family subscription has no Stripe subscription ID' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-    
-    // Determine Stripe mode from environment variable
-    const isLiveMode = getStripeMode()
-    const stripe = getStripeInstance(isLiveMode)
-    
-    let stripeSubscription: Stripe.Subscription
-    try {
-      stripeSubscription = await stripe.subscriptions.retrieve(familySubscription.stripe_subscription_id, {
-        expand: ['items.data.price']
-      })
-    } catch (error: any) {
-      console.error('❌ Error retrieving Stripe subscription:', error)
-      await logError(
-        supabaseAdmin,
-        'family-management',
-        'stripe_api',
-        'Failed to retrieve Stripe subscription',
-        { error: error.message, subscriptionId: familySubscription.stripe_subscription_id },
-        userId,
-        body,
-        ipAddress
-      )
-      return new Response(
-        JSON.stringify({ error: 'Failed to retrieve subscription details' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-    
-    const subscriptionQuantity = stripeSubscription.items?.data?.[0]?.quantity || 1
-    const subscriptionItemId = stripeSubscription.items?.data?.[0]?.id
-    
-    // Check if we need to update Stripe subscription quantity
-    let updatedQuantity = subscriptionQuantity
-    if (subscriptionQuantity < newMemberCount) {
-      console.log(`ℹ️ Updating Stripe subscription quantity from ${subscriptionQuantity} to ${newMemberCount}`)
+    // Update Stripe subscription quantity if subscription exists
+    let updatedQuantity = 0
+    if (hasSubscription && subscriptionDetails) {
+      const { familySubscription } = subscriptionDetails
       
-      try {
-        const updatedSubscription = await stripe.subscriptions.update(familySubscription.stripe_subscription_id, {
-          items: [{
-            id: subscriptionItemId,
-            quantity: newMemberCount
-          }],
-          proration_behavior: 'create_prorations'
-        })
+      // Get Stripe subscription details
+      if (!familySubscription.stripe_subscription_id) {
+        console.log('⚠️ Family subscription has no Stripe subscription ID, skipping quantity update')
+      } else {
+        // Determine Stripe mode from environment variable
+        const isLiveMode = getStripeMode()
+        const stripe = getStripeInstance(isLiveMode)
         
-        updatedQuantity = updatedSubscription.items?.data?.[0]?.quantity || newMemberCount
-        console.log(`✅ Updated Stripe subscription quantity to ${updatedQuantity}`)
-      } catch (error: any) {
-        console.error('❌ Error updating Stripe subscription:', error)
-        await logError(
-          supabaseAdmin,
-          'family-management',
-          'stripe_api',
-          'Failed to update Stripe subscription quantity',
-          { error: error.message, subscriptionId: familySubscription.stripe_subscription_id },
-          userId,
-          body,
-          ipAddress
-        )
-        return new Response(
-          JSON.stringify({ error: 'Failed to update subscription quantity' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        let stripeSubscription: Stripe.Subscription
+        try {
+          stripeSubscription = await stripe.subscriptions.retrieve(familySubscription.stripe_subscription_id, {
+            expand: ['items.data.price']
+          })
+        } catch (error: any) {
+          console.error('❌ Error retrieving Stripe subscription:', error)
+          await logError(
+            supabaseAdmin,
+            'family-management',
+            'stripe_api',
+            'Failed to retrieve Stripe subscription',
+            { error: error.message, subscriptionId: familySubscription.stripe_subscription_id },
+            userId,
+            body,
+            ipAddress
+          )
+          // Don't fail - continue without updating subscription
+          console.log('⚠️ Continuing to add member without updating subscription quantity')
+        }
+        
+        if (stripeSubscription) {
+          const subscriptionQuantity = stripeSubscription.items?.data?.[0]?.quantity || 1
+          const subscriptionItemId = stripeSubscription.items?.data?.[0]?.id
+          
+          // Check if we need to update Stripe subscription quantity
+          updatedQuantity = subscriptionQuantity
+          if (subscriptionQuantity < newMemberCount) {
+            console.log(`ℹ️ Updating Stripe subscription quantity from ${subscriptionQuantity} to ${newMemberCount}`)
+            
+            try {
+              const updatedSubscription = await stripe.subscriptions.update(familySubscription.stripe_subscription_id, {
+                items: [{
+                  id: subscriptionItemId,
+                  quantity: newMemberCount
+                }],
+                proration_behavior: 'create_prorations'
+              })
+              
+              updatedQuantity = updatedSubscription.items?.data?.[0]?.quantity || newMemberCount
+              console.log(`✅ Updated Stripe subscription quantity to ${updatedQuantity}`)
+            } catch (error: any) {
+              console.error('❌ Error updating Stripe subscription:', error)
+              await logError(
+                supabaseAdmin,
+                'family-management',
+                'stripe_api',
+                'Failed to update Stripe subscription quantity',
+                { error: error.message, subscriptionId: familySubscription.stripe_subscription_id },
+                userId,
+                body,
+                ipAddress
+              )
+              // Don't fail - continue without updating subscription
+              console.log('⚠️ Continuing to add member without updating subscription quantity')
+            }
+          }
+        }
       }
+    } else {
+      console.log('ℹ️ No active subscription found - member will be added but won\'t have access until subscription is purchased')
     }
     
     // Add or update family member
+    // Default role is 'member', no relationship
+    // Note: Status is 'active' for now - invitation system will be implemented later
     const memberData: any = {
       family_group_id: body.family_group_id,
-      user_id: body.user_id,
-      role: body.role || 'member',
-      relationship: body.relationship || null,
-      status: 'active',
+      user_id: targetUserId,
+      role: 'member', // Default role
+      relationship: null, // No relationship field
+      status: 'active', // Will be 'pending' once invitation system is implemented
+      invited_by: userId,
+      invited_at: new Date().toISOString(),
       joined_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
@@ -727,57 +766,76 @@ async function handleAddMember(
       memberId = created.id
     }
     
-    // Get subscription details for grantFamilyAccess
-    const currentPeriodStart = stripeSubscription.current_period_start
-      ? new Date(stripeSubscription.current_period_start * 1000).toISOString()
-      : new Date().toISOString()
-    const currentPeriodEnd = stripeSubscription.current_period_end
-      ? new Date(stripeSubscription.current_period_end * 1000).toISOString()
-      : null
-    
-    // Get amount from Stripe subscription
-    const price = stripeSubscription.items?.data?.[0]?.price
-    const amountTotal = price?.unit_amount ? (price.unit_amount / 100) : 0
-    const currency = (price?.currency || 'chf').toUpperCase()
-    const subscriptionInterval = price?.recurring?.interval || null
-    
-    // Grant immediate access to all active members (including the new one)
-    try {
-      await grantFamilyAccess(
-        supabaseAdmin,
-        body.family_group_id,
-        service.id,
-        serviceSlug,
-        familySubscription.stripe_subscription_id,
-        familySubscription.stripe_customer_id || '',
-        amountTotal,
-        currency,
-        subscriptionInterval,
-        currentPeriodStart,
-        currentPeriodEnd
-      )
-      console.log('✅ Granted immediate access to all active family members')
-    } catch (error: any) {
-      console.error('❌ Error granting family access:', error)
-      await logError(
-        supabaseAdmin,
-        'family-management',
-        'database',
-        'Failed to grant family access',
-        { error: error.message },
-        userId,
-        body,
-        ipAddress
-      )
-      // Don't fail the request - member is already added, access will be granted on next renewal
+    // Grant immediate access to all active members (including the new one) if subscription exists
+    let accessGranted = false
+    if (hasSubscription && subscriptionDetails) {
+      const { familySubscription, service, serviceSlug } = subscriptionDetails
+      
+      // Get Stripe subscription for access granting
+      if (familySubscription.stripe_subscription_id) {
+        const isLiveMode = getStripeMode()
+        const stripe = getStripeInstance(isLiveMode)
+        
+        try {
+          const stripeSubscription = await stripe.subscriptions.retrieve(
+            familySubscription.stripe_subscription_id,
+            { expand: ['items.data.price'] }
+          )
+          
+          const currentPeriodStart = stripeSubscription.current_period_start
+            ? new Date(stripeSubscription.current_period_start * 1000).toISOString()
+            : new Date().toISOString()
+          const currentPeriodEnd = stripeSubscription.current_period_end
+            ? new Date(stripeSubscription.current_period_end * 1000).toISOString()
+            : null
+          
+          // Get amount from Stripe subscription
+          const price = stripeSubscription.items?.data?.[0]?.price
+          const amountTotal = price?.unit_amount ? (price.unit_amount / 100) : 0
+          const currency = (price?.currency || 'chf').toUpperCase()
+          const subscriptionInterval = price?.recurring?.interval || null
+          
+          // Grant immediate access to all active members (including the new one)
+          await grantFamilyAccess(
+            supabaseAdmin,
+            body.family_group_id,
+            service.id,
+            serviceSlug,
+            familySubscription.stripe_subscription_id,
+            familySubscription.stripe_customer_id || '',
+            amountTotal,
+            currency,
+            subscriptionInterval,
+            currentPeriodStart,
+            currentPeriodEnd
+          )
+          console.log('✅ Granted immediate access to all active family members')
+          accessGranted = true
+        } catch (error: any) {
+          console.error('❌ Error granting family access:', error)
+          await logError(
+            supabaseAdmin,
+            'family-management',
+            'database',
+            'Failed to grant family access',
+            { error: error.message },
+            userId,
+            body,
+            ipAddress
+          )
+          // Don't fail the request - member is already added, access will be granted on next renewal
+        }
+      }
+    } else {
+      console.log('ℹ️ No subscription - member added but access will be granted when subscription is purchased')
     }
     
     return new Response(
       JSON.stringify({
         success: true,
         member_id: memberId,
-        access_granted: true,
-        subscription_quantity_updated: updatedQuantity !== subscriptionQuantity
+        access_granted: accessGranted,
+        has_subscription: hasSubscription
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
@@ -1169,6 +1227,23 @@ async function handleFamilyStatus(
       )
     }
     
+    // Get admin user profile (username)
+    let adminProfile = null
+    if (familyGroup.admin_user_id) {
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('user_profiles')
+        .select('username, email')
+        .eq('id', familyGroup.admin_user_id)
+        .maybeSingle()
+      
+      if (!profileError && profile) {
+        adminProfile = {
+          username: profile.username,
+          email: profile.email
+        }
+      }
+    }
+    
     // Get all active members
     const { data: members, error: membersError } = await supabaseAdmin
       .rpc('get_active_family_members', { family_group_uuid: familyGroupId })
@@ -1180,6 +1255,25 @@ async function handleFamilyStatus(
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    
+    // Enrich members with user profile information (username, email)
+    const enrichedMembers = await Promise.all(
+      (members || []).map(async (member) => {
+        const { data: profile, error: profileError } = await supabaseAdmin
+          .from('user_profiles')
+          .select('username, email')
+          .eq('id', member.user_id)
+          .maybeSingle()
+        
+        return {
+          ...member,
+          profile: profile ? {
+            username: profile.username,
+            email: profile.email
+          } : null
+        }
+      })
+    )
     
     // Get subscription details
     const subscriptionDetails = await getFamilySubscriptionDetails(supabaseAdmin, familyGroupId)
@@ -1201,7 +1295,7 @@ async function handleFamilyStatus(
         )
         
         const subscriptionQuantity = stripeSubscription.items?.data?.[0]?.quantity || 0
-        const activeMemberCount = members?.length || 0
+        const activeMemberCount = enrichedMembers?.length || 0
         availableSlots = Math.max(0, subscriptionQuantity - activeMemberCount)
       } catch (error: any) {
         console.error('❌ Error retrieving Stripe subscription:', error)
@@ -1211,8 +1305,11 @@ async function handleFamilyStatus(
     
     return new Response(
       JSON.stringify({
-        family_group: familyGroup,
-        members: members || [],
+        family_group: {
+          ...familyGroup,
+          admin_profile: adminProfile
+        },
+        members: enrichedMembers || [],
         subscription: subscriptionDetails?.familySubscription || null,
         stripe_subscription: stripeSubscription ? {
           id: stripeSubscription.id,
