@@ -58,6 +58,161 @@ interface CreateFamilyRequest {
 // Helper Functions
 // ============================================================================
 
+/**
+ * Send family notification (email + in-app)
+ */
+async function sendFamilyNotification(
+  supabaseAdmin: any,
+  userId: string,
+  type: string,
+  data: any
+): Promise<void> {
+  try {
+    // Get user's language preference
+    const { data: prefs } = await supabaseAdmin
+      .from('user_preferences')
+      .select('language')
+      .eq('user_id', userId)
+      .single()
+    
+    const userLanguage = prefs?.language || 'en'
+    
+    // Format timestamp
+    const timestamp = new Date().toLocaleString(userLanguage, {
+      dateStyle: 'long',
+      timeStyle: 'short'
+    })
+    
+    // Prepare notification data
+    const notificationData = {
+      ...data,
+      timestamp,
+      preferencesUrl: 'https://bitminded.ch/account?section=notifications',
+      familyUrl: 'https://bitminded.ch/account?section=family',
+      accountUrl: 'https://bitminded.ch/account'
+    }
+    
+    // Get Supabase URL
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    
+    // Send email notification (non-blocking)
+    fetch(`${supabaseUrl}/functions/v1/send-notification-email`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId,
+        type,
+        data: notificationData
+      })
+    }).catch(error => {
+      console.error(`❌ Failed to send email notification (${type}):`, error)
+      // Don't throw - notification failures shouldn't break operations
+    })
+    
+    // Create in-app notification (non-blocking)
+    console.log(`📱 Checking in-app notification preferences for user ${userId}, type: ${type}`)
+    let inappEnabled = true // Default to enabled
+    
+    try {
+      const { data: inappPrefs, error: prefsError } = await supabaseAdmin
+        .from('user_preferences')
+        .select('notification_preferences')
+        .eq('user_id', userId)
+        .single()
+      
+      if (prefsError) {
+        console.log(`⚠️ Could not fetch preferences for user ${userId}, using defaults (enabled):`, prefsError.message)
+        inappEnabled = true // Default to enabled if we can't fetch preferences
+      } else {
+        inappEnabled = inappPrefs?.notification_preferences?.inapp?.[type] !== false
+        console.log(`📱 In-app notification enabled for ${type}: ${inappEnabled}`)
+      }
+    } catch (prefsErr) {
+      console.error(`❌ Error checking preferences, defaulting to enabled:`, prefsErr)
+      inappEnabled = true // Default to enabled on error
+    }
+    
+    if (inappEnabled) {
+      // Get notification templates
+      const templates: Record<string, Record<string, { title: string, message: string, icon: string }>> = {
+        family_member_added: {
+          en: { title: 'Added to Family', message: `You've been added to ${data.familyName || 'a family group'}.`, icon: '👨‍👩‍👧‍👦' },
+          es: { title: 'Agregado a Familia', message: `Has sido agregado a ${data.familyName || 'un grupo familiar'}.`, icon: '👨‍👩‍👧‍👦' },
+          fr: { title: 'Ajouté à la famille', message: `Vous avez été ajouté à ${data.familyName || 'un groupe familial'}.`, icon: '👨‍👩‍👧‍👦' },
+          de: { title: 'Zur Familie hinzugefügt', message: `Sie wurden zu ${data.familyName || 'einer Familiengruppe'} hinzugefügt.`, icon: '👨‍👩‍👧‍👦' }
+        },
+        family_member_removed: {
+          en: { title: 'Removed from Family', message: `You've been removed from ${data.familyName || 'a family group'}.`, icon: '⚠️' },
+          es: { title: 'Removido de Familia', message: `Has sido removido de ${data.familyName || 'un grupo familiar'}.`, icon: '⚠️' },
+          fr: { title: 'Retiré de la famille', message: `Vous avez été retiré de ${data.familyName || 'un groupe familial'}.`, icon: '⚠️' },
+          de: { title: 'Aus Familie entfernt', message: `Sie wurden aus ${data.familyName || 'einer Familiengruppe'} entfernt.`, icon: '⚠️' }
+        },
+        family_deleted: {
+          en: { title: 'Family Deleted', message: `Your family group "${data.familyName || 'Family'}" has been deleted.`, icon: '🗑️' },
+          es: { title: 'Familia Eliminada', message: `Tu grupo familiar "${data.familyName || 'Familia'}" ha sido eliminado.`, icon: '🗑️' },
+          fr: { title: 'Famille supprimée', message: `Votre groupe familial "${data.familyName || 'Famille'}" a été supprimé.`, icon: '🗑️' },
+          de: { title: 'Familie gelöscht', message: `Ihre Familiengruppe "${data.familyName || 'Familie'}" wurde gelöscht.`, icon: '🗑️' }
+        },
+        family_member_left: {
+          en: { title: 'Member Left', message: `${data.memberName || 'A member'} left your family group "${data.familyName || 'Family'}".`, icon: '👋' },
+          es: { title: 'Miembro Salió', message: `${data.memberName || 'Un miembro'} dejó tu grupo familiar "${data.familyName || 'Familia'}".`, icon: '👋' },
+          fr: { title: 'Membre parti', message: `${data.memberName || 'Un membre'} a quitté votre groupe familial "${data.familyName || 'Famille'}".`, icon: '👋' },
+          de: { title: 'Mitglied verlassen', message: `${data.memberName || 'Ein Mitglied'} hat Ihre Familiengruppe "${data.familyName || 'Familie'}" verlassen.`, icon: '👋' }
+        },
+        family_role_changed: {
+          en: { title: 'Role Changed', message: `Your role in "${data.familyName || 'Family'}" has been changed to ${data.newRole || 'member'}.`, icon: '👤' },
+          es: { title: 'Rol Cambiado', message: `Tu rol en "${data.familyName || 'Familia'}" ha sido cambiado a ${data.newRole || 'miembro'}.`, icon: '👤' },
+          fr: { title: 'Rôle modifié', message: `Votre rôle dans "${data.familyName || 'Famille'}" a été modifié en ${data.newRole || 'membre'}.`, icon: '👤' },
+          de: { title: 'Rolle geändert', message: `Ihre Rolle in "${data.familyName || 'Familie'}" wurde zu ${data.newRole || 'Mitglied'} geändert.`, icon: '👤' }
+        }
+      }
+    
+      const template = templates[type]?.[userLanguage] || templates[type]?.en
+      
+      if (template) {
+        console.log(`📱 Creating in-app notification (${type}) for user ${userId}`)
+        console.log(`   Title: ${template.title}`)
+        console.log(`   Message: ${template.message}`)
+        
+        const { data: notification, error: insertError } = await supabaseAdmin
+          .from('user_notifications')
+          .insert({
+            user_id: userId,
+            type: 'account',
+            title: template.title,
+            message: template.message,
+            icon: template.icon,
+            link: '/account?section=family',
+            data: notificationData || {}
+          })
+          .select()
+          .single()
+        
+        if (insertError) {
+          console.error(`❌ Failed to create in-app notification (${type}):`, insertError)
+          console.error(`   User ID: ${userId}`)
+          console.error(`   Error code: ${insertError.code}`)
+          console.error(`   Error message: ${insertError.message}`)
+          console.error(`   Error details:`, JSON.stringify(insertError, null, 2))
+        } else {
+          console.log(`✅ In-app notification created successfully (${type}) for user ${userId}`)
+          console.log(`   Notification ID: ${notification?.id}`)
+        }
+      } else {
+        console.warn(`⚠️ No template found for notification type: ${type}`)
+      }
+    } else {
+      console.log(`⏭️ In-app notification disabled for ${type}, skipping`)
+    }
+  } catch (error) {
+    console.error(`❌ Error sending family notification (${type}):`, error)
+    // Don't throw - notification failures shouldn't break operations
+  }
+}
+
 function getCorsHeaders(origin: string | null): Record<string, string> {
   const allowedOriginsEnv = Deno.env.get('ALLOWED_ORIGINS')
   const allowedOrigins = allowedOriginsEnv 
@@ -313,19 +468,39 @@ async function isFamilyAdmin(
   userId: string,
   familyGroupId: string
 ): Promise<boolean> {
-  const { data, error } = await supabaseAdmin
+  // Check if user is the admin_user_id in family_groups
+  const { data: familyGroup, error: groupError } = await supabaseAdmin
     .from('family_groups')
     .select('admin_user_id')
     .eq('id', familyGroupId)
-    .eq('admin_user_id', userId)
     .maybeSingle()
   
-  if (error) {
-    console.error('❌ Error checking family admin:', error)
+  if (groupError) {
+    console.error('❌ Error checking family admin:', groupError)
     return false
   }
   
-  return !!data
+  // User is admin if they are the admin_user_id OR if they have role='admin' in family_members
+  if (familyGroup?.admin_user_id === userId) {
+    return true
+  }
+  
+  // Check if user has admin role in family_members
+  const { data: member, error: memberError } = await supabaseAdmin
+    .from('family_members')
+    .select('role')
+    .eq('family_group_id', familyGroupId)
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .eq('role', 'admin')
+    .maybeSingle()
+  
+  if (memberError) {
+    console.error('❌ Error checking member admin role:', memberError)
+    return false
+  }
+  
+  return !!member
 }
 
 /**
@@ -872,6 +1047,40 @@ async function handleAddMember(
       console.log('ℹ️ No subscription - member added but access will be granted when subscription is purchased')
     }
     
+    // Send notification to new member
+    try {
+      console.log(`📧 Preparing to send notification to new member: ${targetUserId}`)
+      const { data: familyGroup } = await supabaseAdmin
+        .from('family_groups')
+        .select('family_name, admin_user_id')
+        .eq('id', body.family_group_id)
+        .single()
+      
+      if (familyGroup) {
+        // Get admin name
+        const { data: adminProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('username, email')
+          .eq('id', familyGroup.admin_user_id)
+          .single()
+        
+        const adminName = adminProfile?.username || adminProfile?.email || 'Admin'
+        
+        console.log(`📧 Sending family_member_added notification to ${targetUserId} for family ${familyGroup.family_name}`)
+        await sendFamilyNotification(supabaseAdmin, targetUserId, 'family_member_added', {
+          familyName: familyGroup.family_name,
+          adminName
+        })
+        console.log(`✅ Notification sent to ${targetUserId}`)
+      } else {
+        console.warn(`⚠️ Family group not found for notification: ${body.family_group_id}`)
+      }
+    } catch (error) {
+      console.error('❌ Error sending notification:', error)
+      console.error('   Error stack:', error.stack)
+      // Don't fail the request
+    }
+    
     return new Response(
       JSON.stringify({
         success: true,
@@ -1121,6 +1330,47 @@ async function handleLeaveFamily(
       )
     }
     
+    // Send notification to admin(s) about member leaving
+    try {
+      const { data: familyGroup } = await supabaseAdmin
+        .from('family_groups')
+        .select('family_name, admin_user_id')
+        .eq('id', body.family_group_id)
+        .single()
+      
+      if (familyGroup) {
+        // Get leaving member's name
+        const { data: memberProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('username, email')
+          .eq('id', userId)
+          .single()
+        
+        const memberName = memberProfile?.username || memberProfile?.email || 'A member'
+        
+        // Send to all admins
+        const { data: admins } = await supabaseAdmin
+          .from('family_members')
+          .select('user_id')
+          .eq('family_group_id', body.family_group_id)
+          .eq('role', 'admin')
+          .eq('status', 'active')
+        
+        if (admins && admins.length > 0) {
+          const notificationPromises = admins.map(admin =>
+            sendFamilyNotification(supabaseAdmin, admin.user_id, 'family_member_left', {
+              familyName: familyGroup.family_name,
+              memberName
+            })
+          )
+          await Promise.all(notificationPromises)
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error sending notification:', error)
+      // Don't fail the request
+    }
+    
     return new Response(
       JSON.stringify({
         success: true,
@@ -1217,79 +1467,79 @@ async function handleRemoveMember(
       )
     }
     
-    // Get family subscription details
+    // Get family subscription details (optional - family may not have subscription yet)
     const subscriptionDetails = await getFamilySubscriptionDetails(supabaseAdmin, body.family_group_id)
-    if (!subscriptionDetails) {
-      return new Response(
-        JSON.stringify({ error: 'Family subscription not found or inactive' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    const hasSubscription = !!subscriptionDetails
     
-    const { familySubscription, service } = subscriptionDetails
-    
-    // Revoke access (update service_purchases status to cancelled)
-    const { error: revokeError } = await supabaseAdmin
-      .from('service_purchases')
-      .update({
-        status: 'cancelled',
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', body.user_id)
-      .eq('service_id', service.id)
-      .eq('status', 'active')
-    
-    if (revokeError) {
-      console.error('❌ Error revoking access:', revokeError)
-      // Don't fail - continue with member removal
-    } else {
-      console.log('✅ Revoked access for member:', body.user_id)
-    }
-    
-    // Get current active member count (before removal)
-    const { data: activeMembers, error: membersError } = await supabaseAdmin
-      .rpc('get_active_family_members', { family_group_uuid: body.family_group_id })
-    
-    if (membersError) {
-      console.error('❌ Error fetching active members:', membersError)
-    }
-    
-    const currentMemberCount = activeMembers?.length || 0
-    const newMemberCount = Math.max(1, currentMemberCount - 1) // At least 1 member (admin)
-    
-    // Update Stripe subscription quantity (decrease, with proration)
-    if (familySubscription.stripe_subscription_id) {
-      const isLiveMode = getStripeMode()
-      const stripe = getStripeInstance(isLiveMode)
+    // Revoke access if subscription exists
+    if (hasSubscription && subscriptionDetails) {
+      const { familySubscription, service } = subscriptionDetails
       
-      try {
-        const stripeSubscription = await stripe.subscriptions.retrieve(familySubscription.stripe_subscription_id)
-        const subscriptionItemId = stripeSubscription.items?.data?.[0]?.id
-        
-        if (subscriptionItemId && stripeSubscription.items?.data?.[0]?.quantity && stripeSubscription.items.data[0].quantity > newMemberCount) {
-          await stripe.subscriptions.update(familySubscription.stripe_subscription_id, {
-            items: [{
-              id: subscriptionItemId,
-              quantity: newMemberCount
-            }],
-            proration_behavior: 'create_prorations'
-          })
-          console.log(`✅ Updated Stripe subscription quantity to ${newMemberCount}`)
-        }
-      } catch (error: any) {
-        console.error('❌ Error updating Stripe subscription:', error)
-        await logError(
-          supabaseAdmin,
-          'family-management',
-          'stripe_api',
-          'Failed to update Stripe subscription quantity on member removal',
-          { error: error.message, subscriptionId: familySubscription.stripe_subscription_id },
-          userId,
-          body,
-          ipAddress
-        )
-        // Don't fail - member removal continues
+      // Revoke access (update service_purchases status to cancelled)
+      const { error: revokeError } = await supabaseAdmin
+        .from('service_purchases')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', body.user_id)
+        .eq('service_id', service.id)
+        .eq('status', 'active')
+      
+      if (revokeError) {
+        console.error('❌ Error revoking access:', revokeError)
+        // Don't fail - continue with member removal
+      } else {
+        console.log('✅ Revoked access for member:', body.user_id)
       }
+      
+      // Get current active member count (before removal)
+      const { data: activeMembers, error: membersError } = await supabaseAdmin
+        .rpc('get_active_family_members', { family_group_uuid: body.family_group_id })
+      
+      if (membersError) {
+        console.error('❌ Error fetching active members:', membersError)
+      }
+      
+      const currentMemberCount = activeMembers?.length || 0
+      const newMemberCount = Math.max(1, currentMemberCount - 1) // At least 1 member (admin)
+      
+      // Update Stripe subscription quantity (decrease, with proration) if subscription exists
+      if (familySubscription.stripe_subscription_id) {
+        const isLiveMode = getStripeMode()
+        const stripe = getStripeInstance(isLiveMode)
+        
+        try {
+          const stripeSubscription = await stripe.subscriptions.retrieve(familySubscription.stripe_subscription_id)
+          const subscriptionItemId = stripeSubscription.items?.data?.[0]?.id
+          
+          if (subscriptionItemId && stripeSubscription.items?.data?.[0]?.quantity && stripeSubscription.items.data[0].quantity > newMemberCount) {
+            await stripe.subscriptions.update(familySubscription.stripe_subscription_id, {
+              items: [{
+                id: subscriptionItemId,
+                quantity: newMemberCount
+              }],
+              proration_behavior: 'create_prorations'
+            })
+            console.log(`✅ Updated Stripe subscription quantity to ${newMemberCount}`)
+          }
+        } catch (error: any) {
+          console.error('❌ Error updating Stripe subscription:', error)
+          await logError(
+            supabaseAdmin,
+            'family-management',
+            'stripe_api',
+            'Failed to update Stripe subscription quantity on member removal',
+            { error: error.message, subscriptionId: familySubscription.stripe_subscription_id },
+            userId,
+            body,
+            ipAddress
+          )
+          // Don't fail - member removal continues
+        }
+      }
+    } else {
+      console.log('ℹ️ No active subscription found - member will be removed but no access revocation needed')
     }
     
     // Update family member status to 'removed'
@@ -1319,11 +1569,30 @@ async function handleRemoveMember(
       )
     }
     
+    // Send notification to removed member
+    try {
+      const { data: familyGroupForNotification } = await supabaseAdmin
+        .from('family_groups')
+        .select('family_name')
+        .eq('id', body.family_group_id)
+        .single()
+      
+      if (familyGroupForNotification) {
+        await sendFamilyNotification(supabaseAdmin, body.user_id, 'family_member_removed', {
+          familyName: familyGroupForNotification.family_name
+        })
+      }
+    } catch (error) {
+      console.error('❌ Error sending notification:', error)
+      // Don't fail the request
+    }
+    
     return new Response(
       JSON.stringify({
         success: true,
-        access_revoked: true,
-        member_removed: true
+        access_revoked: hasSubscription,
+        member_removed: true,
+        has_subscription: hasSubscription
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
@@ -1435,6 +1704,25 @@ async function handleUpdateMemberRole(
         JSON.stringify({ error: 'Failed to update member role' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+    
+    // Send notification to affected member
+    try {
+      const { data: familyGroup } = await supabaseAdmin
+        .from('family_groups')
+        .select('family_name')
+        .eq('id', body.family_group_id)
+        .single()
+      
+      if (familyGroup) {
+        await sendFamilyNotification(supabaseAdmin, body.user_id, 'family_role_changed', {
+          familyName: familyGroup.family_name,
+          newRole: body.new_role
+        })
+      }
+    } catch (error) {
+      console.error('❌ Error sending notification:', error)
+      // Don't fail the request
     }
     
     return new Response(
@@ -1706,11 +1994,16 @@ async function handleMyFamilyGroup(
           is_member: true,
           family_group_id: member.family_group_id,
           role: member.role,
-          family_name: null
+          family_name: null,
+          is_admin: member.role === 'admin'
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    
+    // User is admin if they are the admin_user_id OR if they have role='admin'
+    const isAdminUserId = familyGroup.admin_user_id === userId
+    const isAdminMember = member.role === 'admin'
     
     return new Response(
       JSON.stringify({
@@ -1718,7 +2011,7 @@ async function handleMyFamilyGroup(
         family_group_id: member.family_group_id,
         role: member.role,
         family_name: familyGroup.family_name,
-        is_admin: familyGroup.admin_user_id === userId
+        is_admin: isAdminUserId || isAdminMember
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
@@ -1781,13 +2074,14 @@ async function handleDeleteFamily(
       )
     }
     
-    // Check if there are other admins
+    // Check if there are other admins (excluding the current user)
     const { data: adminMembers, error: adminError } = await supabaseAdmin
       .from('family_members')
       .select('id')
       .eq('family_group_id', body.family_group_id)
       .eq('role', 'admin')
       .eq('status', 'active')
+      .neq('user_id', userId) // Exclude the current user
     
     if (adminError) {
       console.error('❌ Error checking admin members:', adminError)
@@ -1795,12 +2089,40 @@ async function handleDeleteFamily(
     
     const adminCount = adminMembers?.length || 0
     
-    if (adminCount > 1) {
+    if (adminCount > 0) {
       return new Response(
         JSON.stringify({ error: 'Cannot delete family group: There are other admins. Transfer admin role first or leave the group.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    
+    // Get family group info and all members BEFORE deletion (for notifications)
+    const { data: familyGroup, error: groupFetchError } = await supabaseAdmin
+      .from('family_groups')
+      .select('id, family_name')
+      .eq('id', body.family_group_id)
+      .single()
+    
+    if (groupFetchError || !familyGroup) {
+      console.error('❌ Error fetching family group:', groupFetchError)
+      return new Response(
+        JSON.stringify({ error: 'Family group not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Get all member user IDs BEFORE deletion (for notifications)
+    const { data: allMembers, error: membersFetchError } = await supabaseAdmin
+      .from('family_members')
+      .select('user_id')
+      .eq('family_group_id', body.family_group_id)
+      .eq('status', 'active')
+    
+    if (membersFetchError) {
+      console.error('❌ Error fetching family members:', membersFetchError)
+    }
+    
+    const memberUserIds = allMembers?.map(m => m.user_id) || []
     
     // Get family subscription details
     const subscriptionDetails = await getFamilySubscriptionDetails(supabaseAdmin, body.family_group_id)
@@ -1820,35 +2142,24 @@ async function handleDeleteFamily(
     }
     
     // Revoke access for all members
-    if (subscriptionDetails) {
+    if (subscriptionDetails && memberUserIds.length > 0) {
       const { service } = subscriptionDetails
       
-      // Get all member user IDs first
-      const { data: members, error: membersError } = await supabaseAdmin
-        .from('family_members')
-        .select('user_id')
-        .eq('family_group_id', body.family_group_id)
+      const { error: revokeError } = await supabaseAdmin
+        .from('service_purchases')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('service_id', service.id)
+        .in('user_id', memberUserIds)
         .eq('status', 'active')
       
-      if (!membersError && members && members.length > 0) {
-        const memberUserIds = members.map(m => m.user_id)
-        
-        const { error: revokeError } = await supabaseAdmin
-          .from('service_purchases')
-          .update({
-            status: 'cancelled',
-            updated_at: new Date().toISOString()
-          })
-          .eq('service_id', service.id)
-          .in('user_id', memberUserIds)
-          .eq('status', 'active')
-        
-        if (revokeError) {
-          console.error('❌ Error revoking access:', revokeError)
-          // Don't fail - continue with deletion
-        } else {
-          console.log('✅ Revoked access for all family members')
-        }
+      if (revokeError) {
+        console.error('❌ Error revoking access:', revokeError)
+        // Don't fail - continue with deletion
+      } else {
+        console.log('✅ Revoked access for all family members')
       }
     }
     
@@ -1912,6 +2223,25 @@ async function handleDeleteFamily(
     }
     
     console.log('✅ Deleted family group:', body.family_group_id)
+    
+    // Send notification to all members (using data fetched before deletion)
+    if (memberUserIds.length > 0) {
+      try {
+        console.log(`📧 Sending family_deleted notifications to ${memberUserIds.length} members`)
+        const notificationPromises = memberUserIds.map(memberUserId =>
+          sendFamilyNotification(supabaseAdmin, memberUserId, 'family_deleted', {
+            familyName: familyGroup.family_name
+          })
+        )
+        await Promise.all(notificationPromises)
+        console.log('✅ Sent family_deleted notifications to all members')
+      } catch (error) {
+        console.error('❌ Error sending notifications:', error)
+        // Don't fail the request
+      }
+    } else {
+      console.log('ℹ️ No members to notify (family was empty)')
+    }
     
     return new Response(
       JSON.stringify({
