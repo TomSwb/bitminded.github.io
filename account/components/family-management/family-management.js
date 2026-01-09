@@ -98,6 +98,13 @@ class FamilyManagement {
             
             // Overview elements
             familyName: document.getElementById('family-name'),
+            editFamilyNameBtn: document.getElementById('edit-family-name-btn'),
+            editFamilyNameForm: document.getElementById('edit-family-name-form'),
+            editFamilyNameInput: document.getElementById('edit-family-name-input'),
+            saveFamilyNameBtn: document.getElementById('save-family-name-btn'),
+            cancelEditFamilyNameBtn: document.getElementById('cancel-edit-family-name-btn'),
+            editFamilyNameError: document.getElementById('edit-family-name-error'),
+            editFamilyNameErrorMessage: document.getElementById('edit-family-name-error-message'),
             familyAdmin: document.getElementById('family-admin'),
             familyMemberCount: document.getElementById('family-member-count'),
             familySubscriptionStatus: document.getElementById('family-subscription-status'),
@@ -342,6 +349,21 @@ class FamilyManagement {
             this.elements.leaveFamilyBtn.addEventListener('click', this.handleLeaveFamily);
         }
         
+        // Edit family name button
+        if (this.elements.editFamilyNameBtn) {
+            this.elements.editFamilyNameBtn.addEventListener('click', () => this.openEditFamilyNameForm());
+        }
+        
+        // Save family name button
+        if (this.elements.saveFamilyNameBtn) {
+            this.elements.saveFamilyNameBtn.addEventListener('click', () => this.handleUpdateFamilyName());
+        }
+        
+        // Cancel edit family name button
+        if (this.elements.cancelEditFamilyNameBtn) {
+            this.elements.cancelEditFamilyNameBtn.addEventListener('click', () => this.closeEditFamilyNameForm());
+        }
+        
         // Create family button
         if (this.elements.createFamilyBtn) {
             this.elements.createFamilyBtn.addEventListener('click', () => this.openCreateFamilyModal());
@@ -453,6 +475,15 @@ class FamilyManagement {
         // Update overview
         if (this.elements.familyName) {
             this.elements.familyName.textContent = family_group?.family_name || 'N/A';
+        }
+        
+        // Show/hide edit family name button (admin only)
+        if (this.elements.editFamilyNameBtn) {
+            if (this.isAdmin) {
+                this.elements.editFamilyNameBtn.classList.remove('hidden');
+            } else {
+                this.elements.editFamilyNameBtn.classList.add('hidden');
+            }
         }
         
         if (this.elements.familyAdmin) {
@@ -1102,6 +1133,161 @@ class FamilyManagement {
             window.logger?.error('❌ Failed to update role:', error);
             this.hideLoading();
             this.showError(error.message || 'Failed to update role');
+        }
+    }
+    
+    /**
+     * Open edit family name form
+     */
+    openEditFamilyNameForm() {
+        if (!this.elements.editFamilyNameForm || !this.elements.editFamilyNameInput || !this.elements.familyName) {
+            return;
+        }
+        
+        // Set current family name as input value
+        this.elements.editFamilyNameInput.value = this.elements.familyName.textContent || '';
+        
+        // Hide the display and edit button, show the form
+        this.elements.familyName.style.display = 'none';
+        if (this.elements.editFamilyNameBtn) {
+            this.elements.editFamilyNameBtn.classList.add('hidden');
+        }
+        this.elements.editFamilyNameForm.classList.remove('hidden');
+        this.elements.editFamilyNameInput.focus();
+        
+        // Hide any previous errors
+        if (this.elements.editFamilyNameError) {
+            this.elements.editFamilyNameError.classList.add('hidden');
+        }
+    }
+    
+    /**
+     * Close edit family name form
+     */
+    closeEditFamilyNameForm() {
+        if (!this.elements.editFamilyNameForm || !this.elements.familyName) {
+            return;
+        }
+        
+        // Show the display and edit button, hide the form
+        this.elements.familyName.style.display = '';
+        if (this.elements.editFamilyNameBtn) {
+            this.elements.editFamilyNameBtn.classList.remove('hidden');
+        }
+        this.elements.editFamilyNameForm.classList.add('hidden');
+        
+        // Clear input
+        if (this.elements.editFamilyNameInput) {
+            this.elements.editFamilyNameInput.value = '';
+        }
+        
+        // Hide any errors
+        if (this.elements.editFamilyNameError) {
+            this.elements.editFamilyNameError.classList.add('hidden');
+        }
+    }
+    
+    /**
+     * Handle update family name
+     */
+    async handleUpdateFamilyName() {
+        if (!this.elements.editFamilyNameInput || !this.familyGroupId) {
+            return;
+        }
+        
+        const newFamilyName = this.elements.editFamilyNameInput.value.trim();
+        
+        // Validate
+        if (!newFamilyName) {
+            this.showEditFamilyNameError('Family name is required');
+            return;
+        }
+        
+        if (newFamilyName.length < 1 || newFamilyName.length > 100) {
+            this.showEditFamilyNameError('Family name must be between 1 and 100 characters');
+            return;
+        }
+        
+        // Check if name actually changed
+        if (newFamilyName === this.elements.familyName?.textContent) {
+            this.closeEditFamilyNameForm();
+            return;
+        }
+        
+        try {
+            // Get session for Authorization header
+            const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
+            
+            if (sessionError || !session) {
+                throw new Error('Not authenticated');
+            }
+            
+            // Get Supabase URL
+            let supabaseUrl = 'https://dynxqnrkmjcvgzsugxtm.supabase.co';
+            if (window.supabase && window.supabase.supabaseUrl) {
+                supabaseUrl = window.supabase.supabaseUrl;
+            } else if (typeof envConfig !== 'undefined' && envConfig.supabaseUrl) {
+                supabaseUrl = envConfig.supabaseUrl;
+            }
+            
+            // Call API
+            const response = await fetch(
+                `${supabaseUrl}/functions/v1/family-management/update-family-name`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        family_group_id: this.familyGroupId,
+                        family_name: newFamilyName
+                    })
+                }
+            );
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Update UI
+            if (this.elements.familyName) {
+                this.elements.familyName.textContent = data.family_name || newFamilyName;
+            }
+            
+            // Update family data
+            if (this.familyData && this.familyData.family_group) {
+                this.familyData.family_group.family_name = data.family_name || newFamilyName;
+            }
+            
+            // Close form
+            this.closeEditFamilyNameForm();
+            
+            // Show success message
+            this.showSuccess('Family name updated successfully');
+            
+            window.logger?.log('✅ Family name updated successfully');
+            
+        } catch (error) {
+            window.logger?.error('❌ Failed to update family name:', error);
+            this.showEditFamilyNameError(error.message || 'Failed to update family name');
+        }
+    }
+    
+    /**
+     * Show error in edit family name form
+     */
+    showEditFamilyNameError(message) {
+        if (this.elements.editFamilyNameError && this.elements.editFamilyNameErrorMessage) {
+            this.elements.editFamilyNameErrorMessage.textContent = message;
+            this.elements.editFamilyNameError.classList.remove('hidden');
         }
     }
 

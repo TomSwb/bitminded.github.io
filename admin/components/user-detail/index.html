@@ -160,20 +160,34 @@
                             </div>
                         </div>
 
-                        <div class="user-detail__section">
-                            <h3 class="translatable-content" data-translation-key="Quick Stats">Quick Stats</h3>
-                            <div class="user-detail__stats-grid">
-                                <div class="user-detail__stat-card">
-                                    <div class="user-detail__stat-number" id="user-detail-subscription-count">0</div>
-                                    <div class="user-detail__stat-label translatable-content" data-translation-key="Active Subscriptions">Active Subscriptions</div>
+                        <div class="user-detail__stats-family-container">
+                            <div class="user-detail__section">
+                                <h3 class="translatable-content" data-translation-key="Quick Stats">Quick Stats</h3>
+                                <div class="user-detail__stats-grid">
+                                    <div class="user-detail__stat-card">
+                                        <div class="user-detail__stat-number" id="user-detail-subscription-count">0</div>
+                                        <div class="user-detail__stat-label translatable-content" data-translation-key="Active Subscriptions">Active Subscriptions</div>
+                                    </div>
+                                    <div class="user-detail__stat-card">
+                                        <div class="user-detail__stat-number" id="user-detail-login-count">0</div>
+                                        <div class="user-detail__stat-label translatable-content" data-translation-key="Total Logins">Total Logins</div>
+                                    </div>
+                                    <div class="user-detail__stat-card">
+                                        <div class="user-detail__stat-number" id="user-detail-session-count">0</div>
+                                        <div class="user-detail__stat-label translatable-content" data-translation-key="Active Sessions">Active Sessions</div>
+                                    </div>
                                 </div>
-                                <div class="user-detail__stat-card">
-                                    <div class="user-detail__stat-number" id="user-detail-login-count">0</div>
-                                    <div class="user-detail__stat-label translatable-content" data-translation-key="Total Logins">Total Logins</div>
-                                </div>
-                                <div class="user-detail__stat-card">
-                                    <div class="user-detail__stat-number" id="user-detail-session-count">0</div>
-                                    <div class="user-detail__stat-label translatable-content" data-translation-key="Active Sessions">Active Sessions</div>
+                            </div>
+
+                            <div class="user-detail__section" id="user-detail-family-section" style="display: none;">
+                                <h3 id="user-detail-family-header">Family</h3>
+                                <div class="user-detail__family-card">
+                                    <div class="user-detail__family-card-body">
+                                        <div class="user-detail__family-card-label translatable-content" data-translation-key="members">Members</div>
+                                        <div id="user-detail-family-members-list" class="user-detail__family-members-list">
+                                            <!-- Family members will be loaded here -->
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

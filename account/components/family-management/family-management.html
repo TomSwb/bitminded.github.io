@@ -37,6 +37,24 @@
                 <div class="family-management__overview-item">
                     <span class="family-management__overview-label translatable-content" data-translation-key="Family Name">Family Name:</span>
                     <span id="family-name" class="family-management__overview-value"></span>
+                    <button id="edit-family-name-btn" class="family-management__edit-name-btn hidden" type="button" aria-label="Edit family name">
+                        <span class="translatable-content" data-translation-key="Edit">Edit</span>
+                    </button>
+                </div>
+                <!-- Edit Family Name Form (hidden by default) -->
+                <div id="edit-family-name-form" class="family-management__edit-name-form hidden">
+                    <input type="text" id="edit-family-name-input" class="family-management__edit-name-input" maxlength="100" required>
+                    <div class="family-management__edit-name-actions">
+                        <button id="save-family-name-btn" class="family-management__btn family-management__btn--primary" type="button">
+                            <span class="translatable-content" data-translation-key="Save">Save</span>
+                        </button>
+                        <button id="cancel-edit-family-name-btn" class="family-management__btn family-management__btn--secondary" type="button">
+                            <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                        </button>
+                    </div>
+                    <div id="edit-family-name-error" class="family-management__error hidden" role="alert">
+                        <span id="edit-family-name-error-message" class="family-management__error-message"></span>
+                    </div>
                 </div>
                 <div class="family-management__overview-item">
                     <span class="family-management__overview-label translatable-content" data-translation-key="Admin">Admin:</span>

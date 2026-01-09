@@ -54,6 +54,15 @@ interface CreateFamilyRequest {
   family_type?: 'household' | 'parent-child' | 'custom'
 }
 
+interface UpdateFamilyNameRequest {
+  family_group_id: string
+  family_name: string
+}
+
+interface GetUserFamilyRequest {
+  target_user_id: string
+}
+
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -2035,6 +2044,242 @@ async function handleMyFamilyGroup(
 }
 
 /**
+ * POST /update-family-name - Update family group name (admin only)
+ */
+async function handleUpdateFamilyName(
+  supabaseAdmin: any,
+  userId: string,
+  body: UpdateFamilyNameRequest,
+  ipAddress: string,
+  origin: string | null
+): Promise<Response> {
+  const corsHeaders = getCorsHeaders(origin)
+  
+  try {
+    // Validate input
+    if (!body.family_group_id || !body.family_name || typeof body.family_name !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Missing required fields: family_group_id, family_name' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    const familyName = body.family_name.trim()
+    if (familyName.length < 1 || familyName.length > 100) {
+      return new Response(
+        JSON.stringify({ error: 'Family name must be between 1 and 100 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Verify user is family admin
+    const isAdmin = await isFamilyAdmin(supabaseAdmin, userId, body.family_group_id)
+    if (!isAdmin) {
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'auth',
+        'User is not family admin',
+        { userId, familyGroupId: body.family_group_id },
+        userId,
+        body,
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Only family admin can update family name' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Update family name
+    const { error: updateError } = await supabaseAdmin
+      .from('family_groups')
+      .update({
+        family_name: familyName,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', body.family_group_id)
+    
+    if (updateError) {
+      console.error('❌ Error updating family name:', updateError)
+      await logError(
+        supabaseAdmin,
+        'family-management',
+        'database',
+        'Failed to update family name',
+        { error: updateError.message },
+        userId,
+        body,
+        ipAddress
+      )
+      return new Response(
+        JSON.stringify({ error: 'Failed to update family name' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    console.log('✅ Updated family name:', body.family_group_id, '→', familyName)
+    
+    return new Response(
+      JSON.stringify({
+        success: true,
+        family_name: familyName
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  } catch (error: any) {
+    console.error('❌ Error in handleUpdateFamilyName:', error)
+    await logError(
+      supabaseAdmin,
+      'family-management',
+      'other',
+      'Unexpected error in handleUpdateFamilyName',
+      { error: error.message, stack: error.stack },
+      userId,
+      body,
+      ipAddress
+    )
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+}
+
+/**
+ * GET /admin/user-family - Get family group info for any user (admin only)
+ */
+async function handleGetUserFamily(
+  supabaseAdmin: any,
+  userId: string,
+  targetUserId: string,
+  ipAddress: string,
+  origin: string | null
+): Promise<Response> {
+  const corsHeaders = getCorsHeaders(origin)
+  
+  try {
+    // Verify requesting user is system admin
+    const { data: adminRole, error: roleError } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle()
+    
+    if (roleError || !adminRole) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Only system admins can view user family info' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Get target user's family membership (bypasses RLS with supabaseAdmin)
+    const { data: familyMember, error: memberError } = await supabaseAdmin
+      .from('family_members')
+      .select('family_group_id, role')
+      .eq('user_id', targetUserId)
+      .eq('status', 'active')
+      .maybeSingle()
+    
+    if (memberError) {
+      console.error('❌ Error fetching user family membership:', memberError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch family membership' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    if (!familyMember) {
+      // User is not in any family group
+      return new Response(
+        JSON.stringify({
+          is_member: false,
+          family_group: null,
+          members: []
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Get family group info
+    const { data: familyGroup, error: groupError } = await supabaseAdmin
+      .from('family_groups')
+      .select('id, family_name, admin_user_id')
+      .eq('id', familyMember.family_group_id)
+      .single()
+    
+    if (groupError || !familyGroup) {
+      console.error('❌ Error fetching family group:', groupError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch family group' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Get all active family members
+    const { data: members, error: membersError } = await supabaseAdmin
+      .rpc('get_active_family_members', { family_group_uuid: familyMember.family_group_id })
+    
+    if (membersError) {
+      console.error('❌ Error fetching active members:', membersError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch family members' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Enrich members with user profile information
+    const enrichedMembers = await Promise.all(
+      (members || []).map(async (member) => {
+        const { data: profile, error: profileError } = await supabaseAdmin
+          .from('user_profiles')
+          .select('username, email')
+          .eq('id', member.user_id)
+          .maybeSingle()
+        
+        return {
+          ...member,
+          profile: profile ? {
+            username: profile.username,
+            email: profile.email
+          } : null
+        }
+      })
+    )
+    
+    return new Response(
+      JSON.stringify({
+        is_member: true,
+        family_group: {
+          id: familyGroup.id,
+          family_name: familyGroup.family_name,
+          admin_user_id: familyGroup.admin_user_id
+        },
+        members: enrichedMembers || []
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  } catch (error: any) {
+    console.error('❌ Error in handleGetUserFamily:', error)
+    await logError(
+      supabaseAdmin,
+      'family-management',
+      'other',
+      'Unexpected error in handleGetUserFamily',
+      { error: error.message, stack: error.stack },
+      userId,
+      { target_user_id: targetUserId },
+      ipAddress
+    )
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+}
+
+/**
  * POST /delete-family - Delete family group (admin only, must be only admin)
  */
 async function handleDeleteFamily(
@@ -2628,6 +2873,18 @@ serve(async (req) => {
     } else if (method === 'POST' && path.endsWith('/delete-family')) {
       const body = await req.json() as DeleteFamilyRequest
       return await handleDeleteFamily(supabaseAdmin, user.id, body, ipAddress, origin)
+    } else if (method === 'POST' && path.endsWith('/update-family-name')) {
+      const body = await req.json() as UpdateFamilyNameRequest
+      return await handleUpdateFamilyName(supabaseAdmin, user.id, body, ipAddress, origin)
+    } else if (method === 'GET' && path.endsWith('/admin/user-family')) {
+      const targetUserId = url.searchParams.get('target_user_id')
+      if (!targetUserId) {
+        return new Response(
+          JSON.stringify({ error: 'Missing required parameter: target_user_id' }),
+          { status: 400, headers: { ...getCorsHeaders(origin), 'Content-Type': 'application/json' } }
+        )
+      }
+      return await handleGetUserFamily(supabaseAdmin, user.id, targetUserId, ipAddress, origin)
     } else {
       return new Response(
         JSON.stringify({ error: 'Not found' }),
