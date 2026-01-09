@@ -9,6 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.13] - 2026-01-08
+
+### Added
+- **Date of Birth field in signup form**: Added required DOB field to user registration for age verification on purchases
+  - DOB field positioned after email, before password
+  - Validation: required field and prevents future dates
+  - Translations added for all languages (en, es, fr, de)
+  - Database integration: DOB saved to `user_profiles.date_of_birth` via updated `handle_new_user()` trigger
+  - Migration: `20260108_add_dob_to_handle_new_user.sql`
+- **Family Management UI component (15.9.4)**: Complete family management interface for account page
+  - View family members, roles, and status
+  - Add/remove family members with email invitations
+  - Family creation functionality
+  - Leave/delete family group functionality
+  - Admin role management (promote members to admin)
+- **Family Management Notifications**: Comprehensive notification system for all family management events
+  - Email notifications for invitations, member additions/removals, role changes
+  - In-app notifications for all family events
+- **Family member invitation simplification**: Streamlined invitation process with email-only input
+
+### Changed
+- **Family Management UX improvements**: Enhanced error handling and user experience
+  - Improved family group UI in user detail page
+  - Better error messages and validation feedback
+  - Simplified member invitation flow (removed role/relationship fields)
+- **Priority lists cleanup**: Removed redundant sections and marked Phase 2 as complete
+  - Moved item 15.10 (DOB signup field) to completed items
+  - Marked Phase 2: Stripe & Payment Foundation as complete
+
+### Fixed
+- Fixed syntax errors in user detail page and session management
+- Fixed family management empty state visibility issue
+
+---
+
 ## [1.0.12] - 2026-01-05
 
 ### Added
