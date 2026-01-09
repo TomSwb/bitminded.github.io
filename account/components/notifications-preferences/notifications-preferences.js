@@ -16,12 +16,22 @@ class NotificationsPreferences {
         this.twoFACheckbox = null;
         this.newLoginCheckbox = null;
         this.usernameChangedCheckbox = null;
+        this.familyMemberAddedCheckbox = null;
+        this.familyMemberRemovedCheckbox = null;
+        this.familyDeletedCheckbox = null;
+        this.familyMemberLeftCheckbox = null;
+        this.familyRoleChangedCheckbox = null;
         
         // Individual notification type checkboxes - In-App
         this.inappPasswordChangedCheckbox = null;
         this.inappTwoFACheckbox = null;
         this.inappNewLoginCheckbox = null;
         this.inappUsernameChangedCheckbox = null;
+        this.inappFamilyMemberAddedCheckbox = null;
+        this.inappFamilyMemberRemovedCheckbox = null;
+        this.inappFamilyDeletedCheckbox = null;
+        this.inappFamilyMemberLeftCheckbox = null;
+        this.inappFamilyRoleChangedCheckbox = null;
         
         // Current user
         this.user = null;
@@ -292,12 +302,22 @@ class NotificationsPreferences {
         this.twoFACheckbox = document.getElementById('email-two-fa');
         this.newLoginCheckbox = document.getElementById('email-new-login');
         this.usernameChangedCheckbox = document.getElementById('email-username-changed');
+        this.familyMemberAddedCheckbox = document.getElementById('email-family-member-added');
+        this.familyMemberRemovedCheckbox = document.getElementById('email-family-member-removed');
+        this.familyDeletedCheckbox = document.getElementById('email-family-deleted');
+        this.familyMemberLeftCheckbox = document.getElementById('email-family-member-left');
+        this.familyRoleChangedCheckbox = document.getElementById('email-family-role-changed');
         
         // Get checkbox inputs for individual notification types - In-App
         this.inappPasswordChangedCheckbox = document.getElementById('inapp-password-changed');
         this.inappTwoFACheckbox = document.getElementById('inapp-two-fa');
         this.inappNewLoginCheckbox = document.getElementById('inapp-new-login');
         this.inappUsernameChangedCheckbox = document.getElementById('inapp-username-changed');
+        this.inappFamilyMemberAddedCheckbox = document.getElementById('inapp-family-member-added');
+        this.inappFamilyMemberRemovedCheckbox = document.getElementById('inapp-family-member-removed');
+        this.inappFamilyDeletedCheckbox = document.getElementById('inapp-family-deleted');
+        this.inappFamilyMemberLeftCheckbox = document.getElementById('inapp-family-member-left');
+        this.inappFamilyRoleChangedCheckbox = document.getElementById('inapp-family-role-changed');
 
         if (!this.form) {
             window.logger?.error('❌ Notifications Preferences: Form not found');
@@ -343,6 +363,26 @@ class NotificationsPreferences {
             this.usernameChangedCheckbox.checked = emailPrefs.username_changed !== false;
         }
 
+        if (this.familyMemberAddedCheckbox) {
+            this.familyMemberAddedCheckbox.checked = emailPrefs.family_member_added !== false;
+        }
+
+        if (this.familyMemberRemovedCheckbox) {
+            this.familyMemberRemovedCheckbox.checked = emailPrefs.family_member_removed !== false;
+        }
+
+        if (this.familyDeletedCheckbox) {
+            this.familyDeletedCheckbox.checked = emailPrefs.family_deleted !== false;
+        }
+
+        if (this.familyMemberLeftCheckbox) {
+            this.familyMemberLeftCheckbox.checked = emailPrefs.family_member_left !== false;
+        }
+
+        if (this.familyRoleChangedCheckbox) {
+            this.familyRoleChangedCheckbox.checked = emailPrefs.family_role_changed !== false;
+        }
+
         // Apply in-app notification preferences
         if (this.inappPasswordChangedCheckbox) {
             this.inappPasswordChangedCheckbox.checked = inappPrefs.password_changed !== false;
@@ -358,6 +398,26 @@ class NotificationsPreferences {
 
         if (this.inappUsernameChangedCheckbox) {
             this.inappUsernameChangedCheckbox.checked = inappPrefs.username_changed !== false;
+        }
+
+        if (this.inappFamilyMemberAddedCheckbox) {
+            this.inappFamilyMemberAddedCheckbox.checked = inappPrefs.family_member_added !== false;
+        }
+
+        if (this.inappFamilyMemberRemovedCheckbox) {
+            this.inappFamilyMemberRemovedCheckbox.checked = inappPrefs.family_member_removed !== false;
+        }
+
+        if (this.inappFamilyDeletedCheckbox) {
+            this.inappFamilyDeletedCheckbox.checked = inappPrefs.family_deleted !== false;
+        }
+
+        if (this.inappFamilyMemberLeftCheckbox) {
+            this.inappFamilyMemberLeftCheckbox.checked = inappPrefs.family_member_left !== false;
+        }
+
+        if (this.inappFamilyRoleChangedCheckbox) {
+            this.inappFamilyRoleChangedCheckbox.checked = inappPrefs.family_role_changed !== false;
         }
     }
 
@@ -397,6 +457,11 @@ class NotificationsPreferences {
                         two_fa: this.twoFACheckbox?.checked ?? true,
                         new_login: this.newLoginCheckbox?.checked ?? true,
                         username_changed: this.usernameChangedCheckbox?.checked ?? true,
+                        family_member_added: this.familyMemberAddedCheckbox?.checked ?? true,
+                        family_member_removed: this.familyMemberRemovedCheckbox?.checked ?? true,
+                        family_deleted: this.familyDeletedCheckbox?.checked ?? true,
+                        family_member_left: this.familyMemberLeftCheckbox?.checked ?? true,
+                        family_role_changed: this.familyRoleChangedCheckbox?.checked ?? true,
                         product_updates: false, // Not yet implemented
                         marketing: false // Not yet implemented
                     },
@@ -405,6 +470,11 @@ class NotificationsPreferences {
                         two_fa: this.inappTwoFACheckbox?.checked ?? true,
                         new_login: this.inappNewLoginCheckbox?.checked ?? true,
                         username_changed: this.inappUsernameChangedCheckbox?.checked ?? true,
+                        family_member_added: this.inappFamilyMemberAddedCheckbox?.checked ?? true,
+                        family_member_removed: this.inappFamilyMemberRemovedCheckbox?.checked ?? true,
+                        family_deleted: this.inappFamilyDeletedCheckbox?.checked ?? true,
+                        family_member_left: this.inappFamilyMemberLeftCheckbox?.checked ?? true,
+                        family_role_changed: this.inappFamilyRoleChangedCheckbox?.checked ?? true,
                         product_updates: false, // Not yet implemented
                         marketing: false // Not yet implemented
                     }

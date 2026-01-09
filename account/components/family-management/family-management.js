@@ -275,7 +275,12 @@ class FamilyManagement {
             this.familyData = data;
             
             // Check if user is admin
-            this.isAdmin = data.family_group?.admin_user_id === this.currentUserId;
+            // User is admin if they are the admin_user_id OR if they have role='admin' in members list
+            const isAdminUserId = data.family_group?.admin_user_id === this.currentUserId;
+            const isAdminMember = data.members?.some(member => 
+                member.user_id === this.currentUserId && member.role === 'admin'
+            );
+            this.isAdmin = isAdminUserId || isAdminMember;
             
             this.hideLoading();
             

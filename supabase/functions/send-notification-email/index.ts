@@ -81,6 +81,82 @@ const EMAIL_TRANSLATIONS = {
       previous: 'Previous username:',
       new: 'New username:',
       warning: 'If you didn\'t make this change, please contact our support team immediately.'
+    },
+    
+    family_member_added: {
+      subject: 'Added to Family Group - BitMinded',
+      title: '👨‍👩‍👧‍👦 Added to Family Group',
+      intro: 'You\'ve been added to a family group on',
+      family_name: 'Family Name:',
+      admin_name: 'Family Admin:',
+      welcome_text: 'Welcome to the family! You now have access to shared family benefits.',
+      access_info: 'What this means:',
+      access_items: [
+        'You can access family plan benefits',
+        'The family admin manages your membership',
+        'You can view family details in your account'
+      ],
+      button: 'View Family Group'
+    },
+    
+    family_member_removed: {
+      subject: 'Removed from Family Group - BitMinded',
+      title: '⚠️ Removed from Family Group',
+      intro: 'You\'ve been removed from a family group on',
+      family_name: 'Family Name:',
+      access_revoked: 'Access Revoked:',
+      access_text: 'Your access to family plan benefits has been revoked.',
+      button: 'View Account'
+    },
+    
+    family_deleted: {
+      subject: 'Family Group Deleted - BitMinded',
+      title: '🗑️ Family Group Deleted',
+      intro: 'Your family group has been deleted on',
+      family_name: 'Family Name:',
+      subscription_cancelled: 'Subscription Cancelled:',
+      subscription_text: 'The family subscription has been cancelled and all access has been revoked.',
+      impact: 'What this means:',
+      impact_items: [
+        'All family members have been removed',
+        'Family plan benefits are no longer available',
+        'You can create a new family group anytime'
+      ],
+      button: 'View Account'
+    },
+    
+    family_member_left: {
+      subject: 'Member Left Family Group - BitMinded',
+      title: '👋 Member Left Family Group',
+      intro: 'A member has left your family group on',
+      family_name: 'Family Name:',
+      member_name: 'Member:',
+      impact: 'Impact:',
+      impact_text: 'The member\'s access to family benefits has been revoked.',
+      button: 'Manage Family Group'
+    },
+    
+    family_role_changed: {
+      subject: 'Role Changed in Family Group - BitMinded',
+      title: '👤 Role Changed in Family Group',
+      intro: 'Your role in a family group has been changed on',
+      family_name: 'Family Name:',
+      new_role: 'New Role:',
+      role_info: 'Role Details:',
+      admin_permissions: 'As an admin, you can:',
+      admin_items: [
+        'Add and remove family members',
+        'Change member roles',
+        'Manage family subscription',
+        'Delete the family group'
+      ],
+      member_permissions: 'As a member, you can:',
+      member_items: [
+        'Access family plan benefits',
+        'View family details',
+        'Leave the family group'
+      ],
+      button: 'View Family Group'
     }
   },
   
@@ -155,6 +231,82 @@ const EMAIL_TRANSLATIONS = {
       previous: 'Nombre de usuario anterior:',
       new: 'Nuevo nombre de usuario:',
       warning: 'Si no realizaste este cambio, contacta a nuestro equipo de soporte inmediatamente.'
+    },
+    
+    family_member_added: {
+      subject: 'Agregado a Grupo Familiar - BitMinded',
+      title: '👨‍👩‍👧‍👦 Agregado a Grupo Familiar',
+      intro: 'Has sido agregado a un grupo familiar el',
+      family_name: 'Nombre del Grupo:',
+      admin_name: 'Administrador del Grupo:',
+      welcome_text: '¡Bienvenido a la familia! Ahora tienes acceso a los beneficios compartidos del plan familiar.',
+      access_info: 'Qué significa esto:',
+      access_items: [
+        'Puedes acceder a los beneficios del plan familiar',
+        'El administrador del grupo gestiona tu membresía',
+        'Puedes ver los detalles de la familia en tu cuenta'
+      ],
+      button: 'Ver Grupo Familiar'
+    },
+    
+    family_member_removed: {
+      subject: 'Removido de Grupo Familiar - BitMinded',
+      title: '⚠️ Removido de Grupo Familiar',
+      intro: 'Has sido removido de un grupo familiar el',
+      family_name: 'Nombre del Grupo:',
+      access_revoked: 'Acceso Revocado:',
+      access_text: 'Tu acceso a los beneficios del plan familiar ha sido revocado.',
+      button: 'Ver Cuenta'
+    },
+    
+    family_deleted: {
+      subject: 'Grupo Familiar Eliminado - BitMinded',
+      title: '🗑️ Grupo Familiar Eliminado',
+      intro: 'Tu grupo familiar ha sido eliminado el',
+      family_name: 'Nombre del Grupo:',
+      subscription_cancelled: 'Suscripción Cancelada:',
+      subscription_text: 'La suscripción familiar ha sido cancelada y todo el acceso ha sido revocado.',
+      impact: 'Qué significa esto:',
+      impact_items: [
+        'Todos los miembros de la familia han sido removidos',
+        'Los beneficios del plan familiar ya no están disponibles',
+        'Puedes crear un nuevo grupo familiar en cualquier momento'
+      ],
+      button: 'Ver Cuenta'
+    },
+    
+    family_member_left: {
+      subject: 'Miembro Dejó Grupo Familiar - BitMinded',
+      title: '👋 Miembro Dejó Grupo Familiar',
+      intro: 'Un miembro ha dejado tu grupo familiar el',
+      family_name: 'Nombre del Grupo:',
+      member_name: 'Miembro:',
+      impact: 'Impacto:',
+      impact_text: 'El acceso del miembro a los beneficios familiares ha sido revocado.',
+      button: 'Gestionar Grupo Familiar'
+    },
+    
+    family_role_changed: {
+      subject: 'Rol Cambiado en Grupo Familiar - BitMinded',
+      title: '👤 Rol Cambiado en Grupo Familiar',
+      intro: 'Tu rol en un grupo familiar ha sido cambiado el',
+      family_name: 'Nombre del Grupo:',
+      new_role: 'Nuevo Rol:',
+      role_info: 'Detalles del Rol:',
+      admin_permissions: 'Como administrador, puedes:',
+      admin_items: [
+        'Agregar y remover miembros de la familia',
+        'Cambiar roles de miembros',
+        'Gestionar la suscripción familiar',
+        'Eliminar el grupo familiar'
+      ],
+      member_permissions: 'Como miembro, puedes:',
+      member_items: [
+        'Acceder a los beneficios del plan familiar',
+        'Ver detalles de la familia',
+        'Dejar el grupo familiar'
+      ],
+      button: 'Ver Grupo Familiar'
     }
   },
   
@@ -229,6 +381,82 @@ const EMAIL_TRANSLATIONS = {
       previous: 'Nom d\'utilisateur précédent:',
       new: 'Nouveau nom d\'utilisateur:',
       warning: 'Si vous n\'avez pas effectué ce changement, veuillez contacter notre équipe de support immédiatement.'
+    },
+    
+    family_member_added: {
+      subject: 'Ajouté au Groupe Familial - BitMinded',
+      title: '👨‍👩‍👧‍👦 Ajouté au Groupe Familial',
+      intro: 'Vous avez été ajouté à un groupe familial le',
+      family_name: 'Nom du Groupe:',
+      admin_name: 'Administrateur du Groupe:',
+      welcome_text: 'Bienvenue dans la famille! Vous avez maintenant accès aux avantages partagés du plan familial.',
+      access_info: 'Ce que cela signifie:',
+      access_items: [
+        'Vous pouvez accéder aux avantages du plan familial',
+        'L\'administrateur du groupe gère votre adhésion',
+        'Vous pouvez voir les détails de la famille dans votre compte'
+      ],
+      button: 'Voir le Groupe Familial'
+    },
+    
+    family_member_removed: {
+      subject: 'Retiré du Groupe Familial - BitMinded',
+      title: '⚠️ Retiré du Groupe Familial',
+      intro: 'Vous avez été retiré d\'un groupe familial le',
+      family_name: 'Nom du Groupe:',
+      access_revoked: 'Accès Révoqué:',
+      access_text: 'Votre accès aux avantages du plan familial a été révoqué.',
+      button: 'Voir le Compte'
+    },
+    
+    family_deleted: {
+      subject: 'Groupe Familial Supprimé - BitMinded',
+      title: '🗑️ Groupe Familial Supprimé',
+      intro: 'Votre groupe familial a été supprimé le',
+      family_name: 'Nom du Groupe:',
+      subscription_cancelled: 'Abonnement Annulé:',
+      subscription_text: 'L\'abonnement familial a été annulé et tout accès a été révoqué.',
+      impact: 'Ce que cela signifie:',
+      impact_items: [
+        'Tous les membres de la famille ont été retirés',
+        'Les avantages du plan familial ne sont plus disponibles',
+        'Vous pouvez créer un nouveau groupe familial à tout moment'
+      ],
+      button: 'Voir le Compte'
+    },
+    
+    family_member_left: {
+      subject: 'Membre a Quitté le Groupe Familial - BitMinded',
+      title: '👋 Membre a Quitté le Groupe Familial',
+      intro: 'Un membre a quitté votre groupe familial le',
+      family_name: 'Nom du Groupe:',
+      member_name: 'Membre:',
+      impact: 'Impact:',
+      impact_text: 'L\'accès du membre aux avantages familiaux a été révoqué.',
+      button: 'Gérer le Groupe Familial'
+    },
+    
+    family_role_changed: {
+      subject: 'Rôle Modifié dans le Groupe Familial - BitMinded',
+      title: '👤 Rôle Modifié dans le Groupe Familial',
+      intro: 'Votre rôle dans un groupe familial a été modifié le',
+      family_name: 'Nom du Groupe:',
+      new_role: 'Nouveau Rôle:',
+      role_info: 'Détails du Rôle:',
+      admin_permissions: 'En tant qu\'administrateur, vous pouvez:',
+      admin_items: [
+        'Ajouter et retirer des membres de la famille',
+        'Modifier les rôles des membres',
+        'Gérer l\'abonnement familial',
+        'Supprimer le groupe familial'
+      ],
+      member_permissions: 'En tant que membre, vous pouvez:',
+      member_items: [
+        'Accéder aux avantages du plan familial',
+        'Voir les détails de la famille',
+        'Quitter le groupe familial'
+      ],
+      button: 'Voir le Groupe Familial'
     }
   },
   
@@ -303,6 +531,82 @@ const EMAIL_TRANSLATIONS = {
       previous: 'Vorheriger Benutzername:',
       new: 'Neuer Benutzername:',
       warning: 'Wenn Sie diese Änderung nicht vorgenommen haben, kontaktieren Sie bitte sofort unser Support-Team.'
+    },
+    
+    family_member_added: {
+      subject: 'Zu Familiengruppe Hinzugefügt - BitMinded',
+      title: '👨‍👩‍👧‍👦 Zu Familiengruppe Hinzugefügt',
+      intro: 'Sie wurden zu einer Familiengruppe hinzugefügt am',
+      family_name: 'Gruppenname:',
+      admin_name: 'Gruppenadministrator:',
+      welcome_text: 'Willkommen in der Familie! Sie haben jetzt Zugang zu den gemeinsamen Familienvorteilen.',
+      access_info: 'Was das bedeutet:',
+      access_items: [
+        'Sie können auf Familienplan-Vorteile zugreifen',
+        'Der Gruppenadministrator verwaltet Ihre Mitgliedschaft',
+        'Sie können Familiendetails in Ihrem Konto einsehen'
+      ],
+      button: 'Familiengruppe Anzeigen'
+    },
+    
+    family_member_removed: {
+      subject: 'Aus Familiengruppe Entfernt - BitMinded',
+      title: '⚠️ Aus Familiengruppe Entfernt',
+      intro: 'Sie wurden aus einer Familiengruppe entfernt am',
+      family_name: 'Gruppenname:',
+      access_revoked: 'Zugang Widerrufen:',
+      access_text: 'Ihr Zugang zu den Familienplan-Vorteilen wurde widerrufen.',
+      button: 'Konto Anzeigen'
+    },
+    
+    family_deleted: {
+      subject: 'Familiengruppe Gelöscht - BitMinded',
+      title: '🗑️ Familiengruppe Gelöscht',
+      intro: 'Ihre Familiengruppe wurde gelöscht am',
+      family_name: 'Gruppenname:',
+      subscription_cancelled: 'Abonnement Gekündigt:',
+      subscription_text: 'Das Familienabonnement wurde gekündigt und der gesamte Zugang wurde widerrufen.',
+      impact: 'Was das bedeutet:',
+      impact_items: [
+        'Alle Familienmitglieder wurden entfernt',
+        'Familienplan-Vorteile sind nicht mehr verfügbar',
+        'Sie können jederzeit eine neue Familiengruppe erstellen'
+      ],
+      button: 'Konto Anzeigen'
+    },
+    
+    family_member_left: {
+      subject: 'Mitglied Verlässt Familiengruppe - BitMinded',
+      title: '👋 Mitglied Verlässt Familiengruppe',
+      intro: 'Ein Mitglied hat Ihre Familiengruppe verlassen am',
+      family_name: 'Gruppenname:',
+      member_name: 'Mitglied:',
+      impact: 'Auswirkung:',
+      impact_text: 'Der Zugang des Mitglieds zu den Familienvorteilen wurde widerrufen.',
+      button: 'Familiengruppe Verwalten'
+    },
+    
+    family_role_changed: {
+      subject: 'Rolle in Familiengruppe Geändert - BitMinded',
+      title: '👤 Rolle in Familiengruppe Geändert',
+      intro: 'Ihre Rolle in einer Familiengruppe wurde geändert am',
+      family_name: 'Gruppenname:',
+      new_role: 'Neue Rolle:',
+      role_info: 'Rollendetails:',
+      admin_permissions: 'Als Administrator können Sie:',
+      admin_items: [
+        'Familienmitglieder hinzufügen und entfernen',
+        'Mitgliedsrollen ändern',
+        'Familienabonnement verwalten',
+        'Die Familiengruppe löschen'
+      ],
+      member_permissions: 'Als Mitglied können Sie:',
+      member_items: [
+        'Auf Familienplan-Vorteile zugreifen',
+        'Familiendetails einsehen',
+        'Die Familiengruppe verlassen'
+      ],
+      button: 'Familiengruppe Anzeigen'
     }
   }
 }
@@ -619,6 +923,244 @@ const generateUsernameChangedEmail = (data: any, lang: string = 'en') => {
   `
 }
 
+const generateFamilyMemberAddedEmail = (data: any, lang: string = 'en') => {
+  const t = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_member_added
+  const common = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS]
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="${lang}">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${t.subject}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">BitMinded</div>
+            <div class="tagline">${common.tagline}</div>
+          </div>
+          <div class="content">
+            <h2>${t.title}</h2>
+            <p>${t.intro} <strong>${data.timestamp || new Date().toLocaleDateString(lang)}</strong>.</p>
+            <div class="success-box">
+              <strong>${t.welcome_text}</strong>
+            </div>
+            <div class="info-box">
+              <strong>${t.family_name}</strong> ${data.familyName || 'N/A'}<br>
+              ${t.admin_name} ${data.adminName || 'N/A'}
+            </div>
+            <div class="info-box">
+              <strong>${t.access_info}</strong>
+              <ul style="margin: 10px 0;">
+                ${t.access_items.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="button-container">
+              <a href="${data.familyUrl || 'https://bitminded.github.io/account?section=family'}" class="button">${t.button}</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>${common.footer_notification}<br>
+            <a href="${data.preferencesUrl || 'https://bitminded.github.io/account?section=notifications'}">${common.manage_preferences}</a></p>
+            <p>${common.copyright}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
+const generateFamilyMemberRemovedEmail = (data: any, lang: string = 'en') => {
+  const t = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_member_removed
+  const common = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS]
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="${lang}">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${t.subject}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">BitMinded</div>
+            <div class="tagline">${common.tagline}</div>
+          </div>
+          <div class="content">
+            <h2>${t.title}</h2>
+            <p>${t.intro} <strong>${data.timestamp || new Date().toLocaleDateString(lang)}</strong>.</p>
+            <div class="info-box">
+              <strong>${t.family_name}</strong> ${data.familyName || 'N/A'}
+            </div>
+            <div class="highlight">
+              <strong>${t.access_revoked}</strong> ${t.access_text}
+            </div>
+            <div class="button-container">
+              <a href="${data.accountUrl || 'https://bitminded.github.io/account'}" class="button">${t.button}</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>${common.footer_notification}<br>
+            <a href="${data.preferencesUrl || 'https://bitminded.github.io/account?section=notifications'}">${common.manage_preferences}</a></p>
+            <p>${common.copyright}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
+const generateFamilyDeletedEmail = (data: any, lang: string = 'en') => {
+  const t = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_deleted
+  const common = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS]
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="${lang}">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${t.subject}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">BitMinded</div>
+            <div class="tagline">${common.tagline}</div>
+          </div>
+          <div class="content">
+            <h2>${t.title}</h2>
+            <p>${t.intro} <strong>${data.timestamp || new Date().toLocaleDateString(lang)}</strong>.</p>
+            <div class="info-box">
+              <strong>${t.family_name}</strong> ${data.familyName || 'N/A'}
+            </div>
+            <div class="highlight">
+              <strong>${t.subscription_cancelled}</strong> ${t.subscription_text}
+            </div>
+            <div class="info-box">
+              <strong>${t.impact}</strong>
+              <ul style="margin: 10px 0;">
+                ${t.impact_items.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="button-container">
+              <a href="${data.accountUrl || 'https://bitminded.github.io/account'}" class="button">${t.button}</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>${common.footer_notification}<br>
+            <a href="${data.preferencesUrl || 'https://bitminded.github.io/account?section=notifications'}">${common.manage_preferences}</a></p>
+            <p>${common.copyright}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
+const generateFamilyMemberLeftEmail = (data: any, lang: string = 'en') => {
+  const t = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_member_left
+  const common = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS]
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="${lang}">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${t.subject}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">BitMinded</div>
+            <div class="tagline">${common.tagline}</div>
+          </div>
+          <div class="content">
+            <h2>${t.title}</h2>
+            <p>${t.intro} <strong>${data.timestamp || new Date().toLocaleDateString(lang)}</strong>.</p>
+            <div class="info-box">
+              <strong>${t.family_name}</strong> ${data.familyName || 'N/A'}<br>
+              <strong>${t.member_name}</strong> ${data.memberName || 'N/A'}
+            </div>
+            <div class="info-box">
+              <strong>${t.impact}</strong> ${t.impact_text}
+            </div>
+            <div class="button-container">
+              <a href="${data.familyUrl || 'https://bitminded.github.io/account?section=family'}" class="button">${t.button}</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>${common.footer_notification}<br>
+            <a href="${data.preferencesUrl || 'https://bitminded.github.io/account?section=notifications'}">${common.manage_preferences}</a></p>
+            <p>${common.copyright}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
+const generateFamilyRoleChangedEmail = (data: any, lang: string = 'en') => {
+  const t = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_role_changed
+  const common = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS]
+  
+  const isAdmin = data.newRole === 'admin'
+  const permissions = isAdmin ? t.admin_permissions : t.member_permissions
+  const items = isAdmin ? t.admin_items : t.member_items
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="${lang}">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${t.subject}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">BitMinded</div>
+            <div class="tagline">${common.tagline}</div>
+          </div>
+          <div class="content">
+            <h2>${t.title}</h2>
+            <p>${t.intro} <strong>${data.timestamp || new Date().toLocaleDateString(lang)}</strong>.</p>
+            <div class="info-box">
+              <strong>${t.family_name}</strong> ${data.familyName || 'N/A'}<br>
+              <strong>${t.new_role}</strong> ${data.newRole || 'N/A'}
+            </div>
+            <div class="success-box">
+              <strong>${t.role_info}</strong><br>
+              <strong>${permissions}</strong>
+              <ul style="margin: 10px 0;">
+                ${items.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="button-container">
+              <a href="${data.familyUrl || 'https://bitminded.github.io/account?section=family'}" class="button">${t.button}</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>${common.footer_notification}<br>
+            <a href="${data.preferencesUrl || 'https://bitminded.github.io/account?section=notifications'}">${common.manage_preferences}</a></p>
+            <p>${common.copyright}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
 // Email template map
 const EMAIL_TEMPLATES: Record<string, { subject: (lang: string) => string, html: (data: any, lang: string) => string }> = {
   password_changed: {
@@ -640,6 +1182,26 @@ const EMAIL_TEMPLATES: Record<string, { subject: (lang: string) => string, html:
   username_changed: {
     subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].username_changed.subject,
     html: generateUsernameChangedEmail
+  },
+  family_member_added: {
+    subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_member_added.subject,
+    html: generateFamilyMemberAddedEmail
+  },
+  family_member_removed: {
+    subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_member_removed.subject,
+    html: generateFamilyMemberRemovedEmail
+  },
+  family_deleted: {
+    subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_deleted.subject,
+    html: generateFamilyDeletedEmail
+  },
+  family_member_left: {
+    subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_member_left.subject,
+    html: generateFamilyMemberLeftEmail
+  },
+  family_role_changed: {
+    subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_role_changed.subject,
+    html: generateFamilyRoleChangedEmail
   }
 }
 
@@ -650,6 +1212,11 @@ const NOTIFICATION_TYPE_MAP: Record<string, string> = {
   two_fa_disabled: 'two_fa',
   new_login: 'new_login',
   username_changed: 'username_changed',
+  family_member_added: 'family_member_added',
+  family_member_removed: 'family_member_removed',
+  family_deleted: 'family_deleted',
+  family_member_left: 'family_member_left',
+  family_role_changed: 'family_role_changed',
 }
 
 serve(async (req) => {

@@ -68,6 +68,36 @@ class NotificationHelper {
                 es: { title: 'Nombre de Usuario Cambiado', message: 'Tu nombre de usuario ha sido actualizado exitosamente.', icon: '👤' },
                 fr: { title: 'Nom d\'utilisateur modifié', message: 'Votre nom d\'utilisateur a été mis à jour avec succès.', icon: '👤' },
                 de: { title: 'Benutzername geändert', message: 'Ihr Benutzername wurde erfolgreich aktualisiert.', icon: '👤' }
+            },
+            family_member_added: {
+                en: { title: 'Added to Family', message: `You've been added to ${data.familyName || 'a family group'}.`, icon: '👨‍👩‍👧‍👦' },
+                es: { title: 'Agregado a Familia', message: `Has sido agregado a ${data.familyName || 'un grupo familiar'}.`, icon: '👨‍👩‍👧‍👦' },
+                fr: { title: 'Ajouté à la famille', message: `Vous avez été ajouté à ${data.familyName || 'un groupe familial'}.`, icon: '👨‍👩‍👧‍👦' },
+                de: { title: 'Zur Familie hinzugefügt', message: `Sie wurden zu ${data.familyName || 'einer Familiengruppe'} hinzugefügt.`, icon: '👨‍👩‍👧‍👦' }
+            },
+            family_member_removed: {
+                en: { title: 'Removed from Family', message: `You've been removed from ${data.familyName || 'a family group'}.`, icon: '⚠️' },
+                es: { title: 'Removido de Familia', message: `Has sido removido de ${data.familyName || 'un grupo familiar'}.`, icon: '⚠️' },
+                fr: { title: 'Retiré de la famille', message: `Vous avez été retiré de ${data.familyName || 'un groupe familial'}.`, icon: '⚠️' },
+                de: { title: 'Aus Familie entfernt', message: `Sie wurden aus ${data.familyName || 'einer Familiengruppe'} entfernt.`, icon: '⚠️' }
+            },
+            family_deleted: {
+                en: { title: 'Family Deleted', message: `Your family group "${data.familyName || 'Family'}" has been deleted.`, icon: '🗑️' },
+                es: { title: 'Familia Eliminada', message: `Tu grupo familiar "${data.familyName || 'Familia'}" ha sido eliminado.`, icon: '🗑️' },
+                fr: { title: 'Famille supprimée', message: `Votre groupe familial "${data.familyName || 'Famille'}" a été supprimé.`, icon: '🗑️' },
+                de: { title: 'Familie gelöscht', message: `Ihre Familiengruppe "${data.familyName || 'Familie'}" wurde gelöscht.`, icon: '🗑️' }
+            },
+            family_member_left: {
+                en: { title: 'Member Left', message: `${data.memberName || 'A member'} left your family group "${data.familyName || 'Family'}".`, icon: '👋' },
+                es: { title: 'Miembro Salió', message: `${data.memberName || 'Un miembro'} dejó tu grupo familiar "${data.familyName || 'Familia'}".`, icon: '👋' },
+                fr: { title: 'Membre parti', message: `${data.memberName || 'Un membre'} a quitté votre groupe familial "${data.familyName || 'Famille'}".`, icon: '👋' },
+                de: { title: 'Mitglied verlassen', message: `${data.memberName || 'Ein Mitglied'} hat Ihre Familiengruppe "${data.familyName || 'Familie'}" verlassen.`, icon: '👋' }
+            },
+            family_role_changed: {
+                en: { title: 'Role Changed', message: `Your role in "${data.familyName || 'Family'}" has been changed to ${data.newRole || 'member'}.`, icon: '👤' },
+                es: { title: 'Rol Cambiado', message: `Tu rol en "${data.familyName || 'Familia'}" ha sido cambiado a ${data.newRole || 'miembro'}.`, icon: '👤' },
+                fr: { title: 'Rôle modifié', message: `Votre rôle dans "${data.familyName || 'Famille'}" a été modifié en ${data.newRole || 'membre'}.`, icon: '👤' },
+                de: { title: 'Rolle geändert', message: `Ihre Rolle in "${data.familyName || 'Familie'}" wurde zu ${data.newRole || 'Mitglied'} geändert.`, icon: '👤' }
             }
         };
 
@@ -76,11 +106,20 @@ class NotificationHelper {
             two_fa_enabled: 'security',
             two_fa_disabled: 'security',
             new_login: 'security',
-            username_changed: 'account'
+            username_changed: 'account',
+            family_member_added: 'account',
+            family_member_removed: 'account',
+            family_deleted: 'account',
+            family_member_left: 'account',
+            family_role_changed: 'account'
         };
 
         // Check if user wants in-app notifications for this type
-        const preferenceKey = type.replace('two_fa_enabled', 'two_fa').replace('two_fa_disabled', 'two_fa');
+        let preferenceKey = type.replace('two_fa_enabled', 'two_fa').replace('two_fa_disabled', 'two_fa');
+        // Family notifications use the same key as the type
+        if (type.startsWith('family_')) {
+            preferenceKey = type;
+        }
         const isEnabled = preferences[preferenceKey] !== false;
 
         if (!isEnabled) {
@@ -280,6 +319,72 @@ class NotificationHelper {
         return this.send('username_changed', {
             oldUsername,
             newUsername,
+            preferencesUrl: `${window.location.origin}/account?section=notifications`
+        });
+    }
+
+    /**
+     * Send family member added notification
+     * @param {string} familyName - Family group name
+     * @param {string} adminName - Admin name
+     */
+    async familyMemberAdded(familyName, adminName) {
+        return this.send('family_member_added', {
+            familyName,
+            adminName,
+            familyUrl: `${window.location.origin}/account?section=family`,
+            preferencesUrl: `${window.location.origin}/account?section=notifications`
+        });
+    }
+
+    /**
+     * Send family member removed notification
+     * @param {string} familyName - Family group name
+     */
+    async familyMemberRemoved(familyName) {
+        return this.send('family_member_removed', {
+            familyName,
+            accountUrl: `${window.location.origin}/account`,
+            preferencesUrl: `${window.location.origin}/account?section=notifications`
+        });
+    }
+
+    /**
+     * Send family deleted notification
+     * @param {string} familyName - Family group name
+     */
+    async familyDeleted(familyName) {
+        return this.send('family_deleted', {
+            familyName,
+            accountUrl: `${window.location.origin}/account`,
+            preferencesUrl: `${window.location.origin}/account?section=notifications`
+        });
+    }
+
+    /**
+     * Send family member left notification
+     * @param {string} memberName - Name of the member who left
+     * @param {string} familyName - Family group name
+     */
+    async familyMemberLeft(memberName, familyName) {
+        return this.send('family_member_left', {
+            memberName,
+            familyName,
+            familyUrl: `${window.location.origin}/account?section=family`,
+            preferencesUrl: `${window.location.origin}/account?section=notifications`
+        });
+    }
+
+    /**
+     * Send family role changed notification
+     * @param {string} familyName - Family group name
+     * @param {string} newRole - New role (admin or member)
+     */
+    async familyRoleChanged(familyName, newRole) {
+        return this.send('family_role_changed', {
+            familyName,
+            newRole,
+            familyUrl: `${window.location.origin}/account?section=family`,
             preferencesUrl: `${window.location.origin}/account?section=notifications`
         });
     }
