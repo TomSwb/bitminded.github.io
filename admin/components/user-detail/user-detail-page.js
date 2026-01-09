@@ -1738,7 +1738,9 @@ class UserDetailPage {
                         suspension_reason: confirmed.reason
                     }
                 });
-                    window.logger?.error('❌ Failed to send suspension email:', emailError);
+                
+                if (emailResult.error) {
+                    window.logger?.error('❌ Failed to send suspension email:', emailResult.error);
                 } else {
                     window.logger?.log('✅ Suspension email sent:', emailResult);
                 }
@@ -1811,7 +1813,9 @@ class UserDetailPage {
                         reactivation_reason: confirmed.reason
                     }
                 });
-                    window.logger?.error('❌ Failed to send reactivation email:', emailError);
+                
+                if (emailResult.error) {
+                    window.logger?.error('❌ Failed to send reactivation email:', emailResult.error);
                 } else {
                     window.logger?.log('✅ Reactivation email sent:', emailResult);
                 }

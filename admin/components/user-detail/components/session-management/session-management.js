@@ -324,8 +324,10 @@ class SessionManagement {
                     target_user_id: this.currentUserId  // Admin revoking for another user
                 }
             });
-                window.logger?.error('❌ Edge Function error:', error);
-                throw error;
+            
+            if (data.error) {
+                window.logger?.error('❌ Edge Function error:', data.error);
+                throw data.error;
             }
             
             if (!data?.success) {
