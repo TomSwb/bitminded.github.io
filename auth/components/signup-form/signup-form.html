@@ -39,6 +39,20 @@
             <div class="signup-form__error" id="signup-email-error" role="alert"></div>
         </div>
 
+        <!-- Date of Birth Field -->
+        <div class="signup-form__field">
+            <label for="signup-dob" class="signup-form__label translatable-content" data-translate="signup.dob">Date of Birth</label>
+            <input 
+                type="date" 
+                id="signup-dob" 
+                name="dob" 
+                class="signup-form__input" 
+                required 
+                max="9999-12-31"
+            >
+            <div class="signup-form__error" id="signup-dob-error" role="alert"></div>
+        </div>
+
         <!-- Password Field -->
         <div class="signup-form__field">
             <label for="signup-password" class="signup-form__label translatable-content" data-translate="signup.password">Password</label>

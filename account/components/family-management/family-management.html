@@ -1,0 +1,220 @@
+<!-- Family Management Component -->
+<div class="family-management" id="family-management">
+    <!-- Loading State -->
+    <div id="family-loading" class="family-management__loading hidden">
+        <div class="family-management__loading-spinner"></div>
+        <p class="family-management__loading-text translatable-content" data-translation-key="Loading family information...">Loading family information...</p>
+    </div>
+
+    <!-- Error Display -->
+    <div id="family-error" class="family-management__error hidden" role="alert">
+        <span id="family-error-message" class="family-management__error-message"></span>
+    </div>
+
+    <!-- Success Display -->
+    <div id="family-success" class="family-management__success hidden" role="alert">
+        <span id="family-success-message" class="family-management__success-message"></span>
+    </div>
+
+    <!-- Empty State (No Family) -->
+    <div id="family-empty-state" class="family-management__empty-state hidden">
+        <div class="family-management__empty-icon">👨‍👩‍👧‍👦</div>
+        <h3 class="family-management__empty-title translatable-content" data-translation-key="No Family Group">No Family Group</h3>
+        <p class="family-management__empty-description translatable-content" data-translation-key="You are not currently a member of any family group.">You are not currently a member of any family group.</p>
+        <button id="create-family-btn" class="family-management__create-family-btn" type="button">
+            <span class="translatable-content" data-translation-key="Create Family Group">Create Family Group</span>
+        </button>
+    </div>
+
+    <!-- Family Content (shown when family exists) -->
+    <div id="family-management-content" class="family-management__content hidden">
+        <!-- Family Group Overview -->
+        <section class="family-management__overview">
+            <div class="family-management__overview-header">
+                <h3 class="family-management__overview-title translatable-content" data-translation-key="Family Group Overview">Family Group Overview</h3>
+            </div>
+            <div class="family-management__overview-content">
+                <div class="family-management__overview-item">
+                    <span class="family-management__overview-label translatable-content" data-translation-key="Family Name">Family Name:</span>
+                    <span id="family-name" class="family-management__overview-value"></span>
+                    <button id="edit-family-name-btn" class="family-management__edit-name-btn hidden" type="button" aria-label="Edit family name">
+                        <span class="translatable-content" data-translation-key="Edit">Edit</span>
+                    </button>
+                </div>
+                <!-- Edit Family Name Form (hidden by default) -->
+                <div id="edit-family-name-form" class="family-management__edit-name-form hidden">
+                    <input type="text" id="edit-family-name-input" class="family-management__edit-name-input" maxlength="100" required>
+                    <div class="family-management__edit-name-actions">
+                        <button id="save-family-name-btn" class="family-management__btn family-management__btn--primary" type="button">
+                            <span class="translatable-content" data-translation-key="Save">Save</span>
+                        </button>
+                        <button id="cancel-edit-family-name-btn" class="family-management__btn family-management__btn--secondary" type="button">
+                            <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                        </button>
+                    </div>
+                    <div id="edit-family-name-error" class="family-management__error hidden" role="alert">
+                        <span id="edit-family-name-error-message" class="family-management__error-message"></span>
+                    </div>
+                </div>
+                <div class="family-management__overview-item">
+                    <span class="family-management__overview-label translatable-content" data-translation-key="Admin">Admin:</span>
+                    <span id="family-admin" class="family-management__overview-value"></span>
+                </div>
+                <div class="family-management__overview-item">
+                    <span class="family-management__overview-label translatable-content" data-translation-key="Members">Members:</span>
+                    <span id="family-member-count" class="family-management__overview-value"></span>
+                </div>
+                <div class="family-management__overview-item">
+                    <span class="family-management__overview-label translatable-content" data-translation-key="Subscription Status">Subscription Status:</span>
+                    <span id="family-subscription-status" class="family-management__overview-value"></span>
+                </div>
+                <div id="family-available-slots" class="family-management__overview-item hidden">
+                    <span class="family-management__overview-label translatable-content" data-translation-key="Available Slots">Available Slots:</span>
+                    <span id="family-slots-count" class="family-management__overview-value"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Subscription Details -->
+        <section id="family-subscription-section" class="family-management__subscription hidden">
+            <div class="family-management__subscription-header">
+                <h3 class="family-management__subscription-title translatable-content" data-translation-key="Subscription Details">Subscription Details</h3>
+            </div>
+            <div class="family-management__subscription-content">
+                <div class="family-management__subscription-item">
+                    <span class="family-management__subscription-label translatable-content" data-translation-key="Plan">Plan:</span>
+                    <span id="subscription-plan" class="family-management__subscription-value"></span>
+                </div>
+                <div class="family-management__subscription-item">
+                    <span class="family-management__subscription-label translatable-content" data-translation-key="Billing Period">Billing Period:</span>
+                    <span id="subscription-period" class="family-management__subscription-value"></span>
+                </div>
+                <div class="family-management__subscription-item">
+                    <span class="family-management__subscription-label translatable-content" data-translation-key="Per Member Price">Per Member Price:</span>
+                    <span id="subscription-per-member" class="family-management__subscription-value"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Family Members List -->
+        <section class="family-management__members">
+            <div class="family-management__members-header">
+                <h3 class="family-management__members-title translatable-content" data-translation-key="Family Members">Family Members</h3>
+                <button id="add-member-btn" class="family-management__add-member-btn hidden" type="button">
+                    <span class="translatable-content" data-translation-key="Add Member">Add Member</span>
+                </button>
+            </div>
+            <div id="family-members-list" class="family-management__members-list">
+                <!-- Members will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Leave Family Button (Non-Admin) -->
+        <section id="leave-family-section" class="family-management__leave hidden">
+            <button id="leave-family-btn" class="family-management__leave-btn" type="button">
+                <span class="translatable-content" data-translation-key="Leave Family Group">Leave Family Group</span>
+            </button>
+            <p class="family-management__leave-warning translatable-content" data-translation-key="Warning: Leaving the family group will revoke your access to family subscription benefits.">Warning: Leaving the family group will revoke your access to family subscription benefits.</p>
+        </section>
+    </div>
+
+    <!-- Add Member Modal (Admin Only) -->
+    <div id="add-member-modal" class="family-management__modal hidden">
+        <div class="family-management__modal-overlay"></div>
+        <div class="family-management__modal-content">
+            <div class="family-management__modal-header">
+                <h3 class="family-management__modal-title translatable-content" data-translation-key="Add Family Member">Add Family Member</h3>
+                <button id="close-add-member-modal" class="family-management__modal-close" type="button" aria-label="Close">
+                    <span>×</span>
+                </button>
+            </div>
+            <form id="add-member-form" class="family-management__form">
+                <div id="add-member-error" class="family-management__modal-error hidden" role="alert">
+                    <span id="add-member-error-message" class="family-management__modal-error-message"></span>
+                </div>
+                <div class="family-management__form-group">
+                    <label for="add-member-email" class="family-management__form-label translatable-content" data-translation-key="Email Address">Email Address:</label>
+                    <input type="email" id="add-member-email" class="family-management__form-input" required>
+                    <p class="family-management__form-help translatable-content" data-translation-key="Enter the email address of the person you want to invite to your family group.">Enter the email address of the person you want to invite to your family group.</p>
+                </div>
+                <div class="family-management__form-actions">
+                    <button type="button" id="cancel-add-member" class="family-management__btn family-management__btn--secondary translatable-content" data-translation-key="Cancel">Cancel</button>
+                    <button type="submit" class="family-management__btn family-management__btn--primary translatable-content" data-translation-key="Send Invitation">Send Invitation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Remove Member Confirmation Modal -->
+    <div id="remove-member-modal" class="family-management__modal hidden">
+        <div class="family-management__modal-overlay"></div>
+        <div class="family-management__modal-content">
+            <div class="family-management__modal-header">
+                <h3 class="family-management__modal-title translatable-content" data-translation-key="Remove Family Member">Remove Family Member</h3>
+                <button id="close-remove-member-modal" class="family-management__modal-close" type="button" aria-label="Close">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="family-management__modal-body">
+                <p class="translatable-content" data-translation-key="Are you sure you want to remove this member from your family group? This action cannot be undone and will revoke their access to family subscription benefits.">Are you sure you want to remove this member from your family group? This action cannot be undone and will revoke their access to family subscription benefits.</p>
+                <p id="remove-member-info" class="family-management__remove-member-info"></p>
+            </div>
+            <div class="family-management__form-actions">
+                <button type="button" id="cancel-remove-member" class="family-management__btn family-management__btn--secondary translatable-content" data-translation-key="Cancel">Cancel</button>
+                <button type="button" id="confirm-remove-member" class="family-management__btn family-management__btn--danger translatable-content" data-translation-key="Remove Member">Remove Member</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Role Modal -->
+    <div id="update-role-modal" class="family-management__modal hidden">
+        <div class="family-management__modal-overlay"></div>
+        <div class="family-management__modal-content">
+            <div class="family-management__modal-header">
+                <h3 class="family-management__modal-title translatable-content" data-translation-key="Update Member Role">Update Member Role</h3>
+                <button id="close-update-role-modal" class="family-management__modal-close" type="button" aria-label="Close">
+                    <span>×</span>
+                </button>
+            </div>
+            <form id="update-role-form" class="family-management__form">
+                <div class="family-management__form-group">
+                    <label for="update-role-select" class="family-management__form-label translatable-content" data-translation-key="Role">Role:</label>
+                    <select id="update-role-select" class="family-management__form-select" required>
+                        <option value="member" class="translatable-content" data-translation-key="Member">Member</option>
+                        <option value="admin" class="translatable-content" data-translation-key="Admin">Admin</option>
+                    </select>
+                    <p id="update-role-member-info" class="family-management__form-help"></p>
+                </div>
+                <div class="family-management__form-actions">
+                    <button type="button" id="cancel-update-role" class="family-management__btn family-management__btn--secondary translatable-content" data-translation-key="Cancel">Cancel</button>
+                    <button type="submit" class="family-management__btn family-management__btn--primary translatable-content" data-translation-key="Update Role">Update Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Family Modal -->
+    <div id="create-family-modal" class="family-management__modal hidden">
+        <div class="family-management__modal-overlay"></div>
+        <div class="family-management__modal-content">
+            <div class="family-management__modal-header">
+                <h3 class="family-management__modal-title translatable-content" data-translation-key="Create Family Group">Create Family Group</h3>
+                <button id="close-create-family-modal" class="family-management__modal-close" type="button" aria-label="Close">
+                    <span>×</span>
+                </button>
+            </div>
+            <form id="create-family-form" class="family-management__form">
+                <div class="family-management__form-group">
+                    <label for="create-family-name" class="family-management__form-label translatable-content" data-translation-key="Family Name">Family Name:</label>
+                    <input type="text" id="create-family-name" class="family-management__form-input" required maxlength="100" placeholder="e.g., Smith Family">
+                    <p class="family-management__form-help translatable-content" data-translation-key="Enter a name for your family group (1-100 characters).">Enter a name for your family group (1-100 characters).</p>
+                </div>
+                <div class="family-management__form-actions">
+                    <button type="button" id="cancel-create-family" class="family-management__btn family-management__btn--secondary translatable-content" data-translation-key="Cancel">Cancel</button>
+                    <button type="submit" class="family-management__btn family-management__btn--primary translatable-content" data-translation-key="Create Family">Create Family</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

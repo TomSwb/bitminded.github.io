@@ -472,11 +472,154 @@ class UserDetailPage {
             this.elements.loginCount.textContent = this.currentUser.total_logins || 0;
             this.elements.sessionCount.textContent = this.currentUser.active_sessions || 0;
 
+            // Load family group data
+            await this.loadFamilyGroupData();
+
             // Load admin notes
             await this.loadAdminNotes();
 
         } catch (error) {
             window.logger?.error('❌ Failed to load overview data:', error);
+        }
+    }
+
+    /**
+     * Load family group data for the user
+     * Uses edge function to bypass RLS recursion issues
+     */
+    async loadFamilyGroupData() {
+        if (!this.currentUser || !window.supabase) return;
+
+        try {
+            // Get session for Authorization header
+            const { data: { session }, error: sessionError } = await window.supabase.auth.getSession();
+            
+            if (sessionError || !session) {
+                window.logger?.log('ℹ️ Not authenticated, skipping family data load');
+                return;
+            }
+
+            // Get Supabase URL
+            let supabaseUrl = 'https://dynxqnrkmjcvgzsugxtm.supabase.co'; // Default to prod
+            if (window.supabase && window.supabase.supabaseUrl) {
+                supabaseUrl = window.supabase.supabaseUrl;
+            } else if (typeof envConfig !== 'undefined' && envConfig.supabaseUrl) {
+                supabaseUrl = envConfig.supabaseUrl;
+            }
+
+            // Call admin endpoint to get family info for target user (bypasses RLS)
+            const response = await fetch(
+                `${supabaseUrl}/functions/v1/family-management/admin/user-family?target_user_id=${this.currentUser.id}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                if (response.status === 404 || response.status === 403) {
+                    // User not in family or not authorized - hide section
+                    const familySection = document.getElementById('user-detail-family-section');
+                    if (familySection) {
+                        familySection.style.display = 'none';
+                    }
+                    return;
+                }
+                const errorData = await response.json().catch(() => ({}));
+                window.logger?.log('ℹ️ Failed to load family data:', errorData.error || `HTTP ${response.status}`);
+                const familySection = document.getElementById('user-detail-family-section');
+                if (familySection) {
+                    familySection.style.display = 'none';
+                }
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                window.logger?.log('ℹ️ Family data error:', data.error);
+                const familySection = document.getElementById('user-detail-family-section');
+                if (familySection) {
+                    familySection.style.display = 'none';
+                }
+                return;
+            }
+
+            if (!data.is_member || !data.family_group || !data.members || data.members.length === 0) {
+                // User is not in a family group, hide the section
+                const familySection = document.getElementById('user-detail-family-section');
+                if (familySection) {
+                    familySection.style.display = 'none';
+                }
+                return;
+            }
+
+            // Display family group info
+            const familySection = document.getElementById('user-detail-family-section');
+            const familyHeaderElement = document.getElementById('user-detail-family-header');
+            const membersListElement = document.getElementById('user-detail-family-members-list');
+
+            if (familySection && familyHeaderElement && membersListElement) {
+                familySection.style.display = 'block';
+
+                // Set header to "Family - [name]"
+                const familyName = data.family_group.family_name || 'N/A';
+                familyHeaderElement.textContent = `Family - ${familyName}`;
+
+                // Build family members list with button-style links
+                if (!data.members || data.members.length === 0) {
+                    membersListElement.innerHTML = '<div style="color: var(--color-text-secondary); font-style: italic; padding: var(--spacing-sm);">No members found</div>';
+                } else {
+                    membersListElement.innerHTML = data.members.map(member => {
+                        const profile = member.profile;
+                        const displayName = profile?.username || profile?.email || member.user_id;
+                        const isCurrentUser = member.user_id === this.currentUser.id;
+                        const isAdmin = member.role === 'admin';
+                        const adminClass = isAdmin ? ' user-detail__family-member-link--admin' : '';
+                        const adminClassName = isAdmin ? ' user-detail__family-member-name--admin' : '';
+                        
+                        if (isCurrentUser) {
+                            // Current user - show as button style (not clickable)
+                            return `<div class="user-detail__family-member-item">
+                                <span class="user-detail__family-member-name${adminClassName}">${this.escapeHtml(displayName)}</span>
+                            </div>`;
+                        } else {
+                            // Other members - make clickable button (opens in new tab)
+                            const userDetailUrl = `/admin/components/user-detail/?id=${member.user_id}`;
+                            return `<div class="user-detail__family-member-item">
+                                <a href="${userDetailUrl}" target="_blank" class="user-detail__family-member-link${adminClass}">${this.escapeHtml(displayName)}</a>
+                            </div>`;
+                        }
+                    }).join('');
+                }
+
+                // Make translatable content visible and translate
+                const translatableElements = familySection.querySelectorAll('.translatable-content');
+                translatableElements.forEach(element => {
+                    element.classList.add('loaded');
+                    // Update translation if i18next is available
+                    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+                        const key = element.getAttribute('data-translation-key');
+                        if (key) {
+                            const translation = i18next.t(key);
+                            if (translation && translation !== key) {
+                                element.textContent = translation;
+                            }
+                        }
+                    }
+                });
+            }
+
+        } catch (error) {
+            window.logger?.error('❌ Error loading family group data:', error);
+            // Hide section on error
+            const familySection = document.getElementById('user-detail-family-section');
+            if (familySection) {
+                familySection.style.display = 'none';
+            }
         }
     }
 
@@ -1738,7 +1881,9 @@ class UserDetailPage {
                         suspension_reason: confirmed.reason
                     }
                 });
-                    window.logger?.error('❌ Failed to send suspension email:', emailError);
+                
+                if (emailResult.error) {
+                    window.logger?.error('❌ Failed to send suspension email:', emailResult.error);
                 } else {
                     window.logger?.log('✅ Suspension email sent:', emailResult);
                 }
@@ -1811,7 +1956,9 @@ class UserDetailPage {
                         reactivation_reason: confirmed.reason
                     }
                 });
-                    window.logger?.error('❌ Failed to send reactivation email:', emailError);
+                
+                if (emailResult.error) {
+                    window.logger?.error('❌ Failed to send reactivation email:', emailResult.error);
                 } else {
                     window.logger?.log('✅ Reactivation email sent:', emailResult);
                 }

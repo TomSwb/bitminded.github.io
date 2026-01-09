@@ -1,6 +1,6 @@
 # 🎯 Priority List - To Do
 
-**Last Updated**: January 5, 2026 (Added Family Management API requirement, updated webhook handler testing status)  
+**Last Updated**: January 9, 2026 (Updated Family Management UI status, marked Family Creation and Notifications as completed)  
 **Based on**: Actual codebase investigation (not just READMEs)
 
 > **Note**: This document contains only active/incomplete items. For completed items, see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md) (same folder).
@@ -38,154 +38,6 @@
 - ⚠️ FAQ system (exists but may need expansion)
 - ⚠️ GDPR data deletion (account deletion exists, workflow incomplete)
 - ⚠️ Multi-currency support (database implemented, verify UI)
-
----
-
-
-
-## 💳 **Phase 2: Stripe & Payment Foundation**
-
-> **Note**: Items 13, 14, 14.1, 15, 15.5, 15.5.1, 15.5.2, 15.6, 15.7, and 15.8 are completed. See [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md) for details.
-
-### 15.9. Family Plan Payment Setup & Stripe Integration ⚠️ **MISSING**
-**Status**: **MISSING** - Family plan pricing UI complete, but payment flow and webhook handling not implemented  
-**Priority**: High - Family plans are a key differentiator and revenue driver  
-**Reference**: See `../payment-financial/FAMILY-PLANS-ANALYSIS.md` for complete implementation details (section "Webhook Handler Implementation Requirements")
-
-**Prerequisites** (MUST COMPLETE FIRST):
-- ✅ Family plan pricing UI implemented (per-member pricing: CHF 3.50/member for All-Tools, CHF 5/member for Supporter)
-- ✅ Database schema: `family_groups`, `family_members`, `family_subscriptions` tables - **COMPLETED** (see `../payment-financial/FAMILY-PLANS-ANALYSIS.md`)
-- ✅ Stripe webhook handler exists (#14) but needs family plan support
-
-**Implementation Order** (must be completed in sequence):
-1. ✅ Database Setup (15.9.1) - Foundation (Phase 2) - **COMPLETED** (see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md))
-2. ✅ Webhook Handler Updates (15.9.3) - Depends on 15.9.1 (Phase 2) - **COMPLETED** (see [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md))
-3. Stripe Checkout Integration (15.9.2) - Depends on #16 (Phase 3, after #16)
-4. Family Management API (15.9.3.1) - Depends on 15.9.1, 15.9.3 (Phase 4, Account Management) - **NEW REQUIREMENT**
-5. Family Management UI (15.9.4) - Depends on 15.9.1, 15.9.2, 15.9.3, 15.9.3.1 (Phase 4, Account Management)
-
----
-
-
-#### 15.9.4. Family Management UI (Account Page Component) ⚠️ **MISSING**
-**Status**: **MISSING**  
-**Priority**: High - Depends on 15.9.1, 15.9.2, 15.9.3, 15.9.3.1  
-**Action**:
-- Create new account page section: `account/components/family-management/`
-  - Component files:
-    - `family-management.html` - Main container with family overview and member list
-    - `family-management.css` - Styling matching account page design system
-    - `family-management.js` - Component logic and API calls
-    - `locales/family-management-locales.json` - Translations (en, fr, de, es)
-  - Features:
-    - **Family Group Overview**:
-      - Display family name (editable by admin)
-      - Show family admin name/avatar
-      - Display current member count / max members
-      - Show family subscription status (active, cancelled, expired)
-      - Link to family subscription management
-    - **Family Members List**:
-      - Display all family members with avatars, names, roles
-      - Show member status (active, pending, suspended)
-      - Show relationship (parent, child, partner, etc.)
-      - Show join date
-      - Role badges (admin, parent, member, child)
-    - **Family Member Invitations** (admin only):
-      - Invite by email (for new users)
-      - Invite by username (for existing users)
-      - Select role when inviting (parent, member, child, guardian)
-      - Select relationship (optional)
-      - Send invitation email
-      - View pending invitations
-      - Resend/cancel invitations
-    - **Family Member Management** (admin only):
-      - Change member roles (with restrictions)
-      - Remove members (with confirmation)
-      - Transfer admin role (with confirmation)
-      - View member activity (if permissions allow)
-    - **Leave Family** (non-admin members):
-      - Leave family group button
-      - Confirmation dialog
-      - Handle subscription impact (if member has individual subscription)
-    - **Family Subscription Management**:
-      - View subscription status and details
-      - View billing period (current_period_start, current_period_end)
-      - View plan name and pricing
-      - Link to subscription cancellation/update (if admin)
-      - Show member count and per-member pricing
-- Add "Family" section to account page layout:
-  - Update `account/components/account-layout/account-layout.html`:
-    - Add "Family" nav item in sidebar (icon: 👨‍👩‍👧‍👦)
-    - Add family section in content area
-  - Update `account/components/account-layout/account-layout.js`:
-    - Add 'family' to section loading logic
-  - Update `account/account-page-loader.js`:
-    - Add 'family' → 'family-management' component mapping
-- Profile Integration:
-  - Update `account/components/profile-management/profile-management.html`:
-    - Add family membership badge (if user is family member)
-    - Add link to family profile
-    - Show family name and role
-  - Update profile display to show family membership
-- Edge Functions (if needed):
-  - `invite-family-member` - Send invitation email and create pending member record
-  - `accept-family-invitation` - Accept invitation and join family group
-  - `remove-family-member` - Remove member from family (admin only)
-  - `update-family-member-role` - Change member role (admin only)
-  - `leave-family-group` - Leave family group (non-admin)
-  - `update-family-group` - Update family name/settings (admin only)
-
-**UI/UX Considerations**:
-- Show family section only if user is a family member or admin
-- Display appropriate permissions based on user role (admin vs member)
-- Handle pending invitations prominently
-- Show subscription status clearly
-- Make member management intuitive and safe (confirmations for destructive actions)
-
-**Depends on**: 15.9.1 (Database Schema), 15.9.2 (Stripe Checkout), 15.9.3 (Webhook Handler), 15.9.3.1 (Family Management API)
-
-**Related Items**:
-- See also: `../payment-financial/FAMILY-PLANS-ANALYSIS.md` lines 760-787 for UI component specifications
-- **Note**: This item has been moved to Phase 4 (Account Subscription Management) - see item 15.9.4 below
-
-### 15.10. Signup Form: Require Date of Birth ⚠️ **MISSING**
-**Status**: **MISSING** - DOB field not present in signup form  
-**Priority**: High - Required for age verification on certain purchases  
-**Action**:
-- Add Date of Birth (DOB) field to signup form (`auth/components/signup-form/`)
-- Use same input type and validation as account management profile section:
-  - Input type: `<input type="date">`
-  - Field ID: `signup-dob` (following existing naming pattern)
-  - Required field validation
-  - Max date validation (e.g., `max="9999-12-31"`)
-- Update signup form HTML (`signup-form.html`):
-  - Add DOB field after email field (before password field)
-  - Include label with translation key
-  - Add error display div for DOB validation
-- Update signup form JavaScript (`signup-form.js`):
-  - Add DOB to form elements cache
-  - Include DOB in form validation
-  - Include DOB in signup submission (add to user metadata or profile creation)
-  - Add DOB validation (age requirements if needed)
-- Update signup form translations (`locales/signup-locales.json`):
-  - Add DOB label translation key for all languages (en, fr, de, es)
-  - Add DOB error messages if needed
-- Update signup form CSS (`signup-form.css`):
-  - Ensure DOB field styling matches existing form fields
-- Database integration:
-  - Ensure DOB is saved to `user_profiles.date_of_birth` during signup
-  - May need to update profile creation trigger/edge function to handle DOB from signup
-
-**Reference Implementation**:
-- See `account/components/profile-management/personal-info/personal-info.html` lines 12-23 for DOB field structure
-- See `account/components/profile-management/personal-info/personal-info.js` for DOB handling logic
-
-**Why This Is Needed**:
-- Age verification required for certain product purchases
-- Better to collect at signup rather than requiring users to complete profile later
-- Ensures all users have DOB before making purchases that require age verification
-
-**Depends on**: None - Can be implemented independently, but should be completed before Phase 3 (Purchase & Checkout Flow) to ensure DOB is available for purchase validation
 
 ---
 
@@ -443,6 +295,7 @@
   - Handle member count changes (upgrade/downgrade member count)
   - Show impact of cancellation on all family members
   - Handle family subscription reactivation
+  - Link to subscription cancellation/update from family management page (if admin)
 
 **Questions to Answer Before Implementation**:
 - Should cancellation be immediate or at period end by default?
@@ -560,90 +413,6 @@
 - Account Subscription Management UI (17) - Show upgrade option
 - Receipts View (17.1) - Show conversion history
 - Webhook Handler (#14) - Handle conversion subscription events
-
----
-
-### 15.9.4. Family Management UI (Account Page Component) ⚠️ **MISSING**
-**Status**: **MISSING**  
-**Priority**: High - Depends on 15.9.1, 15.9.2, 15.9.3  
-**Action**:
-- Create new account page section: `account/components/family-management/`
-  - Component files:
-    - `family-management.html` - Main container with family overview and member list
-    - `family-management.css` - Styling matching account page design system
-    - `family-management.js` - Component logic and API calls
-    - `locales/family-management-locales.json` - Translations (en, fr, de, es)
-  - Features:
-    - **Family Group Overview**:
-      - Display family name (editable by admin)
-      - Show family admin name/avatar
-      - Display current member count / max members
-      - Show family subscription status (active, cancelled, expired)
-      - Link to family subscription management
-    - **Family Members List**:
-      - Display all family members with avatars, names, roles
-      - Show member status (active, pending, suspended)
-      - Show relationship (parent, child, partner, etc.)
-      - Show join date
-      - Role badges (admin, parent, member, child)
-    - **Family Member Invitations** (admin only):
-      - Invite by email (for new users)
-      - Invite by username (for existing users)
-      - Select role when inviting (parent, member, child, guardian)
-      - Select relationship (optional)
-      - Send invitation email
-      - View pending invitations
-      - Resend/cancel invitations
-    - **Family Member Management** (admin only):
-      - Change member roles (with restrictions)
-      - Remove members (with confirmation)
-      - Transfer admin role (with confirmation)
-      - View member activity (if permissions allow)
-    - **Leave Family** (non-admin members):
-      - Leave family group button
-      - Confirmation dialog
-      - Handle subscription impact (if member has individual subscription)
-    - **Family Subscription Management**:
-      - View subscription status and details
-      - View billing period (current_period_start, current_period_end)
-      - View plan name and pricing
-      - Link to subscription cancellation/update (if admin)
-      - Show member count and per-member pricing
-- Add "Family" section to account page layout:
-  - Update `account/components/account-layout/account-layout.html`:
-    - Add "Family" nav item in sidebar (icon: 👨‍👩‍👧‍👦)
-    - Add family section in content area
-  - Update `account/components/account-layout/account-layout.js`:
-    - Add 'family' to section loading logic
-  - Update `account/account-page-loader.js`:
-    - Add 'family' → 'family-management' component mapping
-- Profile Integration:
-  - Update `account/components/profile-management/profile-management.html`:
-    - Add family membership badge (if user is family member)
-    - Add link to family profile
-    - Show family name and role
-  - Update profile display to show family membership
-- Edge Functions (if needed):
-  - `invite-family-member` - Send invitation email and create pending member record
-  - `accept-family-invitation` - Accept invitation and join family group
-  - `remove-family-member` - Remove member from family (admin only)
-  - `update-family-member-role` - Change member role (admin only)
-  - `leave-family-group` - Leave family group (non-admin)
-  - `update-family-group` - Update family name/settings (admin only)
-
-**UI/UX Considerations**:
-- Show family section only if user is a family member or admin
-- Display appropriate permissions based on user role (admin vs member)
-- Handle pending invitations prominently
-- Show subscription status clearly
-- Make member management intuitive and safe (confirmations for destructive actions)
-
-**Depends on**: 15.9.1 (Database Schema), 15.9.2 (Stripe Checkout), 15.9.3 (Webhook Handler), 15.9.3.1 (Family Management API)
-
-**Related Items**:
-- See also: `../payment-financial/FAMILY-PLANS-ANALYSIS.md` lines 760-787 for UI component specifications
-- Integrates with: 17.2 (Subscription Cancellation), 17.3 (Payment Methods), 17.4 (Renewal Reminders)
-- Admin interface: See 15.9.5 (Admin Family Management UI) in Phase 7
 
 ---
 
@@ -2347,7 +2116,7 @@
 7. Receipt System (#16.7) - **CRITICAL - Needed for all Stripe purchases**
 
 ### 🟡 **HIGH PRIORITY (Before Launch)**
-1. Family Plan Payment Setup & Stripe Integration (#15.9) - **HIGH PRIORITY - Family plans are key differentiator, pricing UI complete**
+1. Family Plan Stripe Checkout Integration (#15.9.2) - Add family plan support to checkout (depends on #16)
 3. Account subscription management (#17) - **HIGH PRIORITY - User-facing subscription management**
 4. User Subscription Cancellation & Management (#17.2) - **HIGH PRIORITY - Users need to manage subscriptions**
 5. Payment Method Management (#17.3) - **HIGH PRIORITY - Users need to manage payment methods**
@@ -2397,7 +2166,7 @@
 
 ### Week 3: Purchase & Checkout Flow
 - [ ] Stripe Checkout Integration (#16) - Core checkout flow
-- [ ] Family Plan Stripe Checkout Integration (#15.9.2) - Add family plan support to checkout (depends on #16)
+- [ ] Family Plan Stripe Checkout Integration (#15.9.2) - Add family plan support to checkout (depends on #16) - See item 15.9.2
 - [ ] Purchase Confirmation & Entitlements (#16.5)
 - [ ] Cloudflare Worker Subdomain Protection (#16.6) - **CRITICAL - Must protect paid tools immediately** (includes family subscription checks)
 - [ ] Receipt System implementation (#16.7)
@@ -2410,10 +2179,6 @@
 - [ ] User Account: Receipts View (#17.1)
 - [ ] Upgrade Path: One-Time Purchase to Subscription (#17.5) - Convert single product purchases to subscriptions
 - [ ] Subscription renewal reminders (#17.4) - Includes family plan reminders
-- [ ] Family Management API (#15.9.3.1) - Edge function for immediate member access granting
-- [ ] Family Management UI (#15.9.4) - Account page family management component
-- [ ] Wire up to existing data structures
-- [ ] Integrate with Family Management API (#15.9.3.1)
 
 ### Week 5-7: Service Workflows (Tech Support + Commissioning)
 - [ ] Tech Support Booking Database Schema (#18)

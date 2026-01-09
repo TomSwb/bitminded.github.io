@@ -1,6 +1,6 @@
 # ✅ Priority List - Completed Items
 
-**Last Updated**: January 5, 2026  
+**Last Updated**: January 9, 2026 (Completed Family Management UI - all core features implemented)  
 **Based on**: Actual codebase investigation (not just READMEs)
 
 > **Note**: This document contains all completed items from the priority list. For active/incomplete items, see [PRIORITY-LIST-TO-DO.md](./PRIORITY-LIST-TO-DO.md).
@@ -125,7 +125,7 @@
 
 ---
 
-## 💳 **Phase 2: Stripe & Payment Foundation**
+## 💳 **Phase 2: Stripe & Payment Foundation** ✅ **COMPLETE**
 
 ### 13. Stripe Account Setup and Configuration ✅ **COMPLETED**
 **Status**: ✅ **COMPLETED** - Fully implemented and tested  
@@ -822,6 +822,164 @@
 
 **Depends on**: 15.9.1 (Database Schema) ✅, 15.9.3 (Webhook Handler) ✅  
 **Required for**: 15.9.4 (Family Management UI)
+
+---
+
+### 15.9.4. Family Management UI (Account Page Component) - Partial Completion ✅ **PARTIALLY COMPLETED**
+**Status**: **✅ PARTIALLY COMPLETED** - Basic component structure, empty state, and member management implemented  
+**Priority**: High - Depends on 15.9.1, 15.9.2, 15.9.3, 15.9.3.1  
+**Phase**: Phase 4 - Account Management  
+**Completed**: January 2026
+
+**Completed Actions**:
+- ✅ **Component Files Created**: `account/components/family-management/`
+  - ✅ `family-management.html` - Main container with family overview and member list
+  - ✅ `family-management.css` - Styling matching account page design system
+  - ✅ `family-management.js` - Component logic and API calls (1,080 lines)
+  - ✅ `locales/family-management-locales.json` - Translations (en, fr, de, es)
+- ✅ **Component Integration**:
+  - ✅ Added "Family" section to account page layout (`account-layout.html`)
+  - ✅ Added "Family" nav item in sidebar (icon: 👨‍👩‍👧‍👦)
+  - ✅ Added 'family' to section loading logic (`account-layout.js`)
+  - ✅ Added 'family' → 'family-management' component mapping (`account-page-loader.js`)
+  - ✅ ComponentLoader integration with special initialization handling
+- ✅ **Empty State Implementation**:
+  - ✅ Empty state displays correctly when user is not part of a family
+  - ✅ Fixed visibility issues using `setProperty()` with `'important'` to override CSS rules
+  - ✅ Translatable content properly displayed
+  - ✅ Icon, title, and description all visible
+- ✅ **Family Overview Section**:
+  - ✅ Display family name (editable by admin)
+  - ✅ Show family admin name (username/email)
+  - ✅ Display current member count / max members (e.g., "3 / 6")
+  - ✅ Show family subscription status (active, cancelled, expired)
+  - ✅ Show available slots (if subscription allows)
+- ✅ **Family Members List**:
+  - ✅ Display all family members with user IDs, roles, relationships
+  - ✅ Show member join dates
+  - ✅ Role badges (admin, parent, member, child, guardian)
+  - ✅ Highlight current user in member list
+- ✅ **Member Management** (admin only):
+  - ✅ Add member functionality (email-based, with immediate access granting)
+  - ✅ Remove member functionality (with access revocation)
+  - ✅ Update member role functionality (admin/member roles)
+  - ✅ Modals for add/remove/update operations
+  - ✅ Form validation and error handling
+  - ✅ Subscription optional (can add members before subscription)
+- ✅ **Leave Family** (non-admin members):
+  - ✅ Leave family group button
+  - ✅ Confirmation dialog
+  - ✅ UI section for non-admin members
+- ✅ **Delete Family** (sole admin):
+  - ✅ Delete family group option (when sole admin)
+  - ✅ Confirmation dialog
+  - ✅ Notifications sent to all members
+- ✅ **Admin Leave** (with other admins):
+  - ✅ Admin can leave if other admins exist
+  - ✅ Automatic admin role transfer
+- ✅ **Family Subscription Display**:
+  - ✅ View subscription status and details
+  - ✅ View billing period (current_period_start, current_period_end)
+  - ✅ View plan name and pricing
+  - ✅ Show member count and per-member pricing
+- ✅ **Component Initialization**:
+  - ✅ Proper ComponentLoader integration
+  - ✅ Section activation before component initialization
+  - ✅ Retry logic for element detection
+  - ✅ Translation loading and display
+
+**Implementation Details**:
+- **Component Structure**: Follows account page component patterns
+- **API Integration**: Uses `family-management` edge function endpoints
+- **Visibility Fix**: Uses `style.setProperty()` with `'important'` to override CSS `!important` rules
+- **Error Handling**: Comprehensive error logging and user-friendly error messages
+- **Responsive Design**: Mobile-first approach with proper breakpoints
+
+**Additional Features Completed**:
+- ✅ **Family Creation** (15.9.4.1) - Create family before subscription purchase
+- ✅ **Family Notifications** (15.9.4.2) - Email and in-app notifications for all family events
+- ✅ **Family Name Editing** (15.9.4.3) - Admin can edit family name inline
+- ✅ **Leave/Delete Family** - Members can leave, sole admin can delete
+- ✅ **Admin Role Management** - Promote members to admin, automatic transfer on leave
+
+**Files Created/Modified**:
+- `account/components/family-management/family-management.html` - Component HTML structure
+- `account/components/family-management/family-management.css` - Component styling
+- `account/components/family-management/family-management.js` - Component logic (1,525 lines)
+- `account/components/family-management/locales/family-management-locales.json` - Translations
+- `components/shared/component-loader.js` - Added special initialization for family-management
+- `account/components/account-layout/account-layout.html` - Added Family section
+- `account/components/account-layout/account-layout.js` - Added family to section loading
+- `account/account-page-loader.js` - Added family component mapping
+- `supabase/functions/family-management/index.ts` - Added create-family, update-family-name, leave-family, delete-family endpoints
+- `supabase/functions/send-notification-email/index.ts` - Added family notification email templates
+- `account/components/notifications-preferences/` - Added family notification preferences
+
+**Key Fixes Applied**:
+- ✅ Fixed empty state visibility issue (January 2026)
+  - Used `setProperty()` with `'important'` to override CSS `display: none !important`
+  - Forced visibility on all parent containers
+  - Made translatable content visible with `!important` overrides
+  - Added retry logic for element detection
+
+**Status**: ✅ **COMPLETE** - All core functionality implemented and working
+
+**Note**: Subscription cancellation/update links will be added in item 17.2 (User Subscription Cancellation & Management)
+
+**Depends on**: 15.9.1 (Database Schema) ✅, 15.9.3 (Webhook Handler) ✅, 15.9.3.1 (Family Management API) ✅
+
+---
+
+### 15.10. Signup Form: Require Date of Birth ✅ **COMPLETED**
+**Status**: ✅ **COMPLETED** - DOB field added to signup form and integrated with database  
+**Priority**: High - Required for age verification on certain purchases  
+**Completed**: January 8, 2026
+
+**Completed Actions**:
+- ✅ Added Date of Birth (DOB) field to signup form (`auth/components/signup-form/`)
+- ✅ Used same input type and validation as account management profile section:
+  - Input type: `<input type="date">`
+  - Field ID: `signup-dob` (following existing naming pattern)
+  - Required field validation
+  - Max date validation: `max="9999-12-31"`
+- ✅ Updated signup form HTML (`signup-form.html`):
+  - Added DOB field after email field (before password field)
+  - Included label with translation key
+  - Added error display div for DOB validation
+- ✅ Updated signup form JavaScript (`signup-form.js`):
+  - Added DOB to form elements cache
+  - Included DOB in form validation
+  - Included DOB in signup submission (added to user metadata)
+  - Added DOB validation (required field and future date check)
+- ✅ Updated signup form translations (`locales/signup-locales.json`):
+  - Added DOB label translation key for all languages (en, fr, de, es)
+  - Added DOB error messages (required and future date errors)
+- ✅ Signup form CSS (`signup-form.css`):
+  - No changes needed - existing styles handle date inputs correctly
+- ✅ Database integration:
+  - Created migration `20260108_add_dob_to_handle_new_user.sql`
+  - Updated `handle_new_user()` trigger function to save DOB from signup metadata
+  - DOB is saved to `user_profiles.date_of_birth` during signup
+
+**Implementation Details**:
+- DOB field positioned after email, before password (as specified)
+- Validation includes required field check and prevents future dates
+- DOB passed in signup metadata: `options.data.date_of_birth`
+- Database trigger extracts DOB from `raw_user_meta_data->>'date_of_birth'` and saves to profile
+- All translations added for en, es, fr, de
+
+**Files Modified**:
+- `auth/components/signup-form/signup-form.html`
+- `auth/components/signup-form/signup-form.js`
+- `auth/components/signup-form/locales/signup-locales.json`
+- `supabase/migrations/20260108_add_dob_to_handle_new_user.sql`
+
+**Why This Was Needed**:
+- Age verification required for certain product purchases
+- Better to collect at signup rather than requiring users to complete profile later
+- Ensures all users have DOB before making purchases that require age verification
+
+**Depends on**: None - Implemented independently, completed before Phase 3 (Purchase & Checkout Flow) to ensure DOB is available for purchase validation
 
 ---
 
