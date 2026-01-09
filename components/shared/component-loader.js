@@ -387,6 +387,31 @@ class ComponentLoader {
                         setTimeout(initAccountActions, 50);
                     };
                     document.head.appendChild(translationScript);
+                } else if (componentName === 'family-management') {
+                    // Wait for DOM to be ready before initializing family management
+                    const initFamilyManagement = () => {
+                        // Verify the component HTML is actually in the DOM
+                        const componentElement = document.getElementById('family-management');
+                        if (!componentElement) {
+                            window.logger?.error('❌ Family management component not found in DOM, retrying...');
+                            // Retry after a longer delay
+                            setTimeout(initFamilyManagement, 200);
+                            return;
+                        }
+                        
+                        // Create instance and initialize
+                        if (window.FamilyManagement && !window.familyManagement) {
+                            window.familyManagement = new window.FamilyManagement();
+                        }
+                        if (window.familyManagement) {
+                            window.familyManagement.init(config);
+                        } else {
+                            window.logger?.error('❌ FamilyManagement class not available');
+                        }
+                    };
+                    
+                    // Use timeout to ensure HTML is fully parsed
+                    setTimeout(initFamilyManagement, 50);
                 }
                 resolve();
             };

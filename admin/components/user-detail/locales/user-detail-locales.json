@@ -73,7 +73,11 @@
       "user_updated_successfully": "User updated successfully",
       "failed_to_update_user": "Failed to update user",
       "email_sent_successfully": "Email sent successfully",
-      "failed_to_send_email": "Failed to send email"
+      "failed_to_send_email": "Failed to send email",
+      "family_group": "Family Group",
+      "family_name": "Family Name",
+      "family_members": "Family Members",
+      "members": "Members"
     }
   },
   "es": {
@@ -150,7 +154,11 @@
       "user_updated_successfully": "Usuario actualizado exitosamente",
       "failed_to_update_user": "Error al actualizar usuario",
       "email_sent_successfully": "Email enviado exitosamente",
-      "failed_to_send_email": "Error al enviar email"
+      "failed_to_send_email": "Error al enviar email",
+      "family_group": "Grupo Familiar",
+      "family_name": "Nombre de Familia",
+      "family_members": "Miembros de la Familia",
+      "members": "Miembros"
     }
   },
   "fr": {
@@ -227,7 +235,11 @@
       "user_updated_successfully": "Utilisateur mis à jour avec succès",
       "failed_to_update_user": "Échec de la mise à jour de l'utilisateur",
       "email_sent_successfully": "Email envoyé avec succès",
-      "failed_to_send_email": "Échec de l'envoi de l'email"
+      "failed_to_send_email": "Échec de l'envoi de l'email",
+      "family_group": "Groupe Familial",
+      "family_name": "Nom de Famille",
+      "family_members": "Membres de la Famille",
+      "members": "Membres"
     }
   },
   "de": {
@@ -304,7 +316,11 @@
       "user_updated_successfully": "Benutzer erfolgreich aktualisiert",
       "failed_to_update_user": "Fehler beim Aktualisieren des Benutzers",
       "email_sent_successfully": "E-Mail erfolgreich gesendet",
-      "failed_to_send_email": "Fehler beim Senden der E-Mail"
+      "failed_to_send_email": "Fehler beim Senden der E-Mail",
+      "family_group": "Familiengruppe",
+      "family_name": "Familienname",
+      "family_members": "Familienmitglieder",
+      "members": "Mitglieder"
     }
   }
 }
