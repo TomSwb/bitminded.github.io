@@ -41,53 +41,6 @@
 
 ---
 
-
-
-## 💳 **Phase 2: Stripe & Payment Foundation**
-
-> **Note**: Items 13, 14, 14.1, 15, 15.5, 15.5.1, 15.5.2, 15.6, 15.7, 15.8, and 15.9 (completed items) are completed. See [PRIORITY-LIST-COMPLETED-ITEMS.md](./PRIORITY-LIST-COMPLETED-ITEMS.md) for details. Remaining 15.9 items (15.9.2, 15.9.5) are documented in their respective phases.
-
-### 15.10. Signup Form: Require Date of Birth ⚠️ **MISSING**
-**Status**: **MISSING** - DOB field not present in signup form  
-**Priority**: High - Required for age verification on certain purchases  
-**Action**:
-- Add Date of Birth (DOB) field to signup form (`auth/components/signup-form/`)
-- Use same input type and validation as account management profile section:
-  - Input type: `<input type="date">`
-  - Field ID: `signup-dob` (following existing naming pattern)
-  - Required field validation
-  - Max date validation (e.g., `max="9999-12-31"`)
-- Update signup form HTML (`signup-form.html`):
-  - Add DOB field after email field (before password field)
-  - Include label with translation key
-  - Add error display div for DOB validation
-- Update signup form JavaScript (`signup-form.js`):
-  - Add DOB to form elements cache
-  - Include DOB in form validation
-  - Include DOB in signup submission (add to user metadata or profile creation)
-  - Add DOB validation (age requirements if needed)
-- Update signup form translations (`locales/signup-locales.json`):
-  - Add DOB label translation key for all languages (en, fr, de, es)
-  - Add DOB error messages if needed
-- Update signup form CSS (`signup-form.css`):
-  - Ensure DOB field styling matches existing form fields
-- Database integration:
-  - Ensure DOB is saved to `user_profiles.date_of_birth` during signup
-  - May need to update profile creation trigger/edge function to handle DOB from signup
-
-**Reference Implementation**:
-- See `account/components/profile-management/personal-info/personal-info.html` lines 12-23 for DOB field structure
-- See `account/components/profile-management/personal-info/personal-info.js` for DOB handling logic
-
-**Why This Is Needed**:
-- Age verification required for certain product purchases
-- Better to collect at signup rather than requiring users to complete profile later
-- Ensures all users have DOB before making purchases that require age verification
-
-**Depends on**: None - Can be implemented independently, but should be completed before Phase 3 (Purchase & Checkout Flow) to ensure DOB is available for purchase validation
-
----
-
 ## 🛒 **Phase 3: Purchase & Checkout Flow**
 
 ### 16. Payment Integration (Stripe + Bank Transfer) ⚠️ **MISSING**

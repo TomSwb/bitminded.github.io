@@ -42,6 +42,7 @@ class SignupForm {
             form: document.getElementById('signup-form'),
             username: document.getElementById('signup-username'),
             email: document.getElementById('signup-email'),
+            dob: document.getElementById('signup-dob'),
             password: document.getElementById('signup-password'),
             confirmPassword: document.getElementById('signup-confirm-password'),
             success: document.getElementById('signup-success'),
@@ -49,6 +50,7 @@ class SignupForm {
             // Error elements
             usernameError: document.getElementById('signup-username-error'),
             emailError: document.getElementById('signup-email-error'),
+            dobError: document.getElementById('signup-dob-error'),
             passwordError: document.getElementById('signup-password-error'),
             confirmPasswordError: document.getElementById('signup-confirm-password-error'),
             
@@ -72,6 +74,7 @@ class SignupForm {
         // Real-time validation - only bind if elements exist
         if (this.elements.username) this.elements.username.addEventListener('blur', () => this.validateUsername());
         if (this.elements.email) this.elements.email.addEventListener('blur', () => this.validateEmail());
+        if (this.elements.dob) this.elements.dob.addEventListener('blur', () => this.validateDob());
         if (this.elements.password) {
             this.elements.password.addEventListener('blur', () => this.validatePassword());
             this.elements.password.addEventListener('input', () => this.updatePasswordRequirements());
@@ -174,7 +177,7 @@ class SignupForm {
         if (this.isSubmitting) return;
 
         // Ensure elements are cached
-        if (!this.elements?.username || !this.elements?.email || !this.elements?.password || !this.elements?.confirmPassword) {
+        if (!this.elements?.username || !this.elements?.email || !this.elements?.dob || !this.elements?.password || !this.elements?.confirmPassword) {
             window.logger?.error('❌ Form elements not found. Cannot validate.');
             this.showError('Form not properly initialized. Please refresh the page.');
             return;
@@ -183,10 +186,11 @@ class SignupForm {
         // Validate all fields
         const isUsernameValid = this.validateUsername();
         const isEmailValid = this.validateEmail();
+        const isDobValid = this.validateDob();
         const isPasswordValid = this.validatePassword();
         const isConfirmPasswordValid = this.validateConfirmPassword();
 
-        if (!isUsernameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+        if (!isUsernameValid || !isEmailValid || !isDobValid || !isPasswordValid || !isConfirmPasswordValid) {
             this.showError('Please fix the errors above');
             return;
         }
@@ -203,7 +207,8 @@ class SignupForm {
                 password: this.elements.password.value,
                 options: {
                     data: {
-                        username: this.elements.username.value.trim()
+                        username: this.elements.username.value.trim(),
+                        date_of_birth: this.elements.dob.value
                     },
                     emailRedirectTo: `${window.location.origin}/auth/verify`
                 }
@@ -433,6 +438,30 @@ class SignupForm {
         return true;
     }
 
+    /**
+     * Validate date of birth field
+     * @returns {boolean} True if valid
+     */
+    validateDob() {
+        const dob = this.elements.dob.value;
+        
+        if (!dob) {
+            this.showFieldError('dob', this.getTranslation('signup.errorDobRequired') || 'Date of birth is required');
+            return false;
+        }
+        
+        const dobDate = new Date(dob);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to compare dates only
+        
+        if (dobDate > today) {
+            this.showFieldError('dob', this.getTranslation('signup.errorDobFuture') || 'Date of birth cannot be in the future');
+            return false;
+        }
+        
+        this.clearFieldError('dob');
+        return true;
+    }
 
     /**
      * Show field-specific error
@@ -641,7 +670,7 @@ class SignupForm {
      * Clear all error messages
      */
     clearAllErrors() {
-        const fields = ['username', 'email', 'password', 'confirmPassword'];
+        const fields = ['username', 'email', 'dob', 'password', 'confirmPassword'];
         fields.forEach(field => this.clearFieldError(field));
     }
 
