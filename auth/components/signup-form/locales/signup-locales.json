@@ -5,6 +5,7 @@
       "signup.subtitle": "Join BitMinded today",
       "signup.username": "Username",
       "signup.email": "Email Address",
+      "signup.dob": "Date of Birth",
       "signup.password": "Password",
       "signup.confirmPassword": "Confirm Password",
       "signup.agreeTerms": "I agree to the",
@@ -31,6 +32,8 @@
       "signup.errorPasswordDigit": "Password must contain at least one digit.",
       "signup.errorPasswordSymbol": "Password must contain at least one symbol (!@#$%^&*).",
       "signup.errorUsername": "Please choose a different username.",
+      "signup.errorDobRequired": "Date of birth is required",
+      "signup.errorDobFuture": "Date of birth cannot be in the future",
       "signup.errorGeneral": "An error occurred during signup. Please try again."
     }
   },
@@ -40,6 +43,7 @@
       "signup.subtitle": "Únete a BitMinded hoy",
       "signup.username": "Nombre de Usuario",
       "signup.email": "Dirección de Correo Electrónico",
+      "signup.dob": "Fecha de Nacimiento",
       "signup.password": "Contraseña",
       "signup.confirmPassword": "Confirmar Contraseña",
       "signup.agreeTerms": "Acepto los",
@@ -66,6 +70,8 @@
       "signup.errorPasswordDigit": "La contraseña debe contener al menos un dígito.",
       "signup.errorPasswordSymbol": "La contraseña debe contener al menos un símbolo (!@#$%^&*).",
       "signup.errorUsername": "Por favor elige un nombre de usuario diferente.",
+      "signup.errorDobRequired": "La fecha de nacimiento es obligatoria",
+      "signup.errorDobFuture": "La fecha de nacimiento no puede ser en el futuro",
       "signup.errorGeneral": "Ocurrió un error durante el registro. Por favor intenta de nuevo."
     }
   },
@@ -75,6 +81,7 @@
       "signup.subtitle": "Rejoignez BitMinded aujourd'hui",
       "signup.username": "Nom d'utilisateur",
       "signup.email": "Adresse e-mail",
+      "signup.dob": "Date de naissance",
       "signup.password": "Mot de passe",
       "signup.confirmPassword": "Confirmer le mot de passe",
       "signup.agreeTerms": "J'accepte les",
@@ -101,6 +108,8 @@
       "signup.errorPasswordDigit": "Le mot de passe doit contenir au moins un chiffre.",
       "signup.errorPasswordSymbol": "Le mot de passe doit contenir au moins un symbole (!@#$%^&*).",
       "signup.errorUsername": "Veuillez choisir un autre nom d'utilisateur.",
+      "signup.errorDobRequired": "La date de naissance est obligatoire",
+      "signup.errorDobFuture": "La date de naissance ne peut pas être dans le futur",
       "signup.errorGeneral": "Une erreur s'est produite lors de l'inscription. Veuillez réessayer."
     }
   },
@@ -110,6 +119,7 @@
       "signup.subtitle": "Treten Sie BitMinded heute bei",
       "signup.username": "Benutzername",
       "signup.email": "E-Mail-Adresse",
+      "signup.dob": "Geburtsdatum",
       "signup.password": "Passwort",
       "signup.confirmPassword": "Passwort Bestätigen",
       "signup.agreeTerms": "Ich akzeptiere die",
@@ -136,6 +146,8 @@
       "signup.errorPasswordDigit": "Das Passwort muss mindestens eine Ziffer enthalten.",
       "signup.errorPasswordSymbol": "Das Passwort muss mindestens ein Symbol (!@#$%^&*) enthalten.",
       "signup.errorUsername": "Bitte wählen Sie einen anderen Benutzernamen.",
+      "signup.errorDobRequired": "Das Geburtsdatum ist erforderlich",
+      "signup.errorDobFuture": "Das Geburtsdatum kann nicht in der Zukunft liegen",
       "signup.errorGeneral": "Während der Registrierung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
     }
   }

@@ -125,7 +125,7 @@
 
 ---
 
-## 💳 **Phase 2: Stripe & Payment Foundation**
+## 💳 **Phase 2: Stripe & Payment Foundation** ✅ **COMPLETE**
 
 ### 13. Stripe Account Setup and Configuration ✅ **COMPLETED**
 **Status**: ✅ **COMPLETED** - Fully implemented and tested  
@@ -927,6 +927,59 @@
 **Note**: Subscription cancellation/update links will be added in item 17.2 (User Subscription Cancellation & Management)
 
 **Depends on**: 15.9.1 (Database Schema) ✅, 15.9.3 (Webhook Handler) ✅, 15.9.3.1 (Family Management API) ✅
+
+---
+
+### 15.10. Signup Form: Require Date of Birth ✅ **COMPLETED**
+**Status**: ✅ **COMPLETED** - DOB field added to signup form and integrated with database  
+**Priority**: High - Required for age verification on certain purchases  
+**Completed**: January 8, 2026
+
+**Completed Actions**:
+- ✅ Added Date of Birth (DOB) field to signup form (`auth/components/signup-form/`)
+- ✅ Used same input type and validation as account management profile section:
+  - Input type: `<input type="date">`
+  - Field ID: `signup-dob` (following existing naming pattern)
+  - Required field validation
+  - Max date validation: `max="9999-12-31"`
+- ✅ Updated signup form HTML (`signup-form.html`):
+  - Added DOB field after email field (before password field)
+  - Included label with translation key
+  - Added error display div for DOB validation
+- ✅ Updated signup form JavaScript (`signup-form.js`):
+  - Added DOB to form elements cache
+  - Included DOB in form validation
+  - Included DOB in signup submission (added to user metadata)
+  - Added DOB validation (required field and future date check)
+- ✅ Updated signup form translations (`locales/signup-locales.json`):
+  - Added DOB label translation key for all languages (en, fr, de, es)
+  - Added DOB error messages (required and future date errors)
+- ✅ Signup form CSS (`signup-form.css`):
+  - No changes needed - existing styles handle date inputs correctly
+- ✅ Database integration:
+  - Created migration `20260108_add_dob_to_handle_new_user.sql`
+  - Updated `handle_new_user()` trigger function to save DOB from signup metadata
+  - DOB is saved to `user_profiles.date_of_birth` during signup
+
+**Implementation Details**:
+- DOB field positioned after email, before password (as specified)
+- Validation includes required field check and prevents future dates
+- DOB passed in signup metadata: `options.data.date_of_birth`
+- Database trigger extracts DOB from `raw_user_meta_data->>'date_of_birth'` and saves to profile
+- All translations added for en, es, fr, de
+
+**Files Modified**:
+- `auth/components/signup-form/signup-form.html`
+- `auth/components/signup-form/signup-form.js`
+- `auth/components/signup-form/locales/signup-locales.json`
+- `supabase/migrations/20260108_add_dob_to_handle_new_user.sql`
+
+**Why This Was Needed**:
+- Age verification required for certain product purchases
+- Better to collect at signup rather than requiring users to complete profile later
+- Ensures all users have DOB before making purchases that require age verification
+
+**Depends on**: None - Implemented independently, completed before Phase 3 (Purchase & Checkout Flow) to ensure DOB is available for purchase validation
 
 ---
 
