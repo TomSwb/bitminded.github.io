@@ -151,12 +151,12 @@ class MaintenanceMode {
         try {
             this.setLoading(true);
 
-            const { data, error } = await this.invokeMaintenanceFunction({ action: 'get' });
-            if (error) {
-                throw error;
+            const response = await this.invokeMaintenanceFunction({ action: 'get' });
+            if (response.error) {
+                throw new Error(response.error);
             }
 
-            const settings = data?.settings || data || {};
+            const settings = response?.settings || {};
             this.state.isEnabled = Boolean(settings.is_enabled);
             this.state.bypassIps = Array.isArray(settings.bypass_ips) ? settings.bypass_ips : [];
             this.state.updatedAt = settings.updated_at || null;
@@ -347,12 +347,12 @@ class MaintenanceMode {
         this.setLoading(true);
 
         try {
-            const { data, error } = await this.invokeMaintenanceFunction(payload);
-            if (error) {
-                throw error;
+            const response = await this.invokeMaintenanceFunction(payload);
+            if (response.error) {
+                throw new Error(response.error);
             }
 
-            const settings = data?.settings || data || {};
+            const settings = response?.settings || {};
             this.state.isEnabled = Boolean(settings.is_enabled);
             this.state.bypassIps = Array.isArray(settings.bypass_ips) ? settings.bypass_ips : [];
             this.state.updatedAt = settings.updated_at || this.state.updatedAt;
