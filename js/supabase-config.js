@@ -83,6 +83,23 @@ window.invokeEdgeFunction = async function(functionName, options = {}) {
     });
 
     if (error) {
+        // Log error details for debugging
+        window.logger?.error(`❌ Edge Function ${functionName} error:`, {
+            message: error.message,
+            status: error.status,
+            context: error.context,
+            name: error.name
+        });
+        
+        // Check if data contains error response (sometimes error response is in data)
+        if (data && data.error) {
+            const errorMessage = data.error;
+            const enhancedError = new Error(errorMessage);
+            enhancedError.status = error.status || 400;
+            enhancedError.context = data;
+            throw enhancedError;
+        }
+        
         // If we get a 401, try refreshing once more
         if (error.status === 401 || error.message?.includes('401')) {
             window.logger?.log('🔄 Got 401, refreshing session and retrying...');
@@ -104,13 +121,24 @@ window.invokeEdgeFunction = async function(functionName, options = {}) {
             });
 
             if (retryError) {
-                throw retryError;
+                // Extract actual error message from function response
+                const errorMessage = retryError.context?.message || retryData?.error || retryError.message || 'Unknown error occurred';
+                const enhancedError = new Error(errorMessage);
+                enhancedError.status = retryError.status;
+                enhancedError.context = retryError.context || retryData;
+                throw enhancedError;
             }
 
             return retryData;
         }
         
-        throw error;
+        // Extract actual error message from function response
+        // The error might be in context.message, data.error, or message
+        const errorMessage = error.context?.message || data?.error || error.message || 'Unknown error occurred';
+        const enhancedError = new Error(errorMessage);
+        enhancedError.status = error.status;
+        enhancedError.context = error.context || data;
+        throw enhancedError;
     }
 
     return data;
