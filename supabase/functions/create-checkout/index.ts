@@ -631,14 +631,22 @@ serve(async (req) => {
 
     // Get user's preferred currency from database (default to CHF)
     let userCurrency = 'CHF'
-    const { data: profile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('preferred_currency')
-      .eq('id', user.id)
-      .maybeSingle()
-    
-    if (profile?.preferred_currency) {
-      userCurrency = profile.preferred_currency
+    try {
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('user_profiles')
+        .select('preferred_currency')
+        .eq('id', user.id)
+        .maybeSingle()
+      
+      if (profileError) {
+        console.warn('⚠️ Could not fetch user preferred currency, using CHF:', profileError)
+        // Continue with default CHF if query fails (e.g., column doesn't exist yet)
+      } else if (profile?.preferred_currency) {
+        userCurrency = profile.preferred_currency
+      }
+    } catch (error) {
+      console.warn('⚠️ Error fetching user preferred currency, using CHF:', error)
+      // Continue with default CHF if query fails
     }
     
     // Use provided currency if specified, otherwise use user's preference
@@ -868,7 +876,6 @@ serve(async (req) => {
           item_id: item.id,
           ...(itemSlug && { item_slug: itemSlug })
         },
-        customer_email: userEmail,
         allow_promotion_codes: true
       }
 

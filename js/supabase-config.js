@@ -84,24 +84,48 @@ window.invokeEdgeFunction = async function(functionName, options = {}) {
 
     if (error) {
         // Log error details for debugging
+        console.error(`❌ Edge Function ${functionName} error:`, error);
         window.logger?.error(`❌ Edge Function ${functionName} error:`, {
             message: error.message,
             status: error.status,
             context: error.context,
-            name: error.name
+            name: error.name,
+            stack: error.stack
         });
+        
+        // Try to extract error message from Response object
+        let errorMessage = error.message || 'Unknown error occurred';
+        if (error.context) {
+            try {
+                // If context is a Response object, read it
+                if (error.context instanceof Response || (error.context && typeof error.context.text === 'function')) {
+                    const errorText = await error.context.clone().text();
+                    console.error(`📄 Error response body:`, errorText);
+                    window.logger?.error(`📄 Error response body:`, errorText);
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.error || errorJson.message || errorMessage;
+                    } catch (e) {
+                        // If not JSON, use the text as error message
+                        errorMessage = errorText || errorMessage;
+                    }
+                } else if (typeof error.context === 'object') {
+                    // If context is an object, check for error/message
+                    errorMessage = error.context.error || error.context.message || errorMessage;
+                }
+            } catch (e) {
+                console.error(`❌ Could not read error response:`, e);
+                window.logger?.error(`❌ Could not read error response:`, e);
+            }
+        }
         
         // Check if data contains error response (sometimes error response is in data)
         if (data && data.error) {
-            const errorMessage = data.error;
-            const enhancedError = new Error(errorMessage);
-            enhancedError.status = error.status || 400;
-            enhancedError.context = data;
-            throw enhancedError;
+            errorMessage = data.error;
         }
         
         // If we get a 401, try refreshing once more
-        if (error.status === 401 || error.message?.includes('401')) {
+        if (error.status === 401 || error.message?.includes('401') || errorMessage?.includes('401')) {
             window.logger?.log('🔄 Got 401, refreshing session and retrying...');
             const { data: { session: refreshedSession }, error: refreshError } = await window.supabase.auth.getSession();
             
@@ -121,9 +145,22 @@ window.invokeEdgeFunction = async function(functionName, options = {}) {
             });
 
             if (retryError) {
-                // Extract actual error message from function response
-                const errorMessage = retryError.context?.message || retryData?.error || retryError.message || 'Unknown error occurred';
-                const enhancedError = new Error(errorMessage);
+                // Try to extract error from retry response
+                let retryErrorMessage = retryError.message || 'Unknown error occurred';
+                if (retryError.context && retryError.context instanceof Response) {
+                    try {
+                        const retryErrorText = await retryError.context.clone().text();
+                        try {
+                            const retryErrorJson = JSON.parse(retryErrorText);
+                            retryErrorMessage = retryErrorJson.error || retryErrorJson.message || retryErrorMessage;
+                        } catch (e) {
+                            retryErrorMessage = retryErrorText || retryErrorMessage;
+                        }
+                    } catch (e) {
+                        // Ignore
+                    }
+                }
+                const enhancedError = new Error(retryErrorMessage);
                 enhancedError.status = retryError.status;
                 enhancedError.context = retryError.context || retryData;
                 throw enhancedError;
@@ -132,9 +169,7 @@ window.invokeEdgeFunction = async function(functionName, options = {}) {
             return retryData;
         }
         
-        // Extract actual error message from function response
-        // The error might be in context.message, data.error, or message
-        const errorMessage = error.context?.message || data?.error || error.message || 'Unknown error occurred';
+        // Create enhanced error with extracted message
         const enhancedError = new Error(errorMessage);
         enhancedError.status = error.status;
         enhancedError.context = error.context || data;
