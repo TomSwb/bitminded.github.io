@@ -156,9 +156,16 @@ class MaintenanceMode {
                 throw new Error(response.error);
             }
 
+            window.logger?.log('📋 Frontend: Full response from API', response);
+            
             const settings = response?.settings || {};
+            window.logger?.log('📋 Frontend: settings.bypass_ips', settings.bypass_ips, 'Type:', typeof settings.bypass_ips, 'IsArray:', Array.isArray(settings.bypass_ips));
+            
             this.state.isEnabled = Boolean(settings.is_enabled);
             this.state.bypassIps = Array.isArray(settings.bypass_ips) ? settings.bypass_ips : [];
+            
+            window.logger?.log('📋 Frontend: this.state.bypassIps after assignment', this.state.bypassIps, 'Length:', this.state.bypassIps.length);
+            
             this.state.updatedAt = settings.updated_at || null;
             this.state.updatedByEmail = settings.updated_by_email || null;
             this.state.updatedBy = settings.updated_by || null;
@@ -228,16 +235,24 @@ class MaintenanceMode {
 
     renderAllowlist() {
         if (!this.elements.allowlistList || !this.elements.allowlistEmpty) {
+            window.logger?.warn('⚠️ Frontend: Missing DOM elements for allowlist rendering', {
+                allowlistList: !!this.elements.allowlistList,
+                allowlistEmpty: !!this.elements.allowlistEmpty
+            });
             return;
         }
+
+        window.logger?.log('📋 Frontend: renderAllowlist called, this.state.bypassIps', this.state.bypassIps, 'Length:', this.state.bypassIps.length);
 
         this.elements.allowlistList.innerHTML = '';
 
         if (!this.state.bypassIps.length) {
+            window.logger?.log('📋 Frontend: No IPs to render, showing empty message');
             this.elements.allowlistEmpty.hidden = false;
             return;
         }
 
+        window.logger?.log('📋 Frontend: Rendering', this.state.bypassIps.length, 'IPs:', this.state.bypassIps);
         this.elements.allowlistEmpty.hidden = true;
 
         this.state.bypassIps.forEach((ip) => {
