@@ -354,17 +354,23 @@ async function handleUpdate({
 
   const generateBypassToken = Boolean(body.generate_bypass_token)
 
-  // Ensure bypass_ips is always a proper array (defensive check)
-  const safeRequestedIps = Array.isArray(requestedIps) ? requestedIps : parseTextArray(requestedIps)
-
-  console.log('📋 maintenance-settings: safeRequestedIps after defensive check', JSON.stringify(safeRequestedIps))
-
+  // CRITICAL FIX: Only include bypass_ips in updatePayload if we're explicitly changing it
+  // If not included, Supabase UPDATE will preserve the existing value
   const updatePayload: Partial<MaintenanceSettingsRecord> = {
-    id: 1, // Include id for upsert to work
+    id: 1, // Include id for UPDATE/upsert to work
     is_enabled: requestedEnabled,
-    bypass_ips: safeRequestedIps,
     updated_by: userId,
     updated_at: new Date().toISOString()
+  }
+
+  // Only update bypass_ips if explicitly provided with actual values
+  if (bypassIpsHasValues) {
+    const safeRequestedIps = Array.isArray(requestedIps) ? requestedIps : parseTextArray(requestedIps)
+    console.log('📋 maintenance-settings: Including bypass_ips in update:', JSON.stringify(safeRequestedIps))
+    updatePayload.bypass_ips = safeRequestedIps
+  } else {
+    console.log('📋 maintenance-settings: NOT including bypass_ips in update - preserving existing value from DB')
+    // Don't include bypass_ips at all - this preserves the existing value in the database
   }
 
   let bypassLink: string | null = null
