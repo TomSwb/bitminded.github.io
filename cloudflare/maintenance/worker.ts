@@ -405,6 +405,8 @@ async function getSettings(env, options = {}) {
     const data = await response.json();
     const record = data?.[0] || {};
 
+    console.log('📋 maintenance-worker: raw bypass_ips from DB:', JSON.stringify(record.bypass_ips));
+    
     const settings = {
       is_enabled: Boolean(record.is_enabled),
       bypass_ips: parseSupabaseTextArray(record.bypass_ips),
@@ -414,6 +416,8 @@ async function getSettings(env, options = {}) {
       updated_at: record.updated_at || null,
       updated_by: record.updated_by || null,
     };
+
+    console.log('📋 maintenance-worker: parsed bypass_ips:', JSON.stringify(settings.bypass_ips));
 
     settingsCache.value = settings;
     settingsCache.expiresAt = now + cacheDuration;
@@ -438,7 +442,8 @@ async function getSettings(env, options = {}) {
 function parseSupabaseTextArray(value) {
   if (!value) return [];
   if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
+    // Supabase REST API may return already-parsed array
+    return value.map((item) => String(item ?? '').trim()).filter(Boolean);
   }
   if (typeof value === 'string') {
     const trimmed = value.trim();

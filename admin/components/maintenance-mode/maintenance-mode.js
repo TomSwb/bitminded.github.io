@@ -364,14 +364,8 @@ class MaintenanceMode {
             this.state.updatedByEmail = settings.updated_by_email || this.state.updatedByEmail;
             this.state.updatedBy = settings.updated_by || this.state.updatedBy;
 
-            // If we explicitly changed bypass_ips, reload from server to ensure state is fresh
-            if (isChangingBypassIps) {
-                await this.loadSettings({ showErrors: false });
-            } else {
-                this.renderStatus();
-                this.renderAllowlist();
-                this.renderAlert(settings.alert || null);
-            }
+            // Always reload from server to ensure state is fresh
+            await this.loadSettings({ showErrors: false });
 
             const successMessage = options.successMessage
                 || (payload.is_enabled
