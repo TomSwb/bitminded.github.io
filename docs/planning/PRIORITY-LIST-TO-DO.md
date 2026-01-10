@@ -27,7 +27,7 @@
 - ❌ User onboarding flow
 - ❌ Email template management UI
 - ❌ Admin Dashboard, Analytics, Communication Center, Subscription Management, Revenue Reports (specs only)
-- ❌ Cloudflare Worker Subdomain Protection (now in Phase 3, #16.6 - CRITICAL for protecting paid tools)
+- ❌ Cloudflare Worker Subdomain Protection (now in Phase 3, #19 - CRITICAL for protecting paid tools)
 - ❌ Notification Center Enhancements (now in Phase 7, #52)
 - ❌ Stories & Review System (now planned in Phase 7, #54)
 - ❌ Marketing & Social Media Integration (now planned in Phase 7, #55)
@@ -43,36 +43,246 @@
 
 ## 🛒 **Phase 3: Purchase & Checkout Flow**
 
-### 16. Payment Integration (Stripe + Bank Transfer) ⚠️ **MISSING**
-**Status**: **MISSING** - No checkout flow exists  
+> **Verification Status**: Phase 3 items verified 2026-01-09. See [PHASE-3-VERIFICATION-REPORT.md](./PHASE-3-VERIFICATION-REPORT.md) for detailed implementation status and gaps.
+
+### 16. Payment Integration (Stripe + Bank Transfer) ⚠️ **PARTIALLY IMPLEMENTED**
+**Status**: **PARTIALLY IMPLEMENTED** - Backend webhook handler exists, frontend checkout missing  
 **Priority**: Critical - needed for catalog access purchases and service bookings  
+**Note**: Verified 2026-01-09 - Backend webhook handler (`stripe-webhook/index.ts`) exists and processes `checkout.session.completed` events. Database tables (`product_purchases`, `service_purchases`, `invoices`) exist. Payment method logic implemented. **Missing**: Edge function to create checkout sessions, frontend checkout component, success/cancel pages. See [PHASE-3-VERIFICATION-REPORT.md](./PHASE-3-VERIFICATION-REPORT.md) for details.  
+
+**Implementation Requirements** (2026-01-09):
+- ✅ **Stripe Publishable Keys**: Available in Supabase secrets (`STRIPE_PUBLISHABLE_KEY_TEST`, `STRIPE_PUBLISHABLE_KEY_LIVE`)
+- ✅ **Success/Cancel Page URLs**: `/checkout/success` and `/checkout/cancel` (Stripe provides `session_id` via `{CHECKOUT_SESSION_ID}` placeholder in URLs)
+- ✅ **Product/Service Selection**: **UNIFIED APPROACH** - Single unified checkout function handles both products and services. See "Architecture Decision" below.
+- ✅ **Currency Handling**: Always use user's preferred currency in checkout (stored in `user_profiles.preferred_currency`, managed like `language` - automatically saved). Currency selector is on catalog/service pages only, not on checkout page. Users can change currency before starting checkout, but checkout always uses their selected preference.
+- ✅ **Preferred Currency Storage**: Add `preferred_currency` field to `user_profiles` table (managed automatically like `language` field). Currency switcher component needs update to save to database when user is authenticated (like language switcher does).
+- ✅ **Interval Selection**: Happens on catalog/service pages (not in checkout). Frontend passes `interval: 'monthly' | 'yearly'` to checkout function if product/service supports subscriptions.
+- ✅ **Authentication Requirement**: Users must be authenticated to checkout. If not authenticated, redirect to login page with return URL.
+- ✅ **Bank Transfer Flow**: Stripe checkout first, bank transfer will be manual for users initially (invoice flow deferred)
+- ✅ **UI Design**: Separate page (not modal), following existing CSS patterns and universal CSS variables (`css/variables.css`)
+- ✅ **Testing Environment**: Use Stripe test mode, Stripe CLI installed, can look up test products/services in database
+
+**Architecture Decision - Unified Checkout Function** (2026-01-09):
+- **Approach**: Single unified `create-checkout` edge function handles both products and services (matches existing webhook pattern)
+- **Rationale**: 
+  - Webhook already uses unified `findProductOrService()` pattern that handles both types
+  - Webhook determines `itemType` (`'product'` or `'service'`) and routes to appropriate purchase table
+  - Simpler than separate functions, avoids code duplication
+  - Follows existing codebase patterns
+- **Function Signature**:
+  ```
+  POST /functions/v1/create-checkout
+  Body: {
+    product_id: UUID (optional) - for catalog products from products table
+    service_id: UUID (optional) - for services from services table
+    // Exactly one must be provided (mutually exclusive)
+    
+    interval: 'monthly' | 'yearly' (optional) - if product/service has multiple intervals
+    currency: 'CHF' | 'USD' | 'EUR' | 'GBP' (optional) - defaults to user's preferred currency
+  }
+  ```
+- **Function Logic**:
+  1. Validate exactly one of `product_id` or `service_id` is provided
+  2. Check user authentication - if not authenticated, return error with redirect URL
+  3. Fetch item from appropriate table (`products` or `services`)
+  4. Validate `payment_method` field: must be `'stripe'` or `'both'` (reject if `'bank_transfer'`)
+  5. Get user's preferred currency from `user_profiles.preferred_currency` (default to `'CHF'` if not set)
+  6. Get appropriate Stripe price ID based on item type:
+     - **For Products**: 
+       - If subscription with `interval`: Try `stripe_price_monthly_id` or `stripe_price_yearly_id` (verify currency match if possible)
+       - Currency-specific: `stripe_price_${currency.toLowerCase()}_id` (e.g., `stripe_price_chf_id`)
+       - Legacy fallback: `stripe_price_id` (usually CHF)
+     - **For Services**: 
+       - Access JSONB: `stripe_prices[currency][interval || 'regular']`
+       - Example: `stripe_prices['CHF']['monthly']` for monthly subscription in CHF
+     - Fallback: If price doesn't exist for user's currency, use CHF and log warning
+  7. Create Stripe Checkout session with:
+     - `success_url`: `/checkout/success?session_id={CHECKOUT_SESSION_ID}`
+     - `cancel_url`: `/checkout/cancel?session_id={CHECKOUT_SESSION_ID}`
+     - Metadata:
+       ```json
+       {
+         "item_type": "product" | "service",
+         "item_id": UUID,
+         "item_slug": "slug-value" (for services, matches webhook expectations)
+       }
+       ```
+  8. Return checkout session URL
+- **Frontend Integration**:
+  - Same checkout UI component for both: `/checkout/index.html`
+  - Different entry points:
+    - Catalog "Buy Now" buttons → call with `product_id` (interval selected on catalog page if subscription)
+    - Service "Subscribe Now" buttons → call with `service_id` (interval selected on service page if subscription)
+  - Same success/cancel pages work for both (`/checkout/success`, `/checkout/cancel`)
+  - Currency: Always use user's preferred currency (fetched from `user_profiles.preferred_currency`, default CHF if not set), no currency selector on checkout page
+  - Authentication: Check if user is authenticated, redirect to `/auth?redirect=/checkout` if not
+  - Success/Cancel Pages: Receive `session_id` as query parameter (`?session_id=cs_test_xxx`). Retrieve session details from Stripe API to display purchase summary. On error, display user-friendly error message explaining what went wrong.
+
 **Action**: 
 - **Payment Method Selection/Display**: Payment method selection and display will be handled in the checkout flow, not on service cards (payment method badges removed from user-facing pages)
-- **Stripe Checkout Flow** (for services with `payment_method = 'stripe'` or `payment_method = 'both'`):
-  - Create edge function to create Stripe Checkout sessions
-  - Build checkout flow component
-  - Create success/cancel redirect pages
-  - Wire up to catalog access "Buy Now" buttons and Stripe service buttons
+- **Stripe Checkout Flow** (for items with `payment_method = 'stripe'` or `payment_method = 'both'`):
+  - Create unified edge function `create-checkout` (handles both products and services)
+  - Build checkout flow component (separate page at `/checkout`)
+  - Create success/cancel redirect pages (`/checkout/success`, `/checkout/cancel`)
+  - Wire up to catalog access "Buy Now" buttons (passes `product_id`)
+  - Wire up to Stripe service buttons (passes `service_id`)
   - Handle different pricing types (one-time, subscription, freemium)
   - Display payment method options in checkout (if service supports both)
+  - Use Stripe publishable keys from Supabase secrets for frontend
+  - Currency handling: Always use user's preferred currency (from user settings), no currency switching on checkout page (currency selector is on catalog/service pages only)
 - **Bank Transfer / Invoice Flow** (for services with `payment_method = 'bank_transfer'` or `payment_method = 'both'`):
-  - Build service booking/invoice request form component
-  - Generate QR-bill invoices for PostFinance bank transfers
-  - Create invoice generation edge function
-  - Email invoice with QR-bill to customer
-  - Handle booking confirmation and payment tracking
-  - Wire up "Request Quote" / "Book Service" buttons for commissioning and in-person tech support
+  - ⚠️ **DEFERRED**: Bank transfer flow will be manual for users initially
+  - Build service booking/invoice request form component (Phase 3, other items)
+  - Generate QR-bill invoices for PostFinance bank transfers (Phase 3, other items)
+  - Create invoice generation edge function (Phase 3, other items)
+  - Email invoice with QR-bill to customer (Phase 3, other items)
+  - Handle booking confirmation and payment tracking (Phase 3, other items)
+  - Wire up "Request Quote" / "Book Service" buttons for commissioning and in-person tech support (Phase 3, other items)
 - **Dual Payment System**:
   - Different CTAs based on service `payment_method` field
-  - Stripe services: "Subscribe Now" / "Buy Now" buttons
-  - Bank transfer services: "Request Quote" / "Book Service" buttons
+  - Stripe services (`payment_method = 'stripe'`): "Subscribe Now" / "Buy Now" buttons → redirect to `/checkout`
+  - Bank transfer services (`payment_method = 'bank_transfer'`): "Request Quote" / "Book Service" buttons → manual flow (deferred)
   - Services with `payment_method = 'both'`: Show payment method selector in checkout flow
   - Payment method selection and display handled in checkout, not on service cards (badges removed from user-facing pages)
 
-### 15.9.2. Family Plan Stripe Checkout Integration ⚠️ **MISSING**
-**Status**: **MISSING**  
+**Implementation Details**:
+- **Product/Service Selection**: Unified approach (see "Architecture Decision" above)
+  - Checkout function accepts either `product_id` (catalog products) or `service_id` (services)
+  - Only creates checkout sessions for items with `payment_method = 'stripe'` or `payment_method = 'both'`
+  - Items with `payment_method = 'bank_transfer'` are rejected (use manual invoice flow)
+  - Webhook already handles both types via `findProductOrService()` pattern
+- **Currency Handling**:
+  - Currency is always taken from `user_profiles.preferred_currency` (same pattern as `language` field)
+  - If user has no preferred currency set, default to `'CHF'`
+  - Currency selector is available on catalog and service pages (users can change before checkout)
+  - Currency switcher component needs update to save to database when authenticated (like `LanguageSwitcher.saveLanguageToDatabase()`)
+  - No currency selector on checkout page - checkout always uses user's selected preference
+  - **For Products**: Use individual currency columns + interval columns (current pattern, matches existing codebase)
+    - Currency columns: `stripe_price_chf_id`, `stripe_price_usd_id`, `stripe_price_eur_id`, `stripe_price_gbp_id`
+    - Interval columns: `stripe_price_monthly_id`, `stripe_price_yearly_id` (for subscriptions)
+    - Legacy fallback: `stripe_price_id` (for backward compatibility, usually CHF)
+    - Price lookup priority:
+      1. If subscription with interval: 
+         - Primary: Check if `stripe_price_monthly_id` or `stripe_price_yearly_id` exists and verify its currency matches user's preference (may need to query Stripe API to verify currency)
+         - Alternative: Check currency-specific columns first (`stripe_price_${currency}_id`), then verify it's the correct interval via Stripe API
+      2. For one-time products: Use currency-specific column `stripe_price_${currency.toLowerCase()}_id` (e.g., `stripe_price_chf_id`, `stripe_price_usd_id`)
+      3. Legacy fallback: Use `stripe_price_id` (usually CHF)
+    - **Note**: `stripe_price_monthly_id` and `stripe_price_yearly_id` are typically set to primary currency (CHF) prices. For non-CHF currencies, may need to verify currency match via Stripe API or use currency-specific columns. This may need refinement during implementation based on actual product data structure.
+    - `create-stripe-product` and `create-stripe-subscription-product` functions use this pattern. Webhook searches in this order.
+  - **For Services**: Use `stripe_prices` JSONB field (current pattern, matches existing codebase)
+    - Structure: `{"CHF": {"monthly": "price_xxx", "yearly": "price_yyy", "regular": "price_zzz", "reduced": "price_aaa"}, ...}`
+    - Price lookup: `service.stripe_prices[currency][interval || 'regular']`
+    - Example: `stripe_prices['CHF']['monthly']` for monthly subscription in CHF
+    - Webhook already searches in this JSONB field pattern
+  - **Fallback**: If Stripe price doesn't exist for user's currency, fallback to base currency (CHF) and log warning
+- **Interval Selection**:
+  - Interval (monthly/yearly) is selected on catalog/service pages BEFORE checkout (like currency)
+  - Frontend passes `interval` parameter to checkout function if product/service supports subscriptions
+  - Checkout function uses `interval` to determine which Stripe price ID to use
+  - If product/service only supports one interval, `interval` parameter is optional
+- **Authentication**:
+  - Checkout function requires authenticated user (check `window.supabase.auth.getSession()`)
+  - If not authenticated, return error response with `{ error: 'Authentication required', redirect: '/auth?redirect=/checkout' }`
+  - Frontend should redirect to login if checkout function returns authentication error
+- **Error Handling**:
+  - Default currency: CHF if user has no preferred currency
+  - Missing Stripe price: Fallback to CHF and log warning
+  - Not authenticated: Redirect to login with return URL
+  - Missing product/service: Return error with user-friendly message
+  - Invalid payment_method: Return error explaining service doesn't support Stripe checkout
+- **Success/Cancel Pages**:
+  - Success page (`/checkout/success?session_id=cs_test_xxx`):
+    - Retrieve checkout session from Stripe API using `session_id` query parameter
+    - Display purchase summary: Item name, amount, currency, purchase type (one-time/subscription), interval (if subscription)
+    - Show success message and next steps (e.g., "Your purchase is complete", "Access your content in your account")
+  - Cancel page (`/checkout/cancel?session_id=cs_test_xxx`):
+    - Retrieve checkout session from Stripe API using `session_id` query parameter
+    - Display cancellation message with option to retry checkout
+    - Show error details if payment failed (check session status)
+  - Error handling: If session retrieval fails, display generic error message explaining issue
+
+**Implementation Tasks**:
+- [ ] Add `preferred_currency` field to `user_profiles` table (migration)
+- [ ] Update `CurrencySwitcher` component to save to database (like `LanguageSwitcher.saveLanguageToDatabase()`)
+- [ ] Create unified `create-checkout` edge function
+- [ ] Implement products Stripe price lookup logic (use individual currency columns + interval columns pattern, see "Implementation Details" above)
+- [ ] Build checkout flow component (`/checkout/index.html`)
+- [ ] Create success page (`/checkout/success`) with session retrieval and summary display
+- [ ] Create cancel page (`/checkout/cancel`) with error handling and retry option
+- [ ] Wire up catalog "Buy Now" buttons (pass `product_id` and `interval` if applicable)
+- [ ] Wire up service "Subscribe Now" buttons (pass `service_id` and `interval` if applicable)
+- [ ] Add authentication check in checkout flow (redirect to login if not authenticated)
+
+**Testing**:
+- [ ] Test unified checkout function with `product_id` (catalog products)
+- [ ] Test unified checkout function with `service_id` (services)
+- [ ] Test validation: rejects if both `product_id` and `service_id` provided
+- [ ] Test validation: rejects if neither `product_id` nor `service_id` provided
+- [ ] Test validation: rejects items with `payment_method = 'bank_transfer'`
+- [ ] Test authentication check: redirects to login if not authenticated
+- [ ] Test Stripe Checkout session creation (one-time, subscription, freemium)
+- [ ] Test checkout session metadata (item_type, item_id, item_slug)
+- [ ] Test currency handling: uses user's preferred currency from `user_profiles.preferred_currency`
+- [ ] Test currency fallback: uses CHF if preferred currency not set
+- [ ] Test currency fallback: uses CHF if preferred currency price doesn't exist (with warning log)
+- [ ] Test interval handling: monthly vs yearly subscriptions (passed from frontend)
+- [ ] Test success page: retrieves session from Stripe API and displays summary
+- [ ] Test cancel page: retrieves session and displays appropriate message
+- [ ] Test error handling: displays user-friendly errors for missing products/services
+- [ ] Test checkout flow component UI and user experience (separate page, CSS variables)
+- [ ] Test success/cancel redirect pages with `session_id` query parameter
+- [ ] Test catalog access "Buy Now" button integration (passes `product_id` and `interval`)
+- [ ] Test Stripe service button integration (passes `service_id` and `interval`)
+- [ ] Test payment method selection UI (when service supports both)
+- [ ] Test dual payment system CTAs (correct buttons shown based on payment_method)
+- [ ] Test with Stripe test mode (Stripe CLI installed)
+- [ ] Test with test products/services from database
+- [ ] Test `preferred_currency` field saves automatically when currency is changed
+- [ ] Test bank transfer invoice request form - ⚠️ DEFERRED (manual flow initially)
+- [ ] Test QR-bill invoice generation - ⚠️ DEFERRED
+- [ ] Test invoice email delivery - ⚠️ DEFERRED
+
+**Depends on**: None - Foundation item
+
+---
+
+### 17. Purchase Confirmation & Entitlements ⚠️ **PARTIALLY IMPLEMENTED**
+**Status**: **PARTIALLY IMPLEMENTED** - Auto-grant purchases completed, emails and UI missing  
+**Priority**: Critical - needed after checkout, must be completed before #19 (Subdomain Protection)  
+**Note**: Verified 2026-01-09 - See [PHASE-3-VERIFICATION-REPORT.md](./PHASE-3-VERIFICATION-REPORT.md) for detailed findings.
+
+**Completed**:
+- ✅ Auto-grant purchases on successful payment (webhook creates `product_purchases`/`service_purchases` records)
+- ✅ Access control via purchases (`validate-license` checks `product_purchases` and `entitlements` for access)
+- ✅ Subscription vs one-time purchase handling (webhook handles both)
+
+**Action** (Missing):
+- ⚠️ **CRITICAL**: Add family subscription checks to `validate-license` (currently does NOT check `service_purchases` or call `has_family_subscription_access()`)
+- Create purchase confirmation emails (via Resend) - no template exists in `send-notification-email`
+- Create account subscription management component (`account/components/subscription-management/` doesn't exist)
+
+**Testing**:
+- [ ] Test purchase confirmation email delivery (one-time purchases)
+- [ ] Test purchase confirmation email delivery (subscriptions)
+- [x] Test auto-grant entitlements via webhook (verify database updates) - ✅ Implemented (webhook creates product_purchases/service_purchases)
+- [ ] Test entitlement display in account subscription management - ⚠️ MISSING (UI component doesn't exist)
+- [x] Test subscription vs one-time purchase flow differences - ✅ Implemented (webhook handles both)
+
+**Depends on**: #16 (Payment Integration)
+
+---
+
+### 18. Family Plan Stripe Checkout Integration ⚠️ **PARTIALLY IMPLEMENTED**
+**Status**: **PARTIALLY IMPLEMENTED** - Webhook handling completed, checkout UI missing  
 **Priority**: High - Depends on #16 (Stripe Checkout Integration)  
-**Action**:
+**Completed**:
+- ✅ Family plan webhook handling (`handleFamilyPlanPurchase` function exists)
+- ✅ Family plan detection (`isFamilyPlanPurchase` function)
+- ✅ Family access granting (`grantFamilyAccess` function)
+- ✅ Per-member pricing calculation (handled in webhook)
+- ✅ Family group creation/linking in webhook
+
+**Action** (Missing):
 - Add family plan support to Stripe Checkout session creation (in checkout edge function from #16):
   - **CRITICAL**: Only allow family plan option for All-Tools and Supporter products (validate product_id/slug before showing family plan toggle)
   - Include family plan metadata in checkout sessions: `{ is_family_plan: 'true', family_group_id: '...', plan_name: 'family_all_tools' | 'family_supporter' }`
@@ -101,139 +311,192 @@
 - How to handle family member invitations before payment? (pre-create group with pending members?)
 - Should family plan checkout allow adding members during purchase, or require pre-setup?
 
-**Depends on**: #16 (Stripe Checkout Integration), 15.9.1 (Database Schema)
+**Testing**:
+- [ ] Test family plan toggle visibility (only shows for All-Tools/Supporter products)
+- [ ] Test product validation (prevents family plan for non-eligible products)
+- [ ] Test member count selection (2-8 members)
+- [ ] Test per-member pricing calculation (monthly and yearly)
+- [ ] Test total price calculation based on member count
+- [ ] Test family group creation before checkout
+- [ ] Test linking to existing family group
+- [ ] Test plan_name metadata validation
+- [ ] Test checkout UI (toggle, member selector, pricing breakdown)
+- [ ] Test catalog access page integration
+- [ ] Test success page family group confirmation
+
+**Depends on**: #16 (Payment Integration), 15.9.1 (Database Schema)
 
 ---
 
-### 16.5. Purchase Confirmation & Entitlements ⚠️ **MISSING**
-**Status**: **MISSING**  
-**Priority**: Critical - needed after checkout  
-**Action**:
-- Create purchase confirmation emails (via Resend)
-- Auto-grant entitlements on successful payment (via webhook)
-- Update account subscription management to show purchases
-- Handle subscription vs one-time purchase flows
-
-### 16.6. Cloudflare Worker Subdomain Protection ⚠️ **CRITICAL**
-**Status**: Strategy documented (`admin/components/product-management/docs/SUBDOMAIN-PROTECTION-STRATEGY.md`)  
+### 19. Cloudflare Worker Subdomain Protection ⚠️ **MOSTLY IMPLEMENTED**
+**Status**: **MOSTLY IMPLEMENTED** - Worker creation automated via product wizard, some enhancements needed  
 **Priority**: **CRITICAL** - Must protect paid tools immediately after entitlements are granted  
-**Action**: Implement subscription-based access control for subdomain tools using Cloudflare Workers
+**Note**: Worker implementation is automated via `create-cloudflare-worker` edge function (called from product wizard). Workers are created and deployed automatically with access control.
 
-#### 16.6.1. Cloudflare Worker Setup & Configuration ⚠️ **MISSING**
-**Status**: **MISSING**  
+**Completed**:
+- ✅ Automated worker creation and deployment (`create-cloudflare-worker` edge function)
+- ✅ Worker code generation with access control
+- ✅ DNS record creation/updates
+- ✅ Worker route configuration for custom domains
+- ✅ Integration with `validate-license` edge function
+
+#### 19.1. Cloudflare Worker Setup & Configuration ✅ **COMPLETED**
+**Status**: ✅ **COMPLETED** - Automated via product wizard  
 **Priority**: Foundation - needed for subdomain protection  
-**Action**:
-- Set up Cloudflare Worker for subdomain routing
-- Configure worker routes for all tool subdomains (`*.bitminded.ch`)
-- Set up environment variables (Supabase URL, service key, etc.)
-- Configure worker to intercept all requests to tool subdomains
-- Test worker deployment and routing
+**Completed Actions**:
+- ✅ Set up Cloudflare Worker for subdomain routing (automated via `create-cloudflare-worker`)
+- ✅ Configure worker routes for tool subdomains (`*.bitminded.ch`) (automated)
+- ✅ Environment variables configured (Supabase URL, anon key passed to worker)
+- ✅ Worker intercepts all requests to tool subdomains (implemented in generated worker code)
+- ✅ Worker deployment automated (via Cloudflare API)
+
+**Note**: Workers are created automatically when using the product wizard. Manual deployment also possible via Wrangler CLI.
 
 **Questions to Answer Before Implementation**:
 - Which Cloudflare plan is needed? (Workers free tier vs paid?)
 - How to handle worker deployment? (Wrangler CLI, GitHub Actions?)
 - Should worker cache entitlement checks? (performance vs real-time accuracy)
 
-#### 16.6.2. Authentication Token Handling ⚠️ **MISSING**
-**Status**: **MISSING**  
-**Priority**: High - needed for user identification  
-**Action**:
-- Implement token extraction from cookies (Supabase auth cookies)
-- Implement token extraction from Authorization header
-- Handle cross-domain cookie sharing (`.bitminded.ch` domain)
-- Verify Supabase JWT tokens in worker
-- Handle token expiration and refresh
-- Redirect to login if no valid token found
+**Testing**:
+- [x] Test worker deployment process - ✅ Automated via product wizard
+- [x] Test worker routing configuration (all subdomains intercepted) - ✅ Automated (DNS + routes configured)
+- [x] Test environment variables setup - ✅ Supabase URL and anon key passed to worker
+- [x] Test worker responds to subdomain requests - ✅ Workers created and deployed automatically
+
+#### 19.2. Authentication & Cross-Domain Session Management ⚠️ **MOSTLY IMPLEMENTED**
+**Status**: **MOSTLY IMPLEMENTED** - Token handling done, cross-domain cookie config may need verification  
+**Priority**: High - needed for user identification and seamless experience  
+**Completed**:
+- ✅ Token extraction from cookies (Supabase auth cookies) - implemented in worker code
+- ✅ Token extraction from Authorization header - implemented in worker code
+- ✅ JWT token verification (via `validate-license` edge function call) - implemented
+- ✅ Redirect to login if no valid token found - implemented in worker code
+- ✅ Token expiration handling (401/403 redirects to auth) - implemented
+
+**Action** (May need verification/enhancement):
+- Verify cross-domain cookie configuration (`.bitminded.ch` domain)
+- Verify Supabase auth cookies are accessible from all subdomains
+- Verify secure, SameSite settings
+- Test session synchronization:
+  - Ensure login on main site works on subdomains
+  - Ensure logout on main site works on subdomains
+  - Handle session refresh across domains
+- **Testing**:
+  - Test cross-domain authentication flow:
+    - Login on `bitminded.ch` → access `converter.bitminded.ch`
+    - Logout on `bitminded.ch` → verify logout on subdomains
 
 **Questions to Answer Before Implementation**:
 - Should we use cookies or Authorization headers? (or both?)
 - How to handle token refresh in worker? (redirect to main site?)
 - Cookie domain configuration? (`.bitminded.ch` for cross-subdomain sharing)
+- Cookie SameSite policy? (`Lax`, `None`, `Strict`?)
+- How to handle session refresh across domains?
+- Should we use localStorage or cookies for cross-domain auth?
 
-#### 16.6.3. Entitlement Checking Logic ⚠️ **MISSING**
-**Status**: **MISSING**  
+**Testing**:
+- [x] Test token extraction from cookies - ✅ Implemented (getCookie function in worker)
+- [x] Test token extraction from Authorization header - ✅ Implemented (getToken function checks both)
+- [x] Test JWT token verification - ✅ Implemented (via validate-license call)
+- [x] Test token expiration handling - ✅ Implemented (401/403 redirects to auth)
+- [x] Test redirect to login when no valid token - ✅ Implemented
+- [ ] Test cross-domain cookie sharing (`.bitminded.ch`) - ⚠️ NEEDS VERIFICATION
+- [ ] Test login on main site works on subdomains - ⚠️ NEEDS TESTING
+- [ ] Test logout on main site works on subdomains - ⚠️ NEEDS TESTING
+- [ ] Test session refresh across domains - ⚠️ NEEDS TESTING
+- [ ] Test cookie SameSite and secure settings - ⚠️ NEEDS VERIFICATION
+
+#### 19.3. Entitlement Checking Logic ⚠️ **MOSTLY IMPLEMENTED**
+**Status**: **MOSTLY IMPLEMENTED** - Core logic done, **CRITICAL GAP**: family subscription check missing  
 **Priority**: High - core access control  
-**Action**:
-- Create Supabase RPC function `has_app_access(user_uuid, app_name)` if not exists
-- Implement entitlement check in Cloudflare Worker:
-  - Extract app ID from subdomain (e.g., `converter` from `converter.bitminded.ch`)
-  - Query Supabase to check if user has active entitlement
-  - Check subscription status (active, expired, cancelled)
-  - Check expiration dates
-  - Handle admin-granted access
-  - Handle bundle subscriptions (access to multiple tools)
-  - **Check family subscription access**: Use `has_family_subscription_access()` function to check if user has access via family plan (see 15.9.1)
-  - Handle both individual and family subscriptions
+**Note**: Verified 2026-01-09 - `validate-license` does NOT check `service_purchases` or call `has_family_subscription_access()`. This is a critical gap that must be fixed.
+
+**Completed**:
+- ✅ Supabase RPC function `has_family_subscription_access()` exists (in `20251125_create_family_plans_schema.sql`)
+- ✅ Entitlement check in Cloudflare Worker (calls `validate-license` edge function)
+- ✅ App ID extraction from subdomain (product slug passed to validate-license)
+- ✅ Subscription status checking (active, expired, cancelled) - handled by `validate-license`
+- ✅ Expiration date checking - handled by `validate-license`
+- ✅ Admin-granted access handling - `validate-license` checks `entitlements` table
+- ✅ Error handling (network issues, Supabase downtime) - basic error handling in worker
+
+**Action** (Missing/Needs Enhancement):
+- ❌ **CRITICAL**: Add family subscription access check to `validate-license`:
+  - Currently only checks `product_purchases` and `entitlements` tables
+  - **MISSING**: Check `service_purchases` table (family members get `service_purchases` records)
+  - **MISSING**: Call `has_family_subscription_access(user_uuid)` function
+  - **Impact**: Family plan members may not have access verified correctly
 - Cache entitlement checks (optional, for performance)
-- Handle errors gracefully (network issues, Supabase downtime)
 
 **Questions to Answer Before Implementation**:
 - Should we cache entitlement checks? (how long? 5 min, 1 hour?)
 - How to handle Supabase downtime? (deny access, or allow with warning?)
 - Should we check entitlements on every request or cache per session?
 
-#### 16.6.4. Access Control Flow Implementation ⚠️ **MISSING**
-**Status**: **MISSING**  
+**Testing**:
+- [x] Test RPC function `has_family_subscription_access()` creation/verification - ✅ Function exists in migration
+- [x] Test app ID extraction from subdomain - ✅ Implemented (product slug passed to validate-license)
+- [x] Test entitlement check for individual subscriptions - ✅ Implemented (validate-license checks product_purchases)
+- [ ] Test entitlement check for family subscriptions - ❌ **NOT IMPLEMENTED** (validate-license does NOT check service_purchases or call has_family_subscription_access)
+- [x] Test subscription status validation (active, expired, cancelled) - ✅ Implemented
+- [x] Test expiration date checking - ✅ Implemented
+- [x] Test admin-granted access handling - ✅ Implemented (validate-license checks entitlements table)
+- [ ] Test bundle subscription access - ⚠️ NEEDS VERIFICATION
+- [ ] Test entitlement caching (if implemented) - Not implemented
+- [x] Test error handling (Supabase downtime, network errors) - ✅ Basic error handling exists
+
+#### 19.4. Access Control Flow Implementation ✅ **COMPLETED**
+**Status**: ✅ **COMPLETED** - Implemented in generated worker code  
 **Priority**: High - user experience  
-**Action**:
-- Implement redirect logic for unauthenticated users:
-  - Redirect to `bitminded.ch/auth?redirect={subdomain}`
-  - Preserve original URL for post-login redirect
-- Implement redirect logic for authenticated users without subscription:
-  - Redirect to `bitminded.ch/subscribe?tool={app_id}`
-  - Show friendly message about subscription required
-- Allow access for users with valid entitlements:
-  - Proxy request to actual tool (GitHub Pages or hosting)
-  - Pass through all headers and request data
-  - Handle CORS if needed
-- Handle edge cases:
-  - Expired subscriptions (grace period?)
-  - Admin-granted access
-  - Trial access (if implemented)
+**Completed**:
+- ✅ Redirect logic for unauthenticated users (redirects to `/auth?redirect={path}`)
+- ✅ Preserve original URL for post-login redirect (URL encoding in redirect)
+- ✅ Redirect logic for authenticated users without subscription (redirects to `SUBSCRIBE_URL`)
+- ✅ Allow access for users with valid entitlements (proxies to GitHub Pages)
+- ✅ Request proxying (passes through headers and request data)
+- ✅ Static asset handling (bypasses auth for static files)
+- ✅ Auth page bypass (allows `/auth` routes without auth check)
+
+**Action** (May need enhancement):
+- Verify edge cases handling:
+  - Expired subscriptions (grace period?) - check if `validate-license` handles grace periods
+  - Admin-granted access - ✅ handled (validate-license checks entitlements table)
+  - Trial access - ✅ handled (validate-license checks trial purchases)
 
 **Questions to Answer Before Implementation**:
 - Should expired subscriptions have a grace period? (7 days, 30 days?)
 - How to handle trial access? (separate check, or same entitlement system?)
 - Should we show different messages for different subscription states?
 
-#### 16.6.5. Cross-Domain Session Management ⚠️ **MISSING**
-**Status**: **MISSING**  
-**Priority**: High - seamless user experience  
-**Action**:
-- Configure Supabase auth cookies for cross-domain sharing:
-  - Set cookie domain to `.bitminded.ch`
-  - Ensure cookies are accessible from all subdomains
-  - Configure secure, SameSite settings
-- Implement session synchronization:
-  - Ensure login on main site works on subdomains
-  - Ensure logout on main site works on subdomains
-  - Handle session refresh across domains
-- Test cross-domain authentication flow:
-  - Login on `bitminded.ch` → access `converter.bitminded.ch`
-  - Logout on `bitminded.ch` → verify logout on subdomains
+**Testing**:
+- [x] Test redirect for unauthenticated users (preserves original URL) - ✅ Implemented
+- [x] Test redirect for authenticated users without subscription - ✅ Implemented (redirects to SUBSCRIBE_URL)
+- [x] Test access granted for users with valid entitlements - ✅ Implemented (proxies to GitHub Pages)
+- [x] Test request proxying (headers and data passed through) - ✅ Implemented
+- [x] Test CORS handling - ✅ Static assets bypass auth
+- [ ] Test expired subscription handling (with/without grace period) - ⚠️ NEEDS VERIFICATION (check validate-license grace period handling)
+- [x] Test admin-granted access flow - ✅ Implemented (validate-license checks entitlements)
+- [x] Test trial access (if implemented) - ✅ Implemented (validate-license checks trial purchases)
+- [ ] Test different subscription state messages - ⚠️ NEEDS ENHANCEMENT (currently generic redirect)
 
-**Questions to Answer Before Implementation**:
-- Cookie SameSite policy? (`Lax`, `None`, `Strict`?)
-- How to handle session refresh across domains?
-- Should we use localStorage or cookies for cross-domain auth?
-
-#### 16.6.6. Worker Error Handling & Logging ⚠️ **MISSING**
-**Status**: **MISSING**  
+#### 19.5. Worker Error Handling & Logging ⚠️ **PARTIALLY IMPLEMENTED**
+**Status**: **PARTIALLY IMPLEMENTED** - Basic error handling exists, enhanced logging may be needed  
 **Priority**: Medium - reliability  
-**Action**:
-- Implement comprehensive error handling:
-  - Network errors (Supabase unreachable)
-  - Authentication errors (invalid token)
-  - Entitlement check errors
-  - Worker runtime errors
-- Set up logging and monitoring:
-  - Log all access attempts (success/failure)
-  - Log entitlement check results
-  - Log errors for debugging
-  - Set up alerts for high error rates
-- Implement fallback behavior:
-  - What to do if Supabase is down? (deny access, or allow with warning?)
-  - What to do if worker fails? (fallback to main site?)
+**Completed**:
+- ✅ Basic error handling (try/catch blocks in worker code)
+- ✅ Network error handling (fetch errors caught and return 502)
+- ✅ Authentication error handling (401/403 redirects to auth)
+- ✅ Entitlement check error handling (502 on validation failure)
+- ✅ Debug mode (append `?debug=1` for diagnostics)
+
+**Action** (May need enhancement):
+- Enhanced logging and monitoring:
+  - Log all access attempts (success/failure) - currently basic console logs
+  - Log entitlement check results - currently basic
+  - Set up alerts for high error rates - not implemented
+- Enhanced fallback behavior:
+  - Verify behavior when Supabase is down (currently returns 502)
+  - Verify behavior when worker fails (currently returns error)
 
 **Questions to Answer Before Implementation**:
 - Which logging service? (Cloudflare Workers Logs, external service?)
@@ -248,9 +511,24 @@
 - Performance impact of entitlement checks on every request
 - Cost of Cloudflare Workers (if high traffic)
 
-### 16.7. Receipt System (Stripe Purchases) ⚠️ **MISSING**
-**Status**: **MISSING**  
+**Testing**:
+- [x] Test error handling for network errors - ✅ Basic error handling exists (returns 502)
+- [x] Test error handling for authentication errors - ✅ Handled (401/403 redirects)
+- [x] Test error handling for entitlement check errors - ✅ Handled (502 on failure)
+- [x] Test error handling for worker runtime errors - ✅ Try/catch blocks implemented
+- [ ] Test logging of access attempts - ⚠️ Basic console logs, enhanced logging may be needed
+- [ ] Test logging of entitlement check results - ⚠️ Basic logging, may need enhancement
+- [x] Test error logging and debugging - ✅ Debug mode available (`?debug=1`)
+- [ ] Test alert setup for high error rates - ⚠️ NOT IMPLEMENTED
+- [ ] Test fallback behavior when Supabase is down - ⚠️ NEEDS VERIFICATION (currently returns 502)
+- [ ] Test fallback behavior when worker fails - ⚠️ NEEDS VERIFICATION
+
+---
+
+### 20. Receipt System (Stripe Purchases) ⚠️ **MISSING**
+**Status**: **MISSING** - Verified 2026-01-09 - No receipt functionality found  
 **Priority**: Critical - needed for all Stripe purchases  
+**Note**: Verified 2026-01-09 - See [PHASE-3-VERIFICATION-REPORT.md](./PHASE-3-VERIFICATION-REPORT.md) for detailed findings. No receipt generation, storage, or UI found.  
 **Action**:
 - Auto-generate receipts after Stripe payment (via webhook)
 - Create receipt PDF template (simple, branded)
@@ -258,8 +536,6 @@
 - Link receipts to `product_purchases` table
 - Email receipts via Resend
 - Display receipts in user account
-
-**Note**: Cloudflare Worker Subdomain Protection (#16.6) must be implemented immediately after entitlements are granted to protect paid tools.
 
 **Questions to Answer Before Implementation**:
 - What information should receipts include? (date, amount, product, payment method, transaction ID)
@@ -272,16 +548,39 @@
 - Storage costs for receipt PDFs (Supabase storage)
 - Receipt template versioning if design changes
 
+**Testing**:
+- [ ] Test receipt generation via webhook (one-time purchases)
+- [ ] Test receipt generation via webhook (subscriptions)
+- [ ] Test receipt PDF template rendering
+- [ ] Test receipt storage in Supabase storage
+- [ ] Test receipt linking to `product_purchases` table
+- [ ] Test receipt email delivery via Resend
+- [ ] Test receipt display in user account
+- [ ] Test receipt download functionality (if applicable)
+- [ ] Test multi-language receipts (if applicable)
+
+**Depends on**: #16 (Payment Integration), #17 (Purchase Confirmation & Entitlements)
+
 ---
 
 ## 👤 **Phase 4: Account Subscription Management**
 
-### 17. Account Subscription Management Component ⚠️ **MISSING**
+### 21. Account Subscription Management Component ⚠️ **MISSING**
 **Status**: **Directory doesn't exist** (`account/components/subscription-management/`)  
 **Priority**: User-facing subscription management  
 **Action**: Create component to view owned products, renewal status, payment method placeholders
 
-### 17.2. User Subscription Cancellation & Management ⚠️ **MISSING**
+**Testing**:
+- [ ] Test component creation and initialization
+- [ ] Test display of owned products
+- [ ] Test renewal status display
+- [ ] Test payment method placeholder display
+
+**Depends on**: #17 (Purchase Confirmation & Entitlements)
+
+---
+
+### 21.2. User Subscription Cancellation & Management ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - users need to manage their subscriptions  
 **Action**:
@@ -304,7 +603,22 @@
 - Prorated refunds for mid-cycle cancellations?
 - How to handle family subscription cancellations? (immediate vs end of period for all members?)
 
-### 17.3. Payment Method Management (User Account) ⚠️ **MISSING**
+**Testing**:
+- [ ] Test subscription cancellation (immediate)
+- [ ] Test subscription cancellation (at period end)
+- [ ] Test subscription upgrade/downgrade
+- [ ] Test cancellation confirmation display
+- [ ] Test subscription reactivation (within grace period)
+- [ ] Test cancellation reason tracking
+- [ ] Test family subscription cancellation (affects all members)
+- [ ] Test family member count changes (upgrade/downgrade)
+- [ ] Test family subscription reactivation
+
+**Depends on**: #21 (Account Subscription Management Component)
+
+---
+
+### 21.3. Payment Method Management (User Account) ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - users need to manage payment methods  
 **Action**:
@@ -326,7 +640,22 @@
 - Should we support multiple payment methods per user?
 - Should family members see which payment method is used for family subscription?
 
-### 17.4. Subscription Renewal Reminders ⚠️ **MISSING**
+**Testing**:
+- [ ] Test adding payment method (Stripe integration)
+- [ ] Test updating payment method
+- [ ] Test setting default payment method
+- [ ] Test removing payment method
+- [ ] Test viewing payment method details (masked)
+- [ ] Test handling expired payment methods
+- [ ] Test family admin payment method management
+- [ ] Test family payment method display
+- [ ] Test family payment method update notifications
+
+**Depends on**: #21 (Account Subscription Management Component)
+
+---
+
+### 21.4. Subscription Renewal Reminders ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: Medium - reduce failed renewals  
 **Action**:
@@ -347,14 +676,43 @@
 - Should reminders include payment method update link?
 - Should all family members receive renewal reminders or just admin?
 
-### 17.1. User Account: Receipts View ⚠️ **MISSING**
+**Testing**:
+- [ ] Test email reminders before renewal (7 days, 3 days, 1 day)
+- [ ] Test payment method expiration warnings
+- [ ] Test renewal failure notifications
+- [ ] Test grace period reminders
+- [ ] Test renewal success confirmations
+- [ ] Test family renewal reminders (admin and members)
+- [ ] Test family renewal failure notifications
+
+**Depends on**: #21 (Account Subscription Management Component)
+
+---
+
+### 21.1. User Account: Receipts View ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - user needs access to receipts  
 **Action**:
 - Create `account/components/receipts/` component
 - List all receipts (Stripe purchases)
+- Download receipt PDFs
+- Filter by date, product, amount
+- Show receipt details (date, amount, product, payment method, transaction ID)
 
-### 17.5. Upgrade Path: One-Time Purchase to Subscription ⚠️ **MISSING**
+**Testing**:
+- [ ] Test component creation
+- [ ] Test listing all receipts
+- [ ] Test receipt download functionality
+- [ ] Test filtering by date
+- [ ] Test filtering by product
+- [ ] Test filtering by amount
+- [ ] Test receipt details display
+
+**Depends on**: #20 (Receipt System), #21 (Account Subscription Management Component)
+
+---
+
+### 21.5. Upgrade Path: One-Time Purchase to Subscription ⚠️ **MISSING**
 **Status**: **MISSING**  
 **Priority**: High - Users need ability to upgrade from single product purchase to full subscription  
 **Action**:
@@ -404,14 +762,28 @@
 - Conversion restrictions: Can users convert multiple one-time purchases? Can they convert if they already have a subscription?
 - Edge cases: What if one-time purchase was on sale? What if subscription price changed?
 
+**Testing**:
+- [ ] Test edge function `convert-purchase-to-subscription`
+- [ ] Test one-time purchase verification
+- [ ] Test credit/refund calculation
+- [ ] Test Stripe subscription creation
+- [ ] Test database updates (converted status, linked subscriptions)
+- [ ] Test webhook handler updates for conversions
+- [ ] Test database schema updates
+- [ ] Test UI upgrade option display
+- [ ] Test upgrade CTA and pricing difference display
+- [ ] Test confirmation dialog
+- [ ] Test success message
+- [ ] Test converted status display
+
 **Dependencies**:
-- Requires #16 (Stripe Checkout Integration) for subscription creation
-- Requires 17.2 (User Subscription Cancellation & Management) for subscription management UI
+- Requires #16 (Payment Integration) for subscription creation
+- Requires #21.2 (User Subscription Cancellation & Management) for subscription management UI
 - Requires database schema updates (can be done in parallel)
 
 **Integration Points**:
-- Account Subscription Management UI (17) - Show upgrade option
-- Receipts View (17.1) - Show conversion history
+- Account Subscription Management UI (#21) - Show upgrade option
+- Receipts View (#21.1) - Show conversion history
 - Webhook Handler (#14) - Handle conversion subscription events
 
 ---
@@ -1814,7 +2186,7 @@
 
 **Related Items**:
 - #54 (Stories & Review System) - Community includes reviews
-- #17 (Account Subscription Management) - Supporter Tier integration
+- #21 (Account Subscription Management) - Supporter Tier integration
 - #52 (Notification Center Enhancements) - Community notifications
 - Phase 8 Analytics Dashboard - Community metrics integration
 
@@ -2110,25 +2482,25 @@
 ## 📋 **Summary by Priority**
 
 ### 🔴 **CRITICAL (Do First)**
-1. Stripe Checkout Integration (#16) - **CRITICAL - Needed for purchases**
-5. Purchase Confirmation & Entitlements (#16.5) - **CRITICAL - Needed after checkout**
-6. Cloudflare Worker Subdomain Protection (#16.6) - **CRITICAL - Must protect paid tools immediately**
-7. Receipt System (#16.7) - **CRITICAL - Needed for all Stripe purchases**
+1. Payment Integration (#16) - **CRITICAL - Needed for purchases** (Stripe + Bank Transfer)
+2. Purchase Confirmation & Entitlements (#17) - **CRITICAL - Needed after checkout**
+3. Cloudflare Worker Subdomain Protection (#19) - **CRITICAL - Must protect paid tools immediately**
+4. Receipt System (#20) - **CRITICAL - Needed for all Stripe purchases**
 
 ### 🟡 **HIGH PRIORITY (Before Launch)**
-1. Family Plan Stripe Checkout Integration (#15.9.2) - Add family plan support to checkout (depends on #16)
-3. Account subscription management (#17) - **HIGH PRIORITY - User-facing subscription management**
-4. User Subscription Cancellation & Management (#17.2) - **HIGH PRIORITY - Users need to manage subscriptions**
-5. Payment Method Management (#17.3) - **HIGH PRIORITY - Users need to manage payment methods**
-6. User Account Receipts View (#17.1) - **HIGH PRIORITY - User needs access to receipts**
-7. Upgrade Path: One-Time Purchase to Subscription (#17.5) - **HIGH PRIORITY - Users need ability to upgrade from single product to full subscription**
+1. Family Plan Stripe Checkout Integration (#18) - Add family plan support to checkout (depends on #16)
+3. Account subscription management (#21) - **HIGH PRIORITY - User-facing subscription management**
+4. User Subscription Cancellation & Management (#21.2) - **HIGH PRIORITY - Users need to manage subscriptions**
+5. Payment Method Management (#21.3) - **HIGH PRIORITY - Users need to manage payment methods**
+6. User Account Receipts View (#21.1) - **HIGH PRIORITY - User needs access to receipts**
+7. Upgrade Path: One-Time Purchase to Subscription (#21.5) - **HIGH PRIORITY - Users need ability to upgrade from single product to full subscription**
 7. Service Workflows (#18-28) - **HIGH PRIORITY - Tech Support + Commissioning + Service Delivery Helper**
 8. Contract System (#29-33) - **HIGH PRIORITY - Needed for commissioning agreements**
 9. Invoice System (#34-42) - **HIGH PRIORITY - Needed for commissioning and large purchases**
 10. Refund Processing System (#43) - **HIGH PRIORITY - Needed for customer service**
 
 ### 🟢 **MEDIUM PRIORITY (Can Do in Parallel)**
-1. Subscription renewal reminders (#17.4)
+1. Subscription renewal reminders (#21.4)
 2. User onboarding flow (#44)
 3. Email template management UI (#45)
 4. FAQ system enhancement (#46)
@@ -2165,20 +2537,20 @@
   - ✅ Production ready
 
 ### Week 3: Purchase & Checkout Flow
-- [ ] Stripe Checkout Integration (#16) - Core checkout flow
-- [ ] Family Plan Stripe Checkout Integration (#15.9.2) - Add family plan support to checkout (depends on #16) - See item 15.9.2
-- [ ] Purchase Confirmation & Entitlements (#16.5)
-- [ ] Cloudflare Worker Subdomain Protection (#16.6) - **CRITICAL - Must protect paid tools immediately** (includes family subscription checks)
-- [ ] Receipt System implementation (#16.7)
+- [ ] Payment Integration (#16) - Core checkout flow (Stripe + Bank Transfer)
+- [ ] Purchase Confirmation & Entitlements (#17) - **CRITICAL - Must be done before #19**
+- [ ] Family Plan Stripe Checkout Integration (#18) - Add family plan support to checkout (depends on #16)
+- [ ] Cloudflare Worker Subdomain Protection (#19) - **CRITICAL - Must protect paid tools immediately** (includes family subscription checks)
+- [ ] Receipt System (#20) - Receipt generation and display
 - [ ] Wire up to catalog access buttons
 
 ### Week 4: Account Subscription Management
-- [ ] Create account subscription management component (#17)
-- [ ] User subscription cancellation & management (#17.2) - Includes family plan cancellation
-- [ ] Payment method management (#17.3) - Includes family plan payment methods
-- [ ] User Account: Receipts View (#17.1)
-- [ ] Upgrade Path: One-Time Purchase to Subscription (#17.5) - Convert single product purchases to subscriptions
-- [ ] Subscription renewal reminders (#17.4) - Includes family plan reminders
+- [ ] Create account subscription management component (#21)
+- [ ] User subscription cancellation & management (#21.2) - Includes family plan cancellation
+- [ ] Payment method management (#21.3) - Includes family plan payment methods
+- [ ] User Account: Receipts View (#21.1)
+- [ ] Upgrade Path: One-Time Purchase to Subscription (#21.5) - Convert single product purchases to subscriptions
+- [ ] Subscription renewal reminders (#21.4) - Includes family plan reminders
 
 ### Week 5-7: Service Workflows (Tech Support + Commissioning)
 - [ ] Tech Support Booking Database Schema (#18)

@@ -339,6 +339,14 @@
             }
         }
 
+        // Add purchase button if product is available for purchase
+        if (!product.status.purchaseDisabled && product.status.availability === 'available') {
+            const purchaseButton = buildPurchaseButton(product);
+            if (purchaseButton) {
+                body.appendChild(purchaseButton);
+            }
+        }
+
         card.appendChild(header);
         card.appendChild(body);
         const featuredPanel = buildDetailPanel(product);
@@ -403,6 +411,14 @@
             const saleInfo = buildSaleInfo(product.sale);
             if (saleInfo) {
                 body.appendChild(saleInfo);
+            }
+        }
+        
+        // Add purchase button if product is available for purchase
+        if (!product.status.purchaseDisabled && product.status.availability === 'available') {
+            const purchaseButton = buildPurchaseButton(product);
+            if (purchaseButton) {
+                body.appendChild(purchaseButton);
             }
         }
         
@@ -685,6 +701,38 @@
         });
 
         return list;
+    }
+
+    function buildPurchaseButton(product) {
+        if (!product || !product.id || product.status.purchaseDisabled) {
+            return null;
+        }
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'catalog-card__action';
+
+        const button = document.createElement('a');
+        button.className = 'catalog-card__purchase-button';
+        button.href = `/checkout?product_id=${encodeURIComponent(product.id)}`;
+        
+        // Add interval parameter for subscriptions
+        if (product.pricing && product.pricing.pricingType === 'subscription' && product.pricing.subscriptionInterval) {
+            button.href += `&interval=${product.pricing.subscriptionInterval}`;
+        }
+
+        button.classList.add('translatable-content');
+        button.dataset.i18n = 'catalog-cta-buy-now';
+        button.textContent = translateText('catalog-cta-buy-now', 'Buy Now');
+        button.setAttribute('aria-label', translateText('catalog-cta-buy-now-aria', `Purchase ${product.name}`));
+
+        button.addEventListener('click', (event) => {
+            // Prevent default navigation for now, let the href handle it
+            // Could add analytics or loading state here if needed
+            window.logger?.log('🛒 Purchase button clicked:', product.name, product.id);
+        });
+
+        buttonContainer.appendChild(button);
+        return buttonContainer;
     }
 
     function buildMediaPreview(product) {
