@@ -332,6 +332,7 @@ async function handleUpdate({
   const generateBypassToken = Boolean(body.generate_bypass_token)
 
   const updatePayload: Partial<MaintenanceSettingsRecord> = {
+    id: 1, // Include id for upsert to work
     is_enabled: requestedEnabled,
     bypass_ips: requestedIps,
     updated_by: userId,
@@ -341,6 +342,7 @@ async function handleUpdate({
   let bypassLink: string | null = null
 
   if (generateBypassToken) {
+    // Generate new token and expiry
     const secret = currentSettings.bypass_cookie_secret ?? generateSecret()
     const issuedAt = Math.floor(Date.now() / 1000)
     const expiresAt = issuedAt + BYPASS_TTL_SECONDS
@@ -352,19 +354,34 @@ async function handleUpdate({
     updatePayload.last_generated_token = signedToken
     updatePayload.last_generated_token_expires_at = new Date(expiresAt * 1000).toISOString()
     bypassLink = buildBypassLink(signedToken)
-  } else if (currentSettings.last_generated_token) {
-    bypassLink = buildBypassLink(currentSettings.last_generated_token)
+  } else if (requestedEnabled) {
+    // Maintenance mode is enabled: preserve existing token fields if they exist
+    if (currentSettings.bypass_cookie_secret) {
+      updatePayload.bypass_cookie_secret = currentSettings.bypass_cookie_secret
+    }
+    if (currentSettings.last_generated_token) {
+      updatePayload.last_generated_token = currentSettings.last_generated_token
+      updatePayload.last_generated_token_expires_at = currentSettings.last_generated_token_expires_at
+      bypassLink = buildBypassLink(currentSettings.last_generated_token)
+    }
+  } else {
+    // Maintenance mode is disabled: clear token fields for clean state
+    updatePayload.bypass_cookie_secret = null
+    updatePayload.last_generated_token = null
+    updatePayload.last_generated_token_expires_at = null
   }
 
   const { data: updatedSettings, error: updateError } = await supabaseAdmin
     .from('maintenance_settings')
-    .update(updatePayload as Record<string, unknown>)
-    .eq('id', 1)
+    .upsert(updatePayload as Record<string, unknown>, { 
+      onConflict: 'id',
+      ignoreDuplicates: false 
+    })
     .select()
     .single()
 
   if (updateError) {
-    console.error('❌ maintenance-settings: update failed', updateError)
+    console.error('❌ maintenance-settings: upsert failed', updateError)
 
     if (generateBypassToken && updateError.code === '42703') {
       return jsonResponse(
