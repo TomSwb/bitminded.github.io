@@ -276,8 +276,14 @@
                 raw: product.status,
                 ...statusMeta,
                 isVisible: statusMeta.visibility === 'visible',
-                purchaseDisabled: true, // Purchase button intentionally inactive for now
-                // Provide a hint if we ever enable purchase in the future
+                // Enable purchase if product is available, has Stripe configured, and supports checkout
+                purchaseDisabled: !(
+                    statusMeta.isPurchasable && 
+                    product.is_available_for_purchase === true &&
+                    (product.stripe_product_id || product.stripe_price_id || 
+                     product.stripe_price_monthly_id || product.stripe_price_yearly_id ||
+                     product.stripe_price_lifetime_id)
+                ),
                 canTogglePurchase: statusMeta.isPurchasable && product.is_available_for_purchase === true
             },
             category,

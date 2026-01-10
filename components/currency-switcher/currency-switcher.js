@@ -42,8 +42,8 @@ class CurrencySwitcher {
                 return;
             }
 
-            // Load saved currency preference
-            this.loadCurrencyPreference();
+            // Load saved currency preference (async, may need to wait)
+            await this.loadCurrencyPreference();
 
             // Setup component
             this.setupComponent();
@@ -67,16 +67,47 @@ class CurrencySwitcher {
     }
 
     /**
-     * Load currency preference from localStorage
+     * Load currency preference from database (if authenticated) or localStorage
      */
-    loadCurrencyPreference() {
+    async loadCurrencyPreference() {
         try {
+            // First try to load from database if user is authenticated
+            if (typeof window.supabase !== 'undefined') {
+                const { data: { user }, error: userError } = await window.supabase.auth.getUser();
+                
+                if (!userError && user) {
+                    // Try to load from database
+                    const { data: profile, error: profileError } = await window.supabase
+                        .from('user_profiles')
+                        .select('preferred_currency')
+                        .eq('id', user.id)
+                        .maybeSingle();
+                    
+                    if (!profileError && profile?.preferred_currency && this.currencies[profile.preferred_currency]) {
+                        this.currentCurrency = profile.preferred_currency;
+                        // Also save to localStorage for offline access
+                        this.saveCurrencyPreference();
+                        return;
+                    }
+                }
+            }
+            
+            // Fallback to localStorage
             const saved = localStorage.getItem('selectedCurrency');
             if (saved && this.currencies[saved]) {
                 this.currentCurrency = saved;
             }
         } catch (error) {
             window.logger?.warn('⚠️ Could not load currency preference:', error);
+            // Fallback to localStorage on error
+            try {
+                const saved = localStorage.getItem('selectedCurrency');
+                if (saved && this.currencies[saved]) {
+                    this.currentCurrency = saved;
+                }
+            } catch (localError) {
+                window.logger?.warn('⚠️ Could not load currency from localStorage:', localError);
+            }
         }
     }
 
@@ -88,6 +119,44 @@ class CurrencySwitcher {
             localStorage.setItem('selectedCurrency', this.currentCurrency);
         } catch (error) {
             window.logger?.warn('⚠️ Could not save currency preference:', error);
+        }
+    }
+
+    /**
+     * Save currency preference to database for authenticated users
+     * @param {string} currency - Currency to save
+     */
+    async saveCurrencyToDatabase(currency) {
+        try {
+            // Check if Supabase is available
+            if (typeof window.supabase === 'undefined') {
+                window.logger?.log('Supabase not available, skipping database save');
+                return;
+            }
+
+            // Check if user is authenticated
+            const { data: { user }, error: userError } = await window.supabase.auth.getUser();
+            
+            if (userError || !user) {
+                // Currency saved to localStorage silently
+                return;
+            }
+
+            // Update currency in database
+            const { error } = await window.supabase
+                .from('user_profiles')
+                .update({ preferred_currency: currency })
+                .eq('id', user.id);
+
+            if (error) {
+                window.logger?.error('Failed to save currency to database:', error);
+            } else {
+                window.logger?.log(`✅ Currency saved to database: ${currency}`);
+            }
+
+        } catch (error) {
+            window.logger?.error('Error saving currency to database:', error);
+            // Don't fail the currency change if database save fails
         }
     }
 
@@ -194,8 +263,14 @@ class CurrencySwitcher {
         const previousCurrency = this.currentCurrency;
         this.currentCurrency = currency;
 
-        // Save preference
+        // Save preference to localStorage (immediate)
         this.saveCurrencyPreference();
+
+        // Save to database if authenticated (async, don't block)
+        this.saveCurrencyToDatabase(currency).catch(error => {
+            window.logger?.error('Failed to save currency to database:', error);
+            // Don't block currency change if database save fails
+        });
 
         // Update display
         this.updateDisplay();

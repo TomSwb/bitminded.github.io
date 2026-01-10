@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - BitMinded</title>
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="../css/critical.css">
+    <script src="../js/critical.js"></script>
+    
+    <script src="../components/shared/component-loader.js"></script>
+
+    <link rel="stylesheet" href="checkout.css">
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+
+<body>
+    <header>
+        <!-- Navigation Menu Component will be loaded here -->
+    </header>
+
+    <main class="checkout-page">
+        <div class="checkout-container">
+            <!-- Loading State -->
+            <div id="checkout-loading" class="checkout-loading">
+                <div class="checkout-loading__spinner" aria-hidden="true"></div>
+                <span class="checkout-loading__label translatable-content" data-i18n="checkout-loading-label">
+                    Preparing your checkout...
+                </span>
+            </div>
+
+            <!-- Error State -->
+            <div id="checkout-error" class="checkout-error hidden" role="alert">
+                <h2 class="checkout-error__title translatable-content" data-i18n="checkout-error-title">
+                    Unable to proceed with checkout
+                </h2>
+                <p class="checkout-error__message" id="checkout-error-message"></p>
+                <div class="checkout-error__actions">
+                    <button type="button" class="checkout-button checkout-button--primary" id="checkout-retry-button" data-i18n="checkout-error-retry">
+                        Try again
+                    </button>
+                    <a href="/" class="checkout-button checkout-button--secondary" data-i18n="checkout-error-home">
+                        Return home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <!-- Theme Switcher Component will be loaded here -->
+    </footer>
+
+    <!-- Supabase CDN (must load before supabase-config.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Environment configuration (must load before supabase-config.js) -->
+    <script src="../js/env-config.js"></script>
+    <!-- Logger utility (must load after env-config.js, before other scripts) -->
+    <script src="/js/logger.js"></script>
+    <!-- Supabase configuration -->
+    <script src="../js/supabase-config.js"></script>
+    <!-- i18next CDN language switcher -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
+    <!-- other scripts (includes loading screen) -->
+    <script src="../js/script.js"></script>
+    <!-- Checkout page translation -->
+    <script src="lang-checkout/lang-checkout.js"></script>
+    <!-- Checkout page loader -->
+    <script src="checkout.js"></script>
+
+</body>
+
+</html>
