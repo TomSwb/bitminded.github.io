@@ -4,7 +4,7 @@
 
 ## Status: ✅ All Deployed
 
-Last updated: 2025-11-29
+Last updated: 2026-01-10
 
 ## Deployed Functions
 
@@ -22,6 +22,7 @@ Last updated: 2025-11-29
 - ✅ delete-user
 - ✅ create-github-repository
 - ✅ family-management
+- ✅ maintenance-settings
 - ❌ **validate-license** - NOT YET DEPLOYED (required for subdomain protection)
 - ❌ **create-cloudflare-worker** - NOT YET DEPLOYED (required for Worker creation)
 
@@ -59,6 +60,12 @@ supabase functions deploy <function-name> --project-ref dynxqnrkmjcvgzsugxtm
 - Deployed all 12 Edge Functions
 - Configured all environment variables
 - Set up cron jobs
+
+### 2026-01-10 - Fixed Maintenance Settings Edge Function
+- ✅ Fixed `maintenance-settings` to use upsert instead of update (fixes 500 error when row doesn't exist)
+- ✅ Clear token fields (bypass_cookie_secret, last_generated_token, last_generated_token_expires_at) when maintenance mode is disabled for clean state
+- ✅ Preserve existing token fields when maintenance mode is enabled (if not generating new token)
+- ✅ Include id in payload for upsert to work correctly
 
 ## Next Function to Deploy
 
