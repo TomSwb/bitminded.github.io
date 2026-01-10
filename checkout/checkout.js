@@ -97,16 +97,30 @@
             }
 
             window.logger?.log('🛒 Creating checkout session:', requestBody);
+            console.log('📤 Request body being sent:', JSON.stringify(requestBody, null, 2));
 
-            const result = await window.invokeEdgeFunction('create-checkout', {
-                body: requestBody,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            let result;
+            try {
+                result = await window.invokeEdgeFunction('create-checkout', {
+                    body: requestBody
+                });
+                console.log('✅ Response received:', result);
+            } catch (err) {
+                console.error('❌ Error details:', {
+                    message: err.message,
+                    status: err.status,
+                    context: err.context,
+                    stack: err.stack
+                });
+                throw err;
+            }
 
             if (!result || !result.checkout_url) {
-                throw new Error(result?.error || 'No checkout URL returned');
+                // Check if result contains an error
+                if (result?.error) {
+                    throw new Error(result.error);
+                }
+                throw new Error('No checkout URL returned');
             }
 
             // Redirect to Stripe Checkout
@@ -115,6 +129,15 @@
 
         } catch (error) {
             window.logger?.error('❌ Checkout error:', error);
+            
+            // Log full error details for debugging
+            if (error.context || error.status || error.message) {
+                window.logger?.error('Error details:', {
+                    message: error.message,
+                    status: error.status,
+                    context: error.context
+                });
+            }
             
             // Hide loading, show error
             if (loadingEl) loadingEl.classList.add('hidden');
