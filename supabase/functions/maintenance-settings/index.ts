@@ -324,6 +324,9 @@ async function handleUpdate({
 }) {
   const currentSettings = await getSettings(supabaseAdmin)
 
+  console.log('📋 maintenance-settings: currentSettings.bypass_ips', JSON.stringify(currentSettings.bypass_ips))
+  console.log('📋 maintenance-settings: body.bypass_ips', JSON.stringify(body.bypass_ips))
+  
   const requestedEnabled = typeof body.is_enabled === 'boolean'
     ? body.is_enabled
     : currentSettings.is_enabled
@@ -334,6 +337,9 @@ async function handleUpdate({
   const requestedIps = bypassIpsProvided
     ? normalizeIps(body.bypass_ips, currentSettings.bypass_ips)
     : currentSettings.bypass_ips
+
+  console.log('📋 maintenance-settings: bypassIpsProvided', bypassIpsProvided)
+  console.log('📋 maintenance-settings: requestedIps', JSON.stringify(requestedIps))
 
   const generateBypassToken = Boolean(body.generate_bypass_token)
 
@@ -413,7 +419,7 @@ async function handleUpdate({
   }, 200, corsHeaders)
 }
 
-async function getSettings(supabaseAdmin: ReturnType<typeof createClient>) {
+async function getSettings(supabaseAdmin: ReturnType<typeof createClient>): Promise<MaintenanceSettingsRecord> {
   const { data, error } = await supabaseAdmin
     .from('maintenance_settings')
     .select('*')
@@ -425,7 +431,13 @@ async function getSettings(supabaseAdmin: ReturnType<typeof createClient>) {
     throw error
   }
 
-  return data ?? DEFAULT_SETTINGS
+  if (!data) return DEFAULT_SETTINGS
+
+  // Normalize bypass_ips to ensure it's always a proper JS array
+  return {
+    ...data,
+    bypass_ips: parseTextArray(data.bypass_ips)
+  }
 }
 
 async function decorateSettings(
@@ -457,6 +469,26 @@ async function decorateSettings(
     last_generated_link: link,
     last_generated_link_expires_at: settings.last_generated_token_expires_at
   }
+}
+
+function parseTextArray(value: unknown): string[] {
+  if (!value) return []
+  if (Array.isArray(value)) {
+    return value.map(v => String(v ?? '').trim()).filter(Boolean)
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    if (!trimmed || trimmed === '{}') return []
+    const inner = trimmed.startsWith('{') && trimmed.endsWith('}')
+      ? trimmed.slice(1, -1)
+      : trimmed
+    if (!inner) return []
+    return inner
+      .match(/"([^"\\]*(\\.[^"\\]*)*)"|[^,]+/g)
+      ?.map(s => s.replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"').trim())
+      .filter(Boolean) || []
+  }
+  return []
 }
 
 function normalizeIps(input: unknown, fallback: string[]) {
