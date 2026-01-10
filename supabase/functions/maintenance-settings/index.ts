@@ -291,7 +291,9 @@ serve(async (req) => {
 
     if (action === 'get') {
       const settings = await getSettings(supabaseAdmin)
+      console.log('📋 maintenance-settings: GET - normalized settings.bypass_ips', JSON.stringify(settings.bypass_ips))
       const responsePayload = await decorateSettings(supabaseAdmin, settings)
+      console.log('📋 maintenance-settings: GET - responsePayload.bypass_ips', JSON.stringify(responsePayload.bypass_ips))
       return jsonResponse({ success: true, settings: responsePayload }, 200, corsHeaders)
     }
 
@@ -343,10 +345,15 @@ async function handleUpdate({
 
   const generateBypassToken = Boolean(body.generate_bypass_token)
 
+  // Ensure bypass_ips is always a proper array (defensive check)
+  const safeRequestedIps = Array.isArray(requestedIps) ? requestedIps : parseTextArray(requestedIps)
+
+  console.log('📋 maintenance-settings: safeRequestedIps after defensive check', JSON.stringify(safeRequestedIps))
+
   const updatePayload: Partial<MaintenanceSettingsRecord> = {
     id: 1, // Include id for upsert to work
     is_enabled: requestedEnabled,
-    bypass_ips: requestedIps,
+    bypass_ips: safeRequestedIps,
     updated_by: userId,
     updated_at: new Date().toISOString()
   }
@@ -354,7 +361,7 @@ async function handleUpdate({
   let bypassLink: string | null = null
 
   if (generateBypassToken) {
-    // Generate new token and expiry
+    // Explicitly generate new token and expiry
     const secret = currentSettings.bypass_cookie_secret ?? generateSecret()
     const issuedAt = Math.floor(Date.now() / 1000)
     const expiresAt = issuedAt + BYPASS_TTL_SECONDS
@@ -367,14 +374,44 @@ async function handleUpdate({
     updatePayload.last_generated_token_expires_at = new Date(expiresAt * 1000).toISOString()
     bypassLink = buildBypassLink(signedToken)
   } else if (requestedEnabled) {
-    // Maintenance mode is enabled: preserve existing token fields if they exist
-    if (currentSettings.bypass_cookie_secret) {
-      updatePayload.bypass_cookie_secret = currentSettings.bypass_cookie_secret
-    }
-    if (currentSettings.last_generated_token) {
-      updatePayload.last_generated_token = currentSettings.last_generated_token
-      updatePayload.last_generated_token_expires_at = currentSettings.last_generated_token_expires_at
-      bypassLink = buildBypassLink(currentSettings.last_generated_token)
+    // Maintenance mode is enabled: ensure secret exists, preserve or generate token
+    // Always ensure we have a secret for token verification
+    const secret = currentSettings.bypass_cookie_secret ?? generateSecret()
+    updatePayload.bypass_cookie_secret = secret
+
+    // If we have an existing valid token, preserve it
+    if (currentSettings.last_generated_token && currentSettings.last_generated_token_expires_at) {
+      const expiresAt = new Date(currentSettings.last_generated_token_expires_at).getTime()
+      if (expiresAt > Date.now()) {
+        // Token is still valid, preserve it
+        updatePayload.last_generated_token = currentSettings.last_generated_token
+        updatePayload.last_generated_token_expires_at = currentSettings.last_generated_token_expires_at
+        bypassLink = buildBypassLink(currentSettings.last_generated_token)
+      } else {
+        // Token expired, generate new one
+        console.log('📋 maintenance-settings: Existing token expired, generating new one')
+        const issuedAt = Math.floor(Date.now() / 1000)
+        const newExpiresAt = issuedAt + BYPASS_TTL_SECONDS
+        const rawToken = generateToken()
+        const signature = await signToken(secret, `${rawToken}.${newExpiresAt}`)
+        const signedToken = `${rawToken}.${newExpiresAt}.${signature}`
+        
+        updatePayload.last_generated_token = signedToken
+        updatePayload.last_generated_token_expires_at = new Date(newExpiresAt * 1000).toISOString()
+        bypassLink = buildBypassLink(signedToken)
+      }
+    } else {
+      // No token exists, generate one
+      console.log('📋 maintenance-settings: No existing token, generating new one')
+      const issuedAt = Math.floor(Date.now() / 1000)
+      const expiresAt = issuedAt + BYPASS_TTL_SECONDS
+      const rawToken = generateToken()
+      const signature = await signToken(secret, `${rawToken}.${expiresAt}`)
+      const signedToken = `${rawToken}.${expiresAt}.${signature}`
+      
+      updatePayload.last_generated_token = signedToken
+      updatePayload.last_generated_token_expires_at = new Date(expiresAt * 1000).toISOString()
+      bypassLink = buildBypassLink(signedToken)
     }
   } else {
     // Maintenance mode is disabled: clear token fields for clean state
@@ -383,17 +420,55 @@ async function handleUpdate({
     updatePayload.last_generated_token_expires_at = null
   }
 
+  console.log('📋 maintenance-settings: Final updatePayload.bypass_ips', JSON.stringify(updatePayload.bypass_ips))
+  console.log('📋 maintenance-settings: Final updatePayload.bypass_ips type:', typeof updatePayload.bypass_ips, 'isArray:', Array.isArray(updatePayload.bypass_ips))
+  console.log('📋 maintenance-settings: Full updatePayload', JSON.stringify(updatePayload, null, 2))
+
+  // Use UPDATE instead of UPSERT when record exists (id=1 should always exist)
+  // This ensures we don't accidentally clear fields
   const { data: updatedSettings, error: updateError } = await supabaseAdmin
     .from('maintenance_settings')
-    .upsert(updatePayload as Record<string, unknown>, { 
-      onConflict: 'id',
-      ignoreDuplicates: false 
-    })
+    .update(updatePayload as Record<string, unknown>)
+    .eq('id', 1)
     .select()
     .single()
 
   if (updateError) {
-    console.error('❌ maintenance-settings: upsert failed', updateError)
+    console.error('❌ maintenance-settings: update failed', updateError)
+    console.error('❌ maintenance-settings: updatePayload that failed', JSON.stringify(updatePayload, null, 2))
+
+    // If record doesn't exist (shouldn't happen), fall back to upsert
+    if (updateError.code === 'PGRST116' || updateError.message?.includes('No rows')) {
+      console.log('⚠️ maintenance-settings: Record not found, attempting upsert')
+      const { data: upsertedSettings, error: upsertError } = await supabaseAdmin
+        .from('maintenance_settings')
+        .upsert(updatePayload as Record<string, unknown>, { 
+          onConflict: 'id',
+          ignoreDuplicates: false 
+        })
+        .select()
+        .single()
+
+      if (upsertError) {
+        console.error('❌ maintenance-settings: upsert fallback also failed', upsertError)
+        return jsonResponse({ error: 'Failed to update maintenance settings', details: upsertError.message }, 500, corsHeaders)
+      }
+
+      // Normalize the upserted settings
+      const normalizedUpserted: MaintenanceSettingsRecord = {
+        ...upsertedSettings,
+        bypass_ips: parseTextArray(upsertedSettings?.bypass_ips)
+      }
+      console.log('📋 maintenance-settings: upsertedSettings.bypass_ips (raw)', JSON.stringify(upsertedSettings?.bypass_ips))
+      console.log('📋 maintenance-settings: normalizedUpserted.bypass_ips', JSON.stringify(normalizedUpserted.bypass_ips))
+      
+      const responseSettings = await decorateSettings(supabaseAdmin, normalizedUpserted, bypassLink)
+      return jsonResponse({
+        success: true,
+        message: 'Maintenance settings updated.',
+        settings: responseSettings
+      }, 200, corsHeaders)
+    }
 
     if (generateBypassToken && updateError.code === '42703') {
       return jsonResponse(
@@ -407,10 +482,22 @@ async function handleUpdate({
       )
     }
 
-    return jsonResponse({ error: 'Failed to update maintenance settings' }, 500, corsHeaders)
+    return jsonResponse({ error: 'Failed to update maintenance settings', details: updateError.message }, 500, corsHeaders)
   }
 
-  const responseSettings = await decorateSettings(supabaseAdmin, updatedSettings, bypassLink)
+  // Normalize the returned settings to ensure bypass_ips is a proper JS array
+  const normalizedSettings: MaintenanceSettingsRecord = {
+    ...updatedSettings,
+    bypass_ips: parseTextArray(updatedSettings?.bypass_ips)
+  }
+
+  console.log('📋 maintenance-settings: updatedSettings.bypass_ips (raw from DB)', JSON.stringify(updatedSettings?.bypass_ips), 'Type:', typeof updatedSettings?.bypass_ips, 'IsArray:', Array.isArray(updatedSettings?.bypass_ips))
+  console.log('📋 maintenance-settings: normalizedSettings.bypass_ips', JSON.stringify(normalizedSettings.bypass_ips), 'Length:', normalizedSettings.bypass_ips.length)
+  
+  // Verify what we sent vs what we got back
+  console.log('📋 maintenance-settings: VERIFICATION - What we sent:', JSON.stringify(updatePayload.bypass_ips), 'What we got back:', JSON.stringify(normalizedSettings.bypass_ips))
+
+  const responseSettings = await decorateSettings(supabaseAdmin, normalizedSettings, bypassLink)
 
   return jsonResponse({
     success: true,
@@ -431,13 +518,22 @@ async function getSettings(supabaseAdmin: ReturnType<typeof createClient>): Prom
     throw error
   }
 
-  if (!data) return DEFAULT_SETTINGS
+  if (!data) {
+    console.log('📋 maintenance-settings: No data found, returning DEFAULT_SETTINGS')
+    return DEFAULT_SETTINGS
+  }
+
+  console.log('📋 maintenance-settings: Raw data.bypass_ips from DB:', JSON.stringify(data.bypass_ips), 'Type:', typeof data.bypass_ips, 'IsArray:', Array.isArray(data.bypass_ips))
 
   // Normalize bypass_ips to ensure it's always a proper JS array
-  return {
+  const normalized = {
     ...data,
     bypass_ips: parseTextArray(data.bypass_ips)
   }
+  
+  console.log('📋 maintenance-settings: Normalized bypass_ips:', JSON.stringify(normalized.bypass_ips))
+  
+  return normalized
 }
 
 async function decorateSettings(
@@ -459,7 +555,7 @@ async function decorateSettings(
   const link = explicitLink
     ?? (settings.last_generated_token ? buildBypassLink(settings.last_generated_token) : null)
 
-  return {
+  const result = {
     id: settings.id,
     is_enabled: settings.is_enabled,
     bypass_ips: settings.bypass_ips ?? [],
@@ -469,6 +565,11 @@ async function decorateSettings(
     last_generated_link: link,
     last_generated_link_expires_at: settings.last_generated_token_expires_at
   }
+
+  console.log('📋 maintenance-settings: decorateSettings - input bypass_ips:', JSON.stringify(settings.bypass_ips), 'Type:', typeof settings.bypass_ips, 'IsArray:', Array.isArray(settings.bypass_ips))
+  console.log('📋 maintenance-settings: decorateSettings - output bypass_ips:', JSON.stringify(result.bypass_ips), 'Type:', typeof result.bypass_ips, 'IsArray:', Array.isArray(result.bypass_ips))
+
+  return result
 }
 
 function parseTextArray(value: unknown): string[] {
