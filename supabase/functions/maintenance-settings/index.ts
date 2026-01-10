@@ -328,7 +328,13 @@ async function handleUpdate({
     ? body.is_enabled
     : currentSettings.is_enabled
 
-  const requestedIps = normalizeIps(body.bypass_ips, currentSettings.bypass_ips)
+  // Only update bypass_ips if explicitly provided in the request
+  // This preserves existing IPs when toggling maintenance mode on/off
+  const bypassIpsProvided = body.bypass_ips !== undefined
+  const requestedIps = bypassIpsProvided
+    ? normalizeIps(body.bypass_ips, currentSettings.bypass_ips)
+    : currentSettings.bypass_ips
+
   const generateBypassToken = Boolean(body.generate_bypass_token)
 
   const updatePayload: Partial<MaintenanceSettingsRecord> = {

@@ -337,11 +337,16 @@ class MaintenanceMode {
         }
 
         const previousState = this.state.isEnabled;
+        const isChangingBypassIps = options.bypassIps !== undefined;
         const payload = {
             action: 'update',
-            is_enabled: options.isEnabled !== undefined ? options.isEnabled : this.state.isEnabled,
-            bypass_ips: options.bypassIps || this.state.bypassIps
+            is_enabled: options.isEnabled !== undefined ? options.isEnabled : this.state.isEnabled
         };
+        
+        // Only include bypass_ips if explicitly changing it (not when just toggling mode)
+        if (isChangingBypassIps) {
+            payload.bypass_ips = options.bypassIps;
+        }
 
         this.isSaving = true;
         this.setLoading(true);
@@ -359,9 +364,14 @@ class MaintenanceMode {
             this.state.updatedByEmail = settings.updated_by_email || this.state.updatedByEmail;
             this.state.updatedBy = settings.updated_by || this.state.updatedBy;
 
-            this.renderStatus();
-            this.renderAllowlist();
-            this.renderAlert(settings.alert || null);
+            // If we explicitly changed bypass_ips, reload from server to ensure state is fresh
+            if (isChangingBypassIps) {
+                await this.loadSettings({ showErrors: false });
+            } else {
+                this.renderStatus();
+                this.renderAllowlist();
+                this.renderAlert(settings.alert || null);
+            }
 
             const successMessage = options.successMessage
                 || (payload.is_enabled
@@ -374,7 +384,7 @@ class MaintenanceMode {
                 await this.logAdminAction('maintenance_mode_toggled', {
                     is_enabled: this.state.isEnabled
                 });
-            } else if (options.bypassIps) {
+            } else if (isChangingBypassIps) {
                 await this.logAdminAction('maintenance_allowlist_updated', {
                     count: this.state.bypassIps.length
                 });
