@@ -333,15 +333,24 @@ async function handleUpdate({
     ? body.is_enabled
     : currentSettings.is_enabled
 
-  // Only update bypass_ips if explicitly provided in the request
+  // Only update bypass_ips if explicitly provided AND has actual values
   // This preserves existing IPs when toggling maintenance mode on/off
+  // If an empty array is sent, preserve existing IPs (don't clear unless explicitly intended via a separate flag)
   const bypassIpsProvided = body.bypass_ips !== undefined
-  const requestedIps = bypassIpsProvided
+  const bypassIpsHasValues = bypassIpsProvided && (
+    Array.isArray(body.bypass_ips) && body.bypass_ips.length > 0
+  )
+  
+  // Only update if explicitly provided with actual values
+  // Empty arrays from frontend likely mean "preserve existing" not "clear all"
+  const requestedIps = bypassIpsHasValues
     ? normalizeIps(body.bypass_ips, currentSettings.bypass_ips)
     : currentSettings.bypass_ips
 
   console.log('📋 maintenance-settings: bypassIpsProvided', bypassIpsProvided)
+  console.log('📋 maintenance-settings: bypassIpsHasValues', bypassIpsHasValues)
   console.log('📋 maintenance-settings: requestedIps', JSON.stringify(requestedIps))
+  console.log('📋 maintenance-settings: currentSettings.bypass_ips preserved as:', JSON.stringify(currentSettings.bypass_ips))
 
   const generateBypassToken = Boolean(body.generate_bypass_token)
 
