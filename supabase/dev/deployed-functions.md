@@ -4,7 +4,7 @@
 
 ## Status: ✅ All Deployed
 
-Last updated: 2026-01-15
+Last updated: 2026-01-XX
 
 ## Deployed Functions
 
@@ -25,6 +25,7 @@ Last updated: 2026-01-15
 - ✅ maintenance-settings
 - ✅ stripe-webhook
 - ✅ validate-license
+- ✅ sync-stripe-subscriptions
 
 ## Environment Variables Set
 
@@ -71,6 +72,13 @@ supabase functions deploy <function-name> --project-ref eygpejbljuqpxwwoawkn
 - ✅ Updated `validate-license` with family subscription checks (service_purchases and has_family_subscription_access)
 - ✅ Updated `send-notification-email` with purchase confirmation email templates (one-time and subscription)
 - All functions deployed with correct JWT settings (stripe-webhook and send-notification-email use --no-verify-jwt)
+
+### 2026-01-XX - Item 17.2: Subscription Management Component
+- ✅ Deployed `sync-stripe-subscriptions` Edge Function
+- Syncs all Stripe subscriptions with database (user_subscriptions table)
+- Admin-only function with rate limiting (5 req/min, 20 req/hour)
+- Handles pagination for large subscription lists
+- Returns sync results (created, updated, errors)
 
 ## Next Function to Deploy
 
