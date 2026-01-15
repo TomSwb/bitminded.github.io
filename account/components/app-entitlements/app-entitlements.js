@@ -9,7 +9,9 @@ class AppEntitlements {
         this.isInitialized = false;
         this.currentUserId = null;
         this.entitlements = [];
+        this.purchases = [];
         this.productMap = {};
+        this.serviceMap = {};
         this.elements = {};
         this.translations = null;
         this.currentLanguage = 'en';
@@ -47,11 +49,13 @@ class AppEntitlements {
             // Make translatable content visible
             this.showTranslatableContent();
 
-            // Load products
+            // Load products and services
             await this.loadProducts();
+            await this.loadServices();
 
-            // Load entitlements
+            // Load entitlements and purchases
             await this.loadEntitlements();
+            await this.loadPurchases();
 
             this.isInitialized = true;
             window.logger?.log('✅ App Entitlements initialized');
@@ -213,6 +217,46 @@ class AppEntitlements {
     }
 
     /**
+     * Load services from database
+     */
+    async loadServices() {
+        try {
+            if (!window.supabase) {
+                this.serviceMap = {};
+                return;
+            }
+
+            const { data, error } = await window.supabase
+                .from('services')
+                .select('id, name, slug, status')
+                .order('name', { ascending: true });
+
+            if (error) {
+                window.logger?.error('❌ Error loading services:', error);
+                this.serviceMap = {};
+                return;
+            }
+
+            this.serviceMap = {};
+            (data || []).forEach(s => {
+                const slug = s.slug || s.id;
+                if (slug) {
+                    this.serviceMap[slug] = {
+                        id: s.id,
+                        name: s.name || 'Unnamed Service',
+                        slug: slug,
+                        status: s.status
+                    };
+                }
+            });
+
+        } catch (error) {
+            window.logger?.error('❌ Failed to load services:', error);
+            this.serviceMap = {};
+        }
+    }
+
+    /**
      * Load entitlements for the current user
      */
     async loadEntitlements() {
@@ -246,7 +290,7 @@ class AppEntitlements {
             }
 
             this.entitlements = data || [];
-            this.renderEntitlements();
+            this.renderAll();
 
             this.showLoading(false);
 
@@ -258,14 +302,217 @@ class AppEntitlements {
     }
 
     /**
-     * Render entitlements in the table
+     * Load purchases for the current user
      */
-    renderEntitlements() {
+    async loadPurchases() {
+        try {
+            if (!window.supabase || !this.currentUserId) {
+                this.purchases = [];
+                return;
+            }
+
+            // Fetch product purchases
+            const { data: productPurchases, error: productError } = await window.supabase
+                .from('product_purchases')
+                .select(`
+                    id,
+                    user_id,
+                    product_id,
+                    purchase_type,
+                    status,
+                    payment_status,
+                    amount_paid,
+                    currency,
+                    subscription_interval,
+                    purchased_at,
+                    expires_at,
+                    current_period_end,
+                    is_trial,
+                    trial_end,
+                    products!inner(id, name, slug)
+                `)
+                .eq('user_id', this.currentUserId)
+                .eq('status', 'active')
+                .order('purchased_at', { ascending: false });
+
+            if (productError) {
+                window.logger?.warn('⚠️ Error loading product purchases:', productError);
+            }
+
+            // Fetch service purchases
+            const { data: servicePurchases, error: serviceError } = await window.supabase
+                .from('service_purchases')
+                .select(`
+                    id,
+                    user_id,
+                    service_id,
+                    purchase_type,
+                    status,
+                    payment_status,
+                    amount_paid,
+                    currency,
+                    subscription_interval,
+                    purchased_at,
+                    expires_at,
+                    current_period_end,
+                    is_trial,
+                    trial_end,
+                    services!inner(id, name, slug)
+                `)
+                .eq('user_id', this.currentUserId)
+                .eq('status', 'active')
+                .order('purchased_at', { ascending: false });
+
+            if (serviceError) {
+                window.logger?.warn('⚠️ Error loading service purchases:', serviceError);
+            }
+
+            // Combine and format purchases
+            this.purchases = [];
+            
+            if (productPurchases) {
+                productPurchases.forEach(p => {
+                    this.purchases.push({
+                        id: p.id,
+                        type: 'product',
+                        product_id: p.product_id,
+                        service_id: null,
+                        app_id: p.products?.slug || null,
+                        product_name: p.products?.name || 'Unknown Product',
+                        purchase_type: p.purchase_type,
+                        status: p.status,
+                        payment_status: p.payment_status,
+                        amount_paid: p.amount_paid,
+                        currency: p.currency,
+                        subscription_interval: p.subscription_interval,
+                        purchased_at: p.purchased_at,
+                        expires_at: p.expires_at,
+                        current_period_end: p.current_period_end,
+                        is_trial: p.is_trial,
+                        trial_end: p.trial_end,
+                        source: 'purchase'
+                    });
+                });
+            }
+
+            if (servicePurchases) {
+                servicePurchases.forEach(s => {
+                    this.purchases.push({
+                        id: s.id,
+                        type: 'service',
+                        product_id: null,
+                        service_id: s.service_id,
+                        app_id: s.services?.slug || null,
+                        product_name: s.services?.name || 'Unknown Service',
+                        purchase_type: s.purchase_type,
+                        status: s.status,
+                        payment_status: s.payment_status,
+                        amount_paid: s.amount_paid,
+                        currency: s.currency,
+                        subscription_interval: s.subscription_interval,
+                        purchased_at: s.purchased_at,
+                        expires_at: s.expires_at,
+                        current_period_end: s.current_period_end,
+                        is_trial: s.is_trial,
+                        trial_end: s.trial_end,
+                        source: 'purchase'
+                    });
+                });
+            }
+
+        } catch (error) {
+            window.logger?.error('❌ Failed to load purchases:', error);
+            this.purchases = [];
+        }
+    }
+
+    /**
+     * Render entitlements and purchases in the table
+     */
+    renderAll() {
         if (!this.elements.tableBody) return;
 
         this.elements.tableBody.innerHTML = '';
 
-        if (this.entitlements.length === 0) {
+        // Combine entitlements and purchases
+        const allItems = [];
+
+        // Add entitlements (admin grants)
+        this.entitlements.forEach(e => {
+            allItems.push({
+                ...e,
+                source: 'admin_grant',
+                product_name: e.app_id === 'all' 
+                    ? (this.getTranslation('All Products') || 'All Products')
+                    : (this.productMap[e.app_id]?.name || e.app_id || 'Unknown Product')
+            });
+        });
+
+        // Add purchases (convert to entitlement-like format)
+        this.purchases.forEach(p => {
+            // Map purchase type to grant_type
+            let grantType = 'subscription';
+            if (p.purchase_type === 'one_time') {
+                grantType = 'lifetime';
+            } else if (p.purchase_type === 'trial' || p.is_trial) {
+                grantType = 'trial';
+            } else if (p.purchase_type === 'subscription') {
+                grantType = 'subscription';
+            }
+
+            // Determine expiration
+            let expiresAt = p.expires_at || p.current_period_end || null;
+            if (grantType === 'lifetime') {
+                expiresAt = null;
+            } else if (grantType === 'trial' && p.trial_end) {
+                expiresAt = p.trial_end;
+            }
+
+            // Check if active
+            const isActive = p.status === 'active' && p.payment_status === 'succeeded';
+
+            allItems.push({
+                id: p.id,
+                app_id: p.app_id,
+                active: isActive,
+                expires_at: expiresAt,
+                created_at: p.purchased_at,
+                grant_type: grantType,
+                source: 'purchase',
+                product_name: p.product_name,
+                purchase_type: p.purchase_type,
+                subscription_interval: p.subscription_interval,
+                amount_paid: p.amount_paid,
+                currency: p.currency,
+                current_period_end: p.current_period_end
+            });
+        });
+
+        // Remove duplicates (if purchase has corresponding entitlement, prefer purchase for more details)
+        const uniqueItems = [];
+        const seenAppIds = new Set();
+        
+        // First add purchases (they have more detail)
+        allItems.forEach(item => {
+            if (item.source === 'purchase' && item.app_id) {
+                if (!seenAppIds.has(item.app_id)) {
+                    uniqueItems.push(item);
+                    seenAppIds.add(item.app_id);
+                }
+            }
+        });
+
+        // Then add entitlements that don't have purchases
+        allItems.forEach(item => {
+            if (item.source === 'admin_grant' && item.app_id) {
+                if (!seenAppIds.has(item.app_id)) {
+                    uniqueItems.push(item);
+                    seenAppIds.add(item.app_id);
+                }
+            }
+        });
+
+        if (uniqueItems.length === 0) {
             this.showEmpty(true);
             this.showTable(false);
             return;
@@ -274,8 +521,8 @@ class AppEntitlements {
         this.showEmpty(false);
         this.showTable(true);
 
-        this.entitlements.forEach(entitlement => {
-            const row = this.createEntitlementRow(entitlement);
+        uniqueItems.forEach(item => {
+            const row = this.createEntitlementRow(item);
             this.elements.tableBody.appendChild(row);
         });
 
@@ -299,6 +546,19 @@ class AppEntitlements {
         productCell.innerHTML = `<strong>${this.escapeHtml(productName)}</strong>`;
         row.appendChild(productCell);
 
+        // Source (Purchase vs Admin Grant)
+        const sourceCell = document.createElement('td');
+        sourceCell.className = 'app-entitlements__table-cell';
+        const source = entitlement.source || 'admin_grant';
+        const sourceText = source === 'purchase' 
+            ? (this.getTranslation('Purchase') || 'Purchase')
+            : (this.getTranslation('Admin Grant') || 'Admin Grant');
+        const sourceClass = source === 'purchase' 
+            ? 'app-entitlements__badge--purchase'
+            : 'app-entitlements__badge--admin';
+        sourceCell.innerHTML = `<span class="app-entitlements__badge ${sourceClass}">${this.escapeHtml(sourceText)}</span>`;
+        row.appendChild(sourceCell);
+
         // Grant type
         const grantTypeCell = document.createElement('td');
         grantTypeCell.className = 'app-entitlements__table-cell';
@@ -318,14 +578,27 @@ class AppEntitlements {
         statusCell.innerHTML = `<span class="app-entitlements__badge ${statusClass}">${this.escapeHtml(statusText)}</span>`;
         row.appendChild(statusCell);
 
-        // Granted date
+        // Granted date / Purchase date
         const grantedDateCell = document.createElement('td');
         grantedDateCell.className = 'app-entitlements__table-cell';
         const grantedDate = entitlement.created_at ? new Date(entitlement.created_at) : null;
-        grantedDateCell.textContent = grantedDate ? this.formatDate(grantedDate) : '-';
+        if (grantedDate) {
+            grantedDateCell.textContent = this.formatDate(grantedDate);
+            // For purchases, show additional info if subscription
+            if (entitlement.source === 'purchase' && entitlement.subscription_interval) {
+                const intervalText = entitlement.subscription_interval === 'monthly' 
+                    ? (this.getTranslation('Monthly') || 'Monthly')
+                    : entitlement.subscription_interval === 'yearly'
+                    ? (this.getTranslation('Yearly') || 'Yearly')
+                    : entitlement.subscription_interval;
+                grantedDateCell.innerHTML += `<br><small class="app-entitlements__subscription-info">${this.escapeHtml(intervalText)}</small>`;
+            }
+        } else {
+            grantedDateCell.textContent = '-';
+        }
         row.appendChild(grantedDateCell);
 
-        // Expiration
+        // Expiration / Next billing
         const expirationCell = document.createElement('td');
         expirationCell.className = 'app-entitlements__table-cell';
         if (!entitlement.expires_at) {
@@ -342,6 +615,12 @@ class AppEntitlements {
                 expirationCell.innerHTML = `<span class="app-entitlements__badge app-entitlements__badge--warning">${daysUntil} ${this.getTranslation('days') || 'days'}</span>`;
             } else {
                 expirationCell.textContent = this.formatDate(expDate);
+            }
+            // For subscriptions, show "Next billing" label
+            if (entitlement.source === 'purchase' && entitlement.purchase_type === 'subscription' && entitlement.current_period_end) {
+                const nextBillingDate = new Date(entitlement.current_period_end);
+                const nextBillingText = this.getTranslation('Next billing') || 'Next billing';
+                expirationCell.innerHTML += `<br><small class="app-entitlements__subscription-info">${this.escapeHtml(nextBillingText)}: ${this.formatDate(nextBillingDate)}</small>`;
             }
         }
         row.appendChild(expirationCell);

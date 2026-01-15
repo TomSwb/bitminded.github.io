@@ -23,7 +23,14 @@
       "All Products": "All Products",
       "Manual": "Manual",
       "Trial": "Trial",
-      "Subscription": "Subscription"
+      "Subscription": "Subscription",
+      "Source": "Source",
+      "Purchase": "Purchase",
+      "Admin Grant": "Admin Grant",
+      "Monthly": "Monthly",
+      "Yearly": "Yearly",
+      "Next billing": "Next billing",
+      "One-Time Purchase": "One-Time Purchase"
     }
   },
   "es": {
@@ -50,7 +57,14 @@
       "All Products": "Todos los Productos",
       "Manual": "Manual",
       "Trial": "Prueba",
-      "Subscription": "Suscripción"
+      "Subscription": "Suscripción",
+      "Source": "Origen",
+      "Purchase": "Compra",
+      "Admin Grant": "Concesión de Admin",
+      "Monthly": "Mensual",
+      "Yearly": "Anual",
+      "Next billing": "Próxima facturación",
+      "One-Time Purchase": "Compra Única"
     }
   },
   "fr": {
@@ -77,7 +91,14 @@
       "All Products": "Tous les Produits",
       "Manual": "Manuel",
       "Trial": "Essai",
-      "Subscription": "Abonnement"
+      "Subscription": "Abonnement",
+      "Source": "Source",
+      "Purchase": "Achat",
+      "Admin Grant": "Accès Admin",
+      "Monthly": "Mensuel",
+      "Yearly": "Annuel",
+      "Next billing": "Prochaine facturation",
+      "One-Time Purchase": "Achat Unique"
     }
   },
   "de": {
@@ -104,7 +125,14 @@
       "All Products": "Alle Produkte",
       "Manual": "Manuell",
       "Trial": "Testversion",
-      "Subscription": "Abonnement"
+      "Subscription": "Abonnement",
+      "Source": "Quelle",
+      "Purchase": "Kauf",
+      "Admin Grant": "Admin-Zugriff",
+      "Monthly": "Monatlich",
+      "Yearly": "Jährlich",
+      "Next billing": "Nächste Abrechnung",
+      "One-Time Purchase": "Einmaliger Kauf"
     }
   }
 }

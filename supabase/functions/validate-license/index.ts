@@ -390,6 +390,88 @@ serve(async (req) => {
       }
     }
 
+    // If no access from product purchases, check service_purchases (family plans)
+    if (!hasAccess) {
+      const { data: servicePurchases, error: servicePurchasesError } = await supabaseAdmin
+        .from('service_purchases')
+        .select('id, service_id, purchase_type, status, payment_status, expires_at, current_period_end, grace_period_ends_at, is_trial, trial_end')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('purchased_at', { ascending: false })
+
+      if (!servicePurchasesError && servicePurchases && servicePurchases.length > 0) {
+        // Get service slugs to check if they grant access to requested product
+        const serviceIds = servicePurchases.map(sp => sp.service_id).filter(Boolean)
+        
+        if (serviceIds.length > 0) {
+          const { data: services, error: servicesError } = await supabaseAdmin
+            .from('services')
+            .select('id, slug')
+            .in('id', serviceIds)
+
+          if (!servicesError && services) {
+            const serviceSlugMap = new Map(services.map(s => [s.id, s.slug]))
+            
+            for (const sp of servicePurchases) {
+              // Grace period takes precedence if still valid
+              if (sp.grace_period_ends_at && new Date(sp.grace_period_ends_at) > now) {
+                hasAccess = true
+                reason = 'family_service_grace_period'
+                break
+              }
+
+              const serviceSlug = serviceSlugMap.get(sp.service_id)
+              
+              // Family services grant access to all products
+              if (serviceSlug === 'all-tools-membership-family' || serviceSlug === 'supporter-tier-family') {
+                // Check if service purchase is valid
+                if (sp.purchase_type === 'subscription') {
+                  const activeStatus = sp.status === 'active'
+                  const notExpired = !sp.expires_at || new Date(sp.expires_at) > now
+                  const periodNotExpired = !sp.current_period_end || new Date(sp.current_period_end) > now
+                  if (activeStatus && notExpired && periodNotExpired) {
+                    hasAccess = true
+                    reason = 'family_service_active'
+                    break
+                  }
+                } else if (sp.purchase_type === 'one_time') {
+                  const paid = sp.payment_status === 'succeeded'
+                  if (paid) {
+                    hasAccess = true
+                    reason = 'family_service_one_time'
+                    break
+                  }
+                } else if (sp.purchase_type === 'trial' || sp.is_trial) {
+                  const trialValid = (!sp.trial_end || new Date(sp.trial_end) > now)
+                  if (trialValid) {
+                    hasAccess = true
+                    reason = 'family_service_trial'
+                    break
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // If still no access, check family subscription access via RPC function
+    if (!hasAccess) {
+      try {
+        const { data: familyAccess, error: familyAccessError } = await supabaseAdmin
+          .rpc('has_family_subscription_access', { user_uuid: userId })
+
+        if (!familyAccessError && familyAccess === true) {
+          hasAccess = true
+          reason = 'family_subscription_active'
+        }
+      } catch (error: any) {
+        console.error('❌ Error checking family subscription access:', error)
+        // Continue - don't fail access check if RPC fails
+      }
+    }
+
     // If no access from purchases, check entitlements table (admin-granted access)
     if (!hasAccess && productSlug) {
       const { data: entitlements, error: entitlementsError } = await supabaseAdmin

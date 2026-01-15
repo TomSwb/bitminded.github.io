@@ -1,6 +1,6 @@
 # ✅ Priority List - Completed Items
 
-**Last Updated**: January 9, 2026 (Completed Family Management UI - all core features implemented)  
+**Last Updated**: January 15, 2026 (Completed Purchase Confirmation & Entitlements - item 17)  
 **Based on**: Actual codebase investigation (not just READMEs)
 
 > **Note**: This document contains all completed items from the priority list. For active/incomplete items, see [PRIORITY-LIST-TO-DO.md](./PRIORITY-LIST-TO-DO.md).
@@ -997,6 +997,110 @@
 - ✅ `services` table: `base_price_currency VARCHAR(3) DEFAULT 'CHF'` with same constraint
 
 **Note**: Verify that UI components properly display and handle currency selection/display.
+
+---
+
+## 🛒 **Phase 3: Purchase & Checkout Flow**
+
+### 16. Payment Integration (Stripe + Bank Transfer) ✅ **COMPLETED**
+**Status**: **COMPLETED** - Core checkout flow implemented (2026-01-10)  
+**Priority**: Critical - needed for catalog access purchases and service bookings  
+**Completed**: 2026-01-10
+
+**Summary**:
+- ✅ Unified `create-checkout` edge function (handles both products and services)
+- ✅ Checkout flow component (`/checkout/index.html`)
+- ✅ Success/cancel pages with session retrieval via `get-checkout-session` edge function
+- ✅ Catalog "Buy Now" buttons wired up (passes `product_id` and `interval`)
+- ✅ Authentication checks (redirects to login if not authenticated)
+- ✅ Currency handling (uses user's preferred currency from `user_profiles.preferred_currency`)
+- ✅ `preferred_currency` field migration and CurrencySwitcher component updates
+- ✅ Buy Now button styling added to catalog cards
+- ⚠️ **DEFERRED**: Service "Subscribe Now" buttons wiring (moved to Item #21 - Account Subscription Management)
+
+**Key Files**:
+- `supabase/functions/create-checkout/index.ts` - Unified checkout session creation
+- `supabase/functions/get-checkout-session/index.ts` - Session retrieval for success/cancel pages
+- `checkout/index.html`, `checkout/success.html`, `checkout/cancel.html` - Checkout pages
+- `checkout/checkout.js` - Checkout flow logic
+- `checkout/checkout.css` - Checkout styling
+- `catalog/catalog.js` - Buy Now button implementation
+- `catalog/catalog.css` - Buy Now button styling
+- `components/currency-switcher/currency-switcher.js` - Currency preference persistence
+- `supabase/migrations/20260109_add_preferred_currency_to_user_profiles.sql` - Database migration
+
+**Note**: Service purchase buttons are deferred to Item #21. Backend fully supports `service_id` parameter, but frontend service pages still show "Coming Soon" buttons.
+
+### 17. Purchase Confirmation & Entitlements ✅ **COMPLETED**
+**Status**: **✅ COMPLETED** - All critical gaps fixed and features implemented (2026-01-15)  
+**Priority**: Critical - needed after checkout, must be completed before #19 (Subdomain Protection)  
+**Completed**: 2026-01-15
+
+**Summary**:
+- ✅ Entitlement sync from purchases implemented (`syncEntitlementFromPurchase` function)
+- ✅ Family subscription access checks added to `validate-license`
+- ✅ Purchase confirmation emails implemented (one-time and subscription templates)
+- ✅ App entitlements component enhanced to display purchases alongside entitlements
+- ✅ All functions deployed to both dev and production
+
+**Completed Actions**:
+
+1. **Entitlement Sync Implementation**:
+   - ✅ Created `syncEntitlementFromPurchase()` helper function in `stripe-webhook/index.ts`
+   - ✅ Maps purchases to entitlements with correct `app_id` (product/service slug, not UUID)
+   - ✅ Maps `grant_type` based on purchase type (subscription → 'subscription', one_time → 'lifetime', trial → 'trial')
+   - ✅ Syncs expiration dates from purchases (subscriptions use `expires_at` or `current_period_end`, one-time uses NULL for lifetime)
+   - ✅ Integrated into `handleCheckoutSessionCompleted()`, `handleInvoicePaid()`, and `updatePurchaseFromSubscription()`
+   - ✅ Uses UPSERT with `(user_id, app_id)` unique constraint for idempotency
+
+2. **Family Subscription Access Checks**:
+   - ✅ Added `service_purchases` table check to `validate-license` function
+   - ✅ Checks family services (`all-tools-membership-family`, `supporter-tier-family`) for access to all products
+   - ✅ Added `has_family_subscription_access()` RPC function call
+   - ✅ Returns appropriate reason codes (`family_service_active`, `family_subscription_active`)
+   - ✅ Handles grace periods, expiration, and trial status for family purchases
+
+3. **Purchase Confirmation Emails**:
+   - ✅ Added email translations for all languages (EN/FR/DE/ES)
+   - ✅ Created `purchase_confirmation_one_time` template with product details, amount, receipt link
+   - ✅ Created `purchase_confirmation_subscription` template with billing cycle, next billing date, manage link
+   - ✅ Added template generators: `generatePurchaseConfirmationOneTimeEmail()` and `generatePurchaseConfirmationSubscriptionEmail()`
+   - ✅ Added to `EMAIL_TEMPLATES` map and `NOTIFICATION_TYPE_MAP` (maps to `purchase_notifications` preference)
+   - ✅ Created `sendPurchaseConfirmationEmail()` helper function
+   - ✅ Integrated email sending in `stripe-webhook` after purchase creation and subscription renewals
+
+4. **App Entitlements Component Enhancement**:
+   - ✅ Enhanced `app-entitlements` component to load and display purchases from `product_purchases` and `service_purchases` tables
+   - ✅ Added `loadPurchases()` and `loadServices()` methods
+   - ✅ Merged purchases with entitlements in unified display (removes duplicates, prefers purchases for more detail)
+   - ✅ Added "Source" column to show "Purchase" vs "Admin Grant" with color-coded badges
+   - ✅ Displays subscription details (billing interval, next billing date) for purchase-based access
+   - ✅ Added translation keys for purchase-related labels (EN/FR/DE/ES)
+   - ✅ Added CSS styles for purchase badges and subscription info
+
+5. **Deployment**:
+   - ✅ Deployed `stripe-webhook` to dev and prod (with `--no-verify-jwt`)
+   - ✅ Deployed `validate-license` to dev and prod (with JWT verification)
+   - ✅ Deployed `send-notification-email` to dev and prod (with `--no-verify-jwt`)
+   - ✅ Updated deployment documentation in `supabase/dev/deployed-functions.md` and `supabase/prod/deployed-functions.md`
+
+**Key Files Modified**:
+- `supabase/functions/stripe-webhook/index.ts` - Added entitlement sync and email sending
+- `supabase/functions/validate-license/index.ts` - Added family subscription checks
+- `supabase/functions/send-notification-email/index.ts` - Added purchase confirmation templates
+- `account/components/app-entitlements/app-entitlements.js` - Enhanced to display purchases
+- `account/components/app-entitlements/app-entitlements.html` - Added Source column
+- `account/components/app-entitlements/app-entitlements.css` - Added purchase badge styles
+- `account/components/app-entitlements/locales/app-entitlements-locales.json` - Added purchase translations
+
+**Impact**:
+- ✅ Account "App Entitlements" section now shows all user access (purchases + admin grants)
+- ✅ Admin "Access Control" now shows purchased apps (via synced entitlements)
+- ✅ Users receive purchase confirmation emails automatically
+- ✅ Family plan members can access products via `service_purchases` and family subscription checks
+- ✅ All purchase types (one-time, subscription, trial) properly sync to entitlements
+
+**Note**: Originally planned to create separate subscription-management component, but decided to enhance existing app-entitlements component instead to show purchases and entitlements in unified view.
 
 ---
 

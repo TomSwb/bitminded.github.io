@@ -1753,6 +1753,31 @@ async function handleCheckoutSessionCompleted(
         )
       } else {
         console.log(`✅ ${itemType} purchase updated:`, existingPurchase.id)
+        // Sync entitlement after purchase update
+        const { data: updatedPurchase } = await supabaseAdmin
+          .from(existingPurchase.table)
+          .select('*')
+          .eq('id', existingPurchase.id)
+          .single()
+        
+        if (updatedPurchase) {
+          await syncEntitlementFromPurchase(supabaseAdmin, updatedPurchase, existingPurchase.table)
+          // Send confirmation email for updated purchase (only if payment just succeeded)
+          if (purchaseData.payment_status === 'succeeded') {
+            const itemName = item.type === 'product' 
+              ? (await supabaseAdmin.from('products').select('name').eq('id', itemId).maybeSingle()).data?.name
+              : (await supabaseAdmin.from('services').select('name').eq('id', itemId).maybeSingle()).data?.name
+            if (itemName) {
+              await sendPurchaseConfirmationEmail(
+                supabaseAdmin,
+                userId,
+                updatedPurchase,
+                existingPurchase.table,
+                itemName
+              )
+            }
+          }
+        }
       }
     } else {
       // Create new purchase record
@@ -1772,13 +1797,37 @@ async function handleCheckoutSessionCompleted(
             itemId,
             itemType
           )
-          if (existingId) {
-            console.log('✅ Found existing purchase after duplicate error, updating:', existingId.id)
-            await supabaseAdmin
-              .from(existingId.table)
-              .update(purchaseData)
-              .eq('id', existingId.id)
-          }
+            if (existingId) {
+              console.log('✅ Found existing purchase after duplicate error, updating:', existingId.id)
+              await supabaseAdmin
+                .from(existingId.table)
+                .update(purchaseData)
+                .eq('id', existingId.id)
+            
+              // Sync entitlement after update
+              const { data: updatedPurchase } = await supabaseAdmin
+                .from(existingId.table)
+                .select('*')
+                .eq('id', existingId.id)
+                .single()
+            
+              if (updatedPurchase) {
+                await syncEntitlementFromPurchase(supabaseAdmin, updatedPurchase, existingId.table)
+                // Send confirmation email
+                const itemName = item.type === 'product'
+                  ? (await supabaseAdmin.from('products').select('name').eq('id', itemId).maybeSingle()).data?.name
+                  : (await supabaseAdmin.from('services').select('name').eq('id', itemId).maybeSingle()).data?.name
+                if (itemName) {
+                  await sendPurchaseConfirmationEmail(
+                    supabaseAdmin,
+                    userId,
+                    updatedPurchase,
+                    existingId.table,
+                    itemName
+                  )
+                }
+              }
+            }
         } else {
           await logError(
             supabaseAdmin,
@@ -1792,6 +1841,33 @@ async function handleCheckoutSessionCompleted(
         }
       } else {
         console.log(`✅ ${itemType} purchase created:`, purchase.id)
+        // Sync entitlement after purchase creation
+        await syncEntitlementFromPurchase(supabaseAdmin, purchase, purchaseTable)
+        // Send purchase confirmation email
+        const itemName = item.type === 'product'
+          ? (await supabaseAdmin.from('products').select('name').eq('id', itemId).maybeSingle()).data?.name
+          : (await supabaseAdmin.from('services').select('name').eq('id', itemId).maybeSingle()).data?.name
+        if (itemName) {
+          // Get receipt URL from Stripe if available
+          let receiptUrl: string | undefined
+          if (paymentIntentId) {
+            try {
+              const stripe = getStripeInstance(isLiveMode)
+              const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+              receiptUrl = paymentIntent.charges?.data?.[0]?.receipt_url || undefined
+            } catch (error: any) {
+              console.warn('⚠️ Could not fetch receipt URL:', error.message)
+            }
+          }
+          await sendPurchaseConfirmationEmail(
+            supabaseAdmin,
+            userId,
+            purchase,
+            purchaseTable,
+            itemName,
+            receiptUrl
+          )
+        }
       }
     }
   }
@@ -2803,6 +2879,42 @@ async function handleInvoicePaid(
       console.error('❌ Error updating purchase:', error)
     } else {
       console.log('✅ Purchase updated with payment success:', purchaseId)
+      // Sync entitlement after purchase update
+      const { data: updatedPurchase } = await supabaseAdmin
+        .from(tableToUpdate)
+        .select('*')
+        .eq('id', purchaseId)
+        .single()
+      
+      if (updatedPurchase) {
+        await syncEntitlementFromPurchase(supabaseAdmin, updatedPurchase, tableToUpdate as 'product_purchases' | 'service_purchases')
+        // Send confirmation email for subscription renewals (invoice.paid)
+        if (subscriptionId) {
+          // Get product/service name
+          const idColumn = tableToUpdate === 'product_purchases' ? 'product_id' : 'service_id'
+          const itemId = updatedPurchase[idColumn]
+          const itemName = tableToUpdate === 'product_purchases'
+            ? (await supabaseAdmin.from('products').select('name').eq('id', itemId).maybeSingle()).data?.name
+            : (await supabaseAdmin.from('services').select('name').eq('id', itemId).maybeSingle()).data?.name
+          if (itemName) {
+            // Get receipt URL from invoice
+            let receiptUrl: string | undefined
+            if (invoice.hosted_invoice_url) {
+              receiptUrl = invoice.hosted_invoice_url
+            } else if (invoice.invoice_pdf) {
+              receiptUrl = invoice.invoice_pdf
+            }
+            await sendPurchaseConfirmationEmail(
+              supabaseAdmin,
+              userId,
+              updatedPurchase,
+              tableToUpdate as 'product_purchases' | 'service_purchases',
+              itemName,
+              receiptUrl
+            )
+          }
+        }
+      }
     }
   }
 }
@@ -3375,6 +3487,220 @@ async function handlePaymentMethodDetached(
 /**
  * Helper: Update purchase from subscription object
  */
+/**
+ * Send purchase confirmation email
+ * Calls send-notification-email edge function
+ */
+async function sendPurchaseConfirmationEmail(
+  supabaseAdmin: any,
+  userId: string,
+  purchase: any,
+  purchaseTable: 'product_purchases' | 'service_purchases',
+  productName: string,
+  receiptUrl?: string
+): Promise<void> {
+  try {
+    // Determine email type based on purchase type
+    const emailType = purchase.purchase_type === 'subscription' 
+      ? 'purchase_confirmation_subscription'
+      : 'purchase_confirmation_one_time'
+
+    // Get product/service slug for URL
+    const idColumn = purchaseTable === 'product_purchases' ? 'product_id' : 'service_id'
+    const itemId = purchase[idColumn]
+    
+    let productSlug: string | null = null
+    if (purchaseTable === 'product_purchases') {
+      const { data: product } = await supabaseAdmin
+        .from('products')
+        .select('slug')
+        .eq('id', itemId)
+        .maybeSingle()
+      productSlug = product?.slug || null
+    } else {
+      const { data: service } = await supabaseAdmin
+        .from('services')
+        .select('slug')
+        .eq('id', itemId)
+        .maybeSingle()
+      productSlug = service?.slug || null
+    }
+
+    // Prepare email data
+    const emailData: any = {
+      productName: productName,
+      amount: purchase.amount_paid || 0,
+      currency: purchase.currency || 'CHF',
+      purchaseDate: purchase.purchased_at || new Date().toISOString(),
+      receiptUrl: receiptUrl || null,
+      productUrl: productSlug ? `https://bitminded.ch/catalog?product=${productSlug}` : 'https://bitminded.ch/catalog',
+      preferencesUrl: 'https://bitminded.ch/account?section=notifications'
+    }
+
+    // Add subscription-specific data
+    if (emailType === 'purchase_confirmation_subscription') {
+      emailData.billingInterval = purchase.subscription_interval || 'monthly'
+      emailData.nextBillingDate = purchase.current_period_end || purchase.expires_at || null
+      emailData.manageUrl = 'https://bitminded.ch/account?section=subscription'
+    }
+
+    // Call send-notification-email edge function
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseFunctionsUrl = `${supabaseUrl}/functions/v1`
+    
+    const response = await fetch(`${supabaseFunctionsUrl}/send-notification-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''}`
+      },
+      body: JSON.stringify({
+        userId: userId,
+        type: emailType,
+        data: emailData
+      })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.warn(`⚠️ Failed to send purchase confirmation email: ${response.status} ${errorText}`)
+      // Don't throw - email sending failure shouldn't break purchase creation
+    } else {
+      console.log(`✅ Purchase confirmation email sent for purchase ${purchase.id}`)
+    }
+  } catch (error: any) {
+    console.warn('⚠️ Error sending purchase confirmation email:', error.message)
+    // Don't throw - email sending failure shouldn't break purchase creation
+  }
+}
+
+/**
+ * Sync entitlement from purchase record
+ * Creates or updates entitlements table based on purchase data
+ * This ensures UI components can display purchases correctly
+ */
+async function syncEntitlementFromPurchase(
+  supabaseAdmin: any,
+  purchase: any,
+  purchaseTable: 'product_purchases' | 'service_purchases'
+): Promise<void> {
+  try {
+    // Skip if purchase is not active or payment not succeeded
+    if (purchase.status !== 'active' || purchase.payment_status !== 'succeeded') {
+      console.log(`⏭️ Skipping entitlement sync - purchase not active or payment not succeeded: ${purchase.id}`)
+      return
+    }
+
+    // Get product/service slug (app_id uses slug, not UUID)
+    let appId: string | null = null
+    const idColumn = purchaseTable === 'product_purchases' ? 'product_id' : 'service_id'
+    const itemId = purchase[idColumn]
+
+    if (!itemId) {
+      console.warn(`⚠️ Cannot sync entitlement - missing ${idColumn} in purchase:`, purchase.id)
+      return
+    }
+
+    // Query products or services table to get slug
+    if (purchaseTable === 'product_purchases') {
+      const { data: product, error: productError } = await supabaseAdmin
+        .from('products')
+        .select('slug')
+        .eq('id', itemId)
+        .maybeSingle()
+
+      if (productError || !product) {
+        console.warn(`⚠️ Product not found for entitlement sync: ${itemId}`, productError)
+        return
+      }
+
+      appId = product.slug || null
+    } else {
+      // service_purchases
+      const { data: service, error: serviceError } = await supabaseAdmin
+        .from('services')
+        .select('slug')
+        .eq('id', itemId)
+        .maybeSingle()
+
+      if (serviceError || !service) {
+        console.warn(`⚠️ Service not found for entitlement sync: ${itemId}`, serviceError)
+        return
+      }
+
+      appId = service.slug || null
+    }
+
+    if (!appId) {
+      console.warn(`⚠️ Cannot sync entitlement - product/service has no slug: ${itemId}`)
+      return
+    }
+
+    // Map purchase type to grant_type
+    let grantType: 'subscription' | 'lifetime' | 'trial' = 'subscription'
+    if (purchase.purchase_type === 'one_time') {
+      grantType = 'lifetime'
+    } else if (purchase.purchase_type === 'trial' || purchase.is_trial) {
+      grantType = 'trial'
+    } else if (purchase.purchase_type === 'subscription') {
+      grantType = 'subscription'
+    }
+
+    // Determine expires_at
+    let expiresAt: string | null = null
+    if (grantType === 'lifetime') {
+      // One-time purchases are lifetime - no expiration
+      expiresAt = null
+    } else if (grantType === 'trial' && purchase.trial_end) {
+      expiresAt = purchase.trial_end
+    } else if (grantType === 'subscription') {
+      // Use expires_at from purchase, or current_period_end, or calculate from subscription
+      expiresAt = purchase.expires_at || purchase.current_period_end || null
+    }
+
+    // Determine active status
+    const isActive = purchase.status === 'active' && purchase.payment_status === 'succeeded'
+
+    // Prepare entitlement data
+    const entitlementData: any = {
+      user_id: purchase.user_id,
+      app_id: appId,
+      grant_type: grantType,
+      active: isActive,
+      expires_at: expiresAt,
+      stripe_customer_id: purchase.stripe_customer_id || null,
+      stripe_subscription_id: purchase.stripe_subscription_id || null,
+      updated_at: new Date().toISOString()
+    }
+
+    // Use UPSERT with (user_id, app_id) unique constraint
+    const { error: upsertError } = await supabaseAdmin
+      .from('entitlements')
+      .upsert(entitlementData, {
+        onConflict: 'user_id,app_id',
+        ignoreDuplicates: false
+      })
+
+    if (upsertError) {
+      console.error('❌ Error syncing entitlement from purchase:', upsertError)
+      await logError(
+        supabaseAdmin,
+        'stripe-webhook',
+        'database',
+        'Failed to sync entitlement from purchase',
+        { error: upsertError.message, purchaseId: purchase.id, appId, entitlementData },
+        purchase.user_id,
+        { purchase, purchaseTable }
+      )
+    } else {
+      console.log(`✅ Entitlement synced for purchase ${purchase.id} (app_id: ${appId}, grant_type: ${grantType})`)
+    }
+  } catch (error: any) {
+    console.error('❌ Exception in syncEntitlementFromPurchase:', error)
+    // Don't throw - entitlements are derived data, purchase creation should not fail
+  }
+}
+
 async function updatePurchaseFromSubscription(
   supabaseAdmin: any,
   purchaseId: string,
@@ -3446,6 +3772,17 @@ async function updatePurchaseFromSubscription(
 
   if (error) {
     console.error('❌ Error updating purchase from subscription:', error)
+  } else {
+    // Sync entitlement after purchase update
+    const { data: updatedPurchase } = await supabaseAdmin
+      .from(table)
+      .select('*')
+      .eq('id', purchaseId)
+      .single()
+    
+    if (updatedPurchase) {
+      await syncEntitlementFromPurchase(supabaseAdmin, updatedPurchase, table)
+    }
   }
 }
 

@@ -4,7 +4,7 @@
 
 ## Status: ✅ All Deployed
 
-Last updated: 2026-01-10
+Last updated: 2026-01-15
 
 ## Deployed Functions
 
@@ -23,7 +23,8 @@ Last updated: 2026-01-10
 - ✅ create-github-repository
 - ✅ family-management
 - ✅ maintenance-settings
-- ❌ **validate-license** - NOT YET DEPLOYED (required for subdomain protection)
+- ✅ stripe-webhook
+- ✅ validate-license
 - ❌ **create-cloudflare-worker** - NOT YET DEPLOYED (required for Worker creation)
 
 ## Environment Variables Set
@@ -66,6 +67,13 @@ supabase functions deploy <function-name> --project-ref dynxqnrkmjcvgzsugxtm
 - ✅ Clear token fields (bypass_cookie_secret, last_generated_token, last_generated_token_expires_at) when maintenance mode is disabled for clean state
 - ✅ Preserve existing token fields when maintenance mode is enabled (if not generating new token)
 - ✅ Include id in payload for upsert to work correctly
+
+### 2026-01-15 - Item 17: Purchase Confirmation & Entitlements
+- ✅ Updated `stripe-webhook` with entitlement sync from purchases (syncEntitlementFromPurchase function)
+- ✅ Updated `stripe-webhook` with purchase confirmation email sending (sendPurchaseConfirmationEmail function)
+- ✅ Deployed `validate-license` with family subscription checks (service_purchases and has_family_subscription_access)
+- ✅ Updated `send-notification-email` with purchase confirmation email templates (one-time and subscription)
+- All functions deployed with correct JWT settings (stripe-webhook and send-notification-email use --no-verify-jwt)
 
 ## Next Function to Deploy
 
