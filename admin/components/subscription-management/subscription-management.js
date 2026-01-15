@@ -541,17 +541,14 @@ class SubscriptionManagement {
      */
     async enrichSubscriptionData(sub, source) {
         try {
-            // Get user profile
+            // Get user profile with email
             const { data: profile } = await window.supabase
                 .from('user_profiles')
-                .select('id, username, avatar_url')
+                .select('id, username, avatar_url, email')
                 .eq('id', sub.user_id)
                 .single();
 
-            // Get user email
-            const { data: authUser } = await window.supabase.auth.admin?.getUserById(sub.user_id) || 
-                { data: { user: null } };
-            const email = authUser?.user?.email || 'N/A';
+            const email = profile?.email || 'N/A';
 
             return {
                 id: sub.id,
@@ -593,17 +590,14 @@ class SubscriptionManagement {
      */
     async enrichPurchaseData(purchase, type) {
         try {
-            // Get user profile
+            // Get user profile with email
             const { data: profile } = await window.supabase
                 .from('user_profiles')
-                .select('id, username, avatar_url')
+                .select('id, username, avatar_url, email')
                 .eq('id', purchase.user_id)
                 .single();
 
-            // Get user email
-            const { data: authUser } = await window.supabase.auth.admin?.getUserById(purchase.user_id) || 
-                { data: { user: null } };
-            const email = authUser?.user?.email || 'N/A';
+            const email = profile?.email || 'N/A';
 
             // Get product/service name
             const tableName = type === 'product' ? 'products' : 'services';
@@ -656,17 +650,14 @@ class SubscriptionManagement {
      */
     async enrichEntitlementData(entitlement) {
         try {
-            // Get user profile
+            // Get user profile with email
             const { data: profile } = await window.supabase
                 .from('user_profiles')
-                .select('id, username, avatar_url')
+                .select('id, username, avatar_url, email')
                 .eq('id', entitlement.user_id)
                 .single();
 
-            // Get user email
-            const { data: authUser } = await window.supabase.auth.admin?.getUserById(entitlement.user_id) || 
-                { data: { user: null } };
-            const email = authUser?.user?.email || 'N/A';
+            const email = profile?.email || 'N/A';
 
             // Try to determine if it's a product or service
             const { data: product } = await window.supabase
