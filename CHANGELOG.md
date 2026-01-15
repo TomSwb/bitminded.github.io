@@ -9,6 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.14] - 2026-01-15
+
+### Added
+- **Purchase Confirmation & Entitlements (Item 17)**: Complete implementation of purchase confirmation and entitlement synchronization
+  - **Entitlement Sync**: Automatic entitlement creation/updates from purchases via `syncEntitlementFromPurchase()` function
+    - Maps purchases to entitlements with correct `app_id` (product/service slug)
+    - Syncs `grant_type` based on purchase type (subscription → 'subscription', one_time → 'lifetime', trial → 'trial')
+    - Syncs expiration dates from purchases (subscriptions use `expires_at` or `current_period_end`)
+    - Integrated into checkout completion, invoice payment, and subscription update handlers
+  - **Family Subscription Access**: Added family subscription checks to `validate-license` function
+    - Checks `service_purchases` table for family plan access
+    - Calls `has_family_subscription_access()` RPC function for family group membership verification
+    - Returns appropriate reason codes (`family_service_active`, `family_subscription_active`)
+  - **Purchase Confirmation Emails**: Email notifications for purchase confirmations
+    - One-time purchase confirmation template with product details, amount, receipt link
+    - Subscription confirmation template with billing cycle, next billing date, manage link
+    - Translations added for all languages (EN/FR/DE/ES)
+    - Integrated into Stripe webhook after purchase creation and subscription renewals
+  - **App Entitlements Enhancement**: Enhanced account "Apps" section to display purchases
+    - Loads and displays purchases from `product_purchases` and `service_purchases` tables
+    - Merges purchases with entitlements in unified display
+    - Added "Source" column showing "Purchase" vs "Admin Grant" with color-coded badges
+    - Displays subscription details (billing interval, next billing date) for purchase-based access
+    - Translation keys added for purchase-related labels (EN/FR/DE/ES)
+
+### Changed
+- **App Entitlements Component**: Enhanced to show both purchases and admin-granted entitlements
+  - Added `loadPurchases()` and `loadServices()` methods
+  - Unified display with intelligent duplicate removal (prefers purchases for more detail)
+  - Added visual distinction between purchase and admin-granted access
+- **Priority Lists**: Moved item 17 (Purchase Confirmation & Entitlements) from TODO to completed items
+
+### Fixed
+- Fixed critical gap where purchases were created but entitlements were not synced
+- Fixed family plan members not having access verified correctly (added service_purchases and family subscription checks)
+- Fixed account "App Entitlements" section showing empty for purchased apps
+
+### Deployment
+- Deployed `stripe-webhook` to dev and prod (with `--no-verify-jwt`)
+- Deployed `validate-license` to dev and prod (with JWT verification)
+- Deployed `send-notification-email` to dev and prod (with `--no-verify-jwt`)
+- Updated deployment documentation in `supabase/dev/deployed-functions.md` and `supabase/prod/deployed-functions.md`
+
+---
+
 ## [1.0.13] - 2026-01-08
 
 ### Added

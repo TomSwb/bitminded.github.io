@@ -157,6 +157,36 @@ const EMAIL_TRANSLATIONS = {
         'Leave the family group'
       ],
       button: 'View Family Group'
+    },
+    
+    purchase_confirmation_one_time: {
+      subject: 'Purchase Confirmation - BitMinded',
+      title: '✅ Purchase Confirmed',
+      intro: 'Thank you for your purchase!',
+      product_title: 'Product:',
+      amount_title: 'Amount Paid:',
+      purchase_date_title: 'Purchase Date:',
+      receipt_title: 'Receipt:',
+      receipt_link: 'View Receipt',
+      access_info: 'You now have lifetime access to this product.',
+      button: 'Access Product'
+    },
+    
+    purchase_confirmation_subscription: {
+      subject: 'Subscription Confirmed - BitMinded',
+      title: '✅ Subscription Confirmed',
+      intro: 'Thank you for subscribing!',
+      product_title: 'Product:',
+      amount_title: 'Amount:',
+      billing_cycle_title: 'Billing Cycle:',
+      next_billing_title: 'Next Billing Date:',
+      purchase_date_title: 'Purchase Date:',
+      receipt_title: 'Receipt:',
+      receipt_link: 'View Receipt',
+      manage_title: 'Manage Subscription:',
+      manage_link: 'Manage Subscription',
+      access_info: 'You now have access to this product. Your subscription will automatically renew.',
+      button: 'Access Product'
     }
   },
   
@@ -307,6 +337,36 @@ const EMAIL_TRANSLATIONS = {
         'Dejar el grupo familiar'
       ],
       button: 'Ver Grupo Familiar'
+    },
+    
+    purchase_confirmation_one_time: {
+      subject: 'Confirmación de Compra - BitMinded',
+      title: '✅ Compra Confirmada',
+      intro: '¡Gracias por tu compra!',
+      product_title: 'Producto:',
+      amount_title: 'Monto Pagado:',
+      purchase_date_title: 'Fecha de Compra:',
+      receipt_title: 'Recibo:',
+      receipt_link: 'Ver Recibo',
+      access_info: 'Ahora tienes acceso de por vida a este producto.',
+      button: 'Acceder al Producto'
+    },
+    
+    purchase_confirmation_subscription: {
+      subject: 'Suscripción Confirmada - BitMinded',
+      title: '✅ Suscripción Confirmada',
+      intro: '¡Gracias por suscribirte!',
+      product_title: 'Producto:',
+      amount_title: 'Monto:',
+      billing_cycle_title: 'Ciclo de Facturación:',
+      next_billing_title: 'Próxima Fecha de Facturación:',
+      purchase_date_title: 'Fecha de Compra:',
+      receipt_title: 'Recibo:',
+      receipt_link: 'Ver Recibo',
+      manage_title: 'Gestionar Suscripción:',
+      manage_link: 'Gestionar Suscripción',
+      access_info: 'Ahora tienes acceso a este producto. Tu suscripción se renovará automáticamente.',
+      button: 'Acceder al Producto'
     }
   },
   
@@ -457,6 +517,36 @@ const EMAIL_TRANSLATIONS = {
         'Quitter le groupe familial'
       ],
       button: 'Voir le Groupe Familial'
+    },
+    
+    purchase_confirmation_one_time: {
+      subject: 'Confirmation d\'Achat - BitMinded',
+      title: '✅ Achat Confirmé',
+      intro: 'Merci pour votre achat!',
+      product_title: 'Produit:',
+      amount_title: 'Montant Payé:',
+      purchase_date_title: 'Date d\'Achat:',
+      receipt_title: 'Reçu:',
+      receipt_link: 'Voir le Reçu',
+      access_info: 'Vous avez maintenant un accès à vie à ce produit.',
+      button: 'Accéder au Produit'
+    },
+    
+    purchase_confirmation_subscription: {
+      subject: 'Abonnement Confirmé - BitMinded',
+      title: '✅ Abonnement Confirmé',
+      intro: 'Merci de vous être abonné!',
+      product_title: 'Produit:',
+      amount_title: 'Montant:',
+      billing_cycle_title: 'Cycle de Facturation:',
+      next_billing_title: 'Prochaine Date de Facturation:',
+      purchase_date_title: 'Date d\'Achat:',
+      receipt_title: 'Reçu:',
+      receipt_link: 'Voir le Reçu',
+      manage_title: 'Gérer l\'Abonnement:',
+      manage_link: 'Gérer l\'Abonnement',
+      access_info: 'Vous avez maintenant accès à ce produit. Votre abonnement sera renouvelé automatiquement.',
+      button: 'Accéder au Produit'
     }
   },
   
@@ -607,6 +697,36 @@ const EMAIL_TRANSLATIONS = {
         'Die Familiengruppe verlassen'
       ],
       button: 'Familiengruppe Anzeigen'
+    },
+    
+    purchase_confirmation_one_time: {
+      subject: 'Kaufbestätigung - BitMinded',
+      title: '✅ Kauf Bestätigt',
+      intro: 'Vielen Dank für Ihren Kauf!',
+      product_title: 'Produkt:',
+      amount_title: 'Bezahlter Betrag:',
+      purchase_date_title: 'Kaufdatum:',
+      receipt_title: 'Quittung:',
+      receipt_link: 'Quittung Anzeigen',
+      access_info: 'Sie haben jetzt lebenslangen Zugang zu diesem Produkt.',
+      button: 'Zum Produkt'
+    },
+    
+    purchase_confirmation_subscription: {
+      subject: 'Abonnement Bestätigt - BitMinded',
+      title: '✅ Abonnement Bestätigt',
+      intro: 'Vielen Dank für Ihr Abonnement!',
+      product_title: 'Produkt:',
+      amount_title: 'Betrag:',
+      billing_cycle_title: 'Abrechnungszyklus:',
+      next_billing_title: 'Nächstes Abrechnungsdatum:',
+      purchase_date_title: 'Kaufdatum:',
+      receipt_title: 'Quittung:',
+      receipt_link: 'Quittung Anzeigen',
+      manage_title: 'Abonnement Verwalten:',
+      manage_link: 'Abonnement Verwalten',
+      access_info: 'Sie haben jetzt Zugang zu diesem Produkt. Ihr Abonnement wird automatisch verlängert.',
+      button: 'Zum Produkt'
     }
   }
 }
@@ -1161,6 +1281,137 @@ const generateFamilyRoleChangedEmail = (data: any, lang: string = 'en') => {
   `
 }
 
+const generatePurchaseConfirmationOneTimeEmail = (data: any, lang: string = 'en') => {
+  const t = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].purchase_confirmation_one_time
+  const common = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS]
+  
+  const formatAmount = (amount: number, currency: string) => {
+    return new Intl.NumberFormat(lang === 'en' ? 'en-US' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'de-DE', {
+      style: 'currency',
+      currency: currency.toUpperCase()
+    }).format(amount)
+  }
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="${lang}">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${t.subject}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">BitMinded</div>
+            <div class="tagline">${common.tagline}</div>
+          </div>
+          <div class="content">
+            <h2>${t.title}</h2>
+            <p>${t.intro}</p>
+            <div class="success-box">
+              <strong>${t.product_title}</strong> ${data.productName || 'N/A'}<br>
+              <strong>${t.amount_title}</strong> ${formatAmount(data.amount || 0, data.currency || 'CHF')}<br>
+              <strong>${t.purchase_date_title}</strong> ${data.purchaseDate ? new Date(data.purchaseDate).toLocaleDateString(lang) : new Date().toLocaleDateString(lang)}
+            </div>
+            <div class="info-box">
+              ${t.access_info}
+            </div>
+            ${data.receiptUrl ? `
+            <div class="button-container">
+              <a href="${data.receiptUrl}" class="button" target="_blank">${t.receipt_link}</a>
+            </div>
+            ` : ''}
+            ${data.productUrl ? `
+            <div class="button-container">
+              <a href="${data.productUrl}" class="button">${t.button}</a>
+            </div>
+            ` : ''}
+          </div>
+          <div class="footer">
+            <p>${common.footer_notification}<br>
+            <a href="${data.preferencesUrl || 'https://bitminded.github.io/account?section=notifications'}">${common.manage_preferences}</a></p>
+            <p>${common.copyright}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
+const generatePurchaseConfirmationSubscriptionEmail = (data: any, lang: string = 'en') => {
+  const t = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].purchase_confirmation_subscription
+  const common = EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS]
+  
+  const formatAmount = (amount: number, currency: string) => {
+    return new Intl.NumberFormat(lang === 'en' ? 'en-US' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'de-DE', {
+      style: 'currency',
+      currency: currency.toUpperCase()
+    }).format(amount)
+  }
+  
+  const formatBillingCycle = (interval: string) => {
+    if (interval === 'monthly' || interval === 'month') return lang === 'en' ? 'Monthly' : lang === 'es' ? 'Mensual' : lang === 'fr' ? 'Mensuel' : 'Monatlich'
+    if (interval === 'yearly' || interval === 'year') return lang === 'en' ? 'Yearly' : lang === 'es' ? 'Anual' : lang === 'fr' ? 'Annuel' : 'Jährlich'
+    return interval
+  }
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="${lang}">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${t.subject}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">BitMinded</div>
+            <div class="tagline">${common.tagline}</div>
+          </div>
+          <div class="content">
+            <h2>${t.title}</h2>
+            <p>${t.intro}</p>
+            <div class="success-box">
+              <strong>${t.product_title}</strong> ${data.productName || 'N/A'}<br>
+              <strong>${t.amount_title}</strong> ${formatAmount(data.amount || 0, data.currency || 'CHF')}<br>
+              <strong>${t.billing_cycle_title}</strong> ${formatBillingCycle(data.billingInterval || 'monthly')}<br>
+              ${data.nextBillingDate ? `<strong>${t.next_billing_title}</strong> ${new Date(data.nextBillingDate).toLocaleDateString(lang)}<br>` : ''}
+              <strong>${t.purchase_date_title}</strong> ${data.purchaseDate ? new Date(data.purchaseDate).toLocaleDateString(lang) : new Date().toLocaleDateString(lang)}
+            </div>
+            <div class="info-box">
+              ${t.access_info}
+            </div>
+            ${data.receiptUrl ? `
+            <div class="button-container">
+              <a href="${data.receiptUrl}" class="button" target="_blank">${t.receipt_link}</a>
+            </div>
+            ` : ''}
+            ${data.manageUrl ? `
+            <div class="button-container">
+              <a href="${data.manageUrl}" class="button">${t.manage_link}</a>
+            </div>
+            ` : ''}
+            ${data.productUrl ? `
+            <div class="button-container">
+              <a href="${data.productUrl}" class="button">${t.button}</a>
+            </div>
+            ` : ''}
+          </div>
+          <div class="footer">
+            <p>${common.footer_notification}<br>
+            <a href="${data.preferencesUrl || 'https://bitminded.github.io/account?section=notifications'}">${common.manage_preferences}</a></p>
+            <p>${common.copyright}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
 // Email template map
 const EMAIL_TEMPLATES: Record<string, { subject: (lang: string) => string, html: (data: any, lang: string) => string }> = {
   password_changed: {
@@ -1202,6 +1453,14 @@ const EMAIL_TEMPLATES: Record<string, { subject: (lang: string) => string, html:
   family_role_changed: {
     subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].family_role_changed.subject,
     html: generateFamilyRoleChangedEmail
+  },
+  purchase_confirmation_one_time: {
+    subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].purchase_confirmation_one_time.subject,
+    html: generatePurchaseConfirmationOneTimeEmail
+  },
+  purchase_confirmation_subscription: {
+    subject: (lang: string) => EMAIL_TRANSLATIONS[lang as keyof typeof EMAIL_TRANSLATIONS].purchase_confirmation_subscription.subject,
+    html: generatePurchaseConfirmationSubscriptionEmail
   }
 }
 
@@ -1217,6 +1476,8 @@ const NOTIFICATION_TYPE_MAP: Record<string, string> = {
   family_deleted: 'family_deleted',
   family_member_left: 'family_member_left',
   family_role_changed: 'family_role_changed',
+  purchase_confirmation_one_time: 'purchase_notifications',
+  purchase_confirmation_subscription: 'purchase_notifications',
 }
 
 serve(async (req) => {
