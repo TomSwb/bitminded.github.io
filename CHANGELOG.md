@@ -9,6 +9,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.15] - 2026-01-XX
+
+### Added
+- **Admin Subscription Management Component (Item 17.2)**: Complete subscription lifecycle management interface
+  - **Subscription Dashboard**: Metrics display with Total Subscriptions, Active Subscriptions, MRR (Monthly Recurring Revenue), and Churn Rate
+  - **Unified Subscription View**: Aggregates subscriptions from multiple sources
+    - Stripe subscriptions from `user_subscriptions` table
+    - Product subscriptions from `product_purchases` table
+    - Service subscriptions from `service_purchases` table
+    - Manual entitlements from `entitlements` table
+  - **Advanced Filtering**: Comprehensive filter panel with status, product/service, billing cycle, source, payment status, and date range filters
+  - **Subscription Table**: 8-column table displaying User, Product/Plan, Status, Billing, Revenue, Source, Payment Method, and Actions
+  - **Subscription Detail Modal**: Multi-tab interface with Overview, Billing History, Events, and Modifications tabs
+  - **Subscription Actions**: Full lifecycle management capabilities
+    - Cancel subscription (immediate or at period end)
+    - Refund and cancel
+    - Extend subscription (add days/months)
+    - Change plan (upgrade/downgrade with proration)
+    - Pause/Resume subscription
+    - View in Stripe (external link)
+  - **Stripe Sync Functionality**: Sync all Stripe subscriptions with database via Edge Function
+  - **Export Functionality**: CSV export of filtered subscriptions
+  - **Multi-language Support**: Complete translations for EN/FR/DE/ES
+- **Sync Stripe Subscriptions Edge Function**: New Edge Function `sync-stripe-subscriptions`
+  - Fetches all Stripe subscriptions via Stripe API
+  - Compares with `user_subscriptions` table
+  - Creates or updates subscription records
+  - Returns sync results (created, updated, errors)
+  - Admin-only access with rate limiting (5 req/min, 20 req/hour)
+  - Handles pagination for large subscription lists
+
+### Changed
+- **Admin Layout**: Subscription Management component registered and ready for use
+- **Priority Lists**: Item 17.2 (Subscription Management Component) implementation completed
+
+### Deployment
+- Deployed `sync-stripe-subscriptions` Edge Function to dev (eygpejbljuqpxwwoawkn)
+- Deployed `sync-stripe-subscriptions` Edge Function to prod (dynxqnrkmjcvgzsugxtm)
+- Updated deployment documentation in `supabase/dev/deployed-functions.md` and `supabase/prod/deployed-functions.md`
+
+---
+
 ## [1.0.14] - 2026-01-15
 
 ### Added
@@ -543,7 +585,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.9...HEAD
+[Unreleased]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.15...HEAD
+[1.0.15]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.14...v1.0.15
 [1.0.9]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/bitminded/bitminded.github.io/compare/v1.0.6...v1.0.7

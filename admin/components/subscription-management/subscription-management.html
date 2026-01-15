@@ -1,0 +1,262 @@
+<!-- Subscription Management Component -->
+<div class="subscription-management" id="subscription-management">
+    <!-- Header -->
+    <div class="subscription-management__header">
+        <div class="subscription-management__title-section">
+            <h1 class="subscription-management__title translatable-content" data-translation-key="subscription_management">Subscription Management</h1>
+        </div>
+        
+        <div class="subscription-management__actions">
+            <button class="subscription-management__button subscription-management__button--secondary" id="sync-stripe-button">
+                <span class="translatable-content" data-translation-key="sync_with_stripe">Sync with Stripe</span>
+            </button>
+            <button class="subscription-management__button subscription-management__button--secondary" id="export-subscriptions-button">
+                <span class="translatable-content" data-translation-key="export_subscriptions">Export</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="subscription-management__stats">
+        <div class="subscription-management__stat-card">
+            <div class="subscription-management__stat-label translatable-content" data-translation-key="total_subscriptions">Total Subscriptions</div>
+            <div class="subscription-management__stat-value" id="stat-total">0</div>
+        </div>
+        <div class="subscription-management__stat-card">
+            <div class="subscription-management__stat-label translatable-content" data-translation-key="active_subscriptions">Active Subscriptions</div>
+            <div class="subscription-management__stat-value" id="stat-active">0</div>
+        </div>
+        <div class="subscription-management__stat-card">
+            <div class="subscription-management__stat-label translatable-content" data-translation-key="mrr">Monthly Recurring Revenue</div>
+            <div class="subscription-management__stat-value" id="stat-mrr">CHF 0</div>
+        </div>
+        <div class="subscription-management__stat-card">
+            <div class="subscription-management__stat-label translatable-content" data-translation-key="churn_rate">Churn Rate</div>
+            <div class="subscription-management__stat-value" id="stat-churn">0%</div>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="subscription-management__controls">
+        <div class="subscription-management__filters">
+            <!-- Status Filter -->
+            <div class="subscription-management__filter-group">
+                <label for="status-filter" class="subscription-management__filter-label translatable-content" data-translation-key="subscription_status">Status</label>
+                <select class="subscription-management__filter-select" id="status-filter">
+                    <option value="all" class="translatable-content" data-translation-key="all">All</option>
+                    <option value="active" class="translatable-content" data-translation-key="active">Active</option>
+                    <option value="cancelled" class="translatable-content" data-translation-key="cancelled">Cancelled</option>
+                    <option value="past_due" class="translatable-content" data-translation-key="past_due">Past Due</option>
+                    <option value="trialing" class="translatable-content" data-translation-key="trialing">Trialing</option>
+                </select>
+            </div>
+
+            <!-- Product/Service Filter -->
+            <div class="subscription-management__filter-group">
+                <label for="product-filter" class="subscription-management__filter-label translatable-content" data-translation-key="product_service">Product/Service</label>
+                <select class="subscription-management__filter-select" id="product-filter">
+                    <option value="all" class="translatable-content" data-translation-key="all">All</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Billing Cycle Filter -->
+            <div class="subscription-management__filter-group">
+                <label for="billing-filter" class="subscription-management__filter-label translatable-content" data-translation-key="billing_cycle">Billing Cycle</label>
+                <select class="subscription-management__filter-select" id="billing-filter">
+                    <option value="all" class="translatable-content" data-translation-key="all">All</option>
+                    <option value="monthly" class="translatable-content" data-translation-key="monthly">Monthly</option>
+                    <option value="yearly" class="translatable-content" data-translation-key="yearly">Yearly</option>
+                    <option value="lifetime" class="translatable-content" data-translation-key="lifetime">Lifetime</option>
+                </select>
+            </div>
+
+            <!-- Source Filter -->
+            <div class="subscription-management__filter-group">
+                <label for="source-filter" class="subscription-management__filter-label translatable-content" data-translation-key="source">Source</label>
+                <select class="subscription-management__filter-select" id="source-filter">
+                    <option value="all" class="translatable-content" data-translation-key="all">All</option>
+                    <option value="stripe" class="translatable-content" data-translation-key="stripe">Stripe</option>
+                    <option value="manual" class="translatable-content" data-translation-key="manual">Manual</option>
+                    <option value="trial" class="translatable-content" data-translation-key="trial">Trial</option>
+                </select>
+            </div>
+
+            <!-- Payment Status Filter -->
+            <div class="subscription-management__filter-group">
+                <label for="payment-status-filter" class="subscription-management__filter-label translatable-content" data-translation-key="payment_status">Payment Status</label>
+                <select class="subscription-management__filter-select" id="payment-status-filter">
+                    <option value="all" class="translatable-content" data-translation-key="all">All</option>
+                    <option value="paid" class="translatable-content" data-translation-key="paid">Paid</option>
+                    <option value="failed" class="translatable-content" data-translation-key="failed">Failed</option>
+                    <option value="pending" class="translatable-content" data-translation-key="pending">Pending</option>
+                </select>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="subscription-management__filter-group">
+                <label for="date-from-filter" class="subscription-management__filter-label translatable-content" data-translation-key="date_from">From</label>
+                <input type="date" class="subscription-management__filter-input" id="date-from-filter">
+            </div>
+
+            <div class="subscription-management__filter-group">
+                <label for="date-to-filter" class="subscription-management__filter-label translatable-content" data-translation-key="date_to">To</label>
+                <input type="date" class="subscription-management__filter-input" id="date-to-filter">
+            </div>
+
+            <!-- Clear Filters Button -->
+            <div class="subscription-management__filter-group">
+                <button type="button" class="subscription-management__button subscription-management__button--text" id="clear-filters-button">
+                    <span class="translatable-content" data-translation-key="clear_filters">Clear Filters</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="subscription-management__loading" id="subscription-loading" style="display: none;">
+        <div class="subscription-management__loading-text translatable-content" data-translation-key="loading_subscriptions">Loading subscriptions...</div>
+    </div>
+
+    <!-- Error State -->
+    <div class="subscription-management__error" id="subscription-error" style="display: none;">
+        <div class="subscription-management__error-text" id="subscription-error-text"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="subscription-management__empty" id="subscription-empty" style="display: none;">
+        <div class="subscription-management__empty-text translatable-content" data-translation-key="no_subscriptions_found">No subscriptions found</div>
+    </div>
+
+    <!-- Subscriptions Table -->
+    <div class="subscription-management__table-container">
+        <table class="subscription-management__table" id="subscriptions-table">
+            <thead>
+                <tr>
+                    <th class="subscription-management__sortable-header" data-sort="user">
+                        <span class="translatable-content" data-translation-key="user">User</span>
+                    </th>
+                    <th class="subscription-management__sortable-header" data-sort="product">
+                        <span class="translatable-content" data-translation-key="product_plan">Product/Plan</span>
+                    </th>
+                    <th class="subscription-management__sortable-header" data-sort="status">
+                        <span class="translatable-content" data-translation-key="status">Status</span>
+                    </th>
+                    <th class="subscription-management__sortable-header" data-sort="billing">
+                        <span class="translatable-content" data-translation-key="billing">Billing</span>
+                    </th>
+                    <th class="subscription-management__sortable-header" data-sort="revenue">
+                        <span class="translatable-content" data-translation-key="revenue">Revenue</span>
+                    </th>
+                    <th>
+                        <span class="translatable-content" data-translation-key="source">Source</span>
+                    </th>
+                    <th>
+                        <span class="translatable-content" data-translation-key="payment_method">Payment Method</span>
+                    </th>
+                    <th>
+                        <span class="translatable-content" data-translation-key="actions">Actions</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="subscriptions-table-body">
+                <!-- Populated dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="subscription-management__pagination" id="subscription-pagination" style="display: none;">
+        <div class="subscription-management__pagination-info">
+            <span class="translatable-content" data-translation-key="showing">Showing</span>
+            <span id="pagination-start">0</span>
+            <span class="translatable-content" data-translation-key="to">to</span>
+            <span id="pagination-end">0</span>
+            <span class="translatable-content" data-translation-key="of">of</span>
+            <span id="pagination-total">0</span>
+        </div>
+        <div class="subscription-management__pagination-controls">
+            <button class="subscription-management__button subscription-management__button--secondary" id="pagination-prev" disabled>
+                <span class="translatable-content" data-translation-key="previous">Previous</span>
+            </button>
+            <button class="subscription-management__button subscription-management__button--secondary" id="pagination-next" disabled>
+                <span class="translatable-content" data-translation-key="next">Next</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Subscription Detail Modal -->
+<div class="subscription-management__modal" id="subscription-detail-modal" style="display: none;">
+    <div class="subscription-management__modal-overlay"></div>
+    <div class="subscription-management__modal-content">
+        <div class="subscription-management__modal-header">
+            <h2 class="subscription-management__modal-title translatable-content" data-translation-key="subscription_details">Subscription Details</h2>
+            <button class="subscription-management__modal-close" id="modal-close-button">&times;</button>
+        </div>
+        
+        <div class="subscription-management__modal-tabs">
+            <button class="subscription-management__modal-tab active" data-tab="overview">
+                <span class="translatable-content" data-translation-key="overview">Overview</span>
+            </button>
+            <button class="subscription-management__modal-tab" data-tab="billing">
+                <span class="translatable-content" data-translation-key="billing_history">Billing History</span>
+            </button>
+            <button class="subscription-management__modal-tab" data-tab="events">
+                <span class="translatable-content" data-translation-key="events">Events</span>
+            </button>
+            <button class="subscription-management__modal-tab" data-tab="modifications">
+                <span class="translatable-content" data-translation-key="modifications">Modifications</span>
+            </button>
+        </div>
+
+        <div class="subscription-management__modal-body">
+            <div class="subscription-management__modal-tab-content active" id="tab-overview">
+                <!-- Overview content populated dynamically -->
+            </div>
+            <div class="subscription-management__modal-tab-content" id="tab-billing">
+                <!-- Billing history populated dynamically -->
+            </div>
+            <div class="subscription-management__modal-tab-content" id="tab-events">
+                <!-- Events timeline populated dynamically -->
+            </div>
+            <div class="subscription-management__modal-tab-content" id="tab-modifications">
+                <!-- Modifications history populated dynamically -->
+            </div>
+        </div>
+
+        <div class="subscription-management__modal-footer">
+            <button class="subscription-management__button subscription-management__button--secondary" id="modal-cancel-subscription">
+                <span class="translatable-content" data-translation-key="cancel_subscription">Cancel Subscription</span>
+            </button>
+            <button class="subscription-management__button" id="modal-close-button-2">
+                <span class="translatable-content" data-translation-key="close">Close</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Action Confirmation Modal -->
+<div class="subscription-management__modal" id="action-confirm-modal" style="display: none;">
+    <div class="subscription-management__modal-overlay"></div>
+    <div class="subscription-management__modal-content subscription-management__modal-content--small">
+        <div class="subscription-management__modal-header">
+            <h2 class="subscription-management__modal-title" id="confirm-modal-title"></h2>
+            <button class="subscription-management__modal-close" id="confirm-modal-close">&times;</button>
+        </div>
+        <div class="subscription-management__modal-body">
+            <p id="confirm-modal-message"></p>
+            <div id="confirm-modal-form" style="display: none;">
+                <!-- Form fields populated dynamically -->
+            </div>
+        </div>
+        <div class="subscription-management__modal-footer">
+            <button class="subscription-management__button subscription-management__button--secondary" id="confirm-modal-cancel">
+                <span class="translatable-content" data-translation-key="cancel">Cancel</span>
+            </button>
+            <button class="subscription-management__button" id="confirm-modal-confirm">
+                <span class="translatable-content" data-translation-key="confirm">Confirm</span>
+            </button>
+        </div>
+    </div>
+</div>

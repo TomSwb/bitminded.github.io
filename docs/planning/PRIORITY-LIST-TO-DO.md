@@ -47,6 +47,108 @@
 
 ---
 
+### 17.2. Admin Subscription Management Component ⚠️ **MISSING**
+**Status**: **MISSING** - Only SPEC.md exists (`admin/components/subscription-management/SPEC.md`)  
+**Priority**: High - Essential for admin subscription lifecycle management  
+**Note**: Component spec exists but implementation not started. See [admin/components/subscription-management/SPEC.md](../../admin/components/subscription-management/SPEC.md) for full specification.
+
+**Action**:
+- Create subscription management component in `admin/components/subscription-management/`
+- Implement subscription viewing and filtering:
+  - View all subscriptions (Stripe + manual grants)
+  - Filter by status (Active / Cancelled / Past Due / Trialing)
+  - Filter by product, billing cycle, source, payment status
+  - Date range filtering
+- Implement subscription metrics dashboard:
+  - Total subscriptions count
+  - Active subscriptions count
+  - MRR (Monthly Recurring Revenue)
+  - Churn rate calculation
+- Implement subscription table with columns:
+  - User (avatar + username + email)
+  - Product/Plan (name, type, price)
+  - Status (color-coded badges)
+  - Billing (period dates, next billing)
+  - Revenue (amount per cycle, total paid, LTV)
+  - Source (Stripe/manual/trial)
+  - Payment Method (card brand + last 4)
+  - Actions (view, modify, cancel, refund)
+- Implement subscription detail modal with tabs:
+  - Overview (basic subscription info)
+  - Billing History (charges and invoices)
+  - Events (subscription events timeline)
+  - Modifications (change history)
+- Implement subscription actions:
+  - Cancel subscription (immediate or at period end)
+  - Refund and cancel
+  - Extend subscription (add days/months)
+  - Change plan (upgrade/downgrade with proration)
+  - Pause/Resume subscription
+  - Apply discount/coupon
+  - Update payment method
+- Implement Stripe integration:
+  - Sync with Stripe subscriptions
+  - View subscription in Stripe (external link)
+  - Cancel via Stripe API
+  - Process refunds via Stripe API
+  - Update subscription plans via Stripe API
+- Implement subscription analytics charts:
+  - Subscription growth over time (line chart)
+  - Plan distribution (pie chart)
+  - Churn rate trend
+  - MRR trend
+- Add translations for all UI text (EN/FR/DE/ES)
+- Integrate with admin layout component
+- Add proper error handling and logging
+
+**Key Files to Create**:
+- `admin/components/subscription-management/subscription-management.html`
+- `admin/components/subscription-management/subscription-management.css`
+- `admin/components/subscription-management/subscription-management.js`
+- `admin/components/subscription-management/subscription-management-translations.js`
+- `admin/components/subscription-management/locales/subscription-management-locales.json`
+
+**Database Queries Needed**:
+- Combine `entitlements` with `product_purchases` and `service_purchases`
+- Join with `user_profiles` and `auth.users` for user info
+- Calculate metrics (MRR, churn rate, LTV)
+- Query Stripe subscription data (via edge function or direct API)
+
+**Stripe Integration**:
+- Edge function for Stripe API calls (cancel, refund, update plan)
+- Webhook handlers already exist in `stripe-webhook` function
+- Need to add admin-specific edge functions for subscription management actions
+
+**Questions to Answer Before Implementation**:
+- Should we create edge functions for each action (cancel, refund, extend) or one unified function?
+- How to handle Stripe API rate limits when syncing all subscriptions?
+- Should subscription data be cached? How long?
+- How to handle manual subscriptions (not from Stripe) in the UI?
+- Should we show family plan subscriptions separately or merged with individual subscriptions?
+
+**Testing**:
+- [ ] Test component initialization and loading
+- [ ] Test subscription list loading and filtering
+- [ ] Test metrics calculation (MRR, churn rate)
+- [ ] Test Stripe subscription sync
+- [ ] Test cancel subscription (Stripe)
+- [ ] Test cancel subscription (manual)
+- [ ] Test refund and cancel flow
+- [ ] Test extend subscription
+- [ ] Test change plan (upgrade/downgrade)
+- [ ] Test subscription detail modal
+- [ ] Test billing history display
+- [ ] Test analytics charts rendering
+- [ ] Test export functionality
+- [ ] Test mobile responsiveness
+- [ ] Test all translations (EN/FR/DE/ES)
+- [ ] Test error handling (Stripe API failures, network errors)
+- [ ] Test admin permission checks
+
+**Depends on**: #17 (Purchase Confirmation & Entitlements) - Needs entitlements and purchase data to display
+
+---
+
 ### 18. Family Plan Stripe Checkout Integration ⚠️ **PARTIALLY IMPLEMENTED**
 **Status**: **PARTIALLY IMPLEMENTED** - Webhook handling completed, checkout UI missing  
 **Priority**: High - Depends on #16 (Stripe Checkout Integration)  

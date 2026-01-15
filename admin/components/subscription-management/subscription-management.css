@@ -1,0 +1,557 @@
+/* Subscription Management Component Styles */
+
+/* ===== MAIN CONTAINER ===== */
+.subscription-management {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-md);
+}
+
+/* ===== HEADER ===== */
+.subscription-management__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.subscription-management__title-section {
+    flex: 1;
+}
+
+.subscription-management__title {
+    margin: 0 0 var(--spacing-sm);
+    font-size: var(--font-size-3xl);
+    color: var(--color-text-primary);
+    font-weight: bold;
+}
+
+.subscription-management__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+/* ===== STATS ROW ===== */
+.subscription-management__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.subscription-management__stat-card {
+    background-color: var(--color-bg-secondary);
+    border: 2px solid var(--border-color-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.subscription-management__stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.subscription-management__stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: bold;
+    color: var(--color-text-primary);
+}
+
+/* ===== CONTROLS ===== */
+.subscription-management__controls {
+    margin-bottom: var(--spacing-lg);
+}
+
+.subscription-management__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    align-items: flex-end;
+}
+
+.subscription-management__filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.subscription-management__filter-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.subscription-management__filter-select,
+.subscription-management__filter-input {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 2px solid var(--border-color-primary);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    border-radius: var(--radius-sm);
+    min-width: 150px;
+}
+
+.subscription-management__filter-select:focus,
+.subscription-management__filter-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+/* ===== BUTTONS ===== */
+.subscription-management__button {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: 2px solid var(--border-color-primary);
+    background-color: transparent;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.subscription-management__button:hover {
+    background-color: var(--color-primary);
+    color: var(--color-background-primary);
+}
+
+.subscription-management__button--secondary {
+    border-color: var(--border-color-secondary);
+}
+
+.subscription-management__button--secondary:hover {
+    background-color: var(--color-secondary);
+}
+
+.subscription-management__button--text {
+    border: none;
+    text-decoration: underline;
+    padding: var(--spacing-sm);
+}
+
+.subscription-management__button--text:hover {
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+.subscription-management__button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.subscription-management__button:disabled:hover {
+    background-color: transparent;
+    color: var(--color-text-primary);
+}
+
+/* ===== LOADING/ERROR/EMPTY STATES ===== */
+.subscription-management__loading,
+.subscription-management__error,
+.subscription-management__empty {
+    text-align: center;
+    padding: var(--spacing-xl);
+    margin: var(--spacing-xl) 0;
+}
+
+.subscription-management__loading-text,
+.subscription-management__error-text,
+.subscription-management__empty-text {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+}
+
+.subscription-management__error-text {
+    color: var(--color-error);
+}
+
+/* ===== TABLE ===== */
+.subscription-management__table-container {
+    overflow-x: auto;
+    margin-bottom: var(--spacing-lg);
+}
+
+.subscription-management__table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-bg-primary);
+}
+
+.subscription-management__table thead {
+    background-color: var(--color-bg-secondary);
+}
+
+.subscription-management__table th {
+    padding: var(--spacing-md);
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    border-bottom: 2px solid var(--border-color-primary);
+}
+
+.subscription-management__table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-primary);
+    color: var(--color-text-primary);
+}
+
+.subscription-management__table tbody tr:hover {
+    background-color: var(--color-bg-secondary);
+}
+
+.subscription-management__sortable-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.subscription-management__sortable-header:hover {
+    background-color: var(--color-bg-secondary);
+}
+
+.subscription-management__sortable-header::after {
+    content: ' ↕';
+    opacity: 0.3;
+    font-size: var(--font-size-sm);
+}
+
+.subscription-management__sortable-header[data-sort-direction="asc"]::after {
+    content: ' ↑';
+    opacity: 1;
+}
+
+.subscription-management__sortable-header[data-sort-direction="desc"]::after {
+    content: ' ↓';
+    opacity: 1;
+}
+
+/* ===== STATUS BADGES ===== */
+.subscription-management__status-badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.subscription-management__status-badge--active {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: rgb(34, 197, 94);
+}
+
+.subscription-management__status-badge--cancelled {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: rgb(107, 114, 128);
+}
+
+.subscription-management__status-badge--past_due {
+    background-color: rgba(234, 179, 8, 0.2);
+    color: rgb(234, 179, 8);
+}
+
+.subscription-management__status-badge--trialing {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: rgb(59, 130, 246);
+}
+
+/* ===== SOURCE BADGES ===== */
+.subscription-management__source-badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.subscription-management__source-badge--stripe {
+    background-color: rgba(99, 102, 241, 0.2);
+    color: rgb(99, 102, 241);
+}
+
+.subscription-management__source-badge--manual {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: rgb(107, 114, 128);
+}
+
+.subscription-management__source-badge--trial {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: rgb(59, 130, 246);
+}
+
+/* ===== USER CELL ===== */
+.subscription-management__user-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.subscription-management__user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.subscription-management__user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.subscription-management__user-name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.subscription-management__user-name:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
+.subscription-management__user-email {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+/* ===== ACTIONS DROPDOWN ===== */
+.subscription-management__actions-cell {
+    position: relative;
+}
+
+.subscription-management__actions-button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: transparent;
+    border: 1px solid var(--border-color-primary);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.subscription-management__actions-button:hover {
+    background-color: var(--color-bg-secondary);
+}
+
+.subscription-management__actions-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: var(--color-bg-primary);
+    border: 2px solid var(--border-color-primary);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    min-width: 200px;
+    display: none;
+}
+
+.subscription-management__actions-dropdown.show {
+    display: block;
+}
+
+.subscription-management__actions-item {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.subscription-management__actions-item:hover {
+    background-color: var(--color-bg-secondary);
+}
+
+.subscription-management__actions-item--danger {
+    color: var(--color-error);
+}
+
+.subscription-management__actions-item--danger:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* ===== PAGINATION ===== */
+.subscription-management__pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-lg);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.subscription-management__pagination-info {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.subscription-management__pagination-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+/* ===== MODAL ===== */
+.subscription-management__modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subscription-management__modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.subscription-management__modal-content {
+    position: relative;
+    background-color: var(--color-bg-primary);
+    border: 2px solid var(--border-color-primary);
+    border-radius: var(--radius-lg);
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 1001;
+}
+
+.subscription-management__modal-content--small {
+    max-width: 500px;
+}
+
+.subscription-management__modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 2px solid var(--border-color-primary);
+}
+
+.subscription-management__modal-title {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    color: var(--color-text-primary);
+}
+
+.subscription-management__modal-close {
+    background: none;
+    border: none;
+    font-size: var(--font-size-2xl);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+}
+
+.subscription-management__modal-close:hover {
+    background-color: var(--color-bg-secondary);
+}
+
+.subscription-management__modal-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color-primary);
+    padding: 0 var(--spacing-lg);
+}
+
+.subscription-management__modal-tab {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.subscription-management__modal-tab:hover {
+    color: var(--color-text-primary);
+}
+
+.subscription-management__modal-tab.active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+}
+
+.subscription-management__modal-body {
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    flex: 1;
+}
+
+.subscription-management__modal-tab-content {
+    display: none;
+}
+
+.subscription-management__modal-tab-content.active {
+    display: block;
+}
+
+.subscription-management__modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    border-top: 2px solid var(--border-color-primary);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .subscription-management__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .subscription-management__stats {
+        grid-template-columns: 1fr;
+    }
+
+    .subscription-management__filters {
+        flex-direction: column;
+    }
+
+    .subscription-management__filter-select,
+    .subscription-management__filter-input {
+        width: 100%;
+    }
+
+    .subscription-management__table-container {
+        overflow-x: scroll;
+    }
+
+    .subscription-management__modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .subscription-management__modal-tabs {
+        overflow-x: auto;
+    }
+}
