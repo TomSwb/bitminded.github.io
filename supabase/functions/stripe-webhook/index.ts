@@ -2223,6 +2223,18 @@ async function handleSubscriptionDeleted(
     )
   } else {
     console.log('✅ Purchase marked as cancelled/expired:', purchaseId)
+    
+    // Deactivate entitlements after marking purchase as cancelled/expired
+    // Fetch updated purchase to sync entitlements
+    const { data: updatedPurchase } = await supabaseAdmin
+      .from(purchaseTable)
+      .select('*')
+      .eq('id', purchaseId)
+      .single()
+    
+    if (updatedPurchase) {
+      await syncEntitlementFromPurchase(supabaseAdmin, updatedPurchase, purchaseTable)
+    }
   }
 }
 
@@ -3585,9 +3597,13 @@ async function syncEntitlementFromPurchase(
   purchaseTable: 'product_purchases' | 'service_purchases'
 ): Promise<void> {
   try {
-    // Skip if purchase is not active or payment not succeeded
-    if (purchase.status !== 'active' || purchase.payment_status !== 'succeeded') {
-      console.log(`⏭️ Skipping entitlement sync - purchase not active or payment not succeeded: ${purchase.id}`)
+    // For cancelled/expired purchases, we still need to sync to deactivate entitlements
+    // Only skip if purchase is in an invalid state (e.g., pending without payment)
+    const shouldDeactivate = purchase.status === 'cancelled' || purchase.status === 'expired'
+    const isActivePurchase = purchase.status === 'active' && purchase.payment_status === 'succeeded'
+    
+    if (!isActivePurchase && !shouldDeactivate) {
+      console.log(`⏭️ Skipping entitlement sync - purchase not active or cancelled: ${purchase.id} (status: ${purchase.status}, payment_status: ${purchase.payment_status})`)
       return
     }
 
@@ -3654,12 +3670,18 @@ async function syncEntitlementFromPurchase(
     } else if (grantType === 'trial' && purchase.trial_end) {
       expiresAt = purchase.trial_end
     } else if (grantType === 'subscription') {
-      // Use expires_at from purchase, or current_period_end, or calculate from subscription
-      expiresAt = purchase.expires_at || purchase.current_period_end || null
+      // For cancelled subscriptions, use cancelled_at or current_period_end
+      // For active subscriptions, use expires_at or current_period_end
+      if (shouldDeactivate) {
+        expiresAt = purchase.cancelled_at || purchase.current_period_end || purchase.expires_at || null
+      } else {
+        expiresAt = purchase.expires_at || purchase.current_period_end || null
+      }
     }
 
     // Determine active status
-    const isActive = purchase.status === 'active' && purchase.payment_status === 'succeeded'
+    // For cancelled/expired purchases, always set active to false
+    const isActive = !shouldDeactivate && (purchase.status === 'active' && purchase.payment_status === 'succeeded')
 
     // Prepare entitlement data
     const entitlementData: any = {

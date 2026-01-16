@@ -65,9 +65,9 @@ class AccessControl {
 
             this.isInitialized = true;
             
-            // Final translation update after everything is loaded
+            // Final translation update after everything is loaded (skip re-render to prevent flickering)
             setTimeout(() => {
-                this.updateTranslations();
+                this.updateTranslations(true); // Skip re-render since table is already rendered
             }, 200);
 
         } catch (error) {
@@ -722,11 +722,6 @@ class AccessControl {
                 this.elements.grantedByOptions.appendChild(label);
             });
         }
-        
-        // Reapply translations after populating filter options
-        setTimeout(() => {
-            this.updateTranslations();
-        }, 100);
 
         // Product search is handled by handleProductSearch() - no need to populate dropdown
     }
@@ -843,10 +838,11 @@ class AccessControl {
 
         this.renderGrants();
         
-        // Reapply translations after rendering (in case DOM was reset)
-        setTimeout(() => {
-            this.updateTranslations();
-        }, 100);
+        // Update translations without re-rendering (translations are already applied in renderGrants)
+        if (window.accessControlTranslations) {
+            window.accessControlTranslations.updateTranslations();
+        }
+        this.showTranslatableContent();
     }
 
     /**
@@ -1758,8 +1754,9 @@ class AccessControl {
 
     /**
      * Update translations
+     * @param {boolean} skipRerender - If true, skip re-rendering the table (prevents flickering)
      */
-    updateTranslations() {
+    updateTranslations(skipRerender = false) {
         if (window.accessControlTranslations) {
             window.accessControlTranslations.updateTranslations();
         }
@@ -1768,8 +1765,8 @@ class AccessControl {
         // Re-populate filter options with new translations
         this.populateFilterOptions();
         
-        // Re-render table with new translations
-        if (this.grants && this.grants.length > 0) {
+        // Re-render table with new translations (only if not skipping)
+        if (!skipRerender && this.grants && this.grants.length > 0) {
             this.renderGrants();
         }
     }
