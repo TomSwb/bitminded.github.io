@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.16] - 2026-01-XX
+
+### Fixed
+- **Admin Subscription Management Component**: Fixed translation visibility issue
+  - Added `showTranslatableContent()` method to make translatable elements visible after initialization
+  - Translatable content now properly displays on component load and language changes
+
+### Changed
+- **Admin Subscription Management Component UI Alignment**: Aligned component styling with user and product management panels
+  - Updated header layout to centered title with absolute-positioned actions
+  - Added search bar with consistent styling
+  - Wrapped filters in bordered container with proper background and padding
+  - Updated table container with background, border, and min-height
+  - Made table header sticky for better scrolling experience
+  - Changed table cell alignment to center (matching other admin panels)
+  - Replaced hardcoded badge colors with CSS variables for consistent theming
+  - Added loading spinner animation
+  - Replaced non-standard CSS variables with standard design tokens
+  - Enhanced mobile responsiveness with table-to-card transformation
+  - Updated stat label colors from `--color-text-secondary` to `--color-text-primary`
+
+### Added
+- **Admin Subscription Management Component**: Added search functionality
+  - Real-time search with 300ms debounce
+  - Searches across username, email, product name, and subscription ID
+  - Filter summary displays filtered vs total count
+  - Clear search button integration
+
 ## [1.0.15] - 2026-01-XX
 
 ### Added

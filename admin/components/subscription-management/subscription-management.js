@@ -20,6 +20,7 @@ class SubscriptionManagement {
         this.elements = {};
         this.products = [];
         this.services = [];
+        this.searchTimeout = null;
     }
 
     /**
@@ -27,6 +28,7 @@ class SubscriptionManagement {
      */
     getDefaultFilters() {
         return {
+            search: '',
             status: 'all',
             product: 'all',
             billing: 'all',
@@ -56,6 +58,9 @@ class SubscriptionManagement {
             
             // Initialize translations
             await this.loadTranslations();
+            
+            // Show translatable content
+            this.showTranslatableContent();
             
             // Load products and services for filter dropdown
             await this.loadProductsAndServices();
@@ -109,6 +114,10 @@ class SubscriptionManagement {
             syncStripeButton: document.getElementById('sync-stripe-button'),
             exportButton: document.getElementById('export-subscriptions-button'),
             
+            // Search
+            searchInput: document.getElementById('subscription-search-input'),
+            filterSummary: document.getElementById('subscription-filter-summary'),
+            
             // Table
             tableBody: document.getElementById('subscriptions-table-body'),
             table: document.getElementById('subscriptions-table'),
@@ -152,6 +161,17 @@ class SubscriptionManagement {
      * Bind event listeners
      */
     bindEvents() {
+        // Search input (debounced)
+        if (this.elements.searchInput) {
+            this.elements.searchInput.addEventListener('input', (e) => {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.filters.search = e.target.value.toLowerCase();
+                    this.applyFilters();
+                }, 300); // 300ms debounce
+            });
+        }
+
         // Filter changes
         if (this.elements.statusFilter) {
             this.elements.statusFilter.addEventListener('change', () => {
@@ -302,6 +322,15 @@ class SubscriptionManagement {
         if (window.subscriptionManagementTranslations) {
             window.subscriptionManagementTranslations.updateTranslations();
         }
+        this.showTranslatableContent();
+    }
+
+    /**
+     * Show translatable content
+     */
+    showTranslatableContent() {
+        const elements = document.querySelectorAll('#subscription-management .translatable-content');
+        elements.forEach(el => el.classList.add('loaded'));
     }
 
     /**
@@ -789,6 +818,18 @@ class SubscriptionManagement {
      */
     applyFilters() {
         this.filteredSubscriptions = this.subscriptions.filter(sub => {
+            // Search filter
+            if (this.filters.search) {
+                const searchLower = this.filters.search;
+                const matchesSearch = 
+                    sub.user?.username?.toLowerCase().includes(searchLower) ||
+                    sub.user?.email?.toLowerCase().includes(searchLower) ||
+                    sub.productName?.toLowerCase().includes(searchLower) ||
+                    sub.subscriptionId?.toLowerCase().includes(searchLower);
+                
+                if (!matchesSearch) return false;
+            }
+
             // Status filter
             if (this.filters.status !== 'all') {
                 if (sub.status !== this.filters.status) {
@@ -857,9 +898,31 @@ class SubscriptionManagement {
         // Update metrics with filtered data
         this.updateMetricsForFiltered();
 
+        // Update filter summary
+        this.updateFilterSummary();
+
         // Render
         this.renderSubscriptions();
         this.updatePagination();
+    }
+
+    /**
+     * Update filter summary
+     */
+    updateFilterSummary() {
+        if (!this.elements.filterSummary) return;
+
+        const totalCount = this.subscriptions.length;
+        const filteredCount = this.filteredSubscriptions.length;
+
+        let summaryText;
+        if (filteredCount === totalCount) {
+            summaryText = `Showing all ${totalCount} subscriptions`;
+        } else {
+            summaryText = `Showing ${filteredCount} of ${totalCount} subscriptions`;
+        }
+
+        this.elements.filterSummary.textContent = summaryText;
     }
 
     /**
@@ -886,6 +949,11 @@ class SubscriptionManagement {
      */
     clearFilters() {
         this.filters = this.getDefaultFilters();
+
+        // Clear search input
+        if (this.elements.searchInput) {
+            this.elements.searchInput.value = '';
+        }
 
         if (this.elements.statusFilter) {
             this.elements.statusFilter.value = 'all';
@@ -1030,6 +1098,7 @@ class SubscriptionManagement {
         // User cell
         const userCell = document.createElement('td');
         userCell.className = 'subscription-management__user-cell';
+        userCell.setAttribute('data-label', this.t('user'));
         const avatar = sub.user?.avatar_url 
             ? `<img src="${sub.user.avatar_url}" alt="${sub.user.username}" class="subscription-management__user-avatar">`
             : '<div class="subscription-management__user-avatar" style="background-color: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-bg-primary); font-weight: bold;">' + (sub.user?.username?.[0] || 'U') + '</div>';
@@ -1043,6 +1112,7 @@ class SubscriptionManagement {
 
         // Product/Plan cell
         const productCell = document.createElement('td');
+        productCell.setAttribute('data-label', this.t('product_plan'));
         productCell.innerHTML = `
             <div><strong>${sub.productName || 'Unknown'}</strong></div>
             <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">${this.t(sub.billingCycle)}</div>
@@ -1051,6 +1121,7 @@ class SubscriptionManagement {
 
         // Status cell
         const statusCell = document.createElement('td');
+        statusCell.setAttribute('data-label', this.t('status'));
         const statusClass = `subscription-management__status-badge--${sub.status}`;
         statusCell.innerHTML = `
             <span class="subscription-management__status-badge ${statusClass}">${this.t(sub.status)}</span>
@@ -1058,6 +1129,7 @@ class SubscriptionManagement {
 
         // Billing cell
         const billingCell = document.createElement('td');
+        billingCell.setAttribute('data-label', this.t('billing'));
         const periodStart = sub.currentPeriodStart ? this.formatDate(sub.currentPeriodStart) : 'N/A';
         const periodEnd = sub.currentPeriodEnd ? this.formatDate(sub.currentPeriodEnd) : 'N/A';
         billingCell.innerHTML = `
@@ -1067,6 +1139,7 @@ class SubscriptionManagement {
 
         // Revenue cell
         const revenueCell = document.createElement('td');
+        revenueCell.setAttribute('data-label', this.t('revenue'));
         revenueCell.innerHTML = `
             ${sub.amountPerCycle ? `<div>${sub.currency} ${sub.amountPerCycle.toFixed(2)}/${this.t(sub.billingCycle === 'yearly' ? 'year' : 'month')}</div>` : '<div>N/A</div>'}
             ${sub.totalPaid ? `<div style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">${this.t('total_paid')}: ${sub.currency} ${sub.totalPaid.toFixed(2)}</div>` : ''}
@@ -1074,6 +1147,7 @@ class SubscriptionManagement {
 
         // Source cell
         const sourceCell = document.createElement('td');
+        sourceCell.setAttribute('data-label', this.t('source'));
         const sourceClass = `subscription-management__source-badge--${sub.source}`;
         let sourceText = this.t(sub.source);
         if (sub.source === 'stripe' && sub.subscriptionId) {
@@ -1085,11 +1159,13 @@ class SubscriptionManagement {
 
         // Payment method cell
         const paymentCell = document.createElement('td');
+        paymentCell.setAttribute('data-label', this.t('payment_method'));
         paymentCell.textContent = sub.paymentMethod === 'stripe' ? 'Card ****' : this.t('n_a');
 
         // Actions cell
         const actionsCell = document.createElement('td');
         actionsCell.className = 'subscription-management__actions-cell';
+        actionsCell.setAttribute('data-label', this.t('actions'));
         const isActive = sub.status === 'active';
         actionsCell.innerHTML = `
             <button class="subscription-management__actions-button" onclick="window.subscriptionManagementComponent?.openActionsMenu(event, '${sub.id}')">
