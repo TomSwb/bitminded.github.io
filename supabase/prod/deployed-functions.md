@@ -83,6 +83,13 @@ supabase functions deploy <function-name> --project-ref dynxqnrkmjcvgzsugxtm
 - Handles pagination for large subscription lists
 - Returns sync results (created, updated, errors)
 
+### 2026-01-XX - Fixed Entitlement Deactivation on Subscription Cancellation
+- ✅ Updated `stripe-webhook` to deactivate entitlements when subscriptions are cancelled
+- Modified `syncEntitlementFromPurchase()` to handle cancelled/expired purchases
+- Modified `handleSubscriptionDeleted()` to sync entitlements after marking purchase as cancelled
+- Entitlements now properly set `active: false` and update `expires_at` when subscriptions are cancelled
+- Fixes gap where entitlements remained active after subscription cancellation
+
 ## Next Function to Deploy
 
 None - all current functions deployed
