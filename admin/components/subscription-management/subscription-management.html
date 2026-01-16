@@ -36,9 +36,22 @@
         </div>
     </div>
 
-    <!-- Filter Panel -->
+    <!-- Search and Filters -->
     <div class="subscription-management__controls">
+        <!-- Search Bar -->
+        <div class="subscription-management__search">
+            <input 
+                type="text" 
+                class="subscription-management__search-input translatable-content" 
+                id="subscription-search-input"
+                data-translation-key="Search subscriptions..."
+                placeholder="Search subscriptions...">
+        </div>
+
+        <!-- Advanced Filters -->
         <div class="subscription-management__filters">
+            <div class="subscription-management__filters-header">
+                <div class="subscription-management__filters-controls">
             <!-- Status Filter -->
             <div class="subscription-management__filter-group">
                 <label for="status-filter" class="subscription-management__filter-label translatable-content" data-translation-key="subscription_status">Status</label>
@@ -104,9 +117,15 @@
                 <input type="date" class="subscription-management__filter-input" id="date-to-filter">
             </div>
 
-            <!-- Clear Filters Button -->
-            <div class="subscription-management__filter-group">
-                <button type="button" class="subscription-management__button subscription-management__button--text" id="clear-filters-button">
+                </div>
+            </div>
+
+            <!-- Summary Row -->
+            <div class="subscription-management__summary-row">
+                <div class="subscription-management__summary">
+                    <span class="subscription-management__count" id="subscription-filter-summary"></span>
+                </div>
+                <button type="button" class="subscription-management__clear-btn" id="clear-filters-button">
                     <span class="translatable-content" data-translation-key="clear_filters">Clear Filters</span>
                 </button>
             </div>
@@ -115,7 +134,8 @@
 
     <!-- Loading State -->
     <div class="subscription-management__loading" id="subscription-loading" style="display: none;">
-        <div class="subscription-management__loading-text translatable-content" data-translation-key="loading_subscriptions">Loading subscriptions...</div>
+        <div class="subscription-management__spinner"></div>
+        <p class="translatable-content" data-translation-key="loading_subscriptions">Loading subscriptions...</p>
     </div>
 
     <!-- Error State -->
@@ -135,18 +155,23 @@
                 <tr>
                     <th class="subscription-management__sortable-header" data-sort="user">
                         <span class="translatable-content" data-translation-key="user">User</span>
+                        <span class="subscription-management__sort-indicator"></span>
                     </th>
                     <th class="subscription-management__sortable-header" data-sort="product">
                         <span class="translatable-content" data-translation-key="product_plan">Product/Plan</span>
+                        <span class="subscription-management__sort-indicator"></span>
                     </th>
                     <th class="subscription-management__sortable-header" data-sort="status">
                         <span class="translatable-content" data-translation-key="status">Status</span>
+                        <span class="subscription-management__sort-indicator"></span>
                     </th>
                     <th class="subscription-management__sortable-header" data-sort="billing">
                         <span class="translatable-content" data-translation-key="billing">Billing</span>
+                        <span class="subscription-management__sort-indicator"></span>
                     </th>
                     <th class="subscription-management__sortable-header" data-sort="revenue">
                         <span class="translatable-content" data-translation-key="revenue">Revenue</span>
+                        <span class="subscription-management__sort-indicator"></span>
                     </th>
                     <th>
                         <span class="translatable-content" data-translation-key="source">Source</span>
