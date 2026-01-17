@@ -444,12 +444,13 @@ class TwoFactorVerify {
             window.logger?.log(`📊 Login attempt logged: ${success ? 'Success with 2FA' : 'Failed 2FA'}${sessionId ? ' (session tracked)' : ''}`);
 
             // Send new login notification if login was successful
-            if (success && typeof window.notificationHelper !== 'undefined') {
-                await window.notificationHelper.newLogin({
-                    device: deviceInfo.deviceType || 'Unknown',
-                    browser: deviceInfo.browser || 'Unknown'
-                });
-            }
+            // COMMENTED OUT: Login notifications disabled by default
+            // if (success && typeof window.notificationHelper !== 'undefined') {
+            //     await window.notificationHelper.newLogin({
+            //         device: deviceInfo.deviceType || 'Unknown',
+            //         browser: deviceInfo.browser || 'Unknown'
+            //     });
+            // }
 
         } catch (error) {
             window.logger?.error('Failed to log login attempt:', error);

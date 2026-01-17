@@ -626,12 +626,13 @@ class LoginForm {
 
             // Send new login notification ONLY if login was successful AND 2FA was NOT used
             // (If 2FA is enabled, notification will be sent from 2fa-verify.js instead)
-            if (success && !used2FA && typeof window.notificationHelper !== 'undefined') {
-                await window.notificationHelper.newLogin({
-                    device: deviceInfo.deviceType || 'Unknown',
-                    browser: deviceInfo.browser || 'Unknown'
-                });
-            }
+            // COMMENTED OUT: Login notifications disabled by default
+            // if (success && !used2FA && typeof window.notificationHelper !== 'undefined') {
+            //     await window.notificationHelper.newLogin({
+            //         device: deviceInfo.deviceType || 'Unknown',
+            //         browser: deviceInfo.browser || 'Unknown'
+            //     });
+            // }
 
         } catch (error) {
             // Don't fail login if logging fails

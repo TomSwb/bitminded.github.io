@@ -292,17 +292,21 @@ serve(async (req) => {
       )
     }
 
-    // Admin bypass
-    const { data: adminRole, error: roleError } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle()
+    // Admin bypass (commented out - replaced with authenticated user bypass)
+    // const { data: adminRole, error: roleError } = await supabaseAdmin
+    //   .from('user_roles')
+    //   .select('role')
+    //   .eq('user_id', userId)
+    //   .eq('role', 'admin')
+    //   .maybeSingle()
 
-    if (!roleError && adminRole?.role === 'admin') {
-      return jsonResponse({ allowed: true, reason: 'admin_bypass', role: 'admin', user_id: userId }, 200, corsHeaders)
-    }
+    // if (!roleError && adminRole?.role === 'admin') {
+    //   return jsonResponse({ allowed: true, reason: 'admin_bypass', role: 'admin', user_id: userId }, 200, corsHeaders)
+    // }
+
+    // Authenticated user bypass - any user with an account gets access to all apps
+    // User authentication is already verified above, so we can grant access here
+    return jsonResponse({ allowed: true, reason: 'authenticated_user_access', role: 'user', user_id: userId }, 200, corsHeaders)
 
     // Parse request body
     let body: ValidateRequest | null = null
