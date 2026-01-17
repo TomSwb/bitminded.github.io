@@ -84,29 +84,21 @@
         <!-- Hero Section -->
         <section class="hero">
             <img id="hero-image" src="icons/here-header-dark.jpeg" alt="BitMinded - Handcrafted Software" class="hero__image">
+            <!-- Hero content - COMMENTED OUT (keeping only image) -->
+            <!--
             <div class="hero__content">
                 <h1 id="main-title" class="hero__title translatable-content">We Build. We Guide.</h1>
                 <p id="hero-subtitle" class="hero__subtitle translatable-content">We build artisanal apps for everyday needs — and help you feel confident with any technology you use.</p>
-                <!-- Additional visible text for search engines -->
                 <p style="display: none;" aria-hidden="true">We build artisanal apps for everyday needs — and help you feel confident with any technology you use.</p>
             </div>
+            -->
         </section>
 
-        <!-- Mission Toggle -->
-        <div class="mission-toggle">
-            <div class="mission-toggle__container">
-                <button class="mission-toggle__button mission-toggle__button--active" id="mission-toggle-build" data-mission="build">
-                    <span class="mission-toggle__button-text translatable-content" id="mission-toggle-build-text" data-translate="mission-toggle-build">We Build</span>
-                </button>
-                <button class="mission-toggle__button" id="mission-toggle-guide" data-mission="guide">
-                    <span class="mission-toggle__button-text translatable-content" id="mission-toggle-guide-text" data-translate="mission-toggle-guide">We Guide</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mission: We Build -->
+        <!-- Old content - COMMENTED OUT -->
+        <!--
+        <div class="mission-toggle">...</div>
         <div id="mission-build" class="mission-content">
-                <!-- Philosophy Section -->
+                
                 <section class="philosophy">
             <h2 id="philosophy-title" class="philosophy__title translatable-content">Why Artisanal App Creation?</h2>
             <p id="philosophy-intro" class="philosophy__intro translatable-content">We design every app like a bespoke instrument—listening closely, trimming the noise, and shaping software that blends into daily life.</p>
@@ -126,7 +118,7 @@
             </div>
         </section>
 
-        <!-- Our Work Section -->
+        
         <section class="products">
             <h2 id="products-title" class="products__title translatable-content">Our Work</h2>
             <p id="products-subtitle" class="products__subtitle translatable-content">Handcrafted tools for everyday needs</p>
@@ -148,7 +140,7 @@
             </div>
         </section>
 
-        <!-- How We Work Section -->
+        
         <section class="how-we-work">
             <h2 id="how-we-work-title" class="how-we-work__title translatable-content">How We Work</h2>
             <div class="how-we-work__content">
@@ -167,12 +159,12 @@
             </div>
         </section>
         </div>
-        <!-- END Mission: We Build -->
+        
 
-        <!-- Mission: We Guide -->
+        
         <div id="mission-guide" class="mission-content hidden">
             
-            <!-- Guide Philosophy Section -->
+            
             <section class="guide-philosophy">
                 <h2 id="guide-philosophy-title" class="guide-philosophy__title translatable-content">Why Personal Tech Guidance?</h2>
                 <p id="guide-philosophy-text" class="guide-philosophy__intro translatable-content">Technology should feel safe, clear, and human. We sit beside you—patient, judgment-free—to translate confusing tools into plain language, helping you make confident choices and enjoy the apps that matter in your life.</p>
@@ -192,7 +184,7 @@
                 </div>
             </section>
 
-            <!-- Personal Tech Guidance Section -->
+            
             <section class="services">
             <h2 id="services-title" class="services__title translatable-content">How We Support You</h2>
             <p id="services-subtitle" class="services__subtitle translatable-content">Support designed for the moments when tech feels overwhelming, uncertain, or urgent</p>
@@ -212,7 +204,7 @@
             </div>
         </section>
 
-            <!-- How It Works Section -->
+            
             <section class="guide-how-it-works">
                 <h2 id="guide-how-it-works-title" class="guide-how-it-works__title translatable-content">How It Works</h2>
                 <div class="guide-how-it-works__content">
@@ -231,7 +223,40 @@
                 </div>
             </section>
         </div>
-        <!-- END Mission: We Guide -->
+        -->
+        <!-- END Old Content -->
+
+        <!-- New Portfolio Home Page -->
+        <section class="portfolio-intro">
+            <div class="portfolio-intro__content">
+                <h1 class="portfolio-intro__title translatable-content" data-i18n="home-intro-title">A Learning Journey in Code</h1>
+                <p class="portfolio-intro__subtitle translatable-content" data-i18n="home-intro-subtitle">
+                    I'm Thomas, a software architect and continuous learner. This portfolio is a living document of my growth—each project represents a step forward in understanding how to build thoughtful, human-centered technology.
+                </p>
+            </div>
+        </section>
+
+        <section class="portfolio-about">
+            <div class="portfolio-about__content">
+                <h2 class="portfolio-about__title translatable-content" data-i18n="home-about-title">Why This Portfolio?</h2>
+                <p class="portfolio-about__text translatable-content" data-i18n="home-about-text">
+                    Every developer's journey is unique. Mine is driven by a simple belief: technology should empower people, not overwhelm them. Through building custom software, exploring new frameworks, and continuously learning, I document the process of becoming a better craftsman—one project at a time.
+                </p>
+                <p class="portfolio-about__text translatable-content" data-i18n="home-about-text-2">
+                    What you'll find here isn't just finished products, but the evolution of ideas, the lessons learned, and the ongoing pursuit of building software with intention and care. Each piece in my portfolio tells a story of problem-solving, iteration, and growth.
+                </p>
+            </div>
+        </section>
+
+        <section class="portfolio-cta">
+            <div class="portfolio-cta__content">
+                <h2 class="portfolio-cta__title translatable-content" data-i18n="home-cta-title">Explore My Work</h2>
+                <p class="portfolio-cta__text translatable-content" data-i18n="home-cta-text">
+                    Browse through the projects I've built, the challenges I've tackled, and the solutions I've crafted. Each one represents a moment of learning, a problem solved, and a step forward in my journey.
+                </p>
+                <a href="/catalog/" class="portfolio-cta__link translatable-content" data-i18n="home-cta-link">View Portfolio →</a>
+            </div>
+        </section>
     </main>
 
     <footer>
@@ -253,8 +278,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
     <!--- language switcher-->
     <script src="js/lang-index/lang-index.js"></script>
-    <!-- Mission Toggle -->
+    <!-- Mission Toggle - COMMENTED OUT -->
+    <!--
     <script src="js/mission-toggle.js"></script>
+    -->
 
 </body> 
 

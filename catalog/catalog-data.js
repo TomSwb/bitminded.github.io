@@ -303,6 +303,9 @@
                 screenshots: Array.isArray(product.screenshots) ? product.screenshots : [],
                 demoVideo: product.demo_video_url || null
             },
+            github: {
+                repoUrl: product.github_repo_url || null
+            },
             metrics: {
                 createdAt: product.created_at ? new Date(product.created_at) : null,
                 updatedAt: product.updated_at ? new Date(product.updated_at) : null,
@@ -395,6 +398,7 @@
                 icon_url,
                 screenshots,
                 demo_video_url,
+                github_repo_url,
                 tags,
                 is_featured,
                 created_at,

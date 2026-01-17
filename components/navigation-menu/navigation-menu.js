@@ -130,10 +130,10 @@ class NavigationMenu {
                     this.loadSubnavTranslations('about');
                 }
             }
-            // Update legal subnav translations if loaded
-            if (this.legalSubnavLoaded) {
-                this.loadLegalSubnavTranslations();
-            }
+            // Update legal subnav translations if loaded - COMMENTED OUT
+            // if (this.legalSubnavLoaded) {
+            //     this.loadLegalSubnavTranslations();
+            // }
             // Update account nav translations if loaded
             if (this.accountNavLoaded) {
                 this.updateAccountNavTranslations();
@@ -344,10 +344,10 @@ class NavigationMenu {
             this.loadSubnav();
         }
         
-        // Load legal sub-nav if on Legal page (mobile only)
-        if (this.isOnLegalPage()) {
-            this.loadLegalSubnav();
-        }
+        // Load legal sub-nav if on Legal page (mobile only) - COMMENTED OUT
+        // if (this.isOnLegalPage()) {
+        //     this.loadLegalSubnav();
+        // }
         
         // Load account nav if on Account page (mobile only)
         if (this.isOnAccountPage()) {
@@ -1300,35 +1300,35 @@ class NavigationMenu {
             }
         }
 
-        // Move existing Currency Switcher to mobile container (only if it exists)
-        const existingCurrencySwitcher = document.querySelector('.currency-switcher');
-        const mobileCurrencyContainer = this.mobileComponents.querySelector('#mobile-currency-switcher');
+        // Move existing Currency Switcher to mobile container - COMMENTED OUT
+        // const existingCurrencySwitcher = document.querySelector('.currency-switcher');
+        // const mobileCurrencyContainer = this.mobileComponents.querySelector('#mobile-currency-switcher');
         
-        if (existingCurrencySwitcher && mobileCurrencyContainer && !mobileCurrencyContainer.querySelector('.currency-switcher')) {
-            // Clone the existing currency switcher
-            const currencyClone = existingCurrencySwitcher.cloneNode(true);
-            currencyClone.classList.add('compact');
-            mobileCurrencyContainer.appendChild(currencyClone);
+        // if (existingCurrencySwitcher && mobileCurrencyContainer && !mobileCurrencyContainer.querySelector('.currency-switcher')) {
+        //     // Clone the existing currency switcher
+        //     const currencyClone = existingCurrencySwitcher.cloneNode(true);
+        //     currencyClone.classList.add('compact');
+        //     mobileCurrencyContainer.appendChild(currencyClone);
             
-            // Prevent currency switcher clicks from closing the menu
-            const currencyToggle = currencyClone.querySelector('.currency-switcher__toggle');
-            if (currencyToggle) {
-                currencyToggle.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                });
-            }
+        //     // Prevent currency switcher clicks from closing the menu
+        //     const currencyToggle = currencyClone.querySelector('.currency-switcher__toggle');
+        //     if (currencyToggle) {
+        //         currencyToggle.addEventListener('click', (e) => {
+        //             e.stopPropagation();
+        //         });
+        //     }
             
-            // Re-initialize the cloned currency switcher
-            if (window.CurrencySwitcher) {
-                // Create a new instance for the mobile version
-                const mobileCurrencySwitcher = new CurrencySwitcher();
-                mobileCurrencySwitcher.element = currencyClone;
-                mobileCurrencySwitcher.init({ compact: true });
-                window.logger?.log('✅ Mobile currency switcher moved and initialized');
-            } else {
-                window.logger?.warn('⚠️ window.CurrencySwitcher not available');
-            }
-        }
+        //     // Re-initialize the cloned currency switcher
+        //     if (window.CurrencySwitcher) {
+        //         // Create a new instance for the mobile version
+        //         const mobileCurrencySwitcher = new CurrencySwitcher();
+        //         mobileCurrencySwitcher.element = currencyClone;
+        //         mobileCurrencySwitcher.init({ compact: true });
+        //         window.logger?.log('✅ Mobile currency switcher moved and initialized');
+        //     } else {
+        //         window.logger?.warn('⚠️ window.CurrencySwitcher not available');
+        //     }
+        // }
 
         // Move existing Theme Switcher to mobile container
         const existingThemeSwitcher = document.querySelector('.theme-switcher');

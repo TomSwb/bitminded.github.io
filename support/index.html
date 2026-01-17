@@ -45,9 +45,9 @@
 
     <main class="support-page">
         <section class="support-hero">
-            <h1 class="translatable-content" data-i18n="support-hero-title">How can we support you today?</h1>
+            <h1 class="translatable-content" data-i18n="support-hero-title">How can I help you today?</h1>
             <p class="support-hero__subtitle translatable-content" data-i18n="support-hero-subtitle">
-                Reach out to our team for personalised guidance, technical troubleshooting, or commission inquiries.
+                Reach out to me for personalised guidance, technical troubleshooting, or project inquiries.
             </p>
             <div class="support-hero__meta">
                 <span class="support-hero__response-time translatable-content" data-i18n="support-response-time">Average response time: under 24 hours on business days.</span>
@@ -59,22 +59,25 @@
             <div class="support-quick-help__cards">
                 <article class="support-card" data-support-type="tech-help">
                     <h3 class="translatable-content" data-i18n="support-card-tech-help-title">Request tech help</h3>
-                    <p class="translatable-content" data-i18n="support-card-tech-help-copy">Ask about any device or issue (apps, hardware, workflows) and we'll sort it together in plain language.</p>
+                    <p class="translatable-content" data-i18n="support-card-tech-help-copy">Ask about any device or issue (apps, hardware, workflows) and I'll help you sort it out in plain language.</p>
                 </article>
                 <article class="support-card" data-support-type="bug">
                     <h3 class="translatable-content" data-i18n="support-card-bug-title">Report an app issue</h3>
-                    <p class="translatable-content" data-i18n="support-card-bug-copy">Share steps, devices, and screenshots so we can triage fast.</p>
+                    <p class="translatable-content" data-i18n="support-card-bug-copy">Share steps, devices, and screenshots so I can triage fast.</p>
                 </article>
+                <!-- Billing-related card - COMMENTED OUT -->
+                <!--
                 <article class="support-card" data-support-type="account">
                     <h3 class="translatable-content" data-i18n="support-card-account-title">Account or billing help</h3>
                     <p class="translatable-content" data-i18n="support-card-account-copy">Get support with BitMinded accounts, billing questions, or subscription changes.</p>
                 </article>
+                -->
             </div>
         </section>
 
         <section class="support-form-section support-form-section--hidden" id="tech-help-form-section" data-support-form-section="tech-help">
             <h2 class="translatable-content" data-i18n="support-tech-help-form-title">Request tech help</h2>
-            <p class="support-form-section__helper translatable-content" data-i18n="support-tech-help-form-helper">Pick the closest topic and tell us what you need.</p>
+            <p class="support-form-section__helper translatable-content" data-i18n="support-tech-help-form-helper">Pick the closest topic and tell me what you need.</p>
             <form id="tech-help-form" class="support-form" novalidate>
                 <div class="support-form__grid">
                     <div class="support-form__group">
@@ -93,7 +96,7 @@
                         <option value="app-or-service-question" class="translatable-content" data-i18n="support-tech-help-topic-service">Understand how an app or service works</option>
                         <option value="digital-habits-support" class="translatable-content" data-i18n="support-tech-help-topic-habits">Build safer or calmer digital habits</option>
                         <option value="family-or-shared-devices" class="translatable-content" data-i18n="support-tech-help-topic-family">Help for family or shared devices</option>
-                        <option value="something-else" class="translatable-content" data-i18n="support-tech-help-topic-other">Something else (tell us more)</option>
+                        <option value="something-else" class="translatable-content" data-i18n="support-tech-help-topic-other">Something else (tell me more)</option>
                     </select>
                 </div>
                 <div class="support-form__group support-form__group--wide">
@@ -113,7 +116,7 @@
                 </div>
                 <div class="support-form__actions">
                     <button type="submit" class="support-form__submit translatable-content" data-i18n="support-submit-label">Send support request</button>
-                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">We email a confirmation with your ticket number.</span>
+                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">I'll email a confirmation with your ticket number.</span>
                 </div>
             </form>
             <output id="tech-help-form-status" class="support-form__status" aria-live="polite"></output>
@@ -121,7 +124,7 @@
 
         <section class="support-form-section support-form-section--hidden" id="bug-report-form-section" data-support-form-section="bug">
             <h2 class="translatable-content" data-i18n="support-bug-form-title">Report an app issue</h2>
-            <p class="support-form-section__helper translatable-content" data-i18n="support-bug-form-helper">Walk us through what you expected, what happened, and where it occurred.</p>
+            <p class="support-form-section__helper translatable-content" data-i18n="support-bug-form-helper">Walk me through what you expected, what happened, and where it occurred.</p>
             <form id="bug-report-form" class="support-form" novalidate>
                 <div class="support-form__grid">
                     <div class="support-form__group">
@@ -147,7 +150,7 @@
                     <textarea id="bug-device-details" name="deviceDetails" rows="4" required></textarea>
                 </div>
                 <div class="support-form__group support-form__group--wide">
-                    <label for="bug-notes" class="translatable-content" data-i18n="support-bug-notes-label">Anything else we should know?</label>
+                    <label for="bug-notes" class="translatable-content" data-i18n="support-bug-notes-label">Anything else I should know?</label>
                     <textarea id="bug-notes" name="notes" rows="4"></textarea>
                 </div>
                 <div class="support-form__group support-form__group--wide">
@@ -163,7 +166,7 @@
                 </div>
                 <div class="support-form__actions">
                     <button type="submit" class="support-form__submit translatable-content" data-i18n="support-submit-label">Send support request</button>
-                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">We email a confirmation with your ticket number.</span>
+                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">I'll email a confirmation with your ticket number.</span>
                 </div>
             </form>
             <output id="bug-form-status" class="support-form__status" aria-live="polite"></output>
@@ -171,7 +174,7 @@
 
         <section class="support-form-section support-form-section--hidden" id="account-support-form-section" data-support-form-section="account">
             <h2 class="translatable-content" data-i18n="support-account-form-title">Account or billing help</h2>
-            <p class="support-form-section__helper translatable-content" data-i18n="support-account-form-helper">Let us know what needs to be updated or unlocked for your BitMinded account.</p>
+            <p class="support-form-section__helper translatable-content" data-i18n="support-account-form-helper">Let me know what needs to be updated or unlocked for your BitMinded account.</p>
             <form id="account-support-form" class="support-form" novalidate>
                 <div class="support-form__grid">
                     <div class="support-form__group">
@@ -209,7 +212,7 @@
                 </div>
                 <div class="support-form__actions">
                     <button type="submit" class="support-form__submit translatable-content" data-i18n="support-submit-label">Send support request</button>
-                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">We email a confirmation with your ticket number.</span>
+                    <span class="support-form__note translatable-content" data-i18n="support-submit-note">I'll email a confirmation with your ticket number.</span>
                 </div>
             </form>
             <output id="account-form-status" class="support-form__status" aria-live="polite"></output>
