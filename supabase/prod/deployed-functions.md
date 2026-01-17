@@ -90,6 +90,13 @@ supabase functions deploy <function-name> --project-ref dynxqnrkmjcvgzsugxtm
 - Entitlements now properly set `active: false` and update `expires_at` when subscriptions are cancelled
 - Fixes gap where entitlements remained active after subscription cancellation
 
+### 2026-01-XX - Changed Access Control: Authenticated Users Get Access to All Apps
+- ✅ Updated `validate-license` to grant access to all authenticated users (not just admins)
+- Commented out admin-only bypass check
+- Replaced with authenticated user bypass - any user with a valid account gets access to all apps
+- Authentication is still required (verified via JWT token)
+- All authenticated users now bypass purchase/entitlement checks
+
 ## Next Function to Deploy
 
 None - all current functions deployed

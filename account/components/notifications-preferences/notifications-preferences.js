@@ -149,7 +149,7 @@ class NotificationsPreferences {
                         email: {
                             password_changed: true,
                             two_fa: true,
-                            new_login: true,
+                            new_login: false, // Default: disabled
                             username_changed: true,
                             product_updates: false,
                             marketing: false
@@ -157,7 +157,7 @@ class NotificationsPreferences {
                         inapp: {
                             password_changed: true,
                             two_fa: true,
-                            new_login: true,
+                            new_login: false, // Default: disabled
                             username_changed: true,
                             product_updates: false,
                             marketing: false
@@ -172,7 +172,7 @@ class NotificationsPreferences {
                         email: {
                             password_changed: true,
                             two_fa: true,
-                            new_login: true,
+                            new_login: false, // Default: disabled
                             username_changed: true,
                             product_updates: false,
                             marketing: false
@@ -180,7 +180,7 @@ class NotificationsPreferences {
                         inapp: {
                             password_changed: true,
                             two_fa: true,
-                            new_login: true,
+                            new_login: false, // Default: disabled
                             username_changed: true,
                             product_updates: false,
                             marketing: false
@@ -200,7 +200,7 @@ class NotificationsPreferences {
                     email: {
                         password_changed: true,
                         two_fa: true,
-                        new_login: true,
+                        new_login: false, // Default: disabled
                         username_changed: true,
                         product_updates: false,
                         marketing: false
@@ -208,7 +208,7 @@ class NotificationsPreferences {
                     inapp: {
                         password_changed: true,
                         two_fa: true,
-                        new_login: true,
+                        new_login: false, // Default: disabled
                         username_changed: true,
                         product_updates: false,
                         marketing: false
@@ -231,7 +231,7 @@ class NotificationsPreferences {
                     email: {
                         password_changed: true,
                         two_fa: true,
-                        new_login: true,
+                        new_login: false, // Default: disabled
                         username_changed: true,
                         product_updates: false,
                         marketing: false
@@ -239,7 +239,7 @@ class NotificationsPreferences {
                     inapp: {
                         password_changed: true,
                         two_fa: true,
-                        new_login: true,
+                        new_login: false, // Default: disabled
                         username_changed: true,
                         product_updates: false,
                         marketing: false
@@ -270,7 +270,7 @@ class NotificationsPreferences {
                     email: {
                         password_changed: true,
                         two_fa: true,
-                        new_login: true,
+                        new_login: false, // Default: disabled
                         username_changed: true,
                         product_updates: false,
                         marketing: false
@@ -278,7 +278,7 @@ class NotificationsPreferences {
                     inapp: {
                         password_changed: true,
                         two_fa: true,
-                        new_login: true,
+                        new_login: false, // Default: disabled
                         username_changed: true,
                         product_updates: false,
                         marketing: false
