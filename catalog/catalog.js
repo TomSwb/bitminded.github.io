@@ -330,7 +330,8 @@
         if (media) {
             body.classList.add('catalog-card__body--with-media');
         }
-        body.appendChild(buildTagList(product));
+        // Tags - COMMENTED OUT
+        // body.appendChild(buildTagList(product));
 
         // Add sale info if product is on sale
         if (product.sale && product.sale.isOnSale) {
@@ -400,7 +401,8 @@
             );
         }
 
-        const meta = buildMetaLine(product);
+        // Meta line - COMMENTED OUT
+        // const meta = buildMetaLine(product);
 
         const body = document.createElement('div');
         body.className = 'catalog-card__body';
@@ -409,11 +411,13 @@
             body.appendChild(media);
         }
         body.appendChild(title);
-        if (meta) {
-            body.appendChild(meta);
-        }
+        // Meta line - COMMENTED OUT
+        // if (meta) {
+        //     body.appendChild(meta);
+        // }
         body.appendChild(tagline);
-        body.appendChild(buildTagList(product));
+        // Tags - COMMENTED OUT
+        // body.appendChild(buildTagList(product));
         
         // Add sale info if product is on sale
         if (product.sale && product.sale.isOnSale) {
