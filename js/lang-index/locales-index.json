@@ -56,7 +56,10 @@
       "home-about-text-2": "What you'll find here isn't just finished products, but the evolution of ideas, the lessons learned, and the ongoing pursuit of building software with intention and care. Each piece in my portfolio tells a story of problem-solving, iteration, and growth.",
       "home-cta-title": "Explore My Work",
       "home-cta-text": "Browse through the projects I've built, the challenges I've tackled, and the solutions I've crafted. Each one represents a moment of learning, a problem solved, and a step forward in my journey.",
-      "home-cta-link": "View Portfolio →"
+      "home-cta-link": "View Portfolio →",
+      "home-twitch-title": "Watch Me Build",
+      "home-twitch-text": "I stream my development process live on Twitch. Join me as I write code, create apps, and make video games—see the process behind the projects in real-time.",
+      "home-twitch-link": "Watch on Twitch"
     }
   },
   "es": {
@@ -116,7 +119,10 @@
       "home-about-text-2": "Lo que encontrarás aquí no son solo productos terminados, sino la evolución de ideas, las lecciones aprendidas y la búsqueda continua de construir software con intención y cuidado. Cada pieza en mi portfolio cuenta una historia de resolución de problemas, iteración y crecimiento.",
       "home-cta-title": "Explora Mi Trabajo",
       "home-cta-text": "Navega por los proyectos que he construido, los desafíos que he enfrentado y las soluciones que he creado. Cada uno representa un momento de aprendizaje, un problema resuelto y un paso adelante en mi viaje.",
-      "home-cta-link": "Ver Portfolio →"
+      "home-cta-link": "Ver Portfolio →",
+      "home-twitch-title": "Mírame Construir",
+      "home-twitch-text": "Transmito mi proceso de desarrollo en vivo en Twitch. Únete mientras escribo código, creo aplicaciones y hago videojuegos—ve el proceso detrás de los proyectos en tiempo real.",
+      "home-twitch-link": "Ver en Twitch"
     }
   },
   "fr": {
@@ -176,7 +182,10 @@
       "home-about-text-2": "Ce que vous trouverez ici ne sont pas seulement des produits finis, mais l'évolution des idées, les leçons apprises et la poursuite continue de construire des logiciels avec intention et soin. Chaque pièce de mon portfolio raconte une histoire de résolution de problèmes, d'itération et de croissance.",
       "home-cta-title": "Explorez Mon Travail",
       "home-cta-text": "Parcourez les projets que j'ai construits, les défis que j'ai relevés et les solutions que j'ai créées. Chacun représente un moment d'apprentissage, un problème résolu et un pas en avant dans mon parcours.",
-      "home-cta-link": "Voir le Portfolio →"
+      "home-cta-link": "Voir le Portfolio →",
+      "home-twitch-title": "Regardez-Moi Construire",
+      "home-twitch-text": "Je diffuse mon processus de développement en direct sur Twitch. Rejoignez-moi pendant que j'écris du code, crée des applications et fais des jeux vidéo—voyez le processus derrière les projets en temps réel.",
+      "home-twitch-link": "Regarder sur Twitch"
     }
   },
   "de": {
@@ -236,7 +245,10 @@
       "home-about-text-2": "Was Sie hier finden werden, sind nicht nur fertige Produkte, sondern die Evolution von Ideen, die gelernten Lektionen und das fortwährende Streben, Software mit Absicht und Sorgfalt zu bauen. Jedes Stück in meinem Portfolio erzählt eine Geschichte von Problemlösung, Iteration und Wachstum.",
       "home-cta-title": "Erkunden Sie Meine Arbeit",
       "home-cta-text": "Durchstöbern Sie die Projekte, die ich gebaut habe, die Herausforderungen, die ich bewältigt habe, und die Lösungen, die ich geschaffen habe. Jedes repräsentiert einen Moment des Lernens, ein gelöstes Problem und einen Schritt vorwärts auf meiner Reise.",
-      "home-cta-link": "Portfolio Ansehen →"
+      "home-cta-link": "Portfolio Ansehen →",
+      "home-twitch-title": "Sehen Sie Mir Beim Bauen Zu",
+      "home-twitch-text": "Ich übertrage meinen Entwicklungsprozess live auf Twitch. Begleiten Sie mich, während ich Code schreibe, Apps erstelle und Videospiele mache—sehen Sie den Prozess hinter den Projekten in Echtzeit.",
+      "home-twitch-link": "Auf Twitch Ansehen"
     }
   }
 }
