@@ -2,7 +2,7 @@
   "en": {
     "translation": {
       "nav-home": "Home",
-      "nav-catalog": "Catalog",
+      "nav-catalog": "Portfolio",
       "nav-services": "Services",
       "nav-about": "About",
       "nav-support": "Support",
@@ -16,7 +16,7 @@
   "es": {
     "translation": {
       "nav-home": "Inicio",
-      "nav-catalog": "Catálogo",
+      "nav-catalog": "Portfolio",
       "nav-services": "Servicios",
       "nav-about": "Acerca de",
       "nav-support": "Soporte",
@@ -30,7 +30,7 @@
   "fr": {
     "translation": {
       "nav-home": "Accueil",
-      "nav-catalog": "Catalogue",
+      "nav-catalog": "Portfolio",
       "nav-services": "Services",
       "nav-about": "À propos",
       "nav-support": "Support",
@@ -44,7 +44,7 @@
   "de": {
     "translation": {
       "nav-home": "Startseite",
-      "nav-catalog": "Katalog",
+      "nav-catalog": "Portfolio",
       "nav-services": "Dienstleistungen",
       "nav-about": "Über uns",
       "nav-support": "Support",

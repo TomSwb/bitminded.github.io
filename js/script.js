@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // This helps search engines prioritize the main content over UI components
     setTimeout(() => {
         loadNotificationCenter();
-        // Load currency switcher on services and catalog pages
-        loadCurrencySwitcher();
+        // Load currency switcher on services and catalog pages - COMMENTED OUT
+        // loadCurrencySwitcher();
     }, 500);
     
     // Account page specific initialization is now handled by account-page-loader.js

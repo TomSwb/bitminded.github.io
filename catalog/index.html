@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catalog - BitMinded</title>
+    <title>Portfolio - BitMinded</title>
     <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
@@ -27,19 +27,21 @@
         <section class="catalog-hero">
             <div class="catalog-hero__content">
                 <h1 class="catalog-hero__title translatable-content" data-i18n="catalog-hero-title">
-                    Discover BitMinded’s digital craftsmanship
+                    Portfolio
                 </h1>
                 <p class="catalog-hero__subtitle translatable-content" data-i18n="catalog-hero-subtitle">
-                    Explore the tools, experiments, and commissions we’re building. Published apps are ready for you today, and beta builds give you a glimpse of what’s coming next.
+                    A personal collection of projects I've built while learning and growing as a developer. Each piece represents a step in my journey of understanding how to create thoughtful, human-centered software.
                 </p>
                 <div class="catalog-hero__meta">
                     <span class="catalog-hero__meta-item translatable-content" data-i18n="catalog-hero-meta">
-                        Catalog updates as new products move from concept to launch.
+                        Documenting my learning process, one project at a time.
                     </span>
                 </div>
             </div>
         </section>
 
+        <!-- Filter bar - COMMENTED OUT -->
+        <!--
         <section class="catalog-filter-bar" aria-label="Catalog filters">
             <div class="catalog-filter-bar__controls">
                 <button class="catalog-filter-bar__toggle" data-filter="all" data-active="true">
@@ -63,8 +65,11 @@
                        data-i18n-placeholder="catalog-search-placeholder">
             </div>
         </section>
+        -->
 
         <section class="catalog-grid" aria-labelledby="catalog-grid-title">
+            <!-- Catalog section heading - COMMENTED OUT -->
+            <!--
             <div class="catalog-section-heading">
                 <h2 id="catalog-grid-title" class="translatable-content" data-i18n="catalog-grid-title">
                     Explore the catalog
@@ -73,6 +78,7 @@
                     Filter by category or status to find the perfect tool for your workflow.
                 </p>
             </div>
+            -->
             <div class="catalog-grid__content" id="catalog-grid">
                 <!-- Product cards dynamically rendered -->
             </div>
@@ -87,6 +93,8 @@
             </div>
         </section>
 
+        <!-- How commissions become catalog releases section - COMMENTED OUT -->
+        <!--
         <section class="catalog-how-it-works" aria-labelledby="catalog-how-title">
             <div class="catalog-section-heading">
                 <h2 id="catalog-how-title" class="translatable-content" data-i18n="catalog-how-title">
@@ -120,36 +128,40 @@
                 </article>
             </div>
         </section>
+        -->
 
-        <section class="catalog-newsletter" aria-labelledby="catalog-newsletter-title">
-            <div class="catalog-newsletter__content">
-                <h2 id="catalog-newsletter-title" class="catalog-newsletter__title translatable-content" data-i18n="catalog-newsletter-title">
-                    Join the release list
-                </h2>
-                <p class="catalog-newsletter__subtitle translatable-content" data-i18n="catalog-newsletter-subtitle">
-                    Short, thoughtful updates when new apps move from beta to launch—no noise, just the essentials.
-                </p>
-            </div>
-            <form class="catalog-newsletter__form" id="catalog-newsletter-form" novalidate>
-                <label class="catalog-newsletter__label" for="catalog-newsletter-email">
-                    <span class="sr-only translatable-content" data-i18n="catalog-newsletter-email-label">Email address</span>
-                </label>
-                <input id="catalog-newsletter-email"
-                       class="catalog-newsletter__input"
-                       type="email"
-                       name="email"
-                       placeholder="you@example.com"
-                       required
-                       data-i18n-placeholder="catalog-newsletter-email-placeholder">
-                <button type="submit" class="catalog-newsletter__submit translatable-content" data-i18n="catalog-newsletter-submit">
-                    Notify me
-                </button>
-                <p class="catalog-newsletter__privacy translatable-content" data-i18n="catalog-newsletter-privacy">
-                    We’ll only use your email for catalog updates. Unsubscribe anytime.
-                </p>
-                <output class="catalog-newsletter__status" id="catalog-newsletter-status"></output>
-            </form>
-        </section>
+        <!-- Newsletter section - COMMENTED OUT -->
+        <!--
+                <section class="catalog-newsletter" aria-labelledby="catalog-newsletter-title">
+                    <div class="catalog-newsletter__content">
+                        <h2 id="catalog-newsletter-title" class="catalog-newsletter__title translatable-content" data-i18n="catalog-newsletter-title">
+                            Join the release list
+                        </h2>
+                        <p class="catalog-newsletter__subtitle translatable-content" data-i18n="catalog-newsletter-subtitle">
+                            Short, thoughtful updates when new apps move from beta to launch—no noise, just the essentials.
+                        </p>
+                    </div>
+                    <form class="catalog-newsletter__form" id="catalog-newsletter-form" novalidate>
+                        <label class="catalog-newsletter__label" for="catalog-newsletter-email">
+                            <span class="sr-only translatable-content" data-i18n="catalog-newsletter-email-label">Email address</span>
+                        </label>
+                        <input id="catalog-newsletter-email"
+                               class="catalog-newsletter__input"
+                               type="email"
+                               name="email"
+                               placeholder="you@example.com"
+                               required
+                               data-i18n-placeholder="catalog-newsletter-email-placeholder">
+                        <button type="submit" class="catalog-newsletter__submit translatable-content" data-i18n="catalog-newsletter-submit">
+                            Notify me
+                        </button>
+                        <p class="catalog-newsletter__privacy translatable-content" data-i18n="catalog-newsletter-privacy">
+                            We’ll only use your email for catalog updates. Unsubscribe anytime.
+                        </p>
+                        <output class="catalog-newsletter__status" id="catalog-newsletter-status"></output>
+                    </form>
+                </section>
+        -->
     </main>
 
     <footer class="catalog-footer">
@@ -165,7 +177,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
     <script src="/catalog/lang-catalog/lang-catalog.js" defer></script>
     <script src="/catalog/catalog-data.js" defer></script>
+    <!-- Newsletter script - COMMENTED OUT -->
+    <!--
     <script src="/catalog/catalog-newsletter.js" defer></script>
+    -->
     <script src="/catalog/catalog.js" defer></script>
 </body>
 </html>
