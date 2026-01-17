@@ -702,11 +702,11 @@
 
 /* ===== PORTFOLIO TWITCH SECTION ===== */
 .portfolio-twitch {
-  padding: var(--spacing-4xl) var(--spacing-lg) var(--spacing-3xl);
+  padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-xl);
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
-  background-color: var(--color-background-secondary);
+  background-color: var(--color-background-primary);
   border-radius: var(--radius-lg);
   margin-top: var(--spacing-2xl);
   margin-bottom: var(--spacing-2xl);
