@@ -5,12 +5,12 @@
   "display": "standalone",
   "background_color": "#272B2E",
   "theme_color": "#CFDE67",
-  "description": "BitMinded - Digital solutions and consulting services",
+  "description": "BitMinded - Software Developer Portfolio & Learning Journey",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
   "dir": "ltr",
-  "categories": ["business", "technology", "consulting"],
+  "categories": ["portfolio", "technology", "development"],
   "icons": [
     {
       "src": "icons/icon-192x192.png",

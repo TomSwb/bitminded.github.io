@@ -700,6 +700,66 @@
   box-shadow: var(--shadow-md);
 }
 
+/* ===== PORTFOLIO TWITCH SECTION ===== */
+.portfolio-twitch {
+  padding: var(--spacing-4xl) var(--spacing-lg) var(--spacing-3xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: var(--color-background-secondary);
+  border-radius: var(--radius-lg);
+  margin-top: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.portfolio-twitch__content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.portfolio-twitch__title {
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+}
+
+.portfolio-twitch__text {
+  margin-bottom: var(--spacing-xl);
+  color: var(--color-text-primary);
+  opacity: 0.8;
+  font-size: var(--font-size-lg);
+  line-height: 1.6;
+}
+
+.portfolio-twitch__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  background-color: #9146ff;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-normal);
+  border: 2px solid #9146ff;
+}
+
+.portfolio-twitch__link:hover,
+.portfolio-twitch__link:focus-visible {
+  background-color: #772ce8;
+  border-color: #772ce8;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.portfolio-twitch__icon {
+  font-size: var(--font-size-xl);
+  line-height: 1;
+}
+
 /* ===== RESPONSIVE ADJUSTMENTS FOR PORTFOLIO SECTIONS ===== */
 @media (max-width: 768px) {
   .portfolio-intro,
@@ -718,7 +778,8 @@
   }
 
   .portfolio-about__title,
-  .portfolio-cta__title {
+  .portfolio-cta__title,
+  .portfolio-twitch__title {
     font-size: var(--font-size-2xl);
   }
 }
