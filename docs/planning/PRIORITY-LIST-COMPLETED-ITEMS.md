@@ -157,8 +157,8 @@
 - ✅ Error logging and idempotency checks
 - ✅ Deployed to production with `--no-verify-jwt` (required for Stripe webhooks)
 - ✅ Testing guide created with CLI workflows
-- ✅ **Test Mode Webhook**: Configured in DEV and PROD (whsec_9XuaCqZ5EKCUFOtbsID3ZEVNVIRuGWFl)
-- ✅ **Live Mode Webhook**: Created in PROD only (we_1SWeS4PBAwkcNEBloBQg67bc, whsec_ntkk0iTh2adifXM8YK95MqBP9n6NxfcZ)
+- ✅ **Test Mode Webhook**: Configured in DEV and PROD
+- ✅ **Live Mode Webhook**: Created in PROD only
 - ✅ Both webhooks subscribed to all 29 events
 - ✅ Environment variables properly configured: `STRIPE_SECRET_KEY_TEST`, `STRIPE_SECRET_KEY_LIVE`, `STRIPE_WEBHOOK_SECRET_TEST`, `STRIPE_WEBHOOK_SECRET_LIVE`
 
