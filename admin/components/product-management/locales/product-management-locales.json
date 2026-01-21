@@ -3,6 +3,7 @@
     "translation": {
       "Product Management": "Product Management",
       "Add New Product": "Add New Product",
+      "Add Quick Product": "Add Quick Product",
       "Create Bundle": "Create Bundle",
       "Search products...": "Search products...",
       "Product Name": "Product Name",
@@ -43,6 +44,7 @@
     "translation": {
       "Product Management": "Gestión de Productos",
       "Add New Product": "Agregar Nuevo Producto",
+      "Add Quick Product": "Agregar Producto Rápido",
       "Create Bundle": "Crear Paquete",
       "Search products...": "Buscar productos...",
       "Product Name": "Nombre del Producto",
@@ -83,6 +85,7 @@
     "translation": {
       "Product Management": "Gestion des Produits",
       "Add New Product": "Ajouter un Nouveau Produit",
+      "Add Quick Product": "Ajouter un Produit Rapide",
       "Create Bundle": "Créer un Paquet",
       "Search products...": "Rechercher des produits...",
       "Product Name": "Nom du Produit",
@@ -123,6 +126,7 @@
     "translation": {
       "Product Management": "Produktverwaltung",
       "Add New Product": "Neues Produkt Hinzufügen",
+      "Add Quick Product": "Schnelles Produkt Hinzufügen",
       "Create Bundle": "Bundle Erstellen",
       "Search products...": "Produkte suchen...",
       "Product Name": "Produktname",

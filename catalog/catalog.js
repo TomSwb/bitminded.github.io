@@ -341,8 +341,11 @@
             }
         }
 
-        // Add purchase button if product is available for purchase
-        if (!product.status.purchaseDisabled && product.status.availability === 'available') {
+        // Add purchase button if product is available for purchase or has external URL
+        // Show button for products with Stripe OR external URLs (like itch.io games)
+        const shouldShowButton = (!product.status.purchaseDisabled && product.status.availability === 'available') ||
+                                  (product.externalUrl && product.status.availability === 'available');
+        if (shouldShowButton) {
             const purchaseButton = buildPurchaseButton(product);
             if (purchaseButton) {
                 body.appendChild(purchaseButton);
@@ -427,8 +430,11 @@
             }
         }
         
-        // Add purchase button if product is available for purchase
-        if (!product.status.purchaseDisabled && product.status.availability === 'available') {
+        // Add purchase button if product is available for purchase or has external URL
+        // Show button for products with Stripe OR external URLs (like itch.io games)
+        const shouldShowButton = (!product.status.purchaseDisabled && product.status.availability === 'available') ||
+                                  (product.externalUrl && product.status.availability === 'available');
+        if (shouldShowButton) {
             const purchaseButton = buildPurchaseButton(product);
             if (purchaseButton) {
                 body.appendChild(purchaseButton);
@@ -734,8 +740,8 @@
 
         const button = document.createElement('a');
         button.className = 'catalog-card__purchase-button';
-        // Link to product subdomain instead of checkout
-        button.href = `https://${product.slug}.bitminded.ch/`;
+        // Link to external URL if available, otherwise use product subdomain
+        button.href = product.externalUrl || `https://${product.slug}.bitminded.ch/`;
         button.target = '_blank';
         button.rel = 'noopener noreferrer';
 
