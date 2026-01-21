@@ -97,8 +97,11 @@ if (typeof window.StepContentMedia === 'undefined') {
                     saveStatus.textContent = window.productWizardTranslations?.getTranslation('Saving...') || 'Saving...';
                 }
 
-                // Save step data
-                const result = await window.productWizard.saveStepToDatabase(3);
+                // Save form data to formData first
+                this.saveFormData();
+
+                // Save step data (Step 2: Content & Media)
+                const result = await window.productWizard.saveStepToDatabase(2);
 
                 if (result.success) {
                     // Show success message
@@ -112,16 +115,16 @@ if (typeof window.StepContentMedia === 'undefined') {
                     // Update navigation buttons to re-enable Next
                     await window.productWizard.updateNavigationButtons();
                     
-                    window.logger?.log('✅ Step 3 saved successfully');
+                    window.logger?.log('✅ Step 2 saved successfully');
                 } else {
                     throw new Error(result.error || 'Failed to save step');
                 }
             } catch (error) {
-                window.logger?.error('❌ Error saving Step 3:', error);
+                window.logger?.error('❌ Error saving Step 2:', error);
                 if (saveStatus) {
                     saveStatus.textContent = 'Error: ' + (error.message || 'Failed to save');
                 }
-                window.productWizard?.showError('Failed to save Step 3: ' + (error.message || 'Unknown error'));
+                window.productWizard?.showError('Failed to save Step 2: ' + (error.message || 'Unknown error'));
             } finally {
                 // Re-enable button
                 if (saveBtn) {
