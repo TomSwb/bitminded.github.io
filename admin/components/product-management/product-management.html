@@ -10,6 +10,9 @@
             <button class="product-management__button product-management__button--primary" id="add-product-button">
                 <span class="translatable-content" data-translation-key="Add New Product">Add New Product</span>
             </button>
+            <button class="product-management__button product-management__button--secondary" id="add-quick-product-button">
+                <span class="translatable-content" data-translation-key="Add Quick Product">Add Quick Product</span>
+            </button>
             <button class="product-management__button product-management__button--secondary" id="create-bundle-button">
                 <span class="translatable-content" data-translation-key="Create Bundle">Create Bundle</span>
             </button>
@@ -352,6 +355,208 @@
                     <div class="product-management__spinner"></div>
                     <p>Loading product details...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Product Modal -->
+    <link rel="stylesheet" href="/admin/components/product-management/quick-product-modal/quick-product-modal.css">
+    
+    <!-- Quick Product Modal HTML -->
+    <div class="quick-product-modal hidden" id="quick-product-modal">
+        <div class="quick-product-modal__overlay"></div>
+        <div class="quick-product-modal__content">
+            <div class="quick-product-modal__header">
+                <h3 class="quick-product-modal__title translatable-content" data-translation-key="Add Quick Product">Add Quick Product</h3>
+                <button type="button" id="close-quick-product-modal" class="quick-product-modal__close">&times;</button>
+            </div>
+            <div class="quick-product-modal__body">
+                <form id="quick-product-form" class="quick-product-modal__form">
+                    <div id="quick-product-error" class="quick-product-modal__error hidden" role="alert">
+                        <span id="quick-product-error-message" class="quick-product-modal__error-message"></span>
+                    </div>
+
+                    <!-- Main Form Fields -->
+                    <div class="quick-product-modal__fields">
+                        <div class="quick-product-modal__field-group">
+                            <label for="quick-product-name" class="quick-product-modal__label">
+                                <span class="translatable-content" data-translation-key="Product Name">Product Name</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="quick-product-name" name="name" class="quick-product-modal__input" required minlength="2">
+                            <small class="quick-product-modal__help translatable-content" data-translation-key="product_name_help">The display name for your product</small>
+                        </div>
+
+                        <div class="quick-product-modal__field-group">
+                            <label for="quick-product-slug" class="quick-product-modal__label">
+                                <span class="translatable-content" data-translation-key="Product Slug">Product Slug</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="quick-product-slug" name="slug" class="quick-product-modal__input" required pattern="[a-z0-9-]+">
+                            <small class="quick-product-modal__help translatable-content" data-translation-key="product_slug_help">URL-friendly identifier (e.g., my-game)</small>
+                        </div>
+
+                        <div class="quick-product-modal__field-group">
+                            <label for="quick-product-short-description" class="quick-product-modal__label">
+                                <span class="translatable-content" data-translation-key="Short Description">Short Description</span>
+                                <span class="required">*</span>
+                            </label>
+                            <textarea id="quick-product-short-description" name="short_description" class="quick-product-modal__textarea" rows="3" required maxlength="500"></textarea>
+                            <small class="quick-product-modal__help translatable-content" data-translation-key="short_description_help">Brief description shown in product cards</small>
+                        </div>
+
+                        <div class="quick-product-modal__field-group">
+                            <label for="quick-product-description" class="quick-product-modal__label">
+                                <span class="translatable-content" data-translation-key="Description">Description</span>
+                            </label>
+                            <textarea id="quick-product-description" name="description" class="quick-product-modal__textarea" rows="4"></textarea>
+                            <small class="quick-product-modal__help translatable-content" data-translation-key="description_help">Detailed description of your product</small>
+                        </div>
+
+                        <div class="quick-product-modal__field-group">
+                            <label for="quick-product-external-url" class="quick-product-modal__label">
+                                <span class="translatable-content" data-translation-key="itch.io URL">itch.io URL</span>
+                                <span class="required">*</span>
+                            </label>
+                            <input type="url" id="quick-product-external-url" name="external_url" class="quick-product-modal__input" required placeholder="https://yourgame.itch.io/game">
+                            <small class="quick-product-modal__help translatable-content" data-translation-key="external_url_help">Link to your game on itch.io</small>
+                        </div>
+
+                        <div class="quick-product-modal__field-group">
+                            <label for="quick-product-image" class="quick-product-modal__label">
+                                <span class="translatable-content" data-translation-key="Product Image">Product Image</span>
+                                <span class="required">*</span>
+                            </label>
+                            <div class="quick-product-modal__upload">
+                                <input type="file" id="quick-product-image" name="image" accept="image/*" class="quick-product-modal__file-input" required>
+                                <div class="quick-product-modal__preview">
+                                    <img id="quick-product-image-preview" src="" alt="Image preview" style="display: none;">
+                                    <div class="quick-product-modal__preview-placeholder">
+                                        <span>📎</span>
+                                        <small class="translatable-content" data-translation-key="image_upload_help">Recommended: 512x512px PNG (max 5MB)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <small id="quick-product-image-status" class="quick-product-modal__help" style="display: none;"></small>
+                        </div>
+
+                        <div class="quick-product-modal__field-group">
+                            <label for="quick-product-category" class="quick-product-modal__label">
+                                <span class="translatable-content" data-translation-key="Category">Category</span>
+                            </label>
+                            <select id="quick-product-category" name="category_id" class="quick-product-modal__select">
+                                <option value="">Select a category...</option>
+                            </select>
+                        </div>
+
+                        <div class="quick-product-modal__field-group">
+                            <label for="quick-product-status" class="quick-product-modal__label">
+                                <span class="translatable-content" data-translation-key="Status">Status</span>
+                            </label>
+                            <select id="quick-product-status" name="status" class="quick-product-modal__select">
+                                <option value="active">Active</option>
+                                <option value="draft">Draft</option>
+                                <option value="coming-soon">Coming Soon</option>
+                                <option value="beta">Beta</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Translations Section -->
+                    <div class="quick-product-modal__translations">
+                        <div class="quick-product-modal__translations-header">
+                            <h3 class="quick-product-modal__translations-title translatable-content" data-translation-key="Localized Content">Localized Content</h3>
+                            <p class="quick-product-modal__translations-description translatable-content" data-translation-key="localized_content_help">
+                                We'll auto-translate your product copy into Spanish, French, and German. Adjust any language manually if you need to fine-tune it.
+                            </p>
+                        </div>
+
+                        <div class="quick-product-modal__translations-actions">
+                            <button type="button" id="quick-product-generate-translations-btn" class="quick-product-modal__btn quick-product-modal__btn--primary">
+                                <span class="translatable-content" data-translation-key="Generate Translations">Generate Translations</span>
+                            </button>
+                            <span id="quick-product-generate-translations-status" class="quick-product-modal__translations-status" aria-live="polite"></span>
+                        </div>
+
+                        <div class="quick-product-modal__translations-tabs" role="tablist" aria-label="Translation languages">
+                            <button type="button" class="quick-product-modal__translations-tab active" role="tab" aria-selected="true" aria-controls="quick-translation-panel-en" data-language-tab="en">
+                                English
+                            </button>
+                            <button type="button" class="quick-product-modal__translations-tab" role="tab" aria-selected="false" aria-controls="quick-translation-panel-es" data-language-tab="es">
+                                Español
+                            </button>
+                            <button type="button" class="quick-product-modal__translations-tab" role="tab" aria-selected="false" aria-controls="quick-translation-panel-fr" data-language-tab="fr">
+                                Français
+                            </button>
+                            <button type="button" class="quick-product-modal__translations-tab" role="tab" aria-selected="false" aria-controls="quick-translation-panel-de" data-language-tab="de">
+                                Deutsch
+                            </button>
+                        </div>
+
+                        <div class="quick-product-modal__translations-panels">
+                            <section id="quick-translation-panel-en" class="quick-product-modal__translations-panel active" role="tabpanel" data-language-panel="en" aria-labelledby="quick-translation-panel-en">
+                                <h4 class="quick-product-modal__translations-heading">English (source)</h4>
+                                <p class="quick-product-modal__translations-note">Edit the fields above to change the English copy.</p>
+                            </section>
+
+                            <section id="quick-translation-panel-es" class="quick-product-modal__translations-panel" role="tabpanel" data-language-panel="es" hidden>
+                                <h4 class="quick-product-modal__translations-heading">Spanish</h4>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-name-es">Name</label>
+                                    <input type="text" id="quick-product-name-es" class="quick-product-modal__input" data-translation-field="name" data-language="es">
+                                </div>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-summary-es">Summary</label>
+                                    <textarea id="quick-product-summary-es" class="quick-product-modal__textarea" rows="2" data-translation-field="summary" data-language="es"></textarea>
+                                </div>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-description-es">Description</label>
+                                    <textarea id="quick-product-description-es" class="quick-product-modal__textarea" rows="4" data-translation-field="description" data-language="es"></textarea>
+                                </div>
+                            </section>
+
+                            <section id="quick-translation-panel-fr" class="quick-product-modal__translations-panel" role="tabpanel" data-language-panel="fr" hidden>
+                                <h4 class="quick-product-modal__translations-heading">French</h4>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-name-fr">Name</label>
+                                    <input type="text" id="quick-product-name-fr" class="quick-product-modal__input" data-translation-field="name" data-language="fr">
+                                </div>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-summary-fr">Summary</label>
+                                    <textarea id="quick-product-summary-fr" class="quick-product-modal__textarea" rows="2" data-translation-field="summary" data-language="fr"></textarea>
+                                </div>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-description-fr">Description</label>
+                                    <textarea id="quick-product-description-fr" class="quick-product-modal__textarea" rows="4" data-translation-field="description" data-language="fr"></textarea>
+                                </div>
+                            </section>
+
+                            <section id="quick-translation-panel-de" class="quick-product-modal__translations-panel" role="tabpanel" data-language-panel="de" hidden>
+                                <h4 class="quick-product-modal__translations-heading">German</h4>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-name-de">Name</label>
+                                    <input type="text" id="quick-product-name-de" class="quick-product-modal__input" data-translation-field="name" data-language="de">
+                                </div>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-summary-de">Summary</label>
+                                    <textarea id="quick-product-summary-de" class="quick-product-modal__textarea" rows="2" data-translation-field="summary" data-language="de"></textarea>
+                                </div>
+                                <div class="quick-product-modal__translations-group">
+                                    <label class="quick-product-modal__label" for="quick-product-description-de">Description</label>
+                                    <textarea id="quick-product-description-de" class="quick-product-modal__textarea" rows="4" data-translation-field="description" data-language="de"></textarea>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="quick-product-modal__footer">
+                <button type="button" id="cancel-quick-product" class="quick-product-modal__btn quick-product-modal__btn--secondary">
+                    <span class="translatable-content" data-translation-key="Cancel">Cancel</span>
+                </button>
+                <button type="button" id="save-quick-product" class="quick-product-modal__btn quick-product-modal__btn--primary">
+                    <span class="translatable-content" data-translation-key="Save Product">Save Product</span>
+                </button>
             </div>
         </div>
     </div>

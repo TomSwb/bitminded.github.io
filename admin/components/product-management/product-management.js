@@ -24,6 +24,7 @@ class ProductManagement {
         };
         this.searchTimeout = null;
         this.elements = {}; // Store DOM elements
+        this.quickProductModal = null; // Quick product modal instance
     }
 
     /**
@@ -58,6 +59,9 @@ class ProductManagement {
 
             // Apply initial filters
             this.applyFilters();
+
+            // Pre-load quick product modal script
+            await this.preloadQuickProductModal();
 
             this.isInitialized = true;
             
@@ -151,6 +155,20 @@ class ProductManagement {
             addProductButton.addEventListener('click', () => {
                 this.addProduct();
             });
+        }
+
+        // Add Quick Product button
+        const addQuickProductButton = document.getElementById('add-quick-product-button');
+        if (addQuickProductButton) {
+            window.logger?.log('✅ Add Quick Product button found, attaching event listener');
+            addQuickProductButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.logger?.log('🔘 Add Quick Product button clicked');
+                this.addQuickProduct();
+            });
+        } else {
+            window.logger?.warn('⚠️ Add Quick Product button not found in DOM');
         }
 
         // Create Bundle button
@@ -307,6 +325,7 @@ class ProductManagement {
                     cloudflare_domain,
                     cloudflare_worker_url,
                     icon_url,
+                    external_url,
                     stripe_product_id,
                     stripe_price_id,
                     stripe_price_monthly_id,
@@ -1308,18 +1327,27 @@ class ProductManagement {
             // For real products, validate required fields when publishing (status = 'active')
             if (!isTest && newStatus === 'active') {
                 const missingFields = [];
+                const isExternalProduct = product.external_url && product.external_url.trim() !== '';
                 
-                if (!product.github_repo_url && !product.github_repo_name) {
-                    missingFields.push('GitHub repository');
-                }
-                if (!product.cloudflare_domain && !product.cloudflare_worker_url) {
-                    missingFields.push('Cloudflare configuration');
-                }
-                if (!product.stripe_product_id) {
-                    missingFields.push('Stripe product');
-                }
-                if (!product.icon_url) {
-                    missingFields.push('Product icon');
+                // For external products (e.g., itch.io games), only require icon
+                if (isExternalProduct) {
+                    if (!product.icon_url) {
+                        missingFields.push('Product icon');
+                    }
+                } else {
+                    // For regular products, require all fields
+                    if (!product.github_repo_url && !product.github_repo_name) {
+                        missingFields.push('GitHub repository');
+                    }
+                    if (!product.cloudflare_domain && !product.cloudflare_worker_url) {
+                        missingFields.push('Cloudflare configuration');
+                    }
+                    if (!product.stripe_product_id) {
+                        missingFields.push('Stripe product');
+                    }
+                    if (!product.icon_url) {
+                        missingFields.push('Product icon');
+                    }
                 }
                 
                 if (missingFields.length > 0) {
@@ -1381,10 +1409,11 @@ class ProductManagement {
             }
 
             const isTest = this.isTestProduct(product);
+            const isExternalProduct = product.external_url && product.external_url.trim().length > 0;
             
-            // For real products, validate required fields (unless it's a test product)
-            if (!isTest) {
-                // Validate required fields for real products
+            // For real products, validate required fields (unless it's a test product or external product)
+            if (!isTest && !isExternalProduct) {
+                // Validate required fields for real products (only for non-external products)
                 const missingFields = [];
                 
                 if (!product.github_repo_url && !product.github_repo_name) {
@@ -1396,6 +1425,18 @@ class ProductManagement {
                 if (!product.stripe_product_id) {
                     missingFields.push('Stripe product');
                 }
+                if (!product.icon_url) {
+                    missingFields.push('Product icon');
+                }
+                
+                if (missingFields.length > 0) {
+                    this.showError(`Cannot publish product. Missing required fields: ${missingFields.join(', ')}`);
+                    return;
+                }
+            } else if (!isTest && isExternalProduct) {
+                // For external products, only validate icon (GitHub, Cloudflare, and Stripe not needed)
+                const missingFields = [];
+                
                 if (!product.icon_url) {
                     missingFields.push('Product icon');
                 }
@@ -1423,9 +1464,14 @@ class ProductManagement {
             await this.loadProducts();
             
             // Show success message
-            const message = isTest 
-                ? `Test product "${productName}" has been published (test mode - validation skipped)`
-                : `Product "${productName}" has been published successfully`;
+            let message;
+            if (isTest) {
+                message = `Test product "${productName}" has been published (test mode - validation skipped)`;
+            } else if (isExternalProduct) {
+                message = `External product "${productName}" has been published successfully`;
+            } else {
+                message = `Product "${productName}" has been published successfully`;
+            }
             this.showSuccess(message);
             
         } catch (error) {
@@ -1539,6 +1585,161 @@ class ProductManagement {
         window.logger?.log('Opening product creation wizard');
         // Open product creation wizard in new tab
         window.open('/admin/components/product-wizard/product-wizard.html', '_blank');
+    }
+
+    /**
+     * Add quick product (opens modal)
+     */
+    async addQuickProduct() {
+        window.logger?.log('🔘 Opening quick product modal');
+        
+        try {
+            // Check if modal HTML exists first
+            const modalElement = document.getElementById('quick-product-modal');
+            if (!modalElement) {
+                window.logger?.error('❌ Quick product modal HTML not found in DOM');
+                this.showError('Quick product modal not found. Please refresh the page.');
+                return;
+            }
+            window.logger?.log('✅ Modal HTML found in DOM');
+
+            // Ensure script is loaded
+            if (!window.QuickProductModal) {
+                window.logger?.log('⏳ QuickProductModal class not found, loading script...');
+                await this.loadQuickProductModalScript();
+                
+                // Wait a bit for the script to register
+                if (!window.QuickProductModal) {
+                    window.logger?.error('❌ QuickProductModal class still not available after script load');
+                    this.showError('Quick product modal script failed to load. Please refresh the page.');
+                    return;
+                }
+                window.logger?.log('✅ QuickProductModal class loaded');
+            }
+
+            // Initialize modal if not already initialized
+            if (!this.quickProductModal) {
+                window.logger?.log('⏳ Initializing QuickProductModal...');
+                this.quickProductModal = new window.QuickProductModal();
+                await this.quickProductModal.init();
+                window.logger?.log('✅ QuickProductModal initialized');
+            }
+
+            // Open modal
+            window.logger?.log('🔓 Opening modal...');
+            this.quickProductModal.open();
+        } catch (error) {
+            window.logger?.error('❌ Error opening quick product modal:', error);
+            this.showError('Failed to open quick product modal: ' + (error.message || 'Unknown error'));
+        }
+    }
+
+    /**
+     * Pre-load quick product modal script during initialization
+     */
+    async preloadQuickProductModal() {
+        try {
+            // Check if script is already loaded
+            if (window.QuickProductModal) {
+                window.logger?.log('✅ QuickProductModal already available');
+                return;
+            }
+
+            // Check if script tag already exists
+            const existingScript = document.querySelector('script[src*="quick-product-modal.js"]');
+            if (existingScript) {
+                window.logger?.log('⏳ Quick product modal script tag exists, waiting for load...');
+                // Wait for it to load
+                await new Promise((resolve) => {
+                    const checkInterval = setInterval(() => {
+                        if (window.QuickProductModal) {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 100);
+                    
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        resolve(); // Don't fail if it takes too long
+                    }, 3000);
+                });
+                return;
+            }
+
+            // Load the script
+            await this.loadQuickProductModalScript();
+        } catch (error) {
+            window.logger?.warn('⚠️ Failed to preload quick product modal script:', error);
+            // Don't fail initialization if this fails
+        }
+    }
+
+    /**
+     * Load quick product modal script if not already loaded
+     */
+    async loadQuickProductModalScript() {
+        return new Promise((resolve, reject) => {
+            // Check if script is already loaded
+            if (window.QuickProductModal) {
+                window.logger?.log('✅ QuickProductModal already loaded');
+                resolve();
+                return;
+            }
+
+            // Check if script tag already exists
+            const existingScript = document.querySelector('script[src*="quick-product-modal.js"]');
+            if (existingScript) {
+                window.logger?.log('⏳ Script tag exists, waiting for load...');
+                // Wait for it to load with a timeout
+                const checkInterval = setInterval(() => {
+                    if (window.QuickProductModal) {
+                        clearInterval(checkInterval);
+                        window.logger?.log('✅ QuickProductModal loaded from existing script');
+                        resolve();
+                    }
+                }, 100);
+                
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    if (!window.QuickProductModal) {
+                        window.logger?.warn('⚠️ Timeout waiting for existing script to load');
+                        // Try loading a new script
+                        this.loadNewScript(resolve, reject);
+                    }
+                }, 5000);
+                return;
+            }
+
+            // Load the script
+            this.loadNewScript(resolve, reject);
+        });
+    }
+
+    /**
+     * Load a new script tag for quick product modal
+     */
+    loadNewScript(resolve, reject) {
+        window.logger?.log('📥 Loading quick product modal script...');
+        const script = document.createElement('script');
+        script.src = '/admin/components/product-management/quick-product-modal/quick-product-modal.js';
+        script.async = false; // Load synchronously to ensure it's available
+        script.onload = () => {
+            // Give it a moment to register
+            setTimeout(() => {
+                if (window.QuickProductModal) {
+                    window.logger?.log('✅ QuickProductModal script loaded successfully');
+                    resolve();
+                } else {
+                    window.logger?.error('❌ Script loaded but QuickProductModal class not found');
+                    reject(new Error('Script loaded but QuickProductModal class not available'));
+                }
+            }, 100);
+        };
+        script.onerror = () => {
+            window.logger?.error('❌ Failed to load quick product modal script');
+            reject(new Error('Failed to load quick product modal script'));
+        };
+        document.head.appendChild(script);
     }
 
     /**

@@ -276,14 +276,26 @@
                 raw: product.status,
                 ...statusMeta,
                 isVisible: statusMeta.visibility === 'visible',
-                // Enable purchase if product is available, has Stripe configured, and supports checkout
-                purchaseDisabled: !(
-                    statusMeta.isPurchasable && 
-                    product.is_available_for_purchase === true &&
-                    (product.stripe_product_id || product.stripe_price_id || 
-                     product.stripe_price_monthly_id || product.stripe_price_yearly_id ||
-                     product.stripe_price_lifetime_id)
-                ),
+                // Enable purchase if:
+                // 1. Product is available AND has Stripe configured, OR
+                // 2. Product has external_url (for external products like itch.io games)
+                // For external products, we don't need Stripe or is_available_for_purchase check
+                purchaseDisabled: (() => {
+                    // If product has external_url and is purchasable, enable purchase
+                    if (statusMeta.isPurchasable && product.external_url && product.external_url.trim() !== '') {
+                        return false; // Enable button
+                    }
+                    // For regular products, require Stripe configuration
+                    if (statusMeta.isPurchasable && 
+                        product.is_available_for_purchase === true &&
+                        (product.stripe_product_id || product.stripe_price_id || 
+                         product.stripe_price_monthly_id || product.stripe_price_yearly_id ||
+                         product.stripe_price_lifetime_id)) {
+                        return false; // Enable button
+                    }
+                    // Otherwise, disable purchase
+                    return true; // Disable button
+                })(),
                 canTogglePurchase: statusMeta.isPurchasable && product.is_available_for_purchase === true
             },
             category,
@@ -306,6 +318,7 @@
             github: {
                 repoUrl: product.github_repo_url || null
             },
+            externalUrl: product.external_url || null,
             metrics: {
                 createdAt: product.created_at ? new Date(product.created_at) : null,
                 updatedAt: product.updated_at ? new Date(product.updated_at) : null,
@@ -388,6 +401,10 @@
                 is_available_for_purchase,
                 stripe_product_id,
                 stripe_price_id,
+                stripe_price_monthly_id,
+                stripe_price_yearly_id,
+                stripe_price_lifetime_id,
+                external_url,
                 is_on_sale,
                 sale_start_date,
                 sale_end_date,

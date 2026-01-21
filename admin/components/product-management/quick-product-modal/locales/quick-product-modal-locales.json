@@ -1,0 +1,102 @@
+{
+  "en": {
+    "translation": {
+      "Add Quick Product": "Add Quick Product",
+      "Product Name": "Product Name",
+      "Product Slug": "Product Slug",
+      "Small Description": "Small Description",
+      "itch.io URL": "itch.io URL",
+      "Product Image": "Product Image",
+      "Upload product image": "Upload product image",
+      "Category": "Category",
+      "Status": "Status",
+      "Cancel": "Cancel",
+      "Save Product": "Save Product",
+      "product_name_help": "The display name for your product",
+      "product_slug_help": "URL-friendly identifier (e.g., my-game)",
+      "short_description_help": "Brief description shown in product cards",
+      "description_help": "Detailed description of your product",
+      "external_url_help": "Link to your game on itch.io",
+      "image_upload_help": "Recommended: 512x512px PNG (max 5MB)",
+      "Localized Content": "Localized Content",
+      "localized_content_help": "We'll auto-translate your product copy into Spanish, French, and German. Adjust any language manually if you need to fine-tune it.",
+      "Generate Translations": "Generate Translations",
+      "Translating": "Translating"
+    }
+  },
+  "es": {
+    "translation": {
+      "Add Quick Product": "Agregar Producto Rápido",
+      "Product Name": "Nombre del Producto",
+      "Product Slug": "Slug del Producto",
+      "Small Description": "Descripción Corta",
+      "itch.io URL": "URL de itch.io",
+      "Product Image": "Imagen del Producto",
+      "Upload product image": "Subir imagen del producto",
+      "Category": "Categoría",
+      "Status": "Estado",
+      "Cancel": "Cancelar",
+      "Save Product": "Guardar Producto",
+      "product_name_help": "El nombre de visualización para tu producto",
+      "product_slug_help": "Identificador amigable para URL (ej., mi-juego)",
+      "short_description_help": "Descripción breve mostrada en las tarjetas del producto",
+      "description_help": "Descripción detallada de tu producto",
+      "external_url_help": "Enlace a tu juego en itch.io",
+      "image_upload_help": "Recomendado: PNG 512x512px (máx. 5MB)",
+      "Localized Content": "Contenido Localizado",
+      "localized_content_help": "Traduciremos automáticamente el contenido del producto al español, francés y alemán. Ajusta cualquier idioma manualmente si necesitas afinarlo.",
+      "Generate Translations": "Generar Traducciones",
+      "Translating": "Traduciendo"
+    }
+  },
+  "fr": {
+    "translation": {
+      "Add Quick Product": "Ajouter un Produit Rapide",
+      "Product Name": "Nom du Produit",
+      "Product Slug": "Slug du Produit",
+      "Small Description": "Description Courte",
+      "itch.io URL": "URL itch.io",
+      "Product Image": "Image du Produit",
+      "Upload product image": "Télécharger l'image du produit",
+      "Category": "Catégorie",
+      "Status": "Statut",
+      "Cancel": "Annuler",
+      "Save Product": "Enregistrer le Produit",
+      "product_name_help": "Le nom d'affichage pour votre produit",
+      "product_slug_help": "Identifiant convivial pour URL (ex., mon-jeu)",
+      "short_description_help": "Description brève affichée dans les cartes produit",
+      "description_help": "Description détaillée de votre produit",
+      "external_url_help": "Lien vers votre jeu sur itch.io",
+      "image_upload_help": "Recommandé : PNG 512x512px (max 5MB)",
+      "Localized Content": "Contenido Localisé",
+      "localized_content_help": "Nous traduirons automatiquement le contenu de votre produit en espagnol, français et allemand. Ajustez chaque langue manuellement si nécessaire.",
+      "Generate Translations": "Générer les Traductions",
+      "Translating": "Traduction en cours"
+    }
+  },
+  "de": {
+    "translation": {
+      "Add Quick Product": "Schnelles Produkt Hinzufügen",
+      "Product Name": "Produktname",
+      "Product Slug": "Produkt-Slug",
+      "Small Description": "Kurze Beschreibung",
+      "itch.io URL": "itch.io URL",
+      "Product Image": "Produktbild",
+      "Upload product image": "Produktbild hochladen",
+      "Category": "Kategorie",
+      "Status": "Status",
+      "Cancel": "Abbrechen",
+      "Save Product": "Produkt Speichern",
+      "product_name_help": "Der Anzeigename für Ihr Produkt",
+      "product_slug_help": "URL-freundlicher Bezeichner (z.B. mein-spiel)",
+      "short_description_help": "Kurze Beschreibung in Produktkarten angezeigt",
+      "description_help": "Detaillierte Beschreibung Ihres Produkts",
+      "external_url_help": "Link zu Ihrem Spiel auf itch.io",
+      "image_upload_help": "Empfohlen: PNG 512x512px (max. 5MB)",
+      "Localized Content": "Lokalisierter Inhalt",
+      "localized_content_help": "Wir übersetzen Ihren Produkttext automatisch ins Spanische, Französische und Deutsche. Passen Sie jede Sprache bei Bedarf manuell an.",
+      "Generate Translations": "Übersetzungen Erzeugen",
+      "Translating": "Übersetzung läuft"
+    }
+  }
+}
