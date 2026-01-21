@@ -35,10 +35,8 @@ if (typeof window.StepReviewSummary === 'undefined') {
                 
                 // Section content containers
                 basicInfoContent: document.getElementById('basic-info-content'),
-                technicalSpecContent: document.getElementById('technical-spec-content'),
                 contentMediaContent: document.getElementById('content-media-content'),
                 githubContent: document.getElementById('github-content'),
-                stripeContent: document.getElementById('stripe-content'),
                 cloudflareContent: document.getElementById('cloudflare-content'),
                 
                 // Status icons
@@ -46,9 +44,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
                     1: document.getElementById('status-icon-1'),
                     2: document.getElementById('status-icon-2'),
                     3: document.getElementById('status-icon-3'),
-                    4: document.getElementById('status-icon-4'),
-                    5: document.getElementById('status-icon-5'),
-                    6: document.getElementById('status-icon-6')
+                    4: document.getElementById('status-icon-4')
                 }
             };
         }
@@ -78,10 +74,8 @@ if (typeof window.StepReviewSummary === 'undefined') {
 
             // Render each section
             this.renderBasicInfo(formData);
-            this.renderTechnicalSpec(stepData[2], formData);
             this.renderContentMedia(formData);
             this.renderGitHub(formData);
-            this.renderStripe(formData);
             this.renderCloudflare(formData);
 
             // Show validation status
@@ -144,12 +138,9 @@ if (typeof window.StepReviewSummary === 'undefined') {
         }
 
         renderTechnicalSpec(step2Data, formData) {
-            if (!this.elements.technicalSpecContent) return;
-
-            const technicalSpec = step2Data?.technicalSpecification || formData.technical_specification || null;
-            const hasSpec = technicalSpec && technicalSpec.trim() !== '';
-
-            this.updateStatusIcon(2, hasSpec);
+            // Step 2 (Technical Specification) has been removed from the wizard
+            // This method is kept for backward compatibility but does nothing
+            return;
 
             if (!hasSpec) {
                 this.elements.technicalSpecContent.innerHTML = `
@@ -194,7 +185,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
             const hasFeatures = featuresArray.length > 0;
             const isComplete = hasIcon && hasFeatures;
 
-            this.updateStatusIcon(3, isComplete);
+            this.updateStatusIcon(2, isComplete);
 
             const screenshotsArray = Array.isArray(screenshots) 
                 ? screenshots 
@@ -266,7 +257,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
             const repoName = data.github_repo_name || null;
             const branch = data.github_branch || 'main';
 
-            this.updateStatusIcon(4, repoCreated && repoUrl);
+            this.updateStatusIcon(3, repoCreated && repoUrl);
 
             if (!repoCreated || !repoUrl) {
                 this.elements.githubContent.innerHTML = `
@@ -302,17 +293,9 @@ if (typeof window.StepReviewSummary === 'undefined') {
         }
 
         renderStripe(data) {
-            if (!this.elements.stripeContent) return;
-
-            const productId = data.stripe_product_id || null;
-            const priceId = data.stripe_price_id || null;
-            const pricingType = data.pricing_type || '';
-            const priceAmount = data.price_amount || null;
-            const currency = data.price_currency || 'USD';
-            const subscriptionInterval = data.subscription_interval || null;
-            const enterprisePrice = data.enterprise_price || null;
-
-            this.updateStatusIcon(5, !!productId);
+            // Step 5 (Stripe) has been removed from the wizard
+            // This method is kept for backward compatibility but does nothing
+            return;
 
             if (!productId) {
                 this.elements.stripeContent.innerHTML = `
@@ -357,7 +340,7 @@ if (typeof window.StepReviewSummary === 'undefined') {
             const workerUrl = data.cloudflare_worker_url || null;
             const hasConfig = !!(domain || workerUrl);
 
-            this.updateStatusIcon(6, hasConfig);
+            this.updateStatusIcon(4, hasConfig);
 
             if (!hasConfig) {
                 this.elements.cloudflareContent.innerHTML = `
@@ -413,35 +396,24 @@ if (typeof window.StepReviewSummary === 'undefined') {
                 errors.push('Step 1: Product name and slug are required');
             }
 
-            // Step 2: Optional but recommended
-            const techSpec = stepData[2]?.technicalSpecification || formData.technical_specification;
-            if (!techSpec || techSpec.trim() === '') {
-                warnings.push('Step 2: Technical specification not generated');
-            }
-
-            // Step 3: Required fields
+            // Step 2: Required fields
             if (!formData.icon_url) {
-                errors.push('Step 3: Product icon is required');
+                errors.push('Step 2: Product icon is required');
             }
             const features = formData.features || [];
             const featuresArray = Array.isArray(features) ? features : (features ? [features] : []);
             if (featuresArray.length === 0) {
-                errors.push('Step 3: At least one feature is required');
+                errors.push('Step 2: At least one feature is required');
+            }
+
+            // Step 3: Optional
+            if (!formData.github_repo_created) {
+                warnings.push('Step 3: GitHub repository not created');
             }
 
             // Step 4: Optional
-            if (!formData.github_repo_created) {
-                warnings.push('Step 4: GitHub repository not created');
-            }
-
-            // Step 5: Optional but recommended
-            if (!formData.stripe_product_id) {
-                warnings.push('Step 5: Stripe product not created');
-            }
-
-            // Step 6: Optional
             if (!formData.cloudflare_domain && !formData.cloudflare_worker_url) {
-                warnings.push('Step 6: Cloudflare configuration not completed');
+                warnings.push('Step 4: Cloudflare configuration not completed');
             }
 
             // Display validation status

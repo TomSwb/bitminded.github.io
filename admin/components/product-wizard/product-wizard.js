@@ -8,7 +8,7 @@ class ProductWizard {
     constructor() {
         this.isInitialized = false;
         this.currentStep = 1;
-        this.totalSteps = 7; // Removed Step 5 (Database Configuration)
+        this.totalSteps = 5; // Removed Step 2 (Technical Specification) and Step 5 (Stripe)
         this.formData = {};
         this.elements = {};
         this.steps = {};
@@ -304,16 +304,8 @@ class ProductWizard {
                 }
             }
 
-            // Load AI data into stepData for Step 2
-            if (data.ai_recommendations || data.ai_conversations || data.ai_final_decisions || data.technical_specification) {
-                this.stepData = this.stepData || {};
-                this.stepData[2] = {
-                    recommendations: data.ai_recommendations || {},
-                    conversationHistory: data.ai_conversations || {},
-                    finalDecisions: data.ai_final_decisions || {},
-                    technicalSpecification: data.technical_specification || ''
-                };
-            }
+            // Note: Step 2 (Technical Specification) and Step 5 (Stripe) have been removed from the wizard
+            // Data for these steps remains in the database but is not loaded into the wizard
 
             // Load completed steps from database (but we'll rebuild them based on actual data to handle step reordering)
             if (data.completed_steps && Array.isArray(data.completed_steps)) {
@@ -337,37 +329,22 @@ class ProductWizard {
         // Step 1 is always completed if we're in edit mode (basic info exists)
         this.markStepCompleted(1);
 
-        // Step 2: Check if technical specification exists
-        if (this.stepData && this.stepData[2] && this.stepData[2].technicalSpecification) {
-            const technicalSpec = this.stepData[2].technicalSpecification;
-            if (technicalSpec && technicalSpec.trim() !== '') {
-                this.markStepCompleted(2);
-                window.logger?.log('✅ Step 2 marked as completed (technical spec exists)');
-            }
-        }
-
-        // Step 3: Check if content & media exists (icon is required)
+        // Step 2: Check if content & media exists (icon is required)
         if (this.formData.icon_url && this.formData.features && this.formData.features.length > 0) {
-            this.markStepCompleted(3);
-            window.logger?.log('✅ Step 3 marked as completed (icon and features exist)');
+            this.markStepCompleted(2);
+            window.logger?.log('✅ Step 2 marked as completed (icon and features exist)');
         }
 
-        // Step 4: Check if GitHub repository exists
+        // Step 3: Check if GitHub repository exists
         if (this.formData.github_repo_created && this.formData.github_repo_url) {
-            this.markStepCompleted(4);
-            window.logger?.log('✅ Step 4 marked as completed (GitHub repo exists)');
+            this.markStepCompleted(3);
+            window.logger?.log('✅ Step 3 marked as completed (GitHub repo exists)');
         }
 
-        // Step 5: Check if Stripe product exists
-        if (this.formData.stripe_product_id) {
-            this.markStepCompleted(5);
-            window.logger?.log('✅ Step 5 marked as completed (Stripe product exists)');
-        }
-
-        // Step 6: Check if Cloudflare domain is configured
+        // Step 4: Check if Cloudflare domain is configured
         if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
-            this.markStepCompleted(6);
-            window.logger?.log('✅ Step 6 marked as completed (Cloudflare configured)');
+            this.markStepCompleted(4);
+            window.logger?.log('✅ Step 4 marked as completed (Cloudflare configured)');
         }
     }
 
@@ -379,7 +356,7 @@ class ProductWizard {
         if (!this.formData.product_id) return;
 
         // Check each step to see if it's saved in the database
-        for (let stepNumber = 1; stepNumber <= 6; stepNumber++) {
+        for (let stepNumber = 1; stepNumber <= 4; stepNumber++) {
             const isSaved = await this.checkStepSavedInDB(stepNumber);
             if (isSaved) {
                 window.logger?.log(`✅ Step ${stepNumber} initialized as saved from database`);
@@ -536,22 +513,16 @@ class ProductWizard {
                     await this.loadStep1(stepContent);
                     break;
                 case 2:
-                    await this.loadStep2(stepContent);
+                    await this.loadStep3(stepContent); // Content & Media (was step 3)
                     break;
                 case 3:
-                    await this.loadStep3(stepContent); // Content & Media
+                    await this.loadStep4(stepContent); // GitHub (was step 4)
                     break;
                 case 4:
-                    await this.loadStep4(stepContent); // GitHub
+                    await this.loadStep6(stepContent); // Cloudflare (was step 6)
                     break;
                 case 5:
-                    await this.loadStep5(stepContent); // Cloudflare (was Step 6)
-                    break;
-                case 6:
-                    await this.loadStep6(stepContent); // Stripe (was Step 7)
-                    break;
-                case 7:
-                    await this.loadStep7(stepContent); // Review & Publish (was Step 8)
+                    await this.loadStep7(stepContent); // Review & Publish (was step 7)
                     break;
                 default:
                     window.logger?.error(`Unknown step: ${stepNumber}`);
@@ -778,18 +749,13 @@ class ProductWizard {
         
         // Forward navigation - check if current step is saved
         if (stepNumber > this.currentStep) {
-            // TEMPORARY: Allow navigation from Step 4 to Step 5 without saving Step 4
-            const isStep4To5 = this.currentStep === 4 && stepNumber === 5;
-            
-            if (!isStep4To5) {
-                const isCurrentStepSaved = await this.checkStepSavedInDB(this.currentStep);
-                if (!isCurrentStepSaved) {
-                    this.showError(
-                        `Please save Step ${this.currentStep} before proceeding to Step ${stepNumber}. ` +
-                        `Click the "Save" button at the bottom of the current step.`
-                    );
-                    return; // Block navigation
-                }
+            const isCurrentStepSaved = await this.checkStepSavedInDB(this.currentStep);
+            if (!isCurrentStepSaved) {
+                this.showError(
+                    `Please save Step ${this.currentStep} before proceeding to Step ${stepNumber}. ` +
+                    `Click the "Save" button at the bottom of the current step.`
+                );
+                return; // Block navigation
             }
         }
         
@@ -804,18 +770,6 @@ class ProductWizard {
     async navigateToStep(stepNumber) {
         // Save current step data before moving (in-memory only)
         const previousStep = this.currentStep;
-        
-        // For Stripe step (step 5), ensure form fields are populated from DB before reading them
-        if (previousStep === 5 && this.steps[5] && this.steps[5].isInitialized) {
-            // Ensure form fields are populated from DB first (in case they weren't loaded yet)
-            if (typeof this.steps[5].populateFormFields === 'function') {
-                this.steps[5].populateFormFields();
-            }
-            // Then read current form field values to capture any user changes
-            if (typeof this.steps[5].readFormFieldValues === 'function') {
-                this.steps[5].readFormFieldValues();
-            }
-        }
         
         // Save current step data to in-memory formData only (no auto-save to DB)
         this.saveCurrentStepData(previousStep);
@@ -869,8 +823,10 @@ class ProductWizard {
                 break;
             }
             case 2: {
-                const spec = this.stepData && this.stepData[2] && this.stepData[2].technicalSpecification;
-                if (spec && String(spec).trim() !== '') {
+                const hasIcon = !!this.formData.icon_url;
+                const features = this.formData.features || [];
+                const hasFeatures = Array.isArray(features) && features.length > 0;
+                if (hasIcon && hasFeatures) {
                     this.markStepCompleted(2);
                 } else {
                     this.markStepIncomplete(2);
@@ -878,10 +834,7 @@ class ProductWizard {
                 break;
             }
             case 3: {
-                const hasIcon = !!this.formData.icon_url;
-                const features = this.formData.features || [];
-                const hasFeatures = Array.isArray(features) && features.length > 0;
-                if (hasIcon && hasFeatures) {
+                if (this.formData.github_repo_created && this.formData.github_repo_url) {
                     this.markStepCompleted(3);
                 } else {
                     this.markStepIncomplete(3);
@@ -889,26 +842,10 @@ class ProductWizard {
                 break;
             }
             case 4: {
-                if (this.formData.github_repo_created && this.formData.github_repo_url) {
+                if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
                     this.markStepCompleted(4);
                 } else {
                     this.markStepIncomplete(4);
-                }
-                break;
-            }
-            case 5: {
-                if (this.formData.stripe_product_id) {
-                    this.markStepCompleted(5);
-                } else {
-                    this.markStepIncomplete(5);
-                }
-                break;
-            }
-            case 6: {
-                if (this.formData.cloudflare_domain || this.formData.cloudflare_worker_url) {
-                    this.markStepCompleted(6);
-                } else {
-                    this.markStepIncomplete(6);
                 }
                 break;
             }
@@ -963,16 +900,17 @@ class ProductWizard {
      * @param {number} stepNumber - Optional step number, defaults to currentStep
      */
     saveCurrentStepData(stepNumber = this.currentStep) {
+        // Map new step numbers to old component methods
+        let actualStepNumber = stepNumber;
+        if (stepNumber === 2) actualStepNumber = 3; // Content & Media (was step 3)
+        else if (stepNumber === 3) actualStepNumber = 4; // GitHub (was step 4)
+        else if (stepNumber === 4) actualStepNumber = 6; // Cloudflare (was step 6)
+        else if (stepNumber === 5) actualStepNumber = 7; // Review (was step 7)
+        
         // Only save data for the current step being navigated away from
         // Don't save data for steps that haven't been visited or initialized
-        if (this.steps[stepNumber] && this.steps[stepNumber].saveFormData) {
-            // For Stripe step (step 5), check if it's initialized before saving
-            // This prevents saving default values when step hasn't been visited
-            if (stepNumber === 5 && this.steps[stepNumber].isInitialized === false) {
-                window.logger?.log('⚠️ Skipping save for step 5 - not initialized yet');
-                return;
-            }
-            this.steps[stepNumber].saveFormData(this.formData);
+        if (this.steps[actualStepNumber] && this.steps[actualStepNumber].saveFormData) {
+            this.steps[actualStepNumber].saveFormData(this.formData);
         }
     }
 
@@ -1170,11 +1108,9 @@ class ProductWizard {
     getStepRequiredFields(stepNumber) {
         const stepFields = {
             1: ['id', 'name', 'slug'],
-            2: ['id', 'technical_specification'],
-            3: ['id', 'icon_url', 'features'],
-            4: ['id', 'github_repo_created', 'github_repo_url'],
-            5: ['id', 'stripe_product_id'],
-            6: ['id', 'cloudflare_domain', 'cloudflare_worker_url']
+            2: ['id', 'icon_url', 'features'],
+            3: ['id', 'github_repo_created', 'github_repo_url'],
+            4: ['id', 'cloudflare_domain', 'cloudflare_worker_url']
         };
         return stepFields[stepNumber] || ['id'];
     }
@@ -1193,19 +1129,13 @@ class ProductWizard {
                 // Step 1 requires name and slug
                 return !!(data.name && data.slug && data.name.trim() && data.slug.trim());
             case 2:
-                // Step 2 requires technical_specification
-                return !!(data.technical_specification && String(data.technical_specification).trim() !== '');
-            case 3:
-                // Step 3 requires icon_url and features
+                // Step 2 requires icon_url and features
                 return !!(data.icon_url && data.features && Array.isArray(data.features) && data.features.length > 0);
-            case 4:
-                // Step 4 requires github_repo_created and github_repo_url
+            case 3:
+                // Step 3 requires github_repo_created and github_repo_url
                 return !!(data.github_repo_created && data.github_repo_url);
-            case 5:
-                // Step 5 requires stripe_product_id
-                return !!data.stripe_product_id;
-            case 6:
-                // Step 6 requires cloudflare_domain or cloudflare_worker_url
+            case 4:
+                // Step 4 requires cloudflare_domain or cloudflare_worker_url
                 return !!(data.cloudflare_domain || data.cloudflare_worker_url);
             default:
                 return false;
@@ -1266,18 +1196,10 @@ class ProductWizard {
             1: ['name', 'slug', 'category_id', 'short_description', 'description', 'tags', 
                 'name_translations', 'summary_translations', 
                 'description_translations', 'tag_translations'],
-            2: ['technical_specification', 'ai_recommendations', 'ai_conversations', 
-                'ai_final_decisions'],
-            3: ['icon_url', 'screenshots', 'features', 'demo_video_url', 
+            2: ['icon_url', 'screenshots', 'features', 'demo_video_url', 
                 'documentation_url', 'support_email'],
-            4: ['github_repo_created', 'github_repo_url', 'github_repo_name', 'github_branch'],
-            5: ['stripe_product_id', 'stripe_price_id', 'stripe_price_monthly_id', 
-                'stripe_price_yearly_id', 'stripe_price_lifetime_id', 'stripe_price_chf_id',
-                'stripe_price_usd_id', 'stripe_price_eur_id', 'stripe_price_gbp_id',
-                'pricing_type', 'price_amount', 'price_currency', 'price_amount_chf',
-                'price_amount_usd', 'price_amount_eur', 'price_amount_gbp',
-                'trial_days', 'trial_requires_payment'],
-            6: ['cloudflare_domain', 'cloudflare_worker_url']
+            3: ['github_repo_created', 'github_repo_url', 'github_repo_name', 'github_branch'],
+            4: ['cloudflare_domain', 'cloudflare_worker_url']
         };
         return stepFields[stepNumber] || [];
     }
@@ -1325,22 +1247,7 @@ class ProductWizard {
             // 2. Save current step data to formData first
             this.saveCurrentStepData(stepNumber);
             
-            // 3. Handle Step 2 special case - need to get data from stepData
-            if (stepNumber === 2 && this.stepData && this.stepData[2]) {
-                const step2Data = this.stepData[2];
-                if (step2Data.technicalSpecification) {
-                    this.formData.technical_specification = step2Data.technicalSpecification;
-                }
-                if (step2Data.recommendations) {
-                    this.formData.ai_recommendations = step2Data.recommendations;
-                }
-                if (step2Data.conversationHistory) {
-                    this.formData.ai_conversations = step2Data.conversationHistory;
-                }
-                if (step2Data.finalDecisions) {
-                    this.formData.ai_final_decisions = step2Data.finalDecisions;
-                }
-            }
+            // Note: Step 2 (Technical Specification) and Step 5 (Stripe) have been removed
             
             // 4. Ensure translations are populated for Step 1
             if (stepNumber === 1) {
@@ -1360,7 +1267,7 @@ class ProductWizard {
                     short_description: this.formData.short_description || '',
                     description: this.formData.description || '',
                     tags: this.parseTags(this.formData.tags || ''),
-                    pricing_type: null, // Will be set in Step 5
+                    pricing_type: null, // Can be set manually if needed
                     name_translations: this.formData.name_translations || null,
                     summary_translations: this.formData.summary_translations || null,
                     description_translations: this.formData.description_translations || null,
@@ -1391,93 +1298,8 @@ class ProductWizard {
             // 7. Build update object with only step fields that have values
             const updateData = {};
             
-            // Special handling for Step 5: Convert pricing objects to individual price_amount_* columns
-            if (stepNumber === 5) {
-                // Helper function to convert value to number or null (handles empty strings, undefined, etc.)
-                // Note: 0 is a valid price (for freemium), so we only convert empty strings/undefined to null
-                const toNumericOrNull = (value) => {
-                    // Handle null, undefined, empty string
-                    if (value === undefined || value === null || value === '') {
-                        return null;
-                    }
-                    // Convert to string first to handle edge cases
-                    const strValue = String(value).trim();
-                    if (strValue === '' || strValue === 'null' || strValue === 'undefined') {
-                        return null;
-                    }
-                    // Allow 0 as a valid price (for freemium)
-                    if (value === 0 || strValue === '0') {
-                        return 0;
-                    }
-                    const num = parseFloat(strValue);
-                    if (isNaN(num)) {
-                        window.logger?.warn(`⚠️ Could not parse numeric value: "${value}" (type: ${typeof value}), converting to null`);
-                        return null;
-                    }
-                    return num;
-                };
-                
-                // Determine which pricing object to use based on pricing_type
-                const pricingType = this.formData.pricing_type;
-                
-                window.logger?.log('💾 Step 5 save - pricing_type:', pricingType);
-                window.logger?.log('💾 Step 5 save - subscription_pricing:', this.formData.subscription_pricing);
-                window.logger?.log('💾 Step 5 save - one_time_pricing:', this.formData.one_time_pricing);
-                
-                // Handle subscription_pricing object -> price_amount_* columns
-                if (pricingType === 'subscription' && this.formData.subscription_pricing && typeof this.formData.subscription_pricing === 'object') {
-                    const subPricing = this.formData.subscription_pricing;
-                    // Only set if the property exists (even if 0, which is valid for freemium)
-                    if ('CHF' in subPricing) {
-                        updateData.price_amount_chf = toNumericOrNull(subPricing.CHF);
-                        window.logger?.log('💾 Converting subscription_pricing.CHF:', subPricing.CHF, '->', updateData.price_amount_chf);
-                    }
-                    if ('USD' in subPricing) {
-                        updateData.price_amount_usd = toNumericOrNull(subPricing.USD);
-                        window.logger?.log('💾 Converting subscription_pricing.USD:', subPricing.USD, '->', updateData.price_amount_usd);
-                    }
-                    if ('EUR' in subPricing) {
-                        updateData.price_amount_eur = toNumericOrNull(subPricing.EUR);
-                        window.logger?.log('💾 Converting subscription_pricing.EUR:', subPricing.EUR, '->', updateData.price_amount_eur);
-                    }
-                    if ('GBP' in subPricing) {
-                        updateData.price_amount_gbp = toNumericOrNull(subPricing.GBP);
-                        window.logger?.log('💾 Converting subscription_pricing.GBP:', subPricing.GBP, '->', updateData.price_amount_gbp);
-                    }
-                }
-                
-                // Handle one_time_pricing object -> price_amount_* columns
-                if (pricingType === 'one_time' && this.formData.one_time_pricing && typeof this.formData.one_time_pricing === 'object') {
-                    const oneTimePricing = this.formData.one_time_pricing;
-                    // Only set if the property exists (even if 0, which is valid for freemium)
-                    if ('CHF' in oneTimePricing) {
-                        updateData.price_amount_chf = toNumericOrNull(oneTimePricing.CHF);
-                        window.logger?.log('💾 Converting one_time_pricing.CHF:', oneTimePricing.CHF, '->', updateData.price_amount_chf);
-                    }
-                    if ('USD' in oneTimePricing) {
-                        updateData.price_amount_usd = toNumericOrNull(oneTimePricing.USD);
-                        window.logger?.log('💾 Converting one_time_pricing.USD:', oneTimePricing.USD, '->', updateData.price_amount_usd);
-                    }
-                    if ('EUR' in oneTimePricing) {
-                        updateData.price_amount_eur = toNumericOrNull(oneTimePricing.EUR);
-                        window.logger?.log('💾 Converting one_time_pricing.EUR:', oneTimePricing.EUR, '->', updateData.price_amount_eur);
-                    }
-                    if ('GBP' in oneTimePricing) {
-                        updateData.price_amount_gbp = toNumericOrNull(oneTimePricing.GBP);
-                        window.logger?.log('💾 Converting one_time_pricing.GBP:', oneTimePricing.GBP, '->', updateData.price_amount_gbp);
-                    }
-                }
-                
-                // Handle freemium - set all prices to 0
-                if (pricingType === 'freemium') {
-                    updateData.price_amount_chf = 0;
-                    updateData.price_amount_usd = 0;
-                    updateData.price_amount_eur = 0;
-                    updateData.price_amount_gbp = 0;
-                }
-                
-                window.logger?.log('💾 Step 5 updateData after pricing conversion:', updateData);
-            }
+            // Note: saveCurrentStepData() above already calls saveFormData() on the component
+            // which reads from DOM and populates this.formData, so we don't need to call getFormData() here
             
             for (const field of stepFields) {
                 let newValue = this.formData[field];
@@ -1486,32 +1308,6 @@ class ProductWizard {
                 // Special handling for tags - parse string to array
                 if (field === 'tags' && typeof newValue === 'string') {
                     newValue = this.parseTags(newValue);
-                }
-                
-                // Special handling for pricing_type (Step 5 only) - ensure it's valid
-                if (field === 'pricing_type' && stepNumber === 5) {
-                    if (!newValue || newValue === '' || !['one_time', 'subscription', 'freemium'].includes(newValue)) {
-                        // Skip invalid pricing_type values - preserve existing DB value
-                        continue;
-                    }
-                }
-                
-                // Skip price_amount_* fields if we already set them from pricing objects
-                if (stepNumber === 5 && ['price_amount_chf', 'price_amount_usd', 'price_amount_eur', 'price_amount_gbp'].includes(field)) {
-                    // Only use direct values if pricing objects weren't set
-                    if (!(this.formData.subscription_pricing || this.formData.one_time_pricing)) {
-                        // Use direct value if no pricing objects - convert to number or null
-                        if (newValue !== undefined) {
-                            // Convert empty string to null for numeric fields
-                            const numericValue = (newValue === '' || newValue === null) ? null : parseFloat(newValue);
-                            if (!isNaN(numericValue) && numericValue !== currentValue) {
-                                updateData[field] = numericValue;
-                            } else if (numericValue === null && currentValue !== null) {
-                                updateData[field] = null;
-                            }
-                        }
-                    }
-                    continue; // Skip since we handled it above
                 }
                 
                 // Only include field if it has an explicit value (including null) AND it's different
@@ -1753,48 +1549,8 @@ class ProductWizard {
                 status: productStatus
             };
 
-            // Add AI data from Step 2 if available
-            window.logger?.log('🔍 Checking for Step 2 data:', {
-                hasStepData: !!this.stepData,
-                stepDataKeys: this.stepData ? Object.keys(this.stepData) : [],
-                step2Data: this.stepData && this.stepData[2] ? this.stepData[2] : null
-            });
-            
-            if (this.stepData && this.stepData[2]) {
-                const step2Data = this.stepData[2];
-                
-                window.logger?.log('📊 Step 2 data details:', {
-                    hasRecommendations: !!step2Data.recommendations,
-                    recommendationsKeys: step2Data.recommendations ? Object.keys(step2Data.recommendations) : [],
-                    hasConversationHistory: !!step2Data.conversationHistory,
-                    conversationHistoryKeys: step2Data.conversationHistory ? Object.keys(step2Data.conversationHistory) : [],
-                    hasFinalDecisions: !!step2Data.finalDecisions,
-                    finalDecisionsKeys: step2Data.finalDecisions ? Object.keys(step2Data.finalDecisions) : [],
-                    hasTechnicalSpec: !!step2Data.technicalSpecification
-                });
-                
-                // Add AI recommendations and conversations
-                if (step2Data.recommendations) {
-                    productData.ai_recommendations = step2Data.recommendations;
-                    window.logger?.log('✅ Added ai_recommendations to productData');
-                }
-                if (step2Data.conversationHistory) {
-                    productData.ai_conversations = step2Data.conversationHistory;
-                    window.logger?.log('✅ Added ai_conversations to productData');
-                }
-                if (step2Data.finalDecisions) {
-                    productData.ai_final_decisions = step2Data.finalDecisions;
-                    window.logger?.log('✅ Added ai_final_decisions to productData');
-                }
-                
-                // Add technical specification if generated
-                if (step2Data.technicalSpecification) {
-                    productData.technical_specification = step2Data.technicalSpecification;
-                    window.logger?.log('✅ Added technical_specification to productData');
-                }
-            } else {
-                window.logger?.log('❌ No Step 2 data found to save');
-            }
+            // Note: Step 2 (Technical Specification) has been removed from the wizard
+            // AI data and technical specification fields remain in the database but are not populated via the wizard
             
             // Add GitHub repository status if created
             if (this.formData.github_repo_created) {

@@ -416,7 +416,7 @@ if (typeof window.StepGithubSetup === 'undefined') {
                 
                 // Mark step as saved
                 if (window.productWizard && typeof window.productWizard.saveStepToDatabase === 'function') {
-                    const saveResult = await window.productWizard.saveStepToDatabase(4);
+                    const saveResult = await window.productWizard.saveStepToDatabase(3);
                     if (saveResult?.success) {
                         window.logger?.log('✅ Step 4 marked as saved after repository creation');
                     }

@@ -317,7 +317,7 @@ if (typeof window.StepCloudflareSetup === 'undefined') {
                     window.productWizard.formData.cloudflare_worker_url = data.workerDevUrl;
                     
                     // Save to database and mark step as saved
-                    const saveResult = await window.productWizard.saveStepToDatabase(6);
+                    const saveResult = await window.productWizard.saveStepToDatabase(4);
                     if (saveResult?.success) {
                         window.logger?.log('✅ Step 6 saved successfully after worker creation');
                     }

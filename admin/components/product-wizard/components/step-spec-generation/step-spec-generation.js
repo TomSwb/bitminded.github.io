@@ -263,6 +263,14 @@ class StepSpecGeneration {
     }
 
     async loadInitialRecommendations() {
+        // Validate that Step 1 data exists
+        const productContext = this.getProductContext();
+        if (!productContext.productName || !productContext.description) {
+            window.logger?.error('❌ Cannot load AI recommendations: Step 1 data is missing');
+            window.productWizard?.showError('Please complete Step 1 (Basic Information) before loading AI recommendations.');
+            return;
+        }
+        
         // Show loading state on button
         if (this.loadAiBtn) {
             this.loadAiBtn.disabled = true;
@@ -271,6 +279,7 @@ class StepSpecGeneration {
         
         const fields = ['platform-type', 'frontend-tech', 'backend-tech', 'database-type', 'auth-type', 'payment-type'];
         let completed = 0;
+        let errors = [];
         
         for (const fieldName of fields) {
             try {
@@ -283,6 +292,7 @@ class StepSpecGeneration {
                 }
             } catch (error) {
                 window.logger?.error(`❌ Error loading recommendation for ${fieldName}:`, error);
+                errors.push({ field: fieldName, error: error.message });
                 completed++;
             }
         }
@@ -290,9 +300,20 @@ class StepSpecGeneration {
         // Update button visibility and restore button text
         if (this.loadAiBtn) {
             this.loadAiBtn.disabled = false;
-            this.loadAiBtn.style.display = 'none';
+            if (errors.length === 0) {
+                this.loadAiBtn.style.display = 'none';
+            } else {
+                this.loadAiBtn.innerHTML = '<span class="btn-icon">⚠️</span>Some recommendations failed. Click to retry.';
+            }
         }
         if (this.clearAiBtn) this.clearAiBtn.style.display = 'inline-flex';
+        
+        // Show error message if any recommendations failed
+        if (errors.length > 0) {
+            const errorMessage = `Failed to load ${errors.length} recommendation(s). Please try again or use the "Ask AI" button for individual fields.`;
+            window.logger?.error('❌ AI Recommendations loading errors:', errors);
+            window.productWizard?.showError(errorMessage);
+        }
     }
 
     async getInitialRecommendation(fieldName) {
@@ -310,8 +331,24 @@ class StepSpecGeneration {
 
             window.logger?.log(`📥 Response for ${fieldName}:`, response);
 
+            // Check for errors in response
             if (response.error) {
-                throw new Error(response.error.message);
+                throw new Error(response.error.message || response.error || 'Failed to get AI recommendation');
+            }
+
+            // Check if response.data exists and has error
+            if (response.data && response.data.error) {
+                throw new Error(response.data.error || 'Failed to get AI recommendation');
+            }
+
+            // Check if response.data.success is false
+            if (response.data && response.data.success === false) {
+                throw new Error(response.data.error || 'Failed to get AI recommendation');
+            }
+
+            // Check if response exists
+            if (!response.data || !response.data.response) {
+                throw new Error('No recommendation returned from AI service');
             }
 
             const aiResponse = response.data.response;
@@ -479,8 +516,24 @@ class StepSpecGeneration {
                 }
             });
 
+            // Check for errors in response
             if (response.error) {
-                throw new Error(response.error.message);
+                throw new Error(response.error.message || response.error || 'Failed to get AI response');
+            }
+
+            // Check if response.data exists and has error
+            if (response.data && response.data.error) {
+                throw new Error(response.data.error || 'Failed to get AI response');
+            }
+
+            // Check if response.data.success is false
+            if (response.data && response.data.success === false) {
+                throw new Error(response.data.error || 'Failed to get AI response');
+            }
+
+            // Check if response exists
+            if (!response.data || !response.data.response) {
+                throw new Error('No response returned from AI service');
             }
 
             const aiResponse = response.data.response;
@@ -562,8 +615,24 @@ class StepSpecGeneration {
                 }
             });
 
+            // Check for errors in response
             if (response.error) {
-                throw new Error(response.error.message);
+                throw new Error(response.error.message || response.error || 'Failed to get suggestion');
+            }
+
+            // Check if response.data exists and has error
+            if (response.data && response.data.error) {
+                throw new Error(response.data.error || 'Failed to get suggestion');
+            }
+
+            // Check if response.data.success is false
+            if (response.data && response.data.success === false) {
+                throw new Error(response.data.error || 'Failed to get suggestion');
+            }
+
+            // Check if suggestion exists
+            if (!response.data || !response.data.suggestion) {
+                throw new Error('No suggestion returned from AI service');
             }
 
             const suggestion = response.data.suggestion;
@@ -590,10 +659,33 @@ class StepSpecGeneration {
             }
 
             const specData = this.collectSpecificationData();
+            window.logger?.log('📤 Generating specification with data:', specData);
             
             const response = await window.invokeEdgeFunction('generate-product-spec', {
                 body: specData
             });
+
+            window.logger?.log('📥 Specification generation response:', response);
+
+            // Check for errors in response
+            if (response.error) {
+                throw new Error(response.error.message || response.error || 'Failed to generate specification');
+            }
+
+            // Check if response.data exists and has error
+            if (response.data && response.data.error) {
+                throw new Error(response.data.error || 'Failed to generate specification');
+            }
+
+            // Check if response.data.success is false
+            if (response.data && response.data.success === false) {
+                throw new Error(response.data.error || 'Failed to generate specification');
+            }
+
+            // Check if specification exists in response
+            if (!response.data || !response.data.specification) {
+                throw new Error('No specification returned from server');
+            }
 
             const specification = response.data.specification;
             
@@ -631,8 +723,10 @@ class StepSpecGeneration {
         } catch (error) {
             window.logger?.error('❌ Error generating specification:', error);
             if (this.generationStatus) {
-                this.generationStatus.textContent = `Error: ${error.message}`;
+                this.generationStatus.textContent = `Error: ${error.message || 'Failed to generate specification'}`;
+                this.generationStatus.style.color = 'var(--color-error)';
             }
+            window.productWizard?.showError(`Failed to generate specification: ${error.message || 'Unknown error'}`);
         } finally {
             this.generateSpecBtn.disabled = false;
             this.generateSpecBtn.innerHTML = '<span class="btn-icon">🤖</span> Generate Technical Specification';
@@ -641,6 +735,19 @@ class StepSpecGeneration {
 
     collectSpecificationData() {
         const productContext = this.getProductContext();
+        
+        // Validate required fields
+        if (!productContext.productName || !productContext.description) {
+            throw new Error('Product name and description are required. Please complete Step 1 first.');
+        }
+
+        // Validate that all decisions have been made
+        const requiredFields = ['platform-type', 'frontend-tech', 'backend-tech', 'database-type', 'auth-type', 'payment-type'];
+        const missingFields = requiredFields.filter(fieldName => !this.finalDecisions[fieldName]);
+        
+        if (missingFields.length > 0) {
+            throw new Error(`Please accept AI recommendations for all fields before generating the specification. Missing: ${missingFields.join(', ')}`);
+        }
         
         return {
             ...productContext,
