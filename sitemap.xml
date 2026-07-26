@@ -1,91 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0 encoding=UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Homepage -->
-  <url>
-    <loc>https://bitminded.ch/</loc>
-    <lastmod>2025-01-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  
-  <!-- Portfolio -->
-  <url>
-    <loc>https://bitminded.ch/catalog/</loc>
-    <lastmod>2025-01-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <!-- FAQ Pages -->
-  <url>
-    <loc>https://bitminded.ch/faq/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://bitminded.ch/faq/general/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://bitminded.ch/faq/account-billing/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://bitminded.ch/faq/catalog-access/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://bitminded.ch/faq/commissioning/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://bitminded.ch/faq/tech-support/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <!-- Support -->
-  <url>
-    <loc>https://bitminded.ch/support/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- Legal Pages -->
-  <url>
-    <loc>https://bitminded.ch/legal-pages/privacy/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://bitminded.ch/legal-pages/terms/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://bitminded.ch/legal-pages/imprint/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://bitminded.ch/legal-pages/cookies/</loc>
-    <lastmod>2025-01-21</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-</urlset>
-
+	<!--  Homepage  -->
+	<url>
+		<loc>https://bitminded.ch/</loc>
+		<lastmod>2026-07-22</lastmod>
+		<changefreq>montly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--  Projects  -->
+	<url>
+		<loc>https://bitminded.ch/projects/</loc>
+		<lastmod>2026-07-22</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.9</priority>
+	</url>
+	<!--  Legal Pages  -->
+	<url>
+		<loc>https://bitminded.ch/legal/legal_notice/</loc>
+		<lastmod>2026-07-22</lastmod>
+		<changefreq>yearly</changefreq>
+		<priority>0.5</priority>
+	</url>
+	<url>
+		<loc>https://bitminded.ch/legal/privacy_notice/</loc>
+		<lastmod>2026-07-22</lastmod>
+		<changefreq>yearly</changefreq>
+		<priority>0.5</priority>
+	</url>

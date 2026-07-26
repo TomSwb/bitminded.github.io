@@ -1,0 +1,12 @@
+# robots.txt for bitminded.ch
+# Instructions for search engine crawlers
+
+User-agent: *
+Allow: /
+
+# Block static assets (not needed for indexing)
+Disallow: /css/
+Disallow: /assets/
+
+# Sitemap location
+Sitemap: https://bitminded.ch/sitemap.xml
