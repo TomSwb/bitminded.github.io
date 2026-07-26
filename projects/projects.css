@@ -1,0 +1,199 @@
+html body {
+	height: 100svh;
+	margin: 1svh;
+	background-color: var(--white);
+	color: var(--black);
+}
+
+.nav_button {
+	text-align: center;
+}
+
+.nav_button a {
+	display: inline-block;
+	text-decoration: none;
+	font-size: small;
+	margin: 0 15px;
+	padding: 1svh;
+	border-color: var(--pink);
+	border-radius: 10%;
+	color: var(--dark);
+	background-color: var(--green);	
+	cursor: pointer;
+}
+
+.nav_button a:hover{
+	background-color: var(--green-hover);
+}
+
+.nav_button a:active{
+	background-color: var(--green-hover);
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100svh;
+}
+
+main	{
+	flex: 1;
+}
+
+.main_title {
+	text-align: center;
+	color: var(--pink);
+}
+
+h3 {
+	text-align: center; 
+	color: var(--black);
+	font-style: italic;
+}
+
+h4 {
+	text-align: center;
+	color: var(--pink);
+	font-size: clamp(1.5rem, 2vw, 1.8rem);
+	text-shadow: 2px 2px 6px var(--green);
+	margin-bottom: 0;
+}
+
+p {
+	text-align: center;
+}
+
+.product-cards p {
+	text-align: center;
+}
+
+.product-cards .github-button {
+	text-decoration: none;
+	font-size: clamp(0.8rem, 2vw, 1rem);
+	text-align: center;
+	color: var(--green);
+	background-color: var(--black);
+	padding: 0.5rem;
+	border-radius: 1rem;
+	display: block;
+	margin: 0 auto;
+	max-width: 10rem;
+	cursor: pointer;
+}
+
+.product-cards .github-button:hover{
+	background-color: var(--black-hover);
+}
+
+.product-cards .github-button:active{
+	background-color: var(--black-hover);
+}
+
+.games-grid {
+	display: grid; 
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	justify-items: center;
+	align-items: start;
+	gap: 2.5rem;
+}
+
+.games-cards {
+	width: 100%;
+	max-width: 280px;         
+	height: fit-content;
+	margin-bottom: 1rem;
+	border-radius: 1rem;
+	padding-bottom: 0.5rem;
+	padding-top: 0.2rem;
+	background: var(--pink);
+	align-items: center;
+}
+
+.games-cards:hover {
+	box-shadow: 0 0 8px 2px var(--pink);
+}
+
+.games-cards h5 {
+	color: var(--white);
+	text-shadow: 2px 2px 10px var(--black);
+	text-align: center;
+	font-size: clamp(1rem, 2vw, 1.5rem);
+}
+
+.games-cards .games-image {
+	display: block;
+	margin: 0 auto;
+	width: 70%;
+}
+
+.games-cards p {
+	text-align: center;
+	font-size: medium;
+	padding-left: 1rem;
+	padding-right: 1rem;
+} 
+
+.games-cards .itch-button {
+	text-decoration: none;
+	font-size: clamp(1rem, 2vw, 1.2rem);
+	text-align: center;
+	color: var(--black);
+	background-color: var(--green);
+	padding: 0.5rem;
+	border-radius: 1rem;
+	display: block;
+	margin: 0 auto;
+	max-width: 7rem;
+	cursor: pointer;
+}
+
+.games-cards .itch-button:hover{
+	background-color: var(--green-hover);
+}
+
+.games-cards .itch-button:active{
+	background-color: var(--green-hover);
+}
+
+.games-cards .github-button {
+	text-decoration: none;
+	font-size: clamp(0.8rem, 2.5vw, 0.8rem);
+	text-align: center;
+	color: var(--green);
+	background-color: var(--black);
+	padding: 0.5rem;
+	border-radius: 1rem;
+	display: block;
+	margin: 1rem auto;
+	max-width: 5rem;
+	cursor: pointer;
+}
+
+.games-cards .github-button:hover{
+	background-color: var(--black-hover);
+}
+
+.games-cards .github-button:active{
+	background-color: var(--black-hover);
+}
+
+footer	{
+	border-top: 1px solid var(--black);
+	margin-top: 5ssvh;
+	padding-top: 1ssvh;
+	text-align: center;
+	font-size: small;
+}
+
+footer a {
+	text-decoration: none;
+	color: grey;
+}
+
+footer a:hover {
+	text-decoration: underline;
+}
+
+footer a:active {
+	text-decoration: underline;
+}

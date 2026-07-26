@@ -1,304 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="eng">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, intial-scale=1">
+		<title>Bitminded</title>
 
-<head>
-    <!-- Sets the character encoding for the document -->
-    <meta charset="UTF-8">
-    
-    <!-- Ensures proper rendering and touch zooming on mobile devices -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!--Browser Tab title-->
-    <title>BitMinded | Software Developer Portfolio & Learning Journey</title>
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="BitMinded portfolio - A personal collection of projects built while learning and growing as a developer. Explore software development projects, app creation, and the journey of building thoughtful, human-centered technology.">
-    <meta name="keywords" content="software developer portfolio, web development, app development, software architect, coding projects, learning journey, developer portfolio, BitMinded portfolio">
-    <meta name="author" content="BitMinded">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://bitminded.ch">
-    
-    <!-- Google Search Console Verification -->
-    <meta name="google-site-verification" content="pqWgZCMRdDssorVf27vNBHpxIjcChL1Mcw2YmoWaHdg" />
-    
-    <!-- Open Graph Meta Tags (Facebook, LinkedIn, WhatsApp, etc.) -->
-    <meta property="og:title" content="BitMinded | Software Developer Portfolio & Learning Journey">
-    <meta property="og:description" content="BitMinded portfolio - A personal collection of projects built while learning and growing as a developer. Each piece represents a step in the journey of understanding how to create thoughtful, human-centered software.">
-    <meta property="og:image" content="https://bitminded.ch/icons/bitminded-social.png">
-    <meta property="og:image:secure_url" content="https://bitminded.ch/icons/bitminded-social.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:url" content="https://bitminded.ch">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="BitMinded">
-    <meta property="og:locale" content="en_US">
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="BitMinded | Software Developer Portfolio & Learning Journey">
-    <meta name="twitter:description" content="BitMinded portfolio - A personal collection of projects built while learning and growing as a developer. Each piece represents a step in the journey of understanding how to create thoughtful, human-centered software.">
-    <meta name="twitter:image" content="https://bitminded.ch/icons/bitminded-social.png">
-    <meta name="twitter:image:alt" content="BitMinded Portfolio">
-    
-    <!--Browser Tab icon-->
-    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+		<!--Browser Tab icon-->
+		<link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+		<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
 
-    <!--Apple home-saved app icon-->
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <!-- iOS status bar style -->
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- Critical CSS to prevent white flash -->
-    <link rel="stylesheet" href="css/critical.css">
-    
-    <!-- Critical JavaScript for immediate initialization -->
-    <script src="js/critical.js"></script>
-    
-    <!-- Component Loader -->
-    <script src="components/shared/component-loader.js"></script>
-    
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="css/main.css">
-    <!-- Preload hero image for faster initial load -->
-    <link rel="preload" as="image" href="icons/here-header-dark.jpeg" fetchpriority="high">
-</head>
+		<!--Apple home-saved app icon-->
+	    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 
-<body>
-    <!-- Noscript content for search engines -->
-    <noscript>
-        <div style="padding: 2rem; text-align: center;">
-            <h1>A Learning Journey in Code</h1>
-            <p>I'm Thomas, a software and game designer. This portfolio is a living document of my growth — each project a step forward in understanding how to build thoughtful, human‑centered technology.</p>
-        </div>
-    </noscript>
-    <header>
-        <!-- Navigation Menu Component will be loaded here -->
-        
-        <!-- Language Switcher Component will be loaded here -->
-    </header>
+		<!-- SEO Meta Tags -->
+		<meta name="description" content="A software engineering journey.">
+		<meta name="keywords" content="software developer portfolio, web development, app development, software architect, coding projects, learning journey, developer portfolio, Bitminded portfolio">
+		<meta name="author" content="BitMinded">
+		<meta name="robots" content="index, follow">
+		<link rel="canonical" href="https://bitminded.ch">
+		
+		<!-- Open Graph / Facebook / LinkedIn / WhatsApp / iMessage -->
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://bitminded.ch/">
+		<meta property="og:title" content="Bitminded">
+		<meta property="og:description" content="A software engineering journey.">
+		<meta property="og:image" content="https://bitminded.ch/assets/icons/bitminded-social.png">
+		<meta property="og:image:secure_url" content="https://bitminded.ch/assets/icons/bitminded-social.png">
+		<meta property="og:image:type" content="image/png">
+		<meta property="og:image:width" content="1200">
+		<meta property="og:image:height" content="630">
+		<meta property="og:site_name" content="Bitminded">
 
-    <main>
-        <!-- Hero Section -->
-        <section class="hero">
-            <img id="hero-image" src="icons/here-header-dark.jpeg" alt="BitMinded - Handcrafted Software" class="hero__image">
-            <!-- Hero content - COMMENTED OUT (keeping only image) -->
-            <!--
-            <div class="hero__content">
-                <h1 id="main-title" class="hero__title translatable-content">We Build. We Guide.</h1>
-                <p id="hero-subtitle" class="hero__subtitle translatable-content">We build artisanal apps for everyday needs — and help you feel confident with any technology you use.</p>
-                <p style="display: none;" aria-hidden="true">We build artisanal apps for everyday needs — and help you feel confident with any technology you use.</p>
-            </div>
-            -->
-        </section>
+		<!-- Links to stylesheets -->
+		<link rel="stylesheet" href="css/variables.css">
+		<link rel="stylesheet" href="css/home.css">
+	</head>
+	
+	<body>
+		<header>
+			<nav class="nav_button">
+				<a href="projects/index.html">Projects</a>
+			</nav>
+			<img id="hero-img" src="assets/icons/bitminded__jpeg.jpg" alt="BitMinded">
+		</header>
 
-        <!-- Old content - COMMENTED OUT -->
-        <!--
-        <div class="mission-toggle">...</div>
-        <div id="mission-build" class="mission-content">
-                
-                <section class="philosophy">
-            <h2 id="philosophy-title" class="philosophy__title translatable-content">Why Artisanal App Creation?</h2>
-            <p id="philosophy-intro" class="philosophy__intro translatable-content">We design every app like a bespoke instrument—listening closely, trimming the noise, and shaping software that blends into daily life.</p>
-            <div class="philosophy__content">
-                <div class="philosophy__item">
-                    <h3 id="philosophy-human-scale-title" class="translatable-content">Human-Scale</h3>
-                    <p id="philosophy-human-scale-text" class="translatable-content">Small, clean, purposeful tools—never bloated mass-market apps. Built by one independent coder, with care and a clear philosophy.</p>
-                </div>
-                <div class="philosophy__item">
-                    <h3 id="philosophy-transparent-title" class="translatable-content">Transparent & Ethical</h3>
-                    <p id="philosophy-transparent-text" class="translatable-content">Like Swiss artisans, we build sustainably, ethically, and transparently. You know who made your software and why.</p>
-                </div>
-                <div class="philosophy__item">
-                    <h3 id="philosophy-personal-title" class="translatable-content">Personal Touch</h3>
-                    <p id="philosophy-personal-text" class="translatable-content">Every tool is crafted with intention. Commission an app: pay for the build you need, keep a perpetual-use license while we offer it through our catalog for others to benefit.</p>
-                </div>
-            </div>
-        </section>
-
-        
-        <section class="products">
-            <h2 id="products-title" class="products__title translatable-content">Our Work</h2>
-            <p id="products-subtitle" class="products__subtitle translatable-content">Handcrafted tools for everyday needs</p>
-            <div class="products__grid">
-                <div class="product-card">
-                    <div class="product-card__icon">
-                        <img src="images/rythmo-icon.png" alt="Rythmo" onerror="this.style.display='none'">
-                    </div>
-                    <h3 id="rythmo-title" class="product-card__title translatable-content">Rythmo</h3>
-                    <p id="rythmo-description" class="product-card__description translatable-content">A custom workout timer app with exercise and rest intervals. Built for focused training sessions.</p>
-                </div>
-                <div class="product-card">
-                    <div class="product-card__icon">
-                        <img src="images/measure-mate-icon.png" alt="Measure Mate" onerror="this.style.display='none'">
-                    </div>
-                    <h3 id="measure-mate-title" class="product-card__title translatable-content">Measure Mate</h3>
-                    <p id="measure-mate-description" class="product-card__description translatable-content">A simple, efficient unit conversion tool. Convert between various units of measurement quickly and accurately.</p>
-                </div>
-            </div>
-        </section>
-
-        
-        <section class="how-we-work">
-            <h2 id="how-we-work-title" class="how-we-work__title translatable-content">How We Work</h2>
-            <div class="how-we-work__content">
-                <div class="how-we-work__item">
-                    <h3 id="commission-title" class="translatable-content">Commission a Tool</h3>
-                    <p id="commission-text" class="translatable-content">Need something special? Let's build it together. Commission an app tailored to your needs—pay for the build you value, enjoy a perpetual license while we add it to our catalog for others to benefit.</p>
-                </div>
-                <div class="how-we-work__item">
-                    <h3 id="catalog-title" class="translatable-content">Growing Catalog</h3>
-                    <p id="catalog-text" class="translatable-content">Each commission becomes part of our artisanal catalog. Purchase individual tools or subscribe to access multiple apps. Simple, honest pricing.</p>
-                </div>
-                <div class="how-we-work__item">
-                    <h3 id="support-title" class="translatable-content">Support Indie Software</h3>
-                    <p id="support-text" class="translatable-content">Choose software made with care, not mass production. Support independent development and get tools that respect your time and attention.</p>
-                </div>
-            </div>
-        </section>
-        </div>
-        
-
-        
-        <div id="mission-guide" class="mission-content hidden">
+		<main>
+			<section>
+				<h2>Welcome!</h2>
+				<p>This is Bitminded launchpad. Currently a place to demonstrate my projects, the objectif is to grow in a compagny serving people through thoughfully made softwares. Starting from zero code knowledge in 2024, then vibe-coding in 2025, 2026 marked the beginning of creating software by hand with AI used only to learn what i need to know and not work for me.</p>
+			</section>
+			<section>
+				<h2>The way of 0's and 1's</h2>
+				<p>Coding is the way I found to express my creativity. Coding is simple: it works, or it doesn't. 0's and 1's, embeded together, making your computer do what you want (maybe). I find the beauty of this simple logic appeasing and allowing for anyone to do anything.</p>
+			</section>
+			<section>
+				<h2>Projects</h2>
+				<p>I enjoy making two types of projects: useful products and fun video games. As I am only getting started, my goal is to grow my library with projects that train different software development skills, discovering my path as I go.</p>
+			</section>
+			<section>
+				<h2>AI Policy</h2>
+				<p>My journey began in 2024 and at first I used AI to do anything I did of consequences, including the first instance of this website. I vibe-coded a whole CRM system, and many more tools. Until I reach the point to integrate paiement methods and begin commercialise my products. I could not move forward with it, unwilling to play with poeple money and data. I decided I needed to learn to do all of it by myself, using AI only as an advance websearch support. All projects (including this website) are to be considered handmade.</p>
+			</section>
+		</main>
             
-            
-            <section class="guide-philosophy">
-                <h2 id="guide-philosophy-title" class="guide-philosophy__title translatable-content">Why Personal Tech Guidance?</h2>
-                <p id="guide-philosophy-text" class="guide-philosophy__intro translatable-content">Technology should feel safe, clear, and human. We sit beside you—patient, judgment-free—to translate confusing tools into plain language, helping you make confident choices and enjoy the apps that matter in your life.</p>
-                <div class="guide-philosophy__content">
-                    <div class="guide-philosophy__item">
-                        <h3 id="guide-philosophy-pillar1-title" class="translatable-content">We Sit Beside You</h3>
-                        <p id="guide-philosophy-pillar1-text" class="translatable-content">Bring any device, account, or question. We start with calm listening so you feel seen before we touch a single button.</p>
-                    </div>
-                    <div class="guide-philosophy__item">
-                        <h3 id="guide-philosophy-pillar2-title" class="translatable-content">Plain-Language Guidance</h3>
-                        <p id="guide-philosophy-pillar2-text" class="translatable-content">We translate screens into everyday language and steps that make sense, so you always know what we’re doing—and why.</p>
-                    </div>
-                    <div class="guide-philosophy__item">
-                        <h3 id="guide-philosophy-pillar3-title" class="translatable-content">Confidence That Lasts</h3>
-                        <p id="guide-philosophy-pillar3-text" class="translatable-content">You leave with notes, rituals, and safety tips tailored to you, so the confidence stays long after the session ends.</p>
-                    </div>
-                </div>
-            </section>
-
-            
-            <section class="services">
-            <h2 id="services-title" class="services__title translatable-content">How We Support You</h2>
-            <p id="services-subtitle" class="services__subtitle translatable-content">Support designed for the moments when tech feels overwhelming, uncertain, or urgent</p>
-            <div class="services__grid">
-                <div class="service-card">
-                    <h3 id="software-learning-title" class="service-card__title translatable-content">Tech Confidence Coaching</h3>
-                    <p id="software-learning-text" class="service-card__description translatable-content">Build lasting ease with guided practice tailored to the tools you want to master—patient pacing, plain language, and encouragement at every step.</p>
-                </div>
-                <div class="service-card">
-                    <h3 id="digital-literacy-title" class="service-card__title translatable-content">Quick Tech Help</h3>
-                    <p id="digital-literacy-text" class="service-card__description translatable-content">Bring the tricky glitches, password lockouts, or mystery pop-ups. We troubleshoot beside you so the fix actually makes sense.</p>
-                </div>
-                <div class="service-card">
-                    <h3 id="software-tutoring-title" class="service-card__title translatable-content">Family Tech Connection</h3>
-                    <p id="software-tutoring-text" class="service-card__description translatable-content">Create a shared tech language at home—learn your kids’ games, set healthy boundaries, and help relatives join in without stress.</p>
-                </div>
-            </div>
-        </section>
-
-            
-            <section class="guide-how-it-works">
-                <h2 id="guide-how-it-works-title" class="guide-how-it-works__title translatable-content">How It Works</h2>
-                <div class="guide-how-it-works__content">
-                    <div class="guide-how-it-works__item">
-                        <h3 id="guide-step-1-title" class="translatable-content">Reach Out & Connect</h3>
-                        <p id="guide-step-1-text" class="translatable-content">Share what feels confusing or urgent—no tech jargon needed. We'll listen, explore the situation together, and plan support that fits you.</p>
-                    </div>
-                    <div class="guide-how-it-works__item">
-                        <h3 id="guide-step-3-title" class="translatable-content">Get Support</h3>
-                        <p id="guide-step-3-text" class="translatable-content">Flexible sessions via video call, phone, or in-person. We work at your pace, in the way that feels most comfortable.</p>
-                    </div>
-                    <div class="guide-how-it-works__item">
-                        <h3 id="guide-step-4-title" class="translatable-content">Build Confidence</h3>
-                        <p id="guide-step-4-text" class="translatable-content">Ongoing support whenever you need it. We're here as your technology companion, not just a one-time fix.</p>
-                    </div>
-                </div>
-            </section>
-        </div>
-        -->
-        <!-- END Old Content -->
-
-        <!-- New Portfolio Home Page -->
-        <section class="portfolio-intro">
-            <div class="portfolio-intro__content">
-                <h1 class="portfolio-intro__title translatable-content" data-i18n="home-intro-title">A Learning Journey in Code</h1>
-                <p class="portfolio-intro__subtitle translatable-content" data-i18n="home-intro-subtitle-1">
-                    I'm Thomas, a software and game designer. This portfolio is a living document of my growth, each project represents a step forward in understanding how to build thoughtful, human-centered technology.
-                </p><br>
-                <p class="portfolio-intro__subtitle translatable-content" data-i18n="home-intro-subtitle-2">
-                    My hope is for BitMinded to one day become an indie studio, creating games and producing applications, bringing life, joy and peace in people's life.</p><br><p>I'm looking forward to collaborate with people passionate by art, music/sound and project management.
-                </p>
-            </div>
-        </section>
-        <section class="portfolio-cta">
-            <div class="portfolio-cta__content">
-                <h2 class="portfolio-cta__title translatable-content" data-i18n="home-cta-title">Explore My Work</h2>
-                <p class="portfolio-cta__text translatable-content" data-i18n="home-cta-text">
-                    Browse through the projects I've built, the challenges I've tackled, and the solutions I've crafted. Each
-                    one represents a moment of learning, a problem solved, and a step forward in my journey.
-                </p>
-                <a href="/catalog/" class="portfolio-cta__link translatable-content" data-i18n="home-cta-link">View Portfolio
-                    →</a>
-            </div>
-        </section>
-        <section class="portfolio-about">
-            <div class="portfolio-about__content">
-                <h2 class="portfolio-about__title translatable-content" data-i18n="home-about-title">Why This Portfolio?</h2>
-                <p class="portfolio-about__text translatable-content" data-i18n="home-about-text">
-                    Every developer's journey is unique. Mine is driven by a simple belief: technology should empower people, not overwhelm them. Through building custom software, exploring new frameworks, and continuously learning, I document the process of becoming a better craftsman, one project at a time.
-                </p>
-                <p class="portfolio-about__text translatable-content" data-i18n="home-about-text-2">
-                    What you'll find here isn't just finished products, but the evolution of ideas, the lessons learned, and the ongoing pursuit of building software with intention and care. Each piece in my portfolio tells a story of problem-solving, iteration, and growth.
-                </p>
-            </div>
-        </section>
-
-        <!--<section class="portfolio-twitch">
-            <div class="portfolio-twitch__content">
-                <h2 class="portfolio-twitch__title translatable-content" data-i18n="home-twitch-title">Watch Me Build</h2>
-                <p class="portfolio-twitch__text translatable-content" data-i18n="home-twitch-text">
-                    I stream my development process live on Twitch. Join me as I write code, create apps, and make video games, see the process behind the projects in real-time.
-                </p>
-                <a href="https://www.twitch.tv/tombitminded" target="_blank" rel="noopener noreferrer" class="portfolio-twitch__link translatable-content" data-i18n="home-twitch-link">
-                    <span class="portfolio-twitch__icon" aria-hidden="true">📺</span>
-                    <span>Watch on Twitch</span>
-                </a>
-            </div>
-        </section>-->
-    </main>
-
-    <footer>
-        <!-- Theme Switcher Component will be loaded here -->
-    </footer>
-
-    <!-- Supabase client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <!-- Environment configuration (must load before supabase-config.js) -->
-    <script src="js/env-config.js"></script>
-    <!-- Logger utility (must load after env-config.js, before other scripts) -->
-    <script src="js/logger.js"></script>
-    <!-- Supabase configuration -->
-    <script src="js/supabase-config.js"></script>
-    <!-- i18next CDN language-switcher-->
-    <!-- other scripts (includes loading screen) -->
-    <script src="js/script.js"></script>
-    <script src="js/hero-image.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/25.5.2/i18next.min.js"></script>
-    <!--- language switcher-->
-    <script src="js/lang-index/lang-index.js"></script>
-    <!-- Mission Toggle - COMMENTED OUT -->
-    <!--
-    <script src="js/mission-toggle.js"></script>
-    -->
-
-</body> 
-
+		<footer>
+			<p>© 2026 Bitminded - based in Switzerland 🇨🇭<br>
+			<a href="legal/legal_notice.html">Legal notice</a> - 
+			<a href="legal/privacy_notice.html">Privacy notice</a>
+			</p>
+		</footer>
+     </body>
 </html>
