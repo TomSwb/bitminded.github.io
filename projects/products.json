@@ -1,0 +1,16 @@
+[
+  {
+    "id": "bitminded",
+    "title": "Bitminded.ch",
+    "description": "The window on my journey as a developer.",
+    "language": "Language: HTML/CSS/JS",
+    "github_link": "https://github.com/TomSwb/bitminded.github.io"
+  },
+  {
+    "id": "libft",
+    "title": "Libft",
+    "description": "A custom C library made as support for the 42 curriculum",
+    "language": "Language: C",
+    "github_link": "https://github.com/TomSwb/jumpy_puppy"
+  }
+]
