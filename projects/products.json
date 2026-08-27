@@ -7,6 +7,20 @@
     "github_link": "https://github.com/TomSwb/bitminded.github.io"
   },
   {
+    "id": "piscine_42",
+    "title": "Piscine 42",
+    "description": "A compilation of exercices done during the Piscine at 42",
+    "language": "Language: C",
+    "github_link": "https://github.com/TomSwb/piscine_42"
+  },
+  {
+    "id": "c_piscine_reloaded",
+    "title": "C Piscine Reloaded",
+    "description": "A compilation of exercices done after the piscine and waiting for the begining of the common core",
+    "language": "Language: C",
+    "github_link": "https://github.com/TomSwb/c_piscine_reloaded"
+  },
+  {
     "id": "libft",
     "title": "Libft",
     "description": "A custom C library made as support for the 42 curriculum",
