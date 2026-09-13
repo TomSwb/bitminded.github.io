@@ -16,14 +16,14 @@
   {
     "id": "c_piscine_reloaded",
     "title": "C Piscine Reloaded",
-    "description": "A compilation of exercices done after the piscine and waiting for the begining of the common core",
+    "description": "A compilation of exercices done after the piscine awaiting for the begining of 42 common core",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/c_piscine_reloaded"
   },
   {
     "id": "libft",
     "title": "Libft",
-    "description": "A custom C library made as support for the 42 curriculum",
+    "description": "A custom C library made as support for the 42 curriculum, 1st module of said curriculum.",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/jumpy_puppy"
   }
