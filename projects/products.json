@@ -7,24 +7,17 @@
     "github_link": "https://github.com/TomSwb/bitminded.github.io"
   },
   {
-    "id": "piscine_42",
-    "title": "Piscine 42",
-    "description": "A compilation of exercices done during the Piscine at 42",
-    "language": "Language: C",
-    "github_link": "https://github.com/TomSwb/piscine_42"
-  },
-  {
-    "id": "c_piscine_reloaded",
-    "title": "C Piscine Reloaded",
-    "description": "A compilation of exercices done after the piscine awaiting for the begining of 42 common core",
-    "language": "Language: C",
-    "github_link": "https://github.com/TomSwb/c_piscine_reloaded"
-  },
-  {
     "id": "libft",
     "title": "Libft",
     "description": "A custom C library made as support for the 42 curriculum, 1st module of said curriculum.",
     "language": "Language: C",
-    "github_link": "https://github.com/TomSwb/jumpy_puppy"
+    "github_link": "https://github.com/TomSwb/libft"
+  },
+  {
+    "id": "gnl",
+    "title": "GNL / get_next_line",
+    "description": "A C function allowing to read files line by line (repo contains a program version as well).",
+    "language": "Language: C",
+    "github_link": "https://github.com/TomSwb/get_next_line"
   }
 ]
