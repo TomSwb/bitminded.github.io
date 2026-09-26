@@ -19,5 +19,14 @@
     "description": "A C function allowing to read files line by line (repo contains a program version as well).",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/get_next_line"
+  },
+  {
+    "id": "ft_printf",
+    "title": "ft_printf",
+    "description": "A C function allowing to print a desired output based on variadic parameters.",
+    "language": "Language: C",
+    "github_link": "https://github.com/TomSwb/ft_printf"
   }
 ]
+
+
