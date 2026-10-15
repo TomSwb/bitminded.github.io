@@ -13,7 +13,7 @@ function escapeHtml(str) {
 
 async function loadProjects() {
 	const res = await fetch('products.json'); // gets the data in the json
-	const projects = await res.json(); // what does it do?
+	const projects = await res.json(); // parse the response text from JSON into an array of project objects
 
 	const grid = document.getElementById('products-grid'); // find the element in the html file with an id of games-grid
 	grid.innerHTML = ''; // clear any loading state
@@ -22,7 +22,7 @@ async function loadProjects() {
 	projects.forEach(project => {
 		const card = document.createElement('article'); // creates the article html element
 		card.className = 'products-cards'; //give it the class name to not loose my css
-		card.id = project.id; // give the article an id corresponding to the id in Json so the functions knows which we targetting? what the need?
+		card.id = project.id; // unique id per card, e.g. to link to it (projects/#libft) or style it in CSS
 
 		// Build inner HTML in a given structure fetching the data for each element in the json
 		card.innerHTML = `
