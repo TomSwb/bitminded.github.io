@@ -9,21 +9,21 @@
   {
     "id": "libft",
     "title": "Libft",
-    "description": "A custom C library made as support for the 42 curriculum, 1st module of said curriculum.",
+    "description": "A custom C library built as a foundation for the 42 curriculum, and its first project.",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/libft"
   },
   {
     "id": "gnl",
     "title": "GNL / get_next_line",
-    "description": "A C function allowing to read files line by line (repo contains a program version as well).",
+    "description": "A C function that reads a file line by line (the repo also contains a program version).",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/get_next_line"
   },
   {
     "id": "ft_printf",
     "title": "ft_printf",
-    "description": "A C function allowing to print a desired output based on variadic parameters.",
+    "description": "A C function that prints formatted output from a variable number of arguments.",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/ft_printf"
   }
