@@ -4,8 +4,8 @@
     "title": "Jumpy Puppy",
     "image": "../assets/images/jp.jpeg",
     "alt": "jumpy-puppy",
-    "description": "Help brownie save the kittens!",
-    "details": "2d platformer using scrolling mechanics and node based logic",
+    "description": "Help Brownie save the kittens!",
+    "details": "2D platformer using scrolling mechanics and node-based logic",
     "engine": "Engine: Godot",
     "itch_link": "https://tombitminded.itch.io/jumpy-puppy",
     "github_link": "https://github.com/TomSwb/jumpy_puppy"
@@ -15,8 +15,8 @@
     "title": "Swimmy Turtle",
     "image": "../assets/images/turtle.jpeg",
     "alt": "Swimmy turtle",
-    "description": "Reach the furtest point of the sea!",
-    "details": "2d automatic scroller using node and code based logic for infinite spawing",
+    "description": "Reach the furthest point of the sea!",
+    "details": "2D auto-scroller using node- and code-based logic for infinite spawning",
     "engine": "Engine: Godot",
     "itch_link": "https://tombitminded.itch.io/swimmy-turtle",
     "github_link": "https://github.com/TomSwb/swimmy_turtle"
