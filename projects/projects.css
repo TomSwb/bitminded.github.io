@@ -63,7 +63,7 @@ p {
 	text-align: center;
 }
 
-.products-grid {
+.projects-grid {
 	display: grid; 
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 	justify-items: center;
@@ -71,7 +71,7 @@ p {
 	gap: 2.5rem;
 }
 
-.products-cards {
+.projects-cards {
 	width: 100%;
 	max-width: 280px;         
 	height: fit-content;
@@ -83,31 +83,31 @@ p {
 	align-items: center;
 }
 
-.products-cards:hover {
+.projects-cards:hover {
 	box-shadow: 0 0 8px 2px var(--pink);
 }
 
-.products-cards h5 {
+.projects-cards h5 {
 	color: var(--white);
 	text-shadow: 2px 2px 10px var(--black);
 	text-align: center;
 	font-size: clamp(1rem, 2vw, 1.5rem);
 }
 
-.products-cards .games-image {
+.projects-cards .games-image {
 	display: block;
 	margin: 0 auto;
 	width: 70%;
 }
 
-.products-cards p {
+.projects-cards p {
 	text-align: center;
 	font-size: medium;
 	padding-left: 1rem;
 	padding-right: 1rem;
 } 
 
-.products-cards .itch-button {
+.projects-cards .itch-button {
 	text-decoration: none;
 	font-size: clamp(1rem, 2vw, 1.2rem);
 	text-align: center;
@@ -121,15 +121,15 @@ p {
 	cursor: pointer;
 }
 
-.products-cards .itch-button:hover{
+.projects-cards .itch-button:hover{
 	background-color: var(--green-hover);
 }
 
-.products-cards .itch-button:active{
+.projects-cards .itch-button:active{
 	background-color: var(--green-hover);
 }
 
-.products-cards .github-button {
+.projects-cards .github-button {
 	text-decoration: none;
 	font-size: clamp(0.8rem, 2.5vw, 0.8rem);
 	text-align: center;
@@ -143,11 +143,11 @@ p {
 	cursor: pointer;
 }
 
-.products-cards .github-button:hover{
+.projects-cards .github-button:hover{
 	background-color: var(--black-hover);
 }
 
-.products-cards .github-button:active{
+.projects-cards .github-button:active{
 	background-color: var(--black-hover);
 }
 
