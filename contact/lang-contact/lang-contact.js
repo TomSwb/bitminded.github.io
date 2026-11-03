@@ -13,16 +13,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
-        if (document.getElementById('contact-linkedin')) {
-            document.getElementById('contact-linkedin').textContent = i18next.t('contact-linkedin');
+        // Login/Sign Up button translations
+        if (document.querySelector('.auth-buttons button:nth-child(1)')) {
+            document.querySelector('.auth-buttons button:nth-child(1)').textContent = i18next.t('login-btn');
         }
+        if (document.querySelector('.auth-buttons button:nth-child(2)')) {
+            document.querySelector('.auth-buttons button:nth-child(2)').textContent = i18next.t('signup-btn');
+        }
+        // Sign Out button translation
+        if (document.getElementById('signout-btn')) {
+            document.getElementById('signout-btn').textContent = i18next.t('signout-btn');
+        }
+        // Nav menu translations
         if (document.getElementById('nav-home')) {
             document.getElementById('nav-home').textContent = i18next.t('nav-home');
         }
         if (document.getElementById('nav-contact')) {
             document.getElementById('nav-contact').textContent = i18next.t('nav-contact');
         }
-
         // Contact form translations
         if (document.querySelector('label[for="name"]')) {
             document.querySelector('label[for="name"]').textContent = i18next.t('contact-name');
@@ -36,13 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.querySelector('button.contact')) {
             document.querySelector('button.contact').textContent = i18next.t('contact-send');
         }
-        
         // Show all translatable content after translation is complete
         const translatableElements = document.querySelectorAll('.translatable-content');
         translatableElements.forEach(element => {
             element.classList.add('loaded');
         });
-        
         // Remove the hide-translatable class from document
         document.documentElement.classList.remove('hide-translatable');
     }

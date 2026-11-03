@@ -1,6 +1,11 @@
 {
   "en": {
     "translation": {
+
+      "login-btn": "Login",
+      "signup-btn": "Sign Up",
+      "signout-btn": "Sign Out",
+
       "nav-home": "Home", 
       "nav-contact": "Contact",
 
@@ -10,6 +15,11 @@
   },
   "fr": {
     "translation": {
+
+      "login-btn": "Connexion",
+      "signup-btn": "Inscription",
+      "signout-btn": "Déconnexion",
+
       "nav-home": "Accueil", 
       "nav-contact": "Contact",
       

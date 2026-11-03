@@ -13,17 +13,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function updateContent() {
+        // Login/Sign Up button translations
+        if (document.querySelector('.auth-buttons button:nth-child(1)')) {
+            document.querySelector('.auth-buttons button:nth-child(1)').textContent = i18next.t('login-btn');
+        }
+        if (document.querySelector('.auth-buttons button:nth-child(2)')) {
+            document.querySelector('.auth-buttons button:nth-child(2)').textContent = i18next.t('signup-btn');
+        }
+        // Sign Out button translation
+        if (document.getElementById('signout-btn')) {
+            document.getElementById('signout-btn').textContent = i18next.t('signout-btn');
+        }
+        // Nav menu translations
+        if (document.getElementById('nav-home')) {
+            document.getElementById('nav-home').textContent = i18next.t('nav-home');
+        }
+        if (document.getElementById('nav-contact')) {
+            document.getElementById('nav-contact').textContent = i18next.t('nav-contact');
+        }
+
         if (document.getElementById('main-title')) {
             document.getElementById('main-title').textContent = i18next.t('main-title');
         }
         if (document.getElementById('subtitle')) {
             document.getElementById('subtitle').textContent = i18next.t('subtitle');
-        }
-        if (document.getElementById('nav-home')) {
-            document.getElementById('nav-home').textContent = i18next.t('nav-home');
-        }
-        if (document.getElementById('nav-contact')) {
-        document.getElementById('nav-contact').textContent = i18next.t('nav-contact');
         }
         
         // Show all translatable content after translation is complete
