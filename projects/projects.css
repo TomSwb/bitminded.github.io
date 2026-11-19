@@ -71,6 +71,14 @@ p {
 	gap: 2.5rem;
 }
 
+.projects_42-grid {
+	display: grid; 
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	justify-items: center;
+	align-items: start;
+	gap: 2.5rem;
+}
+
 .projects-cards {
 	width: 100%;
 	max-width: 280px;         

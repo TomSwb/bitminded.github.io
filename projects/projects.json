@@ -7,32 +7,11 @@
     "github_link": "https://github.com/TomSwb/bitminded.github.io"
   },
   {
-    "id": "libft",
-    "title": "libft",
-    "description": "A custom C library built as a foundation for the 42 curriculum, and its first project.",
+    "id": "gaming_hub",
+    "title": "Gaming Hub",
+    "description": "A custom gaming library manager to access games no matter where they might be hosted and manage sessions in a healthy manner.",
     "language": "Language: C",
-    "github_link": "https://github.com/TomSwb/libft"
-  },
-  {
-    "id": "gnl",
-    "title": "get_next_line",
-    "description": "A C function that reads a file line by line (the repo also contains a program version).",
-    "language": "Language: C",
-    "github_link": "https://github.com/TomSwb/get_next_line"
-  },
-  {
-    "id": "ft_printf",
-    "title": "ft_printf",
-    "description": "A C function that prints formatted output from a variable number of arguments.",
-    "language": "Language: C",
-    "github_link": "https://github.com/TomSwb/ft_printf"
-  },
-  {
-    "id": "push_swap",
-    "title": "push_swap",
-    "description": "A C program regroupping 3 algorytms capable or sorting a given array using different techniques.",
-    "language": "Language: C",
-    "github_link": "https://github.com/TomSwb/push_swap"
+    "github_link": "https://github.com/TomSwb/gaming_hub"
   }
 ]
 
