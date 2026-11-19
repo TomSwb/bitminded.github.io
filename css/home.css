@@ -12,6 +12,7 @@ html body {
 .nav_button a {
 	display: inline-block;
 	text-decoration: none;
+	text-align: center;
 	font-size: small;
 	margin: 0 15px;
 	padding: 1svh;
