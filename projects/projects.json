@@ -9,7 +9,7 @@
   {
     "id": "gaming_hub",
     "title": "Gaming Hub",
-    "description": "A custom gaming library manager to access games no matter where they might be hosted and manage sessions in a healthy manner.",
+    "description": "A small companion window for my gaming sessions on Linux: live system stats, a session timer and break reminders. Written by hand in C with GTK4..",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/gaming_hub"
   }
