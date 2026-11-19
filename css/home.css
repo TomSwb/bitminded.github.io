@@ -64,9 +64,8 @@ h2 {
 	text-align: center;
 }
 
-.contact {
-	text-align: justify;
-	font-size: medium;
+.contact a {
+	font-size: large;
 }
 
 footer	{
