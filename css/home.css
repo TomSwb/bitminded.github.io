@@ -65,7 +65,8 @@ h2 {
 }
 
 a {
-	text-align: center;
+	text-align: justify;
+	font-size: medium;
 }
 
 footer	{
