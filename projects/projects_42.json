@@ -23,7 +23,7 @@
   {
     "id": "push_swap",
     "title": "push_swap",
-    "description": "A C program regroupping 3 algorytms capable or sorting a given array using different techniques.",
+    "description": "A C program that sorts a stack of numbers with as few moves as possible, using only two stacks and a limited set of operations.",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/push_swap"
   }

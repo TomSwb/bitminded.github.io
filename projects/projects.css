@@ -67,17 +67,19 @@ p {
 
 .projects-grid {
 	display: grid; 
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(180px, 280px));
 	justify-items: center;
+	justify-content: center;
 	align-items: start;
 	gap: 2.5rem;
 }
 
 .projects_42-grid {
 	display: grid; 
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(180px, 280px));
 	justify-items: center;
 	align-items: start;
+	justify-content: center;
 	gap: 2.5rem;
 }
 
@@ -173,6 +175,7 @@ p {
 	margin: 1rem auto;
 	max-width: 10rem;
 	cursor: pointer;
+	white-space: nowrap
 }
 
 .github-button:hover{
@@ -185,8 +188,9 @@ p {
 
 .games-grid {
 	display: grid; 
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(180px, 280px));
 	justify-items: center;
+	justify-content: center;
 	align-items: start;
 	gap: 2.5rem;
 }

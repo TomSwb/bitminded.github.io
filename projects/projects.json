@@ -1,18 +1,18 @@
 [
   {
-    "id": "bitminded",
-    "title": "bitminded.ch",
-    "description": "The window on my journey as a developer.",
-    "language": "Language: HTML/CSS/JS",
-    "github_link": "https://github.com/TomSwb/bitminded.github.io"
-  },
-  {
     "id": "gaming_hub",
     "title": "Gaming Hub",
     "description": "A small companion window for my gaming sessions on Linux: live system stats, a session timer and break reminders. Written by hand in C with GTK4.",
     "language": "Language: C",
     "github_link": "https://github.com/TomSwb/gaming_hub"
-  }
+  },
+  {
+    "id": "bitminded",
+    "title": "bitminded.ch",
+    "description": "The window on my journey as a developer.",
+    "language": "Language: HTML/CSS/JS",
+    "github_link": "https://github.com/TomSwb/bitminded.github.io"
+  }  
 ]
 
 
